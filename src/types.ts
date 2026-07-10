@@ -4,6 +4,14 @@ export type Profile = {
   role: 'customer' | 'barber' | 'admin';
 };
 
+export type Service = {
+  id: string;
+  name: string;
+  price_cents: number;
+  duration_min: number;
+  is_active: boolean;
+};
+
 export type Barber = {
   id: string;
   shop_name: string | null;

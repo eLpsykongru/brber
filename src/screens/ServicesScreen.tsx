@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import {
-  Alert, Button, FlatList, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View,
-} from 'react-native';
+import { Alert, FlatList, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Card, Chip, Empty, Field, PillButton, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
 import { supabase } from '../lib/supabase';
+import { colors, font, sp } from '../theme';
 import type { Service } from '../types';
 
-export default function ServicesScreen({ barberId, onBack }: { barberId: string; onBack: () => void }) {
+export default function ServicesScreen({ barberId }: { barberId: string }) {
   const [services, setServices] = useState<Service[]>([]);
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
@@ -50,36 +50,40 @@ export default function ServicesScreen({ barberId, onBack }: { barberId: string;
     load();
   }
 
-  async function toggleActive(s: Service) {
-    const { error } = await supabase.from('services').update({ is_active: !s.is_active }).eq('id', s.id);
+  async function toggleActive(svc: Service) {
+    const { error } = await supabase.from('services').update({ is_active: !svc.is_active }).eq('id', svc.id);
     if (error) Alert.alert('Could not update', error.message);
     else load();
   }
 
   return (
-    <View style={styles.screen}>
-      <Button title="← Back" onPress={onBack} />
-      <Text style={styles.title}>My services</Text>
-      <TextInput style={styles.input} placeholder="Service name (e.g. Haircut)" value={name} onChangeText={setName} />
-      <View style={styles.row}>
-        <TextInput style={[styles.input, styles.half]} placeholder="Price" keyboardType="decimal-pad"
-          value={price} onChangeText={setPrice} />
-        <TextInput style={[styles.input, styles.half]} placeholder="Minutes" keyboardType="number-pad"
-          value={duration} onChangeText={setDuration} />
-      </View>
-      <Button title={busy ? '...' : editingId ? 'Update service' : 'Add service'} disabled={busy} onPress={save} />
-      {editingId && <Button title="Cancel edit" onPress={clearForm} />}
+    <View style={s.screen}>
+      <ScreenHeader title="My services" />
+      <Card>
+        <Field placeholder="Service name (e.g. Haircut)" value={name} onChangeText={setName} />
+        <View style={s.row}>
+          <Field placeholder="Price (MAD)" keyboardType="decimal-pad" value={price}
+            onChangeText={setPrice} style={s.half} />
+          <Field placeholder="Minutes" keyboardType="number-pad" value={duration}
+            onChangeText={setDuration} style={s.half} />
+        </View>
+        <PillButton title={editingId ? 'Update service' : 'Add service'} onPress={save} loading={busy} />
+        {editingId && <PillButton title="Cancel edit" variant="secondary" onPress={clearForm} />}
+      </Card>
       <FlatList
         data={services}
-        keyExtractor={(s) => s.id}
-        ListEmptyComponent={<Text style={styles.empty}>No services yet — add your first one above.</Text>}
+        keyExtractor={(svc) => svc.id}
+        contentContainerStyle={s.list}
+        ListEmptyComponent={<Empty text="No services yet — add your first one above." />}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.item} onPress={() => startEdit(item)}>
-            <View style={styles.itemText}>
-              <Text style={!item.is_active && styles.inactive}>{item.name}</Text>
-              <Text style={styles.meta}>{(item.price_cents / 100).toFixed(2)} · {item.duration_min} min</Text>
+          <TouchableOpacity style={s.item} onPress={() => startEdit(item)}>
+            <View style={s.grow}>
+              <Text style={[s.itemName, !item.is_active && s.inactive]}>{item.name}</Text>
+              <Text style={s.meta}>{(item.price_cents / 100).toFixed(2)} MAD · {item.duration_min} min</Text>
             </View>
-            <Switch value={item.is_active} onValueChange={() => toggleActive(item)} />
+            {!item.is_active && <Chip label="hidden" />}
+            <Switch value={item.is_active} onValueChange={() => toggleActive(item)}
+              trackColor={{ true: colors.accent }} />
           </TouchableOpacity>
         )}
       />
@@ -87,18 +91,18 @@ export default function ServicesScreen({ barberId, onBack }: { barberId: string;
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, padding: 24, gap: 12 },
-  title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center' },
-  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12 },
-  row: { flexDirection: 'row', gap: 8 },
+const s = StyleSheet.create({
+  screen: { flex: 1, paddingTop: sp(14), paddingHorizontal: sp(5), gap: sp(3) },
+  row: { flexDirection: 'row', gap: sp(2) },
   half: { flex: 1 },
+  list: { gap: sp(2), paddingBottom: TAB_BAR_INSET, paddingTop: sp(2) },
   item: {
-    flexDirection: 'row', alignItems: 'center', paddingVertical: 12,
-    borderBottomWidth: 1, borderBottomColor: '#eee',
+    flexDirection: 'row', alignItems: 'center', gap: sp(2),
+    borderWidth: 1, borderColor: colors.border, borderRadius: 14, padding: sp(3),
+    backgroundColor: colors.bg,
   },
-  itemText: { flex: 1 },
-  inactive: { color: '#999', textDecorationLine: 'line-through' },
-  meta: { color: '#666', fontSize: 12 },
-  empty: { textAlign: 'center', color: '#666', marginTop: 24 },
+  grow: { flex: 1 },
+  itemName: { fontSize: font.body, fontWeight: '600', color: colors.text },
+  inactive: { color: colors.textTertiary, textDecorationLine: 'line-through' },
+  meta: { color: colors.textSecondary, fontSize: font.small },
 });

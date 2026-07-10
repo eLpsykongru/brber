@@ -1,8 +1,9 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import {
-  Alert, Button, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View,
-} from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Card, Field, PillButton, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
 import { supabase } from '../lib/supabase';
+import { colors, font, sp } from '../theme';
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -19,7 +20,7 @@ function toHHMM(mins: number): string {
   return `${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`;
 }
 
-export default function AvailabilityScreen({ barberId, onBack }: { barberId: string; onBack: () => void }) {
+export default function AvailabilityScreen({ barberId }: { barberId: string }) {
   const [days, setDays] = useState<DayRow[]>(
     WEEKDAYS.map(() => ({ open: false, start: '09:00', end: '18:00' })),
   );
@@ -86,51 +87,64 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.screen}>
-      <Button title="← Back" onPress={onBack} />
-      <Text style={styles.title}>Working hours</Text>
-      {WEEKDAYS.map((label, i) => (
-        <View key={label} style={styles.dayRow}>
-          <Switch value={days[i].open} onValueChange={(v) => setDay(i, { open: v })} />
-          <Text style={styles.dayLabel}>{label.slice(0, 3)}</Text>
-          {days[i].open ? (
-            <>
-              <TextInput style={styles.time} value={days[i].start}
-                onChangeText={(t) => setDay(i, { start: t })} keyboardType="numbers-and-punctuation" />
-              <Text>–</Text>
-              <TextInput style={styles.time} value={days[i].end}
-                onChangeText={(t) => setDay(i, { end: t })} keyboardType="numbers-and-punctuation" />
-            </>
-          ) : (
-            <Text style={styles.closed}>Closed</Text>
-          )}
-        </View>
-      ))}
-      <Button title={busy ? '...' : 'Save hours'} disabled={busy} onPress={save} />
+    <ScrollView style={s.screen} contentContainerStyle={s.content}>
+      <ScreenHeader title="Working hours" />
+      <Card>
+        {WEEKDAYS.map((label, i) => (
+          <View key={label} style={s.dayRow}>
+            <Switch value={days[i].open} onValueChange={(v) => setDay(i, { open: v })}
+              trackColor={{ true: colors.accent }} />
+            <Text style={s.dayLabel}>{label.slice(0, 3)}</Text>
+            {days[i].open ? (
+              <>
+                <Field value={days[i].start} onChangeText={(t) => setDay(i, { start: t })}
+                  keyboardType="numbers-and-punctuation" style={s.time} />
+                <Text style={s.dash}>–</Text>
+                <Field value={days[i].end} onChangeText={(t) => setDay(i, { end: t })}
+                  keyboardType="numbers-and-punctuation" style={s.time} />
+              </>
+            ) : (
+              <Text style={s.closed}>Closed</Text>
+            )}
+          </View>
+        ))}
+        <PillButton title="Save hours" onPress={save} loading={busy} />
+      </Card>
 
-      <Text style={styles.title}>Days off</Text>
-      <View style={styles.dayRow}>
-        <TextInput style={[styles.time, styles.grow]} placeholder="YYYY-MM-DD"
-          value={newDayOff} onChangeText={setNewDayOff} />
-        <Button title="Add" onPress={addDayOff} />
+      <Text style={s.section}>Days off</Text>
+      <View style={s.dayOffAdd}>
+        <Field placeholder="YYYY-MM-DD" value={newDayOff} onChangeText={setNewDayOff} style={s.grow} />
+        <PillButton title="Add" variant="secondary" onPress={addDayOff} />
       </View>
       {daysOff.map((d) => (
-        <View key={d.id} style={styles.dayRow}>
-          <Text style={styles.grow}>{d.day}</Text>
-          <TouchableOpacity onPress={() => removeDayOff(d.id)}><Text style={styles.remove}>✕</Text></TouchableOpacity>
+        <View key={d.id} style={s.dayOffRow}>
+          <Text style={s.dayOffText}>{d.day}</Text>
+          <Pressable onPress={() => removeDayOff(d.id)} hitSlop={8} accessibilityLabel={`Remove ${d.day}`}
+            style={({ pressed }) => pressed && s.pressed}>
+            <Ionicons name="close-circle" size={22} color={colors.danger} />
+          </Pressable>
         </View>
       ))}
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  screen: { padding: 24, gap: 10 },
-  title: { fontSize: 20, fontWeight: 'bold', marginTop: 12 },
-  dayRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  dayLabel: { width: 40 },
-  time: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 8, minWidth: 70, textAlign: 'center' },
+const s = StyleSheet.create({
+  screen: { flex: 1, paddingTop: sp(14) },
+  content: { paddingHorizontal: sp(5), gap: sp(3), paddingBottom: TAB_BAR_INSET },
+  dayRow: { flexDirection: 'row', alignItems: 'center', gap: sp(2), marginBottom: sp(2) },
+  dayLabel: { width: 40, fontSize: font.body, fontWeight: '600', color: colors.text },
+  time: { minWidth: 78, textAlign: 'center', minHeight: 42 },
+  dash: { color: colors.textSecondary },
+  closed: { color: colors.textTertiary, fontSize: font.small },
+  section: { fontSize: font.h2, fontWeight: '700', color: colors.text, marginTop: sp(2) },
+  dayOffAdd: { flexDirection: 'row', gap: sp(2), alignItems: 'center' },
+  dayOffRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    borderWidth: 1, borderColor: colors.border, borderRadius: 14,
+    paddingVertical: sp(2.5), paddingHorizontal: sp(3.5), backgroundColor: colors.bg,
+  },
+  dayOffText: { fontSize: font.body, color: colors.text },
   grow: { flex: 1 },
-  closed: { color: '#999' },
-  remove: { color: '#c00', fontSize: 18, paddingHorizontal: 8 },
+  pressed: { opacity: 0.7 },
 });

@@ -18,7 +18,7 @@ export default function App() {
 
   const loadUser = useCallback(async (s: Session) => {
     const { data: profile } = await supabase
-      .from('profiles').select('id, full_name, role').eq('id', s.user.id).single();
+      .from('profiles').select('id, full_name, phone, avatar_url, role').eq('id', s.user.id).single();
     if (!profile) return setUser(null);
     let barber: Barber | null = null;
     if (profile.role === 'barber') {
@@ -50,7 +50,8 @@ export default function App() {
   } else if (user.barber && !user.barber.id_document_path) {
     content = <OnboardingScreen barber={user.barber} onDone={() => loadUser(session)} />;
   } else {
-    content = <HomeScreen profile={user.profile} barber={user.barber} />;
+    content = <HomeScreen profile={user.profile} barber={user.barber}
+      phone={user.profile.phone} onProfileChanged={() => loadUser(session!)} />;
   }
 
   return (

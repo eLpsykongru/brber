@@ -7,6 +7,7 @@ import AvailabilityScreen from './AvailabilityScreen';
 import BookingsScreen from './BookingsScreen';
 import ChatsScreen from './ChatsScreen';
 import DiscoverScreen from './DiscoverScreen';
+import ExploreScreen from './ExploreScreen';
 import MyBookingsScreen from './MyBookingsScreen';
 import PortfolioScreen from './PortfolioScreen';
 import ProfileScreen from './ProfileScreen';
@@ -14,6 +15,7 @@ import ServicesScreen from './ServicesScreen';
 
 const CUSTOMER_TABS: TabItem[] = [
   { key: 'home', label: 'Home', icon: 'home', iconOutline: 'home-outline' },
+  { key: 'explore', label: 'Explore', icon: 'compass', iconOutline: 'compass-outline' },
   { key: 'bookings', label: 'Bookings', icon: 'calendar', iconOutline: 'calendar-outline' },
   { key: 'chats', label: 'Chat', icon: 'chatbubble-ellipses', iconOutline: 'chatbubble-ellipses-outline' },
   { key: 'profile', label: 'Profile', icon: 'person', iconOutline: 'person-outline' },
@@ -42,12 +44,13 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
     else if (tab === 'services') content = <ServicesScreen barberId={barber.id} />;
     else if (tab === 'hours') content = <AvailabilityScreen barberId={barber.id} />;
     else if (tab === 'work') content = <PortfolioScreen barberId={barber.id} />;
-    else content = <ProfileScreen profile={profile} barber={barber} phone={phone} onProfileChanged={onProfileChanged} />;
+    else content = <ProfileScreen profile={profile} barber={barber} phone={phone} onProfileChanged={onProfileChanged} onChromeHidden={setChromeHidden} />;
   } else {
     if (tab === 'home') content = <DiscoverScreen onChromeHidden={setChromeHidden} />;
+    else if (tab === 'explore') content = <ExploreScreen onChromeHidden={setChromeHidden} />;
     else if (tab === 'bookings') content = <MyBookingsScreen customerId={profile.id} onChromeHidden={setChromeHidden} />;
     else if (tab === 'chats') content = <ChatsScreen customerId={profile.id} onChromeHidden={setChromeHidden} />;
-    else content = <ProfileScreen profile={profile} barber={null} phone={phone} onProfileChanged={onProfileChanged} />;
+    else content = <ProfileScreen profile={profile} barber={null} phone={phone} onProfileChanged={onProfileChanged} onChromeHidden={setChromeHidden} />;
   }
 
   return (

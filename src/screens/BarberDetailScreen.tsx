@@ -26,7 +26,6 @@ type Review = {
 };
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const DAYS_AHEAD = 14;
 const SLOT_STEP_MIN = 30;
 
 function toHHMM(mins: number) {
@@ -47,21 +46,38 @@ function timeAgo(iso: string) {
   return `${years} year${years > 1 ? 's' : ''} ago`;
 }
 
-function freeSlots(day: Date, durationMin: number, windows: Window[], booked: Range[], daysOff: string[]): Date[] {
+type SlotStatus = 'free' | 'full' | 'past';
+type Slot = { time: Date; status: SlotStatus };
+
+// all slots in the day's working window, each tagged free / full (booked) / past.
+// full & past are shown but disabled; full gets a strike-through.
+function daySlots(day: Date, durationMin: number, windows: Window[], booked: Range[], daysOff: string[]): Slot[] {
   if (daysOff.includes(localDateStr(day))) return [];
   const now = Date.now();
-  const slots: Date[] = [];
+  const slots: Slot[] = [];
   for (const w of windows.filter((w) => w.weekday === day.getDay())) {
     for (let t = w.start_min; t + durationMin <= w.end_min; t += SLOT_STEP_MIN) {
       const start = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, t);
       const end = start.getTime() + durationMin * 60_000;
-      if (start.getTime() <= now) continue;
-      if (booked.some((b) => start.getTime() < new Date(b.ends_at).getTime()
-        && end > new Date(b.starts_at).getTime())) continue;
-      slots.push(start);
+      const full = booked.some((b) => start.getTime() < new Date(b.ends_at).getTime()
+        && end > new Date(b.starts_at).getTime());
+      const status: SlotStatus = start.getTime() <= now ? 'past' : full ? 'full' : 'free';
+      slots.push({ time: start, status });
     }
   }
   return slots;
+}
+
+// Monday-based start of the week containing `d`
+function weekStartOf(d: Date): Date {
+  const s = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const day = s.getDay(); // 0 = Sun
+  s.setDate(s.getDate() - (day === 0 ? 6 : day - 1));
+  return s;
+}
+
+function sameDay(a: Date, b: Date) {
+  return a.toDateString() === b.toDateString();
 }
 
 export default function BarberDetailScreen({ barber, salonName, onBack, onChromeHidden }: Props) {
@@ -75,7 +91,9 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
   const [customerCount, setCustomerCount] = useState<number | null>(null);
   const [selected, setSelected] = useState<Service | null>(null);
   const [slotMode, setSlotMode] = useState(false);
-  const [dayIndex, setDayIndex] = useState(0);
+  const [weekStart, setWeekStart] = useState<Date>(() => weekStartOf(new Date()));
+  const [selectedDay, setSelectedDay] = useState<Date>(() => new Date());
+  const [selectedTime, setSelectedTime] = useState<Date | null>(null);
   const [busy, setBusy] = useState(false);
   const [bioExpanded, setBioExpanded] = useState(false);
   const [reviewQuery, setReviewQuery] = useState('');
@@ -87,23 +105,41 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
     ? barber.reviews.reduce((s, r) => s + r.rating, 0) / barber.reviews.length
     : null;
 
-  const days = useMemo(() => {
-    const today = new Date();
-    return Array.from({ length: DAYS_AHEAD }, (_, i) =>
-      new Date(today.getFullYear(), today.getMonth(), today.getDate() + i));
-  }, []);
+  const today = useMemo(() => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }, []);
+  const weekDays = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + i)),
+    [weekStart],
+  );
+  const canGoPrev = weekStart.getTime() > weekStartOf(today).getTime();
+
+  async function loadBooked(ws: Date) {
+    const from = new Date(Math.max(ws.getTime(), Date.now()));
+    const to = new Date(ws.getTime() + 7 * 86_400_000);
+    const { data } = await supabase.rpc('booked_ranges',
+      { p_barber: barber.id, p_from: from.toISOString(), p_to: to.toISOString() });
+    setBooked(data ?? []);
+  }
 
   async function loadCalendar() {
-    const from = new Date();
-    const to = new Date(from.getTime() + DAYS_AHEAD * 86_400_000);
-    const [av, off, bk] = await Promise.all([
+    const [av, off] = await Promise.all([
       supabase.from('availability').select('weekday, start_min, end_min').eq('barber_id', barber.id),
       supabase.from('days_off').select('day').eq('barber_id', barber.id),
-      supabase.rpc('booked_ranges', { p_barber: barber.id, p_from: from.toISOString(), p_to: to.toISOString() }),
     ]);
     setWindows(av.data ?? []);
     setDaysOff((off.data ?? []).map((d) => d.day));
-    setBooked(bk.data ?? []);
+    loadBooked(weekStart);
+  }
+
+  function changeWeek(dir: 'prev' | 'next') {
+    if (dir === 'prev' && !canGoPrev) return;
+    const ws = new Date(weekStart);
+    ws.setDate(ws.getDate() + (dir === 'next' ? 7 : -7));
+    setWeekStart(ws);
+    setSelectedTime(null);
+    // land on the first bookable day of the new week (today if it's this week)
+    const firstDay = ws.getTime() <= today.getTime() ? today : ws;
+    setSelectedDay(firstDay);
+    loadBooked(ws);
   }
 
   useEffect(() => {
@@ -147,7 +183,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
     const svc = selected!;
     const when = `${slot.toDateString()} ${slot.toTimeString().slice(0, 5)}`;
     Alert.alert('Confirm booking',
-      `${svc.name} with ${name} at ${salonName}\n${when}\n${(svc.price_cents / 100).toFixed(2)} MAD, paid at the shop`, [
+      `${svc.name} with ${name} at ${salonName}\n${when}\n${(svc.price_cents / 100).toFixed(2)} DH, paid at the shop`, [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Book',
@@ -164,6 +200,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
               Alert.alert('Booked!', 'Your appointment is confirmed. Pay at the shop.');
               setSlotMode(false);
               setSelected(null);
+              setSelectedTime(null);
               loadCalendar();
             }
           },
@@ -176,34 +213,86 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
       onBack={() => { setChatBookingId(null); onChromeHidden?.(false); }} />;
   }
 
-  // ---------- slot picking (own view, per mockup flow) ----------
+  // ---------- slot picking (weekly day selector + time grid) ----------
   if (slotMode && selected) {
-    const slots = freeSlots(days[dayIndex], selected.duration_min, windows, booked, daysOff);
+    const slots = daySlots(selectedDay, selected.duration_min, windows, booked, daysOff);
     return (
       <View style={s.screen}>
         <ScreenHeader title="Pick a time" onBack={() => setSlotMode(false)} />
-        <Text style={s.slotSubtitle}>{selected.name} · {selected.duration_min} min · {(selected.price_cents / 100).toFixed(2)} MAD</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={s.dayStripWrap}>
-          <View style={s.dayStrip}>
-            {days.map((d, i) => (
-              <TouchableOpacity key={i} style={[s.dayBtn, i === dayIndex && s.dayBtnActive]}
-                onPress={() => setDayIndex(i)}>
-                <Text style={[s.dayBtnDow, i === dayIndex && s.dayBtnTextActive]}>
-                  {d.toDateString().slice(0, 3)}
-                </Text>
-                <Text style={[s.dayBtnNum, i === dayIndex && s.dayBtnTextActive]}>{d.getDate()}</Text>
-              </TouchableOpacity>
-            ))}
+        <Text style={s.slotSubtitle}>
+          {selected.name} · {selected.duration_min} min · {(selected.price_cents / 100).toFixed(2)} DH
+        </Text>
+
+        {/* week header — no month/year, just navigation */}
+        <View style={s.weekHead}>
+          <Text style={s.weekLabel}>Select a date</Text>
+          <View style={s.weekNav}>
+            <Pressable onPress={() => changeWeek('prev')} disabled={!canGoPrev} hitSlop={6}
+              accessibilityLabel="Previous week"
+              style={({ pressed }) => [s.navBtn, pressed && s.pressed, !canGoPrev && s.navDisabled]}>
+              <Ionicons name="chevron-back" size={18} color={colors.text} />
+            </Pressable>
+            <Pressable onPress={() => changeWeek('next')} hitSlop={6} accessibilityLabel="Next week"
+              style={({ pressed }) => [s.navBtn, pressed && s.pressed]}>
+              <Ionicons name="chevron-forward" size={18} color={colors.text} />
+            </Pressable>
           </View>
+        </View>
+
+        {/* 7-day row */}
+        <View style={s.weekRow}>
+          {weekDays.map((d) => {
+            const isPast = d.getTime() < today.getTime();
+            const isSel = sameDay(d, selectedDay);
+            return (
+              <Pressable key={d.toISOString()} disabled={isPast} style={s.dayCol}
+                onPress={() => { setSelectedDay(d); setSelectedTime(null); }}>
+                <Text style={[s.dayDow, isPast && s.dayMuted]}>
+                  {d.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 2)}
+                </Text>
+                <View style={[s.dayNum, isSel && s.dayNumActive, isPast && s.dayNumPast]}>
+                  <Text style={[s.dayNumText, isSel && s.dayNumTextActive, isPast && s.dayMuted]}>
+                    {d.getDate()}
+                  </Text>
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {/* time grid */}
+        <ScrollView contentContainerStyle={s.slotScroll}>
+          {slots.length === 0 && <Empty text="Not working this day." />}
+          <View style={s.slotGrid}>
+            {slots.map(({ time, status }) => {
+              const isSel = selectedTime?.getTime() === time.getTime();
+              const disabled = status !== 'free';
+              return (
+                <Pressable key={time.getTime()} disabled={disabled}
+                  onPress={() => setSelectedTime(time)}
+                  style={[s.slot, isSel && s.slotSel, status === 'full' && s.slotFull, status === 'past' && s.slotPast]}>
+                  <Text style={[
+                    s.slotText,
+                    isSel && s.slotTextSel,
+                    status === 'full' && s.slotTextFull,
+                    status === 'past' && s.slotTextPast,
+                  ]}>
+                    {time.toTimeString().slice(0, 5)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+          {slots.some((sl) => sl.status === 'full') && (
+            <Text style={s.legend}>Crossed-out times are already booked.</Text>
+          )}
         </ScrollView>
-        <ScrollView contentContainerStyle={s.slotGrid}>
-          {slots.length === 0 && <Empty text="No free slots this day." />}
-          {slots.map((sl) => (
-            <TouchableOpacity key={sl.getTime()} style={s.slot} disabled={busy} onPress={() => book(sl)}>
-              <Text style={s.slotText}>{sl.toTimeString().slice(0, 5)}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+
+        {/* confirm */}
+        <View style={s.slotCta}>
+          <PillButton title={selectedTime ? `Book ${selectedTime.toTimeString().slice(0, 5)}` : 'Select a time'}
+            disabled={!selectedTime || busy} onPress={() => selectedTime && book(selectedTime)} />
+        </View>
       </View>
     );
   }
@@ -301,7 +390,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
                     <Text style={s.serviceName}>{sv.name}</Text>
                     <Text style={s.meta}>{sv.duration_min} minutes</Text>
                   </View>
-                  <Text style={s.servicePrice}>{(sv.price_cents / 100).toFixed(2)} MAD</Text>
+                  <Text style={s.servicePrice}>{(sv.price_cents / 100).toFixed(2)} DH</Text>
                   <Ionicons name={on ? 'checkmark-circle' : 'ellipse-outline'} size={22}
                     color={on ? colors.accent : colors.border} />
                 </TouchableOpacity>
@@ -400,6 +489,10 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
               setTab('services');
               return Alert.alert('Pick a service', 'Select a service first, then book.');
             }
+            setWeekStart(weekStartOf(today));
+            setSelectedDay(today);
+            setSelectedTime(null);
+            loadBooked(weekStartOf(today));
             setSlotMode(true);
           }} />
       </View>
@@ -484,21 +577,42 @@ const s = StyleSheet.create({
 
   cta: { position: 'absolute', left: sp(5), right: sp(5), bottom: sp(7) },
 
-  slotSubtitle: { textAlign: 'center', color: colors.textSecondary, fontSize: font.small, marginBottom: sp(2) },
-  dayStripWrap: { flexGrow: 0, marginBottom: sp(3) },
-  dayStrip: { flexDirection: 'row', gap: sp(2) },
-  dayBtn: {
-    width: 52, alignItems: 'center', paddingVertical: sp(2),
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, backgroundColor: colors.bg,
+  slotSubtitle: { textAlign: 'center', color: colors.textSecondary, fontSize: font.small, marginBottom: sp(3) },
+
+  weekHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: sp(2) },
+  weekLabel: { fontSize: font.small, fontWeight: '600', color: colors.textSecondary },
+  weekNav: { flexDirection: 'row', gap: sp(2) },
+  navBtn: {
+    width: 34, height: 34, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border,
+    alignItems: 'center', justifyContent: 'center',
   },
-  dayBtnActive: { backgroundColor: colors.accent, borderColor: colors.accent },
-  dayBtnDow: { fontSize: font.tiny, color: colors.textSecondary },
-  dayBtnNum: { fontSize: font.body, fontWeight: '700', color: colors.text },
-  dayBtnTextActive: { color: colors.onAccent },
-  slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: sp(2), paddingBottom: 40 },
+  navDisabled: { opacity: 0.35 },
+
+  weekRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: sp(4) },
+  dayCol: { alignItems: 'center', gap: sp(1.5), flex: 1 },
+  dayDow: { fontSize: font.tiny, color: colors.textSecondary },
+  dayMuted: { color: colors.textTertiary },
+  dayNum: {
+    width: 38, height: 38, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center',
+  },
+  dayNumActive: { backgroundColor: colors.accent },
+  dayNumPast: { opacity: 0.5 },
+  dayNumText: { fontSize: font.body, fontWeight: '700', color: colors.text },
+  dayNumTextActive: { color: colors.onAccent },
+
+  slotScroll: { paddingBottom: 100 },
+  slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: sp(2) },
   slot: {
-    borderWidth: 1, borderColor: colors.accent, borderRadius: radius.pill,
-    paddingVertical: sp(2.5), paddingHorizontal: sp(3.5),
+    width: '31%', alignItems: 'center', paddingVertical: sp(3), borderRadius: radius.md,
+    borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg,
   },
-  slotText: { color: colors.accent, fontWeight: '600' },
+  slotSel: { backgroundColor: colors.accent, borderColor: colors.accent },
+  slotFull: { backgroundColor: colors.surface, borderColor: colors.surface },
+  slotPast: { opacity: 0.5 },
+  slotText: { color: colors.text, fontWeight: '600', fontSize: font.small },
+  slotTextSel: { color: colors.onAccent },
+  slotTextFull: { color: colors.textTertiary, textDecorationLine: 'line-through' },
+  slotTextPast: { color: colors.textTertiary },
+  legend: { fontSize: font.tiny, color: colors.textTertiary, marginTop: sp(3) },
+  slotCta: { position: 'absolute', left: sp(5), right: sp(5), bottom: sp(7) },
 });

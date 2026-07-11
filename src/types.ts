@@ -40,5 +40,5 @@ export type Specialist = {
   years_experience: number | null;
   profiles: { full_name: string | null; avatar_url: string | null; phone: string | null } | null;
   reviews: { rating: number }[];
-  services: { name: string; is_active: boolean }[];
+  services: { id: string; name: string; price_cents: number; duration_min: number; is_active: boolean; category?: string }[];
 };

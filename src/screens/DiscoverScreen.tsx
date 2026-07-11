@@ -3,20 +3,11 @@ import { useEffect, useState } from 'react';
 import {
   Alert, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
-import { Field, ScreenHeader, Stars, TAB_BAR_INSET } from '../components/ui';
+import { Field, Stars, TAB_BAR_INSET } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, sp } from '../theme';
-import type { Specialist } from '../types';
-import BarberDetailScreen from './BarberDetailScreen';
-
-type SalonCard = {
-  id: string;
-  name: string;
-  address: string | null;
-  bio: string | null;
-  barbers: Specialist[];
-};
+import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
 
 // category chips filter by service-name keywords — no category column needed
 const CATEGORIES: { label: string; icon: keyof typeof Ionicons.glyphMap; re: RegExp }[] = [
@@ -62,14 +53,13 @@ export default function DiscoverScreen({ onChromeHidden }: {
 }) {
   const [salons, setSalons] = useState<SalonCard[]>([]);
   const [salon, setSalon] = useState<SalonCard | null>(null);
-  const [barber, setBarber] = useState<Specialist | null>(null);
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string | null>(null);
 
   useEffect(() => {
     // barbers!salon_id: disambiguates from the salons.owner_id relationship
     supabase.from('salons')
-      .select('id, name, address, bio, barbers!salon_id(id, bio, status, specialty, years_experience, profiles(full_name, avatar_url, phone), reviews(rating), services(name, is_active))')
+      .select('id, name, address, bio, website, barbers!salon_id(id, bio, status, specialty, years_experience, profiles(full_name, avatar_url, phone), reviews(rating), services(id, name, price_cents, duration_min, is_active, category))')
       .order('name')
       .then(({ data, error }) => {
         if (error) return Alert.alert('Could not load salons', error.message);
@@ -80,9 +70,9 @@ export default function DiscoverScreen({ onChromeHidden }: {
       });
   }, []);
 
-  function openBarber(b: Specialist | null) {
-    setBarber(b);
-    onChromeHidden?.(!!b); // specialist screen has its own pinned CTA — hide the tab bar
+  function open(next: SalonCard | null) {
+    setSalon(next);
+    onChromeHidden?.(!!next); // salon detail has its own pinned CTA — hide the tab bar
   }
 
   const cat = CATEGORIES.find((c) => c.label === category);
@@ -102,33 +92,8 @@ export default function DiscoverScreen({ onChromeHidden }: {
     .sort((a, b) => b.avg - a.avg)
     .slice(0, 5);
 
-  if (salon && barber) {
-    return <BarberDetailScreen barber={barber} salonName={salon.name}
-      onBack={() => openBarber(null)} onChromeHidden={onChromeHidden} />;
-  }
   if (salon) {
-    const salonAvg = avgOf(salon.barbers.flatMap((b) => b.reviews));
-    return (
-      <ScrollView style={styles.tabScreen} contentContainerStyle={styles.detail}>
-        <ScreenHeader title={salon.name} onBack={() => setSalon(null)} />
-        {salonAvg != null && <Stars rating={salonAvg} count={salon.barbers.flatMap((b) => b.reviews).length} />}
-        <Text style={styles.meta}>{salon.address}</Text>
-        {!!salon.bio && <Text style={styles.bio}>{salon.bio}</Text>}
-        <Text style={styles.section}>Barbers</Text>
-        {salon.barbers.map((b) => {
-          const avg = avgOf(b.reviews);
-          return (
-            <TouchableOpacity key={b.id} style={styles.barberRow} onPress={() => openBarber(b)}>
-              <View style={styles.grow}>
-                <Text style={styles.barberName}>{b.profiles?.full_name ?? 'Barber'}</Text>
-                <Text style={styles.meta}>{b.specialty ?? 'Barber'}</Text>
-              </View>
-              {avg != null && <Stars rating={avg} count={b.reviews.length} />}
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
-    );
+    return <SalonDetailScreen salon={salon} onBack={() => open(null)} onChromeHidden={onChromeHidden} />;
   }
 
   const header = (
@@ -165,7 +130,7 @@ export default function DiscoverScreen({ onChromeHidden }: {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.topStrip}>
             <View style={styles.topRow}>
               {topRated.map(({ s, avg }) => (
-                <TouchableOpacity key={s.id} style={styles.topCard} onPress={() => setSalon(s)}>
+                <TouchableOpacity key={s.id} style={styles.topCard} onPress={() => open(s)}>
                   <SalonPhoto salon={s} style={styles.topPhoto} />
                   <View style={styles.topBody}>
                     <Text style={styles.topName} numberOfLines={1}>{s.name}</Text>
@@ -193,7 +158,7 @@ export default function DiscoverScreen({ onChromeHidden }: {
         renderItem={({ item }) => {
           const avg = avgOf(item.barbers.flatMap((b) => b.reviews));
           return (
-            <TouchableOpacity style={styles.card} onPress={() => setSalon(item)}>
+            <TouchableOpacity style={styles.card} onPress={() => open(item)}>
               <SalonPhoto salon={item} style={styles.cardPhoto} />
               <View style={styles.cardBody}>
                 <Text style={styles.cardTitle}>{item.name}</Text>

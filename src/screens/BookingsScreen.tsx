@@ -80,7 +80,7 @@ export default function BookingsScreen({ barberId, onChromeHidden }: {
                 </Text>
               </View>
               <Text style={s.meta}>
-                {item.customer?.full_name ?? 'Customer'} · {item.services?.name ?? 'Service'} · {(item.price_cents / 100).toFixed(2)} MAD
+                {item.customer?.full_name ?? 'Customer'} · {item.services?.name ?? 'Service'} · {(item.price_cents / 100).toFixed(2)} DH
               </Text>
               <View style={s.actions}>
                 <Pressable onPress={() => openChat(item)} hitSlop={8} accessibilityLabel="Open chat"

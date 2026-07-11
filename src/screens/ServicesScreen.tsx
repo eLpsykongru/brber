@@ -62,7 +62,7 @@ export default function ServicesScreen({ barberId }: { barberId: string }) {
       <Card>
         <Field placeholder="Service name (e.g. Haircut)" value={name} onChangeText={setName} />
         <View style={s.row}>
-          <Field placeholder="Price (MAD)" keyboardType="decimal-pad" value={price}
+          <Field placeholder="Price (DH)" keyboardType="decimal-pad" value={price}
             onChangeText={setPrice} style={s.half} />
           <Field placeholder="Minutes" keyboardType="number-pad" value={duration}
             onChangeText={setDuration} style={s.half} />
@@ -79,7 +79,7 @@ export default function ServicesScreen({ barberId }: { barberId: string }) {
           <TouchableOpacity style={s.item} onPress={() => startEdit(item)}>
             <View style={s.grow}>
               <Text style={[s.itemName, !item.is_active && s.inactive]}>{item.name}</Text>
-              <Text style={s.meta}>{(item.price_cents / 100).toFixed(2)} MAD · {item.duration_min} min</Text>
+              <Text style={s.meta}>{(item.price_cents / 100).toFixed(2)} DH · {item.duration_min} min</Text>
             </View>
             {!item.is_active && <Chip label="hidden" />}
             <Switch value={item.is_active} onValueChange={() => toggleActive(item)}

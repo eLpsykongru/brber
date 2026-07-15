@@ -67,6 +67,64 @@ These exist as visual shells to implement later:
   expo-notifications / expo-location in the first-run flow.
 Wired now: My Wallet, My Coupons, Help Center (from the Profile menu).
 
+## Strategy — differentiators (nothing built, decided 2026-07-13)
+
+Not "deferred UI" like the rest of this file — these are the bets that decide
+whether barbers adopt us and whether money can move. Each names its **trigger**:
+raise it when we hit that point, not before.
+
+### Barber adoption (the app is a free tool first, a marketplace second)
+Barbers will not adopt on the promise of new clients (we have none at launch).
+They adopt on tools that fix today's business. Priority order:
+1. **Shareable booking link** — `brber.ma/<barber>` for the Instagram bio / WhatsApp
+   status. Barbers already run on IG DMs; this lets them bring their *own* clients
+   and self-onboard. **Trigger:** as soon as booking is stable + any web surface exists.
+2. **Automatic client reminders** — the felt pain is no-shows, not discovery.
+   **Trigger:** with the push-notifications increment (see Reminders above).
+3. **Client book + informal debt ledger** — regulars' preferences + "owes me 50 DH",
+   which barbers today keep in their head. No foreign competitor models this.
+   **Trigger:** once a barber has repeat customers (needs `bookings` history only).
+4. **Flash discounts on dead hours** (11h–16h chairs are empty) — doubles as our
+   client-acquisition engine. **Trigger:** with the `promotions` table.
+5. **Verified badge / "Top rated in Tangier"** — barbers are competitive and
+   image-driven; costs nothing, we already have reviews + ID verification.
+6. **Zero commission on their own clients, stated loudly.** Monetize only
+   marketplace-sourced clients + payment fees later. **Trigger:** pricing page.
+
+### QUEUE MODE — the one bet that puts us ahead
+Most Moroccan barbershops are **walk-in, not appointment**. An appointment-only app
+fights the culture. Queue mode *is* the culture minus the bench: client takes a
+virtual ticket, sees "3 ahead, ~40 min"; barber sees the queue on his phone.
+Works with **zero payment rail**. No competitor (Booksy/Fresha clones) has this.
+**Trigger:** right after bookings are solid — before packages, before maps.
+Needs: `queue_tickets (barber_id, customer_id, joined_at, position, status)` +
+Realtime for live position; ETA = sum of avg service durations ahead of you.
+
+### Payments — phased, since Stripe is out (see 0005_no_deposits)
+- **Phase 1 (now): no money through us.** Pay at shop. Fight no-shows with
+  *reputation*, not deposits: strike system (2 no-shows → must phone-confirm /
+  lose booking priority), "reliable client" badge, barber marks no-show.
+  **Trigger:** first real no-show complaint from a barber.
+- **Phase 2: in-app wallet** (`WalletScreen` becomes real) = a ledger *we* own,
+  with pluggable top-up rails:
+  - **Card** via **YouCan Pay** (Moroccan, sits on CMI) — verify current fees/API
+    before committing; do NOT assume Stripe-like DX.
+  - **Cash top-up at the barbershop** ← *the unfair advantage.* Client hands the
+    barber 100 DH, barber credits the wallet from his app, we net it against what
+    we owe the barber. **Barbers become our agent network** (the M-Pesa bootstrap)
+    — no Cash Plus partnership needed, and trust is easy because it's *their* barber.
+    Needs: float limit per barber, daily netting, and a check on Bank Al-Maghrib
+    payment-agent rules once real money moves.
+  **Trigger:** once wallets have balance, **deposits** and **coupons** finally have
+  something to attach to — that unblocks 4 items above.
+- **Phase 3: direct m-wallets** (Orange Money, inwi money, Cash Plus API) only when
+  volume justifies the partnership overhead. **Trigger:** not before real volume.
+
+### Localisation
+**Darija/Arabic + French UI, WhatsApp-first sharing.** Cheap for us, and the
+difference between "an app" and "our app". Booksy will never do this well.
+**Trigger:** before any paid client acquisition.
+
 ## Profile menu rows  → `src/screens/ProfileScreen.tsx` (customer)
 - **Payment Methods / My Wallet** — need a payment rail (no Stripe in Morocco; pay
   at shop for now). Wallet also needs a `wallet_transactions` ledger table.

@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 import { colors, font, sp } from '../theme';
 import type { Service } from '../types';
 
-export default function ServicesScreen({ barberId }: { barberId: string }) {
+export default function ServicesScreen({ barberId, onBack }: { barberId: string; onBack?: () => void }) {
   const [services, setServices] = useState<Service[]>([]);
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
@@ -58,7 +58,7 @@ export default function ServicesScreen({ barberId }: { barberId: string }) {
 
   return (
     <View style={s.screen}>
-      <ScreenHeader title="My services" />
+      <ScreenHeader title="My services" onBack={onBack} />
       <Card>
         <Field placeholder="Service name (e.g. Haircut)" value={name} onChangeText={setName} />
         <View style={s.row}>

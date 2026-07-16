@@ -23,6 +23,17 @@ export const colors = {
   star: '#E8A100',
 };
 
+// dark surfaces for the barber dashboard + earnings (per the chosen dark mockup)
+export const dark = {
+  bg: '#0D0D0F',
+  card: '#17171A',
+  card2: '#212125',
+  border: '#26262B',
+  text: '#FFFFFF',
+  sub: '#9A9CA3',
+  barMuted: 'rgba(232,71,79,0.22)', // past-period bars: muted step of the accent hue
+};
+
 export const radius = { sm: 10, md: 14, lg: 18, pill: 999 };
 
 // 4pt rhythm

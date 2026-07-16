@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -6,7 +7,7 @@ import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, sp } from '../theme';
 
-export default function PortfolioScreen({ barberId }: { barberId: string }) {
+export default function PortfolioScreen({ barberId, onBack }: { barberId: string; onBack?: () => void }) {
   const [photos, setPhotos] = useState<{ name: string; url: string }[]>([]);
   const [busy, setBusy] = useState(false);
 
@@ -46,7 +47,7 @@ export default function PortfolioScreen({ barberId }: { barberId: string }) {
 
   return (
     <View style={s.screen}>
-      <ScreenHeader title="My work" />
+      <ScreenHeader title="My work" onBack={onBack} />
       <PillButton title="Add photo" onPress={add} loading={busy} />
       <FlatList
         data={photos}
@@ -55,11 +56,19 @@ export default function PortfolioScreen({ barberId }: { barberId: string }) {
         columnWrapperStyle={s.rowGap}
         contentContainerStyle={s.grid}
         ListEmptyComponent={<Empty text="No photos yet — show off your best cuts." />}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <TouchableOpacity style={s.cell} onLongPress={() => remove(item.name)}
-            accessibilityLabel="Portfolio photo, long-press to remove">
+            accessibilityLabel={`${index === 0 ? 'Cover photo' : 'Portfolio photo'}, long-press to remove`}>
             <Image source={{ uri: item.url }} style={s.photo} />
-            <Text style={s.hint}>long-press to remove</Text>
+            {index === 0 && (
+              <View style={s.coverBadge}>
+                <Ionicons name="star" size={10} color={colors.onAccent} />
+                <Text style={s.coverText}>Cover</Text>
+              </View>
+            )}
+            <Text style={s.hint}>
+              {index === 0 ? 'customers see this first' : 'long-press to remove'}
+            </Text>
           </TouchableOpacity>
         )}
       />
@@ -74,4 +83,10 @@ const s = StyleSheet.create({
   cell: { flex: 1 },
   photo: { width: '100%', aspectRatio: 1, borderRadius: radius.md, backgroundColor: colors.surface },
   hint: { fontSize: font.tiny, color: colors.textTertiary, textAlign: 'center', marginTop: 2 },
+  coverBadge: {
+    position: 'absolute', top: sp(2), left: sp(2), flexDirection: 'row', alignItems: 'center',
+    gap: 3, backgroundColor: colors.accent, borderRadius: radius.sm,
+    paddingVertical: 2, paddingHorizontal: sp(1.5),
+  },
+  coverText: { fontSize: font.tiny, fontWeight: '700', color: colors.onAccent },
 });

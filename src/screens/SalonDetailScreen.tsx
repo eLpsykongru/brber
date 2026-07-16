@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import BookingSheet from '../components/BookingSheet';
 import { Empty, Field, Stars } from '../components/ui';
+import { openDirections, walkMin } from '../lib/geo';
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, sp } from '../theme';
@@ -15,6 +16,8 @@ export type SalonCard = {
   id: string;
   name: string;
   address: string | null;
+  lat: number | null;
+  lng: number | null;
   bio: string | null;
   website?: string | null;
   barbers: Specialist[];
@@ -28,12 +31,6 @@ function avgOf(reviews: { rating: number }[]): number | null {
   return reviews.reduce((a, r) => a + r.rating, 0) / reviews.length;
 }
 
-// TODO(backlog): placeholder distance until lat/lng lands
-function pseudoKm(id: string) {
-  let h = 0; for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) % 900;
-  return 1 + h / 100;
-}
-
 function timeAgo(iso: string) {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
   if (days < 1) return 'today';
@@ -42,8 +39,8 @@ function timeAgo(iso: string) {
   return m < 12 ? `${m}mo ago` : `${Math.floor(m / 12)}y ago`;
 }
 
-export default function SalonDetailScreen({ salon, onBack, onChromeHidden }: {
-  salon: SalonCard; onBack: () => void; onChromeHidden?: (hidden: boolean) => void;
+export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }: {
+  salon: SalonCard; km?: number | null; onBack: () => void; onChromeHidden?: (hidden: boolean) => void;
 }) {
   const [tab, setTab] = useState<Tab>('about');
   const [photos, setPhotos] = useState<{ name: string; url: string }[]>([]);
@@ -61,7 +58,6 @@ export default function SalonDetailScreen({ salon, onBack, onChromeHidden }: {
       ? `${(Math.min(...prices) / 100).toFixed(0)} DH`
       : `${(Math.min(...prices) / 100).toFixed(0)} - ${(Math.max(...prices) / 100).toFixed(0)} DH`)
     : null;
-  const km = pseudoKm(salon.id);
 
   useEffect(() => {
     (async () => setPhotos((await Promise.all(salon.barbers.map((b) => listPortfolio(b.id)))).flat()))();
@@ -160,11 +156,12 @@ export default function SalonDetailScreen({ salon, onBack, onChromeHidden }: {
             <Text style={s.meta}>{salon.address ?? 'Tangier, Morocco'}</Text>
           </View>
           <View style={s.metaGroup}>
-            {/* TODO(backlog): real distance/ETA */}
-            <View style={s.metaLine}>
-              <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
-              <Text style={s.meta}>{Math.round(km * 4)} Min • {(km * 0.62).toFixed(1)} Miles</Text>
-            </View>
+            {km != null && (
+              <View style={s.metaLine}>
+                <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
+                <Text style={s.meta}>{walkMin(km)} Min • {km.toFixed(1)} Km</Text>
+              </View>
+            )}
             {priceRange && (
               <View style={s.metaLine}>
                 <Ionicons name="pricetag-outline" size={14} color={colors.textSecondary} />
@@ -176,7 +173,10 @@ export default function SalonDetailScreen({ salon, onBack, onChromeHidden }: {
           {/* actions */}
           <View style={s.actions}>
             <Action icon="globe-outline" label="Website" onPress={() => action('Website', salon.website)} />
-            <Action icon="map-outline" label="Direction" onPress={() => action('Direction')} />
+            <Action icon="map-outline" label="Direction"
+              onPress={() => (salon.lat != null && salon.lng != null
+                ? openDirections(salon.lat, salon.lng, salon.name)
+                : Alert.alert('Direction', 'This salon has not set its map location yet.'))} />
             <Action icon="chatbubble-outline" label="Message" onPress={() => action('Message')} />
             <Action icon="paper-plane-outline" label="Share"
               onPress={() => Share.share({ message: `${salon.name} on brber!` })} />

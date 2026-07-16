@@ -1,14 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import LocationPicker from '../components/LocationPicker';
 import { Card, Chip, Field, PillButton, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
+import type { LatLng } from '../lib/geo';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, sp } from '../theme';
 import type { Barber, Profile } from '../types';
+import { ActivityIndicator } from 'react-native';
 import CouponsScreen from './CouponsScreen';
 import HelpCenterScreen from './HelpCenterScreen';
 import MyBookingsScreen from './MyBookingsScreen';
+import PortfolioScreen from './PortfolioScreen';
+import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
+import ServicesScreen from './ServicesScreen';
 import WalletScreen from './WalletScreen';
 
 const STATUS_LABEL: Record<string, string> = {
@@ -17,18 +23,20 @@ const STATUS_LABEL: Record<string, string> = {
 
 type MenuItem = { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void; danger?: boolean };
 
-export default function ProfileScreen({ profile, barber, phone, onProfileChanged, onChromeHidden }: {
+export default function ProfileScreen({ profile, barber, phone, onProfileChanged, onChromeHidden, onBack }: {
   profile: Profile; barber: Barber | null; phone: string | null;
   onProfileChanged: () => void; onChromeHidden?: (hidden: boolean) => void;
+  onBack?: () => void;
 }) {
-  const [view, setView] = useState<'menu' | 'edit' | 'bookings' | 'wallet' | 'coupons' | 'help'>('menu');
+  type View = 'menu' | 'edit' | 'bookings' | 'wallet' | 'coupons' | 'help' | 'preview' | 'services' | 'work';
+  const [view, setView] = useState<View>('menu');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatar_url ?? null);
   const [avatarBusy, setAvatarBusy] = useState(false);
 
   const initials = (profile.full_name ?? '?')
     .split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
-  function go(next: 'menu' | 'edit' | 'bookings' | 'wallet' | 'coupons' | 'help') {
+  function go(next: View) {
     setView(next);
     onChromeHidden?.(next !== 'menu');
   }
@@ -77,10 +85,23 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   if (view === 'wallet') return <WalletScreen onBack={() => go('menu')} />;
   if (view === 'coupons') return <CouponsScreen onBack={() => go('menu')} />;
   if (view === 'help') return <HelpCenterScreen onBack={() => go('menu')} />;
+  if (view === 'preview' && barber?.salon_id) {
+    return <PreviewPage salonId={barber.salon_id} onBack={() => go('menu')}
+      onChromeHidden={onChromeHidden} />;
+  }
+  if (view === 'services' && barber) return <ServicesScreen barberId={barber.id} onBack={() => go('menu')} />;
+  if (view === 'work' && barber) return <PortfolioScreen barberId={barber.id} onBack={() => go('menu')} />;
 
   // TODO(backlog): Payment Methods / My Coupons / My Wallet — no payment rail yet
   const items: MenuItem[] = [
     { icon: 'person-outline', label: 'Your profile', onPress: () => go('edit') },
+    ...(barber ? [
+      { icon: 'cut-outline', label: 'My Services', onPress: () => go('services') },
+      { icon: 'images-outline', label: 'My Work', onPress: () => go('work') },
+    ] as MenuItem[] : []),
+    ...(barber?.salon_id ? [
+      { icon: 'eye-outline', label: 'Preview my page', onPress: () => go('preview') },
+    ] as MenuItem[] : []),
     ...(barber ? [] : [
       { icon: 'card-outline', label: 'Payment Methods', onPress: () => soon('Payment Methods') },
       { icon: 'calendar-outline', label: 'My Bookings', onPress: () => go('bookings') },
@@ -94,7 +115,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
 
   return (
     <ScrollView style={s.screen} contentContainerStyle={s.content}>
-      <ScreenHeader title="Profile" />
+      <ScreenHeader title="Profile" onBack={onBack} />
 
       <View style={s.avatarWrap}>
         <Pressable onPress={changeAvatar} disabled={avatarBusy} accessibilityLabel="Change profile photo"
@@ -129,6 +150,27 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   );
 }
 
+// "how customers see me" — fetches the salon in SalonCard shape and reuses the customer screen
+function PreviewPage({ salonId, onBack, onChromeHidden }: {
+  salonId: string; onBack: () => void; onChromeHidden?: (hidden: boolean) => void;
+}) {
+  const [salon, setSalon] = useState<SalonCard | null>(null);
+
+  useEffect(() => {
+    supabase.from('salons')
+      .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, specialty, years_experience, profiles(full_name, avatar_url, phone), reviews(rating), services(id, name, price_cents, duration_min, is_active, category))')
+      .eq('id', salonId).single()
+      .then(({ data, error }) => {
+        if (error) { Alert.alert('Could not load preview', error.message); onBack(); return; }
+        const card = data as unknown as SalonCard;
+        setSalon({ ...card, barbers: card.barbers.filter((b) => b.status === 'approved') });
+      });
+  }, [salonId]);
+
+  if (!salon) return <View style={s.center}><ActivityIndicator /></View>;
+  return <SalonDetailScreen salon={salon} onBack={onBack} onChromeHidden={onChromeHidden} />;
+}
+
 function EditProfile({ profile, barber, phone, onDone, onBack }: {
   profile: Profile; barber: Barber | null; phone: string | null;
   onDone: () => void; onBack: () => void;
@@ -140,6 +182,25 @@ function EditProfile({ profile, barber, phone, onDone, onBack }: {
     barber?.years_experience != null ? String(barber.years_experience) : '',
   );
   const [busy, setBusy] = useState(false);
+  // owned salon (if any) → owner can set/move the map pin
+  const [salon, setSalon] = useState<{ id: string; name: string; lat: number | null; lng: number | null } | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  useEffect(() => {
+    if (!barber?.salon_id) return;
+    supabase.from('salons').select('id, name, lat, lng')
+      .eq('id', barber.salon_id).eq('owner_id', barber.id).maybeSingle()
+      .then(({ data }) => setSalon(data));
+  }, [barber?.salon_id]);
+
+  async function savePin(c: LatLng) {
+    setPickerOpen(false);
+    if (!salon) return;
+    const { error } = await supabase.from('salons')
+      .update({ lat: c.latitude, lng: c.longitude }).eq('id', salon.id);
+    if (error) Alert.alert('Could not save location', error.message);
+    else setSalon({ ...salon, lat: c.latitude, lng: c.longitude });
+  }
 
   async function save() {
     if (!name.trim()) return Alert.alert('Missing name', 'Your name cannot be empty.');
@@ -178,16 +239,36 @@ function EditProfile({ profile, barber, phone, onDone, onBack }: {
             <Field value={yearsExp} onChangeText={setYearsExp} placeholder="e.g. 8" keyboardType="number-pad" />
           </>
         )}
+        {salon && (
+          <>
+            <Text style={s.label}>Salon location ({salon.name})</Text>
+            <TouchableOpacity style={s.locationBtn} onPress={() => setPickerOpen(true)}
+              accessibilityLabel="Set salon location on map">
+              <Ionicons name={salon.lat != null ? 'checkmark-circle' : 'location-outline'} size={20}
+                color={salon.lat != null ? colors.success : colors.accent} />
+              <Text style={s.locationBtnText}>
+                {salon.lat != null ? 'On the map — tap to move the pin' : 'Set location on map'}
+              </Text>
+            </TouchableOpacity>
+          </>
+        )}
         <View style={s.saveRow}>
           <PillButton title="Save changes" onPress={save} loading={busy} />
         </View>
       </Card>
+      {salon && (
+        <LocationPicker visible={pickerOpen}
+          initial={salon.lat != null && salon.lng != null
+            ? { latitude: salon.lat, longitude: salon.lng } : null}
+          onPick={savePin} onClose={() => setPickerOpen(false)} />
+      )}
     </ScrollView>
   );
 }
 
 const s = StyleSheet.create({
   screen: { flex: 1, paddingTop: sp(14) },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { paddingHorizontal: sp(5), gap: sp(4), paddingBottom: TAB_BAR_INSET },
   pressed: { opacity: 0.7 },
 
@@ -218,4 +299,10 @@ const s = StyleSheet.create({
 
   label: { fontSize: font.small, fontWeight: '600', color: colors.textSecondary, marginTop: sp(2) },
   saveRow: { marginTop: sp(3) },
+  locationBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: sp(2),
+    borderWidth: 1, borderColor: colors.border, borderRadius: radius.md,
+    paddingVertical: sp(3), backgroundColor: colors.surface,
+  },
+  locationBtnText: { fontSize: font.body, fontWeight: '600', color: colors.text },
 });

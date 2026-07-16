@@ -138,8 +138,10 @@ export default function MyBookingsScreen({ customerId, onChromeHidden }: {
             <View style={s.card}>
               <View style={s.cardHeadRow}>
                 <View style={s.statusBadge}>
-                  <Text style={s.statusBadgeText}>
-                    {filter === 'upcoming' ? 'Upcoming' : filter === 'completed' ? 'Completed' : item.status}
+                  <Text style={[s.statusBadgeText, filter === 'upcoming' && item.status === 'pending' && s.statusBadgePending]}>
+                    {filter === 'upcoming'
+                      ? (item.status === 'pending' ? 'Waiting for barber' : 'Upcoming')
+                      : filter === 'completed' ? 'Completed' : item.status}
                   </Text>
                 </View>
               </View>
@@ -286,6 +288,7 @@ const s = StyleSheet.create({
     paddingVertical: 4, paddingHorizontal: sp(2.5),
   },
   statusBadgeText: { fontSize: font.tiny, fontWeight: '700', color: colors.textSecondary, textTransform: 'capitalize' },
+  statusBadgePending: { color: colors.warning },
   cardBody: { flexDirection: 'row', gap: sp(3) },
   photo: { width: 96, height: 96, borderRadius: radius.md, backgroundColor: colors.surface },
   photoFallback: { backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },

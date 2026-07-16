@@ -3,14 +3,15 @@
 Screens ship with the full mockup UI; items below are placeholders wired to
 real data *later*. Each names the file + what to replace. Grep `TODO(backlog)`.
 
-## Location & maps  → Explore tab
-- **Real map** — `src/screens/ExploreScreen.tsx` renders a styled placeholder.
-  Needs: lat/lng on `salons` (Google Places autocomplete at onboarding) + a map
-  lib (`react-native-maps`, requires an EAS dev build — no map in Expo Go).
-- **Distances ("8.8 Km", "3.5 Miles • 15 Min")** — currently a stable pseudo value
-  per salon. Real value = haversine(user location, salon lat/lng) once both exist.
-- **"Locate me" FAB / user pin** — needs `expo-location` permission + position.
-- **"Navigate" button on cards** — open the device maps app to salon coords.
+## Location & maps  → Explore tab — DONE 2026-07-15
+Real map (`react-native-maps` — works in Expo Go, the old "needs a dev build"
+note was wrong), pin picker at onboarding + Profile edit (owner), haversine
+distances, locate-me FAB, navigate-to-salon. Still open:
+- **Android production build needs a Google Maps API key** in app.json — only
+  when we ship a store build; Expo Go needs nothing.
+- **Walking ETA is straight-line × 12 min/km** — a routing API if it bites.
+- **Legacy salons have no pin** until the owner sets one in Profile → Your
+  profile; they show in the carousel but not on the map.
 
 ## Wishlist  → heart button on Explore cards
 - Toggling does nothing yet. Needs a `wishlists (customer_id, salon_id)` table +
@@ -20,13 +21,49 @@ real data *later*. Each names the file + what to replace. Grep `TODO(backlog)`.
 - Hardcoded label. Needs a `promotions` table (salon_id, percent, validity) and
   application to the deposit/price once a payment rail exists.
 
-## Filters  → filter button next to search
-- Opens a "coming soon" note. Mockup filter screen: gender, category, rating,
-  distance, price range. Build when categories + lat/lng + price filters are real.
+## Filters  → filter button next to search — PARTIAL 2026-07-15
+- Rating / distance / starting-price filters are live (bottom sheet).
+  Still out: gender + category — those fields don't exist on services/barbers yet.
 
 ## Reminders  → "Remind me" toggle on booking cards (My Bookings)
 - Removed for now; belongs with **push notifications** (Expo push tokens + a DB
   webhook on booking/message insert). Whole push increment is still TODO.
+- **URGENCY UP (2026-07-15):** bookings now need barber approval (0015 reversed
+  0005's instant-confirm — customer requests start 'pending'; barber accepts /
+  declines / reschedules). Without push, barbers only see requests when they
+  open the app and customers wait blind. Push should be the next increment.
+  Pending requests hold the slot and die silently at start time (rendered as
+  expired; no cron). Per-barber "instant book" toggle deferred until asked for.
+
+## Barber dashboard  → `src/screens/BookingsScreen.tsx` (dark mockup, 2026-07-15)
+Built to the provided dark dashboard mockup. Real: daily earnings + 7-day bars
+(booked value of confirmed bookings — a proxy until money actually moves in-app),
+today/capacity + walk-ins tiles, Clock Out (= today day-off toggle), bell → pending
+requests, avatar → Profile (now also hosts My Services / My Work). Placeholders:
+- **Tips tile** — no tips concept; needs the wallet/payment rail (Phase 2).
+- **Inventory chip** — product stock (pomade/blades) tracking; whole feature TODO.
+- **"Start" button / check-in flow** — needs an appointment state machine
+  (checked_in / in_service timestamps on bookings) + a service timer. Alert for now.
+- **LIVE badge** — decorative; becomes real with Supabase Realtime on bookings.
+- The swipe request-deck was replaced by the bell → requests sheet (mockup has no
+  inline deck). Re-add if barbers miss it.
+- **Clients tab** — client book v1 shipped (visits/no-shows/stars/last-visit from
+  booking history; walk-ins grouped by name). Still TODO from the bet: preferences
+  notes + informal debt ledger ("owes me 50 DH").
+
+## Schedule editor  → `src/screens/AvailabilityScreen.tsx` (dark mockup, 2026-07-16)
+Calendar tab = the SCHEDULE editor (accepting-bookings switch, weekly hours,
+time-off blocks). The day timeline (walk-ins, pending accept/decline/reschedule)
+moved to `DayScheduleScreen`, opened by the tab-bar + FAB and the dashboard.
+Backend: 0016 (`barbers.accepting_bookings`, `days_off.label`, `time_blocks`).
+Still open:
+- **Vacations are stored as one `days_off` row per day** — the list shows them
+  individually, not grouped as one "Vacation Jul 21–28" row. Group when it annoys.
+- **Breaks recur every day** (not per-weekday like the mockup's "Every weekday");
+  add a weekday mask to `time_blocks` if a barber asks.
+- **SlotPicker stays light-themed** inside the dark reschedule sheet.
+- **WalletScreen still light** — shared with the customer side; darken with the
+  wallet increment.
 
 ## Salon screen  → `src/screens/SalonDetailScreen.tsx`
 - **Packages tab + "Packages" step in the booking sheet** — needs a `packages` table
@@ -36,8 +73,10 @@ real data *later*. Each names the file + what to replace. Grep `TODO(backlog)`.
   how a package books against one barber + calendar slot.
 - **Intro video** — hero play button is a placeholder; needs a `video_url` on salons + `expo-av`.
 - **Website / Direction / Message actions** — Website opens `salons.website` if set (added
-  in 0013); Direction needs lat/lng + maps; Message needs a booking-scoped chat entry.
-- **Distance/ETA ("12 Min • 1.5 Miles")** — placeholder; see the Explore/maps item.
+  in 0013); Direction opens the device maps app (done 2026-07-15); Message needs a
+  booking-scoped chat entry.
+- **Distance/ETA** — real when opened from Explore; hidden when unknown (no user
+  location, no salon pin, or opened from Home which doesn't pass a distance).
 - **"add review" on the Review tab** — reviews still come only from a completed booking
   (My Bookings → Rate). No arbitrary review entry from the salon screen.
 
@@ -84,6 +123,8 @@ They adopt on tools that fix today's business. Priority order:
 3. **Client book + informal debt ledger** — regulars' preferences + "owes me 50 DH",
    which barbers today keep in their head. No foreign competitor models this.
    **Trigger:** once a barber has repeat customers (needs `bookings` history only).
+   *Seed exists (2026-07-15): walk-in bookings carry a `walk_in_name`; the client
+   book can grow out of recurring walk-in names + booking history.*
 4. **Flash discounts on dead hours** (11h–16h chairs are empty) — doubles as our
    client-acquisition engine. **Trigger:** with the `promotions` table.
 5. **Verified badge / "Top rated in Tangier"** — barbers are competitive and
@@ -105,6 +146,9 @@ Realtime for live position; ETA = sum of avg service durations ahead of you.
   *reputation*, not deposits: strike system (2 no-shows → must phone-confirm /
   lose booking priority), "reliable client" badge, barber marks no-show.
   **Trigger:** first real no-show complaint from a barber.
+  *Partial (2026-07-15, trigger pulled early on request): barber can mark
+  no-show from the Schedule timeline (`mark_no_show` RPC, 0014). The strike
+  system / badge / booking-priority consequences are still TODO.*
 - **Phase 2: in-app wallet** (`WalletScreen` becomes real) = a ledger *we* own,
   with pluggable top-up rails:
   - **Card** via **YouCan Pay** (Moroccan, sits on CMI) — verify current fees/API

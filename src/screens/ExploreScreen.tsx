@@ -1,20 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+import * as Location from 'expo-location';
+import { useEffect, useRef, useState } from 'react';
 import {
-  Alert, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View,
+  Alert, FlatList, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
-import { Field, Stars } from '../components/ui';
+import MapView, { Marker } from 'react-native-maps';
+import { Chip, Field, Stars } from '../components/ui';
+import { DEFAULT_REGION, LatLng, haversineKm, openDirections, walkMin } from '../lib/geo';
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, sp } from '../theme';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
 
-// TODO(backlog): placeholder distance — replace with haversine(user, salon lat/lng)
-function pseudoKm(id: string): number {
-  let h = 0;
-  for (const ch of id) h = (h * 31 + ch.charCodeAt(0)) % 900;
-  return 1 + h / 100; // 1.0 – 9.99, stable per salon
-}
+const CARD_W = 300;
+const CARD_GAP = sp(3);
 
 function startingPrice(s: SalonCard): number | null {
   const prices = s.barbers
@@ -28,13 +27,6 @@ function avgOf(reviews: { rating: number }[]): number | null {
   if (!reviews.length) return null;
   return reviews.reduce((a, r) => a + r.rating, 0) / reviews.length;
 }
-
-// preset scatter positions for up to 5 map pins (top/left %)
-const PIN_POS = [
-  { top: '18%', left: '12%' }, { top: '14%', left: '68%' },
-  { top: '46%', left: '58%' }, { top: '58%', left: '24%' },
-  { top: '40%', left: '82%' },
-] as const;
 
 function SalonPhoto({ salon, style }: { salon: SalonCard; style: object }) {
   const [url, setUrl] = useState<string | null>(null);
@@ -56,16 +48,28 @@ function SalonPhoto({ salon, style }: { salon: SalonCard; style: object }) {
   );
 }
 
+const RATING_OPTS = [{ label: 'Any', v: null }, { label: '4+', v: 4 }, { label: '4.5+', v: 4.5 }] as const;
+const KM_OPTS = [{ label: 'Any', v: null }, { label: '< 1 Km', v: 1 }, { label: '< 3 Km', v: 3 }, { label: '< 5 Km', v: 5 }] as const;
+const PRICE_OPTS = [{ label: 'Any', v: null }, { label: '≤ 50 DH', v: 5000 }, { label: '≤ 100 DH', v: 10000 }, { label: '≤ 200 DH', v: 20000 }] as const;
+
 export default function ExploreScreen({ onChromeHidden }: {
   onChromeHidden?: (hidden: boolean) => void;
 }) {
   const [salons, setSalons] = useState<SalonCard[]>([]);
   const [query, setQuery] = useState('');
   const [salon, setSalon] = useState<SalonCard | null>(null);
+  const [userLoc, setUserLoc] = useState<LatLng | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [minRating, setMinRating] = useState<number | null>(null);
+  const [maxKm, setMaxKm] = useState<number | null>(null);
+  const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const mapRef = useRef<MapView>(null);
+  const listRef = useRef<FlatList<SalonCard>>(null);
 
   useEffect(() => {
     supabase.from('salons')
-      .select('id, name, address, bio, website, barbers!salon_id(id, bio, status, specialty, years_experience, profiles(full_name, avatar_url, phone), reviews(rating), services(id, name, price_cents, duration_min, is_active, category))')
+      .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, specialty, years_experience, profiles(full_name, avatar_url, phone), reviews(rating), services(id, name, price_cents, duration_min, is_active, category))')
       .order('name')
       .then(({ data, error }) => {
         if (error) return Alert.alert('Could not load salons', error.message);
@@ -74,25 +78,59 @@ export default function ExploreScreen({ onChromeHidden }: {
           .filter((s) => s.barbers.length > 0);
         setSalons(cards);
       });
+    locate(false);
   }, []);
+
+  async function locate(recenter: boolean) {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== 'granted') {
+      if (recenter) Alert.alert('Location', 'Allow location access to see distances and recenter the map.');
+      return;
+    }
+    const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+    const loc = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+    setUserLoc(loc);
+    if (recenter) mapRef.current?.animateToRegion({ ...loc, latitudeDelta: 0.02, longitudeDelta: 0.02 }, 400);
+  }
+
+  function kmFor(s: SalonCard): number | null {
+    if (!userLoc || s.lat == null || s.lng == null) return null;
+    return haversineKm(userLoc, { latitude: s.lat, longitude: s.lng });
+  }
 
   function open(next: SalonCard | null) {
     setSalon(next);
     onChromeHidden?.(!!next);
   }
 
-  const visible = salons.filter((s) => {
-    const q = query.trim().toLowerCase();
-    return !q || s.name.toLowerCase().includes(q)
-      || s.barbers.some((b) => b.profiles?.full_name?.toLowerCase().includes(q));
-  });
-
-  if (salon) {
-    return <SalonDetailScreen salon={salon} onBack={() => open(null)} onChromeHidden={onChromeHidden} />;
+  function selectFromMap(s: SalonCard, index: number) {
+    setSelectedId(s.id);
+    listRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.5 });
   }
 
-  // ---- explore landing (map placeholder + carousel) ----
-  const pinned = visible.slice(0, PIN_POS.length);
+  const visible = salons.filter((s) => {
+    const q = query.trim().toLowerCase();
+    const matchQ = !q || s.name.toLowerCase().includes(q)
+      || s.barbers.some((b) => b.profiles?.full_name?.toLowerCase().includes(q));
+    const avg = avgOf(s.barbers.flatMap((b) => b.reviews));
+    const matchR = minRating == null || (avg != null && avg >= minRating);
+    const km = kmFor(s);
+    // no user location → the distance filter can't judge anyone; skip it
+    const matchD = maxKm == null || !userLoc || (km != null && km <= maxKm);
+    const price = startingPrice(s);
+    const matchP = maxPrice == null || (price != null && price <= maxPrice);
+    return matchQ && matchR && matchD && matchP;
+  });
+  // nearby first; salons without a pin (or no user location) sink to the end
+  const sorted = [...visible].sort((a, b) => (kmFor(a) ?? Infinity) - (kmFor(b) ?? Infinity));
+
+  if (salon) {
+    return <SalonDetailScreen salon={salon} km={kmFor(salon)} onBack={() => open(null)}
+      onChromeHidden={onChromeHidden} />;
+  }
+
+  const filtersOn = minRating != null || maxKm != null || maxPrice != null;
+
   return (
     <View style={styles.screen}>
       {/* search + filter */}
@@ -101,54 +139,63 @@ export default function ExploreScreen({ onChromeHidden }: {
           <Field placeholder="Search Salon or Specialist" value={query} onChangeText={setQuery} />
         </View>
         <Pressable style={({ pressed }) => [styles.filterBtn, pressed && styles.pressed]}
-          accessibilityLabel="Filters"
-          /* TODO(backlog): real filter sheet (gender, category, rating, distance, price) */
-          onPress={() => Alert.alert('Filters', 'Coming soon — see BACKLOG.md')}>
+          accessibilityLabel="Filters" onPress={() => setFilterOpen(true)}>
           <Ionicons name="options-outline" size={22} color={colors.onAccent} />
+          {filtersOn && <View style={styles.filterDot} />}
         </Pressable>
       </View>
 
-      {/* TODO(backlog): styled placeholder for the real map (needs lat/lng + react-native-maps) */}
-      <View style={styles.map}>
-        <View style={[styles.street, styles.streetA]} />
-        <View style={[styles.street, styles.streetB]} />
-        <View style={[styles.street, styles.streetC]} />
-        {pinned.map((s, i) => (
-          <TouchableOpacity key={s.id} style={[styles.pinWrap, PIN_POS[i]]} onPress={() => open(s)}>
-            <View style={styles.pin}>
-              <Ionicons name="cut" size={16} color={colors.accent} />
-            </View>
-            <Text style={styles.pinLabel}>{pseudoKm(s.id).toFixed(1)} Km</Text>
-          </TouchableOpacity>
-        ))}
-        {/* user location marker */}
-        <View style={styles.userPin}>
-          <Ionicons name="navigate" size={16} color={colors.onAccent} />
-        </View>
+      {/* map */}
+      <View style={styles.mapWrap}>
+        <MapView ref={mapRef} style={StyleSheet.absoluteFill} initialRegion={DEFAULT_REGION}
+          showsUserLocation showsMyLocationButton={false}>
+          {sorted.map((s, i) => {
+            if (s.lat == null || s.lng == null) return null;
+            const km = kmFor(s);
+            const sel = selectedId === s.id;
+            return (
+              // key carries selection + km: markers are rasterized (tracksViewChanges off),
+              // so remount is what repaints them when either changes
+              <Marker key={`${s.id}-${sel}-${km?.toFixed(1) ?? 'x'}`}
+                coordinate={{ latitude: s.lat, longitude: s.lng }}
+                onPress={() => selectFromMap(s, i)} tracksViewChanges={false}
+                anchor={{ x: 0.5, y: 0.5 }}>
+                <View style={styles.pinWrap}>
+                  <View style={[styles.pin, sel && styles.pinSelected]}>
+                    <Ionicons name="cut" size={16} color={sel ? colors.onAccent : colors.accent} />
+                  </View>
+                  {km != null && <Text style={styles.pinLabel}>{km.toFixed(1)} Km</Text>}
+                </View>
+              </Marker>
+            );
+          })}
+        </MapView>
         {/* locate-me FAB */}
         <Pressable style={({ pressed }) => [styles.locateBtn, pressed && styles.pressed]}
-          accessibilityLabel="Locate me"
-          /* TODO(backlog): expo-location permission + recenter on user */
-          onPress={() => Alert.alert('Location', 'Coming soon — see BACKLOG.md')}>
+          accessibilityLabel="Locate me" onPress={() => locate(true)}>
           <Ionicons name="locate" size={20} color={colors.text} />
         </Pressable>
       </View>
 
-      {/* bottom carousel */}
+      {/* bottom carousel — nearest first */}
       <View style={styles.carousel}>
         <FlatList
-          data={visible}
+          ref={listRef}
+          data={sorted}
           horizontal
           showsHorizontalScrollIndicator={false}
           keyExtractor={(s) => s.id}
           contentContainerStyle={styles.carouselContent}
-          ListEmptyComponent={<Text style={styles.meta}>No salons yet.</Text>}
+          getItemLayout={(_, i) => ({ length: CARD_W + CARD_GAP, offset: i * (CARD_W + CARD_GAP), index: i })}
+          ListEmptyComponent={<Text style={styles.meta}>No salons match.</Text>}
           renderItem={({ item }) => {
             const avg = avgOf(item.barbers.flatMap((b) => b.reviews));
             const price = startingPrice(item);
-            const km = pseudoKm(item.id);
+            const km = kmFor(item);
             return (
-              <TouchableOpacity style={styles.card} onPress={() => open(item)} activeOpacity={0.9}>
+              <TouchableOpacity
+                style={[styles.card, selectedId === item.id && styles.cardSelected]}
+                onPress={() => open(item)} activeOpacity={0.9}>
                 <View style={styles.cardTopRow}>
                   {/* TODO(backlog): real promotions */}
                   <View style={styles.offBadge}>
@@ -179,13 +226,15 @@ export default function ExploreScreen({ onChromeHidden }: {
                 <View style={styles.cardBottomRow}>
                   <View style={styles.iconLine}>
                     <Ionicons name="walk-outline" size={13} color={colors.textSecondary} />
-                    {/* TODO(backlog): real distance + ETA */}
-                    <Text style={styles.meta}>{(km * 0.62).toFixed(1)} Miles • {Math.round(km * 4)} Min</Text>
+                    <Text style={styles.meta}>
+                      {km != null ? `${km.toFixed(1)} Km • ${walkMin(km)} Min` : 'Distance unknown'}
+                    </Text>
                   </View>
                   <Pressable style={({ pressed }) => [styles.navBtn, pressed && styles.pressed]}
                     accessibilityLabel="Navigate to salon"
-                    /* TODO(backlog): open device maps to salon coords */
-                    onPress={() => Alert.alert('Directions', 'Coming soon — see BACKLOG.md')}>
+                    onPress={() => (item.lat != null && item.lng != null
+                      ? openDirections(item.lat, item.lng, item.name)
+                      : Alert.alert('Directions', 'This salon has not set its map location yet.'))}>
                     <Ionicons name="paper-plane" size={16} color={colors.onAccent} />
                   </Pressable>
                 </View>
@@ -194,6 +243,46 @@ export default function ExploreScreen({ onChromeHidden }: {
           }}
         />
       </View>
+
+      {/* filter sheet */}
+      <Modal visible={filterOpen} transparent animationType="slide"
+        onRequestClose={() => setFilterOpen(false)}>
+        <Pressable style={styles.sheetBackdrop} onPress={() => setFilterOpen(false)} />
+        <View style={styles.sheet}>
+          <View style={styles.sheetHeader}>
+            <Text style={styles.sheetTitle}>Filters</Text>
+            <Pressable hitSlop={8}
+              onPress={() => { setMinRating(null); setMaxKm(null); setMaxPrice(null); }}>
+              <Text style={styles.sheetReset}>Reset</Text>
+            </Pressable>
+          </View>
+          <Text style={styles.sheetLabel}>Rating</Text>
+          <View style={styles.chipRow}>
+            {RATING_OPTS.map((o) => (
+              <Chip key={o.label} label={o.label} active={minRating === o.v}
+                onPress={() => setMinRating(o.v)} />
+            ))}
+          </View>
+          <Text style={styles.sheetLabel}>Distance{!userLoc ? ' (needs location access)' : ''}</Text>
+          <View style={styles.chipRow}>
+            {KM_OPTS.map((o) => (
+              <Chip key={o.label} label={o.label} active={maxKm === o.v}
+                onPress={() => setMaxKm(o.v)} />
+            ))}
+          </View>
+          <Text style={styles.sheetLabel}>Starting price</Text>
+          <View style={styles.chipRow}>
+            {PRICE_OPTS.map((o) => (
+              <Chip key={o.label} label={o.label} active={maxPrice === o.v}
+                onPress={() => setMaxPrice(o.v)} />
+            ))}
+          </View>
+          <Pressable style={({ pressed }) => [styles.sheetDone, pressed && styles.pressed]}
+            onPress={() => setFilterOpen(false)}>
+            <Text style={styles.sheetDoneText}>Show {sorted.length} salon{sorted.length === 1 ? '' : 's'}</Text>
+          </Pressable>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -208,24 +297,19 @@ const styles = StyleSheet.create({
     width: 48, height: 48, borderRadius: radius.md, backgroundColor: colors.accent,
     alignItems: 'center', justifyContent: 'center',
   },
+  filterDot: {
+    position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: radius.pill,
+    backgroundColor: colors.onAccent,
+  },
 
-  // map placeholder
-  map: { flex: 1, marginHorizontal: sp(5), borderRadius: radius.lg, backgroundColor: colors.surface, overflow: 'hidden' },
-  street: { position: 'absolute', backgroundColor: colors.border },
-  streetA: { width: '160%', height: 10, top: '30%', left: '-10%', transform: [{ rotate: '-18deg' }] },
-  streetB: { width: '160%', height: 10, top: '62%', left: '-10%', transform: [{ rotate: '-12deg' }] },
-  streetC: { width: 10, height: '160%', top: '-10%', left: '55%', transform: [{ rotate: '15deg' }] },
-  pinWrap: { position: 'absolute', alignItems: 'center' },
+  mapWrap: { flex: 1, marginHorizontal: sp(5), borderRadius: radius.lg, overflow: 'hidden' },
+  pinWrap: { alignItems: 'center' },
   pin: {
     width: 40, height: 40, borderRadius: radius.pill, backgroundColor: colors.accentSoft,
     alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: colors.bg,
   },
+  pinSelected: { backgroundColor: colors.accent },
   pinLabel: { fontSize: font.tiny, fontWeight: '700', color: colors.text, marginTop: 2 },
-  userPin: {
-    position: 'absolute', top: '44%', left: '44%', width: 40, height: 40, borderRadius: radius.pill,
-    backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center',
-    borderWidth: 3, borderColor: colors.bg,
-  },
   locateBtn: {
     position: 'absolute', right: sp(3), bottom: sp(3), width: 44, height: 44, borderRadius: radius.pill,
     backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center',
@@ -234,11 +318,12 @@ const styles = StyleSheet.create({
 
   // carousel
   carousel: { paddingVertical: sp(3) },
-  carouselContent: { paddingHorizontal: sp(5), gap: sp(3) },
+  carouselContent: { paddingHorizontal: sp(5), gap: CARD_GAP },
   card: {
-    width: 300, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg,
+    width: CARD_W, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg,
     padding: sp(3), gap: sp(2), backgroundColor: colors.bg,
   },
+  cardSelected: { borderColor: colors.accent, borderWidth: 2 },
   cardTopRow: {
     position: 'absolute', top: sp(5), left: sp(5), right: sp(5), zIndex: 2,
     flexDirection: 'row', justifyContent: 'space-between',
@@ -264,14 +349,20 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
 
-  // salon detail
-  salonScreen: { flex: 1, paddingTop: sp(14), paddingHorizontal: sp(5) },
-  salonContent: { gap: sp(2), paddingBottom: sp(10) },
-  section: { fontSize: font.body, fontWeight: '700', marginTop: sp(3), color: colors.text },
-  barberRow: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(2),
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: sp(3.5),
-    backgroundColor: colors.bg,
+  // filter sheet
+  sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
+  sheet: {
+    backgroundColor: colors.bg, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg,
+    padding: sp(5), paddingBottom: sp(10), gap: sp(2),
   },
-  barberName: { fontSize: font.body, fontWeight: '700', color: colors.text },
+  sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  sheetTitle: { fontSize: font.h2, fontWeight: '700', color: colors.text },
+  sheetReset: { fontSize: font.small, fontWeight: '600', color: colors.accent },
+  sheetLabel: { fontSize: font.small, fontWeight: '600', color: colors.textSecondary, marginTop: sp(2) },
+  chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: sp(2) },
+  sheetDone: {
+    marginTop: sp(4), backgroundColor: colors.accent, borderRadius: radius.pill,
+    paddingVertical: sp(3.5), alignItems: 'center',
+  },
+  sheetDoneText: { color: colors.onAccent, fontSize: font.body, fontWeight: '700' },
 });

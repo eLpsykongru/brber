@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { supabase } from '../lib/supabase';
-import { daySlots, Range, sameDay, weekStartOf, Window } from '../lib/slots';
+import { Block, daySlots, Range, sameDay, weekStartOf, Window } from '../lib/slots';
 import { colors, font, radius, sp } from '../theme';
 
 // Weekly day selector + time grid. Full slots are struck-through and disabled.
@@ -11,6 +11,7 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect }
 }) {
   const [windows, setWindows] = useState<Window[]>([]);
   const [daysOff, setDaysOff] = useState<string[]>([]);
+  const [blocks, setBlocks] = useState<Block[]>([]);
   const [booked, setBooked] = useState<Range[]>([]);
   const [weekStart, setWeekStart] = useState<Date>(() => weekStartOf(new Date()));
   const [selectedDay, setSelectedDay] = useState<Date>(() => new Date());
@@ -34,9 +35,11 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect }
     Promise.all([
       supabase.from('availability').select('weekday, start_min, end_min').eq('barber_id', barberId),
       supabase.from('days_off').select('day').eq('barber_id', barberId),
-    ]).then(([av, off]) => {
+      supabase.from('time_blocks').select('day, start_min, end_min').eq('barber_id', barberId),
+    ]).then(([av, off, blk]) => {
       setWindows(av.data ?? []);
       setDaysOff((off.data ?? []).map((d) => d.day));
+      setBlocks(blk.data ?? []);
     });
     loadBooked(weekStart);
   }, [barberId]);
@@ -50,7 +53,7 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect }
     loadBooked(ws);
   }
 
-  const slots = daySlots(selectedDay, durationMin, windows, booked, daysOff);
+  const slots = daySlots(selectedDay, durationMin, windows, booked, daysOff, blocks);
 
   return (
     <View>

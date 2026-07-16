@@ -1,7 +1,10 @@
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import LocationPicker from '../components/LocationPicker';
 import { Card, Chip, Field, PillButton } from '../components/ui';
+import type { LatLng } from '../lib/geo';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, sp } from '../theme';
 import type { Barber, Salon } from '../types';
@@ -13,8 +16,10 @@ export default function OnboardingScreen({ barber, onDone }: Props) {
   const [salons, setSalons] = useState<Salon[]>([]);
   const [joinSalonId, setJoinSalonId] = useState<string | null>(null);
   const [salonName, setSalonName] = useState('');
-  // ponytail: plain-text address for now; Google Places autocomplete + lat/lng land with discovery-by-distance
+  // ponytail: plain-text address + a map pin; Google Places autocomplete if typing addresses bites
   const [salonAddress, setSalonAddress] = useState('');
+  const [coords, setCoords] = useState<LatLng | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [bio, setBio] = useState(barber.bio ?? '');
   const [specialty, setSpecialty] = useState(barber.specialty ?? '');
   const [yearsExp, setYearsExp] = useState(
@@ -37,6 +42,9 @@ export default function OnboardingScreen({ barber, onDone }: Props) {
     if (mode === 'create' && (!salonName.trim() || !salonAddress.trim())) {
       return Alert.alert('Missing info', 'Salon name and address are required.');
     }
+    if (mode === 'create' && !coords) {
+      return Alert.alert('Missing location', 'Set your salon location on the map so clients can find you.');
+    }
     if (mode === 'join' && !joinSalonId) {
       return Alert.alert('Missing info', 'Pick the salon you work at.');
     }
@@ -48,7 +56,10 @@ export default function OnboardingScreen({ barber, onDone }: Props) {
       let salonId = joinSalonId;
       if (mode === 'create') {
         const { data, error } = await supabase.from('salons')
-          .insert({ owner_id: barber.id, name: salonName.trim(), address: salonAddress.trim() })
+          .insert({
+            owner_id: barber.id, name: salonName.trim(), address: salonAddress.trim(),
+            lat: coords!.latitude, lng: coords!.longitude,
+          })
           .select('id').single();
         if (error) throw error;
         salonId = data.id;
@@ -90,6 +101,14 @@ export default function OnboardingScreen({ barber, onDone }: Props) {
         <>
           <Field placeholder="Salon name" value={salonName} onChangeText={setSalonName} />
           <Field placeholder="Salon address" value={salonAddress} onChangeText={setSalonAddress} />
+          <TouchableOpacity style={s.locationBtn} onPress={() => setPickerOpen(true)}
+            accessibilityLabel="Set salon location on map">
+            <Ionicons name={coords ? 'checkmark-circle' : 'location-outline'} size={20}
+              color={coords ? colors.success : colors.accent} />
+            <Text style={s.locationBtnText}>
+              {coords ? 'Location set — tap to adjust' : 'Set location on map'}
+            </Text>
+          </TouchableOpacity>
         </>
       ) : (
         <View style={s.salonList}>
@@ -118,6 +137,9 @@ export default function OnboardingScreen({ barber, onDone }: Props) {
           : <Text style={s.photoHint}>Tap to add a photo of your ID</Text>}
       </TouchableOpacity>
       <PillButton title="Submit for review" onPress={submit} loading={busy} />
+      <LocationPicker visible={pickerOpen} initial={coords}
+        onPick={(c) => { setCoords(c); setPickerOpen(false); }}
+        onClose={() => setPickerOpen(false)} />
     </ScrollView>
   );
 }
@@ -142,4 +164,10 @@ const s = StyleSheet.create({
   },
   photoHint: { color: colors.textSecondary, fontSize: font.body },
   photo: { width: '100%', height: '100%' },
+  locationBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: sp(2),
+    borderWidth: 1, borderColor: colors.border, borderRadius: radius.md,
+    paddingVertical: sp(3), backgroundColor: colors.surface,
+  },
+  locationBtnText: { fontSize: font.body, fontWeight: '600', color: colors.text },
 });

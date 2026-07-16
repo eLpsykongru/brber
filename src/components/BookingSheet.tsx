@@ -86,7 +86,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
     });
     setBusy(false);
     if (error) return Alert.alert('Could not book', error.message);
-    Alert.alert('Booked!', 'Your appointment is confirmed. Pay at the shop.');
+    Alert.alert('Request sent!', 'The barber will confirm your booking shortly. Pay at the shop.');
     onBooked();
     close();
   }

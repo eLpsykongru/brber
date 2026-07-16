@@ -13,18 +13,20 @@ function localDateStr(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-// all slots in the day's working window: free / full (booked or blocked) / past
-export function daySlots(day: Date, durationMin: number, windows: Window[], booked: Range[], daysOff: string[], blocks: Block[] = []): Slot[] {
+// all slots in the day's working window: free / full (booked or blocked) / past.
+// bufferMin = prep+cleanup gap: booked ranges repel new slots by that much on both sides.
+export function daySlots(day: Date, durationMin: number, windows: Window[], booked: Range[], daysOff: string[], blocks: Block[] = [], bufferMin = 0): Slot[] {
   if (daysOff.includes(localDateStr(day))) return [];
   const now = Date.now();
+  const buf = bufferMin * 60_000;
   const dayBlocks = blocks.filter((b) => b.day === null || b.day === localDateStr(day));
   const slots: Slot[] = [];
   for (const w of windows.filter((x) => x.weekday === day.getDay())) {
     for (let t = w.start_min; t + durationMin <= w.end_min; t += SLOT_STEP_MIN) {
       const start = new Date(day.getFullYear(), day.getMonth(), day.getDate(), 0, t);
       const end = start.getTime() + durationMin * 60_000;
-      const full = booked.some((b) => start.getTime() < new Date(b.ends_at).getTime()
-        && end > new Date(b.starts_at).getTime())
+      const full = booked.some((b) => start.getTime() < new Date(b.ends_at).getTime() + buf
+        && end > new Date(b.starts_at).getTime() - buf)
         || dayBlocks.some((b) => t < b.end_min && t + durationMin > b.start_min);
       const status: SlotStatus = start.getTime() <= now ? 'past' : full ? 'full' : 'free';
       slots.push({ time: start, status });
@@ -35,12 +37,12 @@ export function daySlots(day: Date, durationMin: number, windows: Window[], book
 
 // per-day busyness for the schedule strip. 'closed' = not a working weekday or a day off.
 export type DayState = 'closed' | 'empty' | 'partial' | 'full';
-export function dayStatus(day: Date, windows: Window[], dayBookings: Range[], daysOff: string[], blocks: Block[] = []): { state: DayState; count: number } {
+export function dayStatus(day: Date, windows: Window[], dayBookings: Range[], daysOff: string[], blocks: Block[] = [], bufferMin = 0): { state: DayState; count: number } {
   const working = windows.some((w) => w.weekday === day.getDay());
   if (!working || daysOff.includes(localDateStr(day))) return { state: 'closed', count: 0 };
   const count = dayBookings.length;
   if (count === 0) return { state: 'empty', count: 0 };
-  const anyFree = daySlots(day, 30, windows, dayBookings, daysOff, blocks).some((sl) => sl.status === 'free');
+  const anyFree = daySlots(day, 30, windows, dayBookings, daysOff, blocks, bufferMin).some((sl) => sl.status === 'free');
   return { state: anyFree ? 'partial' : 'full', count };
 }
 

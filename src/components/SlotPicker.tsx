@@ -12,6 +12,7 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect }
   const [windows, setWindows] = useState<Window[]>([]);
   const [daysOff, setDaysOff] = useState<string[]>([]);
   const [blocks, setBlocks] = useState<Block[]>([]);
+  const [bufferMin, setBufferMin] = useState(0);
   const [booked, setBooked] = useState<Range[]>([]);
   const [weekStart, setWeekStart] = useState<Date>(() => weekStartOf(new Date()));
   const [selectedDay, setSelectedDay] = useState<Date>(() => new Date());
@@ -36,10 +37,12 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect }
       supabase.from('availability').select('weekday, start_min, end_min').eq('barber_id', barberId),
       supabase.from('days_off').select('day').eq('barber_id', barberId),
       supabase.from('time_blocks').select('day, start_min, end_min').eq('barber_id', barberId),
-    ]).then(([av, off, blk]) => {
+      supabase.from('barbers').select('buffer_before_min, buffer_after_min').eq('id', barberId).single(),
+    ]).then(([av, off, blk, buf]) => {
       setWindows(av.data ?? []);
       setDaysOff((off.data ?? []).map((d) => d.day));
       setBlocks(blk.data ?? []);
+      if (buf.data) setBufferMin(buf.data.buffer_before_min + buf.data.buffer_after_min);
     });
     loadBooked(weekStart);
   }, [barberId]);
@@ -53,7 +56,7 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect }
     loadBooked(ws);
   }
 
-  const slots = daySlots(selectedDay, durationMin, windows, booked, daysOff, blocks);
+  const slots = daySlots(selectedDay, durationMin, windows, booked, daysOff, blocks, bufferMin);
 
   return (
     <View>

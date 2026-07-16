@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Alert, Image, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View,
+  Alert, Animated, Image, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native';
 import SlotPicker from '../components/SlotPicker';
 import { Field, PillButton } from '../components/ui';
+import { takeLastFix } from '../lib/lastFix';
 import { Block, dayStatus, DayState, daySlots, sameDay, Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, radius, sp } from '../theme';
@@ -97,6 +98,7 @@ export default function DayScheduleScreen({ barberId, onBack }: {
   const [windows, setWindows] = useState<Window[]>([]);
   const [daysOff, setDaysOff] = useState<string[]>([]);
   const [blocks, setBlocks] = useState<BlockRow[]>([]);
+  const [bufferMin, setBufferMin] = useState(0);
   const [selectedDay, setSelectedDay] = useState<Date>(new Date());
   const [allBookings, setAllBookings] = useState<DayBooking[]>([]);
   const [history, setHistory] = useState<Hist>({});
@@ -114,12 +116,25 @@ export default function DayScheduleScreen({ barberId, onBack }: {
   const timelineY = useRef(0);
   const rowY = useRef<Record<string, number>>({});
 
+  // blocks touched by the last schedule fix pulse once on arrival
+  const [glowIds] = useState<string[]>(() => takeLastFix());
+  const glow = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (!glowIds.length) return;
+    // fresh timing nodes per pulse — composed animations are single-use
+    const pulse = () => Animated.sequence([
+      Animated.timing(glow, { toValue: 1, duration: 350, useNativeDriver: true }),
+      Animated.timing(glow, { toValue: 0, duration: 450, useNativeDriver: true }),
+    ]);
+    Animated.sequence([pulse(), pulse(), pulse()]).start();
+  }, [glowIds]);
+
   const strip = upcomingDays(14);
 
   const load = useCallback(async () => {
     const from = new Date(); from.setHours(0, 0, 0, 0);
     const to = new Date(from.getTime() + 14 * 86_400_000);
-    const [bk, av, off, blk, sv] = await Promise.all([
+    const [bk, av, off, blk, sv, buf] = await Promise.all([
       supabase.from('bookings')
         .select('id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, services(name), customer:profiles!customer_id(full_name, avatar_url, phone)')
         .eq('barber_id', barberId)
@@ -131,6 +146,7 @@ export default function DayScheduleScreen({ barberId, onBack }: {
       supabase.from('time_blocks').select('id, label, day, start_min, end_min').eq('barber_id', barberId),
       supabase.from('services').select('id, name, price_cents, duration_min')
         .eq('barber_id', barberId).eq('is_active', true).order('name'),
+      supabase.from('barbers').select('buffer_before_min, buffer_after_min').eq('id', barberId).single(),
     ]);
     if (bk.error) Alert.alert('Could not load bookings', bk.error.message);
     else setAllBookings(bk.data as unknown as DayBooking[]);
@@ -138,6 +154,7 @@ export default function DayScheduleScreen({ barberId, onBack }: {
     setDaysOff((off.data ?? []).map((d) => d.day));
     setBlocks((blk.data ?? []) as BlockRow[]);
     setServices(sv.data ?? []);
+    if (buf.data) setBufferMin(buf.data.buffer_before_min + buf.data.buffer_after_min);
   }, [barberId]);
 
   useEffect(() => {
@@ -218,7 +235,7 @@ export default function DayScheduleScreen({ barberId, onBack }: {
   const dayAll = allBookings.filter((b) => sameDay(new Date(b.starts_at), selectedDay));
   const dayLive = dayAll.filter((b) => b.status !== 'no_show');
   const dayBlocks = blocks.filter((b) => b.day === null || b.day === isoOf(selectedDay));
-  const freeTicks = daySlots(selectedDay, STEP, windows, dayLive, daysOff, blocks)
+  const freeTicks = daySlots(selectedDay, STEP, windows, dayLive, daysOff, blocks, bufferMin)
     .filter((sl) => sl.status === 'free')
     .map((sl) => sl.time);
   const midnight = new Date(selectedDay.getFullYear(), selectedDay.getMonth(), selectedDay.getDate());
@@ -249,7 +266,7 @@ export default function DayScheduleScreen({ barberId, onBack }: {
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={s.strip}>
             {strip.map((d) => {
-              const st = dayStatus(d, windows, byDay.get(isoOf(d)) ?? [], daysOff, blocks);
+              const st = dayStatus(d, windows, byDay.get(isoOf(d)) ?? [], daysOff, blocks, bufferMin);
               const sel = sameDay(d, selectedDay);
               const fill = st.state === 'partial' ? s.fillPartial
                 : st.state === 'full' ? s.fillFull
@@ -298,10 +315,15 @@ export default function DayScheduleScreen({ barberId, onBack }: {
             if (item.block) {
               return (
                 <View key={`blk-${item.block.id}`} style={s.slotBlock}>
+                  {glowIds.includes(item.block.id) && (
+                    <Animated.View pointerEvents="none"
+                      style={[StyleSheet.absoluteFillObject, s.glowOverlay, { opacity: glow }]} />
+                  )}
                   <Ionicons name={item.block.day === null ? 'cafe-outline' : 'time-outline'} size={15} color={D.sub} />
                   <Text style={s.slotBlockText}>
                     {item.block.label ?? 'Blocked'} · {minToHHMM(item.block.start_min)}–{minToHHMM(item.block.end_min)}
                   </Text>
+                  {glowIds.includes(item.block.id) && <Text style={s.glowTag}>updated</Text>}
                 </View>
               );
             }
@@ -548,6 +570,8 @@ const s = StyleSheet.create({
     backgroundColor: D.card2, opacity: 0.8,
   },
   slotBlockText: { fontSize: font.small, color: D.sub, fontWeight: '600' },
+  glowOverlay: { backgroundColor: 'rgba(232,184,75,0.35)', borderRadius: radius.md },
+  glowTag: { fontSize: font.tiny, fontWeight: '700', color: '#E8B84B', marginLeft: 'auto' },
 
   sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' },
   sheet: {

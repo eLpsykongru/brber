@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
 import {
-  Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View,
+  ActivityIndicator, Alert, Image, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native';
-import { TAB_BAR_INSET } from '../components/ui';
+import ClientSheet, { ClientRef } from '../components/ClientSheet';
+import SlotPicker from '../components/SlotPicker';
+import { PillButton, TAB_BAR_INSET } from '../components/ui';
 import { Block, daySlots, Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, radius, sp } from '../theme';
@@ -20,9 +22,22 @@ type BookingRow = {
   price_cents: number;
   walk_in_name: string | null;
   customer_id: string;
+  checked_in_at: string | null;
+  started_at: string | null;
+  completed_at: string | null;
   services: { name: string } | null;
-  customer: { full_name: string | null; avatar_url: string | null } | null;
+  customer: { full_name: string | null; avatar_url: string | null; phone: string | null } | null;
 };
+
+// where a live appointment sits in its lifecycle → which single button the card shows
+type Stage = 'confirm' | 'check_in' | 'start' | 'in_chair';
+function stageOf(b: BookingRow): Stage | null {
+  if (b.status === 'pending') return 'confirm';
+  if (b.status !== 'confirmed' || b.completed_at) return null;
+  if (b.started_at) return 'in_chair';
+  if (b.checked_in_at) return 'start';
+  return 'check_in';
+}
 
 const dh = (cents: number) => `${(cents / 100).toFixed(2)} DH`;
 const ampm = (iso: string) =>
@@ -44,6 +59,21 @@ function ClientAvatar({ b, barberId, size = 44 }: { b: BookingRow; barberId: str
   );
 }
 
+function MenuRow({ icon, label, onPress, danger }: {
+  icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void; danger?: boolean;
+}) {
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label}
+      style={({ pressed }) => [s.menuRow, pressed && s.pressed]}>
+      <View style={s.menuRowIcon}>
+        <Ionicons name={icon} size={19} color={danger ? colors.danger : D.text} />
+      </View>
+      <Text style={[s.menuRowLabel, danger && { color: colors.danger }]}>{label}</Text>
+      <Ionicons name="chevron-forward" size={18} color={D.sub} />
+    </Pressable>
+  );
+}
+
 export default function BookingsScreen({ barber, profile, phone, onProfileChanged, onChromeHidden, goSchedule }: {
   barber: Barber;
   profile: Profile;
@@ -53,14 +83,20 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   goSchedule: () => void;
 }) {
   const barberId = barber.id;
-  const [bookings, setBookings] = useState<BookingRow[]>([]);
+  const [bookings, setBookings] = useState<BookingRow[] | null>(null); // null = first load in flight
   const [windows, setWindows] = useState<Window[]>([]);
   const [daysOff, setDaysOff] = useState<{ id: string; day: string }[]>([]);
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [salonName, setSalonName] = useState<string | null>(null);
   const [requestsOpen, setRequestsOpen] = useState(false);
-  const [chat, setChat] = useState<BookingRow | null>(null);
+  const [chat, setChat] = useState<{ id: string; title: string } | null>(null);
+  const [sheetClient, setSheetClient] = useState<ClientRef | null>(null);
   const [showProfile, setShowProfile] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [menuBooking, setMenuBooking] = useState<BookingRow | null>(null);
+  const [resched, setResched] = useState<BookingRow | null>(null);
+  const [reschedAt, setReschedAt] = useState<Date | null>(null);
+  const [completedB, setCompletedB] = useState<BookingRow | null>(null);
   const [showEarnings, setShowEarnings] = useState(false);
 
   useEffect(() => {
@@ -74,7 +110,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     const from = new Date(); from.setHours(0, 0, 0, 0); from.setDate(from.getDate() - 6);
     const to = new Date(); to.setHours(0, 0, 0, 0); to.setDate(to.getDate() + 14);
     const { data, error } = await supabase.from('bookings')
-      .select('id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, services(name), customer:profiles!customer_id(full_name, avatar_url)')
+      .select('id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, services(name), customer:profiles!customer_id(full_name, avatar_url, phone)')
       .eq('barber_id', barberId)
       .gte('starts_at', from.toISOString()).lt('starts_at', to.toISOString())
       .in('status', ['pending', 'confirmed'])
@@ -114,10 +150,19 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     ]);
   }
 
-  function openChat(row: BookingRow | null) {
-    setChat(row);
-    onChromeHidden?.(!!row);
+  function openChat(req: { id: string; title: string } | null) {
+    setSheetClient(null);
+    setChat(req);
+    onChromeHidden?.(!!req);
   }
+
+  const clientRefOf = (b: BookingRow): ClientRef => ({
+    name: nameOf(b, barberId),
+    avatarUrl: b.customer_id === barberId ? null : b.customer?.avatar_url ?? null,
+    phone: b.customer_id === barberId ? null : b.customer?.phone ?? null,
+    customerId: b.customer_id,
+    walkInName: b.walk_in_name,
+  });
 
   function openEarnings(v: boolean) {
     setShowEarnings(v);
@@ -129,19 +174,47 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     onChromeHidden?.(v);
   }
 
-  function bookingMenu(b: BookingRow) {
-    Alert.alert(nameOf(b, barberId), `${b.services?.name ?? 'Service'} · ${ampm(b.starts_at)}`, [
-      ...(b.customer_id !== barberId ? [{ text: 'Chat', onPress: () => openChat(b) }] : []),
-      {
-        text: 'Cancel booking', style: 'destructive' as const,
-        onPress: async () => {
-          const { error } = await supabase.rpc('cancel_booking', { p_booking: b.id });
-          if (error) Alert.alert('Could not cancel', error.message);
-          else load();
-        },
-      },
-      { text: 'Close', style: 'cancel' as const },
-    ]);
+  // stage transitions: confirm uses accept_booking; the rest go through advance_booking
+  async function advance(b: BookingRow, stage: 'check_in' | 'start' | 'complete') {
+    const { error } = await supabase.rpc('advance_booking', { p_booking: b.id, p_stage: stage });
+    if (error) Alert.alert('Could not update', error.message);
+    else if (stage === 'complete') setCompletedB(b);
+    load();
+  }
+
+  async function menuAction(b: BookingRow, rpc: 'cancel_booking' | 'mark_no_show') {
+    setMenuBooking(null);
+    const { error } = await supabase.rpc(rpc, { p_booking: b.id });
+    if (error) Alert.alert('Could not update', error.message);
+    load();
+  }
+
+  async function confirmReschedule() {
+    if (!resched || !reschedAt) return;
+    const { error } = await supabase.rpc('reschedule_booking', {
+      p_booking: resched.id, p_new_start: reschedAt.toISOString(),
+    });
+    if (error) Alert.alert('Could not reschedule', error.message);
+    setResched(null); setReschedAt(null);
+    load();
+  }
+
+  const reviewMsg = (b: BookingRow) =>
+    `Thanks for coming in! How was your ${b.services?.name ?? 'cut'}? You can rate it in the app: My Bookings → Rate ⭐`;
+
+  async function askReviewInChat(b: BookingRow) {
+    const { error } = await supabase.from('messages')
+      .insert({ booking_id: b.id, sender_id: barberId, body: reviewMsg(b) });
+    if (error) Alert.alert('Could not send', error.message);
+    else { setCompletedB(null); Alert.alert('Sent', 'Review ask sent in chat.'); }
+  }
+
+  function askReviewBySms(b: BookingRow) {
+    const phone = b.customer?.phone;
+    if (!phone) return;
+    const sep = Platform.OS === 'ios' ? '&' : '?';
+    Linking.openURL(`sms:${phone}${sep}body=${encodeURIComponent(reviewMsg(b))}`)
+      .catch(() => Alert.alert('SMS', 'Could not open the SMS app.'));
   }
 
   const todayOff = daysOff.find((d) => d.day === isoDay(new Date()));
@@ -166,7 +239,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
 
   if (chat) {
     return <ChatScreen bookingId={chat.id} myId={barberId}
-      title={chat.customer?.full_name ?? 'Customer'} onBack={() => openChat(null)} />;
+      title={chat.title} onBack={() => openChat(null)} />;
   }
   if (showProfile) {
     return <ProfileScreen profile={profile} barber={barber} phone={phone}
@@ -180,7 +253,8 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   // ---- derive the dashboard ----
   const now = Date.now();
   const todayKey = new Date().toDateString();
-  const confirmed = bookings.filter((b) => b.status === 'confirmed');
+  const rows = bookings ?? [];
+  const confirmed = rows.filter((b) => b.status === 'confirmed');
   const todayConfirmed = confirmed.filter((b) => new Date(b.starts_at).toDateString() === todayKey);
   const earnedToday = todayConfirmed.reduce((a, b) => a + b.price_cents, 0);
 
@@ -199,10 +273,18 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   const walkIns = todayConfirmed.filter((b) => b.customer_id === barberId);
   const walkInsDH = walkIns.reduce((a, b) => a + b.price_cents, 0);
 
-  const requests = bookings.filter((b) => b.status === 'pending' && new Date(b.starts_at).getTime() > now);
-  const remaining = todayConfirmed
-    .filter((b) => new Date(b.ends_at).getTime() > now)
+  const requests = rows.filter((b) => b.status === 'pending' && new Date(b.starts_at).getTime() > now);
+  // today's live cards: pending requests inline + confirmed until completed
+  // (an in-chair client running past his slot stays visible until Complete)
+  const remaining = rows
+    .filter((b) => {
+      if (new Date(b.starts_at).toDateString() !== todayKey) return false;
+      if (b.status === 'pending') return new Date(b.starts_at).getTime() > now;
+      if (b.status !== 'confirmed' || b.completed_at) return false;
+      return new Date(b.ends_at).getTime() > now || !!b.checked_in_at;
+    })
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
+  const shown = expanded ? remaining : remaining.slice(0, 3);
 
   const dateLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
 
@@ -218,12 +300,12 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
             </Text>
             <Text style={s.headDate}>{dateLabel}</Text>
           </View>
-          <Pressable onPress={() => setRequestsOpen(true)} accessibilityLabel={`Booking requests, ${requests.length} waiting`}
+          <Pressable onPress={() => setRequestsOpen(true)} accessibilityRole="button" accessibilityLabel={`Booking requests, ${requests.length} waiting`}
             style={({ pressed }) => [s.circleBtn, pressed && s.pressed]}>
             <Ionicons name="notifications-outline" size={20} color={D.text} />
             {requests.length > 0 && <View style={s.bellDot} />}
           </Pressable>
-          <Pressable onPress={() => openProfile(true)} accessibilityLabel="Your profile"
+          <Pressable onPress={() => openProfile(true)} accessibilityRole="button" accessibilityLabel="Your profile"
             style={({ pressed }) => pressed && s.pressed}>
             {profile.avatar_url
               ? <Image source={{ uri: profile.avatar_url }} style={s.headAvatar} />
@@ -236,7 +318,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
         </View>
 
         {/* daily earnings — tap for the full breakdown */}
-        <Pressable onPress={() => openEarnings(true)} accessibilityLabel="Earnings details"
+        <Pressable onPress={() => openEarnings(true)} accessibilityRole="button" accessibilityLabel="Earnings details"
           style={({ pressed }) => [s.earnCard, pressed && s.pressed]}>
           <View style={s.earnTop}>
             <Text style={s.tileLabel}>DAILY EARNINGS</Text>
@@ -249,7 +331,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
             </View>
           </View>
           <Text style={s.earnValue}>{dh(earnedToday)}</Text>
-          <View style={s.chart}
+          <View style={s.chart} accessible
             accessibilityLabel={`Booked earnings, last 7 days, today ${dh(earnedToday)}`}>
             {week.map((v, i) => (
               <View key={i} style={[s.bar, {
@@ -283,17 +365,17 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
         {/* action chips */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={s.chipRow}>
-            <Pressable onPress={goSchedule} accessibilityLabel="New booking"
+            <Pressable onPress={goSchedule} accessibilityRole="button" accessibilityLabel="New booking"
               style={({ pressed }) => [s.chip, s.chipPrimary, pressed && s.pressed]}>
               <Ionicons name="add" size={16} color={colors.onAccent} />
               <Text style={[s.chipText, { color: colors.onAccent }]}>New Booking</Text>
             </Pressable>
-            <Pressable onPress={toggleClockOut} accessibilityLabel={todayOff ? 'Clock back in' : 'Clock out'}
+            <Pressable onPress={toggleClockOut} accessibilityRole="button" accessibilityLabel={todayOff ? 'Clock back in' : 'Clock out'}
               style={({ pressed }) => [s.chip, pressed && s.pressed]}>
               <Ionicons name="time-outline" size={16} color={D.text} />
               <Text style={s.chipText}>{todayOff ? 'Clocked out · undo' : 'Clock Out'}</Text>
             </Pressable>
-            <Pressable accessibilityLabel="Inventory"
+            <Pressable accessibilityRole="button" accessibilityLabel="Inventory"
               /* TODO(backlog): product inventory */
               onPress={() => Alert.alert('Inventory', 'Coming soon — see BACKLOG.md')}
               style={({ pressed }) => [s.chip, pressed && s.pressed]}>
@@ -306,21 +388,31 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
         {/* schedule */}
         <View style={s.schedHead}>
           <Text style={s.tileLabel}>SCHEDULE • {remaining.length} REMAINING</Text>
-          <Pressable onPress={goSchedule} hitSlop={6} style={({ pressed }) => pressed && s.pressed}>
-            <Text style={s.viewAll}>View all</Text>
-          </Pressable>
+          {remaining.length > 3 && (
+            <Pressable onPress={() => setExpanded(!expanded)} hitSlop={6} accessibilityState={{ expanded }}
+              accessibilityRole="button" accessibilityLabel={expanded ? 'Show fewer appointments' : `View all ${remaining.length} appointments`}
+              style={({ pressed }) => pressed && s.pressed}>
+              <Text style={s.viewAll}>{expanded ? 'Show less ⌄' : `View all (${remaining.length}) ›`}</Text>
+            </Pressable>
+          )}
         </View>
-        {remaining.length === 0 && (
+        {bookings === null && (
+          <View style={s.schedCard}>
+            <ActivityIndicator color={colors.accent} accessibilityLabel="Loading appointments" />
+          </View>
+        )}
+        {bookings !== null && remaining.length === 0 && (
           <View style={s.schedCard}>
             <Text style={s.tileSub}>{todayOff ? 'Clocked out for today.' : 'Nothing left today.'}</Text>
           </View>
         )}
-        {remaining.map((b, i) => {
-          const inProgress = new Date(b.starts_at).getTime() <= now;
-          const first = i === 0;
+        {shown.map((b) => {
+          const st = stageOf(b)!;
+          const inChair = st === 'in_chair';
           return (
-            <View key={b.id} style={s.schedCard}>
-              <View style={s.schedTop}>
+            <View key={b.id} style={[s.schedCard, inChair && s.schedCardHot]}>
+              <Pressable onPress={() => setSheetClient(clientRefOf(b))}
+                accessibilityRole="button" accessibilityLabel={`${nameOf(b, barberId)}, view client`} style={s.schedTop}>
                 <ClientAvatar b={b} barberId={barberId} />
                 <View style={s.grow}>
                   <Text style={s.schedName}>{nameOf(b, barberId)}</Text>
@@ -328,37 +420,177 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
                   <Text style={s.schedPrice}>{(b.price_cents / 100).toFixed(0)} DH</Text>
                 </View>
                 <View style={s.schedRight}>
-                  <View style={s.timeBadge}><Text style={s.timeBadgeText}>{ampm(b.starts_at)}</Text></View>
-                  {first
-                    ? <Text style={s.statusHot}>{inProgress ? 'In progress' : 'Up next'}</Text>
-                    : <Text style={s.statusOk}>✓ Confirmed</Text>}
+                  {inChair
+                    ? <View style={s.chairPill}><Text style={s.chairPillText}>In chair</Text></View>
+                    : <View style={s.timeBadge}><Text style={s.timeBadgeText}>{ampm(b.starts_at)}</Text></View>}
+                  {st === 'confirm' && <Text style={s.statusWait}>Awaiting confirmation</Text>}
+                  {st === 'check_in' && <Text style={s.statusOk}>✓ Confirmed</Text>}
+                  {st === 'start' && <Text style={s.statusHot}>Checked in</Text>}
+                  {inChair && b.started_at && <Text style={s.statusHot}>● Started {ampm(b.started_at)}</Text>}
                 </View>
+              </Pressable>
+              <View style={s.startRow}>
+                {st === 'confirm' && (
+                  <Pressable onPress={() => accept(b)} accessibilityRole="button" accessibilityLabel="Confirm booking"
+                    style={({ pressed }) => [s.stageBtn, s.stageBtnRed, pressed && s.pressed]}>
+                    <Ionicons name="checkmark" size={16} color={colors.onAccent} />
+                    <Text style={s.stageTextLight}>Confirm</Text>
+                  </Pressable>
+                )}
+                {st === 'check_in' && (
+                  <Pressable onPress={() => advance(b, 'check_in')} accessibilityRole="button" accessibilityLabel="Check in"
+                    style={({ pressed }) => [s.stageBtn, s.stageBtnDark, pressed && s.pressed]}>
+                    <Text style={s.stageTextDark}>Check in</Text>
+                  </Pressable>
+                )}
+                {st === 'start' && (
+                  <Pressable onPress={() => advance(b, 'start')} accessibilityRole="button" accessibilityLabel="Start appointment"
+                    style={({ pressed }) => [s.stageBtn, s.stageBtnRed, pressed && s.pressed]}>
+                    <Ionicons name="play" size={14} color={colors.onAccent} />
+                    <Text style={s.stageTextLight}>Start</Text>
+                  </Pressable>
+                )}
+                {inChair && (
+                  <Pressable onPress={() => advance(b, 'complete')} accessibilityRole="button" accessibilityLabel="Complete appointment"
+                    style={({ pressed }) => [s.stageBtn, s.stageBtnGreen, pressed && s.pressed]}>
+                    <Ionicons name="square-outline" size={14} color={colors.onAccent} />
+                    <Text style={s.stageTextLight}>Complete</Text>
+                  </Pressable>
+                )}
+                <Pressable onPress={() => setMenuBooking(b)} accessibilityRole="button" accessibilityLabel="More actions"
+                  style={({ pressed }) => [s.moreBtn, pressed && s.pressed]}>
+                  <Ionicons name="ellipsis-horizontal" size={18} color={D.text} />
+                </Pressable>
               </View>
-              {first && (
-                <View style={s.startRow}>
-                  <Pressable accessibilityLabel="Start appointment"
-                    /* TODO(backlog): check-in / service timer flow */
-                    onPress={() => Alert.alert('Start', 'Check-in & service timer coming soon — see BACKLOG.md')}
-                    style={({ pressed }) => [s.startBtn, pressed && s.pressed]}>
-                    <Text style={s.startText}>Start</Text>
-                  </Pressable>
-                  <Pressable onPress={() => bookingMenu(b)} accessibilityLabel="More actions"
-                    style={({ pressed }) => [s.moreBtn, pressed && s.pressed]}>
-                    <Ionicons name="ellipsis-horizontal" size={18} color={D.text} />
-                  </Pressable>
-                </View>
-              )}
             </View>
           );
         })}
       </ScrollView>
 
+      {/* client quick-view */}
+      <ClientSheet client={sheetClient} barberId={barberId}
+        onClose={() => setSheetClient(null)}
+        onChat={(id, title) => openChat({ id, title })} />
+
+      {/* … actions menu */}
+      <Modal visible={!!menuBooking} transparent animationType="slide" onRequestClose={() => setMenuBooking(null)}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.sheetBackdrop} onPress={() => setMenuBooking(null)} />
+        {menuBooking && (() => {
+          const b = menuBooking;
+          const canNoShow = b.status === 'confirmed' && new Date(b.starts_at).getTime() <= now && !b.completed_at;
+          const canCancel = !b.started_at && new Date(b.starts_at).getTime() > now;
+          return (
+            <View style={s.sheet} onAccessibilityEscape={() => setMenuBooking(null)}>
+              <View style={s.handle} />
+              <View style={s.menuHead}>
+                <View style={s.grow}>
+                  <Text style={s.sheetTitle}>{nameOf(b, barberId)}</Text>
+                  <Text style={s.tileSub}>{ampm(b.starts_at)} • {b.services?.name ?? 'Service'}</Text>
+                </View>
+                <Pressable onPress={() => setMenuBooking(null)} hitSlop={8} accessibilityRole="button" accessibilityLabel="Close"
+                  style={({ pressed }) => [s.menuClose, pressed && s.pressed]}>
+                  <Ionicons name="close" size={18} color={D.text} />
+                </Pressable>
+              </View>
+              {!b.started_at && (
+                <MenuRow icon="calendar-outline" label="Reschedule"
+                  onPress={() => { setMenuBooking(null); setResched(b); setReschedAt(null); }} />
+              )}
+              {b.customer_id !== barberId && (
+                <MenuRow icon="chatbox-outline" label="Message client"
+                  onPress={() => { setMenuBooking(null); openChat({ id: b.id, title: nameOf(b, barberId) }); }} />
+              )}
+              {canNoShow && (
+                <MenuRow icon="person-remove-outline" label="Mark as no-show"
+                  onPress={() => menuAction(b, 'mark_no_show')} />
+              )}
+              {canCancel && (
+                <MenuRow danger icon="trash-outline"
+                  label={b.status === 'pending' ? 'Decline request' : 'Cancel booking'}
+                  onPress={() => menuAction(b, 'cancel_booking')} />
+              )}
+            </View>
+          );
+        })()}
+      </Modal>
+
+      {/* reschedule */}
+      <Modal visible={!!resched} transparent animationType="slide" onRequestClose={() => setResched(null)}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.sheetBackdrop} onPress={() => setResched(null)} />
+        {resched && (
+          <View style={[s.sheet, s.sheetLight]} onAccessibilityEscape={() => setResched(null)}>
+            <Text style={s.sheetTitleLight}>
+              Move {nameOf(resched, barberId)} · {(new Date(resched.ends_at).getTime() - new Date(resched.starts_at).getTime()) / 60_000} min
+            </Text>
+            {/* ponytail: SlotPicker is light-themed; lives on a light sheet until a dark variant matters */}
+            <SlotPicker barberId={barberId}
+              durationMin={(new Date(resched.ends_at).getTime() - new Date(resched.starts_at).getTime()) / 60_000}
+              selected={reschedAt} onSelect={setReschedAt} />
+            <PillButton title={reschedAt ? `Move to ${reschedAt.toTimeString().slice(0, 5)}` : 'Pick a new time'}
+              disabled={!reschedAt} onPress={confirmReschedule} />
+          </View>
+        )}
+      </Modal>
+
+      {/* service complete — the mirror moment */}
+      <Modal visible={!!completedB} transparent animationType="slide" onRequestClose={() => setCompletedB(null)}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.sheetBackdrop} onPress={() => setCompletedB(null)} />
+        {completedB && (() => {
+          const b = completedB;
+          const isWalkIn = b.customer_id === barberId;
+          const firstName = nameOf(b, barberId).split(' ')[0];
+          return (
+            <View style={s.sheet} onAccessibilityEscape={() => setCompletedB(null)}>
+              <View style={s.handle} />
+              <View style={s.menuHead}>
+                <ClientAvatar b={b} barberId={barberId} size={48} />
+                <View style={s.grow}>
+                  <View style={s.doneTagRow}>
+                    <Ionicons name="checkmark" size={13} color={colors.success} />
+                    <Text style={s.doneTag}>SERVICE COMPLETE</Text>
+                  </View>
+                  <Text style={s.sheetTitle}>{nameOf(b, barberId)}</Text>
+                  <Text style={s.tileSub}>{b.services?.name ?? 'Service'} • {(b.price_cents / 100).toFixed(0)} DH</Text>
+                </View>
+                <Pressable onPress={() => setCompletedB(null)} hitSlop={8} accessibilityRole="button" accessibilityLabel="Close"
+                  style={({ pressed }) => [s.menuClose, pressed && s.pressed]}>
+                  <Ionicons name="close" size={18} color={D.text} />
+                </Pressable>
+              </View>
+
+              <View style={s.reviewCard}>
+                <View style={s.starsRow} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Ionicons key={i} name="star" size={22} color={colors.star} />
+                  ))}
+                </View>
+                <Text style={s.reviewTitle}>Ask {firstName} for a review</Text>
+                <Text style={s.tileSub}>
+                  {isWalkIn
+                    ? "Walk-ins have no account, so they can't leave a review yet."
+                    : 'Fresh-cut clients leave the best reviews — ask now.'}
+                </Text>
+              </View>
+
+              {!isWalkIn && (
+                <MenuRow icon="paper-plane-outline" label="Ask in chat" onPress={() => askReviewInChat(b)} />
+              )}
+              {!isWalkIn && b.customer?.phone && (
+                <MenuRow icon="chatbox-ellipses-outline" label="Send by SMS"
+                  onPress={() => { setCompletedB(null); askReviewBySms(b); }} />
+              )}
+            </View>
+          );
+        })()}
+      </Modal>
+
       {/* booking requests sheet (bell) */}
       <Modal visible={requestsOpen} transparent animationType="slide" onRequestClose={() => setRequestsOpen(false)}>
-        <Pressable style={s.sheetBackdrop} onPress={() => setRequestsOpen(false)} />
-        <View style={s.sheet}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.sheetBackdrop} onPress={() => setRequestsOpen(false)} />
+        <View style={s.sheet} onAccessibilityEscape={() => setRequestsOpen(false)}>
           <Text style={s.sheetTitle}>Booking requests</Text>
-          {requests.length === 0 && <Text style={s.tileSub}>All caught up.</Text>}
+          {bookings === null && <ActivityIndicator color={colors.accent} accessibilityLabel="Loading requests" />}
+          {bookings !== null && requests.length === 0 && <Text style={s.tileSub}>All caught up.</Text>}
           {requests.map((b) => (
             <View key={b.id} style={s.reqRow}>
               <ClientAvatar b={b} barberId={barberId} size={40} />
@@ -368,11 +600,11 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
                   {b.services?.name ?? 'Service'} · {new Date(b.starts_at).toDateString().slice(0, 10)} {ampm(b.starts_at)} · {(b.price_cents / 100).toFixed(0)} DH
                 </Text>
               </View>
-              <Pressable onPress={() => decline(b)} hitSlop={6} accessibilityLabel="Decline"
+              <Pressable onPress={() => decline(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel="Decline"
                 style={({ pressed }) => [s.reqIcon, pressed && s.pressed]}>
                 <Ionicons name="close" size={18} color={colors.danger} />
               </Pressable>
-              <Pressable onPress={() => accept(b)} hitSlop={6} accessibilityLabel="Accept"
+              <Pressable onPress={() => accept(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel="Accept"
                 style={({ pressed }) => [s.reqIcon, s.reqIconAccept, pressed && s.pressed]}>
                 <Ionicons name="checkmark" size={18} color={colors.onAccent} />
               </Pressable>
@@ -469,4 +701,40 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   reqIconAccept: { backgroundColor: colors.success, borderColor: colors.success },
+
+  // stage cards
+  schedCardHot: { borderWidth: 1.5, borderColor: colors.accent },
+  chairPill: { backgroundColor: colors.accent, borderRadius: radius.sm, paddingVertical: 3, paddingHorizontal: sp(2) },
+  chairPillText: { fontSize: font.tiny, fontWeight: '800', color: colors.onAccent },
+  statusWait: { fontSize: font.small, fontWeight: '600', color: '#E8B84B' },
+  stageBtn: {
+    flex: 1, height: 44, borderRadius: radius.pill, flexDirection: 'row', gap: sp(1.5),
+    alignItems: 'center', justifyContent: 'center',
+  },
+  stageBtnRed: { backgroundColor: colors.accent },
+  stageBtnGreen: { backgroundColor: colors.success },
+  stageBtnDark: { backgroundColor: D.card2, borderWidth: 1, borderColor: D.border },
+  stageTextLight: { fontSize: font.body, fontWeight: '700', color: colors.onAccent },
+  stageTextDark: { fontSize: font.body, fontWeight: '700', color: D.text },
+
+  // menu / completion sheets
+  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: D.border, marginBottom: sp(2) },
+  menuHead: { flexDirection: 'row', alignItems: 'center', gap: sp(3), marginBottom: sp(1) },
+  menuClose: {
+    width: 36, height: 36, borderRadius: radius.pill, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  menuRow: { flexDirection: 'row', alignItems: 'center', gap: sp(3.5), paddingVertical: sp(3) },
+  menuRowIcon: {
+    width: 44, height: 44, borderRadius: radius.md, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  menuRowLabel: { flex: 1, fontSize: font.body, fontWeight: '700', color: D.text },
+  sheetLight: { backgroundColor: colors.bg },
+  sheetTitleLight: { fontSize: font.h2, fontWeight: '700', color: colors.text },
+  doneTagRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  doneTag: { fontSize: font.tiny, fontWeight: '800', color: colors.success, letterSpacing: 1 },
+  reviewCard: { backgroundColor: D.card2, borderRadius: radius.lg, padding: sp(4), gap: sp(2) },
+  starsRow: { flexDirection: 'row', gap: sp(1) },
+  reviewTitle: { fontSize: font.body, fontWeight: '700', color: D.text },
 });

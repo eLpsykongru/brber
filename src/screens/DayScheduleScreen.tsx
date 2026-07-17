@@ -23,6 +23,9 @@ type DayBooking = {
   price_cents: number;
   walk_in_name: string | null;
   customer_id: string;
+  checked_in_at: string | null;
+  started_at: string | null;
+  completed_at: string | null;
   services: { name: string } | null;
   customer: { full_name: string | null; avatar_url: string | null; phone: string | null } | null;
 };
@@ -67,7 +70,7 @@ function Avatar({ url, name, size = 44 }: { url?: string | null; name: string; s
 
 function RelStars({ n }: { n: number }) {
   return (
-    <View style={s.relRow}>
+    <View style={s.relRow} accessible accessibilityLabel={`${n} of 5 reliability stars`}>
       {[1, 2, 3, 4, 5].map((i) => (
         <Ionicons key={i} name="star" size={11} color={i <= n ? colors.star : D.border} />
       ))}
@@ -92,8 +95,13 @@ function StatusBadge({ state, count }: { state: DayState; count: number }) {
   );
 }
 
-export default function DayScheduleScreen({ barberId, onBack }: {
-  barberId: string; onBack: () => void;
+export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefillName, prefillServiceId, preferMin }: {
+  barberId: string;
+  onBack: () => void;
+  autoAddNow?: boolean;    // open the add sheet at today's next free slot on arrival
+  prefillName?: string;    // client name prefilled in the add sheet (quick add → existing client)
+  prefillServiceId?: string; // client's usual service — listed first with a USUAL tag
+  preferMin?: number;      // client's usual time — auto-open at the nearest free slot
 }) {
   const [windows, setWindows] = useState<Window[]>([]);
   const [daysOff, setDaysOff] = useState<string[]>([]);
@@ -108,9 +116,12 @@ export default function DayScheduleScreen({ barberId, onBack }: {
   const [reschedule, setReschedule] = useState<DayBooking | null>(null);
   const [rescheduleAt, setRescheduleAt] = useState<Date | null>(null);
   const [addAt, setAddAt] = useState<Date | null>(null);
-  const [walkInName, setWalkInName] = useState('');
+  const [walkInName, setWalkInName] = useState(prefillName ?? '');
+  const [usualServiceId, setUsualServiceId] = useState(prefillServiceId ?? null);
   const [addBusy, setAddBusy] = useState(false);
   const [chat, setChat] = useState<DayBooking | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const didAutoAdd = useRef(false);
 
   const scrollRef = useRef<ScrollView>(null);
   const timelineY = useRef(0);
@@ -136,7 +147,7 @@ export default function DayScheduleScreen({ barberId, onBack }: {
     const to = new Date(from.getTime() + 14 * 86_400_000);
     const [bk, av, off, blk, sv, buf] = await Promise.all([
       supabase.from('bookings')
-        .select('id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, services(name), customer:profiles!customer_id(full_name, avatar_url, phone)')
+        .select('id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, services(name), customer:profiles!customer_id(full_name, avatar_url, phone)')
         .eq('barber_id', barberId)
         .gte('starts_at', from.toISOString()).lt('starts_at', to.toISOString())
         .in('status', ['pending', 'confirmed', 'no_show'])
@@ -155,6 +166,7 @@ export default function DayScheduleScreen({ barberId, onBack }: {
     setBlocks((blk.data ?? []) as BlockRow[]);
     setServices(sv.data ?? []);
     if (buf.data) setBufferMin(buf.data.buffer_before_min + buf.data.buffer_after_min);
+    setLoaded(true);
   }, [barberId]);
 
   useEffect(() => {
@@ -174,6 +186,22 @@ export default function DayScheduleScreen({ barberId, onBack }: {
       });
   }, [barberId]);
 
+  // quick add: "start now" jumps to today's next free slot; a picked client jumps
+  // to the free slot nearest their usual time ('free' already excludes past ticks)
+  useEffect(() => {
+    if ((!autoAddNow && preferMin == null) || didAutoAdd.current || !loaded) return;
+    didAutoAdd.current = true;
+    const today = new Date();
+    const live = allBookings.filter((b) => b.status !== 'no_show' && sameDay(new Date(b.starts_at), today));
+    const free = daySlots(today, STEP, windows, live, daysOff, blocks, bufferMin)
+      .filter((sl) => sl.status === 'free');
+    if (!free.length) return Alert.alert('No free slot today', 'Pick a slot on the timeline yourself.');
+    const minOf = (d: Date) => d.getHours() * 60 + d.getMinutes();
+    const pick = preferMin == null ? free[0]
+      : free.reduce((a, b) => (Math.abs(minOf(b.time) - preferMin) < Math.abs(minOf(a.time) - preferMin) ? b : a));
+    setAddAt(pick.time);
+  }, [loaded]);
+
   async function addWalkIn(service: Service) {
     if (!addAt) return;
     setAddBusy(true);
@@ -187,7 +215,7 @@ export default function DayScheduleScreen({ barberId, onBack }: {
         ? 'That time overlaps another booking.' : error.message;
       return Alert.alert('Could not add', msg);
     }
-    setAddAt(null); setWalkInName('');
+    setAddAt(null); setWalkInName(''); setUsualServiceId(null); // habits apply to the first add only
     load();
   }
 
@@ -254,7 +282,7 @@ export default function DayScheduleScreen({ barberId, onBack }: {
     <View style={s.screen}>
       <ScrollView ref={scrollRef} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.head}>
-          <Pressable onPress={onBack} hitSlop={8} accessibilityLabel="Back"
+          <Pressable onPress={onBack} hitSlop={8} accessibilityRole="button" accessibilityLabel="Back"
             style={({ pressed }) => [s.circleBtn, pressed && s.pressed]}>
             <Ionicons name="chevron-back" size={20} color={D.text} />
           </Pressable>
@@ -274,7 +302,8 @@ export default function DayScheduleScreen({ barberId, onBack }: {
               const muted = st.state === 'closed';
               return (
                 <Pressable key={d.toDateString()} onPress={() => setSelectedDay(d)}
-                  accessibilityLabel={`${d.toDateString()}, ${st.state}${st.state === 'partial' ? `, ${st.count} booked` : ''}`}
+                  accessibilityRole="button" accessibilityLabel={`${d.toDateString()}, ${st.state}${st.state === 'partial' ? `, ${st.count} booked` : ''}`}
+                  accessibilityState={{ selected: sel }}
                   style={({ pressed }) => [s.dayCell, fill, sel && s.dayCellSel, pressed && s.pressed]}>
                   <StatusBadge state={st.state} count={st.count} />
                   <Text style={[s.dayCellWk, muted && s.textMuted]}>{d.toDateString().slice(0, 3)}</Text>
@@ -293,7 +322,7 @@ export default function DayScheduleScreen({ barberId, onBack }: {
               const stars = isWalkIn ? null : reliabilityOf(b.customer_id, history);
               return (
                 <Pressable key={b.id} onPress={() => goToClient(b)}
-                  accessibilityLabel={`${nameOf(b, barberId)} at ${hhmm(b.starts_at)}`}
+                  accessibilityRole="button" accessibilityLabel={`${nameOf(b, barberId)} at ${hhmm(b.starts_at)}`}
                   style={({ pressed }) => [s.clientCard, highlightId === b.id && s.clientCardActive, pressed && s.pressed]}>
                   <Avatar url={isWalkIn ? null : b.customer?.avatar_url} name={nameOf(b, barberId)} />
                   <Text style={s.clientName} numberOfLines={1}>{nameOf(b, barberId)}</Text>
@@ -331,25 +360,29 @@ export default function DayScheduleScreen({ barberId, onBack }: {
               const b = item.booking;
               const pending = b.status === 'pending';
               const expired = pending && new Date(b.starts_at).getTime() <= Date.now();
+              const done = !!b.completed_at;
+              const inChair = !!b.started_at && !done;
+              const checkedIn = !!b.checked_in_at && !b.started_at;
               return (
                 <Pressable key={b.id}
                   onLayout={(e) => { rowY.current[b.id] = e.nativeEvent.layout.y; }}
                   onPress={() => setSheetBooking(b)}
-                  accessibilityLabel={`${pending ? 'Request' : 'Booking'} at ${hhmm(b.starts_at)}`}
+                  accessibilityRole="button" accessibilityLabel={`${pending ? 'Request' : 'Booking'} at ${hhmm(b.starts_at)}`}
                   style={({ pressed }) => [
                     s.slotBooked, pending && s.slotPending,
                     highlightId === b.id && s.slotHighlight, pressed && s.pressed,
                   ]}>
                   <View style={[s.slotBar,
                     b.status === 'no_show' && s.slotBarNoShow,
-                    pending && s.slotBarPending]} />
+                    pending && s.slotBarPending,
+                    done && s.slotBarDone]} />
                   <View style={s.grow}>
                     <Text style={[s.slotName, (b.status === 'no_show' || expired) && s.struck]}>
                       {nameOf(b, barberId)}
                     </Text>
                     <Text style={s.slotMeta}>
                       {hhmm(b.starts_at)}–{hhmm(b.ends_at)} · {b.services?.name ?? 'Service'}
-                      {b.status === 'no_show' ? ' · no-show' : expired ? ' · request expired' : pending ? ' · PENDING' : ''}
+                      {b.status === 'no_show' ? ' · no-show' : expired ? ' · request expired' : pending ? ' · PENDING' : done ? ' · completed ✓' : inChair ? ' · in chair' : checkedIn ? ' · checked in' : ''}
                     </Text>
                   </View>
                   <Text style={s.slotPrice}>{(b.price_cents / 100).toFixed(0)} DH</Text>
@@ -358,7 +391,7 @@ export default function DayScheduleScreen({ barberId, onBack }: {
             }
             return (
               <Pressable key={item.at.getTime()} onPress={() => setAddAt(item.at)}
-                accessibilityLabel={`Add booking at ${item.at.toTimeString().slice(0, 5)}`}
+                accessibilityRole="button" accessibilityLabel={`Add booking at ${item.at.toTimeString().slice(0, 5)}`}
                 style={({ pressed }) => [s.slotFree, pressed && s.pressed]}>
                 <Ionicons name="add" size={16} color={colors.accent} />
                 <Text style={s.slotFreeText}>{item.at.toTimeString().slice(0, 5)}</Text>
@@ -370,17 +403,19 @@ export default function DayScheduleScreen({ barberId, onBack }: {
 
       {/* client profile panel */}
       <Modal visible={!!sheetBooking} transparent animationType="slide" onRequestClose={() => setSheetBooking(null)}>
-        <Pressable style={s.sheetBackdrop} onPress={() => setSheetBooking(null)} />
+        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.sheetBackdrop} onPress={() => setSheetBooking(null)} />
         {sheetBooking && (() => {
           const b = sheetBooking;
           const isWalkIn = b.customer_id === barberId;
           const started = new Date(b.starts_at).getTime() <= Date.now();
           const pending = b.status === 'pending';
+          const done = !!b.completed_at;
+          const inChair = !!b.started_at && !done;
           const stars = !isWalkIn ? reliabilityOf(b.customer_id, history) : null;
           const visits = !isWalkIn ? (history[b.customer_id]?.visits ?? 0) : 0;
           const phone = b.customer?.phone;
           return (
-            <View style={s.sheet}>
+            <View style={s.sheet} onAccessibilityEscape={() => setSheetBooking(null)}>
               <View style={s.panelHead}>
                 <Avatar url={isWalkIn ? null : b.customer?.avatar_url} name={nameOf(b, barberId)} size={56} />
                 <View style={s.grow}>
@@ -398,7 +433,7 @@ export default function DayScheduleScreen({ barberId, onBack }: {
               </View>
               <Text style={s.panelBooking}>
                 {b.services?.name ?? 'Service'} · {hhmm(b.starts_at)}–{hhmm(b.ends_at)} · {(b.price_cents / 100).toFixed(0)} DH
-                {b.status === 'no_show' ? ' · no-show' : ''}
+                {b.status === 'no_show' ? ' · no-show' : done ? ` · completed ${hhmm(b.completed_at!)}` : ''}
               </Text>
 
               {pending && !started ? (
@@ -419,7 +454,15 @@ export default function DayScheduleScreen({ barberId, onBack }: {
                   {!isWalkIn && (
                     <PanelBtn icon="chatbubble-ellipses-outline" label="Chat" onPress={() => openChat(b)} />
                   )}
-                  {b.status !== 'no_show' && (!started || !isWalkIn) && (
+                  {inChair && (
+                    <PanelBtn icon="checkbox-outline" label="Complete"
+                      onPress={async () => {
+                        const { error } = await supabase.rpc('advance_booking', { p_booking: b.id, p_stage: 'complete' });
+                        if (error) Alert.alert('Could not complete', error.message);
+                        setSheetBooking(null); load();
+                      }} />
+                  )}
+                  {!done && !inChair && b.status !== 'no_show' && (!started || !isWalkIn) && (
                     <PanelBtn danger icon={started ? 'close-circle-outline' : 'trash-outline'}
                       label={started ? 'No-show' : isWalkIn ? 'Remove' : 'Cancel'}
                       onPress={() => rpcAndReload(started ? 'mark_no_show' : 'cancel_booking', b.id, 'Could not update')} />
@@ -434,9 +477,9 @@ export default function DayScheduleScreen({ barberId, onBack }: {
       {/* reschedule sheet */}
       <Modal visible={!!reschedule} transparent animationType="slide"
         onRequestClose={() => setReschedule(null)}>
-        <Pressable style={s.sheetBackdrop} onPress={() => setReschedule(null)} />
+        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.sheetBackdrop} onPress={() => setReschedule(null)} />
         {reschedule && (
-          <View style={[s.sheet, s.sheetLight]}>
+          <View style={[s.sheet, s.sheetLight]} onAccessibilityEscape={() => setReschedule(null)}>
             <Text style={s.sheetTitleLight}>
               Move {nameOf(reschedule, barberId)} · {(new Date(reschedule.ends_at).getTime() - new Date(reschedule.starts_at).getTime()) / 60_000} min
             </Text>
@@ -452,8 +495,8 @@ export default function DayScheduleScreen({ barberId, onBack }: {
 
       {/* add walk-in sheet */}
       <Modal visible={!!addAt} transparent animationType="slide" onRequestClose={() => setAddAt(null)}>
-        <Pressable style={s.sheetBackdrop} onPress={() => setAddAt(null)} />
-        <View style={s.sheet}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.sheetBackdrop} onPress={() => setAddAt(null)} />
+        <View style={s.sheet} onAccessibilityEscape={() => setAddAt(null)}>
           <Text style={s.sheetTitle}>
             New booking · {addAt ? `${addAt.toDateString().slice(0, 10)}, ${addAt.toTimeString().slice(0, 5)}` : ''}
           </Text>
@@ -461,11 +504,16 @@ export default function DayScheduleScreen({ barberId, onBack }: {
             style={s.darkField} value={walkInName} onChangeText={setWalkInName} />
           <Text style={s.sheetLabel}>Service</Text>
           {services.length === 0 && <Text style={s.note}>Add a service first (Profile → My Services).</Text>}
-          {services.map((sv) => (
+          {[...services].sort((a, b) => Number(b.id === usualServiceId) - Number(a.id === usualServiceId)).map((sv) => (
             <Pressable key={sv.id} disabled={addBusy} onPress={() => addWalkIn(sv)}
-              style={({ pressed }) => [s.svcRow, pressed && s.pressed]}>
+              accessibilityRole="button"
+              accessibilityLabel={`${sv.name}, ${sv.duration_min} min, ${(sv.price_cents / 100).toFixed(0)} DH${sv.id === usualServiceId ? ', their usual' : ''}`}
+              style={({ pressed }) => [s.svcRow, sv.id === usualServiceId && s.svcRowUsual, pressed && s.pressed]}>
               <View style={s.grow}>
-                <Text style={s.slotName}>{sv.name}</Text>
+                <View style={s.svcNameRow}>
+                  <Text style={s.slotName}>{sv.name}</Text>
+                  {sv.id === usualServiceId && <View style={s.usualTag}><Text style={s.usualTagText}>USUAL</Text></View>}
+                </View>
                 <Text style={s.slotMeta}>{sv.duration_min} min</Text>
               </View>
               <Text style={s.slotPrice}>{(sv.price_cents / 100).toFixed(0)} DH</Text>
@@ -481,7 +529,7 @@ function PanelBtn({ icon, label, onPress, danger }: {
   icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void; danger?: boolean;
 }) {
   return (
-    <Pressable onPress={onPress} accessibilityLabel={label}
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label}
       style={({ pressed }) => [s.panelBtn, pressed && s.pressed]}>
       <View style={[s.panelBtnIcon, danger && s.panelBtnIconDanger]}>
         <Ionicons name={icon} size={20} color={danger ? colors.danger : D.text} />
@@ -554,6 +602,7 @@ const s = StyleSheet.create({
   slotBar: { width: 4, alignSelf: 'stretch', borderRadius: 2, backgroundColor: colors.accent },
   slotBarNoShow: { backgroundColor: D.border },
   slotBarPending: { backgroundColor: colors.warning },
+  slotBarDone: { backgroundColor: colors.success },
   slotName: { fontSize: font.body, fontWeight: '700', color: D.text },
   struck: { textDecorationLine: 'line-through', color: D.sub },
   slotMeta: { fontSize: font.small, color: D.sub },
@@ -587,6 +636,13 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: sp(3),
     borderRadius: radius.md, padding: sp(3.5), backgroundColor: D.card2,
   },
+  svcRowUsual: { borderWidth: 1, borderColor: colors.accent },
+  svcNameRow: { flexDirection: 'row', alignItems: 'center', gap: sp(2) },
+  usualTag: {
+    backgroundColor: 'rgba(232,71,79,0.15)', borderRadius: radius.sm,
+    paddingVertical: 2, paddingHorizontal: sp(1.5),
+  },
+  usualTagText: { fontSize: 9, fontWeight: '800', color: colors.accent, letterSpacing: 0.5 },
 
   panelHead: { flexDirection: 'row', alignItems: 'center', gap: sp(3) },
   panelName: { fontSize: font.h2, fontWeight: '700', color: D.text },

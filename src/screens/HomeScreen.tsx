@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import QuickAddSheet, { QuickPick } from '../components/QuickAddSheet';
 import TabBar, { TabItem } from '../components/TabBar';
 import { colors } from '../theme';
 import type { Barber, Profile } from '../types';
@@ -30,6 +31,8 @@ const BARBER_TABS: TabItem[] = [
   { key: 'wallet', label: 'Wallet', icon: 'wallet', iconOutline: 'wallet-outline' },
 ];
 
+type DayOpts = { autoAddNow?: boolean; prefillName?: string; prefillServiceId?: string; preferMin?: number };
+
 // ponytail: state-based tabs, no navigation lib — Android hardware-back doesn't walk
 // back through inner screens yet; adopt React Navigation when that bites real users.
 export default function HomeScreen({ profile, barber, phone, onProfileChanged }: {
@@ -38,17 +41,27 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
   const tabs = barber ? BARBER_TABS : CUSTOMER_TABS;
   const [tab, setTab] = useState(tabs[0].key);
   const [chromeHidden, setChromeHidden] = useState(false);
-  // the day timeline (walk-ins) is a full-screen overlay: FAB + dashboard both open it
+  // the day timeline (walk-ins) is a full-screen overlay: FAB quick-add + dashboard open it
   const [dayOpen, setDayOpen] = useState(false);
+  const [quickOpen, setQuickOpen] = useState(false);
+  const [dayOpts, setDayOpts] = useState<DayOpts>({});
 
-  function openDay(open: boolean) {
+  function openDay(open: boolean, opts: DayOpts = {}) {
+    setDayOpts(opts);
     setDayOpen(open);
     setChromeHidden(open);
   }
 
+  function onQuickPick({ mode, name, serviceId, preferMin }: QuickPick) {
+    setQuickOpen(false);
+    openDay(true, { autoAddNow: mode === 'now', prefillName: name, prefillServiceId: serviceId, preferMin });
+  }
+
   let content;
   if (barber && dayOpen) {
-    content = <DayScheduleScreen barberId={barber.id} onBack={() => openDay(false)} />;
+    content = <DayScheduleScreen barberId={barber.id} onBack={() => openDay(false)}
+      autoAddNow={dayOpts.autoAddNow} prefillName={dayOpts.prefillName}
+      prefillServiceId={dayOpts.prefillServiceId} preferMin={dayOpts.preferMin} />;
   } else if (barber) {
     if (tab === 'home') {
       content = <BookingsScreen barber={barber} profile={profile} phone={phone}
@@ -69,9 +82,13 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
   return (
     <View style={s.screen}>
       {content}
+      {barber && (
+        <QuickAddSheet visible={quickOpen} barberId={barber.id}
+          onClose={() => setQuickOpen(false)} onPick={onQuickPick} />
+      )}
       {!chromeHidden && (
         <TabBar items={tabs} active={tab}
-          center={barber ? { label: 'Add walk-in', onPress: () => openDay(true) } : undefined}
+          center={barber ? { label: 'Quick add', onPress: () => setQuickOpen(true) } : undefined}
           onChange={(k) => { setChromeHidden(false); setTab(k); }} />
       )}
     </View>

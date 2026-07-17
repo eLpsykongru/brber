@@ -42,8 +42,14 @@ today/capacity + walk-ins tiles, Clock Out (= today day-off toggle), bell → pe
 requests, avatar → Profile (now also hosts My Services / My Work). Placeholders:
 - **Tips tile** — no tips concept; needs the wallet/payment rail (Phase 2).
 - **Inventory chip** — product stock (pomade/blades) tracking; whole feature TODO.
-- **"Start" button / check-in flow** — needs an appointment state machine
-  (checked_in / in_service timestamps on bookings) + a service timer. Alert for now.
+- **"Start" button / check-in flow** — DONE 2026-07-17 (0018): full lifecycle on
+  the schedule cards (Confirm → Check in → Start → Complete) via
+  `checked_in_at/started_at/completed_at` timestamps + `advance_booking` RPC;
+  status stays 'confirmed' so nothing else changed. Completion opens a review-ask
+  sheet (chat + SMS composer). Still open: an elapsed-service timer on the
+  "In chair" card, and the **one-tap review link** — needs the `brber.ma` web
+  surface (adoption bet #1); until then the ask is a chat/SMS message pointing
+  at My Bookings → Rate.
 - **LIVE badge** — decorative; becomes real with Supabase Realtime on bookings.
 - The swipe request-deck was replaced by the bell → requests sheet (mockup has no
   inline deck). Re-add if barbers miss it.
@@ -125,11 +131,25 @@ They adopt on tools that fix today's business. Priority order:
    **Trigger:** once a barber has repeat customers (needs `bookings` history only).
    *Seed exists (2026-07-15): walk-in bookings carry a `walk_in_name`; the client
    book can grow out of recurring walk-in names + booking history.*
-4. **Flash discounts on dead hours** (11h–16h chairs are empty) — doubles as our
+   *Seed grew (2026-07-17): Quick add → existing client derives habits from history
+   (most-booked service + median arrival) and pre-fills the booking with them.*
+4. **Booking invite → client confirms** — today "Book existing client" (Quick add)
+   creates a named walk-in row (`customer_id = barber_id`, `walk_in_name` = their
+   name), same as any walk-in. It does NOT link to the client's actual account:
+   `bookings_insert` RLS requires `customer_id = auth.uid()`, on purpose — a
+   barber must never be able to write into a client's history unconsented (fake
+   no-shows would poison their reliability stars). Consequence: the client sees
+   nothing in My Bookings, gets no chat thread, no reminder, can't cancel it, and
+   can't leave a review, and their reliability stars don't accrue on it — it's
+   invisible to them. Proper fix: barber creates a *proposal*, client gets a
+   notification and accepts it himself (satisfies the RLS check, links chat/
+   reminders/reviews/reputation for real). **Trigger:** with the push-notifications
+   increment — a proposal nobody sees is worse than today's walk-in row.
+5. **Flash discounts on dead hours** (11h–16h chairs are empty) — doubles as our
    client-acquisition engine. **Trigger:** with the `promotions` table.
-5. **Verified badge / "Top rated in Tangier"** — barbers are competitive and
+6. **Verified badge / "Top rated in Tangier"** — barbers are competitive and
    image-driven; costs nothing, we already have reviews + ID verification.
-6. **Zero commission on their own clients, stated loudly.** Monetize only
+7. **Zero commission on their own clients, stated loudly.** Monetize only
    marketplace-sourced clients + payment fees later. **Trigger:** pricing page.
 
 ### QUEUE MODE — the one bet that puts us ahead

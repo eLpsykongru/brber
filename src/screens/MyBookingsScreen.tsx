@@ -11,6 +11,7 @@ type Row = {
   starts_at: string;
   ends_at: string;
   status: string;
+  completed_at: string | null;
   price_cents: number;
   services: { name: string; duration_min: number } | null;
   barbers: {
@@ -60,7 +61,7 @@ export default function MyBookingsScreen({ customerId, onChromeHidden }: {
   const load = useCallback(async () => {
     const [bk, rv] = await Promise.all([
       supabase.from('bookings')
-        .select('id, starts_at, ends_at, status, price_cents, services(name, duration_min), barbers(id, profiles(full_name), salon:salons!salon_id(name, address))')
+        .select('id, starts_at, ends_at, status, completed_at, price_cents, services(name, duration_min), barbers(id, profiles(full_name), salon:salons!salon_id(name, address))')
         .eq('customer_id', customerId)
         .order('starts_at', { ascending: false })
         .limit(50),
@@ -103,8 +104,10 @@ export default function MyBookingsScreen({ customerId, onChromeHidden }: {
   const now = Date.now();
   const filtered = rows.filter((r) => {
     const live = ['pending', 'confirmed'].includes(r.status);
-    if (filter === 'upcoming') return live && new Date(r.ends_at).getTime() >= now;
-    if (filter === 'completed') return live && new Date(r.ends_at).getTime() < now;
+    // completed_at = barber finished the service (possibly before the slot time)
+    const done = r.status === 'confirmed' && (!!r.completed_at || new Date(r.ends_at).getTime() < now);
+    if (filter === 'upcoming') return live && !done && new Date(r.ends_at).getTime() >= now;
+    if (filter === 'completed') return done;
     return !live; // cancelled / no_show
   });
 
@@ -133,7 +136,7 @@ export default function MyBookingsScreen({ customerId, onChromeHidden }: {
         renderItem={({ item }) => {
           const upcoming = new Date(item.starts_at).getTime() > now;
           const live = ['pending', 'confirmed'].includes(item.status);
-          const done = item.status === 'confirmed' && new Date(item.ends_at).getTime() < now;
+          const done = item.status === 'confirmed' && (!!item.completed_at || new Date(item.ends_at).getTime() < now);
           return (
             <View style={s.card}>
               <View style={s.cardHeadRow}>
@@ -176,7 +179,7 @@ export default function MyBookingsScreen({ customerId, onChromeHidden }: {
               </View>
 
               <View style={s.actions}>
-                {live && upcoming && (
+                {live && upcoming && !done && (
                   <View style={s.grow}>
                     <PillButton title="Cancel" variant="secondary" onPress={() => cancel(item.id)} />
                   </View>

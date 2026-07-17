@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, FlatList, Image, Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import ClientSheet, { ClientRef } from '../components/ClientSheet';
 import { Field, TAB_BAR_INSET } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, radius, sp } from '../theme';
@@ -23,6 +24,7 @@ type Client = {
   avatar: string | null;
   phone: string | null;
   isWalkIn: boolean;
+  walkInName: string | null; // raw grouping key for walk-ins
   visits: number;
   noShows: number;
   lastVisit: string;      // ISO of most recent booking
@@ -42,7 +44,8 @@ export default function ClientsScreen({ barberId, onChromeHidden }: {
 }) {
   const [clients, setClients] = useState<Client[]>([]);
   const [query, setQuery] = useState('');
-  const [chat, setChat] = useState<Client | null>(null);
+  const [sheetClient, setSheetClient] = useState<ClientRef | null>(null);
+  const [chat, setChat] = useState<{ id: string; title: string } | null>(null);
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.from('bookings')
@@ -63,6 +66,7 @@ export default function ClientsScreen({ barberId, onChromeHidden }: {
         avatar: isWalkIn ? null : r.customer?.avatar_url ?? null,
         phone: isWalkIn ? null : r.customer?.phone ?? null,
         isWalkIn,
+        walkInName: isWalkIn ? r.walk_in_name : null,
         visits: 0, noShows: 0,
         lastVisit: r.starts_at, lastBookingId: r.id, // rows arrive newest-first
       };
@@ -74,22 +78,15 @@ export default function ClientsScreen({ barberId, onChromeHidden }: {
 
   useEffect(() => { load(); }, [load]);
 
-  function openChat(c: Client | null) {
-    setChat(c);
-    onChromeHidden?.(!!c);
-  }
-
-  function actions(c: Client) {
-    Alert.alert(c.name, `${c.visits} visit${c.visits === 1 ? '' : 's'}${c.noShows ? ` · ${c.noShows} no-show${c.noShows === 1 ? '' : 's'}` : ''}`, [
-      ...(c.phone ? [{ text: 'Call', onPress: () => Linking.openURL(`tel:${c.phone}`) }] : []),
-      ...(!c.isWalkIn ? [{ text: 'Chat', onPress: () => openChat(c) }] : []),
-      { text: 'Close', style: 'cancel' as const },
-    ]);
+  function openChat(req: { id: string; title: string } | null) {
+    setSheetClient(null);
+    setChat(req);
+    onChromeHidden?.(!!req);
   }
 
   if (chat) {
-    return <ChatScreen bookingId={chat.lastBookingId} myId={barberId}
-      title={chat.name} onBack={() => openChat(null)} />;
+    return <ChatScreen bookingId={chat.id} myId={barberId}
+      title={chat.title} onBack={() => openChat(null)} />;
   }
 
   const q = query.trim().toLowerCase();
@@ -108,7 +105,12 @@ export default function ClientsScreen({ barberId, onChromeHidden }: {
         renderItem={({ item }) => {
           const stars = item.visits + item.noShows > 0 ? Math.max(1, 5 - item.noShows) : null;
           return (
-            <Pressable onPress={() => actions(item)} accessibilityLabel={item.name}
+            <Pressable accessibilityLabel={item.name}
+              onPress={() => setSheetClient({
+                name: item.name, avatarUrl: item.avatar, phone: item.phone,
+                customerId: item.isWalkIn ? barberId : item.key,
+                walkInName: item.walkInName,
+              })}
               style={({ pressed }) => [s.row, pressed && s.pressed]}>
               {item.avatar
                 ? <Image source={{ uri: item.avatar }} style={s.avatar} />
@@ -135,6 +137,9 @@ export default function ClientsScreen({ barberId, onChromeHidden }: {
           );
         }}
       />
+      <ClientSheet client={sheetClient} barberId={barberId}
+        onClose={() => setSheetClient(null)}
+        onChat={(id, title) => openChat({ id, title })} />
     </View>
   );
 }

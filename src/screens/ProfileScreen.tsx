@@ -13,6 +13,7 @@ import CouponsScreen from './CouponsScreen';
 import HelpCenterScreen from './HelpCenterScreen';
 import MyBookingsScreen from './MyBookingsScreen';
 import PortfolioScreen from './PortfolioScreen';
+import AvailabilityScreen from './AvailabilityScreen';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
 import ServicesScreen from './ServicesScreen';
 import WalletScreen from './WalletScreen';
@@ -28,7 +29,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   onProfileChanged: () => void; onChromeHidden?: (hidden: boolean) => void;
   onBack?: () => void;
 }) {
-  type View = 'menu' | 'edit' | 'bookings' | 'wallet' | 'coupons' | 'help' | 'preview' | 'services' | 'work';
+  type View = 'menu' | 'edit' | 'bookings' | 'wallet' | 'coupons' | 'help' | 'preview' | 'services' | 'work' | 'schedule';
   const [view, setView] = useState<View>('menu');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatar_url ?? null);
   const [avatarBusy, setAvatarBusy] = useState(false);
@@ -89,6 +90,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     return <PreviewPage salonId={barber.salon_id} onBack={() => go('menu')}
       onChromeHidden={onChromeHidden} />;
   }
+  if (view === 'schedule' && barber) return <AvailabilityScreen barberId={barber.id} onBack={() => go('menu')} />;
   if (view === 'services' && barber) return <ServicesScreen barberId={barber.id} onBack={() => go('menu')} />;
   if (view === 'work' && barber) return <PortfolioScreen barberId={barber.id} onBack={() => go('menu')} />;
 
@@ -96,6 +98,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   const items: MenuItem[] = [
     { icon: 'person-outline', label: 'Your profile', onPress: () => go('edit') },
     ...(barber ? [
+      { icon: 'calendar-outline', label: 'Schedule settings', onPress: () => go('schedule') },
       { icon: 'cut-outline', label: 'My Services', onPress: () => go('services') },
       { icon: 'images-outline', label: 'My Work', onPress: () => go('work') },
     ] as MenuItem[] : []),

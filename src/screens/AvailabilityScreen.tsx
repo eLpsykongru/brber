@@ -132,7 +132,7 @@ function Legend({ items }: { items: { color: string; label: string }[] }) {
   );
 }
 
-export default function AvailabilityScreen({ barberId }: { barberId: string }) {
+export default function AvailabilityScreen({ barberId, onBack }: { barberId: string; onBack?: () => void }) {
   const [days, setDays] = useState<DayRow[]>(
     WEEKDAYS.map(() => ({ open: false, start: '09:00', end: '18:00' })),
   );
@@ -492,7 +492,14 @@ export default function AvailabilityScreen({ barberId }: { barberId: string }) {
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         {/* header */}
         <View style={s.head}>
-          <View style={s.headSide} />
+          <View style={s.headSide}>
+            {onBack && (
+              <Pressable onPress={onBack} hitSlop={8} accessibilityRole="button" accessibilityLabel="Back"
+                style={({ pressed }) => [s.backBtn, pressed && s.pressed]}>
+                <Ionicons name="chevron-back" size={20} color={D.text} />
+              </Pressable>
+            )}
+          </View>
           <Text style={s.headTitle}>SCHEDULE</Text>
           <Pressable onPress={save} disabled={busy} accessibilityLabel="Save"
             style={({ pressed }) => [s.savePill, pressed && s.pressed]}>
@@ -1074,6 +1081,10 @@ const s = StyleSheet.create({
 
   head: { flexDirection: 'row', alignItems: 'center' },
   headSide: { width: 64 },
+  backBtn: {
+    width: 40, height: 40, borderRadius: radius.pill, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
+  },
   headTitle: { flex: 1, textAlign: 'center', fontSize: font.h2, fontWeight: '700', color: D.text, letterSpacing: 2 },
   savePill: {
     width: 64, height: 34, borderRadius: radius.pill, backgroundColor: colors.accent,

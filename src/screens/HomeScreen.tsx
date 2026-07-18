@@ -4,8 +4,8 @@ import QuickAddSheet, { QuickPick } from '../components/QuickAddSheet';
 import TabBar, { TabItem } from '../components/TabBar';
 import { colors } from '../theme';
 import type { Barber, Profile } from '../types';
-import AvailabilityScreen from './AvailabilityScreen';
 import BookingsScreen from './BookingsScreen';
+import CalendarScreen from './CalendarScreen';
 import ChatsScreen from './ChatsScreen';
 import ClientsScreen from './ClientsScreen';
 import DayScheduleScreen from './DayScheduleScreen';
@@ -68,7 +68,7 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
         onProfileChanged={onProfileChanged} onChromeHidden={setChromeHidden}
         goSchedule={() => openDay(true)} />;
     }
-    else if (tab === 'calendar') content = <AvailabilityScreen barberId={barber.id} />;
+    else if (tab === 'calendar') content = <CalendarScreen barberId={barber.id} onChromeHidden={setChromeHidden} />;
     else if (tab === 'clients') content = <ClientsScreen barberId={barber.id} onChromeHidden={setChromeHidden} />;
     else content = <WalletScreen onBack={() => setTab('home')} />;
   } else {

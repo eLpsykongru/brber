@@ -34,6 +34,18 @@ distances, locate-me FAB, navigate-to-salon. Still open:
   open the app and customers wait blind. Push should be the next increment.
   Pending requests hold the slot and die silently at start time (rendered as
   expired; no cron). Per-barber "instant book" toggle deferred until asked for.
+- **URGENCY UP (2026-07-18):** Calendar drag-and-drop + Reschedule (barber side,
+  `CalendarScreen.tsx`) let a barber move a client's appointment in two taps.
+  `reschedule_booking` updates the same row the customer reads (`MyBookingsScreen`
+  reloads on tab-remount, so the new time isn't stale) and auto-inserts a chat
+  message ("Your booking was moved to …") — but that's silent right now: no push,
+  and `ChatsScreen.tsx` has no unread badge yet (`TODO(backlog): real unread —
+  nothing marked unread yet`). A customer only learns their appointment moved by
+  opening My Bookings or Chat on their own. Minimum fix once push lands: send a
+  push on every `reschedule_booking` call (same webhook as the pending-request
+  case above) — the chat message can stay as the in-app record. Until push
+  exists, the honest floor is the chat message; do not skip it or move a booking
+  without one.
 
 ## Barber dashboard  → `src/screens/BookingsScreen.tsx` (dark mockup, 2026-07-15)
 Built to the provided dark dashboard mockup. Real: daily earnings + 7-day bars
@@ -58,11 +70,21 @@ requests, avatar → Profile (now also hosts My Services / My Work). Placeholder
   notes + informal debt ledger ("owes me 50 DH").
 
 ## Schedule editor  → `src/screens/AvailabilityScreen.tsx` (dark mockup, 2026-07-16)
-Calendar tab = the SCHEDULE editor (accepting-bookings switch, weekly hours,
-time-off blocks). The day timeline (walk-ins, pending accept/decline/reschedule)
-moved to `DayScheduleScreen`, opened by the tab-bar + FAB and the dashboard.
-Backend: 0016 (`barbers.accepting_bookings`, `days_off.label`, `time_blocks`).
+Lives in **Profile → Schedule settings** (moved off the Calendar tab 2026-07-18).
+The editor = accepting-bookings switch, weekly hours, time-off blocks. The
+**Calendar tab is now a read-only day/week view** of the books (`CalendarScreen`,
+2026-07-18); the walk-in day timeline stays in `DayScheduleScreen` (tab-bar +
+FAB, dashboard). Backend: 0016 (`barbers.accepting_bookings`, `days_off.label`,
+`time_blocks`).
 Still open:
+- **Calendar tab filters** — show/hide Appointments / Breaks / Time-off DONE
+  2026-07-18 (funnel toggles a chip row; applies to the day timeline). Filtering
+  *by service or by booking status* is still open.
+- **Appointment NOTES** — the mockup's per-appointment note ("Prefers a #2
+  guard…") needs a `bookings.notes` column; part of the client-book bet. The
+  Calendar appointment sheet marks a TODO where the NOTES card goes.
+- **Editing a break from the Calendar sheet** sends you to Schedule settings;
+  inline time-block editing would need an edit sheet on the Calendar tab.
 - **Vacations are stored as one `days_off` row per day** — the list shows them
   individually, not grouped as one "Vacation Jul 21–28" row. Group when it annoys.
 - **Breaks recur every day** (not per-weekday like the mockup's "Every weekday");

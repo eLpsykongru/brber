@@ -93,6 +93,69 @@ Still open:
 - **WalletScreen still light** — shared with the customer side; darken with the
   wallet increment.
 
+## Owner: salon management  → not built (discussed 2026-07-19)
+Owner-only screen. `salons.owner_id` already exists (0011), so gate on
+`owner_id === me` — **a Profile row** ("Salon management"), *not* a new tab
+(occasional owner-use; same pattern as My Services / My Work). Distinct from the
+agent-till screen, which *is* the owner's Wallet tab (built as mock 2026-07-19:
+`AgentWalletScreen`, see its section). Ranked:
+1. **Staff (the core, needs real backend).** List the salon's barbers; **approve /
+   decline join requests**; remove a barber (set `salon_id` null → they fall back
+   to a one-man salon). Closes a live hole: today any barber can pick "Join a
+   salon" at onboarding and attach to your salon with no approval
+   (`OnboardingScreen.tsx`), landing on your public page under your reviews. The
+   0011 comment already flagged this ("add owner approval when salons onboard
+   barbers the admin doesn't know"). Trust boundary → real RLS, not mock.
+2. **Cash-agent picker** — a row action on the staff list ("Make cash agent",
+   crown icon), *not* its own section. One field `salons.cash_agent_id` (default
+   = owner). Dormant until the wallet ships; deciding it in the staff UI costs
+   nothing now. Ties to the Payments bet's "one agent per salon" decision.
+3. **Salon profile** — name / address / pin / bio / website / photos already live
+   in Profile → Your profile; link or move here. "Preview as customer" already exists.
+4. **Promotions / Packages** — salon-level; their home once those tables land
+   (see Promotions and Salon screen sections). Placeholder rows until then.
+- **Stats.** The tab is identical for every salon. Always shown: salon totals
+  (bookings, occupancy — shop-level, no dirhams). The *only* per-barber difference
+  is whether their money shows, keyed on `barbers.pay_model` (default 'rent'):
+    - `commission` → show that barber's revenue (owner takes a cut → entitled)
+    - `rent` → hide revenue; just name + booking count (barber keeps 100%, it's
+      his private book)
+  So all-commission = everyone shows money; all-rent = only salon totals; **mixed =
+  one list, commission chairs show dirhams, rent chairs don't** — no mode, no
+  toggle, the row's flag decides. Needs the `pay_model` field, which doesn't exist
+  yet. **Trigger:** add it before showing any per-barber money to an owner; until
+  then, aggregates only.
+- Skip: schedules / services (each barber owns their own), inventory (whole TODO).
+
+## Agent wallet (salon till)  → `src/screens/AgentWalletScreen.tsx` — REAL 2026-07-19 (0022)
+Owner-only — the barber **Wallet tab**, which only appears for the salon owner
+(gated on `salons.owner_id`; owner = the v1 cash agent). Co-barbers see just
+Home / Calendar / Clients — no Wallet tab (decided 2026-07-19; their personal
+wallet has no home yet — revisit when barbers can hold a balance). UI = Float
+Balance + Activity + Top-up (trimmed from the "Blade" shots; localized to DH).
+**Real since 0022:** `wallet_transactions` ledger (RLS: customer sees own rows,
+agent sees his till; no direct writes) + `agent_cash_topup` RPC (owner-only,
+phone lookup on trailing 9 digits, flat 5,000 DH per-top-up cap). Float =
+sum of the till's top-ups; activity = real rows; receipts (`expo-print`, per-row
++ offered after each top-up) carry the real transaction ref. Customer side:
+`WalletScreen` balance + transactions read the same ledger; its fake Add-Money
+flow was deleted (button → "top up with cash at your barber" until the card
+rail). **DECIDED: commission = 0%** — instant liquidity is the agent's reward;
+tier/bonus/commission UI removed. The fake "Insured by brber Agent Guarantee"
+and "SMS confirmation" copy was deleted too.
+Still open:
+- **Settlement/netting** — the float only ever grows; needs settlement rows
+  (netting against payouts) + a real outstanding-float cap replacing the flat
+  per-top-up cap. First thing to build when real cash volume appears.
+- **Card rail** (YouCan Pay) → customer Add-Money returns then.
+- **Spending the balance** — bookings can't be paid from the wallet yet; that's
+  the deposit/coupon unlock in the Payments bet.
+- **Scan-QR tab is still mock** — needs `expo-camera` + a customer-side QR.
+- **Cash-out** stays cut (top-up-only; would need customer withdrawal codes).
+- **Other-than-owner agent** = `salons.cash_agent_id` picker (Salon-management
+  plan); don't widen the gate ad hoc. Aggregate/paginate the till query when a
+  till has thousands of rows (client sums today).
+
 ## Salon screen  → `src/screens/SalonDetailScreen.tsx`
 - **Packages tab + "Packages" step in the booking sheet** — needs a `packages` table
   (salon-level, name, price, "saved" amount) + `package_items` (services in it), and a
@@ -122,8 +185,9 @@ Still open:
 
 ## Placeholder screens (UI built, not wired to backend)
 These exist as visual shells to implement later:
-- **WalletScreen** (My Wallet / Add Money / Top-Up Success) — static balance + fake
-  transactions. Needs a payment rail + `wallet_transactions` ledger.
+- **WalletScreen** — REAL 2026-07-19 (0022): balance + transactions read the
+  `wallet_transactions` ledger. Add-Money (card) still needs the payment rail;
+  the fake Add Money / Top-Up Success screens were deleted.
 - **CouponsScreen** — static coupon cards; "Copy code" just alerts. Needs promotions table.
 - **HelpCenterScreen** — FAQ accordion + Contact Us; content is placeholder. Wire real links.
 - **CancelReasonScreen** — reason picker; created, NOT wired into My Bookings cancel yet.
@@ -201,6 +265,17 @@ Realtime for live position; ETA = sum of avg service durations ahead of you.
     — no Cash Plus partnership needed, and trust is easy because it's *their* barber.
     Needs: float limit per barber, daily netting, and a check on Bank Al-Maghrib
     payment-agent rules once real money moves.
+    **DECISION (v1): one cash agent per salon, default = owner — not every chair.**
+    Netting is per-person (collected cash cancels only against *that* collector's
+    unpaid earnings), so a low-earning barber who takes a big top-up flips into
+    owing *us* — reverse of the advantage + float risk. Keep it to whoever has a
+    big, reliable payout: one float cap + one till to reconcile per salon. Add
+    per-barber agents later only if a high-volume barber asks and his payouts
+    cover the float.
+    *STARTED 2026-07-19 (0022): `wallet_transactions` + `agent_cash_topup` are
+    live — cash top-up works end to end (agent till + customer balance), no
+    commission (decided: 0%). Still missing: settlement/netting, card rail,
+    spending the balance. See "Agent wallet (salon till)".*
   **Trigger:** once wallets have balance, **deposits** and **coupons** finally have
   something to attach to — that unblocks 4 items above.
 - **Phase 3: direct m-wallets** (Orange Money, inwi money, Cash Plus API) only when
@@ -212,8 +287,9 @@ difference between "an app" and "our app". Booksy will never do this well.
 **Trigger:** before any paid client acquisition.
 
 ## Profile menu rows  → `src/screens/ProfileScreen.tsx` (customer)
-- **Payment Methods / My Wallet** — need a payment rail (no Stripe in Morocco; pay
-  at shop for now). Wallet also needs a `wallet_transactions` ledger table.
+- **Payment Methods** — needs a payment rail (no Stripe in Morocco; pay at shop
+  for now). **My Wallet** is real since 0022 (cash top-ups at the salon); card
+  top-ups + spending the balance still need the rail.
 - **My Coupons** — needs the same `promotions`/coupons table as Explore badges.
 - **Settings** — placeholder. Likely: notification prefs (push), password change
   (`supabase.auth.updateUser`), language (ar/fr/en).

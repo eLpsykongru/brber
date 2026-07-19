@@ -83,7 +83,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   if (view === 'bookings') {
     return <MyBookingsScreen customerId={profile.id} onChromeHidden={onChromeHidden} />;
   }
-  if (view === 'wallet') return <WalletScreen onBack={() => go('menu')} />;
+  if (view === 'wallet') return <WalletScreen customerId={profile.id} onBack={() => go('menu')} />;
   if (view === 'coupons') return <CouponsScreen onBack={() => go('menu')} />;
   if (view === 'help') return <HelpCenterScreen onBack={() => go('menu')} />;
   if (view === 'preview' && barber?.salon_id) {

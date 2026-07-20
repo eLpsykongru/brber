@@ -100,7 +100,8 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     return <PreviewPage salonId={barber.salon_id} onBack={() => go('menu')}
       onChromeHidden={onChromeHidden} />;
   }
-  if (view === 'salon' && barber) return <SalonScreen barberId={barber.id} onBack={() => go('menu')} />;
+  if (view === 'salon' && barber) return <SalonScreen barberId={barber.id} onBack={() => go('menu')}
+    onManageServices={() => go('services')} onEditSalon={() => go('edit')} />;
   if (view === 'schedule' && barber) return <AvailabilityScreen barberId={barber.id} onBack={() => go('menu')} />;
   if (view === 'services' && barber) return <ServicesScreen barberId={barber.id} onBack={() => go('menu')} />;
   if (view === 'work' && barber) return <PortfolioScreen barberId={barber.id} onBack={() => go('menu')} />;
@@ -175,12 +176,12 @@ function PreviewPage({ salonId, onBack, onChromeHidden }: {
 
   useEffect(() => {
     supabase.from('salons')
-      .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, specialty, years_experience, profiles(full_name, avatar_url, phone), reviews(rating), services(id, name, price_cents, duration_min, is_active, category))')
+      .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, profiles(full_name, avatar_url, phone), reviews(rating), services(id, name, price_cents, duration_min, is_active, category))')
       .eq('id', salonId).single()
       .then(({ data, error }) => {
         if (error) { Alert.alert('Could not load preview', error.message); onBack(); return; }
         const card = data as unknown as SalonCard;
-        setSalon({ ...card, barbers: card.barbers.filter((b) => b.status === 'approved') });
+        setSalon({ ...card, barbers: card.barbers.filter((b) => b.status === 'approved' && b.salon_status === 'approved') });
       });
   }, [salonId]);
 

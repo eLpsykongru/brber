@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert, Animated, Image, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native';
+import ClientSheet, { ClientRef } from '../components/ClientSheet';
 import SlotPicker from '../components/SlotPicker';
 import { Field, PillButton } from '../components/ui';
 import { takeLastFix } from '../lib/lastFix';
@@ -119,7 +120,9 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
   const [walkInName, setWalkInName] = useState(prefillName ?? '');
   const [usualServiceId, setUsualServiceId] = useState(prefillServiceId ?? null);
   const [addBusy, setAddBusy] = useState(false);
-  const [chat, setChat] = useState<DayBooking | null>(null);
+  const [chat, setChat] = useState<{ id: string; title: string } | null>(null);
+  const [sheetClient, setSheetClient] = useState<ClientRef | null>(null);
+  const [toast, setToast] = useState<{ booking: DayBooking; clearStart: boolean; clearCheckin: boolean } | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [now, setNow] = useState(() => Date.now()); // ticks so "late"/"over" counters advance while open
   const didAutoAdd = useRef(false);
@@ -145,6 +148,13 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     const id = setInterval(() => setNow(Date.now()), 60_000);
     return () => clearInterval(id);
   }, []);
+
+  // auto-dismiss the completion toast after 5s
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 5000);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   const strip = upcomingDays(14);
 
@@ -232,6 +242,26 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     load();
   }
 
+  // capture only what this call set, so undo restores the exact prior state
+  async function markComplete(b: DayBooking) {
+    const { error } = await supabase.rpc('advance_booking', { p_booking: b.id, p_stage: 'complete' });
+    if (error) return Alert.alert('Could not complete', error.message);
+    setToast({ booking: b, clearStart: !b.started_at, clearCheckin: !b.checked_in_at });
+    setSheetBooking(null);
+    load();
+  }
+
+  async function undoComplete() {
+    if (!toast) return;
+    const { booking, clearStart, clearCheckin } = toast;
+    setToast(null);
+    const { error } = await supabase.rpc('revert_completion', {
+      p_booking: booking.id, p_clear_start: clearStart, p_clear_checkin: clearCheckin,
+    });
+    if (error) Alert.alert('Could not undo', error.message);
+    load();
+  }
+
   async function confirmReschedule() {
     if (!reschedule || !rescheduleAt) return;
     const { error } = await supabase.rpc('reschedule_booking', {
@@ -244,8 +274,16 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
 
   function openChat(b: DayBooking | null) {
     setSheetBooking(null);
-    setChat(b);
+    setChat(b ? { id: b.id, title: nameOf(b, barberId) } : null);
   }
+
+  const clientRefOf = (b: DayBooking): ClientRef => ({
+    name: nameOf(b, barberId),
+    avatarUrl: b.customer_id === barberId ? null : b.customer?.avatar_url ?? null,
+    phone: b.customer_id === barberId ? null : b.customer?.phone ?? null,
+    customerId: b.customer_id,
+    walkInName: b.walk_in_name,
+  });
 
   function goToClient(b: DayBooking) {
     setHighlightId(b.id);
@@ -255,7 +293,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
 
   if (chat) {
     return <ChatScreen bookingId={chat.id} myId={barberId}
-      title={chat.customer?.full_name ?? 'Customer'} onBack={() => openChat(null)} />;
+      title={chat.title} onBack={() => openChat(null)} />;
   }
 
   // per-day status for the strip badges (no-shows don't hold a slot)
@@ -431,7 +469,9 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
           const phone = b.customer?.phone;
           return (
             <View style={s.sheet} onAccessibilityEscape={() => setSheetBooking(null)}>
-              <View style={s.panelHead}>
+              <Pressable onPress={() => { setSheetBooking(null); setSheetClient(clientRefOf(b)); }}
+                accessibilityRole="button" accessibilityLabel={`View ${nameOf(b, barberId)}'s profile and history`}
+                style={({ pressed }) => [s.panelHead, pressed && s.pressed]}>
                 <Avatar url={isWalkIn ? null : b.customer?.avatar_url} name={nameOf(b, barberId)} size={56} />
                 <View style={s.grow}>
                   <Text style={s.panelName}>{nameOf(b, barberId)}</Text>
@@ -445,7 +485,8 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
                   )}
                 </View>
                 {pending && !started && <View style={s.pendingPill}><Text style={s.pendingPillText}>PENDING</Text></View>}
-              </View>
+                <Ionicons name="chevron-forward" size={18} color={D.sub} />
+              </Pressable>
               <Text style={s.panelBooking}>
                 {b.services?.name ?? 'Service'} · {hhmm(b.starts_at)}–{hhmm(b.ends_at)} · {(b.price_cents / 100).toFixed(0)} DH
                 {b.status === 'no_show' ? ' · no-show' : done ? ` · completed ${hhmm(b.completed_at!)}` : ''}
@@ -470,12 +511,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
                     <PanelBtn icon="chatbubble-ellipses-outline" label="Chat" onPress={() => openChat(b)} />
                   )}
                   {inChair && (
-                    <PanelBtn icon="checkbox-outline" label="Complete"
-                      onPress={async () => {
-                        const { error } = await supabase.rpc('advance_booking', { p_booking: b.id, p_stage: 'complete' });
-                        if (error) Alert.alert('Could not complete', error.message);
-                        setSheetBooking(null); load();
-                      }} />
+                    <PanelBtn icon="checkbox-outline" label="Complete" onPress={() => markComplete(b)} />
                   )}
                   {!done && !inChair && b.status !== 'no_show' && (!started || !isWalkIn) && (
                     <PanelBtn danger icon={started ? 'close-circle-outline' : 'trash-outline'}
@@ -536,6 +572,23 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
           ))}
         </View>
       </Modal>
+
+      {/* client profile preview → full history */}
+      <ClientSheet client={sheetClient} barberId={barberId}
+        onClose={() => setSheetClient(null)}
+        onChat={(id, title) => { setSheetClient(null); setChat({ id, title }); }} />
+
+      {/* completion toast with undo */}
+      {toast && (
+        <View style={s.toast}>
+          <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+          <Text style={s.toastText} numberOfLines={1}>{nameOf(toast.booking, barberId)} — completed</Text>
+          <Pressable onPress={undoComplete} accessibilityRole="button" accessibilityLabel="Undo completion"
+            hitSlop={8} style={({ pressed }) => pressed && s.pressed}>
+            <Text style={s.toastUndo}>UNDO</Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
@@ -558,6 +611,14 @@ const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: D.bg },
   content: { padding: sp(5), paddingTop: sp(14), gap: sp(3), paddingBottom: sp(10) },
   pressed: { opacity: 0.7 },
+  toast: {
+    position: 'absolute', left: sp(5), right: sp(5), bottom: sp(9),
+    flexDirection: 'row', alignItems: 'center', gap: sp(3),
+    backgroundColor: D.card2, borderRadius: radius.lg, padding: sp(3.5),
+    borderWidth: 1, borderColor: D.border,
+  },
+  toastText: { flex: 1, fontSize: font.small, fontWeight: '700', color: D.text },
+  toastUndo: { fontSize: font.small, fontWeight: '800', color: colors.accent, letterSpacing: 0.5 },
   grow: { flex: 1 },
   note: { color: D.sub, fontSize: font.small, paddingVertical: sp(2) },
 

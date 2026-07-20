@@ -93,48 +93,66 @@ Still open:
 - **WalletScreen still light** — shared with the customer side; darken with the
   wallet increment.
 
-## Owner: salon management  → `src/screens/SalonScreen.tsx` MOCK 2026-07-20
+## Owner: salon management  → `src/screens/SalonScreen.tsx` — REAL 2026-07-20 (0025)
 Owner-only. Lives in **Profile → Salon management** (a menu row gated on
-`ownsSalon`, same pattern as My Services / My Work) — *not* a bottom tab, so the
-Clients tab stays in the bar for owners and co-barbers alike. Screen = TEAM /
-SERVICES / SETTINGS segments over a shared shop-header (status + address + power +
-4 stat tiles), with a back arrow. Everything is **mock data** (localized
-DH/+212/brber), wired later. Distinct from the agent-till Wallet tab
-(`AgentWalletScreen`). What still needs backend:
-1. **Staff (the core, needs real backend).** List the salon's barbers; **approve /
-   decline join requests**; remove a barber (set `salon_id` null → they fall back
-   to a one-man salon). Closes a live hole: today any barber can pick "Join a
-   salon" at onboarding and attach to your salon with no approval
-   (`OnboardingScreen.tsx`), landing on your public page under your reviews. The
-   0011 comment already flagged this ("add owner approval when salons onboard
-   barbers the admin doesn't know"). Trust boundary → real RLS, not mock.
-2. **Cash-agent picker** — the mock marks the owner with a 👑 (Ionicons has no
-   crown glyph); the "Make cash agent" row action isn't wired. One field
-   `salons.cash_agent_id` (default = owner). Ties to the Payments bet's "one agent
-   per salon" decision.
-3. **Salon profile** — name / address / pin / bio / website / photos already live
-   in Profile → Your profile. Settings tab lists it but the deep-link isn't wired
-   (state-based nav, no router) — Settings rows just Alert for now. Wire the two
-   already-built rows (Salon profile, Opening hours) when it's worth the plumbing.
-4. **Packages** — the Services tab now shows a **mock Packages section** (add-service
-   is a no-op). Real needs the `packages`/`package_items` tables + booking mapping
-   from the Salon screen section. Promotions likewise salon-level.
-- **Invite pay-model** — the invite sheet now picks **Commission (starting split)**
-  or **Rent (DH/mo)**; maps to `barbers.pay_model` + a split/rent value when real.
-  The member sheet already branches: commission shows revenue + split slider, rent
-  hides revenue ("keeps 100%, private"). All mock until `pay_model` lands.
-- **Stats.** The tab is identical for every salon. Always shown: salon totals
-  (bookings, occupancy — shop-level, no dirhams). The *only* per-barber difference
-  is whether their money shows, keyed on `barbers.pay_model` (default 'rent'):
-    - `commission` → show that barber's revenue (owner takes a cut → entitled)
-    - `rent` → hide revenue; just name + booking count (barber keeps 100%, it's
-      his private book)
-  So all-commission = everyone shows money; all-rent = only salon totals; **mixed =
-  one list, commission chairs show dirhams, rent chairs don't** — no mode, no
-  toggle, the row's flag decides. Needs the `pay_model` field, which doesn't exist
-  yet. **Trigger:** add it before showing any per-barber money to an owner; until
-  then, aggregates only.
-- Skip: schedules / services (each barber owns their own), inventory (whole TODO).
+`ownsSalon`) — *not* a bottom tab, so Clients stays in the bar. TEAM / SERVICES /
+SETTINGS segments over a shared shop-header. Backend = migration 0025:
+`barbers.{salon_role, salon_status, pay_model, commission_pct, rent_cents,
+chair_label}` + `salons.{cash_agent_id, default_commission, accepting_bookings}`,
+owner-only RPCs (`salon_team`, `salon_stats`, `salon_set_terms`,
+`salon_approve_member`, `salon_remove_member`, `salon_set_cash_agent`).
+**Done & wired:**
+- **Staff** — team list; **approve / decline** pending join requests; remove
+  member; set pay terms (rent/commission + split); **cash-agent 👑** picker. The
+  join-approval **hole is closed**: a BEFORE UPDATE trigger forces `salon_status =
+  'pending'` when a barber sets `salon_id` to a salon they don't own, and the three
+  public salon queries (Explore/Discover/Preview) now filter `salon_status =
+  'approved'`, so pending joiners don't show under your reviews.
+- **Stats** — `salon_stats()` returns shop-level aggregates only; `salon_team()`
+  returns per-barber revenue **only for commission barbers** (rent → NULL), so the
+  privacy rule is enforced server-side, not in the UI. Presence (in_service) is
+  derived from today's bookings; on-floor = approved members accepting bookings.
+- **Services** — real per-barber `services` (live toggle inline; Manage → Profile →
+  My Services for add/edit). Default commission (Settings) writes `default_commission`.
+- **Chairs** (0026) — real `chairs` table (`salon_id, label, barber_id?, sort`), one
+  barber per chair (partial unique). CHAIRS tab = at-a-glance availability grid
+  (open / in-service / off / empty, derived) + assign/rename/delete via owner RPCs
+  (`salon_chairs`, `salon_add_chair`, `salon_rename_chair`, `salon_delete_chair`,
+  `salon_assign_chair`). Chairs are now the source of truth for the chair label —
+  `salon_team()` reads it off this table, so `barbers.chair_label` (0025) is vestigial.
+- **Opening hours envelope** (0028) — Settings → Opening hours sets
+  `salons.{open_min, close_min}`; a trigger on `availability` rejects any barber
+  weekly-hours row outside it (so shop 09:00–23:00 → a co-barber can pick 10:00–21:00
+  but not 08:00). AvailabilityScreen shows the window, clamps the +/- steppers, and
+  validates on save. **Default is all-day (0–1440) = no limit** so existing one-man
+  salons aren't retro-clamped; narrowing later doesn't trim rows already saved wider
+  (applies on next edit). Not enforced in the booking path directly — availability is
+  the gate, and it's now envelope-bound at write time.
+- **Shop open/closed** — header power button writes `salons.accepting_bookings`.
+  NOTE: nothing **enforces** it in the booking flow yet (like the per-barber
+  `accepting_bookings`) — wire the check when the request path is next touched.
+**Still blocked / deferred (can't build now, not laziness):**
+- **Packages** — Services tab shows a placeholder; needs the `packages` /
+  `package_items` tables + the pending booking-mapping decision (Salon screen §).
+- **Invite by phone / share link** — the sheet is UI-only; real self-onboarding
+  needs the `brber.ma` web surface (adoption bet #1). Today's real path: barber
+  signs up → picks the salon at onboarding → appears here as pending → owner approves.
+- **Barber earnings statement** (0027, REAL) — member sheet → "Earnings & payouts"
+  opens a per-barber weekly **commission accrual** derived from bookings
+  (`salon_barber_earnings`): gross → barber share → shop cut, with total
+  **outstanding/unsettled** up top. Rent barbers show **rent due**, no revenue
+  (privacy). This is an accrual, **not** a settlement — deliberately no "paid"
+  state, no invoice record, no `payouts` table.
+- **Settlements / invoices / paid status** — the blocked half of payouts. Needs
+  real money movement (Phase 2 settlement rail) before any payout can be marked
+  paid or an invoice generated; the earnings screen shows an honest empty state.
+- **Payouts & taxes (salon-level), Reports, Roles & permissions** — Settings rows
+  still Alert. Payout schedule/tax config need the rail; reports/permissions post-launch.
+- **Cash agent ≠ top-up rights yet** — `salon_set_cash_agent` records the choice,
+  but `agent_cash_topup` (0022) + the Wallet tab are still owner-only. Honor
+  `cash_agent_id` there when a co-barber agent is actually needed.
+- Removing a member sets `salon_id = null` (unlinked), not a fresh solo salon —
+  give them one back if that edge bites.
 
 ## Agent wallet (salon till)  → `src/screens/AgentWalletScreen.tsx` — REAL 2026-07-19 (0022)
 Owner-only — the barber **Wallet tab**, which only appears for the salon owner

@@ -36,6 +36,7 @@ export type Specialist = {
   id: string;
   bio: string | null;
   status: string;
+  salon_status?: string; // salon membership; only 'approved' members show publicly
   specialty: string | null;
   years_experience: number | null;
   profiles: { full_name: string | null; avatar_url: string | null; phone: string | null } | null;

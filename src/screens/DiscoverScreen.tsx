@@ -59,12 +59,12 @@ export default function DiscoverScreen({ onChromeHidden }: {
   useEffect(() => {
     // barbers!salon_id: disambiguates from the salons.owner_id relationship
     supabase.from('salons')
-      .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, specialty, years_experience, profiles(full_name, avatar_url, phone), reviews(rating), services(id, name, price_cents, duration_min, is_active, category))')
+      .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, profiles(full_name, avatar_url, phone), reviews(rating), services(id, name, price_cents, duration_min, is_active, category))')
       .order('name')
       .then(({ data, error }) => {
         if (error) return Alert.alert('Could not load salons', error.message);
         const cards = (data as unknown as SalonCard[])
-          .map((s) => ({ ...s, barbers: s.barbers.filter((b) => b.status === 'approved') }))
+          .map((s) => ({ ...s, barbers: s.barbers.filter((b) => b.status === 'approved' && b.salon_status === 'approved') }))
           .filter((s) => s.barbers.length > 0);
         setSalons(cards);
       });

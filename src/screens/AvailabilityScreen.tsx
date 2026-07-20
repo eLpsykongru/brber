@@ -67,13 +67,13 @@ function upcomingDays(n: number) {
   });
 }
 
-function TimeBox({ value, onChange, label }: {
-  value: string; onChange: (v: string) => void; label: string;
+function TimeBox({ value, onChange, label, min = 0, max = 24 * 60 }: {
+  value: string; onChange: (v: string) => void; label: string; min?: number; max?: number;
 }) {
   const mins = toMin(value);
   const step = (delta: number) => {
     const next = mins + delta;
-    if (next >= 0 && next <= 24 * 60) onChange(toHHMM(next));
+    if (next >= min && next <= max) onChange(toHHMM(next));
   };
   return (
     <View style={s.timeBox}>
@@ -138,6 +138,8 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
   );
   const serverDays = useRef<DayRow[]>([]);
   const [accepting, setAccepting] = useState(true);
+  // salon opening-hours envelope (0028) — barber hours must sit within it
+  const [envelope, setEnvelope] = useState<{ open: number; close: number } | null>(null);
   // booking buffers: prep before + cleanup after every booking
   const [before, setBefore] = useState(0);
   const [after, setAfter] = useState(0);
@@ -188,13 +190,21 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
         serverDays.current = next.map((d) => ({ ...d }));
         setDays(next);
       });
-    supabase.from('barbers').select('accepting_bookings, buffer_before_min, buffer_after_min')
+    supabase.from('barbers').select('accepting_bookings, buffer_before_min, buffer_after_min, salon_id')
       .eq('id', barberId).single()
       .then(({ data }) => {
         if (!data) return;
         setAccepting(data.accepting_bookings);
         setBefore(data.buffer_before_min); setAfter(data.buffer_after_min);
         serverBuf.current = { before: data.buffer_before_min, after: data.buffer_after_min };
+        if (data.salon_id) {
+          supabase.from('salons').select('open_min, close_min').eq('id', data.salon_id).single()
+            .then(({ data: sal }) => {
+              if (sal && !(sal.open_min === 0 && sal.close_min === 1440)) {
+                setEnvelope({ open: sal.open_min, close: sal.close_min });
+              }
+            });
+        }
       });
     loadOff();
   }, [barberId]);
@@ -233,6 +243,10 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
       if (!days[i].open) continue;
       if (toMin(days[i].end) <= toMin(days[i].start)) {
         return Alert.alert('Invalid hours', `${WEEKDAYS[i]}: closing time must be after opening.`);
+      }
+      if (envelope && (toMin(days[i].start) < envelope.open || toMin(days[i].end) > envelope.close)) {
+        return Alert.alert('Outside salon hours',
+          `${WEEKDAYS[i]}: hours must be within the salon's ${toHHMM(envelope.open)}–${toHHMM(envelope.close)}.`);
       }
       rows.push({ barber_id: barberId, weekday: i, start_min: toMin(days[i].start), end_min: toMin(days[i].end) });
     }
@@ -293,7 +307,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
     const hours = delta > 0
       ? days.map((d, weekday) => ({ d, weekday }))
         .filter(({ d }) => d.open)
-        .map(({ d, weekday }) => ({ weekday, newEnd: toHHMM(Math.min(1440, toMin(d.end) + delta)) }))
+        .map(({ d, weekday }) => ({ weekday, newEnd: toHHMM(Math.min(envelope?.close ?? 1440, toMin(d.end) + delta)) }))
         .filter(({ weekday, newEnd }) => newEnd !== days[weekday].end)
       : [];
     return { strategy: strat, targets, scopeDay: null, blocks: blockChanges, inserts: [], hours };
@@ -651,6 +665,12 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                 <Text style={s.copyAllText}>Copy to all</Text>
               </Pressable>
             </View>
+            {envelope && (
+              <View style={s.envelopeHint}>
+                <Ionicons name="business-outline" size={13} color={D.sub} />
+                <Text style={s.envelopeText}>Salon is open {toHHMM(envelope.open)}–{toHHMM(envelope.close)} — set your hours within it.</Text>
+              </View>
+            )}
             {DISPLAY_ORDER.map((i) => {
               const d = days[i];
               const name = WEEKDAYS[i].slice(0, 3);
@@ -670,9 +690,11 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                   {d.open && (
                     <View style={s.timesRow}>
                       <TimeBox value={d.start} label={`${WEEKDAYS[i]} opening`}
+                        min={envelope?.open ?? 0} max={envelope?.close ?? 24 * 60}
                         onChange={(v) => setDay(i, { start: v })} />
                       <Text style={s.dash}>–</Text>
                       <TimeBox value={d.end} label={`${WEEKDAYS[i]} closing`}
+                        min={envelope?.open ?? 0} max={envelope?.close ?? 24 * 60}
                         onChange={(v) => setDay(i, { end: v })} />
                     </View>
                   )}
@@ -1185,6 +1207,11 @@ const s = StyleSheet.create({
 
   sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   sectionLabel: { fontSize: font.tiny, fontWeight: '700', color: D.sub, letterSpacing: 1 },
+  envelopeHint: {
+    flexDirection: 'row', alignItems: 'center', gap: sp(2), backgroundColor: D.card2,
+    borderRadius: radius.md, padding: sp(3),
+  },
+  envelopeText: { flex: 1, fontSize: font.small, color: D.sub },
   copyAll: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   copyAllText: { fontSize: font.small, fontWeight: '700', color: colors.accent },
 

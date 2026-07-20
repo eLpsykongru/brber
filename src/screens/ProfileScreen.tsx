@@ -14,6 +14,7 @@ import HelpCenterScreen from './HelpCenterScreen';
 import MyBookingsScreen from './MyBookingsScreen';
 import PortfolioScreen from './PortfolioScreen';
 import AvailabilityScreen from './AvailabilityScreen';
+import SalonScreen from './SalonScreen';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
 import ServicesScreen from './ServicesScreen';
 import WalletScreen from './WalletScreen';
@@ -29,10 +30,19 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   onProfileChanged: () => void; onChromeHidden?: (hidden: boolean) => void;
   onBack?: () => void;
 }) {
-  type View = 'menu' | 'edit' | 'bookings' | 'wallet' | 'coupons' | 'help' | 'preview' | 'services' | 'work' | 'schedule';
+  type View = 'menu' | 'edit' | 'bookings' | 'wallet' | 'coupons' | 'help' | 'preview' | 'services' | 'work' | 'schedule' | 'salon';
   const [view, setView] = useState<View>('menu');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatar_url ?? null);
   const [avatarBusy, setAvatarBusy] = useState(false);
+  // owner (not just any barber in a salon) gets the Salon management row
+  const [ownsSalon, setOwnsSalon] = useState(false);
+
+  useEffect(() => {
+    if (!barber?.salon_id) return;
+    supabase.from('salons').select('id')
+      .eq('id', barber.salon_id).eq('owner_id', barber.id).maybeSingle()
+      .then(({ data }) => setOwnsSalon(!!data));
+  }, [barber?.salon_id, barber?.id]);
 
   const initials = (profile.full_name ?? '?')
     .split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
@@ -90,6 +100,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     return <PreviewPage salonId={barber.salon_id} onBack={() => go('menu')}
       onChromeHidden={onChromeHidden} />;
   }
+  if (view === 'salon' && barber) return <SalonScreen barberId={barber.id} onBack={() => go('menu')} />;
   if (view === 'schedule' && barber) return <AvailabilityScreen barberId={barber.id} onBack={() => go('menu')} />;
   if (view === 'services' && barber) return <ServicesScreen barberId={barber.id} onBack={() => go('menu')} />;
   if (view === 'work' && barber) return <PortfolioScreen barberId={barber.id} onBack={() => go('menu')} />;
@@ -104,6 +115,9 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     ] as MenuItem[] : []),
     ...(barber?.salon_id ? [
       { icon: 'eye-outline', label: 'Preview my page', onPress: () => go('preview') },
+    ] as MenuItem[] : []),
+    ...(ownsSalon ? [
+      { icon: 'storefront-outline', label: 'Salon management', onPress: () => go('salon') },
     ] as MenuItem[] : []),
     ...(barber ? [] : [
       { icon: 'card-outline', label: 'Payment Methods', onPress: () => soon('Payment Methods') },

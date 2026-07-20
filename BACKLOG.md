@@ -93,12 +93,14 @@ Still open:
 - **WalletScreen still light** — shared with the customer side; darken with the
   wallet increment.
 
-## Owner: salon management  → not built (discussed 2026-07-19)
-Owner-only screen. `salons.owner_id` already exists (0011), so gate on
-`owner_id === me` — **a Profile row** ("Salon management"), *not* a new tab
-(occasional owner-use; same pattern as My Services / My Work). Distinct from the
-agent-till screen, which *is* the owner's Wallet tab (built as mock 2026-07-19:
-`AgentWalletScreen`, see its section). Ranked:
+## Owner: salon management  → `src/screens/SalonScreen.tsx` MOCK 2026-07-20
+Owner-only. Lives in **Profile → Salon management** (a menu row gated on
+`ownsSalon`, same pattern as My Services / My Work) — *not* a bottom tab, so the
+Clients tab stays in the bar for owners and co-barbers alike. Screen = TEAM /
+SERVICES / SETTINGS segments over a shared shop-header (status + address + power +
+4 stat tiles), with a back arrow. Everything is **mock data** (localized
+DH/+212/brber), wired later. Distinct from the agent-till Wallet tab
+(`AgentWalletScreen`). What still needs backend:
 1. **Staff (the core, needs real backend).** List the salon's barbers; **approve /
    decline join requests**; remove a barber (set `salon_id` null → they fall back
    to a one-man salon). Closes a live hole: today any barber can pick "Join a
@@ -106,14 +108,21 @@ agent-till screen, which *is* the owner's Wallet tab (built as mock 2026-07-19:
    (`OnboardingScreen.tsx`), landing on your public page under your reviews. The
    0011 comment already flagged this ("add owner approval when salons onboard
    barbers the admin doesn't know"). Trust boundary → real RLS, not mock.
-2. **Cash-agent picker** — a row action on the staff list ("Make cash agent",
-   crown icon), *not* its own section. One field `salons.cash_agent_id` (default
-   = owner). Dormant until the wallet ships; deciding it in the staff UI costs
-   nothing now. Ties to the Payments bet's "one agent per salon" decision.
+2. **Cash-agent picker** — the mock marks the owner with a 👑 (Ionicons has no
+   crown glyph); the "Make cash agent" row action isn't wired. One field
+   `salons.cash_agent_id` (default = owner). Ties to the Payments bet's "one agent
+   per salon" decision.
 3. **Salon profile** — name / address / pin / bio / website / photos already live
-   in Profile → Your profile; link or move here. "Preview as customer" already exists.
-4. **Promotions / Packages** — salon-level; their home once those tables land
-   (see Promotions and Salon screen sections). Placeholder rows until then.
+   in Profile → Your profile. Settings tab lists it but the deep-link isn't wired
+   (state-based nav, no router) — Settings rows just Alert for now. Wire the two
+   already-built rows (Salon profile, Opening hours) when it's worth the plumbing.
+4. **Packages** — the Services tab now shows a **mock Packages section** (add-service
+   is a no-op). Real needs the `packages`/`package_items` tables + booking mapping
+   from the Salon screen section. Promotions likewise salon-level.
+- **Invite pay-model** — the invite sheet now picks **Commission (starting split)**
+  or **Rent (DH/mo)**; maps to `barbers.pay_model` + a split/rent value when real.
+  The member sheet already branches: commission shows revenue + split slider, rent
+  hides revenue ("keeps 100%, private"). All mock until `pay_model` lands.
 - **Stats.** The tab is identical for every salon. Always shown: salon totals
   (bookings, occupancy — shop-level, no dirhams). The *only* per-barber difference
   is whether their money shows, keyed on `barbers.pay_model` (default 'rent'):

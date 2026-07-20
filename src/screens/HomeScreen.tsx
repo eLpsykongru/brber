@@ -30,7 +30,8 @@ const BARBER_TABS: TabItem[] = [
   { key: 'calendar', label: 'Calendar', icon: 'calendar', iconOutline: 'calendar-outline' },
   { key: 'clients', label: 'Clients', icon: 'people', iconOutline: 'people-outline' },
 ];
-// the salon agent till — only the owner (cash agent) gets a Wallet tab; co-barbers don't
+// the salon agent till — only the owner (cash agent) gets a Wallet tab; co-barbers don't.
+// Salon management lives in Profile → Salon management, not a tab (keeps Clients in the bar).
 const WALLET_TAB: TabItem = { key: 'wallet', label: 'Wallet', icon: 'wallet', iconOutline: 'wallet-outline' };
 
 type DayOpts = { autoAddNow?: boolean; prefillName?: string; prefillServiceId?: string; preferMin?: number };

@@ -121,6 +121,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
   const [addBusy, setAddBusy] = useState(false);
   const [chat, setChat] = useState<DayBooking | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [now, setNow] = useState(() => Date.now()); // ticks so "late"/"over" counters advance while open
   const didAutoAdd = useRef(false);
 
   const scrollRef = useRef<ScrollView>(null);
@@ -139,6 +140,11 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     ]);
     Animated.sequence([pulse(), pulse(), pulse()]).start();
   }, [glowIds]);
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   const strip = upcomingDays(14);
 
@@ -363,6 +369,13 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
               const done = !!b.completed_at;
               const inChair = !!b.started_at && !done;
               const checkedIn = !!b.checked_in_at && !b.started_at;
+              // late = confirmed slot whose start passed but nobody's in the chair;
+              // over = a cut running past its scheduled end. Both put the next client at risk.
+              const lateMin = !pending && b.status !== 'no_show' && !done && !b.started_at
+                ? Math.floor((now - new Date(b.starts_at).getTime()) / 60_000) : 0;
+              const overMin = inChair
+                ? Math.floor((now - new Date(b.ends_at).getTime()) / 60_000) : 0;
+              const lateLabel = overMin > 0 ? `${overMin} min over` : lateMin > 0 ? `${lateMin} min late` : null;
               return (
                 <Pressable key={b.id}
                   onLayout={(e) => { rowY.current[b.id] = e.nativeEvent.layout.y; }}
@@ -375,7 +388,8 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
                   <View style={[s.slotBar,
                     b.status === 'no_show' && s.slotBarNoShow,
                     pending && s.slotBarPending,
-                    done && s.slotBarDone]} />
+                    done && s.slotBarDone,
+                    lateLabel && s.slotBarLate]} />
                   <View style={s.grow}>
                     <Text style={[s.slotName, (b.status === 'no_show' || expired) && s.struck]}>
                       {nameOf(b, barberId)}
@@ -383,6 +397,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
                     <Text style={s.slotMeta}>
                       {hhmm(b.starts_at)}–{hhmm(b.ends_at)} · {b.services?.name ?? 'Service'}
                       {b.status === 'no_show' ? ' · no-show' : expired ? ' · request expired' : pending ? ' · PENDING' : done ? ' · completed ✓' : inChair ? ' · in chair' : checkedIn ? ' · checked in' : ''}
+                      {lateLabel && <Text style={s.lateTag}> · {lateLabel}</Text>}
                     </Text>
                   </View>
                   <Text style={s.slotPrice}>{(b.price_cents / 100).toFixed(0)} DH</Text>
@@ -603,9 +618,11 @@ const s = StyleSheet.create({
   slotBarNoShow: { backgroundColor: D.border },
   slotBarPending: { backgroundColor: colors.warning },
   slotBarDone: { backgroundColor: colors.success },
+  slotBarLate: { backgroundColor: colors.danger },
   slotName: { fontSize: font.body, fontWeight: '700', color: D.text },
   struck: { textDecorationLine: 'line-through', color: D.sub },
   slotMeta: { fontSize: font.small, color: D.sub },
+  lateTag: { color: colors.danger, fontWeight: '700' },
   slotPrice: { fontSize: font.small, fontWeight: '700', color: D.text, fontVariant: ['tabular-nums'] },
   slotFree: {
     flexDirection: 'row', alignItems: 'center', gap: sp(2),

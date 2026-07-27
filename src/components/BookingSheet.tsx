@@ -4,7 +4,7 @@ import {
   Alert, Animated, Dimensions, Modal, PanResponder, Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, sp } from '../theme';
+import { colors, font, radius, serif, shadow, sp } from '../theme';
 import type { Specialist } from '../types';
 import { Chip, PillButton, Stars } from './ui';
 import SlotPicker from './SlotPicker';
@@ -241,15 +241,18 @@ const s = StyleSheet.create({
   backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.45)' },
   sheet: {
     position: 'absolute', left: 0, right: 0, bottom: 0, height: SCREEN_H * 0.88,
-    backgroundColor: colors.bg, borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    backgroundColor: colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28,
   },
-  handleZone: { paddingTop: sp(2.5), paddingHorizontal: sp(5), borderBottomWidth: 1, borderBottomColor: colors.border },
-  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.border, marginBottom: sp(2) },
+  handleZone: { paddingTop: sp(2.5), paddingHorizontal: sp(5) },
+  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: '#D8D4CA', marginBottom: sp(2) },
   headRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   headBtn: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
-  headTitle: { flex: 1, textAlign: 'center', fontSize: font.h2, fontWeight: '700', color: colors.text },
+  headTitle: {
+    flex: 1, textAlign: 'center', fontFamily: serif, fontSize: font.h2,
+    letterSpacing: 0.5, textTransform: 'uppercase', color: colors.text,
+  },
   progress: { flexDirection: 'row', gap: sp(1.5), justifyContent: 'center', paddingVertical: sp(3) },
-  dot: { width: 28, height: 4, borderRadius: 2, backgroundColor: colors.border },
+  dot: { width: 28, height: 4, borderRadius: 2, backgroundColor: '#DDD9CF' },
   dotActive: { backgroundColor: colors.accent },
 
   body: { padding: sp(5), gap: sp(2.5), paddingBottom: sp(10) },
@@ -260,7 +263,7 @@ const s = StyleSheet.create({
 
   optRow: {
     flexDirection: 'row', alignItems: 'center', gap: sp(3),
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: sp(4), backgroundColor: colors.bg,
+    borderRadius: radius.lg, padding: sp(4), backgroundColor: colors.bg, ...shadow,
   },
   optName: { fontSize: font.body, fontWeight: '700', color: colors.text },
   optMeta: { fontSize: font.small, color: colors.textSecondary },
@@ -271,16 +274,17 @@ const s = StyleSheet.create({
   avatarText: { fontSize: font.body, fontWeight: '700', color: colors.accent },
 
   sumCard: {
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: sp(4), gap: 2, backgroundColor: colors.bg,
+    borderRadius: radius.lg, padding: sp(4), gap: 2, backgroundColor: colors.bg, ...shadow,
   },
   sumHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: sp(1) },
-  sumLabel: { fontSize: font.small, fontWeight: '700', color: colors.textSecondary },
+  sumLabel: {
+    fontSize: 10, fontWeight: '700', color: colors.textSecondary,
+    letterSpacing: 1.5, textTransform: 'uppercase',
+  },
   sumEdit: { fontSize: font.small, fontWeight: '600', color: colors.accent },
   sumTitle: { fontSize: font.body, fontWeight: '700', color: colors.text },
   sumLine: { flexDirection: 'row', justifyContent: 'space-between' },
   sumText: { fontSize: font.body, fontWeight: '600', color: colors.text },
 
-  footer: {
-    padding: sp(5), paddingBottom: sp(8), borderTopWidth: 1, borderTopColor: colors.border,
-  },
+  footer: { padding: sp(5), paddingBottom: sp(8) },
 });

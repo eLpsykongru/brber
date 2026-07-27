@@ -1,21 +1,23 @@
 // Design tokens — single source of truth for the visual system.
-// Extracted from the salon-template mockups: coral accent, white cards, dark pill tab bar.
+// "Rentra" editorial skin (design.md): warm off-white canvas, white cards,
+// near-black hero surfaces, Playfair Display for display type, coral accents only.
 
 export const colors = {
-  bg: '#FFFFFF',
-  surface: '#F6F6F8',       // input fields, subtle fills
-  border: '#ECECEF',
-  text: '#17181C',
-  textSecondary: '#6E7076',
-  textTertiary: '#A0A2A8',
+  bg: '#FFFFFF',            // cards, sheets, white surfaces
+  surface: '#F2F0EB',       // warm canvas + subtle fills on white cards
+  border: '#E5E2DB',
+  text: '#111111',
+  textSecondary: '#8A8A85',
+  textTertiary: '#B9B6AD',
 
-  accent: '#E8474F',        // coral — 4.6:1 on white, AA for normal text
-  accentSoft: '#FDE7E8',    // soft pink chips
+  accent: '#E8442E',        // coral — chips, arrows, small highlights only
+  accentSoft: 'rgba(232,68,46,0.12)',
   onAccent: '#FFFFFF',
 
-  tabBg: '#1C1D22',
-  tabActive: '#36373E',
-  tabInactiveText: '#A6A8AF',
+  ink: '#101010',           // hero cards, primary CTA, dark headers
+  tabBg: '#101010',
+  tabActive: '#2B2B28',
+  tabInactiveText: '#9A9A95',
 
   success: '#1E8E4F',
   warning: '#9A6B00',
@@ -31,10 +33,10 @@ export const dark = {
   border: '#26262B',
   text: '#FFFFFF',
   sub: '#9A9CA3',
-  barMuted: 'rgba(232,71,79,0.22)', // past-period bars: muted step of the accent hue
+  barMuted: 'rgba(232,68,46,0.22)', // past-period bars: muted step of the accent hue
 };
 
-export const radius = { sm: 10, md: 14, lg: 18, pill: 999 };
+export const radius = { sm: 10, md: 16, lg: 20, xl: 24, pill: 999 };
 
 // 4pt rhythm
 export const sp = (n: number) => n * 4;
@@ -45,4 +47,25 @@ export const font = {
   body: 15,
   small: 13,
   tiny: 11,
+};
+
+// Playfair Display, loaded in App.tsx. Uppercase + slight letter-spacing at use sites.
+export const serif = 'PlayfairDisplay_700Bold';
+export const serifBlack = 'PlayfairDisplay_800ExtraBold';
+
+// barely-there elevation — separation comes from surface vs bg contrast (design.md)
+export const shadow = {
+  shadowColor: '#000',
+  shadowOpacity: 0.06,
+  shadowRadius: 12,
+  shadowOffset: { width: 0, height: 4 },
+  elevation: 2,
+};
+
+export const shadowLg = {
+  shadowColor: '#000',
+  shadowOpacity: 0.14,
+  shadowRadius: 28,
+  shadowOffset: { width: 0, height: 10 },
+  elevation: 8,
 };

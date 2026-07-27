@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { Block, daySlots, Range, sameDay, weekStartOf, Window } from '../lib/slots';
-import { colors, font, radius, sp } from '../theme';
+import { colors, font, radius, shadow, sp } from '../theme';
 
 // Weekly day selector + time grid. Full slots are struck-through and disabled.
 export default function SlotPicker({ barberId, durationMin, selected, onSelect }: {
@@ -120,8 +120,8 @@ const s = StyleSheet.create({
   weekLabel: { fontSize: font.small, fontWeight: '600', color: colors.textSecondary },
   weekNav: { flexDirection: 'row', gap: sp(2) },
   navBtn: {
-    width: 34, height: 34, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border,
-    alignItems: 'center', justifyContent: 'center',
+    width: 34, height: 34, borderRadius: radius.pill, backgroundColor: colors.bg,
+    alignItems: 'center', justifyContent: 'center', ...shadow,
   },
   navDisabled: { opacity: 0.35 },
   pressed: { opacity: 0.7 },
@@ -130,17 +130,17 @@ const s = StyleSheet.create({
   dayDow: { fontSize: font.tiny, color: colors.textSecondary },
   muted: { color: colors.textTertiary },
   dayNum: { width: 38, height: 38, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
-  dayNumActive: { backgroundColor: colors.accent },
+  dayNumActive: { backgroundColor: colors.ink },
   dayNumPast: { opacity: 0.5 },
   dayNumText: { fontSize: font.body, fontWeight: '700', color: colors.text },
   dayNumTextActive: { color: colors.onAccent },
   slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: sp(2) },
   slot: {
-    width: '31%', alignItems: 'center', paddingVertical: sp(3), borderRadius: radius.md,
-    borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg,
+    width: '31%', alignItems: 'center', paddingVertical: sp(3), borderRadius: 14,
+    backgroundColor: colors.bg,
   },
-  slotSel: { backgroundColor: colors.accent, borderColor: colors.accent },
-  slotFull: { backgroundColor: colors.surface, borderColor: colors.surface },
+  slotSel: { backgroundColor: colors.ink },
+  slotFull: { backgroundColor: '#E9E6DE' },
   slotPast: { opacity: 0.5 },
   slotText: { color: colors.text, fontWeight: '600', fontSize: font.small },
   slotTextSel: { color: colors.onAccent },

@@ -5,11 +5,11 @@ import {
   Alert, FlatList, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
-import { Chip, Field, Stars } from '../components/ui';
+import { Chip, Display, Field, Stars } from '../components/ui';
 import { DEFAULT_REGION, LatLng, haversineKm, openDirections, walkMin } from '../lib/geo';
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, sp } from '../theme';
+import { colors, font, radius, shadow, shadowLg, sp } from '../theme';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
 
 const CARD_W = 300;
@@ -136,7 +136,8 @@ export default function ExploreScreen({ onChromeHidden }: {
       {/* search + filter */}
       <View style={styles.searchRow}>
         <View style={styles.grow}>
-          <Field placeholder="Search Salon or Specialist" value={query} onChangeText={setQuery} />
+          <Field placeholder="Search Salon or Specialist" value={query} onChangeText={setQuery}
+            style={styles.searchPill} />
         </View>
         <Pressable style={({ pressed }) => [styles.filterBtn, pressed && styles.pressed]}
           accessibilityLabel="Filters" onPress={() => setFilterOpen(true)}>
@@ -249,8 +250,9 @@ export default function ExploreScreen({ onChromeHidden }: {
         onRequestClose={() => setFilterOpen(false)}>
         <Pressable style={styles.sheetBackdrop} onPress={() => setFilterOpen(false)} />
         <View style={styles.sheet}>
+          <View style={styles.sheetHandle} />
           <View style={styles.sheetHeader}>
-            <Text style={styles.sheetTitle}>Filters</Text>
+            <Display size={22}>Filters</Display>
             <Pressable hitSlop={8}
               onPress={() => { setMinRating(null); setMaxKm(null); setMaxPrice(null); }}>
               <Text style={styles.sheetReset}>Reset</Text>
@@ -288,40 +290,45 @@ export default function ExploreScreen({ onChromeHidden }: {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, paddingTop: sp(14), backgroundColor: colors.bg },
+  screen: { flex: 1, paddingTop: sp(14), backgroundColor: colors.surface },
   grow: { flex: 1 },
   pressed: { opacity: 0.7 },
 
-  searchRow: { flexDirection: 'row', gap: sp(2), paddingHorizontal: sp(5), marginBottom: sp(3) },
+  searchRow: { flexDirection: 'row', gap: sp(2.5), paddingHorizontal: sp(5), marginBottom: sp(3) },
+  searchPill: { borderRadius: radius.pill, minHeight: 48 },
   filterBtn: {
-    width: 48, height: 48, borderRadius: radius.md, backgroundColor: colors.accent,
+    width: 48, height: 48, borderRadius: radius.md, backgroundColor: colors.ink,
     alignItems: 'center', justifyContent: 'center',
   },
   filterDot: {
     position: 'absolute', top: 8, right: 8, width: 8, height: 8, borderRadius: radius.pill,
-    backgroundColor: colors.onAccent,
+    backgroundColor: colors.accent,
   },
 
   mapWrap: { flex: 1, marginHorizontal: sp(5), borderRadius: radius.lg, overflow: 'hidden' },
   pinWrap: { alignItems: 'center' },
   pin: {
-    width: 40, height: 40, borderRadius: radius.pill, backgroundColor: colors.accentSoft,
-    alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: colors.bg,
+    width: 40, height: 40, borderRadius: radius.pill, backgroundColor: colors.bg,
+    alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: colors.surface,
+    ...shadow,
   },
-  pinSelected: { backgroundColor: colors.accent },
-  pinLabel: { fontSize: font.tiny, fontWeight: '700', color: colors.text, marginTop: 2 },
+  pinSelected: { backgroundColor: colors.accent, borderColor: colors.bg },
+  pinLabel: {
+    fontSize: font.tiny, fontWeight: '700', color: colors.text, marginTop: 2,
+    backgroundColor: colors.bg, borderRadius: radius.pill, paddingVertical: 2, paddingHorizontal: 7,
+    overflow: 'hidden',
+  },
   locateBtn: {
     position: 'absolute', right: sp(3), bottom: sp(3), width: 44, height: 44, borderRadius: radius.pill,
-    backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: colors.border,
+    backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', ...shadow,
   },
 
   // carousel
   carousel: { paddingVertical: sp(3) },
   carouselContent: { paddingHorizontal: sp(5), gap: CARD_GAP },
   card: {
-    width: CARD_W, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg,
-    padding: sp(3), gap: sp(2), backgroundColor: colors.bg,
+    width: CARD_W, borderRadius: radius.lg, padding: sp(3), gap: sp(2),
+    backgroundColor: colors.bg, ...shadow,
   },
   cardSelected: { borderColor: colors.accent, borderWidth: 2 },
   cardTopRow: {
@@ -349,20 +356,29 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
 
-  // filter sheet
-  sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
+  // filter sheet (design 1e — warm canvas, white chips, ink CTA)
+  sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)' },
   sheet: {
-    backgroundColor: colors.bg, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg,
-    padding: sp(5), paddingBottom: sp(10), gap: sp(2),
+    backgroundColor: colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28,
+    padding: sp(5), paddingTop: sp(3), paddingBottom: sp(10), gap: sp(2), ...shadowLg,
   },
-  sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  sheetTitle: { fontSize: font.h2, fontWeight: '700', color: colors.text },
+  sheetHandle: {
+    alignSelf: 'center', width: 40, height: 4, borderRadius: 2,
+    backgroundColor: '#D8D4CA', marginBottom: sp(2),
+  },
+  sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   sheetReset: { fontSize: font.small, fontWeight: '600', color: colors.accent },
-  sheetLabel: { fontSize: font.small, fontWeight: '600', color: colors.textSecondary, marginTop: sp(2) },
+  sheetLabel: {
+    fontSize: font.tiny, fontWeight: '700', color: colors.textSecondary, marginTop: sp(2),
+    letterSpacing: 1.8, textTransform: 'uppercase',
+  },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: sp(2) },
   sheetDone: {
-    marginTop: sp(4), backgroundColor: colors.accent, borderRadius: radius.pill,
-    paddingVertical: sp(3.5), alignItems: 'center',
+    marginTop: sp(4), backgroundColor: colors.ink, borderRadius: radius.pill,
+    minHeight: 54, alignItems: 'center', justifyContent: 'center',
   },
-  sheetDoneText: { color: colors.onAccent, fontSize: font.body, fontWeight: '700' },
+  sheetDoneText: {
+    color: colors.onAccent, fontSize: font.small, fontWeight: '700',
+    letterSpacing: 1, textTransform: 'uppercase',
+  },
 });

@@ -6,7 +6,7 @@ import {
   TextInput, View,
 } from 'react-native';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, sp } from '../theme';
+import { colors, font, radius, shadow, sp } from '../theme';
 
 type Msg = {
   id: string;
@@ -190,11 +190,11 @@ export default function ChatScreen({ bookingId, myId, title, subtitle, avatarUrl
 }
 
 const st = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
+  screen: { flex: 1, backgroundColor: colors.surface },
   header: {
     flexDirection: 'row', alignItems: 'center', gap: sp(2), backgroundColor: colors.tabBg,
     paddingTop: sp(13), paddingBottom: sp(3), paddingHorizontal: sp(4),
-    borderBottomLeftRadius: radius.lg, borderBottomRightRadius: radius.lg,
+    borderBottomLeftRadius: radius.xl, borderBottomRightRadius: radius.xl,
   },
   backBtn: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
   headerAvatar: { width: 40, height: 40, borderRadius: 20 },
@@ -208,8 +208,8 @@ const st = StyleSheet.create({
   daySep: { alignItems: 'center', marginVertical: sp(3) },
   dayText: { fontSize: font.tiny, fontWeight: '700', color: colors.textTertiary, letterSpacing: 1 },
   bubble: { maxWidth: '80%', borderRadius: radius.lg, padding: sp(3), marginTop: sp(1) },
-  mine: { alignSelf: 'flex-end', backgroundColor: colors.tabBg, borderBottomRightRadius: 4 },
-  theirs: { alignSelf: 'flex-start', backgroundColor: colors.surface, borderBottomLeftRadius: 4 },
+  mine: { alignSelf: 'flex-end', backgroundColor: colors.ink, borderBottomRightRadius: 4 },
+  theirs: { alignSelf: 'flex-start', backgroundColor: colors.bg, borderBottomLeftRadius: 4, ...shadow },
   mineText: { color: colors.onAccent, fontSize: font.body },
   theirsText: { color: colors.text, fontSize: font.body },
   loading: { color: colors.textTertiary, fontSize: font.small },
@@ -230,13 +230,13 @@ const st = StyleSheet.create({
     borderTopWidth: 1, borderTopColor: colors.border,
   },
   input: {
-    flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: radius.pill,
+    flex: 1, borderRadius: radius.pill,
     paddingHorizontal: sp(4), paddingTop: Platform.OS === 'ios' ? sp(3) : sp(2),
     paddingBottom: Platform.OS === 'ios' ? sp(3) : sp(2), maxHeight: 110,
-    fontSize: font.body, color: colors.text, backgroundColor: colors.surface,
+    fontSize: font.body, color: colors.text, backgroundColor: colors.bg, ...shadow,
   },
   sendBtn: {
-    width: 44, height: 44, borderRadius: radius.pill, backgroundColor: colors.accent,
+    width: 44, height: 44, borderRadius: radius.pill, backgroundColor: colors.ink,
     alignItems: 'center', justifyContent: 'center',
   },
   pressed: { opacity: 0.7 },

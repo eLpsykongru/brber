@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Empty } from '../components/ui';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, sp } from '../theme';
+import { colors, font, radius, serif, sp } from '../theme';
 import ChatScreen from './ChatScreen';
 
 type Convo = {
@@ -145,7 +145,10 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
         keyExtractor={(c) => c.id}
         contentContainerStyle={st.list}
         ListEmptyComponent={
-          <Empty text={tab === 'unread' ? 'Unread tracking coming soon.' : 'Chats appear here once you have a booking.'} />
+          tab === 'unread'
+            ? <Empty text="Unread tracking coming soon." />
+            : <Empty icon="chatbubble-outline" title="No chats yet"
+                text="Chats appear here once you have a booking with a barber." />
         }
         renderItem={({ item }) => {
           const name = item.barbers?.profiles?.full_name ?? 'Barber';
@@ -170,14 +173,17 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
 }
 
 const st = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
+  screen: { flex: 1, backgroundColor: colors.surface },
   header: {
     backgroundColor: colors.tabBg, paddingTop: sp(14), paddingBottom: sp(4), paddingHorizontal: sp(5),
-    borderBottomLeftRadius: radius.lg, borderBottomRightRadius: radius.lg,
+    borderBottomLeftRadius: 28, borderBottomRightRadius: 28,
   },
   headerTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   headerSide: { width: 40, alignItems: 'center' },
-  headerTitle: { flex: 1, textAlign: 'center', fontSize: font.h2, fontWeight: '700', color: colors.onAccent },
+  headerTitle: {
+    flex: 1, textAlign: 'center', fontFamily: serif, fontSize: font.h2,
+    letterSpacing: 0.7, textTransform: 'uppercase', color: colors.onAccent,
+  },
   search: {
     marginTop: sp(3), backgroundColor: colors.tabActive, borderRadius: radius.pill,
     paddingHorizontal: sp(4), minHeight: 44, color: colors.onAccent, fontSize: font.body,
@@ -192,7 +198,7 @@ const st = StyleSheet.create({
   avatarText: { fontWeight: '700', color: colors.accent },
   onlineDot: {
     position: 'absolute', right: 2, bottom: 2, width: 12, height: 12, borderRadius: 6,
-    backgroundColor: colors.success, borderWidth: 2, borderColor: colors.bg,
+    backgroundColor: '#4ADE80', borderWidth: 2, borderColor: colors.surface,
   },
 
   tabs: { flexDirection: 'row', gap: sp(5), paddingHorizontal: sp(5), paddingVertical: sp(3) },
@@ -200,7 +206,7 @@ const st = StyleSheet.create({
   tabText: { fontSize: font.body, fontWeight: '600', color: colors.textTertiary },
   tabTextActive: { color: colors.text, fontWeight: '700' },
   tabCount: {
-    minWidth: 20, height: 20, borderRadius: 10, backgroundColor: colors.surface,
+    minWidth: 20, height: 20, borderRadius: 10, backgroundColor: '#E9E6DE',
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5,
   },
   tabCountActive: { backgroundColor: colors.accent },
@@ -212,7 +218,7 @@ const st = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: sp(3), paddingVertical: sp(2.5),
     borderBottomWidth: 1, borderBottomColor: colors.border,
   },
-  rowPressed: { backgroundColor: colors.surface },
+  rowPressed: { backgroundColor: '#ECE9E2' },
   rowBody: { flex: 1, gap: 2 },
   rowName: { fontSize: font.body, fontWeight: '700', color: colors.text },
   rowPreview: { fontSize: font.small, color: colors.textSecondary },

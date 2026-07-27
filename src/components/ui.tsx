@@ -1,11 +1,22 @@
 import { Ionicons } from '@expo/vector-icons';
 import { ReactNode } from 'react';
 import {
-  ActivityIndicator, Pressable, StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle,
+  ActivityIndicator, Pressable, StyleSheet, Text, TextInput, TextInputProps, TextStyle, View, ViewStyle,
 } from 'react-native';
-import { colors, font, radius, sp } from '../theme';
+import { colors, font, radius, serif, shadow, sp } from '../theme';
 
 // Shared primitives — every screen builds from these so the app reads as one system.
+
+// Serif display type (Playfair, uppercase) — the Rentra signature.
+export function Display({ children, size = 24, style }: {
+  children: ReactNode; size?: number; style?: TextStyle;
+}) {
+  return (
+    <Text style={[s.display, { fontSize: size, letterSpacing: size * 0.02 }, style]}>
+      {children}
+    </Text>
+  );
+}
 
 export function ScreenHeader({ title, onBack, right }: {
   title: string; onBack?: () => void; right?: ReactNode;
@@ -17,9 +28,9 @@ export function ScreenHeader({ title, onBack, right }: {
           style={({ pressed }) => [s.backBtn, pressed && s.pressed]}>
           <Ionicons name="arrow-back" size={20} color={colors.text} />
         </Pressable>
-      ) : <View style={s.backBtn} />}
-      <Text style={s.headerTitle} numberOfLines={1}>{title}</Text>
-      <View style={s.backBtn}>{right}</View>
+      ) : <View style={s.backBtnGhost} />}
+      <Display size={18} style={s.headerTitle}>{title}</Display>
+      <View style={s.backBtnGhost}>{right}</View>
     </View>
   );
 }
@@ -68,53 +79,81 @@ export function Field(props: TextInputProps) {
 export function Stars({ rating, count }: { rating: number; count?: number }) {
   return (
     <View style={s.starsRow}>
-      <Ionicons name="star" size={13} color={colors.star} />
-      <Text style={s.starsText}>{rating.toFixed(1)}{count != null ? ` (${count})` : ''}</Text>
+      <Text style={s.starsValue}>{rating.toFixed(1)} ★</Text>
+      {count != null && <Text style={s.starsText}>({count})</Text>}
     </View>
   );
 }
 
-export function Empty({ text }: { text: string }) {
-  return <Text style={s.empty}>{text}</Text>;
+export function Empty({ text, title, icon }: {
+  text: string; title?: string; icon?: keyof typeof Ionicons.glyphMap;
+}) {
+  if (!title) return <Text style={s.empty}>{text}</Text>;
+  return (
+    <View style={s.emptyWrap}>
+      <View style={s.emptyCircle}>
+        <Ionicons name={icon ?? 'calendar-outline'} size={34} color={colors.textTertiary} />
+      </View>
+      <Display size={19} style={s.emptyTitle}>{title}</Display>
+      <Text style={s.emptyText}>{text}</Text>
+    </View>
+  );
 }
 
 // list content bottom inset so nothing hides behind the floating tab bar
 export const TAB_BAR_INSET = 104;
 
 const s = StyleSheet.create({
+  display: { fontFamily: serif, color: colors.text, textTransform: 'uppercase' },
+
   header: { flexDirection: 'row', alignItems: 'center', paddingBottom: sp(3), gap: sp(2) },
   backBtn: {
     width: 40, height: 40, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg,
+    backgroundColor: colors.bg, ...shadow,
   },
-  headerTitle: { flex: 1, textAlign: 'center', fontSize: font.h2, fontWeight: '700', color: colors.text },
+  backBtnGhost: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  headerTitle: { flex: 1, textAlign: 'center' },
   card: {
-    backgroundColor: colors.bg, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border,
-    padding: sp(4), gap: sp(1),
+    backgroundColor: colors.bg, borderRadius: radius.lg, padding: sp(4), gap: sp(1), ...shadow,
   },
   pill: {
-    minHeight: 48, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center',
+    minHeight: 52, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center',
     paddingHorizontal: sp(6),
   },
-  pill_primary: { backgroundColor: colors.accent },
-  pill_secondary: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+  pill_primary: { backgroundColor: colors.ink },
+  pill_secondary: { backgroundColor: colors.bg, borderWidth: 1.5, borderColor: colors.border },
   pill_danger: { backgroundColor: colors.danger },
-  pillText: { color: colors.onAccent, fontSize: font.body, fontWeight: '700' },
-  pillTextSecondary: { color: colors.text },
-  chip: {
-    paddingVertical: sp(2), paddingHorizontal: sp(4), borderRadius: radius.pill,
-    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+  pillText: {
+    color: colors.onAccent, fontSize: font.small, fontWeight: '700',
+    textTransform: 'uppercase', letterSpacing: 1.2,
   },
-  chipActive: { backgroundColor: colors.accentSoft, borderColor: colors.accent },
-  chipText: { color: colors.textSecondary, fontSize: font.small, fontWeight: '600' },
-  chipTextActive: { color: colors.accent },
+  pillTextSecondary: { color: '#5C5C58' },
+  chip: {
+    paddingVertical: sp(2.5), paddingHorizontal: sp(4.5), borderRadius: radius.pill,
+    backgroundColor: colors.bg, ...shadow,
+  },
+  chipActive: { backgroundColor: colors.ink },
+  chipText: { color: '#5C5C58', fontSize: font.small, fontWeight: '600' },
+  chipTextActive: { color: colors.onAccent },
   field: {
-    backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
-    paddingHorizontal: sp(4), minHeight: 48, fontSize: font.body, color: colors.text,
+    backgroundColor: colors.bg, borderRadius: radius.md,
+    paddingHorizontal: sp(4.5), minHeight: 50, fontSize: font.body, color: colors.text,
+    ...shadow,
   },
   starsRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  starsValue: { color: colors.text, fontSize: font.small, fontWeight: '700' },
   starsText: { color: colors.textSecondary, fontSize: font.small, fontWeight: '600' },
   empty: { textAlign: 'center', color: colors.textTertiary, marginVertical: sp(6), fontSize: font.body },
+  emptyWrap: { alignItems: 'center', gap: sp(4), paddingVertical: sp(14) },
+  emptyCircle: {
+    width: 96, height: 96, borderRadius: radius.pill, borderWidth: 1.5, borderStyle: 'dashed',
+    borderColor: '#C9C5BB', alignItems: 'center', justifyContent: 'center',
+  },
+  emptyTitle: { textAlign: 'center' },
+  emptyText: {
+    textAlign: 'center', fontSize: font.small, lineHeight: 19,
+    color: colors.textSecondary, maxWidth: 250, marginTop: -sp(2),
+  },
   pressed: { opacity: 0.7 },
   disabled: { opacity: 0.45 },
 });

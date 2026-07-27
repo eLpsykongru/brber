@@ -3,10 +3,11 @@ import { useEffect, useState } from 'react';
 import {
   Alert, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
-import { Field, Stars, TAB_BAR_INSET } from '../components/ui';
+import { Display, Field, Stars, TAB_BAR_INSET } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, sp } from '../theme';
+import { colors, font, radius, serif, shadow, sp } from '../theme';
+import QueueScreen, { DayQueueRow, minutesUntil, QUEUE_POLL_MS } from './QueueScreen';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
 
 // category chips filter by service-name keywords — no category column needed
@@ -46,15 +47,66 @@ function avgOf(reviews: { rating: number }[]): number | null {
   return reviews.reduce((s, r) => s + r.rating, 0) / reviews.length;
 }
 
+function greeting() {
+  const h = new Date().getHours();
+  return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+}
+
+type MyBooking = {
+  id: string;
+  starts_at: string;
+  barbers: { id: string; profiles: { full_name: string | null } | null; salon: { name: string } | null } | null;
+};
+
 // ponytail: single-city launch → list all salons; distance sort/search
 // arrives with the Google Places + lat/lng work
-export default function DiscoverScreen({ onChromeHidden }: {
-  onChromeHidden?: (hidden: boolean) => void;
+export default function DiscoverScreen({ name, customerId, onChromeHidden, onExplore, onBookings }: {
+  name?: string | null; customerId?: string;
+  onChromeHidden?: (hidden: boolean) => void; onExplore?: () => void; onBookings?: () => void;
 }) {
   const [salons, setSalons] = useState<SalonCard[]>([]);
   const [salon, setSalon] = useState<SalonCard | null>(null);
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string | null>(null);
+  const [booking, setBooking] = useState<MyBooking | null>(null);
+  const [dayQueue, setDayQueue] = useState<DayQueueRow[]>([]);
+  const [queueOpen, setQueueOpen] = useState(false);
+
+  // QUEUE MODE — the live ticket is your next *confirmed* booking today; it pops
+  // up once the barber confirms and shows your spot in his day. Polled: other
+  // customers' booking rows are RLS-hidden, so realtime can't signal their moves.
+  useEffect(() => {
+    if (!customerId) return;
+    let alive = true;
+    async function loadTicket() {
+      const d = new Date();
+      const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const dayEnd = new Date(dayStart.getTime() + 86_400_000);
+      const { data } = await supabase.from('bookings')
+        .select('id, starts_at, barbers(id, profiles(full_name), salon:salons!salon_id(name))')
+        .eq('customer_id', customerId!)
+        .eq('status', 'confirmed')
+        .is('completed_at', null)
+        .gte('starts_at', dayStart.toISOString())
+        .lt('starts_at', dayEnd.toISOString())
+        .gte('ends_at', new Date().toISOString())
+        .order('starts_at')
+        .limit(1)
+        .maybeSingle();
+      if (!alive) return;
+      const b = data as unknown as MyBooking | null;
+      setBooking(b);
+      if (b?.barbers?.id) {
+        const { data: q } = await supabase.rpc('barber_day_queue', { p_barber: b.barbers.id });
+        if (alive) setDayQueue((q as DayQueueRow[]) ?? []);
+      } else {
+        setDayQueue([]);
+      }
+    }
+    loadTicket();
+    const t = setInterval(loadTicket, QUEUE_POLL_MS);
+    return () => { alive = false; clearInterval(t); };
+  }, [customerId]);
 
   useEffect(() => {
     // barbers!salon_id: disambiguates from the salons.owner_id relationship
@@ -92,6 +144,12 @@ export default function DiscoverScreen({ onChromeHidden }: {
     .sort((a, b) => b.avg - a.avg)
     .slice(0, 5);
 
+  if (queueOpen && booking?.barbers?.id) {
+    return <QueueScreen barberId={booking.barbers.id} myBookingId={booking.id}
+      barberLine={`${(booking.barbers.profiles?.full_name ?? 'Barber').split(' ')[0]} · ${booking.barbers.salon?.name ?? 'Salon'}`}
+      onBack={() => { setQueueOpen(false); onChromeHidden?.(false); }}
+      onBookings={onBookings} />;
+  }
   if (salon) {
     return <SalonDetailScreen salon={salon} onBack={() => open(null)} onChromeHidden={onChromeHidden} />;
   }
@@ -99,13 +157,28 @@ export default function DiscoverScreen({ onChromeHidden }: {
   const header = (
     <View style={styles.homeHeader}>
       {/* ponytail: single-city launch — location is a label, not a picker */}
-      <Text style={styles.locationLabel}>Location</Text>
-      <View style={styles.locationRow}>
-        <Ionicons name="location" size={16} color={colors.accent} />
-        <Text style={styles.locationText}>Tangier, Morocco</Text>
+      <View style={styles.locationHead}>
+        <View>
+          <Text style={styles.locationLabel}>Location</Text>
+          <View style={styles.locationRow}>
+            <Ionicons name="location" size={16} color={colors.accent} />
+            <Text style={styles.locationText}>Tangier, Morocco</Text>
+          </View>
+        </View>
+        {/* TODO(backlog): notifications land with the push increment */}
+        <TouchableOpacity style={styles.bellBtn} accessibilityLabel="Notifications"
+          onPress={() => Alert.alert('Notifications', 'Coming with push — see BACKLOG.md')}>
+          <Ionicons name="notifications-outline" size={18} color={colors.text} />
+          <View style={styles.bellDot} />
+        </TouchableOpacity>
       </View>
 
-      <Field placeholder="Search salon or barber…" value={query} onChangeText={setQuery} />
+      <Display size={32} style={styles.greeting}>
+        {greeting()},{'\n'}{(name ?? 'there').split(' ')[0]}
+      </Display>
+
+      <Field placeholder="Search salon or barber…" value={query} onChangeText={setQuery}
+        style={styles.searchPill} />
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.catStrip}>
         <View style={styles.catRow}>
@@ -124,9 +197,57 @@ export default function DiscoverScreen({ onChromeHidden }: {
         </View>
       </ScrollView>
 
+      {/* live queue ticket (design 1a) — pops up once the barber confirms today's booking */}
+      {booking && (() => {
+        const mine = dayQueue.find((r) => r.booking_id === booking.id);
+        const ticketNo = dayQueue.findIndex((r) => r.booking_id === booking.id) + 1;
+        const ahead = dayQueue.filter((r) => r.booking_id !== booking.id && r.stage !== 'done'
+          && new Date(r.starts_at).getTime() < new Date(booking.starts_at).getTime());
+        const etaMin = minutesUntil(booking.starts_at);
+        const slot = new Date(booking.starts_at).toTimeString().slice(0, 5);
+        const inChair = mine?.stage === 'in_chair';
+        const initials = (booking.barbers?.profiles?.full_name ?? 'B')
+          .split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+        return (
+          <TouchableOpacity activeOpacity={0.9} style={styles.qCard}
+            onPress={() => { setQueueOpen(true); onChromeHidden?.(true); }}>
+            <View style={styles.qTop}>
+              <View style={styles.qLiveRow}>
+                <View style={styles.qLiveDot} />
+                <Text style={styles.qLiveLabel}>LIVE QUEUE</Text>
+              </View>
+              <View style={styles.qTicketBadge}>
+                <Text style={styles.qTicketBadgeText}>TICKET Nº {String(Math.max(ticketNo, 1)).padStart(2, '0')}</Text>
+              </View>
+            </View>
+            <Text style={styles.qBig}>{inChair ? "You're up" : `${ahead.length} ahead`}</Text>
+            <Text style={styles.qSub}>
+              {inChair ? 'Take a seat — the chair is yours' : `Estimated wait ~${etaMin} min · your slot ${slot}`}
+            </Text>
+            <View style={styles.qProgress}>
+              {[0, 1, 2, 3].map((i) => (
+                <View key={i} style={[styles.qSeg, i < 4 - Math.min(ahead.length, 3) && styles.qSegOn]} />
+              ))}
+            </View>
+            <View style={styles.qFoot}>
+              <View style={styles.qAvatar}><Text style={styles.qAvatarText}>{initials}</Text></View>
+              <Text style={styles.qFootText}>
+                {(booking.barbers?.profiles?.full_name ?? 'Barber').split(' ')[0]} · {booking.barbers?.salon?.name ?? 'Salon'}
+              </Text>
+              <View style={styles.qArrow}>
+                <Ionicons name="arrow-up" size={13} color={colors.accent} style={styles.qArrowIcon} />
+              </View>
+            </View>
+          </TouchableOpacity>
+        );
+      })()}
+
       {topRated.length > 0 && !query && !category && (
         <>
-          <Text style={styles.section}>Top rated salons</Text>
+          <View style={styles.sectionRow}>
+            <Text style={styles.section}>Top rated</Text>
+            {onExplore && <Text style={styles.seeAll} onPress={onExplore}>See all</Text>}
+          </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.topStrip}>
             <View style={styles.topRow}>
               {topRated.map(({ s, avg }) => (
@@ -179,39 +300,49 @@ export default function DiscoverScreen({ onChromeHidden }: {
 }
 
 const styles = StyleSheet.create({
-  tabScreen: { flex: 1, paddingTop: sp(14), paddingHorizontal: sp(5) },
+  tabScreen: { flex: 1, paddingTop: sp(14), paddingHorizontal: sp(5), backgroundColor: colors.surface },
   list: { gap: sp(3), paddingBottom: TAB_BAR_INSET },
 
   // home header
   homeHeader: { gap: sp(3), marginBottom: sp(1) },
-  locationLabel: { fontSize: font.tiny, color: colors.textTertiary },
-  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: -sp(2) },
+  locationHead: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
+  locationLabel: {
+    fontSize: 10, color: colors.textSecondary, fontWeight: '600',
+    letterSpacing: 1.5, textTransform: 'uppercase',
+  },
+  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: sp(1) },
+  bellBtn: {
+    width: 40, height: 40, borderRadius: radius.pill, backgroundColor: colors.bg,
+    alignItems: 'center', justifyContent: 'center', ...shadow,
+  },
+  bellDot: {
+    position: 'absolute', top: 9, right: 10, width: 7, height: 7,
+    borderRadius: 4, backgroundColor: colors.accent,
+  },
   locationText: { fontSize: font.body, fontWeight: '700', color: colors.text },
+  greeting: { lineHeight: 34, marginTop: sp(1) },
+  searchPill: { borderRadius: radius.pill },
   catStrip: { marginHorizontal: -sp(5) },
   catRow: { flexDirection: 'row', gap: sp(4), paddingHorizontal: sp(5) },
-  catItem: { alignItems: 'center', gap: sp(1), width: 64 },
+  catItem: { alignItems: 'center', gap: sp(1.5), width: 64 },
   catCircle: {
-    width: 56, height: 56, borderRadius: radius.pill, backgroundColor: colors.accentSoft,
-    alignItems: 'center', justifyContent: 'center',
+    width: 54, height: 54, borderRadius: radius.pill, backgroundColor: colors.bg,
+    alignItems: 'center', justifyContent: 'center', ...shadow,
   },
   catCircleActive: { backgroundColor: colors.accent },
-  catLabel: { fontSize: font.tiny, color: colors.textSecondary, fontWeight: '600' },
+  catLabel: { fontSize: font.tiny, color: '#5C5C58', fontWeight: '600' },
   catLabelActive: { color: colors.accent },
   topStrip: { marginHorizontal: -sp(5) },
   topRow: { flexDirection: 'row', gap: sp(3), paddingHorizontal: sp(5) },
   topCard: {
-    width: 190, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg,
-    backgroundColor: colors.bg, overflow: 'hidden',
+    width: 190, borderRadius: radius.lg, backgroundColor: colors.bg, overflow: 'hidden', ...shadow,
   },
   topPhoto: { width: '100%', height: 110 },
   topBody: { padding: sp(2.5), gap: 2 },
   topName: { fontSize: font.small, fontWeight: '700', color: colors.text },
   photoFallback: { backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
 
-  card: {
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg,
-    backgroundColor: colors.bg, overflow: 'hidden',
-  },
+  card: { borderRadius: radius.lg, backgroundColor: colors.bg, overflow: 'hidden', ...shadow },
   cardPhoto: { width: '100%', height: 130 },
   cardBody: { padding: sp(4), gap: sp(1) },
   cardTitle: { fontSize: font.h2, fontWeight: '700', color: colors.text },
@@ -223,14 +354,53 @@ const styles = StyleSheet.create({
   },
   meta: { color: colors.textSecondary, fontSize: font.small },
   bio: { marginTop: sp(1), color: colors.text, fontSize: font.body },
+
+  // live queue ticket card (design 1a)
+  qCard: { backgroundColor: colors.ink, borderRadius: radius.xl, padding: sp(5), gap: sp(3) },
+  qTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  qLiveRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  qLiveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#4ADE80' },
+  qLiveLabel: { fontSize: 10, letterSpacing: 1.8, fontWeight: '700', color: 'rgba(255,255,255,0.55)' },
+  qTicketBadge: {
+    backgroundColor: 'rgba(255,255,255,0.12)', borderRadius: radius.pill,
+    paddingVertical: 5, paddingHorizontal: 10,
+  },
+  qTicketBadgeText: { fontSize: 10, letterSpacing: 1.2, fontWeight: '700', color: colors.onAccent },
+  qBig: {
+    fontFamily: serif, fontSize: 40, lineHeight: 42, color: colors.onAccent,
+    textTransform: 'uppercase', letterSpacing: 0.8,
+  },
+  qSub: { fontSize: font.small, color: 'rgba(255,255,255,0.6)', marginTop: -sp(1.5) },
+  qProgress: { flexDirection: 'row', gap: 5 },
+  qSeg: { flex: 1, height: 4, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.18)' },
+  qSegOn: { backgroundColor: colors.accent },
+  qFoot: {
+    flexDirection: 'row', alignItems: 'center', gap: sp(2.5),
+    borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)', paddingTop: sp(3.5),
+  },
+  qAvatar: {
+    width: 34, height: 34, borderRadius: radius.pill, backgroundColor: 'rgba(255,255,255,0.12)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  qAvatarText: { fontSize: font.tiny, fontWeight: '700', color: colors.onAccent },
+  qFootText: { flex: 1, fontSize: font.small, fontWeight: '600', color: colors.onAccent },
+  qArrow: {
+    width: 30, height: 30, borderRadius: radius.pill, backgroundColor: 'rgba(232,68,46,0.16)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  qArrowIcon: { transform: [{ rotate: '45deg' }] },
   empty: { textAlign: 'center', color: colors.textTertiary, marginVertical: sp(3) },
   detail: { gap: sp(2), paddingBottom: TAB_BAR_INSET },
-  section: { fontSize: font.body, fontWeight: '700', marginTop: sp(3), color: colors.text },
+  section: {
+    fontSize: font.tiny, fontWeight: '700', marginTop: sp(3), color: colors.textSecondary,
+    letterSpacing: 1.8, textTransform: 'uppercase',
+  },
+  sectionRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
+  seeAll: { fontSize: font.small, fontWeight: '600', color: colors.accent },
   grow: { flex: 1 },
   barberRow: {
     flexDirection: 'row', alignItems: 'center', gap: sp(2),
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: sp(3.5),
-    backgroundColor: colors.bg,
+    borderRadius: radius.lg, padding: sp(3.5), backgroundColor: colors.bg, ...shadow,
   },
   barberName: { fontSize: font.body, fontWeight: '700', color: colors.text },
 });

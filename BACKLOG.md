@@ -210,6 +210,22 @@ Still open:
 - **Chat search** — search icon filters the conversation list (basic filter is live;
   full-text over message bodies is TODO).
 
+## Sterncut auth & onboarding  → `AuthScreen.tsx`, `IntroScreen.tsx`, `OtpScreen.tsx` (2026-07-22)
+Customer design doc (claude.ai/design "Customer App") implemented: app renamed
+**Sterncut** (app.json name; slug stays `brber`), first-run intro carousel, welcome
+with social sign-in, email sign-in, register. Email/password is the real rail.
+- **Google / Apple sign-in** — buttons alert "coming soon". Needs providers
+  configured in the Supabase dashboard + `expo-auth-session` deep link. Do NOT
+  fake it with a webview.
+- **Phone OTP** (`OtpScreen.tsx`) — full UI, NOT wired into register: Supabase
+  phone OTP needs an SMS provider (Twilio) first. Register keeps email/password;
+  the "we'll text a code" design copy was softened until this is real.
+- **Forgot password** — sends the Supabase reset email; no in-app deep-link
+  reset flow yet (link lands on the site URL).
+- **Register keeps a discreet "Join as a barber" link** — the design dropped the
+  role picker (customer-only doc) but barbers still need to sign up in-app until
+  the `brber.ma` web surface (adoption bet #1) exists.
+
 ## Placeholder screens (UI built, not wired to backend)
 These exist as visual shells to implement later:
 - **WalletScreen** — REAL 2026-07-19 (0022): balance + transactions read the
@@ -271,8 +287,32 @@ fights the culture. Queue mode *is* the culture minus the bench: client takes a
 virtual ticket, sees "3 ahead, ~40 min"; barber sees the queue on his phone.
 Works with **zero payment rail**. No competitor (Booksy/Fresha clones) has this.
 **Trigger:** right after bookings are solid — before packages, before maps.
-Needs: `queue_tickets (barber_id, customer_id, joined_at, position, status)` +
-Realtime for live position; ETA = sum of avg service durations ahead of you.
+**STARTED 2026-07-22 (0029) — real, and simpler than the original sketch.**
+DECIDED: the queue is **not a separate rail** — it's a live view over the
+barber's confirmed day. Customer books → barber confirms → the live ticket card
+pops up on Home (design 1a) for today's confirmed booking, opening the full
+queue view (`QueueScreen.tsx`, design 1b). "Who's ahead" = the barber's
+confirmed bookings today (walk-ins the barber Quick-adds are bookings, so they
+slot in automatically); "in the chair" = `started_at` set (0018 lifecycle:
+Confirm → Check in → Start → Complete — the barber already runs the queue from
+his dashboard, no new barber UI). Backend = one RPC, `barber_day_queue(barber)`
+(0029): today's confirmed bookings with server-side-trimmed names ("Mehdi K."),
+gated to people who are themselves in that barber's day (or the barber).
+Ticket Nº = position in the day's book. The first-cut `queue_tickets` table was
+dropped in the same migration (0029 is idempotent over both states).
+Still open:
+- **Polling, not Realtime** — other customers' booking rows are RLS-hidden, so
+  their change events never reach a subscriber; card + screen poll every 20s
+  (`QUEUE_POLL_MS`). Realtime broadcast (or a push ping) when it matters.
+- **Push ping when you're next** — the "we'll notify you" line; lands with the
+  push increment. Until then positions update only while the app is open.
+- **ETA = minutes until your slot** — honest for appointments, but doesn't model
+  the barber running late. Shift to sum-of-remaining-durations-ahead when
+  lateness data exists (started_at vs starts_at gives it for free).
+- **Pure walk-in ticket (no appointment)** — the dropped self-join rail; re-add
+  as "join today's queue" *creating a walk-in booking at the end of the day's
+  book* if barbers ask for bench-less walk-ins from the app.
+- **Salon-level (multi-chair) queue** — later, with salon management.
 
 ### Payments — phased, since Stripe is out (see 0005_no_deposits)
 - **Phase 1 (now): no money through us.** Pay at shop. Fight no-shows with

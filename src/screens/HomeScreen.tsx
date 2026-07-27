@@ -84,7 +84,9 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
     else if (tab === 'clients') content = <ClientsScreen barberId={barber.id} onChromeHidden={setChromeHidden} />;
     else content = <AgentWalletScreen barberId={barber.id} />; // wallet tab exists for owners only
   } else {
-    if (tab === 'home') content = <DiscoverScreen onChromeHidden={setChromeHidden} />;
+    if (tab === 'home') content = <DiscoverScreen name={profile.full_name} customerId={profile.id}
+      onChromeHidden={setChromeHidden} onExplore={() => setTab('explore')}
+      onBookings={() => { setChromeHidden(false); setTab('bookings'); }} />;
     else if (tab === 'explore') content = <ExploreScreen onChromeHidden={setChromeHidden} />;
     else if (tab === 'bookings') content = <MyBookingsScreen customerId={profile.id} onChromeHidden={setChromeHidden} />;
     else if (tab === 'chats') content = <ChatsScreen customerId={profile.id} onChromeHidden={setChromeHidden} />;
@@ -108,5 +110,5 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
+  screen: { flex: 1, backgroundColor: colors.surface },
 });

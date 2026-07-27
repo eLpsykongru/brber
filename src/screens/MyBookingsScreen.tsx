@@ -1,10 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Empty, Field, PillButton, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
+import { Display, Empty, Field, PillButton, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, sp } from '../theme';
+import { colors, font, radius, serif, shadow, sp } from '../theme';
 
 type Row = {
   id: string;
@@ -132,7 +132,10 @@ export default function MyBookingsScreen({ customerId, onChromeHidden }: {
         data={filtered}
         keyExtractor={(r) => r.id}
         contentContainerStyle={s.list}
-        ListEmptyComponent={<Empty text={`No ${filter} bookings.`} />}
+        ListEmptyComponent={
+          <Empty icon="calendar-outline" title={`No ${filter} bookings`}
+            text="When you book a chair, it shows up here with its ticket and receipt." />
+        }
         renderItem={({ item }) => {
           const upcoming = new Date(item.starts_at).getTime() > now;
           const live = ['pending', 'confirmed'].includes(item.status);
@@ -236,42 +239,120 @@ function Receipt({ booking, onBack }: { booking: Row; onBack: () => void }) {
   );
 }
 
+const RATING_WORD = ['', 'Poor', 'Okay', 'Good', 'Very good', 'Excellent'];
+const REVIEW_TAGS = ['Clean fade', 'On time', 'Friendly', 'Great value', 'Clean shop'];
+
+// Post-service review (design 4a rate + 4b thank-you), from the Completed tab's Rate action.
 function RateForm({ booking, onDone, onBack }: { booking: Row; onDone: () => void; onBack: () => void }) {
   const [rating, setRating] = useState(0);
+  const [tags, setTags] = useState<Set<string>>(new Set());
   const [comment, setComment] = useState('');
   const [busy, setBusy] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const name = booking.barbers?.profiles?.full_name ?? 'your barber';
+  const firstName = name.split(' ')[0];
+  const initials = name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+  const d = new Date(booking.starts_at);
 
   async function submit() {
     if (rating === 0) return Alert.alert('Pick a rating', 'Tap the stars first.');
     setBusy(true);
+    // ponytail: tags fold into the comment — no tags column until reviews need filtering by tag
+    const body = [[...tags].join(' · '), comment.trim()].filter(Boolean).join(' — ');
     const { error } = await supabase.from('reviews')
-      .insert({ booking_id: booking.id, rating, comment: comment.trim() || null });
+      .insert({ booking_id: booking.id, rating, comment: body || null });
     setBusy(false);
     if (error) Alert.alert('Could not submit', error.message);
-    else onDone();
+    else setSent(true);
+  }
+
+  if (sent) {
+    return (
+      <View style={[s.screen, s.sentScreen]}>
+        <View style={s.sentBadge}>
+          <Ionicons name="star" size={30} color={colors.accent} />
+        </View>
+        <Display size={28}>Shukran!</Display>
+        <Text style={s.sentSub}>
+          Your {rating}-star review for {firstName} is live. Reviews help the best barbers in Tangier get found.
+        </Text>
+        <View style={s.sentCard}>
+          <View style={s.rateAvatar}><Text style={s.rateAvatarText}>{initials}</Text></View>
+          <View style={s.grow}>
+            <Text style={s.rateName}>{name}</Text>
+            <Text style={s.meta} numberOfLines={1}>
+              {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}{comment.trim() ? ` · “${comment.trim()}”` : ''}
+            </Text>
+          </View>
+        </View>
+        <View style={s.sentCtas}>
+          <PillButton title="Done" onPress={onDone} />
+          <Text style={[s.skip, s.sentLink]} onPress={onDone}>Back to bookings</Text>
+        </View>
+      </View>
+    );
   }
 
   return (
-    <View style={s.screen}>
-      <ScreenHeader title={`Rate ${booking.barbers?.profiles?.full_name ?? 'your barber'}`} onBack={onBack} />
+    <ScrollView style={s.screen} contentContainerStyle={s.rateContent} keyboardShouldPersistTaps="handled">
+      <ScreenHeader title="Leave a review" onBack={onBack}
+        right={<Text style={s.skip} onPress={onBack}>Skip</Text>} />
+
+      <View style={s.rateBooking}>
+        <View style={s.rateAvatar}><Text style={s.rateAvatarText}>{initials}</Text></View>
+        <View style={s.grow}>
+          <Text style={s.rateName}>{name}</Text>
+          <Text style={s.meta} numberOfLines={1}>
+            {booking.services?.name ?? 'Service'} · {booking.barbers?.salon?.name ?? 'Salon'}
+          </Text>
+          <Text style={s.meta}>
+            {fmtDate(booking.starts_at)} · {(booking.price_cents / 100).toFixed(0)} DH
+          </Text>
+        </View>
+        <View style={s.statusBadge}><Text style={s.statusBadgeText}>Completed</Text></View>
+      </View>
+
+      <View style={s.rateHead}>
+        <Display size={26} style={s.rateTitle}>How was{'\n'}the cut?</Display>
+        <Text style={s.rateSub}>Tap a star to rate {firstName}</Text>
+      </View>
+
       <View style={s.stars}>
         {[1, 2, 3, 4, 5].map((n) => (
           <Pressable key={n} onPress={() => setRating(n)} hitSlop={6}
             accessibilityLabel={`${n} star${n > 1 ? 's' : ''}`}>
-            <Ionicons name={n <= rating ? 'star' : 'star-outline'} size={38}
-              color={n <= rating ? colors.star : colors.textTertiary} />
+            <Ionicons name={n <= rating ? 'star' : 'star-outline'} size={40}
+              color={n <= rating ? colors.text : colors.textTertiary} />
           </Pressable>
         ))}
       </View>
+      {rating > 0 && <Text style={s.ratingWord}>{RATING_WORD[rating]}</Text>}
+
+      <View style={s.tagRow}>
+        {REVIEW_TAGS.map((t) => {
+          const on = tags.has(t);
+          return (
+            <Pressable key={t} onPress={() => {
+              const next = new Set(tags);
+              if (on) next.delete(t); else next.add(t);
+              setTags(next);
+            }} style={[s.tag, on && s.tagOn]}>
+              <Text style={[s.tagText, on && s.tagTextOn]}>{t}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
       <Field placeholder="Anything to add? (optional)" multiline value={comment}
         onChangeText={setComment} style={s.commentField} />
       <PillButton title="Submit review" onPress={submit} loading={busy} />
-    </View>
+    </ScrollView>
   );
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, paddingTop: sp(14), paddingHorizontal: sp(5), gap: sp(3) },
+  screen: { flex: 1, paddingTop: sp(14), paddingHorizontal: sp(5), gap: sp(3), backgroundColor: colors.surface },
   tabsRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.border },
   tabBtn: { flex: 1, alignItems: 'center', paddingVertical: sp(2.5) },
   tabText: { fontSize: font.small, fontWeight: '600', color: colors.textSecondary },
@@ -282,8 +363,7 @@ const s = StyleSheet.create({
   list: { gap: sp(3), paddingBottom: TAB_BAR_INSET, paddingTop: sp(1) },
 
   card: {
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg,
-    padding: sp(4), gap: sp(3), backgroundColor: colors.bg,
+    borderRadius: radius.xl, padding: sp(4.5), gap: sp(3), backgroundColor: colors.bg, ...shadow,
   },
   cardHeadRow: { flexDirection: 'row' },
   statusBadge: {
@@ -317,13 +397,12 @@ const s = StyleSheet.create({
   // receipt
   receiptContent: { paddingBottom: sp(10) },
   receiptCard: {
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg,
-    padding: sp(5), gap: sp(2), backgroundColor: colors.bg,
+    borderRadius: radius.xl, padding: sp(5), gap: sp(2), backgroundColor: colors.bg, ...shadow,
   },
   receiptIcon: { alignSelf: 'center' },
   receiptTitle: {
-    textAlign: 'center', fontSize: font.h2, fontWeight: '700', color: colors.text,
-    textTransform: 'capitalize', marginBottom: sp(2),
+    textAlign: 'center', fontFamily: serif, fontSize: font.h2, letterSpacing: 0.5,
+    color: colors.text, textTransform: 'uppercase', marginBottom: sp(2),
   },
   receiptRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: sp(1) },
   receiptKey: { fontSize: font.small, color: colors.textSecondary },
@@ -332,7 +411,46 @@ const s = StyleSheet.create({
   receiptTotalKey: { fontSize: font.body, fontWeight: '700', color: colors.text },
   receiptTotalVal: { fontSize: font.body, fontWeight: '700', color: colors.accent },
 
-  // rate
-  stars: { flexDirection: 'row', justifyContent: 'center', gap: sp(2), marginVertical: sp(4) },
-  commentField: { minHeight: 90, textAlignVertical: 'top', paddingTop: sp(3) },
+  // rate (design 4a)
+  rateContent: { gap: sp(4), paddingBottom: sp(10) },
+  skip: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
+  rateBooking: {
+    flexDirection: 'row', alignItems: 'center', gap: sp(3.5),
+    backgroundColor: colors.bg, borderRadius: radius.xl, padding: sp(5), ...shadow,
+  },
+  rateAvatar: {
+    width: 56, height: 56, borderRadius: radius.pill, backgroundColor: colors.accentSoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  rateAvatarText: { fontSize: font.body, fontWeight: '700', color: colors.accent },
+  rateName: { fontSize: font.body, fontWeight: '700', color: colors.text },
+  rateHead: { alignItems: 'center', gap: sp(2), marginTop: sp(2) },
+  rateTitle: { textAlign: 'center', lineHeight: 30 },
+  rateSub: { fontSize: font.small, color: colors.textSecondary },
+  stars: { flexDirection: 'row', justifyContent: 'center', gap: sp(3), marginVertical: sp(1) },
+  ratingWord: { textAlign: 'center', fontSize: font.small, fontWeight: '700', color: colors.text, marginTop: -sp(2) },
+  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: sp(2), justifyContent: 'center' },
+  tag: {
+    borderRadius: radius.pill, backgroundColor: colors.bg, paddingVertical: 9, paddingHorizontal: 16, ...shadow,
+  },
+  tagOn: { backgroundColor: colors.ink },
+  tagText: { fontSize: 12, fontWeight: '600', color: '#5C5C58' },
+  tagTextOn: { color: colors.onAccent },
+  commentField: { minHeight: 96, textAlignVertical: 'top', paddingTop: sp(3) },
+
+  // review sent (design 4b)
+  sentScreen: { justifyContent: 'center', alignItems: 'center', paddingBottom: sp(20), gap: sp(4) },
+  sentBadge: {
+    width: 72, height: 72, borderRadius: radius.pill, backgroundColor: colors.accentSoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  sentSub: {
+    textAlign: 'center', fontSize: font.small, lineHeight: 20, color: colors.textSecondary, maxWidth: 280,
+  },
+  sentCard: {
+    flexDirection: 'row', alignItems: 'center', gap: sp(3), alignSelf: 'stretch',
+    backgroundColor: colors.bg, borderRadius: radius.lg, padding: sp(4.5), ...shadow,
+  },
+  sentCtas: { alignSelf: 'stretch', gap: sp(4) },
+  sentLink: { textAlign: 'center', color: colors.accent },
 });

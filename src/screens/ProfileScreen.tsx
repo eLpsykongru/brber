@@ -6,7 +6,7 @@ import LocationPicker from '../components/LocationPicker';
 import { Card, Chip, Field, PillButton, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
 import type { LatLng } from '../lib/geo';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, sp } from '../theme';
+import { colors, font, radius, shadow, sp } from '../theme';
 import type { Barber, Profile } from '../types';
 import { ActivityIndicator } from 'react-native';
 import CouponsScreen from './CouponsScreen';
@@ -146,6 +146,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
           </View>
         </Pressable>
         <Text style={s.name}>{profile.full_name ?? 'Your name'}</Text>
+        {!!phone && <Text style={s.phone}>{phone}</Text>}
         {barber && (
           <Chip label={STATUS_LABEL[barber.status] ?? barber.status} active={barber.status === 'approved'} />
         )}
@@ -157,7 +158,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
             style={({ pressed }) => [s.row, pressed && s.rowPressed]}
             accessibilityRole="button" accessibilityLabel={it.label}>
             <View style={[s.rowIcon, it.danger && s.rowIconDanger]}>
-              <Ionicons name={it.icon} size={20} color={it.danger ? colors.danger : colors.text} />
+              <Ionicons name={it.icon} size={20} color={it.danger ? colors.accent : colors.text} />
             </View>
             <Text style={[s.rowLabel, it.danger && s.rowLabelDanger]}>{it.label}</Text>
             {!it.danger && <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />}
@@ -285,7 +286,7 @@ function EditProfile({ profile, barber, phone, onDone, onBack }: {
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, paddingTop: sp(14) },
+  screen: { flex: 1, paddingTop: sp(14), backgroundColor: colors.surface },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { paddingHorizontal: sp(5), gap: sp(4), paddingBottom: TAB_BAR_INSET },
   pressed: { opacity: 0.7 },
@@ -296,24 +297,28 @@ const s = StyleSheet.create({
   avatarText: { fontSize: 30, fontWeight: '700', color: colors.accent },
   editBadge: {
     position: 'absolute', bottom: 0, right: 0, width: 28, height: 28, borderRadius: radius.pill,
-    backgroundColor: colors.tabActive, alignItems: 'center', justifyContent: 'center',
-    borderWidth: 2, borderColor: colors.bg,
+    backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 3, borderColor: colors.surface,
   },
   name: { fontSize: font.h2, fontWeight: '700', color: colors.text, marginTop: sp(1) },
+  phone: { fontSize: font.small, color: colors.textSecondary, marginTop: -sp(1) },
 
-  menu: { gap: 2 },
-  row: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(3), paddingVertical: sp(3),
-    borderBottomWidth: 1, borderBottomColor: colors.border,
+  menu: {
+    backgroundColor: colors.bg, borderRadius: radius.xl, paddingHorizontal: sp(4.5),
+    paddingVertical: sp(1.5), ...shadow,
   },
-  rowPressed: { backgroundColor: colors.surface },
+  row: {
+    flexDirection: 'row', alignItems: 'center', gap: sp(3.5), paddingVertical: sp(3.25),
+    borderBottomWidth: 1, borderBottomColor: '#EFECE4',
+  },
+  rowPressed: { opacity: 0.7 },
   rowIcon: {
-    width: 40, height: 40, borderRadius: radius.pill, backgroundColor: colors.surface,
+    width: 38, height: 38, borderRadius: radius.pill, backgroundColor: colors.surface,
     alignItems: 'center', justifyContent: 'center',
   },
   rowIconDanger: { backgroundColor: colors.accentSoft },
   rowLabel: { flex: 1, fontSize: font.body, fontWeight: '600', color: colors.text },
-  rowLabelDanger: { color: colors.danger },
+  rowLabelDanger: { color: colors.accent },
 
   label: { fontSize: font.small, fontWeight: '600', color: colors.textSecondary, marginTop: sp(2) },
   saveRow: { marginTop: sp(3) },

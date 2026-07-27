@@ -6,7 +6,7 @@ import {
 import { Empty, Field, PillButton, ScreenHeader, Stars } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, sp } from '../theme';
+import { colors, font, radius, serif, shadow, sp } from '../theme';
 import type { Service, Specialist } from '../types';
 import ChatScreen from './ChatScreen';
 
@@ -158,7 +158,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
   }, [barber.id]);
 
   function share() {
-    Share.share({ message: `${name} — ${barber.specialty ?? 'Barber'} at ${salonName}. Book on brber!` });
+    Share.share({ message: `${name} — ${barber.specialty ?? 'Barber'} at ${salonName}. Book on Sterncut!` });
   }
 
   async function openChat() {
@@ -306,11 +306,11 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
     .map((label, i) => ({ label, w: windows.find((w) => w.weekday === i) }))
     .filter((x) => x.w);
 
-  const stats: { icon: keyof typeof Ionicons.glyphMap; value: string; label: string }[] = [
-    { icon: 'people-outline', value: customerCount != null ? String(customerCount) : '–', label: 'Customers' },
-    { icon: 'briefcase-outline', value: barber.years_experience != null ? `${barber.years_experience}+` : '–', label: 'Years Exp' },
-    { icon: 'star-outline', value: avg != null ? avg.toFixed(1) : '–', label: 'Rating' },
-    { icon: 'chatbubble-outline', value: String(barber.reviews.length), label: 'Reviews' },
+  const stats: { value: string; unit: string; label: string }[] = [
+    { value: customerCount != null ? String(customerCount) : '–', unit: 'clients', label: 'Customers' },
+    { value: barber.years_experience != null ? `${barber.years_experience}+` : '–', unit: 'yrs', label: 'Experience' },
+    { value: avg != null ? avg.toFixed(1) : '–', unit: '★', label: 'Rating' },
+    { value: String(barber.reviews.length), unit: 'total', label: 'Reviews' },
   ];
 
   return (
@@ -348,17 +348,20 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
           </View>
         </View>
 
-        <View style={s.divider} />
-
-        {/* stats row */}
+        {/* Rentra stat grid (design 1g) — 2×2 white cards, accent arrow chip */}
         <View style={s.statsRow}>
           {stats.map((st) => (
             <View key={st.label} style={s.stat}>
-              <View style={s.statCircle}>
-                <Ionicons name={st.icon} size={20} color={colors.textSecondary} />
+              <Text style={s.statValue}>
+                {st.value}<Text style={s.statUnit}> {st.unit}</Text>
+              </Text>
+              <View style={s.statFoot}>
+                <Text style={s.statLabel}>{st.label}</Text>
+                <View style={s.statChip}>
+                  <Ionicons name="arrow-up" size={12} color={colors.accent}
+                    style={s.statChipIcon} />
+                </View>
               </View>
-              <Text style={s.statValue}>{st.value}</Text>
-              <Text style={s.statLabel}>{st.label}</Text>
             </View>
           ))}
         </View>
@@ -501,7 +504,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, paddingTop: sp(14), paddingHorizontal: sp(5), backgroundColor: colors.bg },
+  screen: { flex: 1, paddingTop: sp(14), paddingHorizontal: sp(5), backgroundColor: colors.surface },
   content: { paddingBottom: 120, gap: sp(3) },
   pressed: { opacity: 0.7 },
   grow: { flex: 1 },
@@ -515,18 +518,26 @@ const s = StyleSheet.create({
     borderRadius: radius.pill,
   },
   profileText: { flex: 1, gap: 2 },
-  name: { fontSize: font.title, fontWeight: '700', color: colors.text },
-  subtitle: { fontSize: font.small, color: colors.textSecondary },
-  divider: { height: 1, backgroundColor: colors.border, marginVertical: sp(1) },
-
-  statsRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  stat: { alignItems: 'center', gap: 2, flex: 1 },
-  statCircle: {
-    width: 52, height: 52, borderRadius: radius.pill, backgroundColor: colors.surface,
-    alignItems: 'center', justifyContent: 'center', marginBottom: sp(1),
+  name: {
+    fontFamily: serif, fontSize: font.title, letterSpacing: 0.5,
+    textTransform: 'uppercase', color: colors.text, lineHeight: 27,
   },
-  statValue: { fontSize: font.body, fontWeight: '700', color: colors.text },
-  statLabel: { fontSize: font.tiny, color: colors.textSecondary },
+  subtitle: { fontSize: font.small, color: colors.textSecondary },
+
+  statsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: sp(3), marginTop: sp(1) },
+  stat: {
+    width: '47.8%', backgroundColor: colors.bg, borderRadius: radius.lg,
+    padding: sp(4), gap: sp(3.5), ...shadow,
+  },
+  statValue: { fontSize: 24, fontWeight: '700', color: colors.text, fontVariant: ['tabular-nums'] },
+  statUnit: { fontSize: font.small, fontWeight: '400', color: colors.textSecondary },
+  statFoot: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
+  statLabel: { fontSize: 12, fontWeight: '500', color: colors.textSecondary },
+  statChip: {
+    width: 28, height: 28, borderRadius: radius.pill, backgroundColor: colors.accentSoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  statChipIcon: { transform: [{ rotate: '45deg' }] },
 
   tabsRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: colors.border },
   tabBtn: { flex: 1, alignItems: 'center', paddingVertical: sp(2.5) },
@@ -545,10 +556,10 @@ const s = StyleSheet.create({
 
   serviceCard: {
     flexDirection: 'row', alignItems: 'center', gap: sp(3),
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg,
-    padding: sp(4), backgroundColor: colors.bg,
+    borderWidth: 2, borderColor: 'transparent', borderRadius: radius.lg,
+    padding: sp(4), backgroundColor: colors.bg, ...shadow,
   },
-  serviceCardActive: { borderColor: colors.accent, backgroundColor: colors.accentSoft },
+  serviceCardActive: { borderColor: colors.ink },
   serviceName: { fontSize: font.body, fontWeight: '600', color: colors.text },
   servicePrice: { fontSize: font.body, fontWeight: '700', color: colors.text },
 
@@ -557,8 +568,8 @@ const s = StyleSheet.create({
   contactInitials: { fontSize: font.body, fontWeight: '700', color: colors.accent },
   contactName: { fontSize: font.body, fontWeight: '600', color: colors.text },
   roundBtn: {
-    width: 44, height: 44, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border,
-    alignItems: 'center', justifyContent: 'center',
+    width: 44, height: 44, borderRadius: radius.pill, backgroundColor: colors.bg,
+    alignItems: 'center', justifyContent: 'center', ...shadow,
   },
   hoursRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: sp(1) },
   hoursText: { fontSize: font.body, color: colors.textSecondary },
@@ -569,8 +580,7 @@ const s = StyleSheet.create({
   },
 
   reviewCard: {
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg,
-    padding: sp(3.5), gap: sp(1.5), backgroundColor: colors.bg,
+    borderRadius: radius.lg, padding: sp(3.5), gap: sp(1.5), backgroundColor: colors.bg, ...shadow,
   },
   reviewTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   reviewName: { fontSize: font.small, fontWeight: '700', color: colors.text },
@@ -583,8 +593,8 @@ const s = StyleSheet.create({
   weekLabel: { fontSize: font.small, fontWeight: '600', color: colors.textSecondary },
   weekNav: { flexDirection: 'row', gap: sp(2) },
   navBtn: {
-    width: 34, height: 34, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.border,
-    alignItems: 'center', justifyContent: 'center',
+    width: 34, height: 34, borderRadius: radius.pill, backgroundColor: colors.bg,
+    alignItems: 'center', justifyContent: 'center', ...shadow,
   },
   navDisabled: { opacity: 0.35 },
 
@@ -595,7 +605,7 @@ const s = StyleSheet.create({
   dayNum: {
     width: 38, height: 38, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center',
   },
-  dayNumActive: { backgroundColor: colors.accent },
+  dayNumActive: { backgroundColor: colors.ink },
   dayNumPast: { opacity: 0.5 },
   dayNumText: { fontSize: font.body, fontWeight: '700', color: colors.text },
   dayNumTextActive: { color: colors.onAccent },
@@ -603,11 +613,11 @@ const s = StyleSheet.create({
   slotScroll: { paddingBottom: 100 },
   slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: sp(2) },
   slot: {
-    width: '31%', alignItems: 'center', paddingVertical: sp(3), borderRadius: radius.md,
-    borderWidth: 1, borderColor: colors.border, backgroundColor: colors.bg,
+    width: '31%', alignItems: 'center', paddingVertical: sp(3), borderRadius: 14,
+    backgroundColor: colors.bg,
   },
-  slotSel: { backgroundColor: colors.accent, borderColor: colors.accent },
-  slotFull: { backgroundColor: colors.surface, borderColor: colors.surface },
+  slotSel: { backgroundColor: colors.ink },
+  slotFull: { backgroundColor: '#E9E6DE' },
   slotPast: { opacity: 0.5 },
   slotText: { color: colors.text, fontWeight: '600', fontSize: font.small },
   slotTextSel: { color: colors.onAccent },

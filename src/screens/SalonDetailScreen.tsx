@@ -8,7 +8,7 @@ import { Empty, Field, Stars } from '../components/ui';
 import { openDirections, walkMin } from '../lib/geo';
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, sp } from '../theme';
+import { colors, font, radius, serif, shadow, shadowLg, sp } from '../theme';
 import type { Specialist } from '../types';
 import BarberDetailScreen from './BarberDetailScreen';
 
@@ -111,7 +111,7 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
               <Ionicons name="chevron-back" size={20} color={colors.text} />
             </Pressable>
             <View style={s.heroTopRight}>
-              <Pressable onPress={() => Share.share({ message: `${salon.name} on brber!` })}
+              <Pressable onPress={() => Share.share({ message: `${salon.name} on Sterncut!` })}
                 style={s.circleBtn} hitSlop={8} accessibilityLabel="Share">
                 <Ionicons name="share-social-outline" size={18} color={colors.text} />
               </Pressable>
@@ -179,7 +179,7 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
                 : Alert.alert('Direction', 'This salon has not set its map location yet.'))} />
             <Action icon="chatbubble-outline" label="Message" onPress={() => action('Message')} />
             <Action icon="paper-plane-outline" label="Share"
-              onPress={() => Share.share({ message: `${salon.name} on brber!` })} />
+              onPress={() => Share.share({ message: `${salon.name} on Sterncut!` })} />
           </View>
         </View>
 
@@ -288,11 +288,19 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
         </View>
       </ScrollView>
 
-      {/* pinned CTA */}
+      {/* pinned CTA — floating white pill: price left, ink BOOK right (design 1f) */}
       <View style={s.cta}>
+        <View style={s.grow}>
+          {prices.length > 0 && (
+            <Text style={s.ctaPrice}>
+              {(Math.min(...prices) / 100).toFixed(0)} DH
+              <Text style={s.ctaPriceUnit}> / from</Text>
+            </Text>
+          )}
+        </View>
         <Pressable onPress={() => setSheetOpen(true)}
           style={({ pressed }) => [s.bookBtn, pressed && s.pressed]}>
-          <Text style={s.bookText}>Book Appointment</Text>
+          <Text style={s.bookText}>Book</Text>
         </Pressable>
       </View>
 
@@ -312,17 +320,18 @@ function Action({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphMap
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
+  screen: { flex: 1, backgroundColor: colors.surface },
   scroll: { paddingBottom: 120 },
   pressed: { opacity: 0.7 },
+  grow: { flex: 1 },
 
-  hero: { height: 200 },
+  hero: { height: 230 },
   heroImg: { width: '100%', height: '100%' },
-  heroFallback: { backgroundColor: colors.surface },
+  heroFallback: { backgroundColor: colors.ink },
   heroTop: { ...StyleSheet.absoluteFillObject, paddingTop: sp(13), paddingHorizontal: sp(5) },
   heroTopRight: { position: 'absolute', top: sp(13), right: sp(5), flexDirection: 'row', gap: sp(2) },
   circleBtn: {
-    width: 40, height: 40, borderRadius: radius.pill, backgroundColor: colors.bg,
+    width: 40, height: 40, borderRadius: radius.pill, backgroundColor: colors.surface,
     alignItems: 'center', justifyContent: 'center',
   },
   thumbRow: { flexDirection: 'row', gap: sp(1.5), paddingHorizontal: sp(5), marginTop: sp(3) },
@@ -343,7 +352,10 @@ const s = StyleSheet.create({
     borderRadius: radius.pill, paddingVertical: 4, paddingHorizontal: sp(3),
   },
   offText: { fontSize: font.small, fontWeight: '700', color: colors.accent },
-  title: { fontSize: font.title, fontWeight: '700', color: colors.text, paddingHorizontal: sp(5), marginTop: sp(2) },
+  title: {
+    fontFamily: serif, fontSize: 28, letterSpacing: 0.6, textTransform: 'uppercase',
+    color: colors.text, paddingHorizontal: sp(5), marginTop: sp(2),
+  },
   metaGroup: { flexDirection: 'row', gap: sp(4), paddingHorizontal: sp(5), marginTop: sp(1) },
   metaLine: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: sp(5), marginTop: sp(1) },
   meta: { fontSize: font.small, color: colors.textSecondary },
@@ -354,12 +366,12 @@ const s = StyleSheet.create({
   },
   action: { alignItems: 'center', gap: sp(1.5) },
   actionCircle: {
-    width: 48, height: 48, borderRadius: radius.pill, backgroundColor: colors.surface,
-    alignItems: 'center', justifyContent: 'center',
+    width: 46, height: 46, borderRadius: radius.pill, backgroundColor: colors.bg,
+    alignItems: 'center', justifyContent: 'center', ...shadow,
   },
   actionLabel: { fontSize: font.tiny, color: colors.textSecondary, fontWeight: '600' },
 
-  tabsBarWrap: { backgroundColor: colors.bg, borderBottomWidth: 1, borderBottomColor: colors.border },
+  tabsBarWrap: { backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border },
   tabsBar: { flexDirection: 'row', paddingHorizontal: sp(5), gap: sp(5) },
   tabBtn: { paddingVertical: sp(3) },
   tabText: { fontSize: font.small, fontWeight: '600', color: colors.textSecondary },
@@ -374,15 +386,15 @@ const s = StyleSheet.create({
 
   row: {
     flexDirection: 'row', alignItems: 'center', gap: sp(3),
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: sp(4), backgroundColor: colors.bg,
+    borderRadius: radius.lg, padding: sp(4), backgroundColor: colors.bg, ...shadow,
   },
   rowName: { flex: 1, fontSize: font.body, fontWeight: '600', color: colors.text },
   rowMeta: { fontSize: font.small, color: colors.textSecondary },
 
   specialistGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: sp(3) },
   specialistCard: {
-    width: '47%', borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg,
-    padding: sp(4), alignItems: 'center', gap: 2, backgroundColor: colors.bg,
+    width: '47%', borderRadius: radius.lg,
+    padding: sp(4), alignItems: 'center', gap: 2, backgroundColor: colors.bg, ...shadow,
   },
   specialistAvatar: { width: 64, height: 64, borderRadius: radius.pill, marginBottom: sp(1) },
   avatarFallback: { backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
@@ -393,17 +405,24 @@ const s = StyleSheet.create({
   galleryPhoto: { width: '48.5%', aspectRatio: 1, borderRadius: radius.md, backgroundColor: colors.surface },
 
   reviewCard: {
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: sp(4), gap: sp(1.5), backgroundColor: colors.bg,
+    borderRadius: radius.lg, padding: sp(4), gap: sp(1.5), backgroundColor: colors.bg, ...shadow,
   },
   reviewTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
 
   cta: {
-    position: 'absolute', left: 0, right: 0, bottom: 0, padding: sp(5), paddingBottom: sp(8),
-    backgroundColor: colors.bg, borderTopWidth: 1, borderTopColor: colors.border,
+    position: 'absolute', left: sp(5), right: sp(5), bottom: sp(6.5),
+    flexDirection: 'row', alignItems: 'center', gap: sp(3),
+    backgroundColor: colors.bg, borderRadius: radius.pill,
+    padding: sp(2), paddingLeft: sp(5.5), ...shadowLg,
   },
+  ctaPrice: { fontSize: font.h2, fontWeight: '800', color: colors.text },
+  ctaPriceUnit: { fontSize: 12, fontWeight: '400', color: colors.textSecondary },
   bookBtn: {
-    minHeight: 52, borderRadius: radius.pill, backgroundColor: colors.accent,
-    alignItems: 'center', justifyContent: 'center',
+    minHeight: 52, borderRadius: radius.pill, backgroundColor: colors.ink,
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: sp(8.5),
   },
-  bookText: { color: colors.onAccent, fontSize: font.body, fontWeight: '700' },
+  bookText: {
+    color: colors.onAccent, fontSize: font.small, fontWeight: '700',
+    letterSpacing: 1, textTransform: 'uppercase',
+  },
 });

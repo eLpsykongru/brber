@@ -1,12 +1,12 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import {
-  ActivityIndicator, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View,
-} from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { daySlots, type Block, type Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, font, radius, sp } from '../theme';
+import { dark as D, inter } from '../theme';
+import { Btn, Eyebrow, Ico, Segmented, Sheet, SheetHead, T } from './dark';
 
-// Quick add (tab-bar +): walk-in now, schedule later, or book a known client.
+// 1c — Quick add (tab-bar +). A walk-in is added straight from here; "Appointment"
+// and "Pick…" hand off to the day timeline, which owns arbitrary slot placement.
 export type QuickPick = {
   mode: 'now' | 'schedule';
   name?: string;
@@ -14,12 +14,11 @@ export type QuickPick = {
   preferMin?: number; // client's usual arrival, minutes from midnight
 };
 
-type ClientRow = {
-  name: string; avatar: string | null;
-  serviceId: string | null; serviceName: string | null; preferMin: number | null;
-};
+type Service = { id: string; name: string; price_cents: number; duration_min: number };
+type Range = { starts_at: string; ends_at: string };
 
-const hm = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+const hhmm = (d: Date) => d.toTimeString().slice(0, 5);
+const dh = (cents: number) => `${Math.round(cents / 100)} DH`;
 
 export default function QuickAddSheet({ visible, barberId, onClose, onPick }: {
   visible: boolean;
@@ -27,141 +26,166 @@ export default function QuickAddSheet({ visible, barberId, onClose, onPick }: {
   onClose: () => void;
   onPick: (pick: QuickPick) => void;
 }) {
-  const [step, setStep] = useState<'menu' | 'clients'>('menu');
-  const [clients, setClients] = useState<ClientRow[] | null>(null);
+  const [services, setServices] = useState<Service[] | null>(null);
+  const [slots, setSlots] = useState<Date[]>([]);
+  const [usual, setUsual] = useState<Record<string, string>>({}); // lowercased name → service id
+  const [mode, setMode] = useState<'walkin' | 'appt'>('walkin');
+  const [at, setAt] = useState<Date | null>(null);
+  const [name, setName] = useState('');
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  useEffect(() => { if (visible) { setStep('menu'); setClients(null); } }, [visible]);
+  useEffect(() => {
+    if (!visible) return;
+    setMode('walkin'); setName(''); setPickedId(null); setAt(null); setServices(null);
+    (async () => {
+      const [svc, av, blk, book, hist] = await Promise.all([
+        supabase.from('services').select('id, name, price_cents, duration_min')
+          .eq('barber_id', barberId).eq('is_active', true).order('created_at'),
+        supabase.from('availability').select('weekday, start_min, end_min').eq('barber_id', barberId),
+        supabase.from('time_blocks').select('day, start_min, end_min').eq('barber_id', barberId),
+        supabase.from('bookings').select('starts_at, ends_at').eq('barber_id', barberId)
+          .in('status', ['pending', 'confirmed'])
+          .gte('starts_at', new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),
+        supabase.from('bookings')
+          .select('service_id, walk_in_name, customer:profiles!customer_id(full_name)')
+          .eq('barber_id', barberId).eq('status', 'confirmed')
+          .order('starts_at', { ascending: false }).limit(200),
+      ]);
+      const list = (svc.data ?? []) as Service[];
+      setServices(list);
+      setPickedId(list[0]?.id ?? null);
+      const free = daySlots(new Date(), 30, (av.data ?? []) as Window[],
+        (book.data ?? []) as Range[], [], (blk.data ?? []) as Block[])
+        .filter((sl) => sl.status === 'free').map((sl) => sl.time);
+      setSlots(free);
+      setAt(free[0] ?? null);
+      const seen: Record<string, string> = {};
+      for (const r of (hist.data ?? []) as any[]) {
+        const who = (r.walk_in_name ?? r.customer?.full_name ?? '').trim().toLowerCase();
+        if (who && r.service_id && !seen[who]) seen[who] = r.service_id; // newest wins
+      }
+      setUsual(seen);
+    })();
+  }, [visible, barberId]);
 
-  async function loadClients() {
-    setStep('clients');
-    const { data } = await supabase.from('bookings')
-      .select('customer_id, walk_in_name, starts_at, service_id, services(name), customer:profiles!customer_id(full_name, avatar_url)')
-      .eq('barber_id', barberId)
-      .in('status', ['confirmed', 'no_show'])
-      .order('starts_at', { ascending: false })
-      .limit(200);
-    // habits per client: most-booked service + median arrival time
-    type Agg = { name: string; avatar: string | null; svc: Map<string, { n: number; name: string | null }>; mins: number[] };
-    const seen = new Map<string, Agg>();
-    for (const r of (data ?? []) as any[]) {
-      const isWalkIn = r.customer_id === barberId;
-      const name = isWalkIn ? r.walk_in_name : r.customer?.full_name;
-      if (!name) continue;
-      let e = seen.get(name.toLowerCase());
-      if (!e) {
-        e = { name, avatar: isWalkIn ? null : r.customer?.avatar_url ?? null, svc: new Map(), mins: [] };
-        seen.set(name.toLowerCase(), e);
-      }
-      const d = new Date(r.starts_at);
-      e.mins.push(d.getHours() * 60 + d.getMinutes());
-      if (r.service_id) {
-        const c = e.svc.get(r.service_id) ?? { n: 0, name: r.services?.name ?? null };
-        c.n++;
-        e.svc.set(r.service_id, c);
-      }
+  const picked = services?.find((x) => x.id === pickedId) ?? null;
+  const usualId = usual[name.trim().toLowerCase()] ?? null;
+
+  async function add() {
+    if (!picked || !at) return;
+    setBusy(true);
+    const { error } = await supabase.from('bookings').insert({
+      customer_id: barberId, barber_id: barberId, service_id: picked.id,
+      starts_at: at.toISOString(), walk_in_name: name.trim() || null,
+    });
+    setBusy(false);
+    if (error) {
+      const msg = error.message.includes('no_double_booking')
+        ? 'That time overlaps another booking.' : error.message;
+      return Alert.alert('Could not add', msg);
     }
-    setClients([...seen.values()].map((e) => {
-      let serviceId: string | null = null; let serviceName: string | null = null; let best = 0;
-      // rows arrive newest-first, so ties go to the most recent service
-      for (const [id, c] of e.svc) if (c.n > best) { best = c.n; serviceId = id; serviceName = c.name; }
-      const mins = [...e.mins].sort((a, b) => a - b);
-      return { name: e.name, avatar: e.avatar, serviceId, serviceName, preferMin: mins[Math.floor(mins.length / 2)] ?? null };
-    }));
+    onPick({ mode: 'now' }); // parent closes the sheet and reloads the day
   }
 
-  const rows: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void }[] = [
-    { icon: 'person-add-outline', label: 'Walk-in — start now', onPress: () => onPick({ mode: 'now' }) },
-    { icon: 'calendar-outline', label: 'Schedule appointment', onPress: () => onPick({ mode: 'schedule' }) },
-    { icon: 'people-outline', label: 'Book existing client', onPress: loadClients },
-  ];
-
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.backdrop} onPress={onClose} />
-      <View style={s.sheet} onAccessibilityEscape={onClose}>
-        <View style={s.handle} />
-        <View style={s.head}>
-          <View style={s.grow}>
-            <Text style={s.title}>{step === 'menu' ? 'Quick add' : 'Book existing client'}</Text>
-            <Text style={s.sub}>{step === 'menu' ? 'Add to your chair schedule' : 'Their name prefills the booking'}</Text>
-          </View>
-          <Pressable onPress={step === 'menu' ? onClose : () => setStep('menu')} hitSlop={8}
-            accessibilityRole="button" accessibilityLabel={step === 'menu' ? 'Close' : 'Back'}
-            style={({ pressed }) => [s.closeBtn, pressed && s.pressed]}>
-            <Ionicons name={step === 'menu' ? 'close' : 'chevron-back'} size={18} color={D.text} />
+    <Sheet visible={visible} onClose={onClose}>
+      <SheetHead title="Quick add" onClose={onClose} left />
+
+      <Segmented
+        items={[{ key: 'walkin', label: 'Walk-in', icon: 'user' },
+          { key: 'appt', label: 'Appointment', icon: 'calendar' }]}
+        active={mode}
+        onChange={(k) => {
+          if (k === 'appt') return onPick({ mode: 'schedule' });
+          setMode('walkin');
+        }} />
+
+      <View style={{ gap: 8 }}>
+        <Eyebrow ls={1.4}>STARTS AT</Eyebrow>
+        <View style={s.chipRow}>
+          {slots.slice(0, 2).map((t, i) => {
+            const on = at?.getTime() === t.getTime();
+            return (
+              <Pressable key={t.toISOString()} onPress={() => setAt(t)} accessibilityRole="button"
+                accessibilityState={{ selected: on }}
+                style={({ pressed }) => [s.slotChip, on && s.slotChipOn, pressed && s.pressed]}>
+                <T w={on ? 'b' : 'sb'} size={13} c={on ? '#fff' : D.sub}>
+                  {i === 0 ? `Now · ${hhmm(t)}` : hhmm(t)}
+                </T>
+              </Pressable>
+            );
+          })}
+          <Pressable onPress={() => onPick({ mode: 'schedule', name: name.trim() || undefined })}
+            accessibilityRole="button" accessibilityLabel="Pick a time on the timeline"
+            style={({ pressed }) => [s.slotChip, pressed && s.pressed]}>
+            <T w="sb" size={13} c={D.sub}>Pick…</T>
           </Pressable>
         </View>
-
-        {step === 'menu' ? rows.map((r) => (
-          <Pressable key={r.label} onPress={r.onPress} accessibilityRole="button" accessibilityLabel={r.label}
-            style={({ pressed }) => [s.row, pressed && s.pressed]}>
-            <View style={s.rowIcon}><Ionicons name={r.icon} size={20} color={D.text} /></View>
-            <Text style={s.rowLabel}>{r.label}</Text>
-            <Ionicons name="chevron-forward" size={18} color={D.sub} />
-          </Pressable>
-        )) : (
-          <ScrollView style={s.clientList} showsVerticalScrollIndicator={false}>
-            {clients === null && <ActivityIndicator style={s.spinner} color={colors.accent} accessibilityLabel="Loading clients" />}
-            {clients?.length === 0 && <Text style={s.sub}>No clients yet — they appear after their first visit.</Text>}
-            {clients?.map((c) => (
-              <Pressable key={c.name}
-                onPress={() => onPick({ mode: 'schedule', name: c.name, serviceId: c.serviceId ?? undefined, preferMin: c.preferMin ?? undefined })}
-                accessibilityRole="button"
-                accessibilityLabel={`Book ${c.name}${c.serviceName ? `, usually ${c.serviceName}` : ''}${c.preferMin != null ? ` around ${hm(c.preferMin)}` : ''}`}
-                style={({ pressed }) => [s.row, pressed && s.pressed]}>
-                {c.avatar
-                  ? <Image source={{ uri: c.avatar }} style={s.avatar} />
-                  : <View style={[s.avatar, s.avatarFallback]}>
-                      <Text style={s.avatarText}>
-                        {c.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
-                      </Text>
-                    </View>}
-                <View style={s.grow}>
-                  <Text style={s.rowName}>{c.name}</Text>
-                  {(c.serviceName || c.preferMin != null) && (
-                    <Text style={s.rowHabit} numberOfLines={1}>
-                      {[c.serviceName && `Usually ${c.serviceName}`, c.preferMin != null && `~${hm(c.preferMin)}`]
-                        .filter(Boolean).join(' · ')}
-                    </Text>
-                  )}
-                </View>
-                <Ionicons name="chevron-forward" size={18} color={D.sub} />
-              </Pressable>
-            ))}
-          </ScrollView>
-        )}
       </View>
-    </Modal>
+
+      <View style={{ gap: 8 }}>
+        <Eyebrow ls={1.4}>CLIENT NAME</Eyebrow>
+        <View style={s.nameField}>
+          <Ico name="user" size={16} color={D.sub} />
+          <TextInput value={name} onChangeText={setName} style={s.nameInput}
+            placeholder="Optional — shows as Walk-in" placeholderTextColor={D.sub}
+            accessibilityLabel="Client name" />
+        </View>
+      </View>
+
+      <View style={{ gap: 9 }}>
+        <Eyebrow ls={1.4}>SERVICE · TAP TO PICK</Eyebrow>
+        {services === null && <ActivityIndicator color={D.accent} accessibilityLabel="Loading services" />}
+        {services?.length === 0 && (
+          <T size={12} c={D.sub}>No active services — add one in My services first.</T>
+        )}
+        {services?.map((svc) => {
+          const on = svc.id === pickedId;
+          return (
+            <Pressable key={svc.id} onPress={() => setPickedId(svc.id)} accessibilityRole="button"
+              accessibilityState={{ selected: on }}
+              style={({ pressed }) => [s.svcRow, on && s.svcRowOn, pressed && s.pressed]}>
+              <View style={s.grow}>
+                <T w="b" size={14}>{svc.name}</T>
+                <T size={11} c={D.sub} style={{ marginTop: 2 }}>
+                  {svc.duration_min} min{svc.id === usualId ? ' · usual for this client' : ''}
+                </T>
+              </View>
+              <T w="eb" size={15} style={s.tnum}>{dh(svc.price_cents)}</T>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      <Btn title={picked && at ? `ADD TO THE CHAIR · ${dh(picked.price_cents)}` : 'NO FREE SLOT TODAY'}
+        height={52} onPress={add}
+        style={!picked || !at || busy ? { opacity: 0.5 } : undefined} />
+    </Sheet>
   );
 }
 
 const s = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' },
-  sheet: {
-    backgroundColor: D.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg,
-    padding: sp(5), paddingBottom: sp(10), gap: sp(2), maxHeight: '75%',
-  },
-  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: D.border, marginBottom: sp(2) },
-  head: { flexDirection: 'row', alignItems: 'center', gap: sp(3), marginBottom: sp(2) },
   grow: { flex: 1 },
   pressed: { opacity: 0.7 },
-  spinner: { marginVertical: sp(6) },
-  title: { fontSize: font.h2, fontWeight: '700', color: D.text },
-  sub: { fontSize: font.small, color: D.sub, marginTop: 2 },
-  closeBtn: {
-    width: 36, height: 36, borderRadius: radius.pill, backgroundColor: D.card2,
+  tnum: { fontVariant: ['tabular-nums'] },
+
+  chipRow: { flexDirection: 'row', gap: 8 },
+  slotChip: {
+    flex: 1, height: 44, borderRadius: 14, backgroundColor: D.card2,
     alignItems: 'center', justifyContent: 'center',
   },
-  row: { flexDirection: 'row', alignItems: 'center', gap: sp(3.5), paddingVertical: sp(3) },
-  rowIcon: {
-    width: 44, height: 44, borderRadius: radius.md, backgroundColor: D.card2,
-    alignItems: 'center', justifyContent: 'center',
+  slotChipOn: { backgroundColor: D.accent },
+
+  nameField: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: D.card2,
+    borderRadius: 14, height: 48, paddingHorizontal: 16,
   },
-  rowLabel: { flex: 1, fontSize: font.body, fontWeight: '700', color: D.text },
-  rowName: { fontSize: font.body, fontWeight: '700', color: D.text },
-  rowHabit: { fontSize: font.tiny, color: D.sub, marginTop: 2 },
-  clientList: { maxHeight: 320 },
-  avatar: { width: 40, height: 40, borderRadius: radius.pill },
-  avatarFallback: { backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontSize: font.small, fontWeight: '700', color: colors.accent },
+  nameInput: { flex: 1, fontFamily: inter.r, fontSize: 14, color: D.text, padding: 0 },
+
+  svcRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: D.card,
+    borderRadius: 16, padding: 14, paddingHorizontal: 16,
+  },
+  svcRowOn: { borderWidth: 2, borderColor: D.accent },
 });

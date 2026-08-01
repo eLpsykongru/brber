@@ -4,12 +4,13 @@ import {
   Alert, Animated, Image, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native';
 import ClientSheet, { ClientRef } from '../components/ClientSheet';
+import { Ico, Serif, T } from '../components/dark';
 import SlotPicker from '../components/SlotPicker';
 import { Field, PillButton } from '../components/ui';
 import { takeLastFix } from '../lib/lastFix';
-import { Block, dayStatus, DayState, daySlots, sameDay, Window } from '../lib/slots';
+import { Block, dayStatus, daySlots, sameDay, Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, font, radius, sp } from '../theme';
+import { colors, dark as D, font, inter, radius, sp } from '../theme';
 import ChatScreen from './ChatScreen';
 
 const STEP = 30;
@@ -75,23 +76,6 @@ function RelStars({ n }: { n: number }) {
       {[1, 2, 3, 4, 5].map((i) => (
         <Ionicons key={i} name="star" size={11} color={i <= n ? colors.star : D.border} />
       ))}
-    </View>
-  );
-}
-
-function StatusBadge({ state, count }: { state: DayState; count: number }) {
-  if (state === 'closed') return null;
-  if (state === 'empty') return <View style={s.badgeHollow} />;
-  if (state === 'full') {
-    return (
-      <View style={[s.badge, { backgroundColor: colors.success }]}>
-        <Ionicons name="checkmark" size={9} color={colors.onAccent} />
-      </View>
-    );
-  }
-  return (
-    <View style={[s.badge, { backgroundColor: colors.warning }]}>
-      <Text style={s.badgeText}>{count}</Text>
     </View>
   );
 }
@@ -292,7 +276,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
   }
 
   if (chat) {
-    return <ChatScreen bookingId={chat.id} myId={barberId}
+    return <ChatScreen dark bookingId={chat.id} myId={barberId}
       title={chat.title} onBack={() => openChat(null)} />;
   }
 
@@ -328,35 +312,53 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
         <View style={s.head}>
           <Pressable onPress={onBack} hitSlop={8} accessibilityRole="button" accessibilityLabel="Back"
             style={({ pressed }) => [s.circleBtn, pressed && s.pressed]}>
-            <Ionicons name="chevron-back" size={20} color={D.text} />
+            <Ico name="chevron-left" size={16} />
           </Pressable>
-          <Text style={s.headTitle}>MY DAY</Text>
-          <View style={s.circleBtn} />
+          <Serif size={17} style={s.headTitle}>My day</Serif>
+          <Pressable onPress={() => freeTicks[0] && setAddAt(freeTicks[0])} hitSlop={8}
+            accessibilityRole="button" accessibilityLabel="Add a booking"
+            style={({ pressed }) => [s.circleBtn, pressed && s.pressed]}>
+            <Ico name="plus" size={16} />
+          </Pressable>
         </View>
 
-        {/* day strip with busyness badges */}
+        {/* day strip — a dot per day: coral when it has work, grey when it's clear */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={s.strip}>
             {strip.map((d) => {
               const st = dayStatus(d, windows, byDay.get(isoOf(d)) ?? [], daysOff, blocks, bufferMin);
               const sel = sameDay(d, selectedDay);
-              const fill = st.state === 'partial' ? s.fillPartial
-                : st.state === 'full' ? s.fillFull
-                : st.state === 'empty' ? s.fillEmpty : s.fillClosed;
-              const muted = st.state === 'closed';
+              const closed = st.state === 'closed';
+              const dot = sel ? '#fff' : closed ? 'transparent' : st.count ? D.accent : D.muted;
               return (
                 <Pressable key={d.toDateString()} onPress={() => setSelectedDay(d)}
                   accessibilityRole="button" accessibilityLabel={`${d.toDateString()}, ${st.state}${st.state === 'partial' ? `, ${st.count} booked` : ''}`}
                   accessibilityState={{ selected: sel }}
-                  style={({ pressed }) => [s.dayCell, fill, sel && s.dayCellSel, pressed && s.pressed]}>
-                  <StatusBadge state={st.state} count={st.count} />
-                  <Text style={[s.dayCellWk, muted && s.textMuted]}>{d.toDateString().slice(0, 3)}</Text>
-                  <Text style={[s.dayCellNum, muted && s.textMuted]}>{d.getDate()}</Text>
+                  style={({ pressed }) => [
+                    s.dayCell, sel && s.dayCellSel, closed && s.dayCellOff, pressed && s.pressed,
+                  ]}>
+                  <T size={10} c={sel ? 'rgba(255,255,255,0.8)' : D.sub}>
+                    {d.toDateString().slice(0, 3)}
+                  </T>
+                  <T w="b" size={14}>{String(d.getDate()).padStart(2, '0')}</T>
+                  <View style={[s.dayDot, { backgroundColor: dot }]} />
                 </Pressable>
               );
             })}
           </View>
         </ScrollView>
+
+        {/* what the day adds up to */}
+        <View style={s.summary}>
+          <T size={11} c={D.sub}>
+            {dayLive.length} booked · {freeTicks.length} free
+            {dayBlocks.length ? ` · ${dayBlocks.length} break${dayBlocks.length > 1 ? 's' : ''}` : ''}
+          </T>
+          <View style={s.grow} />
+          <T w="b" size={11} c={D.accent}>
+            {Math.round(dayLive.reduce((a, b) => a + b.price_cents, 0) / 100)} DH
+          </T>
+        </View>
 
         {/* clients of the day (first → last), tap to jump to their slot */}
         {dayLive.length > 0 && (
@@ -386,17 +388,22 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
           {!isDayOff && worksThisDay && timeline.length === 0 && <Text style={s.note}>The day is over.</Text>}
           {!isDayOff && timeline.map((item) => {
             if (item.block) {
+              const blk = item.block;
               return (
-                <View key={`blk-${item.block.id}`} style={s.slotBlock}>
-                  {glowIds.includes(item.block.id) && (
-                    <Animated.View pointerEvents="none"
-                      style={[StyleSheet.absoluteFillObject, s.glowOverlay, { opacity: glow }]} />
-                  )}
-                  <Ionicons name={item.block.day === null ? 'cafe-outline' : 'time-outline'} size={15} color={D.sub} />
-                  <Text style={s.slotBlockText}>
-                    {item.block.label ?? 'Blocked'} · {minToHHMM(item.block.start_min)}–{minToHHMM(item.block.end_min)}
-                  </Text>
-                  {glowIds.includes(item.block.id) && <Text style={s.glowTag}>updated</Text>}
+                <View key={`blk-${blk.id}`} style={s.trow}>
+                  <T w="b" size={11} c={D.sub} style={s.ttime}>{minToHHMM(blk.start_min)}</T>
+                  <View style={[s.trail, { backgroundColor: D.amber }]} />
+                  <View style={s.slotBlock}>
+                    {glowIds.includes(blk.id) && (
+                      <Animated.View pointerEvents="none"
+                        style={[StyleSheet.absoluteFillObject, s.glowOverlay, { opacity: glow }]} />
+                    )}
+                    <Ico name={blk.day === null ? 'coffee' : 'clock'} size={14} color={D.amber} />
+                    <T w="sb" size={12} c={D.amber} style={s.grow}>
+                      {blk.label ?? 'Break'} · {blk.end_min - blk.start_min} min
+                    </T>
+                    {glowIds.includes(blk.id) && <T w="b" size={10} c={D.green}>updated</T>}
+                  </View>
                 </View>
               );
             }
@@ -414,41 +421,62 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
               const overMin = inChair
                 ? Math.floor((now - new Date(b.ends_at).getTime()) / 60_000) : 0;
               const lateLabel = overMin > 0 ? `${overMin} min over` : lateMin > 0 ? `${lateMin} min late` : null;
+              const noShow = b.status === 'no_show';
+              const hot = highlightId === b.id;
+              // the rail colour is the whole status vocabulary in one 3px stripe
+              const rail = noShow ? D.red : done ? D.muted : inChair ? D.green
+                : pending ? D.amber : lateLabel ? D.red : hot ? D.accent : D.muted;
+              const isWalkIn = b.customer_id === barberId;
+              const stars = isWalkIn ? null : reliabilityOf(b.customer_id, history);
               return (
-                <Pressable key={b.id}
-                  onLayout={(e) => { rowY.current[b.id] = e.nativeEvent.layout.y; }}
-                  onPress={() => setSheetBooking(b)}
-                  accessibilityRole="button" accessibilityLabel={`${pending ? 'Request' : 'Booking'} at ${hhmm(b.starts_at)}`}
-                  style={({ pressed }) => [
-                    s.slotBooked, pending && s.slotPending,
-                    highlightId === b.id && s.slotHighlight, pressed && s.pressed,
-                  ]}>
-                  <View style={[s.slotBar,
-                    b.status === 'no_show' && s.slotBarNoShow,
-                    pending && s.slotBarPending,
-                    done && s.slotBarDone,
-                    lateLabel && s.slotBarLate]} />
-                  <View style={s.grow}>
-                    <Text style={[s.slotName, (b.status === 'no_show' || expired) && s.struck]}>
-                      {nameOf(b, barberId)}
-                    </Text>
-                    <Text style={s.slotMeta}>
-                      {hhmm(b.starts_at)}–{hhmm(b.ends_at)} · {b.services?.name ?? 'Service'}
-                      {b.status === 'no_show' ? ' · no-show' : expired ? ' · request expired' : pending ? ' · PENDING' : done ? ' · completed ✓' : inChair ? ' · in chair' : checkedIn ? ' · checked in' : ''}
+                <View key={b.id} style={s.trow}
+                  onLayout={(e) => { rowY.current[b.id] = e.nativeEvent.layout.y; }}>
+                  <T w="b" size={11} c={hot ? D.accent : D.sub} style={s.ttime}>{hhmm(b.starts_at)}</T>
+                  <View style={[s.trail, { backgroundColor: rail }]} />
+                  <Pressable onPress={() => setSheetBooking(b)} accessibilityRole="button"
+                    accessibilityLabel={`${pending ? 'Request' : 'Booking'} at ${hhmm(b.starts_at)}`}
+                    style={({ pressed }) => [
+                      s.slotBooked, hot && s.slotHighlight, done && s.slotDone, pressed && s.pressed,
+                    ]}>
+                    {hot && (
+                      <View style={s.hotHead}>
+                        <Avatar url={isWalkIn ? null : b.customer?.avatar_url} name={nameOf(b, barberId)} size={28} />
+                        <Text style={[s.slotName, s.grow]}>{nameOf(b, barberId)}</Text>
+                        {stars != null && <RelStars n={stars} />}
+                      </View>
+                    )}
+                    {!hot && (
+                      <Text style={[s.slotName, (noShow || expired || done) && s.struck]}>
+                        {nameOf(b, barberId)}
+                        {inChair ? <Text style={s.chairTag}> · IN CHAIR</Text> : null}
+                        {pending ? <Text style={s.pendTag}> · PENDING</Text> : null}
+                        {isWalkIn ? <Text style={s.walkTag}> · NO ACCOUNT</Text> : null}
+                      </Text>
+                    )}
+                    <Text style={[s.slotMeta, hot && { marginTop: 6 }]}>
+                      {b.services?.name ?? 'Service'} · {(b.price_cents / 100).toFixed(0)} DH
+                      {noShow ? <Text style={s.lateTag}> · no-show</Text>
+                        : expired ? ' · request expired'
+                        : done ? ' · completed ✓'
+                        : inChair && b.started_at ? ` · started ${hhmm(b.started_at)}`
+                        : checkedIn ? ' · checked in' : ''}
                       {lateLabel && <Text style={s.lateTag}> · {lateLabel}</Text>}
                     </Text>
-                  </View>
-                  <Text style={s.slotPrice}>{(b.price_cents / 100).toFixed(0)} DH</Text>
-                </Pressable>
+                  </Pressable>
+                </View>
               );
             }
             return (
-              <Pressable key={item.at.getTime()} onPress={() => setAddAt(item.at)}
-                accessibilityRole="button" accessibilityLabel={`Add booking at ${item.at.toTimeString().slice(0, 5)}`}
-                style={({ pressed }) => [s.slotFree, pressed && s.pressed]}>
-                <Ionicons name="add" size={16} color={colors.accent} />
-                <Text style={s.slotFreeText}>{item.at.toTimeString().slice(0, 5)}</Text>
-              </Pressable>
+              <View key={item.at.getTime()} style={s.trow}>
+                <T w="b" size={11} c={D.sub} style={s.ttime}>{item.at.toTimeString().slice(0, 5)}</T>
+                <View style={[s.trail, { backgroundColor: D.card2 }]} />
+                <Pressable onPress={() => setAddAt(item.at)} accessibilityRole="button"
+                  accessibilityLabel={`Add booking at ${item.at.toTimeString().slice(0, 5)}`}
+                  style={({ pressed }) => [s.slotFree, pressed && s.pressed]}>
+                  <Ico name="plus" size={14} color={D.sub} />
+                  <T size={12} c={D.sub}>Free — tap to add a walk-in</T>
+                </Pressable>
+              </View>
             );
           })}
         </View>
@@ -609,7 +637,7 @@ function PanelBtn({ icon, label, onPress, danger }: {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: D.bg },
-  content: { padding: sp(5), paddingTop: sp(14), gap: sp(3), paddingBottom: sp(10) },
+  content: { paddingTop: 62, paddingHorizontal: 20, gap: 13, paddingBottom: 40 },
   pressed: { opacity: 0.7 },
   toast: {
     position: 'absolute', left: sp(5), right: sp(5), bottom: sp(9),
@@ -622,41 +650,36 @@ const s = StyleSheet.create({
   grow: { flex: 1 },
   note: { color: D.sub, fontSize: font.small, paddingVertical: sp(2) },
 
-  head: { flexDirection: 'row', alignItems: 'center' },
-  headTitle: { flex: 1, textAlign: 'center', fontSize: font.h2, fontWeight: '700', color: D.text, letterSpacing: 1 },
+  head: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  headTitle: { flex: 1, textAlign: 'center' },
   circleBtn: {
-    width: 40, height: 40, borderRadius: radius.pill, backgroundColor: D.card2,
+    width: 38, height: 38, borderRadius: radius.pill, backgroundColor: D.card2,
     alignItems: 'center', justifyContent: 'center',
   },
+  summary: {
+    flexDirection: 'row', alignItems: 'center', gap: 9, backgroundColor: D.card,
+    borderRadius: 14, paddingVertical: 11, paddingHorizontal: 14,
+  },
+  trow: { flexDirection: 'row', gap: 11, alignItems: 'stretch' },
+  ttime: { width: 44, paddingTop: 14, fontVariant: ['tabular-nums'] },
+  trail: { width: 3, borderRadius: 2 },
+  hotHead: { flexDirection: 'row', alignItems: 'center', gap: 9 },
+  chairTag: { fontSize: 10, letterSpacing: 0.8, color: D.green },
+  pendTag: { fontSize: 10, letterSpacing: 0.8, color: D.amber },
+  walkTag: { fontSize: 10, letterSpacing: 0.8, color: D.sub },
 
   avatarFallback: { backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
   avatarText: { fontSize: font.small, fontWeight: '700', color: colors.accent },
   relRow: { flexDirection: 'row', gap: 1 },
 
-  strip: { flexDirection: 'row', gap: sp(2), paddingVertical: sp(1) },
+  strip: { flexDirection: 'row', gap: 7 },
   dayCell: {
-    width: 52, paddingVertical: sp(2), borderRadius: radius.md, alignItems: 'center', gap: 2,
-    borderWidth: 2, borderColor: 'transparent',
+    width: 62, paddingVertical: 9, borderRadius: 14, alignItems: 'center', gap: 5,
+    backgroundColor: D.card,
   },
-  dayCellSel: { borderColor: colors.accent },
-  fillEmpty: { backgroundColor: D.card },
-  fillPartial: { backgroundColor: 'rgba(154,107,0,0.25)' },
-  fillFull: { backgroundColor: 'rgba(30,142,79,0.28)' },
-  fillClosed: { backgroundColor: D.bg, borderColor: D.border },
-  dayCellWk: { fontSize: font.tiny, fontWeight: '600', color: D.sub },
-  dayCellNum: { fontSize: font.body, fontWeight: '700', color: D.text },
-  textMuted: { color: D.border },
-
-  badge: {
-    position: 'absolute', top: -6, right: -6, minWidth: 16, height: 16, borderRadius: 8,
-    paddingHorizontal: 3, alignItems: 'center', justifyContent: 'center',
-    borderWidth: 1.5, borderColor: D.bg,
-  },
-  badgeText: { fontSize: 9, fontWeight: '800', color: colors.onAccent },
-  badgeHollow: {
-    position: 'absolute', top: -6, right: -6, width: 14, height: 14, borderRadius: 7,
-    borderWidth: 1.5, borderColor: D.sub, backgroundColor: D.bg,
-  },
+  dayCellSel: { backgroundColor: colors.accent },
+  dayCellOff: { opacity: 0.5 },
+  dayDot: { width: 5, height: 5, borderRadius: 999 },
 
   clientRow: { flexDirection: 'row', gap: sp(3) },
   clientCard: {
@@ -667,34 +690,27 @@ const s = StyleSheet.create({
   clientName: { fontSize: font.small, fontWeight: '700', color: D.text, maxWidth: '100%' },
   clientTag: { fontSize: font.tiny, fontWeight: '600', color: D.sub },
 
-  timeline: { gap: sp(2) },
+  timeline: { gap: 9 },
   slotBooked: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(3),
-    borderRadius: radius.md, padding: sp(3), backgroundColor: D.card,
-    borderWidth: 2, borderColor: 'transparent',
+    flex: 1, borderRadius: 16, paddingVertical: 13, paddingHorizontal: 14, backgroundColor: D.card,
   },
-  slotPending: { backgroundColor: 'rgba(154,107,0,0.16)' },
-  slotHighlight: { borderColor: colors.accent },
-  slotBar: { width: 4, alignSelf: 'stretch', borderRadius: 2, backgroundColor: colors.accent },
-  slotBarNoShow: { backgroundColor: D.border },
-  slotBarPending: { backgroundColor: colors.warning },
-  slotBarDone: { backgroundColor: colors.success },
-  slotBarLate: { backgroundColor: colors.danger },
-  slotName: { fontSize: font.body, fontWeight: '700', color: D.text },
+  slotHighlight: { borderWidth: 2, borderColor: colors.accent },
+  slotDone: { opacity: 0.6 },
+  slotName: { fontFamily: inter.b, fontSize: 13, color: D.text },
   struck: { textDecorationLine: 'line-through', color: D.sub },
-  slotMeta: { fontSize: font.small, color: D.sub },
-  lateTag: { color: colors.danger, fontWeight: '700' },
+  slotMeta: { fontFamily: inter.r, fontSize: 11, color: D.sub, marginTop: 2 },
+  lateTag: { color: D.red },
   slotPrice: { fontSize: font.small, fontWeight: '700', color: D.text, fontVariant: ['tabular-nums'] },
   slotFree: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(2),
-    borderWidth: 1, borderColor: D.border, borderStyle: 'dashed', borderRadius: radius.md,
-    paddingVertical: sp(2.5), paddingHorizontal: sp(3),
+    flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8,
+    borderWidth: 1, borderColor: D.muted, borderStyle: 'dashed', borderRadius: 16,
+    paddingVertical: 12, paddingHorizontal: 14,
   },
   slotFreeText: { fontSize: font.small, fontWeight: '600', color: D.sub, fontVariant: ['tabular-nums'] },
   slotBlock: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(2),
-    borderRadius: radius.md, paddingVertical: sp(2.5), paddingHorizontal: sp(3),
-    backgroundColor: D.card2, opacity: 0.8,
+    flex: 1, flexDirection: 'row', alignItems: 'center', gap: 9,
+    borderRadius: 16, paddingVertical: 12, paddingHorizontal: 14,
+    backgroundColor: D.card,
   },
   slotBlockText: { fontSize: font.small, color: D.sub, fontWeight: '600' },
   glowOverlay: { backgroundColor: 'rgba(232,184,75,0.35)', borderRadius: radius.md },

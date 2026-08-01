@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Alert, Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View,
 } from 'react-native';
+import { Ico, Serif, T } from '../components/dark';
 import { Field, TAB_BAR_INSET } from '../components/ui';
 import { setLastFix } from '../lib/lastFix';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, radius, sp } from '../theme';
 
+const AMBER = D.amber;
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const DISPLAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Mon-first
 const STEP = 30;
@@ -171,6 +173,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
 
   // add-block sheet state
   const [sheet, setSheet] = useState<SheetKind | null>(null);
+  const [bufOpen, setBufOpen] = useState(false); // 1f shows the gap as one line; tap to tune it
   const [label, setLabel] = useState('');
   const [start, setStart] = useState('13:00');
   const [end, setEnd] = useState('13:30');
@@ -506,21 +509,179 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         {/* header */}
         <View style={s.head}>
-          <View style={s.headSide}>
-            {onBack && (
-              <Pressable onPress={onBack} hitSlop={8} accessibilityRole="button" accessibilityLabel="Back"
+          {onBack
+            ? <Pressable onPress={onBack} hitSlop={8} accessibilityRole="button" accessibilityLabel="Back"
                 style={({ pressed }) => [s.backBtn, pressed && s.pressed]}>
-                <Ionicons name="chevron-back" size={20} color={D.text} />
+                <Ico name="arrow-left" size={16} />
               </Pressable>
-            )}
-          </View>
-          <Text style={s.headTitle}>SCHEDULE</Text>
-          <Pressable onPress={save} disabled={busy} accessibilityLabel="Save"
-            style={({ pressed }) => [s.savePill, pressed && s.pressed]}>
-            <Text style={s.savePillText}>Save</Text>
-          </Pressable>
+            : <View style={s.headSide} />}
+          <Serif size={17} ls={0.16} style={s.headTitle}>Schedule</Serif>
+          <View style={s.headSide} />
         </View>
-        <View style={s.divider} />
+
+        {/* the gap in one line; the pill opens the prep/cleanup detail */}
+        <Pressable onPress={() => setBufOpen(!bufOpen)} accessibilityRole="button"
+          accessibilityState={{ expanded: bufOpen }} accessibilityLabel="Buffer between clients"
+          style={({ pressed }) => [s.bufRow, pressed && s.pressed]}>
+          <View style={s.grow}>
+            <T w="b" size={13}>Buffer between clients</T>
+            <T size={11} c={D.sub} style={{ marginTop: 2 }}>{before} min prep · {after} min cleanup</T>
+          </View>
+          <View style={s.bufPill}><T w="b" size={12}>{totalGap} min</T></View>
+        </Pressable>
+
+        {bufOpen && (
+          <View style={s.card2}>
+            <View style={s.bufHead}>
+              <View style={s.bufTitleRow}>
+                <Ionicons name="shield-outline" size={15} color={D.sub} />
+                <Text style={s.sectionLabel}>BOOKING BUFFERS</Text>
+              </View>
+              <Pressable onPress={() => { setLinkBoth(!linkBoth); if (!linkBoth) setAfter(before); }}
+                accessibilityLabel="Link both buffers" accessibilityState={{ checked: linkBoth }}
+                style={({ pressed }) => [s.linkRow, pressed && s.pressed]}>
+                <View style={[s.miniTrack, linkBoth && s.miniTrackOn]}>
+                  <View style={[s.miniThumb, linkBoth && s.miniThumbOn]} />
+                </View>
+                <Text style={s.linkText}>LINK BOTH</Text>
+              </Pressable>
+            </View>
+            <Text style={s.cardSub}>
+              Auto-protect gaps around every booking. Clients won't see these slots.
+            </Text>
+            <View style={s.bufCols}>
+              <View style={s.bufCol}>
+                <View style={s.bufColHead}>
+                  <Ionicons name="log-in-outline" size={13} color={D.sub} />
+                  <Text style={s.bufColLabel}>PREP BEFORE</Text>
+                </View>
+                <Text style={s.bufValue}>{before} <Text style={s.bufUnit}>min</Text></Text>
+                <View style={s.chipWrap}>
+                  {[0, 5, 10, 15, 30].map((v) => (
+                    <Pressable key={v} onPress={() => pickBefore(v)}
+                      accessibilityLabel={`Prep ${v} minutes`} accessibilityState={{ selected: before === v }}
+                      style={({ pressed }) => [s.bufChip, before === v && s.bufChipOn, pressed && s.pressed]}>
+                      <Text style={[s.bufChipText, before === v && s.bufChipTextOn]}>{v}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+              <View style={s.bufDivider} />
+              <View style={s.bufCol}>
+                <View style={s.bufColHead}>
+                  <Ionicons name="log-out-outline" size={13} color={D.sub} />
+                  <Text style={s.bufColLabel}>CLEANUP AFTER</Text>
+                </View>
+                <Text style={s.bufValue}>{after} <Text style={s.bufUnit}>min</Text></Text>
+                <View style={s.chipWrap}>
+                  {[0, 5, 10, 15, 30].map((v) => (
+                    <Pressable key={v} onPress={() => pickAfter(v)}
+                      accessibilityLabel={`Cleanup ${v} minutes`} accessibilityState={{ selected: after === v }}
+                      style={({ pressed }) => [s.bufChip, after === v && s.bufChipOn, pressed && s.pressed]}>
+                      <Text style={[s.bufChipText, after === v && s.bufChipTextOn]}>{v}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* buffer conflicts */}
+        {conflicts.length > 0 && (
+          <>
+            <View style={s.conflictHead}>
+              <T w="b" size={11} c={D.red} ls={1.65} style={s.grow}>
+                {conflicts.length} BUFFER CONFLICT{conflicts.length === 1 ? '' : 'S'}
+              </T>
+              {conflicts.length > 1 && (
+                <Pressable onPress={() => setFixPreview(buildPlan(strategy, conflicts))}
+                  accessibilityRole="button" accessibilityLabel="Fix all conflicts"
+                  style={({ pressed }) => [s.fixPill, pressed && s.pressed]}>
+                  <T w="b" size={11}>Fix all</T>
+                </Pressable>
+              )}
+            </View>
+            <View style={{ gap: 8 }}>
+              {conflicts.map((b) => (
+                <View key={b.id} style={s.conflictRow}>
+                  <View style={[s.swatch, { backgroundColor: b.day === null ? AMBER : 'rgba(232,161,0,0.5)' }]} />
+                  <View style={s.grow}>
+                    <T w="b" size={13}>
+                      {b.label ?? 'Blocked'} · {toHHMM(b.start_min)} – {toHHMM(b.end_min)}
+                    </T>
+                    <T size={11} c={D.red} style={{ marginTop: 2 }}>
+                      Buffer needs {totalGap} min, only {b.end_min - b.start_min} free
+                    </T>
+                  </View>
+                  <Pressable onPress={() => setFixPreview(buildPlan(strategy, [b]))}
+                    accessibilityRole="button" accessibilityLabel={`Fix conflict with ${b.label ?? 'block'}`}
+                    style={({ pressed }) => [s.fixPillSm, pressed && s.pressed]}>
+                    <T w="b" size={11}>Fix</T>
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+
+            <T w="b" size={11} c={D.sub} ls={1.65} style={{ marginTop: 2 }}>HOW TO FIX IT</T>
+            <View style={s.stratRowNew}>
+              {STRATEGIES.map((st) => (
+                <Pressable key={st.key} onPress={() => pickStrategy(st.key)}
+                  accessibilityRole="button" accessibilityLabel={`Auto-fix strategy: ${st.label}`}
+                  accessibilityState={{ selected: strategy === st.key }}
+                  style={({ pressed }) => [s.stratBtn, strategy === st.key && s.stratBtnOn, pressed && s.pressed]}>
+                  <T w="b" size={11} ls={0.55} c={strategy === st.key ? '#fff' : D.sub}>
+                    {st.label.toUpperCase()}
+                  </T>
+                </Pressable>
+              ))}
+            </View>
+
+            {/* what the chosen strategy would do, per conflict */}
+            {buildPlan(strategy, conflicts).blocks.map(({ b, newEnd }) => {
+              const win = windowFor(b.day);
+              const d0 = Math.max(0, Math.min(win?.start ?? b.start_min, b.start_min) - 30);
+              const d1 = Math.min(1440, Math.max(win?.end ?? newEnd, newEnd) + 30);
+              return (
+                <View key={b.id} style={s.previewCard}>
+                  <View>
+                    <T w="b" size={13}>
+                      {b.label ?? 'Blocked'} → {toHHMM(b.start_min)} – {toHHMM(newEnd)}
+                    </T>
+                    <T size={11} c={D.sub} style={{ marginTop: 3 }}>
+                      Adds {newEnd - b.end_min} min so the buffer fits.{' '}
+                      {b.day === null ? 'Every day.' : prettyDay(b.day) + ' only.'}
+                    </T>
+                  </View>
+                  <RangeBar domain={[d0, d1]} lanes={[[
+                    ...(win ? [{ from: win.start, to: win.end, color: 'rgba(255,255,255,0.07)' }] : []),
+                    { from: b.start_min, to: b.end_min, color: AMBER },
+                    { from: b.end_min, to: newEnd, color: colors.success },
+                  ]]} />
+                  <Legend items={[
+                    { color: 'rgba(255,255,255,0.07)', label: 'working hours' },
+                    { color: AMBER, label: 'break now' },
+                    { color: colors.success, label: 'added' },
+                  ]} />
+                </View>
+              );
+            })}
+          </>
+        )}
+
+        {/* add a block */}
+        <T w="b" size={11} c={D.sub} ls={1.65} style={{ marginTop: 2 }}>ADD A BLOCK</T>
+        <View style={s.addRow}>
+          {([['break', 'BREAK', 'coffee', AMBER], ['dayoff', 'DAY OFF', 'slash', D.sub],
+            ['vacation', 'VACATION', 'calendar', D.sub]] as const).map(([kind, label, icon, tint]) => (
+            <Pressable key={kind} onPress={() => openSheet(kind)} accessibilityRole="button"
+              accessibilityLabel={label}
+              style={({ pressed }) => [s.addBtn, pressed && s.pressed]}>
+              <Ico name={icon} size={14} color={tint} />
+              <T w="b" size={12} c={tint}>{label}</T>
+            </Pressable>
+          ))}
+        </View>
 
         {/* accepting bookings */}
         <View style={s.card}>
@@ -531,117 +692,6 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
           <Switch value={accepting} onValueChange={toggleAccepting}
             trackColor={{ true: colors.accent, false: D.card2 }} thumbColor={D.text} />
         </View>
-
-        {/* booking buffers */}
-        <View style={s.card2}>
-          <View style={s.bufHead}>
-            <View style={s.bufTitleRow}>
-              <Ionicons name="shield-outline" size={15} color={D.sub} />
-              <Text style={s.sectionLabel}>BOOKING BUFFERS</Text>
-            </View>
-            <Pressable onPress={() => { setLinkBoth(!linkBoth); if (!linkBoth) setAfter(before); }}
-              accessibilityLabel="Link both buffers" accessibilityState={{ checked: linkBoth }}
-              style={({ pressed }) => [s.linkRow, pressed && s.pressed]}>
-              <View style={[s.miniTrack, linkBoth && s.miniTrackOn]}>
-                <View style={[s.miniThumb, linkBoth && s.miniThumbOn]} />
-              </View>
-              <Text style={s.linkText}>LINK BOTH</Text>
-            </Pressable>
-          </View>
-          <Text style={s.cardSub}>
-            Auto-protect gaps around every booking. Clients won't see these slots.
-          </Text>
-          <View style={s.bufCols}>
-            <View style={s.bufCol}>
-              <View style={s.bufColHead}>
-                <Ionicons name="log-in-outline" size={13} color={D.sub} />
-                <Text style={s.bufColLabel}>PREP BEFORE</Text>
-              </View>
-              <Text style={s.bufValue}>{before} <Text style={s.bufUnit}>min</Text></Text>
-              <View style={s.chipWrap}>
-                {[0, 5, 10, 15, 30].map((v) => (
-                  <Pressable key={v} onPress={() => pickBefore(v)}
-                    accessibilityLabel={`Prep ${v} minutes`} accessibilityState={{ selected: before === v }}
-                    style={({ pressed }) => [s.bufChip, before === v && s.bufChipOn, pressed && s.pressed]}>
-                    <Text style={[s.bufChipText, before === v && s.bufChipTextOn]}>{v}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-            <View style={s.bufDivider} />
-            <View style={s.bufCol}>
-              <View style={s.bufColHead}>
-                <Ionicons name="log-out-outline" size={13} color={D.sub} />
-                <Text style={s.bufColLabel}>CLEANUP AFTER</Text>
-              </View>
-              <Text style={s.bufValue}>{after} <Text style={s.bufUnit}>min</Text></Text>
-              <View style={s.chipWrap}>
-                {[0, 5, 10, 15, 30].map((v) => (
-                  <Pressable key={v} onPress={() => pickAfter(v)}
-                    accessibilityLabel={`Cleanup ${v} minutes`} accessibilityState={{ selected: after === v }}
-                    style={({ pressed }) => [s.bufChip, after === v && s.bufChipOn, pressed && s.pressed]}>
-                    <Text style={[s.bufChipText, after === v && s.bufChipTextOn]}>{v}</Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-          </View>
-          <View style={s.stratRow}>
-            <Text style={s.bufColLabel}>AUTO-FIX</Text>
-            <View style={s.stratChips}>
-              {STRATEGIES.map((st) => (
-                <Pressable key={st.key} onPress={() => pickStrategy(st.key)}
-                  accessibilityLabel={`Auto-fix strategy: ${st.label}`}
-                  accessibilityState={{ selected: strategy === st.key }}
-                  style={({ pressed }) => [s.bufChip, strategy === st.key && s.bufChipOn, pressed && s.pressed]}>
-                  <Text style={[s.bufChipText, strategy === st.key && s.bufChipTextOn]}>{st.label}</Text>
-                </Pressable>
-              ))}
-            </View>
-          </View>
-        </View>
-        <View style={s.gapRow}>
-          <Text style={s.sectionLabel}>TOTAL GAP PER BOOKING</Text>
-          <Text style={s.gapValue}>{totalGap} MIN</Text>
-        </View>
-
-        {/* buffer conflicts */}
-        {conflicts.length > 0 && (
-          <View style={s.warnCard}>
-            <View style={s.warnHead}>
-              <Ionicons name="warning-outline" size={15} color="#E8B84B" />
-              <Text style={[s.warnTitle, s.grow]}>
-                {conflicts.length} BUFFER CONFLICT{conflicts.length === 1 ? '' : 'S'}
-              </Text>
-              {conflicts.length > 1 && (
-                <Pressable onPress={() => setFixPreview(buildPlan(strategy, conflicts))}
-                  accessibilityLabel="Fix all conflicts"
-                  style={({ pressed }) => [s.warnFix, pressed && s.pressed]}>
-                  <Text style={s.warnFixText}>Fix all</Text>
-                </Pressable>
-              )}
-            </View>
-            {conflicts.map((b) => (
-              <View key={b.id} style={s.warnRow}>
-                <View style={s.grow}>
-                  <Text style={s.cardTitle}>Buffer overlaps "{b.label ?? 'Blocked'}"</Text>
-                  <Text style={s.cardSub}>
-                    {b.label ?? 'Block'} is {b.end_min - b.start_min} min but buffer around bookings is {totalGap} min.
-                  </Text>
-                </View>
-                <Pressable onPress={() => setFixPreview(buildPlan(strategy, [b]))}
-                  accessibilityLabel={`Fix conflict with ${b.label ?? 'block'}`}
-                  style={({ pressed }) => [s.warnFix, pressed && s.pressed]}>
-                  <Text style={s.warnFixText}>
-                    {strategy === 'trim' ? `Trim gap to ${b.end_min - b.start_min} min`
-                      : strategy === 'shift' ? 'Extend & shift'
-                      : `Extend to ${totalGap} min`}
-                  </Text>
-                </Pressable>
-              </View>
-            ))}
-          </View>
-        )}
 
         {/* segment */}
         <View style={s.segment}>
@@ -704,20 +754,8 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
           </>
         ) : (
           <>
+            {/* the BREAK / DAY OFF / VACATION row lives up top now (1f "ADD A BLOCK") */}
             <Text style={s.sectionLabel}>BLOCKS • {offList.length}</Text>
-            <View style={s.quickRow}>
-              {([
-                { kind: 'break', icon: 'cafe-outline', label: 'BREAK' },
-                { kind: 'dayoff', icon: 'ban-outline', label: 'DAY OFF' },
-                { kind: 'vacation', icon: 'calendar-outline', label: 'VACATION' },
-              ] as const).map((q) => (
-                <Pressable key={q.kind} onPress={() => openSheet(q.kind)} accessibilityLabel={q.label}
-                  style={({ pressed }) => [s.quickCard, pressed && s.pressed]}>
-                  <Ionicons name={q.icon} size={20} color={colors.accent} />
-                  <Text style={s.quickLabel}>{q.label}</Text>
-                </Pressable>
-              ))}
-            </View>
 
             {offList.map((item) => item.kind === 'block' ? (
               <View key={`b-${item.b.id}`} style={s.blockRow}>
@@ -1096,23 +1134,54 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
 }
 
 const s = StyleSheet.create({
+  // --- 1f
+  bufRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: D.card, borderRadius: 18, padding: 14, paddingHorizontal: 16,
+  },
+  bufPill: {
+    height: 32, borderRadius: 999, backgroundColor: D.card2, paddingHorizontal: 13,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  conflictHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  fixPill: {
+    height: 30, borderRadius: 999, backgroundColor: D.card2, paddingHorizontal: 13,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  fixPillSm: {
+    height: 30, borderRadius: 999, backgroundColor: D.card2, paddingHorizontal: 13,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  conflictRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 11,
+    backgroundColor: D.card, borderRadius: 16, padding: 13, paddingHorizontal: 14,
+  },
+  swatch: { width: 10, height: 10, borderRadius: 3 },
+  stratRowNew: { flexDirection: 'row', gap: 8 },
+  stratBtn: {
+    flex: 1, height: 40, borderRadius: 999, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  stratBtnOn: { backgroundColor: colors.accent },
+  previewCard: { backgroundColor: D.card, borderRadius: 20, padding: 16, gap: 13 },
+  addRow: { flexDirection: 'row', gap: 8 },
+  addBtn: {
+    flex: 1, height: 40, borderRadius: 999, backgroundColor: D.card2,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+  },
+
   screen: { flex: 1, backgroundColor: D.bg },
-  content: { padding: sp(5), paddingTop: sp(14), gap: sp(3), paddingBottom: TAB_BAR_INSET + 70 },
+  content: { paddingTop: 62, paddingHorizontal: 20, gap: 13, paddingBottom: TAB_BAR_INSET + 70 },
   pressed: { opacity: 0.7 },
   grow: { flex: 1 },
 
-  head: { flexDirection: 'row', alignItems: 'center' },
-  headSide: { width: 64 },
+  head: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  headSide: { width: 38 },
   backBtn: {
-    width: 40, height: 40, borderRadius: radius.pill, backgroundColor: D.card2,
+    width: 38, height: 38, borderRadius: radius.pill, backgroundColor: D.card2,
     alignItems: 'center', justifyContent: 'center',
   },
-  headTitle: { flex: 1, textAlign: 'center', fontSize: font.h2, fontWeight: '700', color: D.text, letterSpacing: 2 },
-  savePill: {
-    width: 64, height: 34, borderRadius: radius.pill, backgroundColor: colors.accent,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  savePillText: { fontSize: font.small, fontWeight: '700', color: colors.onAccent },
+  headTitle: { flex: 1, textAlign: 'center' },
   divider: { height: 1, backgroundColor: D.border },
 
   card: {
@@ -1189,14 +1258,17 @@ const s = StyleSheet.create({
   scopeRow: { flexDirection: 'row', gap: sp(1.5) },
 
   // preview range bars
-  rbWrap: { marginTop: sp(2), gap: 3 },
-  rbLane: { height: 7, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.03)', overflow: 'hidden' },
-  rbSeg: { position: 'absolute', top: 0, bottom: 0, borderRadius: 3 },
+  rbWrap: { gap: 6 },
+  rbLane: { height: 16, borderRadius: 6, backgroundColor: D.card2, overflow: 'hidden' },
+  rbSeg: { position: 'absolute', top: 0, bottom: 0 },
   rbLabels: { flexDirection: 'row', justifyContent: 'space-between' },
-  rbLabel: { fontSize: 9, color: D.sub, fontVariant: ['tabular-nums'] },
-  legendRow: { flexDirection: 'row', flexWrap: 'wrap', gap: sp(2.5), marginTop: sp(1) },
+  rbLabel: { fontSize: 10, color: D.sub, fontVariant: ['tabular-nums'] },
+  legendRow: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: 14,
+    borderTopWidth: 1, borderTopColor: D.border, paddingTop: 12,
+  },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  legendDot: { width: 7, height: 7, borderRadius: 2 },
+  legendDot: { width: 9, height: 9, borderRadius: 3 },
   legendText: { fontSize: 10, color: D.sub },
 
   segment: { flexDirection: 'row', backgroundColor: D.card, borderRadius: radius.pill, padding: 4, gap: 4 },

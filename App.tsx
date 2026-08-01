@@ -1,4 +1,7 @@
 import {
+  Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_800ExtraBold,
+} from '@expo-google-fonts/inter';
+import {
   PlayfairDisplay_700Bold, PlayfairDisplay_800ExtraBold, useFonts,
 } from '@expo-google-fonts/playfair-display';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -20,7 +23,10 @@ const INTRO_SEEN_KEY = 'intro_seen';
 // gate (intro → auth → onboarding-if-incomplete → home). Add React Navigation when
 // Phase 2 brings real multi-screen browsing.
 export default function App() {
-  const [fontsLoaded] = useFonts({ PlayfairDisplay_700Bold, PlayfairDisplay_800ExtraBold });
+  const [fontsLoaded] = useFonts({
+    PlayfairDisplay_700Bold, PlayfairDisplay_800ExtraBold,
+    Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold, Inter_800ExtraBold,
+  });
   const [booting, setBooting] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<{ profile: Profile; barber: Barber | null } | null>(null);

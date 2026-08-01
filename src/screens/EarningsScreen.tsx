@@ -1,10 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { TAB_BAR_INSET } from '../components/ui';
+import { Alert, StyleSheet, View } from 'react-native';
+import { Eyebrow, Screen, Segmented, Serif, Stat, T, TAB_INSET, TopBar } from '../components/dark';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, font, radius, sp } from '../theme';
+import { dark as D } from '../theme';
 
+// 1i — Earnings. Booked value, not cash in hand: the money is still paid at the shop.
 type Period = 'day' | 'week' | 'month';
 type Row = {
   starts_at: string;
@@ -15,11 +15,12 @@ type Row = {
   customer: { full_name: string | null } | null;
 };
 
-const dh0 = (cents: number) => `${(cents / 100).toFixed(0)} DH`;
+const dh0 = (cents: number) => `${Math.round(cents / 100)} DH`;
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-const ampm = (iso: string) =>
-  new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+const hhmm = (iso: string) => new Date(iso).toTimeString().slice(0, 5);
 const shortDate = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+const grouped = (cents: number) =>
+  (cents / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 
 const PERIODS: { key: Period; label: string; days: number }[] = [
   { key: 'day', label: 'Day', days: 1 },
@@ -58,9 +59,10 @@ export default function EarningsScreen({ barberId, onBack }: { barberId: string;
   const buckets = Array.from({ length: meta.days }, (_, i) => {
     const d = startOfDay(new Date()); d.setDate(d.getDate() - (meta.days - 1 - i));
     const key = d.toDateString();
-    return { d, value: inPeriod.filter((r) => new Date(r.starts_at).toDateString() === key).reduce((a, r) => a + r.price_cents, 0) };
+    return inPeriod.filter((r) => new Date(r.starts_at).toDateString() === key)
+      .reduce((a, r) => a + r.price_cents, 0);
   });
-  const barMax = Math.max(...buckets.map((b) => b.value), 1);
+  const barMax = Math.max(...buckets, 1);
 
   // by-service breakdown
   const svc = new Map<string, { count: number; sum: number }>();
@@ -71,160 +73,106 @@ export default function EarningsScreen({ barberId, onBack }: { barberId: string;
   }
   const byService = [...svc.entries()].sort((a, b) => b[1].sum - a[1].sum);
 
-  const rangeLabel = period === 'day' ? `Today, ${shortDate(new Date())}`
+  const rangeLabel = period === 'day'
+    ? `TODAY, ${shortDate(new Date())}`
     : `${shortDate(start)} – ${shortDate(new Date())}`;
   const dayRows = [...inPeriod].sort((a, b) => a.starts_at.localeCompare(b.starts_at));
-  const nameOf = (r: Row) => r.walk_in_name ?? (r.customer_id === barberId ? 'Walk-in' : r.customer?.full_name ?? 'Client');
+  const nameOf = (r: Row) =>
+    r.walk_in_name ?? (r.customer_id === barberId ? 'Walk-in' : r.customer?.full_name ?? 'Client');
 
   return (
-    <View style={s.screen}>
-      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        <View style={s.head}>
-          <Pressable onPress={onBack} hitSlop={8} accessibilityLabel="Back"
-            style={({ pressed }) => [s.circleBtn, pressed && s.pressed]}>
-            <Ionicons name="chevron-back" size={20} color={D.text} />
-          </Pressable>
-          <Text style={s.headTitle}>Earnings</Text>
-          <View style={s.circleBtn} />
-        </View>
+    <Screen gap={14} bottom={TAB_INSET}>
+      <TopBar title="Earnings" onBack={onBack} backIcon="chevron-left" plain />
 
-        {/* period selector */}
-        <View style={s.segment}>
-          {PERIODS.map((p) => (
-            <Pressable key={p.key} onPress={() => setPeriod(p.key)}
-              accessibilityLabel={p.label} accessibilityState={{ selected: period === p.key }}
-              style={[s.segItem, period === p.key && s.segItemOn]}>
-              <Text style={[s.segText, period === p.key && s.segTextOn]}>{p.label}</Text>
-            </Pressable>
-          ))}
-        </View>
+      <Segmented track={D.card} height={38} active={period}
+        items={PERIODS.map((p) => ({ key: p.key, label: p.label }))}
+        onChange={(k) => setPeriod(k as Period)} />
 
-        {/* hero total */}
-        <View style={s.hero}>
-          <Text style={s.heroLabel}>{rangeLabel.toUpperCase()}</Text>
-          <Text style={s.heroValue}>{(total / 100).toFixed(2)} DH</Text>
-          <Text style={s.heroSub}>
-            booked value · {clients} client{clients === 1 ? '' : 's'}
-            {period !== 'day' ? ` · ${dh0(avgPerDay)}/day avg` : ''}
-          </Text>
-        </View>
+      <View>
+        <Eyebrow ls={1.6}>{rangeLabel.toUpperCase()}</Eyebrow>
+        <Serif size={42} ls={0} style={s.hero}>{grouped(total)} DH</Serif>
+        <T size={12} c={D.sub} style={{ marginTop: 6 }}>
+          booked value · {clients} client{clients === 1 ? '' : 's'}
+          {period !== 'day' ? ` · ${dh0(avgPerDay)}/day avg` : ''}
+        </T>
+      </View>
 
-        {/* chart (week/month) */}
-        {period !== 'day' && (
-          <View style={s.card}>
-            <View style={s.chart} accessibilityLabel={`${meta.label} earnings by day`}>
-              {buckets.map((b, i) => (
-                <View key={i} style={[s.bar, {
-                  height: Math.max(6, Math.round((b.value / barMax) * 90)),
-                  backgroundColor: i === buckets.length - 1 ? colors.accent : D.barMuted,
-                }]} />
-              ))}
-            </View>
-            <View style={s.axis}>
-              <Text style={s.axisText}>{shortDate(start)}</Text>
-              <Text style={s.axisText}>Today</Text>
-            </View>
+      {period !== 'day' && (
+        <View style={s.chartCard}>
+          <View style={s.chart} accessible accessibilityLabel={`${meta.label} earnings by day`}>
+            {buckets.map((v, i) => (
+              <View key={i} style={[s.bar, {
+                height: Math.max(3, Math.round((v / barMax) * 90)),
+                backgroundColor: i === buckets.length - 1 ? D.accent : D.barMuted,
+              }]} />
+            ))}
           </View>
-        )}
-
-        {/* stat tiles */}
-        <View style={s.tileRow}>
-          <View style={s.tile}>
-            <Text style={s.tileLabel}>CLIENTS</Text>
-            <Text style={s.tileValue}>{clients}</Text>
-          </View>
-          <View style={s.tile}>
-            <Text style={s.tileLabel}>WALK-INS</Text>
-            <Text style={s.tileValue}>{walkIns}</Text>
-          </View>
-          <View style={s.tile}>
-            <Text style={s.tileLabel}>{period === 'day' ? 'AVG/CLIENT' : 'AVG/DAY'}</Text>
-            <Text style={s.tileValue}>{period === 'day'
-              ? (clients ? Math.round(total / clients / 100) : 0)
-              : Math.round(avgPerDay / 100)} <Text style={s.tileUnit}>DH</Text></Text>
+          <View style={s.axis}>
+            <T size={10} c={D.sub}>{shortDate(start)}</T>
+            <T size={10} c={D.sub}>Today</T>
           </View>
         </View>
+      )}
 
-        {/* day: booking list; week/month: by-service breakdown */}
+      <View style={s.tileRow}>
+        <Stat radius={18} label="CLIENTS" value={String(clients)} />
+        <Stat radius={18} label="WALK-INS" value={String(walkIns)} />
+        <Stat radius={18} label={period === 'day' ? 'AVG/CLIENT' : 'AVG/DAY'} unit="DH"
+          value={String(period === 'day'
+            ? (clients ? Math.round(total / clients / 100) : 0)
+            : Math.round(avgPerDay / 100))} />
+      </View>
+
+      <T w="b" size={15} style={{ marginTop: 2 }}>{period === 'day' ? "Today's bookings" : 'By service'}</T>
+      <View style={{ gap: 9 }}>
         {period === 'day' ? (
           <>
-            <Text style={s.section}>Today's bookings</Text>
-            {dayRows.length === 0 && <Text style={s.empty}>Nothing booked today.</Text>}
+            {dayRows.length === 0 && <T size={12} c={D.sub}>Nothing booked today.</T>}
             {dayRows.map((r, i) => (
               <View key={i} style={s.listRow}>
-                <Text style={s.listTime}>{ampm(r.starts_at)}</Text>
+                <T w="b" size={12} c={D.accent} style={[s.tnum, { width: 42 }]}>{hhmm(r.starts_at)}</T>
                 <View style={s.grow}>
-                  <Text style={s.listName}>{nameOf(r)}</Text>
-                  <Text style={s.listMeta}>{r.services?.name ?? 'Service'}</Text>
+                  <T w="b" size={14}>{nameOf(r)}</T>
+                  <T size={11} c={D.sub} style={{ marginTop: 2 }}>{r.services?.name ?? 'Service'}</T>
                 </View>
-                <Text style={s.listAmt}>{dh0(r.price_cents)}</Text>
+                <T w="b" size={14} style={s.tnum}>{dh0(r.price_cents)}</T>
               </View>
             ))}
           </>
         ) : (
           <>
-            <Text style={s.section}>By service</Text>
-            {byService.length === 0 && <Text style={s.empty}>No earnings in this period.</Text>}
+            {byService.length === 0 && <T size={12} c={D.sub}>No earnings in this period.</T>}
             {byService.map(([name, e]) => (
               <View key={name} style={s.listRow}>
                 <View style={s.grow}>
-                  <Text style={s.listName}>{name}</Text>
-                  <Text style={s.listMeta}>{e.count} booking{e.count === 1 ? '' : 's'}</Text>
+                  <T w="b" size={14}>{name}</T>
+                  <T size={11} c={D.sub} style={{ marginTop: 2 }}>
+                    {e.count} booking{e.count === 1 ? '' : 's'}
+                  </T>
                 </View>
-                <Text style={s.listAmt}>{dh0(e.sum)}</Text>
+                <T w="b" size={14} style={s.tnum}>{dh0(e.sum)}</T>
               </View>
             ))}
           </>
         )}
-      </ScrollView>
-    </View>
+      </View>
+    </Screen>
   );
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: D.bg },
-  content: { padding: sp(5), paddingTop: sp(14), gap: sp(3), paddingBottom: TAB_BAR_INSET },
-  pressed: { opacity: 0.7 },
   grow: { flex: 1 },
+  tnum: { fontVariant: ['tabular-nums'] },
+  hero: { marginTop: 5, fontVariant: ['tabular-nums'] },
 
-  head: { flexDirection: 'row', alignItems: 'center' },
-  headTitle: { flex: 1, textAlign: 'center', fontSize: font.h2, fontWeight: '700', color: D.text },
-  circleBtn: {
-    width: 40, height: 40, borderRadius: radius.pill, backgroundColor: D.card2,
-    alignItems: 'center', justifyContent: 'center',
-  },
-
-  segment: { flexDirection: 'row', backgroundColor: D.card, borderRadius: radius.pill, padding: 4, gap: 4 },
-  segItem: { flex: 1, height: 38, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
-  segItemOn: { backgroundColor: colors.accent },
-  segText: { fontSize: font.small, fontWeight: '700', color: D.sub },
-  segTextOn: { color: colors.onAccent },
-
-  hero: { gap: 4 },
-  heroLabel: { fontSize: font.tiny, fontWeight: '700', color: D.sub, letterSpacing: 1 },
-  heroValue: { fontSize: 40, fontWeight: '700', color: D.text, fontVariant: ['tabular-nums'] },
-  heroSub: { fontSize: font.small, color: D.sub },
-
-  card: { backgroundColor: D.card, borderRadius: radius.lg, padding: sp(4), gap: sp(2) },
-  chart: { flexDirection: 'row', alignItems: 'flex-end', gap: 3, height: 90 },
+  chartCard: { backgroundColor: D.card, borderRadius: 20, padding: 16, gap: 10 },
+  chart: { flexDirection: 'row', alignItems: 'flex-end', gap: 5, height: 90 },
   bar: { flex: 1, borderRadius: 3, minWidth: 3 },
   axis: { flexDirection: 'row', justifyContent: 'space-between' },
-  axisText: { fontSize: font.tiny, color: D.sub },
 
-  tileRow: { flexDirection: 'row', gap: sp(2.5) },
-  tile: { flex: 1, backgroundColor: D.card, borderRadius: radius.lg, padding: sp(3.5), gap: 3 },
-  tileLabel: { fontSize: font.tiny, fontWeight: '700', color: D.sub, letterSpacing: 0.5 },
-  tileValue: { fontSize: 22, fontWeight: '700', color: D.text, fontVariant: ['tabular-nums'] },
-  tileUnit: { fontSize: font.small, fontWeight: '400', color: D.sub },
-
-  section: { fontSize: font.body, fontWeight: '700', color: D.text, marginTop: sp(2) },
-  empty: { fontSize: font.small, color: D.sub, paddingVertical: sp(2) },
+  tileRow: { flexDirection: 'row', gap: 10 },
   listRow: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(3),
-    backgroundColor: D.card, borderRadius: radius.md, padding: sp(3.5),
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: D.card, borderRadius: 16, padding: 14, paddingHorizontal: 15,
   },
-  listTime: { fontSize: font.small, fontWeight: '700', color: colors.accent, width: 64, fontVariant: ['tabular-nums'] },
-  listName: { fontSize: font.body, fontWeight: '700', color: D.text },
-  listMeta: { fontSize: font.small, color: D.sub, marginTop: 1 },
-  listAmt: { fontSize: font.body, fontWeight: '700', color: D.text, fontVariant: ['tabular-nums'] },
 });

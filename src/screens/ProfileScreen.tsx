@@ -3,13 +3,16 @@ import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import LocationPicker from '../components/LocationPicker';
+import { Eyebrow, Ico, IconName, Screen, Serif, T, TAB_INSET } from '../components/dark';
 import { Card, Chip, Field, PillButton, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
 import type { LatLng } from '../lib/geo';
+import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, shadow, sp } from '../theme';
+import { colors, dark as D, font, radius, serif, shadow, sp } from '../theme';
 import type { Barber, Profile } from '../types';
 import { ActivityIndicator } from 'react-native';
 import CouponsScreen from './CouponsScreen';
+import EarningsScreen from './EarningsScreen';
 import HelpCenterScreen from './HelpCenterScreen';
 import MyBookingsScreen from './MyBookingsScreen';
 import PortfolioScreen from './PortfolioScreen';
@@ -25,13 +28,16 @@ const STATUS_LABEL: Record<string, string> = {
 
 type MenuItem = { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void; danger?: boolean };
 
+type ProfileView =
+  | 'menu' | 'edit' | 'bookings' | 'wallet' | 'coupons' | 'help'
+  | 'preview' | 'services' | 'work' | 'schedule' | 'salon' | 'earnings';
+
 export default function ProfileScreen({ profile, barber, phone, onProfileChanged, onChromeHidden, onBack }: {
   profile: Profile; barber: Barber | null; phone: string | null;
   onProfileChanged: () => void; onChromeHidden?: (hidden: boolean) => void;
   onBack?: () => void;
 }) {
-  type View = 'menu' | 'edit' | 'bookings' | 'wallet' | 'coupons' | 'help' | 'preview' | 'services' | 'work' | 'schedule' | 'salon';
-  const [view, setView] = useState<View>('menu');
+  const [view, setView] = useState<ProfileView>('menu');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatar_url ?? null);
   const [avatarBusy, setAvatarBusy] = useState(false);
   // owner (not just any barber in a salon) gets the Salon management row
@@ -47,7 +53,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   const initials = (profile.full_name ?? '?')
     .split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
-  function go(next: View) {
+  function go(next: ProfileView) {
     setView(next);
     onChromeHidden?.(next !== 'menu');
   }
@@ -103,6 +109,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   if (view === 'salon' && barber) return <SalonScreen barberId={barber.id} onBack={() => go('menu')}
     onManageServices={() => go('services')} onEditSalon={() => go('edit')} />;
   if (view === 'schedule' && barber) return <AvailabilityScreen barberId={barber.id} onBack={() => go('menu')} />;
+  if (view === 'earnings' && barber) return <EarningsScreen barberId={barber.id} onBack={() => go('menu')} />;
   if (view === 'services' && barber) return <ServicesScreen barberId={barber.id} onBack={() => go('menu')} />;
   if (view === 'work' && barber) return <PortfolioScreen barberId={barber.id} onBack={() => go('menu')} />;
 
@@ -131,6 +138,12 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     { icon: 'log-out-outline', label: 'Logout', onPress: signOut, danger: true },
   ];
 
+  if (barber) {
+    return <BarberProfile profile={profile} barber={barber} avatarUrl={avatarUrl}
+      avatarBusy={avatarBusy} initials={initials} ownsSalon={ownsSalon}
+      onAvatar={changeAvatar} onSignOut={signOut} go={go} />;
+  }
+
   return (
     <ScrollView style={s.screen} contentContainerStyle={s.content}>
       <ScreenHeader title="Profile" onBack={onBack} />
@@ -147,9 +160,6 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
         </Pressable>
         <Text style={s.name}>{profile.full_name ?? 'Your name'}</Text>
         {!!phone && <Text style={s.phone}>{phone}</Text>}
-        {barber && (
-          <Chip label={STATUS_LABEL[barber.status] ?? barber.status} active={barber.status === 'approved'} />
-        )}
       </View>
 
       <View style={s.menu}>
@@ -168,6 +178,160 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     </ScrollView>
   );
 }
+
+// 1q — the barber's profile. Same rows, dark canvas, with the numbers that
+// tell him whether his page is actually working.
+function BarberProfile({
+  profile, barber, avatarUrl, avatarBusy, initials, ownsSalon, onAvatar, onSignOut, go,
+}: {
+  profile: Profile; barber: Barber; avatarUrl: string | null; avatarBusy: boolean;
+  initials: string; ownsSalon: boolean;
+  onAvatar: () => void; onSignOut: () => void; go: (v: ProfileView) => void;
+}) {
+  const [stats, setStats] = useState<{
+    salon: string | null; rating: number | null; reviews: number;
+    clients: number | null; services: number; photos: number;
+  }>({ salon: null, rating: null, reviews: 0, clients: null, services: 0, photos: 0 });
+
+  useEffect(() => {
+    (async () => {
+      const [salon, rev, clients, svc, photos] = await Promise.all([
+        barber.salon_id
+          ? supabase.from('salons').select('name').eq('id', barber.salon_id).maybeSingle()
+          : Promise.resolve({ data: null }),
+        supabase.from('reviews').select('rating').eq('barber_id', barber.id),
+        supabase.rpc('barber_customer_count', { p_barber: barber.id }),
+        supabase.from('services').select('id', { count: 'exact', head: true })
+          .eq('barber_id', barber.id).eq('is_active', true),
+        listPortfolio(barber.id),
+      ]);
+      const ratings = (rev.data ?? []).map((r: any) => r.rating as number);
+      setStats({
+        salon: (salon.data as any)?.name ?? null,
+        rating: ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null,
+        reviews: ratings.length,
+        clients: typeof clients.data === 'number' ? clients.data : null,
+        services: svc.count ?? 0,
+        photos: photos.length,
+      });
+    })();
+  }, [barber.id, barber.salon_id]);
+
+  const live = barber.status === 'approved';
+
+  const rows: { icon: IconName; label: string; value?: string; onPress: () => void }[] = [
+    { icon: 'user', label: 'Your profile', onPress: () => go('edit') },
+    { icon: 'calendar', label: 'Schedule settings', onPress: () => go('schedule') },
+    { icon: 'scissors', label: 'My services', value: String(stats.services), onPress: () => go('services') },
+    { icon: 'image', label: 'My work', value: `${stats.photos} photo${stats.photos === 1 ? '' : 's'}`, onPress: () => go('work') },
+    ...(ownsSalon ? [{ icon: 'edit-2' as IconName, label: 'Salon management', onPress: () => go('salon') }] : []),
+    { icon: 'trending-up', label: 'Earnings', onPress: () => go('earnings') },
+    { icon: 'help-circle', label: 'Help Center', onPress: () => go('help') },
+  ];
+
+  return (
+    <Screen gap={15} bottom={TAB_INSET}>
+      <Serif size={17} ls={0.18} style={{ textAlign: 'center' }}>Profile</Serif>
+
+      <View style={d.headRow}>
+        <Pressable onPress={onAvatar} disabled={avatarBusy} accessibilityRole="button"
+          accessibilityLabel="Change profile photo" style={({ pressed }) => [d.avatarWrap, pressed && s.pressed]}>
+          {avatarUrl
+            ? <Image source={{ uri: avatarUrl }} style={d.avatar} />
+            : <View style={d.avatar}>
+                <Text style={d.avatarText}>{initials}</Text>
+              </View>}
+          <View style={d.editBadge}>
+            <Ico name={avatarBusy ? 'clock' : 'edit-2'} size={11} color="#fff" />
+          </View>
+        </Pressable>
+        <View style={s.grow}>
+          <T w="b" size={17}>{profile.full_name ?? 'Your name'}</T>
+          <T size={12} c={D.sub} style={{ marginTop: 3 }}>
+            {[barber.specialty ?? 'Barber', stats.salon].filter(Boolean).join(' · ')}
+          </T>
+          <View style={d.ratingRow}>
+            <T w="b" size={12}>{stats.rating != null ? `${stats.rating.toFixed(1)} ★` : 'No reviews yet'}</T>
+            <T size={12} c={D.sub}>
+              {stats.reviews} review{stats.reviews === 1 ? '' : 's'}
+              {stats.clients != null ? ` · ${stats.clients} clients` : ''}
+            </T>
+          </View>
+        </View>
+      </View>
+
+      <View style={d.liveCard}>
+        <View style={[d.liveIcon, !live && { backgroundColor: D.amberSoft16 }]}>
+          <Ico name={live ? 'check-circle' : 'clock'} size={16} color={live ? D.green : D.amber} />
+        </View>
+        <View style={s.grow}>
+          <T w="b" size={13}>{live ? 'Page is live' : STATUS_LABEL[barber.status] ?? barber.status}</T>
+          <T size={11} c={D.sub} style={{ marginTop: 2 }}>
+            {live ? 'Customers can find and book you' : 'We’ll email you when it’s approved'}
+          </T>
+        </View>
+        {barber.salon_id && (
+          <Pressable onPress={() => go('preview')} hitSlop={8} accessibilityRole="button"
+            style={({ pressed }) => pressed && s.pressed}>
+            <T w="sb" size={12} c={D.accent}>Preview</T>
+          </Pressable>
+        )}
+      </View>
+
+      <View style={d.menu}>
+        {rows.map((r, i) => (
+          <Pressable key={r.label} onPress={r.onPress} accessibilityRole="button" accessibilityLabel={r.label}
+            style={({ pressed }) => [d.row, i < rows.length - 1 && d.rowLine, pressed && s.pressed]}>
+            <View style={d.rowIcon}><Ico name={r.icon} size={15} /></View>
+            <T w="sb" size={14} style={s.grow}>{r.label}</T>
+            {r.value ? <T size={12} c={D.sub}>{r.value}</T> : null}
+            <Ico name="chevron-right" size={14} color={D.muted} />
+          </Pressable>
+        ))}
+        <Pressable onPress={onSignOut} accessibilityRole="button" accessibilityLabel="Logout"
+          style={({ pressed }) => [d.row, d.rowLine, pressed && s.pressed]}>
+          <View style={[d.rowIcon, { backgroundColor: D.accentSoft }]}>
+            <Ico name="log-out" size={15} color={D.accent} />
+          </View>
+          <T w="sb" size={14} c={D.accent} style={s.grow}>Logout</T>
+        </Pressable>
+      </View>
+    </Screen>
+  );
+}
+
+const d = StyleSheet.create({
+  headRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  avatarWrap: { width: 76, height: 76 },
+  avatar: {
+    width: 76, height: 76, borderRadius: 999, backgroundColor: D.card,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  avatarText: { fontFamily: serif, fontSize: 26, color: '#fff' },
+  editBadge: {
+    position: 'absolute', bottom: -2, right: -2, width: 26, height: 26, borderRadius: 999,
+    backgroundColor: D.accent, borderWidth: 3, borderColor: D.bg,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 9, marginTop: 6 },
+
+  liveCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: D.card,
+    borderRadius: 18, padding: 14, paddingHorizontal: 16,
+  },
+  liveIcon: {
+    width: 34, height: 34, borderRadius: 999, backgroundColor: D.greenSoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+
+  menu: { backgroundColor: D.card, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 6 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 14 },
+  rowLine: { borderBottomWidth: 1, borderBottomColor: D.border },
+  rowIcon: {
+    width: 34, height: 34, borderRadius: 999, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+});
 
 // "how customers see me" — fetches the salon in SalonCard shape and reuses the customer screen
 function PreviewPage({ salonId, onBack, onChromeHidden }: {
@@ -290,6 +454,7 @@ const s = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { paddingHorizontal: sp(5), gap: sp(4), paddingBottom: TAB_BAR_INSET },
   pressed: { opacity: 0.7 },
+  grow: { flex: 1 },
 
   avatarWrap: { alignItems: 'center', gap: sp(2) },
   avatar: { width: 96, height: 96, borderRadius: radius.pill },

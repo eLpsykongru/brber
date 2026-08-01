@@ -3,13 +3,20 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator, Alert, Image, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native';
+import {
+  Avatar, Eyebrow, Ico, Screen, Serif, Sheet, SheetHead, Stat, T, TAB_INSET,
+} from '../components/dark';
+import BookingPanelSheet, { BookingRequestSheet, PanelBooking } from '../components/BookingPanels';
+import CancelBookingSheet from '../components/CancelBookingSheet';
 import ClientSheet, { ClientRef } from '../components/ClientSheet';
+import RateClientSheet from '../components/RateClientSheet';
 import SlotPicker from '../components/SlotPicker';
-import { PillButton, TAB_BAR_INSET } from '../components/ui';
+import { PillButton } from '../components/ui';
 import { Block, daySlots, Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, font, radius, sp } from '../theme';
+import { colors, dark as D, inter, radius, sp } from '../theme';
 import type { Barber, Profile } from '../types';
+import BarberQueueScreen from './BarberQueueScreen';
 import ChatScreen from './ChatScreen';
 import EarningsScreen from './EarningsScreen';
 import ProfileScreen from './ProfileScreen';
@@ -39,24 +46,26 @@ function stageOf(b: BookingRow): Stage | null {
   return 'check_in';
 }
 
-const dh = (cents: number) => `${(cents / 100).toFixed(2)} DH`;
-const ampm = (iso: string) =>
-  new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+const dh = (cents: number) => `${Math.round(cents / 100)} DH`;
+const hhmm = (iso: string) => new Date(iso).toTimeString().slice(0, 5);
+const minLabel = (min: number) => new Date(0, 0, 0, 0, min).toTimeString().slice(0, 5);
 const isoDay = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
 const nameOf = (b: BookingRow, barberId: string) =>
   b.walk_in_name ?? (b.customer_id === barberId ? 'Walk-in' : b.customer?.full_name ?? 'Client');
+const initialsOf = (name: string) =>
+  name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
-function ClientAvatar({ b, barberId, size = 44 }: { b: BookingRow; barberId: string; size?: number }) {
+function ClientAvatar({ b, barberId, size = 46, warm }: {
+  b: BookingRow; barberId: string; size?: number; warm?: boolean;
+}) {
   const url = b.customer_id === barberId ? null : b.customer?.avatar_url;
   if (url) return <Image source={{ uri: url }} style={{ width: size, height: size, borderRadius: 999 }} />;
-  const initials = nameOf(b, barberId).split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
-  return (
-    <View style={[s.avatarFallback, { width: size, height: size, borderRadius: 999 }]}>
-      <Text style={s.avatarInitials}>{initials}</Text>
-    </View>
-  );
+  if (b.customer_id === barberId && !b.walk_in_name) {
+    return <Avatar size={size} icon="user" />;
+  }
+  return <Avatar size={size} warm={warm} initials={initialsOf(nameOf(b, barberId))} />;
 }
 
 function MenuRow({ icon, label, onPress, danger }: {
@@ -66,10 +75,10 @@ function MenuRow({ icon, label, onPress, danger }: {
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label}
       style={({ pressed }) => [s.menuRow, pressed && s.pressed]}>
       <View style={s.menuRowIcon}>
-        <Ionicons name={icon} size={19} color={danger ? colors.danger : D.text} />
+        <Ionicons name={icon} size={19} color={danger ? D.red : D.text} />
       </View>
-      <Text style={[s.menuRowLabel, danger && { color: colors.danger }]}>{label}</Text>
-      <Ionicons name="chevron-forward" size={18} color={D.sub} />
+      <T w="b" size={14} c={danger ? D.red : D.text} style={s.grow}>{label}</T>
+      <Ionicons name="chevron-forward" size={18} color={D.muted} />
     </Pressable>
   );
 }
@@ -92,12 +101,15 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   const [chat, setChat] = useState<{ id: string; title: string } | null>(null);
   const [sheetClient, setSheetClient] = useState<ClientRef | null>(null);
   const [showProfile, setShowProfile] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const [menuBooking, setMenuBooking] = useState<BookingRow | null>(null);
   const [resched, setResched] = useState<BookingRow | null>(null);
   const [reschedAt, setReschedAt] = useState<Date | null>(null);
   const [completedB, setCompletedB] = useState<BookingRow | null>(null);
+  const [cancelling, setCancelling] = useState<BookingRow | null>(null);
   const [showEarnings, setShowEarnings] = useState(false);
+  const [showQueue, setShowQueue] = useState(false);
+  const [panel, setPanel] = useState<BookingRow | null>(null);      // 1d
+  const [request, setRequest] = useState<BookingRow | null>(null);  // 3d
 
   useEffect(() => {
     if (!barber.salon_id) return;
@@ -137,7 +149,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   }
 
   function decline(b: BookingRow) {
-    Alert.alert('Decline this request?', `${nameOf(b, barberId)} · ${ampm(b.starts_at)}`, [
+    Alert.alert('Decline this request?', `${nameOf(b, barberId)} · ${hhmm(b.starts_at)}`, [
       { text: 'Keep', style: 'cancel' },
       {
         text: 'Decline', style: 'destructive',
@@ -155,6 +167,19 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     setChat(req);
     onChromeHidden?.(!!req);
   }
+
+  const panelOf = (b: BookingRow): PanelBooking => ({
+    id: b.id, customerId: b.customer_id, name: nameOf(b, barberId),
+    initials: initialsOf(nameOf(b, barberId)),
+    service: b.services?.name ?? 'Service',
+    durationMin: Math.round((new Date(b.ends_at).getTime() - new Date(b.starts_at).getTime()) / 60_000),
+    whenLabel: new Date(b.starts_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+    timeLabel: hhmm(b.starts_at),
+    priceCents: b.price_cents,
+    checkedInAt: b.checked_in_at, startedAt: b.started_at,
+    phone: b.customer_id === barberId ? null : b.customer?.phone ?? null,
+    isWalkIn: b.customer_id === barberId,
+  });
 
   const clientRefOf = (b: BookingRow): ClientRef => ({
     name: nameOf(b, barberId),
@@ -178,7 +203,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   async function advance(b: BookingRow, stage: 'check_in' | 'start' | 'complete') {
     const { error } = await supabase.rpc('advance_booking', { p_booking: b.id, p_stage: stage });
     if (error) Alert.alert('Could not update', error.message);
-    else if (stage === 'complete') setCompletedB(b);
+    else if (stage === 'complete') setCompletedB(b); // → 3a, rate the client
     load();
   }
 
@@ -206,14 +231,14 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     const { error } = await supabase.from('messages')
       .insert({ booking_id: b.id, sender_id: barberId, body: reviewMsg(b) });
     if (error) Alert.alert('Could not send', error.message);
-    else { setCompletedB(null); Alert.alert('Sent', 'Review ask sent in chat.'); }
+    else Alert.alert('Sent', 'Review ask sent in chat.');
   }
 
   function askReviewBySms(b: BookingRow) {
-    const phone = b.customer?.phone;
-    if (!phone) return;
+    const to = b.customer?.phone;
+    if (!to) return;
     const sep = Platform.OS === 'ios' ? '&' : '?';
-    Linking.openURL(`sms:${phone}${sep}body=${encodeURIComponent(reviewMsg(b))}`)
+    Linking.openURL(`sms:${to}${sep}body=${encodeURIComponent(reviewMsg(b))}`)
       .catch(() => Alert.alert('SMS', 'Could not open the SMS app.'));
   }
 
@@ -238,7 +263,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   }
 
   if (chat) {
-    return <ChatScreen bookingId={chat.id} myId={barberId}
+    return <ChatScreen dark bookingId={chat.id} myId={barberId}
       title={chat.title} onBack={() => openChat(null)} />;
   }
   if (showProfile) {
@@ -248,6 +273,10 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   }
   if (showEarnings) {
     return <EarningsScreen barberId={barberId} onBack={() => openEarnings(false)} />;
+  }
+  if (showQueue) {
+    return <BarberQueueScreen barberId={barberId}
+      onBack={() => { setShowQueue(false); onChromeHidden?.(false); load(); }} />;
   }
 
   // ---- derive the dashboard ----
@@ -266,10 +295,12 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
       .reduce((a, b) => a + b.price_cents, 0);
   });
   const weekMax = Math.max(...week, 1);
+  const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 6);
 
   // theoretical slots today, minus breaks — 'full' here only means blocked, since booked=[]
   const capacity = daySlots(new Date(), 30, windows, [], [], blocks)
     .filter((sl) => sl.status !== 'full').length;
+  const freeSlots = Math.max(0, capacity - todayConfirmed.length);
   const walkIns = todayConfirmed.filter((b) => b.customer_id === barberId);
   const walkInsDH = walkIns.reduce((a, b) => a + b.price_cents, 0);
 
@@ -284,193 +315,339 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
       return new Date(b.ends_at).getTime() > now || !!b.checked_in_at;
     })
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
-  const shown = expanded ? remaining : remaining.slice(0, 3);
+  const nextUp = remaining.find((b) => b.status === 'confirmed') ?? null;
+  const pending = remaining.filter((b) => b.status === 'pending');
 
-  const dateLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  const today = new Date();
+  const dateLabel = today
+    .toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
+    .toUpperCase();
+  const firstName = (profile.full_name ?? 'Barber').split(' ')[0];
+  const hours = windows.find((w) => w.weekday === today.getDay());
+  const nextShift = windows.length
+    ? (() => {
+      for (let i = 1; i <= 7; i++) {
+        const d = new Date(); d.setDate(d.getDate() + i);
+        const w = windows.find((x) => x.weekday === d.getDay());
+        if (w && !daysOff.some((o) => o.day === isoDay(d))) {
+          return `${d.toLocaleDateString('en-US', { weekday: 'short' })} ${minLabel(w.start_min)}`;
+        }
+      }
+      return '—';
+    })()
+    : '—';
+
+  // first genuinely free slot in the next week, minus the booking we're about to drop —
+  // 1r offers it to the client in the same breath as the cancellation
+  function nextFreeSlot(excludeId: string): string | null {
+    const busy = confirmed.filter((b) => b.id !== excludeId);
+    const off = daysOff.map((d) => d.day);
+    for (let i = 0; i <= 7; i++) {
+      const day = new Date(); day.setDate(day.getDate() + i);
+      const free = daySlots(day, 30, windows, busy, off, blocks)
+        .find((sl) => sl.status === 'free');
+      if (free) {
+        return `${free.time.toLocaleDateString('en-US', { weekday: 'short' })} ${free.time.toTimeString().slice(0, 5)}`;
+      }
+    }
+    return null;
+  }
+
+  const bars = (
+    <View style={s.chart} accessible
+      accessibilityLabel={`Booked value, last 7 days, today ${dh(earnedToday)}`}>
+      {week.map((v, i) => (
+        <View key={i} style={[s.bar, {
+          height: Math.max(3, Math.round((v / weekMax) * 52)),
+          backgroundColor: i === 6 ? (todayOff ? D.muted : D.accent) : D.barMuted,
+        }]} />
+      ))}
+    </View>
+  );
 
   return (
-    <View style={s.screen}>
-      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        {/* header */}
+    <View style={s.root}>
+      <Screen gap={14} bottom={TAB_INSET}>
+        {/* 1a header — eyebrow date over the Playfair greeting, bell with its unread dot */}
         <View style={s.headRow}>
-          <View style={s.grow}>
-            <Text style={s.headName} numberOfLines={1}>
-              {profile.full_name ?? 'Barber'}
-              {salonName ? <Text style={s.headSalon}>  /  {salonName}</Text> : null}
-            </Text>
-            <Text style={s.headDate}>{dateLabel}</Text>
-          </View>
-          <Pressable onPress={() => setRequestsOpen(true)} accessibilityRole="button" accessibilityLabel={`Booking requests, ${requests.length} waiting`}
-            style={({ pressed }) => [s.circleBtn, pressed && s.pressed]}>
-            <Ionicons name="notifications-outline" size={20} color={D.text} />
-            {requests.length > 0 && <View style={s.bellDot} />}
+          <Pressable onPress={() => openProfile(true)} accessibilityRole="button"
+            accessibilityLabel="Your profile" style={({ pressed }) => [s.grow, pressed && s.pressed]}>
+            <Eyebrow ls={1.8}>{dateLabel}</Eyebrow>
+            <Serif size={26} ls={0.03} style={s.greet}>Salam, {firstName}</Serif>
           </Pressable>
-          <Pressable onPress={() => openProfile(true)} accessibilityRole="button" accessibilityLabel="Your profile"
-            style={({ pressed }) => pressed && s.pressed}>
-            {profile.avatar_url
-              ? <Image source={{ uri: profile.avatar_url }} style={s.headAvatar} />
-              : <View style={[s.headAvatar, s.avatarFallback]}>
-                  <Text style={s.avatarInitials}>
-                    {(profile.full_name ?? '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
-                  </Text>
-                </View>}
+          <Pressable onPress={() => setRequestsOpen(true)} accessibilityRole="button"
+            accessibilityLabel={`Booking requests, ${requests.length} waiting`}
+            style={({ pressed }) => [s.bell, pressed && s.pressed]}>
+            <Ico name="bell" size={16} />
+            {requests.length > 0 && <View style={s.bellDot} />}
           </Pressable>
         </View>
 
-        {/* daily earnings — tap for the full breakdown */}
-        <Pressable onPress={() => openEarnings(true)} accessibilityRole="button" accessibilityLabel="Earnings details"
-          style={({ pressed }) => [s.earnCard, pressed && s.pressed]}>
-          <View style={s.earnTop}>
-            <Text style={s.tileLabel}>DAILY EARNINGS</Text>
-            <View style={s.earnTopRight}>
-              <View style={s.liveBadge}>
-                <View style={s.liveDot} />
-                <Text style={s.liveText}>LIVE</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={18} color={D.sub} />
+        {/* 1s — the clocked-out banner replaces nothing, it sits above the number */}
+        {todayOff && (
+          <View style={s.clockedCard}>
+            <View style={s.clockedIcon}><Ico name="slash" size={16} color={D.amber} /></View>
+            <View style={s.grow}>
+              <T w="b" size={13} c={D.amber}>Clocked out for today</T>
+              <T size={11} c={D.sub} style={{ marginTop: 2 }}>New bookings for today are blocked</T>
             </View>
+            <Pressable onPress={toggleClockOut} accessibilityRole="button" accessibilityLabel="Clock back in"
+              style={({ pressed }) => [s.undoBtn, pressed && s.pressed]}>
+              <T w="eb" size={11} c={D.bg} ls={0.55}>UNDO</T>
+            </Pressable>
           </View>
-          <Text style={s.earnValue}>{dh(earnedToday)}</Text>
-          <View style={s.chart} accessible
-            accessibilityLabel={`Booked earnings, last 7 days, today ${dh(earnedToday)}`}>
-            {week.map((v, i) => (
-              <View key={i} style={[s.bar, {
-                height: Math.max(8, Math.round((v / weekMax) * 64)),
-                backgroundColor: i === 6 ? colors.accent : D.barMuted,
-              }]} />
-            ))}
+        )}
+
+        {/* booked today + the 7-day sparkline */}
+        <Pressable onPress={() => openEarnings(true)} accessibilityRole="button"
+          accessibilityLabel="Earnings details" style={({ pressed }) => pressed && s.pressed}>
+          <Eyebrow ls={1.6}>BOOKED TODAY</Eyebrow>
+          <Serif size={44} ls={0} style={[s.bigMoney, todayOff && { color: D.muted }]}>
+            {dh(earnedToday)}
+          </Serif>
+          {bars}
+          <View style={s.chartAxis}>
+            <T size={11} c={D.sub}>{weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</T>
+            <T size={11} c={D.sub}>Today</T>
           </View>
         </Pressable>
 
-        {/* stat tiles */}
+        {/* three-up tiles */}
         <View style={s.tileRow}>
-          <View style={s.tile}>
-            <Text style={s.tileLabel}>TODAY</Text>
-            <Text style={s.tileValue}>{todayConfirmed.length}</Text>
-            <Text style={s.tileSub}>/ {capacity} slots</Text>
-          </View>
-          <View style={s.tile}>
-            <Text style={s.tileLabel}>WALK-INS</Text>
-            <Text style={s.tileValue}>{walkIns.length}</Text>
-            <Text style={s.tileSub}>{(walkInsDH / 100).toFixed(0)} DH</Text>
-          </View>
-          <View style={s.tile}>
-            <Text style={s.tileLabel}>TIPS</Text>
-            <Text style={s.tileValue}>0 <Text style={s.tileSub}>DH</Text></Text>
-            {/* TODO(backlog): tips need the wallet/payment rail */}
-            <Text style={s.tileSub}>soon</Text>
-          </View>
+          <Stat label="TODAY" value={String(todayConfirmed.length)}
+            valueColor={todayOff ? D.muted : undefined} />
+          <Stat label="WALK-INS" value={String(walkIns.length)}
+            sub={todayOff ? undefined : dh(walkInsDH)} valueColor={todayOff ? D.muted : undefined} />
+          {todayOff
+            ? <View style={s.tile}>
+                <Eyebrow ls={0.8}>NEXT SHIFT</Eyebrow>
+                <T w="b" size={16} style={{ marginTop: 4 }}>{nextShift}</T>
+              </View>
+            : <Stat label="FREE SLOTS" value={String(freeSlots)} />}
         </View>
 
-        {/* action chips */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={s.chipRow}>
-            <Pressable onPress={goSchedule} accessibilityRole="button" accessibilityLabel="New booking"
-              style={({ pressed }) => [s.chip, s.chipPrimary, pressed && s.pressed]}>
-              <Ionicons name="add" size={16} color={colors.onAccent} />
-              <Text style={[s.chipText, { color: colors.onAccent }]}>New Booking</Text>
+        {/* open / clock-out strip */}
+        {!todayOff && (
+          <View style={s.openRow}>
+            <Pressable onPress={() => { setShowQueue(true); onChromeHidden?.(true); }}
+              accessibilityRole="button" accessibilityLabel="Live queue"
+              style={({ pressed }) => [s.openTap, pressed && s.pressed]}>
+              <View style={s.openDotWrap}><View style={s.openDot} /></View>
+              <View style={s.grow}>
+                <T w="b" size={13}>Open · taking walk-ins</T>
+                <T size={11} c={D.sub} style={{ marginTop: 2 }}>
+                  {hours ? `Working ${minLabel(hours.start_min)} – ${minLabel(hours.end_min)} today` : 'No hours set for today'}
+                </T>
+              </View>
             </Pressable>
-            <Pressable onPress={toggleClockOut} accessibilityRole="button" accessibilityLabel={todayOff ? 'Clock back in' : 'Clock out'}
-              style={({ pressed }) => [s.chip, pressed && s.pressed]}>
-              <Ionicons name="time-outline" size={16} color={D.text} />
-              <Text style={s.chipText}>{todayOff ? 'Clocked out · undo' : 'Clock Out'}</Text>
-            </Pressable>
-            <Pressable accessibilityRole="button" accessibilityLabel="Inventory"
-              /* TODO(backlog): product inventory */
-              onPress={() => Alert.alert('Inventory', 'Coming soon — see BACKLOG.md')}
-              style={({ pressed }) => [s.chip, pressed && s.pressed]}>
-              <Ionicons name="cube-outline" size={16} color={D.text} />
-              <Text style={s.chipText}>Inventory</Text>
+            <Pressable onPress={toggleClockOut} accessibilityRole="button" accessibilityLabel="Clock out"
+              style={({ pressed }) => [s.clockOutBtn, pressed && s.pressed]}>
+              <T w="b" size={11} ls={0.55}>CLOCK OUT</T>
             </Pressable>
           </View>
-        </ScrollView>
+        )}
 
-        {/* schedule */}
-        <View style={s.schedHead}>
-          <Text style={s.tileLabel}>SCHEDULE • {remaining.length} REMAINING</Text>
-          {remaining.length > 3 && (
-            <Pressable onPress={() => setExpanded(!expanded)} hitSlop={6} accessibilityState={{ expanded }}
-              accessibilityRole="button" accessibilityLabel={expanded ? 'Show fewer appointments' : `View all ${remaining.length} appointments`}
+        {/* next up */}
+        {!todayOff && (
+          <View style={s.sectionRow}>
+            <Eyebrow ls={1.65}>NEXT UP</Eyebrow>
+            <Pressable onPress={goSchedule} hitSlop={6} accessibilityRole="button" accessibilityLabel="My day"
               style={({ pressed }) => pressed && s.pressed}>
-              <Text style={s.viewAll}>{expanded ? 'Show less ⌄' : `View all (${remaining.length}) ›`}</Text>
+              <T w="sb" size={12} c={D.accent}>My day</T>
             </Pressable>
-          )}
-        </View>
-        {bookings === null && (
-          <View style={s.schedCard}>
-            <ActivityIndicator color={colors.accent} accessibilityLabel="Loading appointments" />
           </View>
         )}
-        {bookings !== null && remaining.length === 0 && (
-          <View style={s.schedCard}>
-            <Text style={s.tileSub}>{todayOff ? 'Clocked out for today.' : 'Nothing left today.'}</Text>
-          </View>
-        )}
-        {shown.map((b) => {
-          const st = stageOf(b)!;
-          const inChair = st === 'in_chair';
+
+        {bookings === null && <ActivityIndicator color={D.accent} accessibilityLabel="Loading appointments" />}
+
+        {nextUp && !todayOff && (() => {
+          const st = stageOf(nextUp)!;
+          const mins = Math.round((new Date(nextUp.starts_at).getTime() - now) / 60_000);
+          const when = st === 'in_chair' ? 'IN CHAIR'
+            : mins <= 0 ? 'NOW' : mins < 60 ? `IN ${mins} MIN` : `IN ${Math.round(mins / 60)} H`;
+          const cta = st === 'check_in' ? 'CHECK IN'
+            : st === 'start' ? 'START' : `MARK DONE · COLLECT ${dh(nextUp.price_cents)}`;
+          const dur = Math.round(
+            (new Date(nextUp.ends_at).getTime() - new Date(nextUp.starts_at).getTime()) / 60_000);
           return (
-            <View key={b.id} style={[s.schedCard, inChair && s.schedCardHot]}>
-              <Pressable onPress={() => setSheetClient(clientRefOf(b))}
-                accessibilityRole="button" accessibilityLabel={`${nameOf(b, barberId)}, view client`} style={s.schedTop}>
-                <ClientAvatar b={b} barberId={barberId} />
+            <View style={s.nextCard}>
+              <Pressable onPress={() => setPanel(nextUp)} accessibilityRole="button"
+                accessibilityLabel={`${nameOf(nextUp, barberId)}, open booking`} style={s.nextTop}>
+                <ClientAvatar b={nextUp} barberId={barberId} size={46} warm />
                 <View style={s.grow}>
-                  <Text style={s.schedName}>{nameOf(b, barberId)}</Text>
-                  <Text style={s.schedService}>{b.services?.name ?? 'Service'}</Text>
-                  <Text style={s.schedPrice}>{(b.price_cents / 100).toFixed(0)} DH</Text>
+                  <T w="b" size={15}>{nameOf(nextUp, barberId)}</T>
+                  <T size={12} c={D.sub} style={{ marginTop: 2 }}>
+                    {nextUp.services?.name ?? 'Service'} · {dur} min · {dh(nextUp.price_cents)}
+                  </T>
                 </View>
-                <View style={s.schedRight}>
-                  {inChair
-                    ? <View style={s.chairPill}><Text style={s.chairPillText}>In chair</Text></View>
-                    : <View style={s.timeBadge}><Text style={s.timeBadgeText}>{ampm(b.starts_at)}</Text></View>}
-                  {st === 'confirm' && <Text style={s.statusWait}>Awaiting confirmation</Text>}
-                  {st === 'check_in' && <Text style={s.statusOk}>✓ Confirmed</Text>}
-                  {st === 'start' && <Text style={s.statusHot}>Checked in</Text>}
-                  {inChair && b.started_at && <Text style={s.statusHot}>● Started {ampm(b.started_at)}</Text>}
+                <View style={s.nextRight}>
+                  <T w="eb" size={15} c={D.accent} style={s.tnum}>{hhmm(nextUp.starts_at)}</T>
+                  <T size={10} c={D.sub} ls={0.8} style={{ marginTop: 2 }}>{when}</T>
                 </View>
               </Pressable>
-              <View style={s.startRow}>
-                {st === 'confirm' && (
-                  <Pressable onPress={() => accept(b)} accessibilityRole="button" accessibilityLabel="Confirm booking"
-                    style={({ pressed }) => [s.stageBtn, s.stageBtnRed, pressed && s.pressed]}>
-                    <Ionicons name="checkmark" size={16} color={colors.onAccent} />
-                    <Text style={s.stageTextLight}>Confirm</Text>
+              {/* ponytail: deposits were removed in 0005_no_deposits — the strip carries
+                  what the shop actually collects until the wallet deposit rail lands. */}
+              <View style={s.moneyStrip}>
+                <Ico name="check" size={13} color={D.green} />
+                <T size={11} c={D.sub} style={s.grow}>
+                  {nextUp.checked_in_at ? `Checked in ${hhmm(nextUp.checked_in_at)} · ` : ''}
+                  {dh(nextUp.price_cents)} in cash
+                </T>
+              </View>
+              <View style={s.nextBtns}>
+                <Pressable onPress={() => advance(nextUp, st === 'check_in' ? 'check_in' : st === 'start' ? 'start' : 'complete')}
+                  accessibilityRole="button" accessibilityLabel={cta}
+                  style={({ pressed }) => [s.cta, st === 'in_chair' && { backgroundColor: D.green }, pressed && s.pressed]}>
+                  <T w="b" size={12} c={st === 'in_chair' ? D.bg : '#fff'} ls={0.72}>{cta}</T>
+                </Pressable>
+                {nextUp.customer_id !== barberId && (
+                  <Pressable onPress={() => openChat({ id: nextUp.id, title: nameOf(nextUp, barberId) })}
+                    accessibilityRole="button" accessibilityLabel="Message client"
+                    style={({ pressed }) => [s.puck42, pressed && s.pressed]}>
+                    <Ico name="message-circle" size={17} />
                   </Pressable>
                 )}
-                {st === 'check_in' && (
-                  <Pressable onPress={() => advance(b, 'check_in')} accessibilityRole="button" accessibilityLabel="Check in"
-                    style={({ pressed }) => [s.stageBtn, s.stageBtnDark, pressed && s.pressed]}>
-                    <Text style={s.stageTextDark}>Check in</Text>
-                  </Pressable>
-                )}
-                {st === 'start' && (
-                  <Pressable onPress={() => advance(b, 'start')} accessibilityRole="button" accessibilityLabel="Start appointment"
-                    style={({ pressed }) => [s.stageBtn, s.stageBtnRed, pressed && s.pressed]}>
-                    <Ionicons name="play" size={14} color={colors.onAccent} />
-                    <Text style={s.stageTextLight}>Start</Text>
-                  </Pressable>
-                )}
-                {inChair && (
-                  <Pressable onPress={() => advance(b, 'complete')} accessibilityRole="button" accessibilityLabel="Complete appointment"
-                    style={({ pressed }) => [s.stageBtn, s.stageBtnGreen, pressed && s.pressed]}>
-                    <Ionicons name="square-outline" size={14} color={colors.onAccent} />
-                    <Text style={s.stageTextLight}>Complete</Text>
-                  </Pressable>
-                )}
-                <Pressable onPress={() => setMenuBooking(b)} accessibilityRole="button" accessibilityLabel="More actions"
-                  style={({ pressed }) => [s.moreBtn, pressed && s.pressed]}>
-                  <Ionicons name="ellipsis-horizontal" size={18} color={D.text} />
+                <Pressable onPress={() => setMenuBooking(nextUp)} accessibilityRole="button"
+                  accessibilityLabel="More actions"
+                  style={({ pressed }) => [s.puck42, pressed && s.pressed]}>
+                  <Ico name="more-vertical" size={16} />
                 </Pressable>
               </View>
             </View>
           );
-        })}
-      </ScrollView>
+        })()}
+
+        {/* pending requests, inline and dashed */}
+        {!todayOff && pending.map((b) => (
+          <View key={b.id} style={s.pendingCard}>
+            <Pressable onPress={() => setRequest(b)} accessibilityRole="button"
+              accessibilityLabel={`${nameOf(b, barberId)}, open request`} style={s.pendingTap}>
+              <ClientAvatar b={b} barberId={barberId} size={40} />
+              <View style={s.grow}>
+                <View style={s.pendingNameRow}>
+                  <T w="b" size={14}>{nameOf(b, barberId)}</T>
+                  <View style={s.pendingChip}><T w="b" size={10} c={D.accent} ls={1}>PENDING</T></View>
+                </View>
+                <T size={12} c={D.sub} style={{ marginTop: 3 }}>
+                  {b.services?.name ?? 'Service'} · {hhmm(b.starts_at)} · {dh(b.price_cents)}
+                </T>
+              </View>
+            </Pressable>
+            <Pressable onPress={() => decline(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel="Decline"
+              style={({ pressed }) => [s.puck36, pressed && s.pressed]}>
+              <Ico name="x" size={15} color={D.red} />
+            </Pressable>
+            <Pressable onPress={() => accept(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel="Accept"
+              style={({ pressed }) => [s.puck36, { backgroundColor: D.green }, pressed && s.pressed]}>
+              <Ico name="check" size={15} color={D.bg} />
+            </Pressable>
+          </View>
+        ))}
+
+        {/* 1s — nothing left today */}
+        {bookings !== null && !nextUp && pending.length === 0 && (
+          <View style={s.emptyWrap}>
+            <View style={s.emptyCircle}><Ico name="scissors" size={32} color={D.muted} /></View>
+            <View style={{ alignItems: 'center' }}>
+              <Serif size={19} ls={0.03}>Nothing left today</Serif>
+              <T size={13} c={D.sub} style={s.emptyText}>
+                {todayOff
+                  ? `Enjoy the day. You're back ${nextShift}.`
+                  : 'Enjoy the day. The chair is free until tomorrow.'}
+              </T>
+            </View>
+            <Pressable onPress={goSchedule} accessibilityRole="button" accessibilityLabel="See the schedule"
+              style={({ pressed }) => [s.emptyBtn, pressed && s.pressed]}>
+              <T w="b" size={12} ls={0.72}>SEE THE SCHEDULE</T>
+            </Pressable>
+          </View>
+        )}
+      </Screen>
 
       {/* client quick-view */}
       <ClientSheet client={sheetClient} barberId={barberId}
         onClose={() => setSheetClient(null)}
         onChat={(id, title) => openChat({ id, title })} />
+
+      {/* 3a–3c — rate the client, raised straight after MARK DONE */}
+      <RateClientSheet
+        visible={!!completedB}
+        onClose={() => setCompletedB(null)}
+        barberId={barberId}
+        booking={completedB && {
+          id: completedB.id,
+          customerId: completedB.customer_id,
+          name: nameOf(completedB, barberId),
+          initials: initialsOf(nameOf(completedB, barberId)),
+          service: completedB.services?.name ?? 'Service',
+          time: hhmm(completedB.starts_at),
+          priceCents: completedB.price_cents,
+          isWalkIn: completedB.customer_id === barberId,
+          hasPhone: !!completedB.customer?.phone,
+          lateMin: completedB.checked_in_at
+            ? Math.max(0, Math.round(
+              (new Date(completedB.checked_in_at).getTime() - new Date(completedB.starts_at).getTime()) / 60_000))
+            : null,
+        }}
+        bookedTodayCents={earnedToday}
+        next={(() => {
+          const n = remaining.find((b) => b.id !== completedB?.id && b.status === 'confirmed');
+          if (!n) return null;
+          return {
+            ticket: String(remaining.indexOf(n) + 1).padStart(2, '0'),
+            label: nameOf(n, barberId),
+            service: n.services?.name ?? 'Service',
+            waitingMin: Math.max(0, Math.round((now - new Date(n.starts_at).getTime()) / 60_000)),
+            priceCents: n.price_cents,
+          };
+        })()}
+        onAskInChat={() => completedB && askReviewInChat(completedB)}
+        onAskBySms={() => { const b = completedB; setCompletedB(null); if (b) askReviewBySms(b); }}
+        onDone={() => { setCompletedB(null); load(); }}
+      />
+
+      {/* 1d — the booking in the chair */}
+      <BookingPanelSheet
+        visible={!!panel}
+        booking={panel && panelOf(panel)}
+        onClose={() => setPanel(null)}
+        onDone={() => { const b = panel; setPanel(null); if (b) advance(b, 'complete'); }}
+        onChat={() => { const b = panel; setPanel(null); if (b) openChat({ id: b.id, title: nameOf(b, barberId) }); }}
+        onHistory={() => { const b = panel; setPanel(null); if (b) setSheetClient(clientRefOf(b)); }}
+        onReschedule={() => { const b = panel; setPanel(null); setResched(b); setReschedAt(null); }}
+        onNoShow={() => { const b = panel; setPanel(null); if (b) menuAction(b, 'mark_no_show'); }}
+      />
+
+      {/* 3d — a request, with the shop's flag on it */}
+      <BookingRequestSheet
+        visible={!!request}
+        booking={request && panelOf(request)}
+        onClose={() => setRequest(null)}
+        onAccept={() => { const b = request; setRequest(null); if (b) accept(b); }}
+        onDecline={() => { const b = request; setRequest(null); if (b) setCancelling(b); }}
+        onClearFlag={async () => {
+          const b = request; setRequest(null);
+          if (!b) return;
+          const { error } = await supabase.from('client_flags')
+            .update({ reason: null, require_full_payment: false, blocked: false })
+            .eq('barber_id', barberId).eq('customer_id', b.customer_id);
+          if (error) Alert.alert('Could not clear the flag', error.message);
+        }}
+      />
+
+      {/* 1r — cancel a booking */}
+      <CancelBookingSheet
+        visible={!!cancelling}
+        onClose={() => setCancelling(null)}
+        onCancelled={() => { setCancelling(null); load(); }}
+        target={cancelling && {
+          id: cancelling.id,
+          name: nameOf(cancelling, barberId),
+          time: hhmm(cancelling.starts_at),
+          isWalkIn: cancelling.customer_id === barberId,
+          nextFreeLabel: nextFreeSlot(cancelling.id),
+        }}
+      />
 
       {/* … actions menu */}
       <Modal visible={!!menuBooking} transparent animationType="slide" onRequestClose={() => setMenuBooking(null)}>
@@ -480,16 +657,16 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
           const canNoShow = b.status === 'confirmed' && new Date(b.starts_at).getTime() <= now && !b.completed_at;
           const canCancel = !b.started_at && new Date(b.starts_at).getTime() > now;
           return (
-            <View style={s.sheet} onAccessibilityEscape={() => setMenuBooking(null)}>
+            <View style={s.menuSheet} onAccessibilityEscape={() => setMenuBooking(null)}>
               <View style={s.handle} />
               <View style={s.menuHead}>
                 <View style={s.grow}>
-                  <Text style={s.sheetTitle}>{nameOf(b, barberId)}</Text>
-                  <Text style={s.tileSub}>{ampm(b.starts_at)} • {b.services?.name ?? 'Service'}</Text>
+                  <T w="b" size={17}>{nameOf(b, barberId)}</T>
+                  <T size={12} c={D.sub}>{hhmm(b.starts_at)} · {b.services?.name ?? 'Service'}</T>
                 </View>
                 <Pressable onPress={() => setMenuBooking(null)} hitSlop={8} accessibilityRole="button" accessibilityLabel="Close"
                   style={({ pressed }) => [s.menuClose, pressed && s.pressed]}>
-                  <Ionicons name="close" size={18} color={D.text} />
+                  <Ico name="x" size={16} />
                 </Pressable>
               </View>
               {!b.started_at && (
@@ -507,7 +684,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
               {canCancel && (
                 <MenuRow danger icon="trash-outline"
                   label={b.status === 'pending' ? 'Decline request' : 'Cancel booking'}
-                  onPress={() => menuAction(b, 'cancel_booking')} />
+                  onPress={() => { setMenuBooking(null); setCancelling(b); }} />
               )}
             </View>
           );
@@ -518,7 +695,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
       <Modal visible={!!resched} transparent animationType="slide" onRequestClose={() => setResched(null)}>
         <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.sheetBackdrop} onPress={() => setResched(null)} />
         {resched && (
-          <View style={[s.sheet, s.sheetLight]} onAccessibilityEscape={() => setResched(null)}>
+          <View style={[s.menuSheet, s.sheetLight]} onAccessibilityEscape={() => setResched(null)}>
             <Text style={s.sheetTitleLight}>
               Move {nameOf(resched, barberId)} · {(new Date(resched.ends_at).getTime() - new Date(resched.starts_at).getTime()) / 60_000} min
             </Text>
@@ -532,196 +709,145 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
         )}
       </Modal>
 
-      {/* service complete — the mirror moment */}
-      <Modal visible={!!completedB} transparent animationType="slide" onRequestClose={() => setCompletedB(null)}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.sheetBackdrop} onPress={() => setCompletedB(null)} />
-        {completedB && (() => {
-          const b = completedB;
-          const isWalkIn = b.customer_id === barberId;
-          const firstName = nameOf(b, barberId).split(' ')[0];
-          return (
-            <View style={s.sheet} onAccessibilityEscape={() => setCompletedB(null)}>
-              <View style={s.handle} />
-              <View style={s.menuHead}>
-                <ClientAvatar b={b} barberId={barberId} size={48} />
-                <View style={s.grow}>
-                  <View style={s.doneTagRow}>
-                    <Ionicons name="checkmark" size={13} color={colors.success} />
-                    <Text style={s.doneTag}>SERVICE COMPLETE</Text>
-                  </View>
-                  <Text style={s.sheetTitle}>{nameOf(b, barberId)}</Text>
-                  <Text style={s.tileSub}>{b.services?.name ?? 'Service'} • {(b.price_cents / 100).toFixed(0)} DH</Text>
-                </View>
-                <Pressable onPress={() => setCompletedB(null)} hitSlop={8} accessibilityRole="button" accessibilityLabel="Close"
-                  style={({ pressed }) => [s.menuClose, pressed && s.pressed]}>
-                  <Ionicons name="close" size={18} color={D.text} />
-                </Pressable>
-              </View>
-
-              <View style={s.reviewCard}>
-                <View style={s.starsRow} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <Ionicons key={i} name="star" size={22} color={colors.star} />
-                  ))}
-                </View>
-                <Text style={s.reviewTitle}>Ask {firstName} for a review</Text>
-                <Text style={s.tileSub}>
-                  {isWalkIn
-                    ? "Walk-ins have no account, so they can't leave a review yet."
-                    : 'Fresh-cut clients leave the best reviews — ask now.'}
-                </Text>
-              </View>
-
-              {!isWalkIn && (
-                <MenuRow icon="paper-plane-outline" label="Ask in chat" onPress={() => askReviewInChat(b)} />
-              )}
-              {!isWalkIn && b.customer?.phone && (
-                <MenuRow icon="chatbox-ellipses-outline" label="Send by SMS"
-                  onPress={() => { setCompletedB(null); askReviewBySms(b); }} />
-              )}
-            </View>
-          );
-        })()}
-      </Modal>
-
       {/* booking requests sheet (bell) */}
-      <Modal visible={requestsOpen} transparent animationType="slide" onRequestClose={() => setRequestsOpen(false)}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.sheetBackdrop} onPress={() => setRequestsOpen(false)} />
-        <View style={s.sheet} onAccessibilityEscape={() => setRequestsOpen(false)}>
-          <Text style={s.sheetTitle}>Booking requests</Text>
-          {bookings === null && <ActivityIndicator color={colors.accent} accessibilityLabel="Loading requests" />}
-          {bookings !== null && requests.length === 0 && <Text style={s.tileSub}>All caught up.</Text>}
-          {requests.map((b) => (
-            <View key={b.id} style={s.reqRow}>
-              <ClientAvatar b={b} barberId={barberId} size={40} />
-              <View style={s.grow}>
-                <Text style={s.schedName}>{nameOf(b, barberId)}</Text>
-                <Text style={s.tileSub}>
-                  {b.services?.name ?? 'Service'} · {new Date(b.starts_at).toDateString().slice(0, 10)} {ampm(b.starts_at)} · {(b.price_cents / 100).toFixed(0)} DH
-                </Text>
-              </View>
-              <Pressable onPress={() => decline(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel="Decline"
-                style={({ pressed }) => [s.reqIcon, pressed && s.pressed]}>
-                <Ionicons name="close" size={18} color={colors.danger} />
-              </Pressable>
-              <Pressable onPress={() => accept(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel="Accept"
-                style={({ pressed }) => [s.reqIcon, s.reqIconAccept, pressed && s.pressed]}>
-                <Ionicons name="checkmark" size={18} color={colors.onAccent} />
-              </Pressable>
+      <Sheet visible={requestsOpen} onClose={() => setRequestsOpen(false)}>
+        <SheetHead title="Booking requests" onClose={() => setRequestsOpen(false)} left />
+        {bookings === null && <ActivityIndicator color={D.accent} accessibilityLabel="Loading requests" />}
+        {bookings !== null && requests.length === 0 && <T size={13} c={D.sub}>All caught up.</T>}
+        {requests.map((b) => (
+          <View key={b.id} style={s.reqRow}>
+            <ClientAvatar b={b} barberId={barberId} size={40} />
+            <View style={s.grow}>
+              <T w="b" size={14}>{nameOf(b, barberId)}</T>
+              <T size={11} c={D.sub} style={{ marginTop: 2 }}>
+                {b.services?.name ?? 'Service'} · {new Date(b.starts_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} {hhmm(b.starts_at)} · {dh(b.price_cents)}
+              </T>
             </View>
-          ))}
-        </View>
-      </Modal>
+            <Pressable onPress={() => decline(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel="Decline"
+              style={({ pressed }) => [s.puck36, pressed && s.pressed]}>
+              <Ico name="x" size={15} color={D.red} />
+            </Pressable>
+            <Pressable onPress={() => accept(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel="Accept"
+              style={({ pressed }) => [s.puck36, { backgroundColor: D.green }, pressed && s.pressed]}>
+              <Ico name="check" size={15} color={D.bg} />
+            </Pressable>
+          </View>
+        ))}
+      </Sheet>
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: D.bg },
-  content: { padding: sp(5), paddingTop: sp(14), gap: sp(3), paddingBottom: TAB_BAR_INSET },
+  root: { flex: 1, backgroundColor: D.bg },
   pressed: { opacity: 0.7 },
   grow: { flex: 1 },
+  tnum: { fontVariant: ['tabular-nums'] },
 
-  headRow: { flexDirection: 'row', alignItems: 'center', gap: sp(3) },
-  headName: { fontSize: font.title, fontWeight: '700', color: D.text },
-  headSalon: { fontSize: font.body, fontWeight: '600', color: D.sub },
-  headDate: { fontSize: font.small, color: D.sub, marginTop: 2 },
-  circleBtn: {
-    width: 42, height: 42, borderRadius: radius.pill, backgroundColor: D.card2,
+  headRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+  greet: { marginTop: 5 },
+  bell: {
+    width: 38, height: 38, borderRadius: 999, backgroundColor: D.card,
     alignItems: 'center', justifyContent: 'center',
   },
   bellDot: {
-    position: 'absolute', top: 9, right: 10, width: 8, height: 8, borderRadius: 4,
-    backgroundColor: colors.accent, borderWidth: 1.5, borderColor: D.card2,
+    position: 'absolute', top: 8, right: 9, width: 7, height: 7, borderRadius: 999,
+    backgroundColor: D.accent,
   },
-  headAvatar: { width: 42, height: 42, borderRadius: radius.pill, borderWidth: 2, borderColor: D.card2 },
-  avatarFallback: { backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
-  avatarInitials: { fontSize: font.small, fontWeight: '700', color: colors.accent },
 
-  earnCard: { backgroundColor: D.card, borderRadius: radius.lg, padding: sp(4), gap: sp(2) },
-  earnTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  earnTopRight: { flexDirection: 'row', alignItems: 'center', gap: sp(2) },
-  tileLabel: { fontSize: font.tiny, fontWeight: '700', color: D.sub, letterSpacing: 1 },
-  liveBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(232,71,79,0.15)',
-    borderRadius: radius.pill, paddingVertical: 3, paddingHorizontal: sp(2),
+  clockedCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 11, borderRadius: 20, padding: 15,
+    paddingHorizontal: 16, backgroundColor: D.amberSoft12, borderWidth: 1, borderColor: D.amberLine,
   },
-  liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.accent },
-  liveText: { fontSize: font.tiny, fontWeight: '800', color: colors.accent, letterSpacing: 0.5 },
-  earnValue: { fontSize: 34, fontWeight: '700', color: D.text, fontVariant: ['tabular-nums'] },
-  chart: { flexDirection: 'row', alignItems: 'flex-end', gap: sp(2), height: 64, marginTop: sp(1) },
-  bar: { flex: 1, borderRadius: 4 },
-
-  tileRow: { flexDirection: 'row', gap: sp(2.5) },
-  tile: { flex: 1, backgroundColor: D.card, borderRadius: radius.lg, padding: sp(3.5), gap: 3 },
-  tileValue: { fontSize: 22, fontWeight: '700', color: D.text, fontVariant: ['tabular-nums'] },
-  tileSub: { fontSize: font.small, color: D.sub },
-
-  chipRow: { flexDirection: 'row', gap: sp(2.5) },
-  chip: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(1.5), minHeight: 44,
-    paddingHorizontal: sp(4), borderRadius: radius.pill, backgroundColor: D.card,
-    borderWidth: 1, borderColor: D.border,
-  },
-  chipPrimary: { backgroundColor: colors.accent, borderColor: colors.accent },
-  chipText: { fontSize: font.small, fontWeight: '700', color: D.text },
-
-  schedHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: sp(1) },
-  viewAll: { fontSize: font.small, fontWeight: '700', color: colors.accent },
-  schedCard: { backgroundColor: D.card, borderRadius: radius.lg, padding: sp(4), gap: sp(3) },
-  schedTop: { flexDirection: 'row', gap: sp(3) },
-  schedName: { fontSize: font.body, fontWeight: '700', color: D.text },
-  schedService: { fontSize: font.small, color: D.sub, marginTop: 1 },
-  schedPrice: { fontSize: font.small, fontWeight: '700', color: D.text, marginTop: 3, fontVariant: ['tabular-nums'] },
-  schedRight: { alignItems: 'flex-end', gap: sp(2) },
-  timeBadge: { backgroundColor: D.card2, borderRadius: radius.sm, paddingVertical: 3, paddingHorizontal: sp(2) },
-  timeBadgeText: { fontSize: font.tiny, fontWeight: '700', color: colors.accent },
-  statusHot: { fontSize: font.small, fontWeight: '600', color: colors.accent },
-  statusOk: { fontSize: font.small, color: D.sub },
-  startRow: { flexDirection: 'row', gap: sp(2.5) },
-  startBtn: {
-    flex: 1, height: 44, borderRadius: radius.pill, backgroundColor: colors.accent,
+  clockedIcon: {
+    width: 34, height: 34, borderRadius: 999, backgroundColor: 'rgba(232,161,0,0.2)',
     alignItems: 'center', justifyContent: 'center',
   },
-  startText: { fontSize: font.body, fontWeight: '700', color: colors.onAccent },
-  moreBtn: {
-    width: 44, height: 44, borderRadius: radius.md, backgroundColor: D.card2,
+  undoBtn: {
+    height: 32, borderRadius: 999, backgroundColor: D.amber, paddingHorizontal: 13,
     alignItems: 'center', justifyContent: 'center',
   },
 
-  sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
-  sheet: {
-    backgroundColor: D.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg,
+  bigMoney: { marginTop: 4, fontVariant: ['tabular-nums'] },
+  chart: { flexDirection: 'row', alignItems: 'flex-end', gap: 3, height: 52, marginTop: 12 },
+  bar: { flex: 1, borderRadius: 3 },
+  chartAxis: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 },
+
+  tileRow: { flexDirection: 'row', gap: 10 },
+  tile: { flex: 1, backgroundColor: D.card, borderRadius: 20, padding: 14, gap: 3 },
+
+  openRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: D.card,
+    borderRadius: 20, padding: 14, paddingHorizontal: 16,
+  },
+  openTap: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
+  openDotWrap: {
+    width: 34, height: 34, borderRadius: 999, backgroundColor: D.greenSoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  openDot: { width: 9, height: 9, borderRadius: 999, backgroundColor: D.green },
+  clockOutBtn: {
+    height: 34, borderRadius: 999, borderWidth: 1, borderColor: D.border,
+    paddingHorizontal: 14, alignItems: 'center', justifyContent: 'center',
+  },
+
+  sectionRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
+
+  nextCard: {
+    backgroundColor: D.card, borderRadius: 22, padding: 16, gap: 13,
+    borderWidth: 2, borderColor: D.accent,
+  },
+  nextTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  nextRight: { alignItems: 'flex-end' },
+  moneyStrip: {
+    flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: D.card2,
+    borderRadius: 12, padding: 10, paddingHorizontal: 12,
+  },
+  nextBtns: { flexDirection: 'row', gap: 9 },
+  cta: {
+    flex: 1, height: 42, borderRadius: 999, backgroundColor: D.accent,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  puck42: {
+    width: 42, height: 42, borderRadius: 999, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  puck36: {
+    width: 36, height: 36, borderRadius: 999, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+
+  pendingCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: D.card,
+    borderRadius: 22, padding: 15, paddingHorizontal: 16,
+    borderWidth: 1, borderStyle: 'dashed', borderColor: D.muted,
+  },
+  pendingTap: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  pendingNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  pendingChip: { backgroundColor: D.accentSoft, borderRadius: 6, paddingVertical: 3, paddingHorizontal: 7 },
+
+  emptyWrap: { alignItems: 'center', gap: 15, paddingTop: 44 },
+  emptyCircle: {
+    width: 88, height: 88, borderRadius: 999, borderWidth: 1.5, borderStyle: 'dashed',
+    borderColor: D.muted, alignItems: 'center', justifyContent: 'center',
+  },
+  emptyText: { textAlign: 'center', marginTop: 8, maxWidth: 250, lineHeight: 20 },
+  emptyBtn: {
+    height: 48, borderRadius: 999, backgroundColor: D.card2, paddingHorizontal: 26,
+    alignItems: 'center', justifyContent: 'center',
+  },
+
+  reqRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+
+  sheetBackdrop: { flex: 1, backgroundColor: D.scrim },
+  menuSheet: {
+    backgroundColor: D.sheet, borderTopLeftRadius: 26, borderTopRightRadius: 26,
     padding: sp(5), paddingBottom: sp(10), gap: sp(3),
   },
-  sheetTitle: { fontSize: font.h2, fontWeight: '700', color: D.text },
-  reqRow: { flexDirection: 'row', alignItems: 'center', gap: sp(3) },
-  reqIcon: {
-    width: 40, height: 40, borderRadius: radius.pill, borderWidth: 1, borderColor: D.border,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  reqIconAccept: { backgroundColor: colors.success, borderColor: colors.success },
-
-  // stage cards
-  schedCardHot: { borderWidth: 1.5, borderColor: colors.accent },
-  chairPill: { backgroundColor: colors.accent, borderRadius: radius.sm, paddingVertical: 3, paddingHorizontal: sp(2) },
-  chairPillText: { fontSize: font.tiny, fontWeight: '800', color: colors.onAccent },
-  statusWait: { fontSize: font.small, fontWeight: '600', color: '#E8B84B' },
-  stageBtn: {
-    flex: 1, height: 44, borderRadius: radius.pill, flexDirection: 'row', gap: sp(1.5),
-    alignItems: 'center', justifyContent: 'center',
-  },
-  stageBtnRed: { backgroundColor: colors.accent },
-  stageBtnGreen: { backgroundColor: colors.success },
-  stageBtnDark: { backgroundColor: D.card2, borderWidth: 1, borderColor: D.border },
-  stageTextLight: { fontSize: font.body, fontWeight: '700', color: colors.onAccent },
-  stageTextDark: { fontSize: font.body, fontWeight: '700', color: D.text },
-
-  // menu / completion sheets
-  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: D.border, marginBottom: sp(2) },
+  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: D.hairline, marginBottom: sp(2) },
   menuHead: { flexDirection: 'row', alignItems: 'center', gap: sp(3), marginBottom: sp(1) },
   menuClose: {
-    width: 36, height: 36, borderRadius: radius.pill, backgroundColor: D.card2,
+    width: 36, height: 36, borderRadius: 999, backgroundColor: D.card2,
     alignItems: 'center', justifyContent: 'center',
   },
   menuRow: { flexDirection: 'row', alignItems: 'center', gap: sp(3.5), paddingVertical: sp(3) },
@@ -729,12 +855,6 @@ const s = StyleSheet.create({
     width: 44, height: 44, borderRadius: radius.md, backgroundColor: D.card2,
     alignItems: 'center', justifyContent: 'center',
   },
-  menuRowLabel: { flex: 1, fontSize: font.body, fontWeight: '700', color: D.text },
   sheetLight: { backgroundColor: colors.bg },
-  sheetTitleLight: { fontSize: font.h2, fontWeight: '700', color: colors.text },
-  doneTagRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  doneTag: { fontSize: font.tiny, fontWeight: '800', color: colors.success, letterSpacing: 1 },
-  reviewCard: { backgroundColor: D.card2, borderRadius: radius.lg, padding: sp(4), gap: sp(2) },
-  starsRow: { flexDirection: 'row', gap: sp(1) },
-  reviewTitle: { fontSize: font.body, fontWeight: '700', color: D.text },
+  sheetTitleLight: { fontFamily: inter.b, fontSize: 18, color: colors.text },
 });

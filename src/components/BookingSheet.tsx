@@ -37,6 +37,9 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
   const [time, setTime] = useState<Date | null>(null);
   const [me, setMe] = useState<{ name: string | null; phone: string | null; email: string | null } | null>(null);
   const [busy, setBusy] = useState(false);
+  // 3e — this barber has flagged you, so the whole price is due up front
+  const [upFront, setUpFront] = useState(false);
+  const [walletCents, setWalletCents] = useState<number | null>(null);
 
   const translateY = useRef(new Animated.Value(SCREEN_H)).current;
 
@@ -56,6 +59,15 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
       translateY.setValue(SCREEN_H);
     }
   }, [visible]);
+
+  // the barber's terms for *me* — a boolean and nothing else leaves their shop (0030)
+  useEffect(() => {
+    if (!barber) return setUpFront(false);
+    supabase.rpc('barber_terms_for_me', { p_barber: barber.id })
+      .then(({ data }) => setUpFront(!!data?.[0]?.require_full_payment));
+    supabase.from('wallet_transactions').select('amount_cents')
+      .then(({ data }) => setWalletCents((data ?? []).reduce((a, t) => a + t.amount_cents, 0)));
+  }, [barber?.id]);
 
   function close() {
     Animated.timing(translateY, { toValue: SCREEN_H, duration: 180, useNativeDriver: true }).start(onClose);
@@ -204,6 +216,65 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
                 <Text style={s.sumText}>{me?.name ?? '—'}</Text>
                 <Text style={s.optMeta}>{me?.phone ?? ''}{me?.email ? `  ·  ${me.email}` : ''}</Text>
               </SummaryCard>
+
+              {upFront && svc && (
+                <>
+                  <View style={s.payCard}>
+                    <View style={s.payTop}>
+                      <View style={s.payIcon}>
+                        <Ionicons name="wallet-outline" size={16} color="#fff" />
+                      </View>
+                      <View style={s.grow}>
+                        <Text style={s.payTitle}>Pay in full at the shop</Text>
+                        <Text style={s.paySub}>
+                          {walletCents != null
+                            ? `Wallet ${(walletCents / 100).toFixed(0)} DH · not spendable yet`
+                            : 'Wallet balance unavailable'}
+                        </Text>
+                      </View>
+                      {/* locked: 100% is the barber's condition, not a choice */}
+                      <View style={s.payToggle}><View style={s.payKnob} /></View>
+                    </View>
+                    <View style={s.paySplit}>
+                      <View style={s.paySplitRow}>
+                        <View>
+                          <Text style={s.payLabel}>DUE UP FRONT</Text>
+                          <Text style={s.payBig}>{(svc.price_cents / 100).toFixed(0)} DH</Text>
+                        </View>
+                        <View style={{ alignItems: 'flex-end' }}>
+                          <Text style={s.payLabel}>SPLIT LATER</Text>
+                          <Text style={s.paySmall}>0 DH</Text>
+                        </View>
+                      </View>
+                      <View style={s.payTrack}>
+                        <View style={s.payFill} />
+                        <View style={s.payHandle} />
+                      </View>
+                      <View style={s.payFoot}>
+                        <View style={s.payLockRow}>
+                          <Ionicons name="lock-closed" size={10} color="rgba(255,255,255,0.45)" />
+                          <Text style={s.payLock}>LOCKED AT 100%</Text>
+                        </View>
+                        <Text style={s.payOf}>
+                          {(svc.price_cents / 100).toFixed(0)} DH of {(svc.price_cents / 100).toFixed(0)} DH
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  <View style={s.warnCard}>
+                    <View style={s.warnIcon}>
+                      <Ionicons name="information-circle-outline" size={14} color={colors.accent} />
+                    </View>
+                    <View style={s.grow}>
+                      <Text style={s.warnTitle}>This barber asks you to pay up front</Text>
+                      <Text style={s.warnBody}>
+                        Missed visits are why. Turn up to your next three and part-payment comes back.
+                      </Text>
+                    </View>
+                  </View>
+                </>
+              )}
             </>
           )}
         </ScrollView>
@@ -217,7 +288,10 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
         )}
         {step === 'summary' && (
           <View style={s.footer}>
-            <PillButton title="Confirm booking" loading={busy} onPress={confirm} />
+            <PillButton loading={busy} onPress={confirm}
+              title={upFront && svc
+                ? `Request · ${(svc.price_cents / 100).toFixed(0)} DH up front`
+                : 'Confirm booking'} />
           </View>
         )}
       </Animated.View>
@@ -287,4 +361,49 @@ const s = StyleSheet.create({
   sumText: { fontSize: font.body, fontWeight: '600', color: colors.text },
 
   footer: { padding: sp(5), paddingBottom: sp(8) },
+
+  // 3e — the up-front panel. Ink card so the money reads as its own object.
+  payCard: { backgroundColor: colors.ink, borderRadius: 22, padding: 18, gap: 13 },
+  payTop: { flexDirection: 'row', alignItems: 'center', gap: 11 },
+  payIcon: {
+    width: 34, height: 34, borderRadius: 10, backgroundColor: 'rgba(255,255,255,0.12)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  payTitle: { fontSize: 13, fontWeight: '700', color: '#fff' },
+  paySub: { fontSize: 11, color: 'rgba(255,255,255,0.55)', marginTop: 2 },
+  payToggle: {
+    width: 42, height: 26, borderRadius: 999, backgroundColor: 'rgba(255,255,255,0.2)',
+    flexDirection: 'row', justifyContent: 'flex-end', padding: 3, opacity: 0.55,
+  },
+  payKnob: { width: 20, height: 20, borderRadius: 999, backgroundColor: '#fff' },
+  paySplit: {
+    borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)', paddingTop: 13, gap: 10,
+  },
+  paySplitRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
+  payLabel: { fontSize: 10, letterSpacing: 1.5, fontWeight: '700', color: 'rgba(255,255,255,0.5)' },
+  payBig: { fontFamily: serif, fontSize: 30, color: '#fff', marginTop: 4 },
+  paySmall: { fontSize: 18, fontWeight: '700', color: 'rgba(255,255,255,0.4)', marginTop: 6 },
+  payTrack: {
+    height: 24, justifyContent: 'center', opacity: 0.5,
+  },
+  payFill: { height: 6, borderRadius: 3, backgroundColor: colors.accent },
+  payHandle: {
+    position: 'absolute', right: 0, width: 24, height: 24, borderRadius: 999,
+    backgroundColor: '#fff', borderWidth: 3, borderColor: colors.ink,
+  },
+  payFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  payLockRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  payLock: { fontSize: 10, letterSpacing: 0.6, fontWeight: '700', color: 'rgba(255,255,255,0.45)' },
+  payOf: { fontSize: 11, fontWeight: '700', color: '#fff' },
+
+  warnCard: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+    backgroundColor: colors.bg, borderRadius: 18, padding: 14, paddingHorizontal: 16, ...shadow,
+  },
+  warnIcon: {
+    width: 28, height: 28, borderRadius: 999, backgroundColor: colors.accentSoft,
+    alignItems: 'center', justifyContent: 'center', marginTop: 1,
+  },
+  warnTitle: { fontSize: 13, fontWeight: '700', color: colors.text },
+  warnBody: { fontSize: 12, lineHeight: 18, color: colors.textSecondary, marginTop: 4 },
 });

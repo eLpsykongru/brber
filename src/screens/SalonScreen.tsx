@@ -1,12 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator, Alert, KeyboardAvoidingView, Modal, PanResponder, Platform, Pressable,
-  ScrollView, StyleSheet, Switch, Text, TextInput, View,
+  ActivityIndicator, Alert, KeyboardAvoidingView, Linking, Modal, PanResponder, Platform, Pressable,
+  ScrollView, Share, StyleSheet, Switch, Text, TextInput, View,
 } from 'react-native';
+import { Eyebrow, Ico, IconName, Serif, T } from '../components/dark';
 import { TAB_BAR_INSET } from '../components/ui';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, font, radius, sp } from '../theme';
+import { colors, dark as D, font, inter, radius, serif, sp } from '../theme';
+import { AllChairsScreen, OwnerBarberScreen, OwnerDashboard } from './OwnerScreens';
+import { ReviewsInboxScreen, ShopListingScreen, ShopReportScreen, WalkInPosterScreen, WallDisplayScreen } from './ShopScreens';
 
 // Owner-only Salon screen — TEAM / SERVICES / SETTINGS. Real backend (0025):
 // salon_team()/salon_stats() RPCs (owner-only, privacy rule baked in — a rent
@@ -20,10 +23,15 @@ const soon = () => Alert.alert('Coming soon', 'See BACKLOG.md — Owner: salon m
 
 type PayModel = 'commission' | 'rent';
 type SalonMeta = {
-  id: string; name: string; address: string | null;
+  id: string; name: string; address: string | null; bio: string | null;
+  lat: number | null; lng: number | null;
   default_commission: number; accepting_bookings: boolean; cash_agent_id: string | null;
   open_min: number; close_min: number;
 };
+
+// the turn-2 screens that sit behind this hub
+type OwnerView =
+  | 'hub' | 'dashboard' | 'allChairs' | 'report' | 'reviews' | 'listing' | 'poster' | 'wall';
 
 const hhmm = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 type Member = {
@@ -58,6 +66,8 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
   onManageServices?: () => void; onEditSalon?: () => void;
 }) {
   const [seg, setSeg] = useState<'team' | 'chairs' | 'services' | 'settings'>('team');
+  const [view, setView] = useState<OwnerView>('hub');
+  const [tabs, setTabs] = useState(false); // the old TEAM/CHAIRS/SERVICES/SETTINGS detail sheet
   const [salon, setSalon] = useState<SalonMeta | null>(null);
   const [team, setTeam] = useState<Member[] | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -73,7 +83,7 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
   const load = useCallback(async () => {
     const [{ data: s }, { data: t }, { data: st }, { data: sv }, { data: ch }] = await Promise.all([
       supabase.from('salons')
-        .select('id, name, address, default_commission, accepting_bookings, cash_agent_id, open_min, close_min')
+        .select('id, name, address, bio, lat, lng, default_commission, accepting_bookings, cash_agent_id, open_min, close_min')
         .eq('owner_id', barberId).maybeSingle(),
       supabase.rpc('salon_team'),
       supabase.rpc('salon_stats'),
@@ -123,52 +133,198 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
 
   if (payoutsFor) return <BarberEarnings member={payoutsFor} onBack={() => setPayoutsFor(null)} />;
 
+  // 2c — an approved barber opens the owner's full view of them
+  if (selected && selected.status === 'approved') {
+    return <OwnerBarberScreen member={selected} salon={salon} onBack={() => setSelected(null)}
+      onSchedule={() => { setPayoutsFor(selected); setSelected(null); }}
+      onChanged={load} />;
+  }
+
+  // ---- turn 2 · the shop screens behind this hub
+  if (view === 'dashboard') {
+    return <OwnerDashboard salon={salon} team={team} onBack={() => setView('hub')}
+      onAllChairs={() => setView('allChairs')} onReports={() => setView('report')}
+      onReviews={() => setView('reviews')} onTeam={() => setView('hub')}
+      onBarber={(m) => { setView('hub'); setSelected(m); }} />;
+  }
+  if (view === 'allChairs') {
+    return <AllChairsScreen salon={salon} team={team} onBack={() => setView('hub')}
+      onAdd={() => Alert.alert('Add a booking', 'Use the + on your own day, or the chair’s own schedule.')} />;
+  }
+  if (view === 'report') return <ShopReportScreen onBack={() => setView('hub')} />;
+  if (view === 'reviews') {
+    return <ReviewsInboxScreen salon={salon} team={team} onBack={() => setView('hub')} />;
+  }
+  if (view === 'listing') {
+    return <ShopListingScreen salon={salon} onBack={() => setView('hub')}
+      onMovePin={() => { setView('hub'); onEditSalon?.(); }}
+      onSaved={() => { setView('hub'); load(); }} />;
+  }
+  if (view === 'poster') return <WalkInPosterScreen salon={salon} onBack={() => setView('hub')} />;
+  if (view === 'wall') {
+    return <WallDisplayScreen salon={salon} team={team} onBack={() => setView('hub')} />;
+  }
+
+  const roster = team.filter((m) => m.status === 'approved');
+  const pending = team.filter((m) => m.status === 'pending');
+  const rated = team.filter((m) => m.reviews > 0);
+  const rating = rated.length
+    ? rated.reduce((a, m) => a + m.rating * m.reviews, 0) / rated.reduce((a, m) => a + m.reviews, 0)
+    : null;
+
+  const shopRows: { icon: IconName; label: string; value?: string; accent?: boolean; onPress: () => void }[] = [
+    { icon: 'clock', label: 'Opening hours', value: `${hhmm(salon.open_min)} – ${hhmm(salon.close_min)}`, onPress: () => setHoursOpen(true) },
+    { icon: 'map-pin', label: 'Address & map pin', value: salon.address ?? 'Not set', onPress: () => setView('listing') },
+    { icon: 'eye', label: 'Shop listing', onPress: () => setView('listing') },
+    { icon: 'grid', label: 'Walk-in QR poster', value: 'Print', accent: true, onPress: () => setView('poster') },
+    { icon: 'monitor', label: 'Wall display', onPress: () => setView('wall') },
+    { icon: 'calendar', label: 'All chairs', onPress: () => setView('allChairs') },
+    { icon: 'star', label: 'Reviews', onPress: () => setView('reviews') },
+    { icon: 'trending-up', label: 'Reports & payouts', onPress: () => setView('report') },
+    { icon: 'percent', label: 'Default commission', value: `${100 - salon.default_commission}%`, onPress: () => setDefCommOpen(true) },
+    { icon: 'sliders', label: 'Chairs, services & settings', onPress: () => setTabs(true) },
+  ];
+
   return (
     <View style={s.screen}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        <View style={s.topRow}>
+        {/* 1p header */}
+        <View style={s.hubHead}>
           {onBack
-            ? <Pressable onPress={onBack} hitSlop={8} accessibilityLabel="Go back"
-                style={({ pressed }) => [s.iconBtn, pressed && s.pressed]}>
-                <Ionicons name="arrow-back" size={18} color={D.text} />
+            ? <Pressable onPress={onBack} hitSlop={8} accessibilityRole="button" accessibilityLabel="Go back"
+                style={({ pressed }) => [s.puck38, pressed && s.pressed]}>
+                <Ico name="arrow-left" size={16} />
               </Pressable>
-            : <View style={s.spacer} />}
-          <View style={s.grow}>
-            <Text style={s.overline}>SALON</Text>
-            <Text style={s.title} numberOfLines={1}>{salon.name}</Text>
-          </View>
-          <Pressable onPress={() => setSeg('settings')} hitSlop={8} accessibilityLabel="Settings"
-            style={({ pressed }) => [s.iconBtn, pressed && s.pressed]}>
-            <Ionicons name="settings-outline" size={18} color={D.text} />
+            : <View style={s.puck38Ghost} />}
+          <T w="b" size={17} style={s.hubTitle} numberOfLines={1}>{salon.name}</T>
+          <Pressable onPress={() => setView('listing')} hitSlop={8} accessibilityRole="button"
+            accessibilityLabel="Edit the shop listing"
+            style={({ pressed }) => [s.puck38, pressed && s.pressed]}>
+            <Ico name="edit-2" size={16} />
           </Pressable>
         </View>
 
-        <View style={s.segment}>
-          {(['team', 'chairs', 'services', 'settings'] as const).map((k) => (
-            <Pressable key={k} onPress={() => setSeg(k)} accessibilityState={{ selected: seg === k }}
-              style={[s.segItem, seg === k && s.segItemOn]}>
-              <Text style={[s.segText, seg === k && s.segTextOn]}>{k.toUpperCase()}</Text>
+        {/* today, at a glance — tap through to the owner dashboard */}
+        <Pressable onPress={() => setView('dashboard')} accessibilityRole="button"
+          accessibilityLabel="Owner dashboard" style={({ pressed }) => [s.hubTiles, pressed && s.pressed]}>
+          <HubTile label="BOOKINGS" value={String(stats.bookings)} />
+          <HubTile label="REVENUE" value={String(Math.round(stats.revenue / 100))} unit="DH" />
+          <HubTile label="RATING" value={rating ? rating.toFixed(1) : '—'} unit={rating ? '★' : undefined} />
+        </Pressable>
+
+        <Eyebrow ls={1.65}>THE TEAM · TODAY</Eyebrow>
+        <View style={{ gap: 9 }}>
+          {roster.map((m) => (
+            <Pressable key={m.id} onPress={() => setSelected(m)} accessibilityRole="button"
+              accessibilityLabel={m.name}
+              style={({ pressed }) => [s.teamRow, pressed && s.pressed]}>
+              <View style={s.teamAvatar}>
+                <Text style={s.avatarText}>{initials(m.name)}</Text>
+                <View style={[s.presence, { backgroundColor: m.inService ? '#4ADE80' : m.todayBookings ? '#4ADE80' : D.muted }]} />
+              </View>
+              <View style={s.grow}>
+                <View style={s.rowCenter}>
+                  <T w="b" size={14}>{m.name}</T>
+                  {m.role === 'owner' && (
+                    <View style={s.ownerChip}><T w="b" size={9} c={colors.accent} ls={0.7}>OWNER</T></View>
+                  )}
+                </View>
+                <T size={11} c={D.sub} style={{ marginTop: 3 }}>
+                  {m.todayBookings
+                    ? `In the shop · ${m.todayBookings} today${m.todayRevenue != null ? ` · ${dh(m.todayRevenue)}` : ''}`
+                    : m.pay === 'rent' ? 'Rent chair' : 'Nothing booked today'}
+                </T>
+              </View>
+              <Ico name="chevron-right" size={14} color={D.muted} />
+            </Pressable>
+          ))}
+          {pending.map((m) => (
+            <Pressable key={m.id} onPress={() => setSelected(m)} accessibilityRole="button"
+              accessibilityLabel={`${m.name}, join request`}
+              style={({ pressed }) => [s.teamRow, s.teamRowPending, pressed && s.pressed]}>
+              <View style={s.teamAvatar}><Text style={s.avatarText}>{initials(m.name)}</Text></View>
+              <View style={s.grow}>
+                <T w="b" size={14}>{m.name}</T>
+                <T size={11} c={colors.star} style={{ marginTop: 3 }}>Wants to join — tap to review</T>
+              </View>
+              <Ico name="chevron-right" size={14} color={D.muted} />
+            </Pressable>
+          ))}
+          <Pressable onPress={() => setInvite(true)} accessibilityRole="button"
+            accessibilityLabel="Invite a barber to the shop"
+            style={({ pressed }) => [s.inviteRow, pressed && s.pressed]}>
+            <View style={s.invitePuck}><Ico name="plus" size={16} color={D.sub} /></View>
+            <T w="sb" size={13} c={D.sub} style={s.grow}>Invite a barber to the shop</T>
+          </Pressable>
+        </View>
+
+        <Eyebrow ls={1.65}>SHOP</Eyebrow>
+        <View style={s.shopList}>
+          {shopRows.map((r, i) => (
+            <Pressable key={r.label} onPress={r.onPress} accessibilityRole="button"
+              accessibilityLabel={r.label}
+              style={({ pressed }) => [s.shopRow, i < shopRows.length - 1 && s.shopRowLine, pressed && s.pressed]}>
+              <View style={s.shopIcon}><Ico name={r.icon} size={15} /></View>
+              <T w="sb" size={13} style={s.grow}>{r.label}</T>
+              {r.value ? (
+                <T w={r.accent ? 'sb' : 'r'} size={12} c={r.accent ? colors.accent : D.sub}>{r.value}</T>
+              ) : null}
+              <Ico name="chevron-right" size={14} color={D.muted} />
             </Pressable>
           ))}
         </View>
 
-        <ShopHeader salon={salon} stats={stats} onToggleOpen={toggleShop} />
-
-        {seg === 'team' && <TeamTab team={team} onOpen={setSelected} onInvite={() => setInvite(true)} />}
-        {seg === 'chairs' && (
-          <ChairsTab chairs={chairs} onOpen={setChairEdit} onAdd={() => setChairEdit('new')} />
-        )}
-        {seg === 'services' && (
-          <ServicesTab services={services} onToggle={toggleService} onManage={onManageServices} />
-        )}
-        {seg === 'settings' && (
-          <SettingsTab salon={salon} members={team.length}
-            onEditSalon={onEditSalon} onSalonHours={() => setHoursOpen(true)}
-            onDefaultCommission={() => setDefCommOpen(true)} />
-        )}
+        <View style={s.hubNote}>
+          <Ico name="info" size={14} color={D.sub} />
+          <T size={12} c={D.sub} style={s.hubNoteText}>
+            Money is paid at the shop today. Settlements are recorded here, not moved.
+          </T>
+        </View>
       </ScrollView>
 
-      {selected && (
+      {/* the original tabbed detail, kept behind one row */}
+      <Modal visible={tabs} animationType="slide" onRequestClose={() => setTabs(false)}>
+        <View style={s.screen}>
+          <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+            <View style={s.topRow}>
+              <Pressable onPress={() => setTabs(false)} hitSlop={8} accessibilityRole="button"
+                accessibilityLabel="Close" style={({ pressed }) => [s.iconBtn, pressed && s.pressed]}>
+                <Ionicons name="arrow-back" size={18} color={D.text} />
+              </Pressable>
+              <View style={s.grow}>
+                <Text style={s.overline}>SALON</Text>
+                <Text style={s.title} numberOfLines={1}>{salon.name}</Text>
+              </View>
+            </View>
+
+            <View style={s.segment}>
+              {(['team', 'chairs', 'services', 'settings'] as const).map((k) => (
+                <Pressable key={k} onPress={() => setSeg(k)} accessibilityState={{ selected: seg === k }}
+                  style={[s.segItem, seg === k && s.segItemOn]}>
+                  <Text style={[s.segText, seg === k && s.segTextOn]}>{k.toUpperCase()}</Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <ShopHeader salon={salon} stats={stats} onToggleOpen={toggleShop} />
+
+            {seg === 'team' && <TeamTab team={team} onOpen={setSelected} onInvite={() => setInvite(true)} />}
+            {seg === 'chairs' && (
+              <ChairsTab chairs={chairs} onOpen={setChairEdit} onAdd={() => setChairEdit('new')} />
+            )}
+            {seg === 'services' && (
+              <ServicesTab services={services} onToggle={toggleService} onManage={onManageServices} />
+            )}
+            {seg === 'settings' && (
+              <SettingsTab salon={salon} members={team.length}
+                onEditSalon={onEditSalon} onSalonHours={() => setHoursOpen(true)}
+                onDefaultCommission={() => setDefCommOpen(true)} />
+            )}
+          </ScrollView>
+        </View>
+      </Modal>
+
+      {selected && selected.status === 'pending' && (
         <MemberSheet m={selected} onClose={() => setSelected(null)}
           onChanged={() => { setSelected(null); load(); }}
           onEarnings={() => { setPayoutsFor(selected); setSelected(null); }} />
@@ -177,7 +333,9 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
         <ChairSheet chair={chairEdit === 'new' ? null : chairEdit} team={team}
           onClose={() => setChairEdit(null)} onChanged={() => { setChairEdit(null); load(); }} />
       )}
-      {invite && <InviteSheet salon={salon} onClose={() => setInvite(false)} />}
+      {invite && (
+        <InviteSheet salon={salon} pending={pending} onClose={() => setInvite(false)} onChanged={load} />
+      )}
       {defCommOpen && (
         <DefaultCommissionSheet salon={salon} onClose={() => setDefCommOpen(false)}
           onSaved={() => { setDefCommOpen(false); load(); }} />
@@ -186,6 +344,17 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
         <SalonHoursSheet salon={salon} onClose={() => setHoursOpen(false)}
           onSaved={() => { setHoursOpen(false); load(); }} />
       )}
+    </View>
+  );
+}
+
+function HubTile({ label, value, unit }: { label: string; value: string; unit?: string }) {
+  return (
+    <View style={s.hubTile}>
+      <Eyebrow ls={0.8}>{label}</Eyebrow>
+      <T w="b" size={20} style={s.tnum}>
+        {value}{unit ? <T w="r" size={11} c={D.sub}>{` ${unit}`}</T> : null}
+      </T>
     </View>
   );
 }
@@ -697,45 +866,126 @@ function HourStepper({ label, value, min, max, onChange }: {
 // ── Invite sheet — MOCK. Real membership = barber self-joins at onboarding → lands
 // pending → owner approves in Team. Invite-by-phone/share link need the brber.ma
 // web surface (adoption bet #1); pay terms are set post-approval in the member sheet.
-function InviteSheet({ salon, onClose }: { salon: SalonMeta; onClose: () => void }) {
+// 2d — Invite a barber. The shop code is derived from the salon id so it is
+// stable and shareable today; onboarding still works by picking the salon, so
+// SEND INVITE says what actually happens rather than pretending.
+function shopCode(salon: SalonMeta) {
+  const word = salon.name.replace(/[^a-z]/gi, '').slice(0, 4).toUpperCase() || 'SHOP';
+  const n = salon.id.replace(/\D/g, '').slice(-2) || '01';
+  return `${word}·${n}`;
+}
+
+function InviteSheet({ salon, pending, onClose, onChanged }: {
+  salon: SalonMeta; pending: Member[]; onClose: () => void; onChanged: () => void;
+}) {
   const [phone, setPhone] = useState('');
-  const [role, setRole] = useState('Barber');
-  const link = 'brber.ma/join/CX8-42K';
+  const [pct, setPct] = useState(100 - salon.default_commission);
+  const [busy, setBusy] = useState(false);
+  const code = shopCode(salon);
+
+  async function saveDefault(next: number) {
+    setPct(next);
+    setBusy(true);
+    // the chips set the shop's starting split, which is real (0025)
+    const { error } = await supabase.from('salons')
+      .update({ default_commission: 100 - next }).eq('id', salon.id);
+    setBusy(false);
+    if (error) Alert.alert('Could not save', error.message);
+    else onChanged();
+  }
+
   return (
     <Sheet onClose={onClose}>
       <View style={s.rowCenter}>
-        <View style={s.inviteIcon}><Ionicons name="person-add-outline" size={18} color={colors.accent} /></View>
-        <View style={s.grow}>
-          <Text style={s.sheetTitle}>Invite a barber</Text>
-          <Text style={s.memberMeta}>They join {salon.name} with their own chair</Text>
-        </View>
-        <Pressable onPress={onClose} hitSlop={8} accessibilityLabel="Close"
+        <Text style={[s.sheetTitle, s.grow]}>Invite a barber</Text>
+        <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel="Close"
           style={({ pressed }) => [s.iconBtn, pressed && s.pressed]}>
           <Ionicons name="close" size={18} color={D.text} />
         </Pressable>
       </View>
 
-      <Text style={s.fieldLabel}>PHONE NUMBER</Text>
-      <TextInput value={phone} onChangeText={setPhone} keyboardType="phone-pad"
-        placeholder="+212 6•• ••• •••" placeholderTextColor={D.sub} style={s.input} />
-      <Text style={s.fieldLabel}>ROLE</Text>
-      <Segmented options={['Senior', 'Barber', 'Apprentice']} value={role} onChange={setRole} />
+      <T size={13} c={D.sub} style={{ lineHeight: 20 }}>
+        He installs Sterncut, picks {salon.name} with this code, and his chair appears here as a
+        request to approve. You keep control of hours and commission.
+      </T>
 
-      <View style={s.linkRow}>
-        <Text style={s.linkText} numberOfLines={1}>{link}</Text>
-        <Pressable onPress={() => Alert.alert('Invite link', link)} accessibilityLabel="Copy link"
-          style={({ pressed }) => [s.copyBtn, pressed && s.pressed]}>
-          <Ionicons name="copy-outline" size={14} color={D.text} />
-          <Text style={s.copyText}>Copy</Text>
-        </Pressable>
+      <View style={s.codeCard}>
+        <Eyebrow ls={1.8}>SHOP CODE</Eyebrow>
+        <Text style={s.codeValue}>{code}</Text>
+        <View style={s.codeBtns}>
+          <Pressable onPress={() => Alert.alert('Shop code', code)} accessibilityRole="button"
+            accessibilityLabel="Show the shop code"
+            style={({ pressed }) => [s.codeBtn, pressed && s.pressed]}>
+            <Ico name="copy" size={14} />
+            <T w="b" size={12}>Copy</T>
+          </Pressable>
+          <Pressable onPress={() => Share.share({
+            message: `Join ${salon.name} on Sterncut — shop code ${code}`,
+          })} accessibilityRole="button" accessibilityLabel="Share the shop code"
+            style={({ pressed }) => [s.codeBtn, pressed && s.pressed]}>
+            <Ico name="send" size={14} />
+            <T w="b" size={12}>Share</T>
+          </Pressable>
+        </View>
       </View>
 
-      <Pressable onPress={() => Alert.alert('Not wired yet',
-        'For now the barber signs up and picks your salon at onboarding — they then appear here as a pending request to approve. Phone invites + share links need the web surface (BACKLOG adoption bet #1).')}
+      <View style={s.orRow}>
+        <View style={s.orLine} />
+        <T w="b" size={11} c={D.sub} ls={1.4}>OR BY PHONE</T>
+        <View style={s.orLine} />
+      </View>
+
+      <View style={s.phoneField}>
+        <Ico name="phone" size={16} color={D.sub} />
+        <TextInput value={phone} onChangeText={setPhone} keyboardType="phone-pad"
+          placeholder="+212 6•• ••• •••" placeholderTextColor={D.sub}
+          accessibilityLabel="Barber's phone number" style={s.phoneInput} />
+      </View>
+
+      <View style={{ gap: 9 }}>
+        <Eyebrow ls={1.4}>STARTING COMMISSION</Eyebrow>
+        <View style={s.commRow}>
+          {[15, 20, 25].map((v) => (
+            <Pressable key={v} onPress={() => saveDefault(v)} accessibilityRole="button"
+              accessibilityState={{ selected: pct === v }} disabled={busy}
+              style={({ pressed }) => [s.commBtn, pct === v && s.commBtnOn, pressed && s.pressed]}>
+              <T w={pct === v ? 'b' : 'sb'} size={13} c={pct === v ? '#fff' : D.sub}>{v}%</T>
+            </Pressable>
+          ))}
+          <Pressable onPress={() => Alert.alert('Custom split',
+            'Set it per barber once they join — open them from the team list.')}
+            accessibilityRole="button" accessibilityLabel="Custom commission"
+            style={({ pressed }) => [s.commBtn, pressed && s.pressed]}>
+            <T w="sb" size={13} c={D.sub}>Custom</T>
+          </Pressable>
+        </View>
+      </View>
+
+      <Pressable onPress={() => {
+        const msg = `Join ${salon.name} on Sterncut — shop code ${code}`;
+        if (phone.trim()) {
+          const sep = Platform.OS === 'ios' ? '&' : '?';
+          Linking.openURL(`sms:${phone.trim()}${sep}body=${encodeURIComponent(msg)}`)
+            .catch(() => Share.share({ message: msg }));
+        } else {
+          Share.share({ message: msg });
+        }
+      }} accessibilityRole="button" accessibilityLabel="Send invite"
         style={({ pressed }) => [s.cta, pressed && s.pressed]}>
         <Ionicons name="paper-plane" size={16} color={colors.onAccent} />
         <Text style={s.ctaText}>Send invite</Text>
       </Pressable>
+
+      {pending.map((m) => (
+        <View key={m.id} style={s.pendingRow}>
+          <View style={s.pendingPuck}><T w="b" size={11} c={D.sub}>{initials(m.name)}</T></View>
+          <View style={s.grow}>
+            <T w="b" size={13}>{m.name}</T>
+            <T size={11} c={colors.star} style={{ marginTop: 2 }}>Waiting for you to approve</T>
+          </View>
+          <T w="b" size={11} c={D.sub}>Review</T>
+        </View>
+      ))}
     </Sheet>
   );
 }
@@ -880,6 +1130,78 @@ function Sheet({ children, onClose }: { children: React.ReactNode; onClose: () =
 }
 
 const s = StyleSheet.create({
+  // --- 1p hub
+  tnum: { fontVariant: ['tabular-nums'] },
+  hubHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  hubTitle: { flex: 1, textAlign: 'center' },
+  puck38: {
+    width: 38, height: 38, borderRadius: 999, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  puck38Ghost: { width: 38, height: 38 },
+  hubTiles: { flexDirection: 'row', gap: 10 },
+  hubTile: { flex: 1, backgroundColor: D.card, borderRadius: 18, padding: 14, gap: 3 },
+  teamRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: D.card, borderRadius: 18, padding: 13, paddingHorizontal: 14,
+  },
+  teamRowPending: { borderWidth: 1, borderColor: 'rgba(232,161,0,0.35)' },
+  teamAvatar: {
+    width: 42, height: 42, borderRadius: 999, backgroundColor: colors.accentSoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  ownerChip: { backgroundColor: colors.accentSoft, borderRadius: 5, paddingVertical: 3, paddingHorizontal: 6 },
+  inviteRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 11, borderRadius: 18, padding: 14,
+    borderWidth: 1.5, borderStyle: 'dashed', borderColor: D.muted,
+  },
+  invitePuck: {
+    width: 34, height: 34, borderRadius: 999, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  shopList: { backgroundColor: D.card, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 6 },
+  shopRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13 },
+  shopRowLine: { borderBottomWidth: 1, borderBottomColor: D.border },
+  shopIcon: {
+    width: 34, height: 34, borderRadius: 999, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  hubNote: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 9,
+    backgroundColor: D.card, borderRadius: 16, padding: 13, paddingHorizontal: 15,
+  },
+  hubNoteText: { flex: 1, lineHeight: 18 },
+
+  // --- 2d invite
+  codeCard: { backgroundColor: D.card, borderRadius: 20, padding: 22, alignItems: 'center', gap: 12 },
+  codeValue: { fontFamily: serif, fontSize: 38, letterSpacing: 8, color: D.text },
+  codeBtns: { flexDirection: 'row', gap: 9, marginTop: 2 },
+  codeBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 7, height: 38, paddingHorizontal: 15,
+    borderRadius: 999, backgroundColor: D.card2,
+  },
+  orRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  orLine: { flex: 1, height: 1, backgroundColor: D.border },
+  phoneField: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: D.card2,
+    borderRadius: 16, height: 48, paddingHorizontal: 16,
+  },
+  phoneInput: { flex: 1, fontFamily: inter.r, fontSize: 14, color: D.text, padding: 0 },
+  commRow: { flexDirection: 'row', gap: 8 },
+  commBtn: {
+    flex: 1, height: 44, borderRadius: 14, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  commBtnOn: { backgroundColor: colors.accent },
+  pendingRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 11,
+    backgroundColor: D.card, borderRadius: 16, padding: 13, paddingHorizontal: 15,
+  },
+  pendingPuck: {
+    width: 34, height: 34, borderRadius: 999, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+
   screen: { flex: 1, backgroundColor: D.bg },
   center: { flex: 1, backgroundColor: D.bg, alignItems: 'center', justifyContent: 'center' },
   content: { padding: sp(5), paddingTop: sp(14), gap: sp(3), paddingBottom: TAB_BAR_INSET },

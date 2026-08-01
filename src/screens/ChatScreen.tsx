@@ -6,7 +6,7 @@ import {
   TextInput, View,
 } from 'react-native';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, shadow, sp } from '../theme';
+import { colors, dark as D, font, inter, radius, shadow, sp } from '../theme';
 
 type Msg = {
   id: string;
@@ -19,7 +19,11 @@ type Msg = {
 type Props = {
   bookingId: string; myId: string; title: string;
   subtitle?: string; avatarUrl?: string; onBack: () => void;
+  dark?: boolean;   // 1m — the barber's thread sits on the dark canvas
 };
+
+// the three taps a barber actually makes mid-cut (1m)
+const QUICK = ['Running 10 min late', "You're next", 'See you soon'];
 
 function fmtTime(iso: string) {
   return new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }).toLowerCase();
@@ -38,7 +42,7 @@ function initialsOf(name: string) {
   return name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 }
 
-export default function ChatScreen({ bookingId, myId, title, subtitle, avatarUrl, onBack }: Props) {
+export default function ChatScreen({ bookingId, myId, title, subtitle, avatarUrl, onBack, dark }: Props) {
   const [msgs, setMsgs] = useState<Msg[]>([]); // ascending (oldest → newest)
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
@@ -77,10 +81,10 @@ export default function ChatScreen({ bookingId, myId, title, subtitle, avatarUrl
     });
   }, [msgs]);
 
-  async function send() {
-    const body = text.trim();
+  async function send(override?: string) {
+    const body = (override ?? text).trim();
     if (!body) return;
-    setText('');
+    if (!override) setText('');
     const { error } = await supabase.from('messages')
       .insert({ booking_id: bookingId, sender_id: myId, body });
     if (error) Alert.alert('Could not send', error.message);
@@ -105,24 +109,27 @@ export default function ChatScreen({ bookingId, myId, title, subtitle, avatarUrl
     }
   }
 
+  const k = dark ? d : st;
+
   return (
-    <KeyboardAvoidingView style={st.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      {/* dark header */}
-      <View style={st.header}>
+    <KeyboardAvoidingView style={k.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <View style={k.header}>
         <Pressable onPress={onBack} hitSlop={8} accessibilityLabel="Back" style={st.backBtn}>
-          <Ionicons name="arrow-back" size={20} color={colors.onAccent} />
+          <Ionicons name="arrow-back" size={dark ? 17 : 20} color={colors.onAccent} />
         </Pressable>
         {avatarUrl
-          ? <Image source={{ uri: avatarUrl }} style={st.headerAvatar} />
-          : <View style={[st.headerAvatar, st.headerAvatarFallback]}><Text style={st.headerInitials}>{initialsOf(title)}</Text></View>}
+          ? <Image source={{ uri: avatarUrl }} style={k.headerAvatar} />
+          : <View style={[k.headerAvatar, k.headerAvatarFallback]}>
+              <Text style={k.headerInitials}>{initialsOf(title)}</Text>
+            </View>}
         <View style={st.headerText}>
-          <Text style={st.headerName} numberOfLines={1}>{title}</Text>
-          {/* TODO(backlog): "Online" is real presence later; show booking context for now */}
-          <Text style={st.headerStatus} numberOfLines={1}>{subtitle ?? 'Booking chat'}</Text>
+          <Text style={k.headerName} numberOfLines={1}>{title}</Text>
+          <Text style={k.headerStatus} numberOfLines={1}>{subtitle ?? 'Booking chat'}</Text>
         </View>
         <Pressable onPress={() => Alert.alert('Options', 'Coming soon — see BACKLOG.md')} hitSlop={8}
-          accessibilityLabel="More options" style={st.backBtn}>
-          <Ionicons name="ellipsis-vertical" size={18} color={colors.onAccent} />
+          accessibilityLabel="More options" style={dark ? d.headerPuck : st.backBtn}>
+          <Ionicons name={dark ? 'call-outline' : 'ellipsis-vertical'} size={dark ? 15 : 18}
+            color={colors.onAccent} />
         </Pressable>
       </View>
 
@@ -130,8 +137,18 @@ export default function ChatScreen({ bookingId, myId, title, subtitle, avatarUrl
         ref={listRef}
         data={msgs}
         keyExtractor={(m) => m.id}
-        contentContainerStyle={st.list}
+        contentContainerStyle={k.list}
         onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
+        ListFooterComponent={dark ? (
+          <View style={d.quickRow}>
+            {QUICK.map((q) => (
+              <Pressable key={q} onPress={() => send(q)} accessibilityRole="button"
+                style={({ pressed }) => [d.quickChip, pressed && st.pressed]}>
+                <Text style={d.quickText}>{q}</Text>
+              </Pressable>
+            ))}
+          </View>
+        ) : null}
         renderItem={({ item, index }) => {
           const mine = item.sender_id === myId;
           const showDay = index === 0
@@ -139,51 +156,47 @@ export default function ChatScreen({ bookingId, myId, title, subtitle, avatarUrl
           return (
             <>
               {showDay && (
-                <View style={st.daySep}><Text style={st.dayText}>{dayLabel(item.created_at)}</Text></View>
+                <View style={st.daySep}><Text style={k.dayText}>{dayLabel(item.created_at)}</Text></View>
               )}
-              <View style={[st.bubble, mine ? st.mine : st.theirs]}>
+              <View style={[k.bubble, mine ? k.mine : k.theirs]}>
                 {item.image_path && (
                   imageUrls[item.image_path]
                     ? <Image source={{ uri: imageUrls[item.image_path] }} style={st.photo} />
-                    : <Text style={st.loading}>Loading photo…</Text>
+                    : <Text style={k.loading}>Loading photo…</Text>
                 )}
-                {!!item.body && <Text style={mine ? st.mineText : st.theirsText}>{item.body}</Text>}
+                {!!item.body && <Text style={mine ? k.mineText : k.theirsText}>{item.body}</Text>}
               </View>
               <View style={[st.metaRow, mine ? st.metaRight : st.metaLeft]}>
-                {!mine && <View style={st.metaAvatar}><Text style={st.metaAvatarText}>{initialsOf(title)}</Text></View>}
-                <Text style={st.metaText}>{mine ? 'You' : title.split(' ')[0]} · {fmtTime(item.created_at)}</Text>
+                {!mine && !dark && (
+                  <View style={st.metaAvatar}><Text style={st.metaAvatarText}>{initialsOf(title)}</Text></View>
+                )}
+                <Text style={k.metaText}>{mine ? 'You' : title.split(' ')[0]} · {fmtTime(item.created_at)}</Text>
               </View>
             </>
           );
         }}
       />
 
-      {/* composer */}
-      <View style={st.inputRow}>
-        {/* TODO(backlog): emoji picker (system keyboard has emoji for now) */}
-        <Pressable hitSlop={6} accessibilityLabel="Emoji"
-          onPress={() => Alert.alert('Emoji', 'Use your keyboard’s emoji key — picker coming soon')}>
-          <Ionicons name="happy-outline" size={22} color={colors.textSecondary} />
-        </Pressable>
-        <TextInput style={st.input} placeholder="Type a message here…" placeholderTextColor={colors.textTertiary}
-          value={text} onChangeText={setText} onSubmitEditing={send} returnKeyType="send" multiline />
-        <Pressable onPress={sendPhoto} disabled={busy} hitSlop={6} accessibilityLabel="Attach photo"
-          style={({ pressed }) => pressed && st.pressed}>
-          <Ionicons name="attach" size={24} color={colors.textSecondary} />
-        </Pressable>
-        {text.trim() ? (
-          <Pressable onPress={send} hitSlop={6} accessibilityLabel="Send"
-            style={({ pressed }) => [st.sendBtn, pressed && st.pressed]}>
-            <Ionicons name="arrow-up" size={20} color={colors.onAccent} />
-          </Pressable>
-        ) : (
-          // TODO(backlog): voice notes (expo-av record → upload → waveform playback)
-          <Pressable onPress={() => Alert.alert('Voice notes', 'Coming soon — see BACKLOG.md')} hitSlop={6}
-            accessibilityLabel="Record voice note"
-            style={({ pressed }) => [st.sendBtn, pressed && st.pressed]}>
-            <Ionicons name="mic" size={20} color={colors.onAccent} />
+      <View style={k.inputRow}>
+        {!dark && (
+          <Pressable hitSlop={6} accessibilityLabel="Emoji"
+            onPress={() => Alert.alert('Emoji', 'Use your keyboard’s emoji key — picker coming soon')}>
+            <Ionicons name="happy-outline" size={22} color={colors.textSecondary} />
           </Pressable>
         )}
+        <TextInput style={k.input}
+          placeholder={dark ? `Message ${title.split(' ')[0]}…` : 'Type a message here…'}
+          placeholderTextColor={dark ? D.sub : colors.textTertiary}
+          value={text} onChangeText={setText} onSubmitEditing={() => send()} returnKeyType="send" multiline />
+        <Pressable onPress={sendPhoto} disabled={busy} hitSlop={6} accessibilityLabel="Attach photo"
+          style={({ pressed }) => pressed && st.pressed}>
+          <Ionicons name="attach" size={dark ? 20 : 24} color={dark ? D.sub : colors.textSecondary} />
+        </Pressable>
+        <Pressable onPress={() => text.trim() ? send() : Alert.alert('Voice notes', 'Coming soon — see BACKLOG.md')}
+          hitSlop={6} accessibilityLabel={text.trim() ? 'Send' : 'Record voice note'}
+          style={({ pressed }) => [k.sendBtn, pressed && st.pressed]}>
+          <Ionicons name={text.trim() ? 'arrow-up' : 'mic'} size={dark ? 17 : 20} color={colors.onAccent} />
+        </Pressable>
       </View>
     </KeyboardAvoidingView>
   );
@@ -240,4 +253,56 @@ const st = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   pressed: { opacity: 0.7 },
+});
+
+// 1m — same layout, barber palette. Square header, coral for what you said.
+const d = StyleSheet.create({
+  screen: { flex: 1, backgroundColor: D.bg },
+  header: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: D.card,
+    borderBottomWidth: 1, borderBottomColor: D.border,
+    paddingTop: 58, paddingBottom: 14, paddingHorizontal: 16,
+  },
+  headerPuck: {
+    width: 34, height: 34, borderRadius: 999, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  headerAvatar: { width: 40, height: 40, borderRadius: 999 },
+  headerAvatarFallback: { backgroundColor: D.accentSoft, alignItems: 'center', justifyContent: 'center' },
+  headerInitials: { fontFamily: inter.b, fontSize: 12, color: D.accent },
+  headerName: { fontFamily: inter.b, fontSize: 14, color: D.text },
+  headerStatus: { fontFamily: inter.r, fontSize: 11, color: D.sub },
+
+  list: { paddingHorizontal: 16, paddingVertical: 18, gap: 4 },
+  dayText: { fontFamily: inter.b, fontSize: 10, color: D.sub, letterSpacing: 2 },
+  bubble: { maxWidth: '78%', borderRadius: 18, paddingVertical: 12, paddingHorizontal: 14, marginTop: 4 },
+  mine: { alignSelf: 'flex-end', backgroundColor: D.accent, borderBottomRightRadius: 4 },
+  theirs: { alignSelf: 'flex-start', backgroundColor: D.card, borderBottomLeftRadius: 4 },
+  mineText: { color: '#fff', fontFamily: inter.r, fontSize: 14, lineHeight: 20 },
+  theirsText: { color: D.text, fontFamily: inter.r, fontSize: 14, lineHeight: 20 },
+  loading: { color: D.sub, fontFamily: inter.r, fontSize: 12 },
+  metaText: { fontFamily: inter.r, fontSize: 10, color: D.sub },
+
+  quickRow: {
+    flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 14,
+  },
+  quickChip: {
+    borderWidth: 1, borderColor: D.hairline, borderRadius: 999, paddingVertical: 8, paddingHorizontal: 13,
+  },
+  quickText: { fontFamily: inter.sb, fontSize: 11, color: D.sub },
+
+  inputRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: D.bg,
+    paddingHorizontal: 16, paddingTop: 12, paddingBottom: 40,
+    borderTopWidth: 1, borderTopColor: D.border,
+  },
+  input: {
+    flex: 1, borderRadius: 999, backgroundColor: D.card, paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'ios' ? 13 : 8, paddingBottom: Platform.OS === 'ios' ? 13 : 8,
+    maxHeight: 110, fontFamily: inter.r, fontSize: 13, color: D.text,
+  },
+  sendBtn: {
+    width: 44, height: 44, borderRadius: 999, backgroundColor: D.accent,
+    alignItems: 'center', justifyContent: 'center',
+  },
 });

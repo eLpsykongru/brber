@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Alert, FlatList, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
-import { Card, Chip, Empty, Field, PillButton, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
+import { Alert, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Btn, Eyebrow, Ico, Screen, T, TAB_INSET, Toggle, TopBar } from '../components/dark';
 import { supabase } from '../lib/supabase';
-import { colors, font, sp } from '../theme';
+import { dark as D, inter } from '../theme';
 import type { Service } from '../types';
 
+// 1n — My services. Add at the top, the live list below; the toggle hides a
+// service from customers without touching the bookings that already used it.
 export default function ServicesScreen({ barberId, onBack }: { barberId: string; onBack?: () => void }) {
   const [services, setServices] = useState<Service[]>([]);
   const [name, setName] = useState('');
@@ -58,33 +60,64 @@ export default function ServicesScreen({ barberId, onBack }: { barberId: string;
 
   return (
     <View style={s.screen}>
-      <ScreenHeader title="My services" onBack={onBack} />
-      <Card>
-        <Field placeholder="Service name (e.g. Haircut)" value={name} onChangeText={setName} />
-        <View style={s.row}>
-          <Field placeholder="Price (DH)" keyboardType="decimal-pad" value={price}
-            onChangeText={setPrice} style={s.half} />
-          <Field placeholder="Minutes" keyboardType="number-pad" value={duration}
-            onChangeText={setDuration} style={s.half} />
+      <View style={s.head}>
+        <TopBar title={editingId ? 'Edit service' : 'My services'} onBack={onBack} plain />
+        <View style={s.addCard}>
+          <Eyebrow ls={1.4}>{editingId ? 'EDIT SERVICE' : 'ADD A SERVICE'}</Eyebrow>
+          <TextInput value={name} onChangeText={setName} style={s.field}
+            placeholder="Service name (e.g. Haircut)" placeholderTextColor={D.sub}
+            accessibilityLabel="Service name" />
+          <View style={s.fieldRow}>
+            <TextInput value={price} onChangeText={setPrice} keyboardType="decimal-pad"
+              style={[s.field, s.grow]} placeholder="Price (DH)" placeholderTextColor={D.sub}
+              accessibilityLabel="Price in dirhams" />
+            <TextInput value={duration} onChangeText={setDuration} keyboardType="number-pad"
+              style={[s.field, s.grow]} placeholder="Minutes" placeholderTextColor={D.sub}
+              accessibilityLabel="Duration in minutes" />
+          </View>
+          <Btn title={editingId ? 'UPDATE SERVICE' : 'ADD SERVICE'} height={48} onPress={save}
+            style={busy ? { opacity: 0.6 } : undefined} />
+          {editingId && (
+            <Pressable onPress={clearForm} accessibilityRole="button"
+              style={({ pressed }) => pressed && s.pressed}>
+              <T w="sb" size={12} c={D.sub} style={s.center}>Cancel edit</T>
+            </Pressable>
+          )}
         </View>
-        <PillButton title={editingId ? 'Update service' : 'Add service'} onPress={save} loading={busy} />
-        {editingId && <PillButton title="Cancel edit" variant="secondary" onPress={clearForm} />}
-      </Card>
+        <Eyebrow ls={1.65}>
+          {services.length} SERVICE{services.length === 1 ? '' : 'S'} · TAP TO EDIT
+        </Eyebrow>
+      </View>
+
       <FlatList
         data={services}
         keyExtractor={(svc) => svc.id}
         contentContainerStyle={s.list}
-        ListEmptyComponent={<Empty text="No services yet — add your first one above." />}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <T size={13} c={D.sub} style={s.center}>No services yet — add your first one above.</T>}
+        ListFooterComponent={services.length
+          ? <T size={11} c={D.sub} style={s.footnote}>
+              Hidden services stay on past bookings but customers can't pick them.
+            </T>
+          : null}
         renderItem={({ item }) => (
-          <TouchableOpacity style={s.item} onPress={() => startEdit(item)}>
+          <Pressable onPress={() => startEdit(item)} accessibilityRole="button"
+            accessibilityLabel={`Edit ${item.name}`}
+            style={({ pressed }) => [s.row, pressed && s.pressed]}>
+            <Ico name="menu" size={14} color={D.muted} />
             <View style={s.grow}>
-              <Text style={[s.itemName, !item.is_active && s.inactive]}>{item.name}</Text>
-              <Text style={s.meta}>{(item.price_cents / 100).toFixed(2)} DH · {item.duration_min} min</Text>
+              <T w="b" size={14} c={item.is_active ? D.text : D.sub}
+                style={!item.is_active && s.struck}>{item.name}</T>
+              <T size={11} c={D.sub} style={{ marginTop: 2 }}>
+                {(item.price_cents / 100).toFixed(2)} DH · {item.duration_min} min
+              </T>
             </View>
-            {!item.is_active && <Chip label="hidden" />}
-            <Switch value={item.is_active} onValueChange={() => toggleActive(item)}
-              trackColor={{ true: colors.accent }} />
-          </TouchableOpacity>
+            {!item.is_active && (
+              <View style={s.hiddenChip}><T w="b" size={9} c={D.sub} ls={0.7}>HIDDEN</T></View>
+            )}
+            <Toggle small on={item.is_active} color={D.accent} onPress={() => toggleActive(item)} />
+          </Pressable>
         )}
       />
     </View>
@@ -92,17 +125,25 @@ export default function ServicesScreen({ barberId, onBack }: { barberId: string;
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, paddingTop: sp(14), paddingHorizontal: sp(5), gap: sp(3) },
-  row: { flexDirection: 'row', gap: sp(2) },
-  half: { flex: 1 },
-  list: { gap: sp(2), paddingBottom: TAB_BAR_INSET, paddingTop: sp(2) },
-  item: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(2),
-    borderWidth: 1, borderColor: colors.border, borderRadius: 14, padding: sp(3),
-    backgroundColor: colors.bg,
-  },
+  screen: { flex: 1, backgroundColor: D.bg },
+  head: { paddingTop: 62, paddingHorizontal: 20, gap: 13 },
   grow: { flex: 1 },
-  itemName: { fontSize: font.body, fontWeight: '600', color: colors.text },
-  inactive: { color: colors.textTertiary, textDecorationLine: 'line-through' },
-  meta: { color: colors.textSecondary, fontSize: font.small },
+  pressed: { opacity: 0.7 },
+  center: { textAlign: 'center' },
+  struck: { textDecorationLine: 'line-through' },
+
+  addCard: { backgroundColor: D.card, borderRadius: 20, padding: 16, gap: 11 },
+  field: {
+    backgroundColor: D.card2, borderRadius: 14, height: 46, paddingHorizontal: 15,
+    fontFamily: inter.r, fontSize: 14, color: D.text,
+  },
+  fieldRow: { flexDirection: 'row', gap: 9 },
+
+  list: { gap: 9, paddingTop: 4, paddingHorizontal: 20, paddingBottom: TAB_INSET },
+  row: {
+    flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: D.card,
+    borderRadius: 16, padding: 14, paddingHorizontal: 15,
+  },
+  hiddenChip: { backgroundColor: D.card2, borderRadius: 6, paddingVertical: 4, paddingHorizontal: 7 },
+  footnote: { marginTop: 4, lineHeight: 17 },
 });

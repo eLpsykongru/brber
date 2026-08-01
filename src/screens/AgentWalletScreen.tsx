@@ -2,9 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { TAB_BAR_INSET } from '../components/ui';
+import { Note, Serif, TAB_INSET } from '../components/dark';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, font, radius, sp } from '../theme';
+import { colors, dark as D, font, inter, radius, sp } from '../theme';
 
 // REAL since 0022: float + activity read wallet_transactions; Top-up calls the
 // agent_cash_topup RPC (owner-only, phone lookup, no commission — decided 2026-07-19).
@@ -64,6 +64,12 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
   const [hidden, setHidden] = useState(false);
   const [txs, setTxs] = useState<Tx[] | null>(null);
   const [sheet, setSheet] = useState(false);
+  const [salon, setSalon] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.from('salons').select('name').eq('owner_id', barberId).maybeSingle()
+      .then(({ data }) => setSalon(data?.name ?? null));
+  }, [barberId]);
 
   // ponytail: loads the whole till ledger and sums client-side; paginate + aggregate
   // server-side when a till has thousands of rows
@@ -104,7 +110,7 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
     <View style={s.screen}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.headText}>
-          <Text style={s.overline}>AGENT · SALON</Text>
+          <Text style={s.overline}>AGENT · {(salon ?? 'SALON').toUpperCase()}</Text>
           <Text style={s.headTitle}>Wallet</Text>
         </View>
 
@@ -120,7 +126,7 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
               <Ionicons name={hidden ? 'eye-off-outline' : 'eye-outline'} size={18} color={D.sub} />
             </Pressable>
           </View>
-          <Text style={s.floatValue}>{hidden ? '••  •••' : dh(float_)}</Text>
+          <Serif size={40} ls={0} style={s.floatValue}>{hidden ? '••  •••' : dh(float_)}</Serif>
           <Text style={s.floatSub}>Cash collected for customer top-ups</Text>
           <Pressable onPress={() => setSheet(true)} accessibilityLabel="Top-up"
             style={({ pressed }) => [s.topupBtn, pressed && s.pressed]}>
@@ -161,6 +167,7 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
             </Pressable>
           </View>
         ))}
+        <Note>The float only grows until settlement — no commission is taken on top-ups.</Note>
       </ScrollView>
 
       {sheet && <TopupSheet onClose={() => setSheet(false)} onConfirm={topup} />}
@@ -248,6 +255,11 @@ function TopupSheet({ onClose, onConfirm }: {
             ))}
           </View>
 
+          <View style={s.afterRow}>
+            <Text style={s.afterLabel}>Amount to credit</Text>
+            <Text style={s.afterValue}>{n} DH</Text>
+          </View>
+
           <Pressable disabled={busy || (mode === 'phone' && !valid)} onPress={confirm}
             accessibilityLabel="Confirm cash received"
             style={({ pressed }) => [s.cta, (busy || (mode === 'phone' && !valid)) && s.ctaDisabled, pressed && s.pressed]}>
@@ -266,55 +278,61 @@ function TopupSheet({ onClose, onConfirm }: {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: D.bg },
-  content: { padding: sp(5), paddingTop: sp(14), gap: sp(3), paddingBottom: TAB_BAR_INSET },
+  content: { paddingTop: 62, paddingHorizontal: 20, gap: 14, paddingBottom: TAB_INSET },
   pressed: { opacity: 0.7 },
   grow: { flex: 1 },
-  rowCenter: { flexDirection: 'row', alignItems: 'center', gap: sp(2) },
+  rowCenter: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   accentText: { color: colors.accent },
 
-  headText: { gap: 2 },
-  overline: { fontSize: font.tiny, fontWeight: '700', color: D.sub, letterSpacing: 1.5 },
-  headTitle: { fontSize: font.h2, fontWeight: '700', color: D.text },
+  headText: { gap: 3 },
+  overline: { fontFamily: inter.b, fontSize: 10, color: D.sub, letterSpacing: 1.8 },
+  headTitle: { fontFamily: inter.b, fontSize: 17, color: D.text },
 
   floatCard: {
     backgroundColor: '#1D1416', borderWidth: 1, borderColor: '#332124',
-    borderRadius: radius.lg, padding: sp(4), gap: sp(3),
+    borderRadius: 20, padding: 18, gap: 14,
   },
   redChip: {
-    width: 34, height: 34, borderRadius: radius.sm, backgroundColor: 'rgba(232,71,79,0.16)',
+    width: 34, height: 34, borderRadius: 10, backgroundColor: D.accentSoft16,
     alignItems: 'center', justifyContent: 'center',
   },
-  floatLabel: { fontSize: font.tiny, fontWeight: '700', color: D.sub, letterSpacing: 1.5 },
+  floatLabel: { fontFamily: inter.b, fontSize: 10, color: D.sub, letterSpacing: 1.6 },
+  afterRow: {
+    flexDirection: 'row', justifyContent: 'space-between', backgroundColor: D.card,
+    borderRadius: 16, padding: 14, paddingHorizontal: 16,
+  },
+  afterLabel: { fontFamily: inter.r, fontSize: 12, color: D.sub },
+  afterValue: { fontFamily: inter.eb, fontSize: 14, color: D.text, fontVariant: ['tabular-nums'] },
   eyeBtn: {
     width: 32, height: 32, borderRadius: radius.pill, backgroundColor: 'rgba(255,255,255,0.06)',
     alignItems: 'center', justifyContent: 'center',
   },
-  floatValue: { fontSize: 40, fontWeight: '700', color: D.text, fontVariant: ['tabular-nums'] },
-  floatSub: { fontSize: font.small, color: D.sub },
+  floatValue: { fontVariant: ['tabular-nums'] },
+  floatSub: { fontFamily: inter.r, fontSize: 12, color: D.sub },
   topupBtn: {
-    flexDirection: 'row', height: 52, borderRadius: radius.md, backgroundColor: colors.accent,
-    alignItems: 'center', justifyContent: 'center', gap: 6,
+    flexDirection: 'row', height: 52, borderRadius: 16, backgroundColor: colors.accent,
+    alignItems: 'center', justifyContent: 'center', gap: 7,
   },
-  topupText: { fontSize: font.body, fontWeight: '700', color: colors.onAccent },
+  topupText: { fontFamily: inter.b, fontSize: 14, color: colors.onAccent },
 
-  section: { fontSize: font.body, fontWeight: '700', color: D.text, marginTop: sp(2) },
-  exportText: { fontSize: font.small, color: D.sub },
+  section: { fontFamily: inter.b, fontSize: 15, color: D.text, marginTop: 2 },
+  exportText: { fontFamily: inter.r, fontSize: 12, color: D.sub },
   spinner: { marginTop: sp(6) },
-  empty: { fontSize: font.small, color: D.sub, paddingVertical: sp(2) },
+  empty: { fontFamily: inter.r, fontSize: 13, color: D.sub, paddingVertical: sp(2) },
 
   txRow: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(3),
-    backgroundColor: D.card, borderRadius: radius.md, padding: sp(3.5),
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: D.card, borderRadius: 16, padding: 13, paddingHorizontal: 14,
   },
   txIcon: {
-    width: 36, height: 36, borderRadius: radius.pill, backgroundColor: 'rgba(232,71,79,0.16)',
+    width: 36, height: 36, borderRadius: 999, backgroundColor: D.accentSoft16,
     alignItems: 'center', justifyContent: 'center',
   },
-  txName: { fontSize: font.body, fontWeight: '700', color: D.text },
-  txMeta: { fontSize: font.small, color: D.sub, marginTop: 1 },
+  txName: { fontFamily: inter.b, fontSize: 14, color: D.text },
+  txMeta: { fontFamily: inter.r, fontSize: 11, color: D.sub, marginTop: 2 },
   txRight: { alignItems: 'flex-end', gap: 2 },
-  txAmt: { fontSize: font.body, fontWeight: '700', color: D.text, fontVariant: ['tabular-nums'] },
-  txTime: { fontSize: font.tiny, color: D.sub },
+  txAmt: { fontFamily: inter.b, fontSize: 14, color: D.text, fontVariant: ['tabular-nums'] },
+  txTime: { fontFamily: inter.r, fontSize: 10, color: D.sub },
   receiptBtn: {
     width: 34, height: 34, borderRadius: radius.pill, backgroundColor: D.card2,
     alignItems: 'center', justifyContent: 'center',
@@ -323,11 +341,11 @@ const s = StyleSheet.create({
   backdropWrap: { flex: 1, justifyContent: 'flex-end' },
   backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.55)' },
   sheet: {
-    backgroundColor: '#151517', borderTopLeftRadius: 24, borderTopRightRadius: 24,
-    padding: sp(5), paddingBottom: sp(9), gap: sp(3),
+    backgroundColor: D.sheet, borderTopLeftRadius: 26, borderTopRightRadius: 26,
+    paddingTop: 12, paddingHorizontal: 22, paddingBottom: 34, gap: 14,
   },
-  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: radius.pill, backgroundColor: '#333' },
-  sheetTitle: { fontSize: font.h2, fontWeight: '700', color: D.text },
+  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: D.hairline },
+  sheetTitle: { fontFamily: inter.b, fontSize: 17, color: D.text },
   closeBtn: {
     width: 32, height: 32, borderRadius: radius.pill, backgroundColor: D.card2,
     alignItems: 'center', justifyContent: 'center',
@@ -339,25 +357,25 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', gap: 6,
   },
   segItemOn: { backgroundColor: colors.accent },
-  segText: { fontSize: font.small, fontWeight: '700', color: D.sub },
+  segText: { fontFamily: inter.b, fontSize: 13, color: D.sub },
   segTextOn: { color: colors.onAccent },
 
-  fieldLabel: { fontSize: font.tiny, fontWeight: '700', color: D.sub, letterSpacing: 1 },
+  fieldLabel: { fontFamily: inter.b, fontSize: 10, color: D.sub, letterSpacing: 1.4 },
   inputRow: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(2),
-    backgroundColor: D.card2, borderRadius: radius.md, paddingHorizontal: sp(3.5),
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: D.card2, borderRadius: 16, paddingHorizontal: 16,
   },
-  input: { flex: 1, height: 48, fontSize: font.body, color: D.text },
+  input: { flex: 1, height: 48, fontFamily: inter.m, fontSize: 14, color: D.text },
   amountInput: {
-    backgroundColor: D.card2, borderRadius: radius.md, paddingHorizontal: sp(3.5),
-    height: 60, fontSize: 30, fontWeight: '700', color: D.text, fontVariant: ['tabular-nums'],
+    backgroundColor: D.card2, borderRadius: 16, paddingHorizontal: 16,
+    height: 60, fontFamily: inter.b, fontSize: 30, color: D.text, fontVariant: ['tabular-nums'],
   },
-  quickRow: { flexDirection: 'row', gap: sp(2) },
+  quickRow: { flexDirection: 'row', gap: 8 },
   quickChip: {
-    paddingHorizontal: sp(3.5), paddingVertical: sp(2), borderRadius: radius.pill,
-    borderWidth: 1, borderColor: '#333', backgroundColor: 'transparent',
+    paddingHorizontal: 16, paddingVertical: 9, borderRadius: 999,
+    borderWidth: 1, borderColor: D.hairline, backgroundColor: 'transparent',
   },
-  quickText: { fontSize: font.small, fontWeight: '700', color: D.text },
+  quickText: { fontFamily: inter.b, fontSize: 12, color: D.text },
 
   qrBox: {
     borderWidth: 1, borderColor: '#3A3A40', borderStyle: 'dashed', borderRadius: radius.lg,
@@ -366,13 +384,13 @@ const s = StyleSheet.create({
   qrText: { fontSize: font.small, color: D.sub },
 
   cta: {
-    height: 52, borderRadius: radius.pill, backgroundColor: colors.accent,
-    alignItems: 'center', justifyContent: 'center', marginTop: sp(1),
+    height: 52, borderRadius: 999, backgroundColor: colors.accent,
+    alignItems: 'center', justifyContent: 'center',
   },
-  ctaDisabled: { backgroundColor: 'rgba(232,71,79,0.35)' },
-  ctaText: { fontSize: font.body, fontWeight: '700', color: colors.onAccent },
+  ctaDisabled: { backgroundColor: 'rgba(232,68,46,0.35)' },
+  ctaText: { fontFamily: inter.b, fontSize: 14, color: colors.onAccent },
   ctaTextDisabled: { color: 'rgba(255,255,255,0.55)' },
 
-  footNote: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 },
-  footText: { fontSize: font.tiny, color: D.sub },
+  footNote: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5 },
+  footText: { fontFamily: inter.r, fontSize: 11, color: D.sub },
 });

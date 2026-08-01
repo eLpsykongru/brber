@@ -1,12 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
-import {
-  ActivityIndicator, Image, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View,
-} from 'react-native';
+import { ActivityIndicator, Image, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, font, radius, sp } from '../theme';
+import { dark as D } from '../theme';
+import { Avatar, Eyebrow, Ico, IconName, Sheet, Stars, T } from './dark';
 
-// Client quick-view: who they are, their history with you, what's coming up.
+// Client quick-view (1h): who they are, their history with you, what's coming up.
 // Works for app clients (customerId) and walk-ins (grouped by walkInName).
 export type ClientRef = {
   name: string;
@@ -31,6 +29,7 @@ const prettyDate = (iso: string) => {
   const ds = new Date(iso).toDateString(); // "Fri Jul 18 2026"
   return `${ds.slice(0, 3)}, ${ds.slice(4, 10)}`;
 };
+const dh = (cents: number) => `${Math.round(cents / 100)} DH`;
 
 export default function ClientSheet({ client, barberId, onClose, onChat }: {
   client: ClientRef | null;
@@ -77,148 +76,127 @@ export default function ClientSheet({ client, barberId, onClose, onChat }: {
   const initials = client.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
   return (
-    <Modal visible transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.backdrop} onPress={onClose} />
-      <View style={s.sheet} onAccessibilityEscape={onClose}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.body}>
-          {/* header */}
-          <View style={s.head}>
-            {client.avatarUrl
-              ? <Image source={{ uri: client.avatarUrl }} style={s.avatar} />
-              : <View style={[s.avatar, s.avatarFallback]}><Text style={s.avatarText}>{initials}</Text></View>}
-            <View style={s.grow}>
-              <Text style={s.name}>{client.name}</Text>
-              {isWalkIn ? <Text style={s.tag}>Walk-in (no account)</Text>
-                : stars != null ? (
-                  <View style={s.starsRow} accessible accessibilityLabel={`Reliability ${stars} of 5 stars`}>
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <Ionicons key={i} name="star" size={12} color={i <= stars ? colors.star : D.border} />
-                    ))}
-                  </View>
-                ) : <Text style={s.tag}>New client</Text>}
-              <Text style={s.meta}>
-                {visits} visit{visits === 1 ? '' : 's'}
-                {noShows ? ` · ${noShows} no-show${noShows === 1 ? '' : 's'}` : ''}
-                {spent ? ` · ${(spent / 100).toFixed(0)} DH spent` : ''}
-              </Text>
-            </View>
-          </View>
-
-          {/* actions */}
-          <View style={s.actions}>
-            {!isWalkIn && client.phone && (
-              <ActionBtn icon="call-outline" label="Call"
-                onPress={() => Linking.openURL(`tel:${client.phone}`)} />
-            )}
-            {!isWalkIn && onChat && chatBooking && (
-              <ActionBtn icon="chatbubble-ellipses-outline" label="Chat"
-                onPress={() => onChat(chatBooking.id, client.name)} />
-            )}
-          </View>
-
-          {rows === null && <ActivityIndicator style={s.spinner} color={colors.accent} accessibilityLabel="Loading client history" />}
-
-          {rows !== null && (
-            <>
-              {/* upcoming */}
-              <Text style={s.section}>UPCOMING</Text>
-              {upcoming.length === 0 && <Text style={s.empty}>Nothing booked.</Text>}
-              {upcoming.map((r) => (
-                <View key={r.id} style={s.row}>
-                  <View style={s.rowLeft}>
-                    <Text style={s.rowWhen}>{prettyDate(r.starts_at)}</Text>
-                    <Text style={s.rowTime}>{hhmm(r.starts_at)}–{hhmm(r.ends_at)}</Text>
-                  </View>
-                  <View style={s.grow}>
-                    <Text style={s.rowService}>{r.services?.name ?? 'Service'}</Text>
-                    {r.status === 'pending' && <Text style={s.pendingTag}>PENDING</Text>}
-                  </View>
-                  <Text style={s.rowPrice}>{(r.price_cents / 100).toFixed(0)} DH</Text>
-                </View>
-              ))}
-
-              {/* history */}
-              <Text style={s.section}>HISTORY</Text>
-              {history.length === 0 && <Text style={s.empty}>No past visits yet.</Text>}
-              {history.slice(0, 15).map((r) => (
-                <View key={r.id} style={s.row}>
-                  <View style={s.rowLeft}>
-                    <Text style={s.rowWhen}>{prettyDate(r.starts_at)}</Text>
-                    <Text style={s.rowTime}>{hhmm(r.starts_at)}</Text>
-                  </View>
-                  <View style={s.grow}>
-                    <Text style={[s.rowService, r.status === 'no_show' && s.struck]}>
-                      {r.services?.name ?? 'Service'}
-                    </Text>
-                    {r.status === 'no_show' && <Text style={s.noShowTag}>NO-SHOW</Text>}
-                  </View>
-                  <Text style={[s.rowPrice, r.status === 'no_show' && s.struck]}>
-                    {(r.price_cents / 100).toFixed(0)} DH
-                  </Text>
-                </View>
-              ))}
-              {history.length > 15 && (
-                <Text style={s.empty}>+ {history.length - 15} older visits</Text>
-              )}
-            </>
-          )}
-        </ScrollView>
+    <Sheet visible onClose={onClose}>
+      <View style={s.head}>
+        {client.avatarUrl
+          ? <Image source={{ uri: client.avatarUrl }} style={s.avatar} />
+          : isWalkIn ? <Avatar size={56} icon="user" /> : <Avatar size={56} warm initials={initials} />}
+        <View style={s.grow}>
+          <T w="b" size={17}>{client.name}</T>
+          {isWalkIn
+            ? <T w="sb" size={11} c={D.sub} style={{ marginTop: 3 }}>Walk-in (no account)</T>
+            : stars != null
+              ? <View style={{ marginTop: 3 }} accessible
+                  accessibilityLabel={`Reliability ${stars} of 5 stars`}><Stars n={stars} size={11} /></View>
+              : <T w="sb" size={11} c={D.sub} style={{ marginTop: 3 }}>New client</T>}
+          <T size={12} c={D.sub} style={{ marginTop: 3 }}>
+            {visits} visit{visits === 1 ? '' : 's'}
+            {noShows ? ` · ${noShows} no-show${noShows === 1 ? '' : 's'}` : ''}
+            {spent ? ` · ${dh(spent)} spent` : ''}
+          </T>
+        </View>
+        <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel="Close"
+          style={({ pressed }) => [s.close, pressed && s.pressed]}>
+          <Ico name="x" size={16} />
+        </Pressable>
       </View>
-    </Modal>
+
+      {!isWalkIn && (client.phone || (onChat && chatBooking)) && (
+        <View style={s.actions}>
+          {client.phone && (
+            <ActionBtn icon="phone" label="Call" onPress={() => Linking.openURL(`tel:${client.phone}`)} />
+          )}
+          {onChat && chatBooking && (
+            <ActionBtn icon="message-circle" label="Chat" onPress={() => onChat(chatBooking.id, client.name)} />
+          )}
+        </View>
+      )}
+
+      {rows === null && (
+        <ActivityIndicator style={s.spinner} color={D.accent} accessibilityLabel="Loading client history" />
+      )}
+
+      {rows !== null && (
+        <>
+          <Eyebrow ls={1.4}>UPCOMING</Eyebrow>
+          {upcoming.length === 0 && <T size={12} c={D.sub}>Nothing booked.</T>}
+          {upcoming.map((r) => (
+            <View key={r.id} style={s.row}>
+              <View style={s.rowLeft}>
+                <T w="b" size={12}>{prettyDate(r.starts_at)}</T>
+                <T size={10} c={D.sub} style={s.tnum}>{hhmm(r.starts_at)}–{hhmm(r.ends_at)}</T>
+              </View>
+              <View style={s.grow}>
+                <T w="sb" size={12}>{r.services?.name ?? 'Service'}</T>
+                {r.status === 'pending' && <T w="b" size={9} c={D.amber} ls={0.5}>PENDING</T>}
+              </View>
+              <T w="b" size={12} style={s.tnum}>{dh(r.price_cents)}</T>
+            </View>
+          ))}
+
+          <Eyebrow ls={1.4}>HISTORY</Eyebrow>
+          {history.length === 0 && <T size={12} c={D.sub}>No past visits yet.</T>}
+          {history.slice(0, 15).map((r) => (
+            <View key={r.id} style={s.row}>
+              <View style={s.rowLeft}>
+                <T w="b" size={12}>{prettyDate(r.starts_at)}</T>
+                <T size={10} c={D.sub} style={s.tnum}>{hhmm(r.starts_at)}</T>
+              </View>
+              <View style={s.grow}>
+                <T w="sb" size={12} c={r.status === 'no_show' ? D.sub : D.text}
+                  style={r.status === 'no_show' && s.struck}>
+                  {r.services?.name ?? 'Service'}
+                </T>
+                {r.status === 'no_show' && <T w="b" size={9} c={D.red} ls={0.5}>NO-SHOW</T>}
+              </View>
+              <T w="b" size={12} c={r.status === 'no_show' ? D.sub : D.text}
+                style={[s.tnum, r.status === 'no_show' && s.struck]}>
+                {dh(r.price_cents)}
+              </T>
+            </View>
+          ))}
+          {history.length > 15 && (
+            <T size={12} c={D.sub}>+ {history.length - 15} older visits</T>
+          )}
+        </>
+      )}
+    </Sheet>
   );
 }
 
-function ActionBtn({ icon, label, onPress }: {
-  icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void;
-}) {
+function ActionBtn({ icon, label, onPress }: { icon: IconName; label: string; onPress: () => void }) {
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label}
       style={({ pressed }) => [s.actionBtn, pressed && s.pressed]}>
-      <Ionicons name={icon} size={16} color={D.text} />
-      <Text style={s.actionText}>{label}</Text>
+      <Ico name={icon} size={15} />
+      <T w="b" size={12}>{label}</T>
     </Pressable>
   );
 }
 
 const s = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' },
-  sheet: {
-    backgroundColor: D.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg,
-    maxHeight: '80%',
-  },
-  body: { padding: sp(5), paddingBottom: sp(10), gap: sp(2.5) },
   grow: { flex: 1 },
   pressed: { opacity: 0.7 },
-  spinner: { marginVertical: sp(6) },
+  tnum: { fontVariant: ['tabular-nums'] },
+  spinner: { marginVertical: 24 },
 
-  head: { flexDirection: 'row', alignItems: 'center', gap: sp(3) },
-  avatar: { width: 56, height: 56, borderRadius: radius.pill },
-  avatarFallback: { backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { fontSize: font.body, fontWeight: '700', color: colors.accent },
-  name: { fontSize: font.h2, fontWeight: '700', color: D.text },
-  tag: { fontSize: font.tiny, fontWeight: '600', color: D.sub, marginTop: 2 },
-  starsRow: { flexDirection: 'row', gap: 1, marginTop: 2 },
-  meta: { fontSize: font.small, color: D.sub, marginTop: 3 },
-
-  actions: { flexDirection: 'row', gap: sp(2.5) },
-  actionBtn: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(1.5), minHeight: 40,
-    paddingHorizontal: sp(3.5), borderRadius: radius.pill, backgroundColor: D.card2,
+  head: { flexDirection: 'row', alignItems: 'center', gap: 13 },
+  avatar: { width: 56, height: 56, borderRadius: 999 },
+  close: {
+    width: 32, height: 32, borderRadius: 999, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
   },
-  actionText: { fontSize: font.small, fontWeight: '700', color: D.text },
 
-  section: { fontSize: font.tiny, fontWeight: '700', color: D.sub, letterSpacing: 1, marginTop: sp(2) },
-  empty: { fontSize: font.small, color: D.sub },
+  actions: { flexDirection: 'row', gap: 9 },
+  actionBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 7, height: 40,
+    paddingHorizontal: 15, borderRadius: 999, backgroundColor: D.card2,
+  },
+
   row: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(3),
-    backgroundColor: D.card2, borderRadius: radius.md, padding: sp(3),
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: D.card2, borderRadius: 16, padding: 12, paddingHorizontal: 14,
   },
   rowLeft: { width: 84 },
-  rowWhen: { fontSize: font.small, fontWeight: '700', color: D.text },
-  rowTime: { fontSize: font.tiny, color: D.sub, marginTop: 1, fontVariant: ['tabular-nums'] },
-  rowService: { fontSize: font.small, fontWeight: '600', color: D.text },
-  rowPrice: { fontSize: font.small, fontWeight: '700', color: D.text, fontVariant: ['tabular-nums'] },
-  pendingTag: { fontSize: 9, fontWeight: '800', color: '#E8B84B', letterSpacing: 0.5, marginTop: 1 },
-  noShowTag: { fontSize: 9, fontWeight: '800', color: colors.danger, letterSpacing: 0.5, marginTop: 1 },
-  struck: { textDecorationLine: 'line-through', color: D.sub },
+  struck: { textDecorationLine: 'line-through' },
 });

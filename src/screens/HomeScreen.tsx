@@ -64,9 +64,10 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
     setChromeHidden(open);
   }
 
+  // 1c adds the walk-in itself; 'now' just means "show me the day it landed in"
   function onQuickPick({ mode, name, serviceId, preferMin }: QuickPick) {
     setQuickOpen(false);
-    openDay(true, { autoAddNow: mode === 'now', prefillName: name, prefillServiceId: serviceId, preferMin });
+    openDay(true, { autoAddNow: mode === 'schedule', prefillName: name, prefillServiceId: serviceId, preferMin });
   }
 
   let content;
@@ -101,7 +102,7 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
           onClose={() => setQuickOpen(false)} onPick={onQuickPick} />
       )}
       {!chromeHidden && (
-        <TabBar items={tabs} active={tab}
+        <TabBar items={tabs} active={tab} dark={!!barber}
           center={barber ? { label: 'Quick add', onPress: () => setQuickOpen(true) } : undefined}
           onChange={(k) => { setChromeHidden(false); setTab(k); }} />
       )}

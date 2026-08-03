@@ -6,8 +6,11 @@ import { Block, daySlots, Range, sameDay, weekStartOf, Window } from '../lib/slo
 import { colors, font, radius, shadow, sp } from '../theme';
 
 // Weekly day selector + time grid. Full slots are struck-through and disabled.
-export default function SlotPicker({ barberId, durationMin, selected, onSelect }: {
+// `markDay` rings a day and captions it NOW — the reschedule sheet (11a) uses it
+// to keep the appointment's current day visible while you pick a different one.
+export default function SlotPicker({ barberId, durationMin, selected, onSelect, label, markDay }: {
   barberId: string; durationMin: number; selected: Date | null; onSelect: (t: Date) => void;
+  label?: string; markDay?: Date | null;
 }) {
   const [windows, setWindows] = useState<Window[]>([]);
   const [daysOff, setDaysOff] = useState<string[]>([]);
@@ -61,7 +64,7 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect }
   return (
     <View>
       <View style={s.weekHead}>
-        <Text style={s.weekLabel}>Select a date</Text>
+        <Text style={[s.weekLabel, !!label && s.weekEyebrow]}>{label ?? 'Select a date'}</Text>
         <View style={s.weekNav}>
           <Pressable onPress={() => changeWeek('prev')} disabled={!canGoPrev} hitSlop={6}
             accessibilityLabel="Previous week"
@@ -79,14 +82,17 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect }
         {weekDays.map((d) => {
           const isPast = d.getTime() < today.getTime();
           const isSel = sameDay(d, selectedDay);
+          const isNow = !!markDay && sameDay(d, markDay);
           return (
             <Pressable key={d.toISOString()} disabled={isPast} style={s.dayCol}
               onPress={() => setSelectedDay(d)}>
               <Text style={[s.dayDow, isPast && s.muted]}>
                 {d.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 2)}
               </Text>
-              <View style={[s.dayNum, isSel && s.dayNumActive, isPast && s.dayNumPast]}>
+              <View style={[s.dayNum, isNow && !isSel && s.dayNumNow,
+                isSel && s.dayNumActive, isPast && s.dayNumPast]}>
                 <Text style={[s.dayNumText, isSel && s.dayNumTextActive, isPast && s.muted]}>{d.getDate()}</Text>
+                {isNow && <Text style={s.dayNowTag}>NOW</Text>}
               </View>
             </Pressable>
           );
@@ -118,6 +124,7 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect }
 const s = StyleSheet.create({
   weekHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: sp(2) },
   weekLabel: { fontSize: font.small, fontWeight: '600', color: colors.textSecondary },
+  weekEyebrow: { fontSize: font.tiny, fontWeight: '700', letterSpacing: 1.65 },
   weekNav: { flexDirection: 'row', gap: sp(2) },
   navBtn: {
     width: 34, height: 34, borderRadius: radius.pill, backgroundColor: colors.bg,
@@ -129,14 +136,19 @@ const s = StyleSheet.create({
   dayCol: { alignItems: 'center', gap: sp(1.5), flex: 1 },
   dayDow: { fontSize: font.tiny, color: colors.textSecondary },
   muted: { color: colors.textTertiary },
-  dayNum: { width: 38, height: 38, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
+  dayNum: { width: 36, height: 36, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
   dayNumActive: { backgroundColor: colors.ink },
+  dayNumNow: { borderWidth: 1.5, borderColor: '#C9C5BB' },
+  dayNowTag: {
+    position: 'absolute', bottom: -10, fontSize: 8, letterSpacing: 0.48,
+    fontWeight: '700', color: colors.textTertiary,
+  },
   dayNumPast: { opacity: 0.5 },
   dayNumText: { fontSize: font.body, fontWeight: '700', color: colors.text },
   dayNumTextActive: { color: colors.onAccent },
   slotGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: sp(2) },
   slot: {
-    width: '31%', alignItems: 'center', paddingVertical: sp(3), borderRadius: 14,
+    width: '31%', height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 14,
     backgroundColor: colors.bg,
   },
   slotSel: { backgroundColor: colors.ink },

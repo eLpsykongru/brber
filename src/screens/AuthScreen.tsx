@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, serifBlack, shadow, sp } from '../theme';
+import { ForgotPasswordScreen } from './AccountScreens';
 
 export type AuthView = 'welcome' | 'signin' | 'register';
 
@@ -106,6 +107,7 @@ function SignIn({ onBack, onRegister }: { onBack: () => void; onRegister: () => 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false); // 23a
 
   async function submit() {
     setBusy(true);
@@ -114,10 +116,9 @@ function SignIn({ onBack, onRegister }: { onBack: () => void; onRegister: () => 
     if (error) Alert.alert('Sign in failed', error.message);
   }
 
-  async function forgot() {
-    if (!email.trim()) return Alert.alert('Forgot password', 'Enter your email above first.');
-    const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
-    Alert.alert('Forgot password', error ? error.message : 'Check your email for a reset link.');
+  // 23a/23b replace the one-shot alert: the wait state is most of the flow
+  if (forgotOpen) {
+    return <ForgotPasswordScreen initialEmail={email.trim()} onBack={() => setForgotOpen(false)} />;
   }
 
   return (
@@ -131,7 +132,7 @@ function SignIn({ onBack, onRegister }: { onBack: () => void; onRegister: () => 
         <LabeledField label="Email" autoCapitalize="none" keyboardType="email-address"
           autoComplete="email" value={email} onChangeText={setEmail} />
         <PasswordField value={password} onChangeText={setPassword} />
-        <Text style={s.forgot} onPress={forgot}>Forgot password?</Text>
+        <Text style={s.forgot} onPress={() => setForgotOpen(true)}>Forgot password?</Text>
         <CtaButton title="Sign in" onPress={submit} busy={busy} />
         <View style={s.orRow}>
           <View style={s.orLineLight} />

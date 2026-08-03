@@ -7,10 +7,13 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Session } from '@supabase/supabase-js';
 import { StatusBar } from 'expo-status-bar';
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, AppState, StyleSheet, View } from 'react-native';
+import { onBannerAction, registerPush } from './src/lib/push';
 import { supabase } from './src/lib/supabase';
+import { SessionExpiredSheet, SetPasswordScreen } from './src/screens/AccountScreens';
 import AuthScreen, { AuthView } from './src/screens/AuthScreen';
+import { biometricLockOn, LockScreen } from './src/screens/LinkedAccountsScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import IntroScreen from './src/screens/IntroScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
@@ -31,11 +34,29 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<{ profile: Profile; barber: Barber | null } | null>(null);
   const [intro, setIntro] = useState<{ show: boolean; next: AuthView }>({ show: false, next: 'welcome' });
+  // 24a remembers who just got signed out; 23c is the emailed reset landing
+  const [expired, setExpired] = useState<{ name: string | null; email: string | null } | null>(null);
+  const [recovering, setRecovering] = useState(false);
+  const userRef = useRef<{ name: string | null; email: string | null } | null>(null);
+  userRef.current = user ? { name: user.profile.full_name, email: user.profile.email ?? null } : null;
+  // 24b — re-locks whenever the app comes back from the background
+  const [locked, setLocked] = useState(false);
+  useEffect(() => {
+    biometricLockOn().then((on) => setLocked(on));
+    const sub = AppState.addEventListener('change', async (st) => {
+      if (st === 'background' && await biometricLockOn()) setLocked(true);
+    });
+    return () => sub.remove();
+  }, []);
 
   const loadUser = useCallback(async (s: Session) => {
-    const { data: profile } = await supabase
-      .from('profiles').select('id, full_name, phone, avatar_url, role').eq('id', s.user.id).single();
-    if (!profile) return setUser(null);
+    const { data: row } = await supabase
+      .from('profiles')
+      .select('id, full_name, phone, avatar_url, role, language, dob, usual_service')
+      .eq('id', s.user.id).single();
+    if (!row) return setUser(null);
+    // email lives on the auth user, not the profile row — 19b shows it locked
+    const profile: Profile = { ...row, email: s.user.email ?? null };
     let barber: Barber | null = null;
     if (profile.role === 'barber') {
       const { data } = await supabase.from('barbers').select('*').eq('id', s.user.id).single();
@@ -53,12 +74,28 @@ export default function App() {
         setBooting(false);
       });
     const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      // 24a — a session that dies while the app is open is a different event
+      // from signing out on purpose, and gets the blocking sheet instead of
+      // dumping the user back on the welcome screen
+      if (event === 'SIGNED_OUT' && userRef.current) setExpired(userRef.current);
+      if (event === 'PASSWORD_RECOVERY') setRecovering(true);   // 23c
       setSession(s);
       if (!s) setUser(null);
-      else if (event === 'SIGNED_IN') loadUser(s);
+      else if (event === 'SIGNED_IN') { setExpired(null); setRecovering(false); loadUser(s); }
     });
     return () => sub.subscription.unsubscribe();
   }, [loadUser]);
+
+  // Barber 4a / customer 13b — every signed-in device gets a token, and
+  // Accept/Decline on a barber's banner runs the same RPCs the app does.
+  // No-ops in Expo Go, which dropped remote push.
+  const userId = user?.profile.id;
+  useEffect(() => {
+    if (!userId) return;
+    registerPush(userId).catch(() => {});
+    const sub = onBannerAction(() => { if (session) loadUser(session); });
+    return () => sub.remove();
+  }, [userId, session, loadUser]);
 
   function finishIntro(next: AuthView) {
     AsyncStorage.setItem(INTRO_SEEN_KEY, '1');
@@ -66,7 +103,13 @@ export default function App() {
   }
 
   let content;
-  if (booting || !fontsLoaded || (session && !user)) {
+  if (locked && user) {
+    content = <LockScreen onUnlocked={() => setLocked(false)}
+      onPassword={() => { setLocked(false); supabase.auth.signOut(); }} />;
+  } else if (recovering) {
+    content = <SetPasswordScreen mode="reset" email={session?.user.email ?? null}
+      onBack={() => setRecovering(false)} onDone={() => setRecovering(false)} />;
+  } else if (booting || !fontsLoaded || (session && !user)) {
     content = <ActivityIndicator color={colors.text} />;
   } else if (!session || !user) {
     content = intro.show
@@ -82,6 +125,9 @@ export default function App() {
   return (
     <View style={styles.container}>
       {content}
+      <SessionExpiredSheet visible={!!expired && !session} name={expired?.name ?? null}
+        email={expired?.email ?? null}
+        onSignIn={() => setExpired(null)} onNotYou={() => setExpired(null)} />
       <StatusBar style="auto" />
     </View>
   );

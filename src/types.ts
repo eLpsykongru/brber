@@ -4,6 +4,12 @@ export type Profile = {
   phone: string | null;
   avatar_url: string | null;
   role: 'customer' | 'barber' | 'admin';
+  // 19a/19b — settings and the customer's own profile (0039). Optional because
+  // most callers select the short column list above.
+  email?: string | null;         // from auth, not a column; filled where known
+  language?: string | null;
+  dob?: string | null;
+  usual_service?: string | null;
 };
 
 export type Salon = {

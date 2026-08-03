@@ -19,6 +19,7 @@ import type { Barber, Profile } from '../types';
 import BarberQueueScreen from './BarberQueueScreen';
 import ChatScreen from './ChatScreen';
 import EarningsScreen from './EarningsScreen';
+import NotificationsScreen from './NotificationsScreen';
 import ProfileScreen from './ProfileScreen';
 
 type BookingRow = {
@@ -97,7 +98,8 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   const [daysOff, setDaysOff] = useState<{ id: string; day: string }[]>([]);
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [salonName, setSalonName] = useState<string | null>(null);
-  const [requestsOpen, setRequestsOpen] = useState(false);
+  const [inboxOpen, setInboxOpen] = useState(false);
+  const [unread, setUnread] = useState(0);
   const [chat, setChat] = useState<{ id: string; title: string } | null>(null);
   const [sheetClient, setSheetClient] = useState<ClientRef | null>(null);
   const [showProfile, setShowProfile] = useState(false);
@@ -138,6 +140,10 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     setWindows(av.data ?? []);
     setDaysOff(off.data ?? []);
     setBlocks(blk.data ?? []);
+    const { count } = await supabase.from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('barber_id', barberId).is('read_at', null);
+    setUnread(count ?? 0);
   }, [barberId]);
 
   useEffect(() => { load(); }, [load]);
@@ -278,6 +284,10 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     return <BarberQueueScreen barberId={barberId}
       onBack={() => { setShowQueue(false); onChromeHidden?.(false); load(); }} />;
   }
+  if (inboxOpen) {
+    return <NotificationsScreen barberId={barberId}
+      onBack={() => { setInboxOpen(false); onChromeHidden?.(false); load(); }} />;
+  }
 
   // ---- derive the dashboard ----
   const now = Date.now();
@@ -375,11 +385,12 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
             <Eyebrow ls={1.8}>{dateLabel}</Eyebrow>
             <Serif size={26} ls={0.03} style={s.greet}>Salam, {firstName}</Serif>
           </Pressable>
-          <Pressable onPress={() => setRequestsOpen(true)} accessibilityRole="button"
-            accessibilityLabel={`Booking requests, ${requests.length} waiting`}
+          <Pressable onPress={() => { setInboxOpen(true); onChromeHidden?.(true); }}
+            accessibilityRole="button"
+            accessibilityLabel={`Notifications, ${unread} unread`}
             style={({ pressed }) => [s.bell, pressed && s.pressed]}>
             <Ico name="bell" size={16} />
-            {requests.length > 0 && <View style={s.bellDot} />}
+            {unread > 0 && <View style={s.bellDot} />}
           </Pressable>
         </View>
 
@@ -709,31 +720,6 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
         )}
       </Modal>
 
-      {/* booking requests sheet (bell) */}
-      <Sheet visible={requestsOpen} onClose={() => setRequestsOpen(false)}>
-        <SheetHead title="Booking requests" onClose={() => setRequestsOpen(false)} left />
-        {bookings === null && <ActivityIndicator color={D.accent} accessibilityLabel="Loading requests" />}
-        {bookings !== null && requests.length === 0 && <T size={13} c={D.sub}>All caught up.</T>}
-        {requests.map((b) => (
-          <View key={b.id} style={s.reqRow}>
-            <ClientAvatar b={b} barberId={barberId} size={40} />
-            <View style={s.grow}>
-              <T w="b" size={14}>{nameOf(b, barberId)}</T>
-              <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-                {b.services?.name ?? 'Service'} · {new Date(b.starts_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} {hhmm(b.starts_at)} · {dh(b.price_cents)}
-              </T>
-            </View>
-            <Pressable onPress={() => decline(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel="Decline"
-              style={({ pressed }) => [s.puck36, pressed && s.pressed]}>
-              <Ico name="x" size={15} color={D.red} />
-            </Pressable>
-            <Pressable onPress={() => accept(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel="Accept"
-              style={({ pressed }) => [s.puck36, { backgroundColor: D.green }, pressed && s.pressed]}>
-              <Ico name="check" size={15} color={D.bg} />
-            </Pressable>
-          </View>
-        ))}
-      </Sheet>
     </View>
   );
 }

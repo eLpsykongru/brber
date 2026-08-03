@@ -14,6 +14,12 @@ import { ActivityIndicator } from 'react-native';
 import CouponsScreen from './CouponsScreen';
 import EarningsScreen from './EarningsScreen';
 import HelpCenterScreen from './HelpCenterScreen';
+import { SetPasswordScreen } from './AccountScreens';
+import CustomerNotificationsScreen from './CustomerNotificationsScreen';
+import InviteScreen from './InviteScreen';
+import LinkedAccountsScreen from './LinkedAccountsScreen';
+import SettingsScreen, { EditProfileScreen } from './SettingsScreen';
+import ReportProblemScreen, { CaseRow, SupportCaseScreen } from './SupportScreens';
 import MyBookingsScreen from './MyBookingsScreen';
 import PortfolioScreen from './PortfolioScreen';
 import AvailabilityScreen from './AvailabilityScreen';
@@ -29,7 +35,8 @@ const STATUS_LABEL: Record<string, string> = {
 type MenuItem = { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void; danger?: boolean };
 
 type ProfileView =
-  | 'menu' | 'edit' | 'bookings' | 'wallet' | 'coupons' | 'help'
+  | 'menu' | 'edit' | 'bookings' | 'wallet' | 'coupons' | 'help' | 'invite' | 'support'
+  | 'settings' | 'notifications' | 'password' | 'linked'
   | 'preview' | 'services' | 'work' | 'schedule' | 'salon' | 'earnings';
 
 export default function ProfileScreen({ profile, barber, phone, onProfileChanged, onChromeHidden, onBack }: {
@@ -42,6 +49,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   const [avatarBusy, setAvatarBusy] = useState(false);
   // owner (not just any barber in a salon) gets the Salon management row
   const [ownsSalon, setOwnsSalon] = useState(false);
+  const [openCase, setOpenCase] = useState<CaseRow | null>(null); // 18b
 
   useEffect(() => {
     if (!barber?.salon_id) return;
@@ -92,16 +100,46 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     ]);
   }
 
+  // 19b is the customer's profile — preferred barber, usual service. Barbers
+  // keep the original editor: theirs carries bio, specialty and the shop.
   if (view === 'edit') {
-    return <EditProfile profile={profile} barber={barber} phone={phone}
-      onDone={() => { onProfileChanged(); go('menu'); }} onBack={() => go('menu')} />;
+    return barber
+      ? <EditProfile profile={profile} barber={barber} phone={phone}
+          onDone={() => { onProfileChanged(); go('menu'); }} onBack={() => go('menu')} />
+      : <EditProfileScreen profile={profile} onBack={() => go('menu')}
+          onDone={() => { onProfileChanged(); go('menu'); }} />;
+  }
+  if (view === 'settings') {
+    return <SettingsScreen profile={profile} onBack={() => go('menu')}
+      onProfileChanged={onProfileChanged} go={go} />;
+  }
+  if (view === 'notifications') {
+    return <CustomerNotificationsScreen userId={profile.id} onBack={() => go('settings')} />;
+  }
+  if (view === 'linked') {
+    return <LinkedAccountsScreen onBack={() => go('settings')} onSetPassword={() => go('password')} />;
+  }
+  if (view === 'password') {
+    return <SetPasswordScreen mode="set" email={profile.email} onBack={() => go('settings')}
+      onDone={() => { Alert.alert('Password saved', 'You can now sign in with your email.'); go('settings'); }} />;
   }
   if (view === 'bookings') {
     return <MyBookingsScreen customerId={profile.id} onChromeHidden={onChromeHidden} />;
   }
   if (view === 'wallet') return <WalletScreen customerId={profile.id} onBack={() => go('menu')} />;
   if (view === 'coupons') return <CouponsScreen onBack={() => go('menu')} />;
-  if (view === 'help') return <HelpCenterScreen onBack={() => go('menu')} />;
+  if (view === 'help') {
+    return <HelpCenterScreen onBack={() => go('menu')}
+      onContact={barber ? undefined : () => go('support')} />;
+  }
+  if (openCase) {
+    return <SupportCaseScreen caseRow={openCase} myId={profile.id}
+      onBack={() => { setOpenCase(null); go('menu'); }} />;
+  }
+  if (view === 'invite') return <InviteScreen onBack={() => go('menu')} />;
+  if (view === 'support') {
+    return <ReportProblemScreen onBack={() => go('menu')} onOpenCase={setOpenCase} />;
+  }
   if (view === 'preview' && barber?.salon_id) {
     return <PreviewPage salonId={barber.salon_id} onBack={() => go('menu')}
       onChromeHidden={onChromeHidden} />;
@@ -132,9 +170,14 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
       { icon: 'calendar-outline', label: 'My Bookings', onPress: () => go('bookings') },
       { icon: 'ticket-outline', label: 'My Coupons', onPress: () => go('coupons') },
       { icon: 'wallet-outline', label: 'My Wallet', onPress: () => go('wallet') },
+      { icon: 'gift-outline', label: 'Invite friends', onPress: () => go('invite') },
     ] as MenuItem[]),
-    { icon: 'settings-outline', label: 'Settings', onPress: () => soon('Settings') },
+    { icon: 'settings-outline', label: 'Settings',
+      onPress: () => barber ? soon('Settings') : go('settings') },
     { icon: 'help-circle-outline', label: 'Help Center', onPress: () => go('help') },
+    ...(barber ? [] : [
+      { icon: 'flag-outline', label: 'Report a problem', onPress: () => go('support') },
+    ] as MenuItem[]),
     { icon: 'log-out-outline', label: 'Logout', onPress: signOut, danger: true },
   ];
 

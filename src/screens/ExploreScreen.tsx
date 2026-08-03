@@ -5,6 +5,7 @@ import {
   Alert, FlatList, Image, Modal, Pressable, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
+import { NoConnection, useOnline } from '../components/Offline';
 import { Chip, Display, Field, Stars } from '../components/ui';
 import { DEFAULT_REGION, LatLng, haversineKm, openDirections, walkMin } from '../lib/geo';
 import { listPortfolio } from '../lib/portfolio';
@@ -52,8 +53,8 @@ const RATING_OPTS = [{ label: 'Any', v: null }, { label: '4+', v: 4 }, { label: 
 const KM_OPTS = [{ label: 'Any', v: null }, { label: '< 1 Km', v: 1 }, { label: '< 3 Km', v: 3 }, { label: '< 5 Km', v: 5 }] as const;
 const PRICE_OPTS = [{ label: 'Any', v: null }, { label: '≤ 50 DH', v: 5000 }, { label: '≤ 100 DH', v: 10000 }, { label: '≤ 200 DH', v: 20000 }] as const;
 
-export default function ExploreScreen({ onChromeHidden }: {
-  onChromeHidden?: (hidden: boolean) => void;
+export default function ExploreScreen({ onChromeHidden, onBookings }: {
+  onChromeHidden?: (hidden: boolean) => void; onBookings?: () => void;
 }) {
   const [salons, setSalons] = useState<SalonCard[]>([]);
   const [query, setQuery] = useState('');
@@ -64,6 +65,8 @@ export default function ExploreScreen({ onChromeHidden }: {
   const [minRating, setMinRating] = useState<number | null>(null);
   const [maxKm, setMaxKm] = useState<number | null>(null);
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const [reload, setReload] = useState(0);
+  const { online } = useOnline();
   const mapRef = useRef<MapView>(null);
   const listRef = useRef<FlatList<SalonCard>>(null);
 
@@ -79,7 +82,7 @@ export default function ExploreScreen({ onChromeHidden }: {
         setSalons(cards);
       });
     locate(false);
-  }, []);
+  }, [reload]);
 
   async function locate(recenter: boolean) {
     const { status } = await Location.requestForegroundPermissionsAsync();
@@ -130,6 +133,17 @@ export default function ExploreScreen({ onChromeHidden }: {
   }
 
   const filtersOn = minRating != null || maxKm != null || maxPrice != null;
+
+  // 25b — Explore is the one tab with nothing useful cached: a map and a salon
+  // list are both live queries, so there is nothing honest to show offline.
+  if (!online && salons.length === 0) {
+    return (
+      <View style={styles.screen}>
+        <Display size={18} style={styles.offlineTitle}>Explore</Display>
+        <NoConnection onRetry={() => setReload((n) => n + 1)} onBookings={onBookings} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.screen}>
@@ -290,6 +304,7 @@ export default function ExploreScreen({ onChromeHidden }: {
 }
 
 const styles = StyleSheet.create({
+  offlineTitle: { textAlign: 'center', letterSpacing: 0.72, marginTop: 20 },
   screen: { flex: 1, paddingTop: sp(14), backgroundColor: colors.surface },
   grow: { flex: 1 },
   pressed: { opacity: 0.7 },

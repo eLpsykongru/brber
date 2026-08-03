@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Alert, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
@@ -7,6 +7,11 @@ import { Display, Field, Stars, TAB_BAR_INSET } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, sp } from '../theme';
+import { OfflineBanner, useOnline } from '../components/Offline';
+import { clearQueueActivity, syncQueueActivity } from '../lib/queueActivity';
+import CustomerNotificationsScreen from './CustomerNotificationsScreen';
+import MyBookingScreen from './MyBookingScreen';
+import CheckInScreen, { WalkInTicketScreen, YoureNextScreen } from './QueueScreens';
 import QueueScreen, { DayQueueRow, minutesUntil, QUEUE_POLL_MS } from './QueueScreen';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
 
@@ -60,6 +65,34 @@ type MyBooking = {
 
 // ponytail: single-city launch → list all salons; distance sort/search
 // arrives with the Google Places + lat/lng work
+// 29b — mirror the live queue onto the lock screen for as long as it is live.
+// Lives next to the poll that already knows the answer rather than opening a
+// second subscription to say the same thing.
+function useQueueActivity(
+  mine: DayQueueRow | null,
+  queue: DayQueueRow[],
+  booking: MyBooking | null,
+) {
+  useEffect(() => {
+    if (!mine || !booking) { clearQueueActivity(); return; }
+    if (mine.stage === 'done') { clearQueueActivity(); return; }
+
+    const ahead = queue.filter((r) => r.stage !== 'done' && r.booking_id !== mine.booking_id
+      && new Date(r.starts_at).getTime() < new Date(mine.starts_at).getTime()).length;
+    syncQueueActivity({
+      phase: mine.stage === 'in_chair' ? 'chair' : ahead === 0 ? 'next' : 'waiting',
+      ticketNo: queue.findIndex((r) => r.booking_id === mine.booking_id) + 1,
+      ahead,
+      etaMin: minutesUntil(mine.starts_at),
+      barberName: booking.barbers?.profiles?.full_name ?? 'Your barber',
+      salonName: booking.barbers?.salon?.name ?? 'the shop',
+    });
+  }, [mine?.booking_id, mine?.stage, mine?.starts_at, queue.length, booking?.id]);
+
+  // the card must not outlive the screen that owns it
+  useEffect(() => () => { clearQueueActivity(); }, []);
+}
+
 export default function DiscoverScreen({ name, customerId, onChromeHidden, onExplore, onBookings }: {
   name?: string | null; customerId?: string;
   onChromeHidden?: (hidden: boolean) => void; onExplore?: () => void; onBookings?: () => void;
@@ -71,6 +104,13 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
   const [booking, setBooking] = useState<MyBooking | null>(null);
   const [dayQueue, setDayQueue] = useState<DayQueueRow[]>([]);
   const [queueOpen, setQueueOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false); // 9a, behind the queue's MY BOOKING
+  const [inboxOpen, setInboxOpen] = useState(false);   // 14a, behind the bell
+  const [unread, setUnread] = useState(0);
+  const [checkIn, setCheckIn] = useState(false);       // 27a, the counter code
+  const [walkIn, setWalkIn] = useState<string | null>(null); // 27c, the fresh ticket
+  const [ackedTakeover, setAckedTakeover] = useState<string | null>(null); // 28
+  const { online, since } = useOnline();                                   // 25
 
   // QUEUE MODE — the live ticket is your next *confirmed* booking today; it pops
   // up once the barber confirms and shows your spot in his day. Polled: other
@@ -122,6 +162,15 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
       });
   }, []);
 
+  const loadUnread = useCallback(async () => {
+    if (!customerId) return;
+    const { count } = await supabase.from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', customerId).is('read_at', null);
+    setUnread(count ?? 0);
+  }, [customerId]);
+  useEffect(() => { loadUnread(); }, [loadUnread]);
+
   function open(next: SalonCard | null) {
     setSalon(next);
     onChromeHidden?.(!!next); // salon detail has its own pinned CTA — hide the tab bar
@@ -144,11 +193,63 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
     .sort((a, b) => b.avg - a.avg)
     .slice(0, 5);
 
+  // 28 — the takeover. Fires off the same poll that drives the Home ticket, so
+  // it appears without the customer touching anything.
+  const mineQ = dayQueue.find((r) => r.booking_id === booking?.id) ?? null;
+  useQueueActivity(mineQ, dayQueue, booking);
+  const aheadOfMe = mineQ
+    ? dayQueue.filter((r) => r.stage !== 'done' && r.booking_id !== mineQ.booking_id
+      && new Date(r.starts_at).getTime() < new Date(mineQ.starts_at).getTime()).length
+    : 0;
+  const phase: 'next' | 'chair' | null = !mineQ ? null
+    : mineQ.stage === 'in_chair' ? 'chair'
+      : aheadOfMe === 0 ? 'next' : null;
+
+  if (phase && booking && ackedTakeover !== `${booking.id}:${phase}`) {
+    const bName = booking.barbers?.profiles?.full_name ?? 'Your barber';
+    return <YoureNextScreen phase={phase}
+      ticketNo={dayQueue.findIndex((r) => r.booking_id === booking.id) + 1}
+      barberName={bName} salonName={booking.barbers?.salon?.name ?? 'the shop'}
+      etaMin={minutesUntil(mineQ!.starts_at)}
+      startedAt={mineQ!.stage === 'in_chair' ? mineQ!.starts_at : null}
+      depositCents={0} priceCents={0}
+      onAck={() => setAckedTakeover(`${booking.id}:${phase}`)}
+      onMessage={() => { setAckedTakeover(`${booking.id}:${phase}`); setDetailOpen(true); }} />;
+  }
+
+  if (checkIn && customerId) {
+    return <CheckInScreen onClose={() => { setCheckIn(false); onChromeHidden?.(false); }}
+      onJoined={(id) => { setCheckIn(false); setWalkIn(id); }} />;
+  }
+  if (walkIn && booking) {
+    return <WalkInTicketScreen
+      ticketNo={Math.max(1, dayQueue.findIndex((r) => r.booking_id === walkIn) + 1)}
+      ahead={aheadOfMe} waitMin={minutesUntil(booking.starts_at)}
+      barberName={booking.barbers?.profiles?.full_name ?? 'Your barber'}
+      salonName={booking.barbers?.salon?.name ?? 'the shop'}
+      priceCents={0}
+      onQueue={() => { setWalkIn(null); setQueueOpen(true); }}
+      onLeave={async () => {
+        await supabase.rpc('leave_queue', { p_booking: walkIn });
+        setWalkIn(null); onChromeHidden?.(false);
+      }} />;
+  }
+  if (inboxOpen && customerId) {
+    return <CustomerNotificationsScreen userId={customerId}
+      onBack={() => { setInboxOpen(false); onChromeHidden?.(false); loadUnread(); }}
+      onOpenBooking={() => { setInboxOpen(false); setDetailOpen(true); }}
+      onRate={() => { setInboxOpen(false); onChromeHidden?.(false); onBookings?.(); }} />;
+  }
+  if (detailOpen && booking && customerId) {
+    return <MyBookingScreen bookingId={booking.id} myId={customerId}
+      onBack={() => { setDetailOpen(false); onChromeHidden?.(false); }}
+      onQueue={() => { setDetailOpen(false); setQueueOpen(true); }} />;
+  }
   if (queueOpen && booking?.barbers?.id) {
     return <QueueScreen barberId={booking.barbers.id} myBookingId={booking.id}
       barberLine={`${(booking.barbers.profiles?.full_name ?? 'Barber').split(' ')[0]} · ${booking.barbers.salon?.name ?? 'Salon'}`}
       onBack={() => { setQueueOpen(false); onChromeHidden?.(false); }}
-      onBookings={onBookings} />;
+      onBookings={() => { setQueueOpen(false); setDetailOpen(true); onChromeHidden?.(true); }} />;
   }
   if (salon) {
     return <SalonDetailScreen salon={salon} onBack={() => open(null)} onChromeHidden={onChromeHidden} />;
@@ -156,6 +257,8 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
 
   const header = (
     <View style={styles.homeHeader}>
+      {/* 25a — the banner over whatever loaded before the connection went */}
+      {!online && <OfflineBanner since={since} onRetry={() => loadUnread()} />}
       {/* ponytail: single-city launch — location is a label, not a picker */}
       <View style={styles.locationHead}>
         <View>
@@ -165,12 +268,19 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
             <Text style={styles.locationText}>Tangier, Morocco</Text>
           </View>
         </View>
-        {/* TODO(backlog): notifications land with the push increment */}
-        <TouchableOpacity style={styles.bellBtn} accessibilityLabel="Notifications"
-          onPress={() => Alert.alert('Notifications', 'Coming with push — see BACKLOG.md')}>
-          <Ionicons name="notifications-outline" size={18} color={colors.text} />
-          <View style={styles.bellDot} />
-        </TouchableOpacity>
+        <View style={styles.headActions}>
+          {/* 27a — scanning the counter code is the walk-in's way in */}
+          <TouchableOpacity style={styles.bellBtn} accessibilityLabel="Check in with a shop code"
+            onPress={() => { setCheckIn(true); onChromeHidden?.(true); }}>
+            <Ionicons name="qr-code-outline" size={18} color={colors.text} />
+          </TouchableOpacity>
+          {/* 14a — the inbox behind the bell; the dot is a real unread count */}
+          <TouchableOpacity style={styles.bellBtn} accessibilityLabel="Notifications"
+            onPress={() => { setInboxOpen(true); onChromeHidden?.(true); }}>
+            <Ionicons name="notifications-outline" size={18} color={colors.text} />
+            {unread > 0 && <View style={styles.bellDot} />}
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Display size={32} style={styles.greeting}>
@@ -311,6 +421,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5, textTransform: 'uppercase',
   },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: sp(1) },
+  headActions: { flexDirection: 'row', gap: 8 },
   bellBtn: {
     width: 40, height: 40, borderRadius: radius.pill, backgroundColor: colors.bg,
     alignItems: 'center', justifyContent: 'center', ...shadow,

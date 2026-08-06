@@ -171,9 +171,12 @@ rail). **DECIDED: commission = 0%** — instant liquidity is the agent's reward;
 tier/bonus/commission UI removed. The fake "Insured by brber Agent Guarantee"
 and "SMS confirmation" copy was deleted too.
 Still open:
-- **Settlement/netting** — the float only ever grows; needs settlement rows
-  (netting against payouts) + a real outstanding-float cap replacing the flat
-  per-top-up cap. First thing to build when real cash volume appears.
+- **Settlement / netting / the float cap — DONE 2026-08-06 (0042, 0044)**, from the
+  admin side: `float_settlements` + `salon_{float,owed,net,gap}_cents()` +
+  `admin_settle_float()` (both directions), and `salons.float_cap_cents` now caps
+  **outstanding net** instead of each top-up — the swap 0022's comment asked for.
+  See "Admin console" for what each number means and what is still deliberately out
+  (forfeited deposits are not counted as owed to the shop).
 - **Card rail** (YouCan Pay) → customer Add-Money returns then.
 - **Spending the balance** — bookings can't be paid from the wallet yet; that's
   the deposit/coupon unlock in the Payments bet.
@@ -225,6 +228,163 @@ with social sign-in, email sign-in, register. Email/password is the real rail.
 - **Register keeps a discreet "Join as a barber" link** — the design dropped the
   role picker (customer-only doc) but barbers still need to sign up in-app until
   the `brber.ma` web surface (adoption bet #1) exists.
+
+## Admin console  → `admin/index.html` — REAL 2026-08-06 (0041–0043)
+Design doc "Admin Dashboard.dc.html". A static web desk, **not** part of the Expo app
+— plain HTML/CSS/JS opened in a browser (`npx serve .` → `/admin/`), because the
+design is a 1400px browser console and the app has no web target (no
+`react-native-web`/`react-dom` installed). All 9 screens: Overview (1a), Salons (1b),
+Bookings (1c), Wallets & float (1d), Support (1e), Salon approval (1f), Reviews +
+flagged review + removal dialog (2b/2a/2c). Hash routes (`#/salons` …), sidebar and
+drill-downs are real, and **every figure comes from Supabase** — no fixtures left.
+Sign-in is email/password against the same project; copy `admin/config.example.js` to
+`admin/config.js` (gitignored) for the URL + anon key. **Only the anon key** — every
+query is gated on `profiles.role = 'admin'` inside the DB, so a service-role key in a
+browser is never needed and must never be pasted there.
+**Making an admin:** the role has existed since 0001 and cannot be self-assigned
+(`handle_new_user` only writes customer/barber). From the SQL editor:
+`update public.profiles set role = 'admin' where id = '<uuid>';`
+**Backend (0041 enum value · 0042 writes + schema · 0043 the 9 read RPCs):**
+- **Reviews moderation** — `reviews.{state, removal_reason, customer_note,
+  moderated_at, moderated_by}` + a `review_actions` audit row per decision.
+  `review_flag` (0031) now parks a review in `state='held'` instead of only
+  date-stamping it; `admin_review_decide()` keeps or removes it, **refuses a removal
+  without a policy reason** (2c's rule, enforced in the DB), and notifies both sides.
+  Removed reviews drop out of `reviews_select` for everyone but their author and us,
+  so every rating average excludes them for free.
+- **Platform shop approval** — `salons.{status, submitted_at, reviewed_at,
+  reviewed_by, review_note}`. **BEHAVIOUR CHANGE: a newly created salon is now
+  `pending` and invisible in Explore until an admin approves it** (existing shops were
+  grandfathered `live`). `admin_salon_decide()` enforces 1f's "approve is locked until
+  the map pin is confirmed". The 5-item checklist is derived, never stored.
+- **Agent float settlement** — **TRIGGER PULLED** on the Agent wallet item below
+  ("Settlement/netting … first thing to build when real cash volume appears").
+  `float_settlements` + `salon_float_cents()` (= cash_topups at that till − collected)
+  + `admin_settle_float()`, capped at what the shop is actually holding. Bookkeeping,
+  not a payment rail — same nature as 0022's top-ups, nothing debits. This is the
+  **platform↔agent** half; 0031's `salon_settlements` (owner↔barber commission) is
+  untouched and unrelated.
+- **Support console** — 0038 said "replies and resolutions come from the service role
+  until support volume earns a UI". `admin_support_reply()` /
+  `admin_support_resolve()` are that UI's backend; the refund credits the customer's
+  wallet for real. `wallet_transactions.created_by` was repointed from `barbers` to
+  `profiles` so an admin can issue one.
+**Netting, the cap and the count — 0044:**
+- **Netting** — a settlement met only cash collected, never what we *owe* the shop.
+  `salon_owed_cents()` = deposits customers paid us for cuts the shop has already
+  delivered, less refunds, less payouts; `salon_net_cents()` = float − owed is the
+  one number a settlement run is about. `admin_settle_float()` now points both ways:
+  a **negative** amount is a payout to the shop (same trick as 0035's negative wallet
+  rows — one table, sum is the truth). **Forfeited deposits (no-show, customer
+  cancellation) are deliberately excluded from "owed"** — who keeps those is an open
+  product decision and a settlement function must not make it by accident.
+- **The float cap is real** — `salons.float_cap_cents` (default 5 000 DH, per shop)
+  caps **outstanding net**, not each top-up, which is what 0022's comment promised.
+  `agent_cash_topup` refuses the top-up that would cross it and says how much to
+  settle. No UI to raise a shop's cap yet: it's a column, set it in SQL.
+- **The declared drawer** — `float_settlements.{expected_cents, declared_cents}`.
+  The console asks one number, the one the admin actually has: *what did you count*.
+  Short of the books → the difference is recorded as the gap, and "UNRECONCILED"
+  finally means the design's "logged 3 200, declared 2 880". Expected subtracts the
+  gap already known, so a missing 320 DH is not counted short again at every
+  settlement. A count with nothing collected is a valid row — that's how an empty
+  drawer gets on the record.
+Still open here:
+- **Barbers / Customers / Coupons** — sidebar rows with no screen in the doc; left
+  inert rather than faked. Coupons data exists (0038), the admin view doesn't.
+- **Search, filters, export and paging are client-side** (0044): the three search
+  boxes, the salon/booking filter chips, the Today↔30-days toggle, salon paging, and
+  CSV export of salons / reviews / the ledger all run over the rows already fetched.
+  Right at a city's scale; when one fetch stops holding a list, push `q`/`page` into
+  the RPC — the render functions already take whatever the fetch hands them.
+  Still static chrome: the ⌘K global search, date-range pickers, bulk select.
+- **Median wait (1a) = minutes until your slot**, not how late the barber is running —
+  same honest limit as the queue ETA. Lateness data (`started_at` vs `starts_at`) is
+  accruing; switch when it's worth it.
+- **No realtime.** The desk loads on navigation; a settlement or a decision reloads
+  its own screen. Poll or subscribe when two admins work the same queue.
+- **Sidebar counts** (Barbers, Customers) are the design's numbers on screens that
+  don't fetch them; Salons/Support/Reviews are live.
+Deviations from the doc, on purpose: the browser-window chrome is dropped (a real
+browser provides it), 1f's four `<image-slot>` photo wells became the application's
+**services** (a shop photo bucket exists per salon, but nothing uploads to it at
+signup yet), screens are `100vh` instead of a fixed 852px, and 2c's blurred backdrop
+is the actual 2a screen behind a blur instead of a painted stand-in.
+
+## Support consoles + review appeals — REAL 2026-08-06 (0045)
+Customer turns 30–32 of "Customer App 3.dc.html" and barber turns 5–6 of
+"Barber App.dc.html" — the two ends of the desk 0042/0043 built. The whole chain
+now runs: ops removes a review → the customer is told and appeals once → a second
+reviewer decides → the barber is told the outcome → he answers in public → the
+reply shows on his page.
+- **Support console, both apps** — `SupportHomeScreen` (30a, warm) and
+  `BarberSupportScreen` (5a, dark) live on **Profile → Help & support**; the old
+  FAQ screen is one tap deeper. `my_support_cases()` returns the list with a real
+  unread count (`support_cases.user_read_at`), `file_support_case` now accepts the
+  **barber** of a booking as well as its customer, and `admin_open_case()` lets ops
+  start a thread — 5b is a case Youssef never filed. Barber reasons (booking /
+  money / client / app) joined the customer's five.
+- **Appeals (31)** — `review_appeals`, one per review, author-only, only on a
+  removed one. `ReviewTakedownScreen` is 31a/31c/31d in one screen driven by the
+  row's state, `AppealScreen` is 31b. **The barber never sees that an appeal
+  happened** — RLS on `review_appeals` excludes him and `admin_decide_appeal()`
+  only tells him the outcome. That asymmetry is the point of the turn.
+- **Public reply (6c → 32a)** — the composer posts through `review_reply()`
+  (0031, already there); `BarberDetailScreen`'s Review tab renders it under the
+  review it answers. Removed reviews never reach the tab — `reviews_select` (0042)
+  hides them from everyone but their author.
+- **Deciding an appeal** ships with it, because an appeal nobody can decide leaves
+  31c waiting forever: a bar above the admin console's Reviews list. That is
+  **beyond the admin design**, which predates appeals — replace it with a real
+  screen when appeals are more than a couple a week.
+Still open here:
+- **Help articles are stubs.** The five rows in 30a/5a alert; the real FAQ content
+  is in `HelpCenterScreen`. Wire the rows to it (or to a `help_articles` table)
+  when someone writes the articles.
+- **CALL US / CALL OPS dial a placeholder number** (`SUPPORT_PHONE` / `OPS_PHONE`).
+- **Photo attachments on the barber's report (5c)** — the sheet says the check-in
+  log is attached, which is true (ops reads it off the booking); an actual image
+  upload is customer-side only for now.
+- **6a's action card closes (0046)** — `review_appeals.action_done_at`, ticked off
+  by the shop itself (`complete_review_action`, barber-only). Overdue turns the
+  card red, and the admin console lists every outstanding ask above the Reviews
+  table so "move the poster" stops being a sentence in a notification nobody
+  chases. No reminders on it: ops sees the list, that is the whole mechanism.
+- **31d's "late-arrival flag cleared" is real (0046)** — see "Late-arrival marks".
+- **Tag filtering on the reviews tab (32b)** — the doc says it needs a tags column
+  the schema deliberately doesn't have. Search over text/barber/customer is live.
+- **No push on any of it.** `moderation` notification rows are written (0041) and
+  land in the in-app inbox; the banner needs the dev build like everything else.
+
+## Late-arrival marks — REAL 2026-08-06 (0046)
+**BACKLOG TRIGGER PULLED (partly):** Phase 1 said "fight no-shows with
+*reputation*, not deposits — strike system, reliable-client badge, booking
+priority". 31d's "your late-arrival flag is cleared — deposits back to 40%"
+needed the first rung of that ladder, so here it is — **one rung, not the ladder**.
+- `customer_marks` — a platform-level mark, one per booking. Raised by a trigger
+  when a check-in lands **more than 15 minutes** after the slot (the same
+  `checked_in_at` the moderation desk reads, so the mark and the evidence can
+  never disagree). `client_flags` (0030) was the wrong home: that table is
+  private to the barber forever and this one is shown to its owner.
+- The consequence is one number: `customer_deposit_pct()` returns **100 instead
+  of 40** while an uncleared mark is under 90 days old, and `fill_booking`'s floor
+  reads it. The refusal names the date and the day it expires rather than quoting
+  a percentage at someone who has no idea where it came from.
+- An **upheld appeal withdraws the mark** on that booking (0046's
+  `admin_decide_appeal`) and the notification says so.
+Still open:
+- **90 days and 15 minutes are guesses.** Nothing has tuned them against real
+  arrivals; they are two constants in `customer_deposit_pct` and
+  `mark_late_arrival`.
+- **The rest of the ladder is still unbuilt**: no strikes, no reliable-client
+  badge, no booking priority, no no-show mark (a no-show is already a booking
+  status; whether it should also cost the customer is undecided).
+- **Nothing surfaces the mark before it bites.** A marked customer learns about it
+  when the booking sheet refuses a 40% deposit. A line on the profile — "full
+  payment until Oct 12" — is the honest fix.
+- **`client_flags.require_full_payment` (0030) is still display-only.** The
+  barber's own "pay up front" flag does not reach `fill_booking`; only the
+  platform mark does. Wire it the same way if a barber asks.
 
 ## Placeholder screens (UI built, not wired to backend)
 These exist as visual shells to implement later:

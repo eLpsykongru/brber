@@ -2,13 +2,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef, useState } from 'react';
 import {
-  Alert, Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View,
+  Alert, Modal, Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native';
-import { Ico, Serif, T } from '../components/dark';
-import { Field, TAB_BAR_INSET } from '../components/ui';
+import { Ico, Serif, T, Toggle } from '../components/dark';
+import { Field } from '../components/ui';
 import { setLastFix } from '../lib/lastFix';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, font, radius, sp } from '../theme';
+import { colors, dark as D, font, inter, radius, sp } from '../theme';
 
 const AMBER = D.amber;
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -79,15 +79,41 @@ function TimeBox({ value, onChange, label, min = 0, max = 24 * 60 }: {
   };
   return (
     <View style={s.timeBox}>
-      <Pressable onPress={() => step(-STEP)} hitSlop={6} accessibilityLabel={`${label} earlier`}
-        style={({ pressed }) => [s.timeBtn, pressed && s.pressed]}>
-        <Ionicons name="remove" size={14} color={D.sub} />
+      <Pressable onPress={() => step(-STEP)} hitSlop={10} accessibilityLabel={`${label} earlier`}
+        style={({ pressed }) => pressed && s.pressed}>
+        <Ionicons name="remove" size={13} color={D.sub} />
       </Pressable>
       <Text style={s.timeText}>{value}</Text>
-      <Pressable onPress={() => step(STEP)} hitSlop={6} accessibilityLabel={`${label} later`}
-        style={({ pressed }) => [s.timeBtn, pressed && s.pressed]}>
-        <Ionicons name="add" size={14} color={D.sub} />
+      <Pressable onPress={() => step(STEP)} hitSlop={10} accessibilityLabel={`${label} later`}
+        style={({ pressed }) => pressed && s.pressed}>
+        <Ionicons name="add" size={13} color={D.sub} />
       </Pressable>
+    </View>
+  );
+}
+
+// one half of 1u's BOOKING BUFFERS card — a big tabular number over five preset chips
+function BufferCol({ icon, label, value, onPick }: {
+  icon: 'log-in-outline' | 'log-out-outline'; label: string;
+  value: number; onPick: (v: number) => void;
+}) {
+  return (
+    <View style={s.bufCol}>
+      <View style={s.bufColHead}>
+        <Ionicons name={icon} size={12} color={D.sub} />
+        <Text style={s.bufColLabel}>{label}</Text>
+      </View>
+      <Text style={s.bufValue}>{value} <Text style={s.bufUnit}>min</Text></Text>
+      <View style={s.chipWrap}>
+        {[0, 5, 10, 15, 30].map((v) => (
+          <Pressable key={v} onPress={() => onPick(v)}
+            accessibilityLabel={`${label.toLowerCase()} ${v} minutes`}
+            accessibilityState={{ selected: value === v }}
+            style={({ pressed }) => [s.bufChip, value === v && s.bufChipOn, pressed && s.pressed]}>
+            <Text style={[s.bufChipText, value === v && s.bufChipTextOn]}>{v}</Text>
+          </Pressable>
+        ))}
+      </View>
     </View>
   );
 }
@@ -491,6 +517,8 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
   const conflicts = totalGap > 0
     ? blocks.filter((b) => b.end_min - b.start_min < totalGap)
     : [];
+  // 1f draws one preview card per conflict the chosen strategy would move
+  const previews = conflicts.length ? buildPlan(strategy, conflicts).blocks : [];
   // unified time-off list: recurring blocks first, then dated items chronologically
   const offList = [
     ...blocks.filter((b) => b.day === null).map((b) => ({ kind: 'block' as const, b, sortKey: '' })),
@@ -531,10 +559,10 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
         </Pressable>
 
         {bufOpen && (
-          <View style={s.card2}>
+          <View style={s.bufCard}>
             <View style={s.bufHead}>
               <View style={s.bufTitleRow}>
-                <Ionicons name="shield-outline" size={15} color={D.sub} />
+                <Ico name="shield" size={14} color={D.sub} />
                 <Text style={s.sectionLabel}>BOOKING BUFFERS</Text>
               </View>
               <Pressable onPress={() => { setLinkBoth(!linkBoth); if (!linkBoth) setAfter(before); }}
@@ -546,43 +574,13 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                 <Text style={s.linkText}>LINK BOTH</Text>
               </Pressable>
             </View>
-            <Text style={s.cardSub}>
+            <Text style={s.cardNote}>
               Auto-protect gaps around every booking. Clients won't see these slots.
             </Text>
             <View style={s.bufCols}>
-              <View style={s.bufCol}>
-                <View style={s.bufColHead}>
-                  <Ionicons name="log-in-outline" size={13} color={D.sub} />
-                  <Text style={s.bufColLabel}>PREP BEFORE</Text>
-                </View>
-                <Text style={s.bufValue}>{before} <Text style={s.bufUnit}>min</Text></Text>
-                <View style={s.chipWrap}>
-                  {[0, 5, 10, 15, 30].map((v) => (
-                    <Pressable key={v} onPress={() => pickBefore(v)}
-                      accessibilityLabel={`Prep ${v} minutes`} accessibilityState={{ selected: before === v }}
-                      style={({ pressed }) => [s.bufChip, before === v && s.bufChipOn, pressed && s.pressed]}>
-                      <Text style={[s.bufChipText, before === v && s.bufChipTextOn]}>{v}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
+              <BufferCol icon="log-in-outline" label="PREP BEFORE" value={before} onPick={pickBefore} />
               <View style={s.bufDivider} />
-              <View style={s.bufCol}>
-                <View style={s.bufColHead}>
-                  <Ionicons name="log-out-outline" size={13} color={D.sub} />
-                  <Text style={s.bufColLabel}>CLEANUP AFTER</Text>
-                </View>
-                <Text style={s.bufValue}>{after} <Text style={s.bufUnit}>min</Text></Text>
-                <View style={s.chipWrap}>
-                  {[0, 5, 10, 15, 30].map((v) => (
-                    <Pressable key={v} onPress={() => pickAfter(v)}
-                      accessibilityLabel={`Cleanup ${v} minutes`} accessibilityState={{ selected: after === v }}
-                      style={({ pressed }) => [s.bufChip, after === v && s.bufChipOn, pressed && s.pressed]}>
-                      <Text style={[s.bufChipText, after === v && s.bufChipTextOn]}>{v}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
+              <BufferCol icon="log-out-outline" label="CLEANUP AFTER" value={after} onPick={pickAfter} />
             </View>
           </View>
         )}
@@ -616,7 +614,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                   </View>
                   <Pressable onPress={() => setFixPreview(buildPlan(strategy, [b]))}
                     accessibilityRole="button" accessibilityLabel={`Fix conflict with ${b.label ?? 'block'}`}
-                    style={({ pressed }) => [s.fixPillSm, pressed && s.pressed]}>
+                    style={({ pressed }) => [s.fixPill, pressed && s.pressed]}>
                     <T w="b" size={11}>Fix</T>
                   </Pressable>
                 </View>
@@ -638,50 +636,47 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
             </View>
 
             {/* what the chosen strategy would do, per conflict */}
-            {buildPlan(strategy, conflicts).blocks.map(({ b, newEnd }) => {
+            {previews.map(({ b, newEnd }, i) => {
               const win = windowFor(b.day);
-              const d0 = Math.max(0, Math.min(win?.start ?? b.start_min, b.start_min) - 30);
-              const d1 = Math.min(1440, Math.max(win?.end ?? newEnd, newEnd) + 30);
+              // the working window IS the domain — lane 1 fills it end to end, as 1f draws it
+              const d0 = Math.min(win?.start ?? b.start_min, b.start_min);
+              const d1 = Math.max(win?.end ?? newEnd, newEnd);
+              const rest = previews.length - 1;
               return (
-                <View key={b.id} style={s.previewCard}>
-                  <View>
-                    <T w="b" size={13}>
-                      {b.label ?? 'Blocked'} → {toHHMM(b.start_min)} – {toHHMM(newEnd)}
-                    </T>
-                    <T size={11} c={D.sub} style={{ marginTop: 3 }}>
-                      Adds {newEnd - b.end_min} min so the buffer fits.{' '}
-                      {b.day === null ? 'Every day.' : prettyDay(b.day) + ' only.'}
-                    </T>
+                <View key={b.id} style={{ gap: 13 }}>
+                  <View style={s.previewCard}>
+                    <View>
+                      <T w="b" size={13}>
+                        {b.label ?? 'Blocked'} → {toHHMM(b.start_min)} – {toHHMM(newEnd)}
+                      </T>
+                      <T size={11} c={D.sub} style={{ marginTop: 3 }}>
+                        Adds {newEnd - b.end_min} min so the buffer fits.{' '}
+                        {b.day === null ? 'Every day.' : prettyDay(b.day) + ' only.'}
+                      </T>
+                    </View>
+                    <RangeBar domain={[d0, d1]} lanes={[
+                      [{ from: d0, to: d1, color: BAR.ctx }],
+                      [{ from: b.start_min, to: b.end_min, color: BAR.block }],
+                      [{ from: b.end_min, to: newEnd, color: BAR.added }],
+                    ]} />
+                    <Legend items={[
+                      { color: BAR.ctx, label: 'working hours' },
+                      { color: BAR.block, label: 'break now' },
+                      { color: BAR.added, label: 'added' },
+                    ]} />
                   </View>
-                  <RangeBar domain={[d0, d1]} lanes={[[
-                    ...(win ? [{ from: win.start, to: win.end, color: 'rgba(255,255,255,0.07)' }] : []),
-                    { from: b.start_min, to: b.end_min, color: AMBER },
-                    { from: b.end_min, to: newEnd, color: colors.success },
-                  ]]} />
-                  <Legend items={[
-                    { color: 'rgba(255,255,255,0.07)', label: 'working hours' },
-                    { color: AMBER, label: 'break now' },
-                    { color: colors.success, label: 'added' },
-                  ]} />
+                  {i === 0 && (
+                    <T size={11} c={D.sub} style={s.footnote}>
+                      Nothing is saved until you apply.
+                      {rest === 1 ? ` “${previews[1].b.label ?? 'Blocked'}” has its own preview below.`
+                        : rest > 1 ? ` ${rest} more previews below.` : ''}
+                    </T>
+                  )}
                 </View>
               );
             })}
           </>
         )}
-
-        {/* add a block */}
-        <T w="b" size={11} c={D.sub} ls={1.65} style={{ marginTop: 2 }}>ADD A BLOCK</T>
-        <View style={s.addRow}>
-          {([['break', 'BREAK', 'coffee', AMBER], ['dayoff', 'DAY OFF', 'slash', D.sub],
-            ['vacation', 'VACATION', 'calendar', D.sub]] as const).map(([kind, label, icon, tint]) => (
-            <Pressable key={kind} onPress={() => openSheet(kind)} accessibilityRole="button"
-              accessibilityLabel={label}
-              style={({ pressed }) => [s.addBtn, pressed && s.pressed]}>
-              <Ico name={icon} size={14} color={tint} />
-              <T w="b" size={12} c={tint}>{label}</T>
-            </Pressable>
-          ))}
-        </View>
 
         {/* accepting bookings */}
         <View style={s.card}>
@@ -689,8 +684,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
             <Text style={s.cardTitle}>Accepting bookings</Text>
             <Text style={s.cardSub}>Open {openCount} day{openCount === 1 ? '' : 's'}/week</Text>
           </View>
-          <Switch value={accepting} onValueChange={toggleAccepting}
-            trackColor={{ true: colors.accent, false: D.card2 }} thumbColor={D.text} />
+          <Toggle on={accepting} onPress={() => toggleAccepting(!accepting)} color={colors.accent} />
         </View>
 
         {/* segment */}
@@ -717,18 +711,19 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
             </View>
             {envelope && (
               <View style={s.envelopeHint}>
-                <Ionicons name="business-outline" size={13} color={D.sub} />
+                <Ico name="home" size={14} color={D.sub} />
                 <Text style={s.envelopeText}>Salon is open {toHHMM(envelope.open)}–{toHHMM(envelope.close)} — set your hours within it.</Text>
               </View>
             )}
+            <View style={s.stack9}>
             {DISPLAY_ORDER.map((i) => {
               const d = days[i];
               const name = WEEKDAYS[i].slice(0, 3);
               return (
-                <View key={i} style={s.dayCard}>
+                <View key={i} style={[s.dayCard, !d.open && s.dayCardClosed]}>
                   <Pressable onPress={() => setDay(i, { open: !d.open })}
                     accessibilityLabel={`${WEEKDAYS[i]} ${d.open ? 'open' : 'closed'}`}
-                    style={({ pressed }) => [s.check, d.open && s.checkOn, pressed && s.pressed]}>
+                    style={({ pressed }) => [s.check, d.open ? s.checkOn : s.checkOff, pressed && s.pressed]}>
                     {d.open
                       ? <Ionicons name="checkmark" size={16} color={colors.accent} />
                       : <Text style={s.checkLetter}>{name[0]}</Text>}
@@ -736,27 +731,42 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                   <View style={s.grow}>
                     <Text style={s.dayName}>{name}</Text>
                     <Text style={s.cardSub}>{d.open ? `${d.start} — ${d.end}` : 'Closed'}</Text>
+                    {d.open && (
+                      <View style={s.timesRow}>
+                        <TimeBox value={d.start} label={`${WEEKDAYS[i]} opening`}
+                          min={envelope?.open ?? 0} max={envelope?.close ?? 24 * 60}
+                          onChange={(v) => setDay(i, { start: v })} />
+                        <Text style={s.dash}>–</Text>
+                        <TimeBox value={d.end} label={`${WEEKDAYS[i]} closing`}
+                          min={envelope?.open ?? 0} max={envelope?.close ?? 24 * 60}
+                          onChange={(v) => setDay(i, { end: v })} />
+                      </View>
+                    )}
                   </View>
-                  {d.open && (
-                    <View style={s.timesRow}>
-                      <TimeBox value={d.start} label={`${WEEKDAYS[i]} opening`}
-                        min={envelope?.open ?? 0} max={envelope?.close ?? 24 * 60}
-                        onChange={(v) => setDay(i, { start: v })} />
-                      <Text style={s.dash}>–</Text>
-                      <TimeBox value={d.end} label={`${WEEKDAYS[i]} closing`}
-                        min={envelope?.open ?? 0} max={envelope?.close ?? 24 * 60}
-                        onChange={(v) => setDay(i, { end: v })} />
-                    </View>
-                  )}
                 </View>
               );
             })}
+            </View>
           </>
         ) : (
           <>
-            {/* the BREAK / DAY OFF / VACATION row lives up top now (1f "ADD A BLOCK") */}
+            {/* 1u: the block kinds sit inside TIME OFF, above the list they add to */}
+            <Text style={s.sectionLabel}>ADD A BLOCK</Text>
+            <View style={s.addRow}>
+              {([['break', 'BREAK', 'coffee', AMBER], ['dayoff', 'DAY OFF', 'slash', D.sub],
+                ['vacation', 'VACATION', 'calendar', D.sub]] as const).map(([kind, label, icon, tint]) => (
+                <Pressable key={kind} onPress={() => openSheet(kind)} accessibilityRole="button"
+                  accessibilityLabel={label}
+                  style={({ pressed }) => [s.addBtn, pressed && s.pressed]}>
+                  <Ico name={icon} size={14} color={tint} />
+                  <T w="b" size={12} c={tint}>{label}</T>
+                </Pressable>
+              ))}
+            </View>
+
             <Text style={s.sectionLabel}>BLOCKS • {offList.length}</Text>
 
+            <View style={s.stack9}>
             {offList.map((item) => item.kind === 'block' ? (
               <View key={`b-${item.b.id}`} style={s.blockRow}>
                 <View style={[s.blockIcon, item.b.day === null && s.blockIconBreak]}>
@@ -771,7 +781,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                 </View>
                 <Pressable onPress={() => removeOff('block', item.b.id)} hitSlop={6}
                   accessibilityLabel={`Remove ${item.b.label ?? 'block'}`}
-                  style={({ pressed }) => [s.trash, pressed && s.pressed]}>
+                  style={({ pressed }) => pressed && s.pressed}>
                   <Ionicons name="trash-outline" size={17} color={D.sub} />
                 </Pressable>
               </View>
@@ -786,7 +796,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                 </View>
                 <Pressable onPress={() => removeOff('day', item.o.id)} hitSlop={6}
                   accessibilityLabel={`Remove ${item.o.label ?? 'day off'}`}
-                  style={({ pressed }) => [s.trash, pressed && s.pressed]}>
+                  style={({ pressed }) => pressed && s.pressed}>
                   <Ionicons name="trash-outline" size={17} color={D.sub} />
                 </Pressable>
               </View>
@@ -794,9 +804,10 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
 
             <Pressable onPress={() => openSheet('custom')} accessibilityLabel="Block off custom time"
               style={({ pressed }) => [s.customRow, pressed && s.pressed]}>
-              <Ionicons name="add" size={16} color={D.sub} />
+              <Ionicons name="add" size={15} color={D.sub} />
               <Text style={s.customText}>Block off custom time</Text>
             </Pressable>
+            </View>
           </>
         )}
       </ScrollView>
@@ -804,7 +815,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
       {/* undo snackbar */}
       {undoFix && (
         <View style={s.snackbar}>
-          <Ionicons name="checkmark-circle" size={16} color={colors.success} />
+          <Ionicons name="checkmark-circle-outline" size={16} color={D.green} />
           <Text style={s.snackText} numberOfLines={1}>{undoFix.label}</Text>
           <Pressable onPress={undoLastFix} hitSlop={8} accessibilityLabel="Undo last fix"
             style={({ pressed }) => pressed && s.pressed}>
@@ -1134,7 +1145,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
 }
 
 const s = StyleSheet.create({
-  // --- 1f
+  // --- 1f / 1t / 1u, numbers lifted from the artboards
   bufRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     backgroundColor: D.card, borderRadius: 18, padding: 14, paddingHorizontal: 16,
@@ -1145,10 +1156,6 @@ const s = StyleSheet.create({
   },
   conflictHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   fixPill: {
-    height: 30, borderRadius: 999, backgroundColor: D.card2, paddingHorizontal: 13,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  fixPillSm: {
     height: 30, borderRadius: 999, backgroundColor: D.card2, paddingHorizontal: 13,
     alignItems: 'center', justifyContent: 'center',
   },
@@ -1164,6 +1171,7 @@ const s = StyleSheet.create({
   },
   stratBtnOn: { backgroundColor: colors.accent },
   previewCard: { backgroundColor: D.card, borderRadius: 20, padding: 16, gap: 13 },
+  footnote: { lineHeight: 16.5 },
   addRow: { flexDirection: 'row', gap: 8 },
   addBtn: {
     flex: 1, height: 40, borderRadius: 999, backgroundColor: D.card2,
@@ -1171,9 +1179,11 @@ const s = StyleSheet.create({
   },
 
   screen: { flex: 1, backgroundColor: D.bg },
-  content: { paddingTop: 62, paddingHorizontal: 20, gap: 13, paddingBottom: TAB_BAR_INSET + 70 },
+  // 118 clears the save bar (14 + 48 + 30), same as the artboards' bottom padding
+  content: { paddingTop: 62, paddingHorizontal: 20, gap: 13, paddingBottom: 118 },
   pressed: { opacity: 0.7 },
   grow: { flex: 1 },
+  stack9: { gap: 9 },  // day cards and time-off rows sit tighter than the page gap
 
   head: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   headSide: { width: 38 },
@@ -1182,64 +1192,43 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   headTitle: { flex: 1, textAlign: 'center' },
-  divider: { height: 1, backgroundColor: D.border },
 
   card: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(3),
-    backgroundColor: D.card, borderRadius: radius.lg, padding: sp(4),
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: D.card, borderRadius: 18, padding: 14, paddingHorizontal: 16,
   },
-  cardTitle: { fontSize: font.body, fontWeight: '700', color: D.text },
-  cardSub: { fontSize: font.small, color: D.sub, marginTop: 2 },
+  cardTitle: { fontFamily: inter.sb, fontSize: 14, color: D.text },
+  cardSub: { fontFamily: inter.r, fontSize: 11, color: D.sub, marginTop: 2 },
+  cardNote: { fontFamily: inter.r, fontSize: 11, lineHeight: 16.5, color: D.sub },
 
-  // booking buffers
-  card2: { backgroundColor: D.card, borderRadius: radius.lg, padding: sp(4), gap: sp(2) },
-  bufHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  bufTitleRow: { flexDirection: 'row', alignItems: 'center', gap: sp(1.5) },
-  linkRow: { flexDirection: 'row', alignItems: 'center', gap: sp(1.5) },
-  linkText: { fontSize: font.tiny, fontWeight: '700', color: D.sub, letterSpacing: 0.5 },
+  // booking buffers (1u) — the one card that sits on the raised surface
+  bufCard: { backgroundColor: D.card2, borderRadius: 18, padding: 16, gap: 11 },
+  bufHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  bufTitleRow: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 7 },
+  linkRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  linkText: { fontFamily: inter.b, fontSize: 10, color: D.sub, letterSpacing: 1 },
   miniTrack: {
-    width: 30, height: 18, borderRadius: 9, backgroundColor: D.card2, padding: 2,
-    borderWidth: 1, borderColor: D.border,
+    width: 30, height: 18, borderRadius: 999, backgroundColor: D.muted,
+    flexDirection: 'row', alignItems: 'center', paddingHorizontal: 2,
   },
-  miniTrackOn: { backgroundColor: colors.accent, borderColor: colors.accent },
-  miniThumb: { width: 12, height: 12, borderRadius: 6, backgroundColor: D.sub },
-  miniThumbOn: { backgroundColor: colors.onAccent, alignSelf: 'flex-end' },
-  bufCols: { flexDirection: 'row', gap: sp(3), marginTop: sp(1) },
-  bufCol: { flex: 1, gap: sp(1.5) },
-  bufDivider: { width: 1, backgroundColor: D.border },
-  bufColHead: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  bufColLabel: { fontSize: font.tiny, fontWeight: '700', color: D.sub, letterSpacing: 0.5 },
-  bufValue: { fontSize: 26, fontWeight: '700', color: D.text, fontVariant: ['tabular-nums'] },
-  bufUnit: { fontSize: font.small, fontWeight: '400', color: D.sub },
-  chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: sp(1.5) },
+  miniTrackOn: { backgroundColor: colors.accent, justifyContent: 'flex-end' },
+  miniThumb: { width: 14, height: 14, borderRadius: 999, backgroundColor: D.sub },
+  miniThumbOn: { backgroundColor: colors.onAccent },
+  bufCols: { flexDirection: 'row', gap: 14 },
+  bufCol: { flex: 1, gap: 8 },
+  bufDivider: { width: 1, backgroundColor: '#2C2C31' },
+  bufColHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  bufColLabel: { fontFamily: inter.b, fontSize: 9, color: D.sub, letterSpacing: 1.08 },
+  bufValue: { fontFamily: inter.b, fontSize: 20, color: D.text, fontVariant: ['tabular-nums'] },
+  bufUnit: { fontFamily: inter.m, fontSize: 11, color: D.sub },
+  chipWrap: { flexDirection: 'row', gap: 5 },
   bufChip: {
-    minWidth: 34, height: 28, borderRadius: radius.sm, backgroundColor: D.card2,
-    alignItems: 'center', justifyContent: 'center', paddingHorizontal: sp(1.5),
+    flex: 1, height: 26, borderRadius: 8, backgroundColor: D.card,
+    alignItems: 'center', justifyContent: 'center',
   },
   bufChipOn: { backgroundColor: colors.accent },
-  bufChipText: { fontSize: font.tiny, fontWeight: '700', color: D.sub },
-  bufChipTextOn: { color: colors.onAccent },
-  stratRow: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    marginTop: sp(2), gap: sp(2),
-  },
-  stratChips: { flexDirection: 'row', gap: sp(1.5), flexWrap: 'wrap', justifyContent: 'flex-end', flex: 1 },
-  gapRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  gapValue: { fontSize: font.small, fontWeight: '800', color: D.text, fontVariant: ['tabular-nums'] },
-
-  // buffer conflicts
-  warnCard: {
-    backgroundColor: 'rgba(154,107,0,0.12)', borderRadius: radius.lg, padding: sp(4), gap: sp(3),
-    borderWidth: 1, borderColor: 'rgba(232,184,75,0.35)',
-  },
-  warnHead: { flexDirection: 'row', alignItems: 'center', gap: sp(1.5) },
-  warnTitle: { fontSize: font.tiny, fontWeight: '800', color: '#E8B84B', letterSpacing: 1 },
-  warnRow: { flexDirection: 'row', alignItems: 'center', gap: sp(3) },
-  warnFix: {
-    borderWidth: 1, borderColor: '#E8B84B', borderRadius: radius.sm,
-    paddingVertical: sp(1.5), paddingHorizontal: sp(2.5),
-  },
-  warnFixText: { fontSize: font.tiny, fontWeight: '700', color: '#E8B84B' },
+  bufChipText: { fontFamily: inter.sb, fontSize: 11, color: D.sub },
+  bufChipTextOn: { fontFamily: inter.b, color: colors.onAccent },
 
   // fix preview
   previewRow: {
@@ -1248,125 +1237,112 @@ const s = StyleSheet.create({
   },
   previewDiff: { flexDirection: 'row', alignItems: 'center', gap: sp(2), marginTop: sp(1) },
   previewOld: {
-    fontSize: font.small, color: D.sub, textDecorationLine: 'line-through',
+    fontFamily: inter.r, fontSize: font.small, color: D.sub, textDecorationLine: 'line-through',
     fontVariant: ['tabular-nums'],
   },
-  previewNew: { fontSize: font.small, fontWeight: '700', color: D.text, fontVariant: ['tabular-nums'] },
-  previewDelta: { fontSize: font.tiny, fontWeight: '700', color: '#E8B84B' },
-  previewActions: { flexDirection: 'row', gap: sp(3), marginTop: sp(1) },
+  previewNew: { fontFamily: inter.b, fontSize: font.small, color: D.text, fontVariant: ['tabular-nums'] },
+  previewDelta: { fontFamily: inter.b, fontSize: font.tiny, color: '#E8B84B' },
+  previewActions: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: sp(1) },
 
-  scopeRow: { flexDirection: 'row', gap: sp(1.5) },
+  scopeRow: { flexDirection: 'row', gap: 5 },
 
-  // preview range bars
-  rbWrap: { gap: 6 },
-  rbLane: { height: 16, borderRadius: 6, backgroundColor: D.card2, overflow: 'hidden' },
+  // preview range bars — three 9px lanes on the #212125 track, as 1f draws them
+  rbWrap: { gap: 5 },
+  rbLane: { height: 9, borderRadius: 4, backgroundColor: D.card2, overflow: 'hidden' },
   rbSeg: { position: 'absolute', top: 0, bottom: 0 },
   rbLabels: { flexDirection: 'row', justifyContent: 'space-between' },
-  rbLabel: { fontSize: 10, color: D.sub, fontVariant: ['tabular-nums'] },
+  rbLabel: { fontFamily: inter.r, fontSize: 10, color: D.sub, fontVariant: ['tabular-nums'] },
   legendRow: {
     flexDirection: 'row', flexWrap: 'wrap', gap: 14,
     borderTopWidth: 1, borderTopColor: D.border, paddingTop: 12,
   },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   legendDot: { width: 9, height: 9, borderRadius: 3 },
-  legendText: { fontSize: 10, color: D.sub },
+  legendText: { fontFamily: inter.r, fontSize: 10, color: D.sub },
 
-  segment: { flexDirection: 'row', backgroundColor: D.card, borderRadius: radius.pill, padding: 4, gap: 4 },
-  segItem: { flex: 1, height: 38, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
-  segOn: { backgroundColor: colors.accent },
-  segText: { fontSize: font.small, fontWeight: '700', color: D.sub, letterSpacing: 0.5 },
-  segTextOn: { color: colors.onAccent },
+  segment: { flexDirection: 'row', backgroundColor: D.card, borderRadius: 14, padding: 4, gap: 4 },
+  segItem: { flex: 1, height: 36, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  segOn: { backgroundColor: D.card2 },
+  segText: { fontFamily: inter.b, fontSize: 11, color: D.sub, letterSpacing: 0.88 },
+  segTextOn: { color: D.text },
 
   sectionRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  sectionLabel: { fontSize: font.tiny, fontWeight: '700', color: D.sub, letterSpacing: 1 },
+  sectionLabel: { fontFamily: inter.b, fontSize: 11, color: D.sub, letterSpacing: 1.65 },
   envelopeHint: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(2), backgroundColor: D.card2,
-    borderRadius: radius.md, padding: sp(3),
+    flexDirection: 'row', alignItems: 'center', gap: 9, backgroundColor: D.card,
+    borderRadius: 14, padding: 12, paddingHorizontal: 14,
   },
-  envelopeText: { flex: 1, fontSize: font.small, color: D.sub },
-  copyAll: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  copyAllText: { fontSize: font.small, fontWeight: '700', color: colors.accent },
+  envelopeText: { flex: 1, fontFamily: inter.r, fontSize: 11, lineHeight: 16, color: D.sub },
+  copyAll: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  copyAllText: { fontFamily: inter.sb, fontSize: 12, color: colors.accent },
 
   dayCard: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(3),
-    backgroundColor: D.card, borderRadius: radius.lg, padding: sp(3.5),
+    flexDirection: 'row', alignItems: 'flex-start', gap: 12,
+    backgroundColor: D.card, borderRadius: 18, padding: 14,
   },
-  check: {
-    width: 38, height: 38, borderRadius: radius.pill, backgroundColor: D.card2,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  checkOn: { backgroundColor: 'rgba(232,71,79,0.18)' },
-  checkLetter: { fontSize: font.small, fontWeight: '700', color: D.sub },
-  dayName: { fontSize: font.body, fontWeight: '700', color: D.text },
-  timesRow: { flexDirection: 'row', alignItems: 'center', gap: sp(1.5) },
-  dash: { color: D.sub },
+  dayCardClosed: { alignItems: 'center' },
+  check: { width: 34, height: 34, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
+  checkOn: { backgroundColor: D.accentSoft },
+  checkOff: { borderWidth: 1.5, borderColor: D.muted },
+  checkLetter: { fontFamily: inter.b, fontSize: 12, color: D.sub },
+  dayName: { fontFamily: inter.b, fontSize: 14, color: D.text },
+  timesRow: { flexDirection: 'row', alignItems: 'center', gap: 9, marginTop: 10 },
+  dash: { fontFamily: inter.r, fontSize: 12, color: D.sub },
   timeBox: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: D.card2,
-    borderRadius: radius.sm, borderWidth: 1, borderColor: D.border, paddingHorizontal: 2,
+    flexDirection: 'row', alignItems: 'center', gap: 9, backgroundColor: D.card2,
+    borderRadius: 11, height: 34, paddingHorizontal: 11,
   },
-  timeBtn: { width: 24, height: 36, alignItems: 'center', justifyContent: 'center' },
-  timeText: { fontSize: font.small, fontWeight: '700', color: D.text, width: 44, textAlign: 'center', fontVariant: ['tabular-nums'] },
-
-  quickRow: { flexDirection: 'row', gap: sp(2.5) },
-  quickCard: {
-    flex: 1, backgroundColor: D.card, borderRadius: radius.lg, paddingVertical: sp(4),
-    alignItems: 'center', gap: sp(2),
-  },
-  quickLabel: { fontSize: font.tiny, fontWeight: '700', color: D.text, letterSpacing: 0.5 },
+  timeText: { fontFamily: inter.sb, fontSize: 13, color: D.text, fontVariant: ['tabular-nums'] },
 
   blockRow: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(3),
-    backgroundColor: D.card, borderRadius: radius.lg, padding: sp(3.5),
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    backgroundColor: D.card, borderRadius: 18, padding: 13, paddingHorizontal: 14,
   },
   blockIcon: {
-    width: 40, height: 40, borderRadius: radius.pill, backgroundColor: D.card2,
+    width: 38, height: 38, borderRadius: 12, backgroundColor: D.card2,
     alignItems: 'center', justifyContent: 'center',
   },
-  blockIconBreak: { backgroundColor: 'rgba(232,184,75,0.15)' },
-  blockIconOff: { backgroundColor: 'rgba(232,71,79,0.15)' },
-  trash: {
-    width: 38, height: 38, borderRadius: radius.md, backgroundColor: D.card2,
-    alignItems: 'center', justifyContent: 'center',
-  },
+  blockIconBreak: { backgroundColor: 'rgba(232,184,75,0.16)' },
+  blockIconOff: { backgroundColor: D.accentSoft },
   customRow: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: sp(2),
-    borderWidth: 1, borderColor: D.border, borderStyle: 'dashed', borderRadius: radius.lg,
-    paddingVertical: sp(3.5),
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    borderWidth: 1, borderColor: D.muted, borderStyle: 'dashed', borderRadius: 16, padding: 13,
   },
-  customText: { fontSize: font.small, fontWeight: '600', color: D.sub },
+  customText: { fontFamily: inter.m, fontSize: 13, color: D.sub },
 
   snackbar: {
-    position: 'absolute', left: sp(5), right: sp(5), bottom: TAB_BAR_INSET + 58,
-    flexDirection: 'row', alignItems: 'center', gap: sp(2.5),
-    backgroundColor: D.card2, borderRadius: radius.md, borderWidth: 1, borderColor: D.border,
-    paddingVertical: sp(3), paddingHorizontal: sp(3.5),
-    shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 12, shadowOffset: { width: 0, height: 6 },
+    position: 'absolute', left: 16, right: 16, bottom: 96,
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    backgroundColor: D.card2, borderRadius: 14, padding: 12, paddingHorizontal: 14,
+    shadowColor: '#000', shadowOpacity: 0.4, shadowRadius: 22, shadowOffset: { width: 0, height: 8 },
     elevation: 8,
   },
-  snackText: { flex: 1, fontSize: font.small, fontWeight: '600', color: D.text },
-  snackUndo: { fontSize: font.small, fontWeight: '800', color: colors.accent, letterSpacing: 0.5 },
+  snackText: { flex: 1, fontFamily: inter.sb, fontSize: 12, color: D.text },
+  snackUndo: { fontFamily: inter.eb, fontSize: 11, color: colors.accent, letterSpacing: 0.88 },
   bottomBar: {
-    position: 'absolute', left: sp(5), right: sp(5), bottom: TAB_BAR_INSET - sp(2),
-    flexDirection: 'row', gap: sp(3),
+    position: 'absolute', left: 0, right: 0, bottom: 0,
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingTop: 14, paddingHorizontal: 16, paddingBottom: 30,
+    backgroundColor: D.bg, borderTopWidth: 1, borderTopColor: '#1E1E22',
   },
   cancelBtn: {
-    flex: 1, height: 50, borderRadius: radius.pill, backgroundColor: D.card2,
-    alignItems: 'center', justifyContent: 'center',
+    height: 48, borderRadius: 999, borderWidth: 1, borderColor: D.border,
+    paddingHorizontal: 22, alignItems: 'center', justifyContent: 'center',
   },
-  cancelText: { fontSize: font.body, fontWeight: '700', color: D.text },
+  cancelText: { fontFamily: inter.sb, fontSize: 13, color: D.sub },
   saveBtn: {
-    flex: 2, height: 50, borderRadius: radius.pill, backgroundColor: colors.accent,
+    flex: 1, height: 48, borderRadius: 999, backgroundColor: colors.accent,
     alignItems: 'center', justifyContent: 'center',
   },
   btnDisabled: { opacity: 0.5 },
-  saveText: { fontSize: font.body, fontWeight: '700', color: colors.onAccent },
+  saveText: { fontFamily: inter.b, fontSize: 13, color: colors.onAccent },
 
   sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' },
   sheet: {
     backgroundColor: D.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg,
     padding: sp(5), paddingBottom: sp(10), gap: sp(3),
   },
-  sheetTitle: { fontSize: font.h2, fontWeight: '700', color: D.text },
+  sheetTitle: { fontFamily: inter.b, fontSize: font.h2, color: D.text },
   sheetTimes: { flexDirection: 'row', alignItems: 'center', gap: sp(2), alignSelf: 'center' },
   darkField: { backgroundColor: D.card2, color: D.text },
 
@@ -1377,7 +1353,7 @@ const s = StyleSheet.create({
   },
   dayCellOn: { backgroundColor: colors.accent },
   dayCellTaken: { opacity: 0.35 },
-  dayCellWk: { fontSize: font.tiny, fontWeight: '600', color: D.sub },
-  dayCellNum: { fontSize: font.body, fontWeight: '700', color: D.text },
+  dayCellWk: { fontFamily: inter.sb, fontSize: font.tiny, color: D.sub },
+  dayCellNum: { fontFamily: inter.b, fontSize: font.body, color: D.text },
   dayCellTextOn: { color: colors.onAccent },
 });

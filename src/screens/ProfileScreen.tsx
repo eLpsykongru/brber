@@ -19,7 +19,11 @@ import CustomerNotificationsScreen from './CustomerNotificationsScreen';
 import InviteScreen from './InviteScreen';
 import LinkedAccountsScreen from './LinkedAccountsScreen';
 import SettingsScreen, { EditProfileScreen } from './SettingsScreen';
-import ReportProblemScreen, { CaseRow, SupportCaseScreen } from './SupportScreens';
+import BarberSupportScreen, { BarberCaseScreen, PublicReplyScreen } from './BarberSupportScreens';
+import ReviewTakedownScreen, { AppealScreen, useRemovedReviews } from './ReviewAppealScreens';
+import ReportProblemScreen, {
+  CaseRow, SupportCaseScreen, SupportHomeScreen,
+} from './SupportScreens';
 import MyBookingsScreen from './MyBookingsScreen';
 import PortfolioScreen from './PortfolioScreen';
 import AvailabilityScreen from './AvailabilityScreen';
@@ -35,8 +39,8 @@ const STATUS_LABEL: Record<string, string> = {
 type MenuItem = { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void; danger?: boolean };
 
 type ProfileView =
-  | 'menu' | 'edit' | 'bookings' | 'wallet' | 'coupons' | 'help' | 'invite' | 'support'
-  | 'settings' | 'notifications' | 'password' | 'linked'
+  | 'menu' | 'edit' | 'bookings' | 'wallet' | 'coupons' | 'help' | 'faq' | 'invite' | 'support'
+  | 'settings' | 'notifications' | 'password' | 'linked' | 'takedown' | 'appeal' | 'reply'
   | 'preview' | 'services' | 'work' | 'schedule' | 'salon' | 'earnings';
 
 export default function ProfileScreen({ profile, barber, phone, onProfileChanged, onChromeHidden, onBack }: {
@@ -50,6 +54,28 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   // owner (not just any barber in a salon) gets the Salon management row
   const [ownsSalon, setOwnsSalon] = useState(false);
   const [openCase, setOpenCase] = useState<CaseRow | null>(null); // 18b
+  // 31 — a review of yours that ops took down, and the appeal on it if any
+  const { rows: takedowns, reload: reloadTakedowns } = useRemovedReviews();
+  const takedown = takedowns?.[0] ?? null;
+  const [replyTo, setReplyTo] = useState<
+    { id: string; rating: number; comment: string | null; created_at: string; customer: string } | null>(null);
+
+  // 6b's REPLY TO THE REVIEW IN PUBLIC — the case knows the booking, the booking
+  // knows the review
+  async function openReplyFromCase(bookingId: string | null) {
+    if (!bookingId) return Alert.alert('No review here', 'This case is not about a review.');
+    const { data } = await supabase.from('reviews')
+      .select('id, rating, comment, created_at, customer:profiles!customer_id(full_name)')
+      .eq('booking_id', bookingId).maybeSingle();
+    if (!data) return Alert.alert('No review here', 'This case is not about a review.');
+    const r = data as unknown as {
+      id: string; rating: number; comment: string | null; created_at: string;
+      customer: { full_name: string | null } | null;
+    };
+    setOpenCase(null);
+    setReplyTo({ ...r, customer: r.customer?.full_name ?? 'A client' });
+    go('reply');
+  }
 
   useEffect(() => {
     if (!barber?.salon_id) return;
@@ -128,13 +154,37 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   }
   if (view === 'wallet') return <WalletScreen customerId={profile.id} onBack={() => go('menu')} />;
   if (view === 'coupons') return <CouponsScreen onBack={() => go('menu')} />;
+  // 30a / 5a — Help Center is now the support console; the FAQ article list it
+  // sits on is the old screen, one tap deeper.
   if (view === 'help') {
-    return <HelpCenterScreen onBack={() => go('menu')}
+    return barber
+      ? <BarberSupportScreen onBack={() => go('menu')} onOpenCase={setOpenCase} />
+      : <SupportHomeScreen onBack={() => go('menu')} onOpenCase={setOpenCase}
+          onNewCase={() => go('support')} />;
+  }
+  if (view === 'faq') {
+    return <HelpCenterScreen onBack={() => go('help')}
       onContact={barber ? undefined : () => go('support')} />;
   }
+  if (view === 'reply' && replyTo) {
+    return <PublicReplyScreen review={replyTo} onClose={() => go('menu')}
+      onPosted={() => { setReplyTo(null); Alert.alert('Posted', 'Your reply is on your page.'); go('menu'); }} />;
+  }
   if (openCase) {
-    return <SupportCaseScreen caseRow={openCase} myId={profile.id}
-      onBack={() => { setOpenCase(null); go('menu'); }} />;
+    return barber
+      ? <BarberCaseScreen caseRow={openCase} myId={profile.id}
+          onBack={() => { setOpenCase(null); go('help'); }}
+          onReplyPublicly={() => openReplyFromCase(openCase.booking_id)} />
+      : <SupportCaseScreen caseRow={openCase} myId={profile.id}
+          onBack={() => { setOpenCase(null); go('help'); }} />;
+  }
+  // 31a/c/d — one screen, three states; 31b is the composer behind APPEAL THIS
+  if ((view === 'takedown' || view === 'appeal') && takedown) {
+    return view === 'appeal'
+      ? <AppealScreen item={takedown} onBack={() => go('takedown')}
+          onSent={() => { reloadTakedowns(); go('takedown'); }} />
+      : <ReviewTakedownScreen item={takedown} onBack={() => go('menu')}
+          onAppeal={() => go('appeal')} />;
   }
   if (view === 'invite') return <InviteScreen onBack={() => go('menu')} />;
   if (view === 'support') {
@@ -174,10 +224,16 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     ] as MenuItem[]),
     { icon: 'settings-outline', label: 'Settings',
       onPress: () => barber ? soon('Settings') : go('settings') },
-    { icon: 'help-circle-outline', label: 'Help Center', onPress: () => go('help') },
+    { icon: 'help-circle-outline', label: 'Help & support', onPress: () => go('help') },
     ...(barber ? [] : [
       { icon: 'flag-outline', label: 'Report a problem', onPress: () => go('support') },
     ] as MenuItem[]),
+    // 31a — only there when there is something to read
+    ...(!barber && takedown ? [{
+      icon: 'star-half-outline' as const,
+      label: takedown.appeal?.upheld ? 'Your review is back' : 'A review was taken down',
+      onPress: () => go('takedown'),
+    }] as MenuItem[] : []),
     { icon: 'log-out-outline', label: 'Logout', onPress: signOut, danger: true },
   ];
 

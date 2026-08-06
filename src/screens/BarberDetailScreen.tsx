@@ -22,6 +22,7 @@ type Window = { weekday: number; start_min: number; end_min: number };
 type Range = { starts_at: string; ends_at: string };
 type Review = {
   id: string; rating: number; comment: string | null; created_at: string;
+  reply: string | null; replied_at: string | null;
   customer: { full_name: string | null } | null;
 };
 
@@ -147,8 +148,11 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
       .select('id, name, price_cents, duration_min, is_active')
       .eq('barber_id', barber.id).eq('is_active', true).order('price_cents')
       .then(({ data }) => setServices(data ?? []));
+    // 32a — the barber's public reply rides along with the review. Removed ones
+    // never arrive: reviews_select (0042) hides them from everyone but their author.
     supabase.from('reviews')
-      .select('id, rating, comment, created_at, customer:profiles!customer_id(full_name)')
+      .select('id, rating, comment, created_at, reply, replied_at,'
+        + ' customer:profiles!customer_id(full_name)')
       .eq('barber_id', barber.id).order('created_at', { ascending: false }).limit(50)
       .then(({ data }) => setReviews((data as unknown as Review[]) ?? []));
     supabase.rpc('barber_customer_count', { p_barber: barber.id })
@@ -478,6 +482,19 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
                 </View>
                 {!!r.comment && <Text style={s.bodyText}>{r.comment}</Text>}
                 <Stars rating={r.rating} />
+                {/* 32a — the reply sits under the review it answers, never above it */}
+                {!!r.reply && (
+                  <View style={s.replyQuote}>
+                    <View style={s.replyHead}>
+                      <Text style={s.replyName}>
+                        {barber.profiles?.full_name?.split(' ')[0] ?? 'The barber'}
+                      </Text>
+                      <View style={s.replyTag}><Text style={s.replyTagText}>THE BARBER</Text></View>
+                      {!!r.replied_at && <Text style={s.meta}>{timeAgo(r.replied_at)}</Text>}
+                    </View>
+                    <Text style={s.replyBody}>{r.reply}</Text>
+                  </View>
+                )}
               </View>
             ))}
           </View>
@@ -584,6 +601,17 @@ const s = StyleSheet.create({
   },
   reviewTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   reviewName: { fontSize: font.small, fontWeight: '700', color: colors.text },
+  replyQuote: {
+    borderLeftWidth: 2, borderLeftColor: colors.accent, paddingLeft: sp(3),
+    marginTop: sp(1), gap: sp(1.5),
+  },
+  replyHead: { flexDirection: 'row', alignItems: 'center', gap: sp(1.5) },
+  replyName: { fontSize: font.tiny, fontWeight: '700', color: colors.text },
+  replyTag: {
+    backgroundColor: colors.accentSoft, borderRadius: 5, paddingVertical: 3, paddingHorizontal: 6,
+  },
+  replyTagText: { fontSize: 9, letterSpacing: 0.5, fontWeight: '700', color: colors.accent },
+  replyBody: { fontSize: 12, lineHeight: 18, color: colors.textSecondary },
 
   cta: { position: 'absolute', left: sp(5), right: sp(5), bottom: sp(7) },
 

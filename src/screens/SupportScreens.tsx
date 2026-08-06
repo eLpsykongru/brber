@@ -2,19 +2,18 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Alert, FlatList, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView,
+  Alert, FlatList, Image, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView,
   StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, shadowLg } from '../theme';
 
-// Turn 17 (17a report, 17b filed) and 18b (the case thread).
+// Turn 17 (17a report, 17b filed), 18b (the case thread) and 30a (support home).
 //
-// ponytail: there is no in-app support console — replies and the resolution
-// come from the service role in the Supabase dashboard. The customer half is
-// real: filing, the thread, the refund card. Build the agent side when the
-// volume justifies a second app.
+// The agent side now exists — it is the admin desk in admin/index.html (0042),
+// so a reply here comes from a person in the console rather than from the
+// service role in the dashboard.
 
 const REASONS: { key: string; label: string; hint?: string }[] = [
   { key: 'no_show', label: "The barber didn't show up" },
@@ -385,6 +384,146 @@ export function SupportCaseScreen({ caseRow, myId, onBack }: {
   );
 }
 
+// ---- 30a -----------------------------------------------------------------
+export type CaseListRow = CaseRow & { salon: string | null; other: string | null; unread: number };
+
+const CASE_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
+  no_show: 'person-remove-outline',
+  wrong_amount: 'card-outline',
+  wrong_service: 'cut-outline',
+  hygiene: 'alert-circle-outline',
+  other: 'help-circle-outline',
+  review: 'star-outline',
+  booking: 'calendar-outline',
+  money: 'card-outline',
+  client: 'person-outline',
+  app: 'alert-circle-outline',
+};
+
+const HELP = [
+  'How deposits & refunds work',
+  'Topping up with cash at your barber',
+  'Cancelling or rescheduling',
+  'Why am I asked to pay up front?',
+  'Joining a queue by QR',
+];
+
+const SUPPORT_PHONE = '+212522000000';   // TODO(backlog): a real support line
+
+export function SupportHomeScreen({ onBack, onOpenCase, onNewCase }: {
+  onBack: () => void; onOpenCase: (c: CaseListRow) => void; onNewCase: () => void;
+}) {
+  const [cases, setCases] = useState<CaseListRow[]>([]);
+  const [q, setQ] = useState('');
+
+  useEffect(() => {
+    supabase.rpc('my_support_cases').then(({ data }) => setCases((data ?? []) as CaseListRow[]));
+  }, []);
+
+  const closed = cases.filter((c) => c.status !== 'open').length;
+  const shown = q
+    ? cases.filter((c) => REASON_LABEL[c.reason]?.toLowerCase().includes(q.toLowerCase())
+        || c.case_no.toLowerCase().includes(q.toLowerCase()))
+    : cases.filter((c) => c.status === 'open');
+  const articles = q ? HELP.filter((h) => h.toLowerCase().includes(q.toLowerCase())) : HELP;
+
+  return (
+    <View style={s.screen}>
+      <ScrollView contentContainerStyle={s.homeContent} showsVerticalScrollIndicator={false}>
+        <View style={s.header}>
+          <Pressable onPress={onBack} hitSlop={8}
+            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel="Go back">
+            <Ionicons name="arrow-back" size={16} color={colors.text} />
+          </Pressable>
+          <Display size={18} style={s.headerTitle}>Support</Display>
+          <View style={s.puckGhost} />
+        </View>
+
+        <View style={s.searchPill}>
+          <Ionicons name="search" size={16} color={colors.textSecondary} />
+          <TextInput value={q} onChangeText={setQ} placeholder="Search help"
+            placeholderTextColor={colors.textSecondary} style={s.searchInput} />
+        </View>
+
+        <View style={s.onlineCard}>
+          <View style={s.onlineDot}><View style={s.onlineDotInner} /></View>
+          <View style={s.grow}>
+            <Text style={s.onlineTitle}>We&apos;re online</Text>
+            <Text style={s.onlineSub}>Replies in about an hour · العربية, Français, English</Text>
+          </View>
+        </View>
+
+        <View style={s.sectionHead}>
+          <Text style={s.eyebrow}>YOUR CASES</Text>
+          {closed > 0 && <Text style={s.link}>Closed ({closed})</Text>}
+        </View>
+
+        <View style={s.optionList}>
+          {shown.length === 0 && (
+            <View style={s.emptyCard}>
+              <Text style={s.emptyText}>
+                Nothing open. Report a problem from a visit and we answer within a day.
+              </Text>
+            </View>
+          )}
+          {shown.map((c) => {
+            const hot = c.unread > 0;
+            return (
+              <Pressable key={c.id} onPress={() => onOpenCase(c)}
+                style={({ pressed }) => [s.caseRow, hot && s.caseRowHot, pressed && s.pressed]}>
+                <View style={[s.caseIcon, hot && s.caseIconHot]}>
+                  <Ionicons name={CASE_ICON[c.reason] ?? 'help-circle-outline'} size={17}
+                    color={hot ? colors.accent : colors.textSecondary} />
+                </View>
+                <View style={s.grow}>
+                  <Text style={[s.caseTitle, hot && s.caseTitleHot]}>
+                    {REASON_LABEL[c.reason] ?? c.reason}
+                  </Text>
+                  <Text style={s.caseMeta}>
+                    {c.case_no}{c.salon ? ` · ${c.salon}` : ''}
+                    {c.amount_cents ? ` · ${dh(c.amount_cents)} DH` : ''}
+                  </Text>
+                </View>
+                {hot ? (
+                  <View style={s.caseBadge}><Text style={s.caseBadgeText}>{c.unread}</Text></View>
+                ) : (
+                  <View style={s.caseTag}>
+                    <Text style={s.caseTagText}>{c.status === 'open' ? 'OPEN' : 'CLOSED'}</Text>
+                  </View>
+                )}
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <Text style={[s.eyebrow, { marginTop: 2 }]}>COMMON QUESTIONS</Text>
+        <View style={s.faq}>
+          {articles.map((h, i) => (
+            <Pressable key={h} onPress={() => Alert.alert(h, 'Help article coming soon.')}
+              style={[s.faqRow, i < articles.length - 1 && s.faqLine]}>
+              <Text style={s.faqText}>{h}</Text>
+              <Ionicons name="chevron-forward" size={14} color={colors.textTertiary} />
+            </Pressable>
+          ))}
+        </View>
+
+        <View style={s.homeActions}>
+          <Pressable onPress={() => Linking.openURL(`tel:${SUPPORT_PHONE}`)}
+            style={({ pressed }) => [s.ghostWide, pressed && s.pressed]}>
+            <Ionicons name="call-outline" size={15} color="#5c5c58" />
+            <Text style={s.ghostWideText}>CALL US</Text>
+          </Pressable>
+          <Pressable onPress={onNewCase}
+            style={({ pressed }) => [s.darkWide, pressed && s.pressed]}>
+            <Ionicons name="add" size={16} color="#fff" />
+            <Text style={s.wideDarkText}>NEW CASE</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
   content: { paddingTop: 66, paddingHorizontal: 20, paddingBottom: 110, gap: 14 },
@@ -555,5 +694,66 @@ const s = StyleSheet.create({
   send: {
     width: 44, height: 44, borderRadius: radius.pill, backgroundColor: colors.ink,
     alignItems: 'center', justifyContent: 'center',
+  },
+
+  // 30a
+  homeContent: { paddingTop: 62, paddingHorizontal: 20, paddingBottom: 40, gap: 13 },
+  searchPill: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.bg,
+    borderRadius: radius.pill, height: 48, paddingHorizontal: 18, ...shadow,
+  },
+  searchInput: { flex: 1, fontSize: 14, color: colors.text, padding: 0 },
+  onlineCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: colors.bg,
+    borderRadius: 20, paddingVertical: 14, paddingHorizontal: 16, ...shadow,
+  },
+  onlineDot: {
+    width: 34, height: 34, borderRadius: radius.pill, backgroundColor: 'rgba(74,222,128,0.18)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  onlineDotInner: { width: 9, height: 9, borderRadius: 999, backgroundColor: '#16A34A' },
+  onlineTitle: { fontSize: 13, fontWeight: '700', color: colors.text },
+  onlineSub: { fontSize: font.tiny, color: colors.textSecondary, marginTop: 2 },
+  sectionHead: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
+  emptyCard: { backgroundColor: colors.bg, borderRadius: 20, padding: 18, ...shadow },
+  emptyText: { fontSize: font.small, lineHeight: 19, color: colors.textSecondary },
+  caseRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.bg,
+    borderRadius: 20, paddingVertical: 13, paddingHorizontal: 14, ...shadow,
+  },
+  caseRowHot: { borderWidth: 2, borderColor: colors.ink },
+  caseIcon: {
+    width: 38, height: 38, borderRadius: 12, backgroundColor: colors.surface,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  caseIconHot: { backgroundColor: colors.accentSoft },
+  caseTitle: { fontSize: 13, fontWeight: '600', color: colors.text },
+  caseTitleHot: { fontWeight: '700' },
+  caseMeta: { fontSize: font.tiny, color: colors.textSecondary, marginTop: 2 },
+  caseBadge: {
+    width: 22, height: 22, borderRadius: 999, backgroundColor: colors.accent,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  caseBadgeText: { fontSize: 11, fontWeight: '700', color: '#fff' },
+  caseTag: {
+    backgroundColor: colors.surface, borderRadius: 6, paddingVertical: 4, paddingHorizontal: 7,
+  },
+  caseTagText: {
+    fontSize: 10, letterSpacing: 0.8, fontWeight: '700', color: colors.textSecondary,
+  },
+  faq: { backgroundColor: colors.bg, borderRadius: 22, paddingHorizontal: 18, ...shadow },
+  faqRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14 },
+  faqLine: { borderBottomWidth: 1, borderBottomColor: '#EFECE4' },
+  faqText: { flex: 1, fontSize: 13, fontWeight: '600', color: colors.text },
+  homeActions: { flexDirection: 'row', gap: 10, marginTop: 2 },
+  ghostWide: {
+    flex: 1, height: 52, borderRadius: radius.pill, backgroundColor: colors.bg,
+    borderWidth: 1.5, borderColor: colors.border,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7,
+  },
+  ghostWideText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6, color: '#5c5c58' },
+  darkWide: {
+    flex: 1.3, height: 52, borderRadius: radius.pill, backgroundColor: colors.ink,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7,
   },
 });

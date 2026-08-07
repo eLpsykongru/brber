@@ -25,7 +25,15 @@ type Row = {
   deposit_cents: number;
   cancelled_by: string | null;
   cancel_reason: string | null;
+  duration_min: number | null;
   services: { name: string; duration_min: number } | null;
+  // 34e — a booking holds 1–n services now (0047). One service still lands here
+  // as a single row, so the card has exactly one shape to render.
+  bundle: { name: string } | null;
+  booking_services: {
+    service_id: string; price_cents: number; duration_min: number;
+    sort: number; done_at: string | null; services: { name: string } | null;
+  }[];
   barbers: {
     id: string;
     profiles: { full_name: string | null } | null;
@@ -44,6 +52,34 @@ function stamp(iso: string) {
   const d = new Date(iso);
   return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
     + ` – ${d.toTimeString().slice(0, 5)}`;
+}
+
+// ---- 34e · one booking, n services -----------------------------------------
+const multi = (r: Row) => (r.booking_services?.length ?? 0) > 1;
+// 0047 puts the sitting's length on the booking; older rows still only have the
+// one service, so fall back rather than render "0 Mins" on everything pre-0047.
+const minsOf = (r: Row) => r.duration_min ?? r.services?.duration_min ?? 0;
+
+/** The running order, with the clock time each service starts at. */
+function ServiceList({ row }: { row: Row }) {
+  if (!multi(row)) return null;
+  const items = [...row.booking_services].sort((a, b) => a.sort - b.sort);
+  let at = new Date(row.starts_at).getTime();
+  return (
+    <View style={s.svcList}>
+      {items.map((it, i) => {
+        const start = new Date(at);
+        at += it.duration_min * 60_000;
+        return (
+          <View key={it.service_id} style={s.svcRow}>
+            <View style={s.svcNum}><Text style={s.svcNumText}>{i + 1}</Text></View>
+            <Text style={s.svcName} numberOfLines={1}>{it.services?.name ?? 'Service'}</Text>
+            <Text style={s.svcAt}>{start.toTimeString().slice(0, 5)}</Text>
+          </View>
+        );
+      })}
+    </View>
+  );
 }
 function firstName(n: string | null | undefined) {
   return (n ?? 'the barber').split(' ')[0];
@@ -109,7 +145,9 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook 
     const [bk, rv] = await Promise.all([
       supabase.from('bookings')
         .select('id, starts_at, ends_at, status, completed_at, price_cents, deposit_cents,'
-          + ' cancelled_by, cancel_reason, services(name, duration_min),'
+          + ' cancelled_by, cancel_reason, duration_min, services(name, duration_min),'
+          + ' bundle:bundles!bundle_id(name),'
+          + ' booking_services(service_id, price_cents, duration_min, sort, done_at, services(name)),'
           + ' barbers(id, profiles(full_name), salon:salons!salon_id(name, address))')
         .eq('customer_id', customerId)
         .order('starts_at', { ascending: false })
@@ -279,7 +317,9 @@ function ConfirmedCard({ row, onOpen, onCancel, onReschedule }: {
     <Pressable onPress={onOpen} style={({ pressed }) => [s.card, pressed && s.pressed]}>
       <View style={s.chipRow}>
         <Chip text="CONFIRMED" tone="ink" />
-        {!!row.services?.name && <Chip text={row.services.name.toUpperCase()} tone="accent" />}
+        {multi(row)
+          ? <Chip text={`${(row.bundle?.name ?? 'BUNDLE').toUpperCase()} · ${row.booking_services.length} SERVICES`} tone="accent" />
+          : !!row.services?.name && <Chip text={row.services.name.toUpperCase()} tone="accent" />}
       </View>
       <View style={s.bodyRow}>
         <BookingPhoto barberId={row.barbers?.id} size={80} />
@@ -292,17 +332,24 @@ function ConfirmedCard({ row, onOpen, onCancel, onReschedule }: {
           <View style={s.metaLine}>
             <Ionicons name="time-outline" size={12} color={colors.textSecondary} />
             <Text style={s.meta}>
-              {row.services?.duration_min ?? 0} Mins · with {firstName(row.barbers?.profiles?.full_name)}
+              {minsOf(row)} Mins · with {firstName(row.barbers?.profiles?.full_name)}
               {' '}· {dh(row.price_cents)} DH
             </Text>
           </View>
         </View>
       </View>
+      <ServiceList row={row} />
       <View style={s.idRow}>
         <View>
           <Text style={s.idLabel}>BOOKING ID</Text>
           <Text style={s.idValue}>{shortId(row.id)}</Text>
         </View>
+        {row.deposit_cents > 0 && (
+          <View style={s.right}>
+            <Text style={s.idLabel}>DEPOSIT PAID</Text>
+            <Text style={s.idValue}>{dh(row.deposit_cents)} DH / {dh(row.price_cents)} DH</Text>
+          </View>
+        )}
         <View style={s.right}>
           <Text style={s.idLabel}>DATE & TIME</Text>
           <Text style={s.idValue}>{stamp(row.starts_at)}</Text>
@@ -312,6 +359,23 @@ function ConfirmedCard({ row, onOpen, onCancel, onReschedule }: {
         <Btn title="CANCEL" onPress={onCancel} />
         <Btn title="RESCHEDULE" dark onPress={onReschedule} />
       </View>
+      {/* 34e — a long sitting can't be moved into any old gap; say so before
+          they tap Reschedule and find three-quarters of the day refuses.
+          ponytail: the mock also names the next day that fits ("There's one on
+          Monday") — that needs the slot scan this card doesn't load. */}
+      {minsOf(row) > 30 && (
+        <View style={s.hardNote}>
+          <View style={s.hardIcon}>
+            <Ionicons name="alert-circle-outline" size={15} color={colors.star} />
+          </View>
+          <View style={s.grow}>
+            <Text style={s.hardTitle}>Rescheduling is harder</Text>
+            <Text style={s.hardBody}>
+              Moving this needs another {Math.ceil(minsOf(row) / 30)}-slot gap in one run.
+            </Text>
+          </View>
+        </View>
+      )}
     </Pressable>
   );
 }
@@ -687,6 +751,29 @@ const s = StyleSheet.create({
     fontSize: font.small, fontWeight: '700', color: colors.text, marginTop: 3,
     fontVariant: ['tabular-nums'],
   },
+
+  // 34e — the running order inside one booking
+  svcList: {
+    gap: 9, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 13,
+  },
+  svcRow: { flexDirection: 'row', alignItems: 'center', gap: 9 },
+  svcNum: {
+    width: 20, height: 20, borderRadius: 10, backgroundColor: colors.surface,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  svcNumText: { fontSize: 10, fontWeight: '700', color: colors.textSecondary },
+  svcName: { flex: 1, fontSize: 12.5, fontWeight: '600', color: colors.text },
+  svcAt: { fontSize: font.tiny, color: colors.textSecondary, fontVariant: ['tabular-nums'] },
+  hardNote: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10,
+    backgroundColor: colors.surface, borderRadius: 18, paddingHorizontal: 16, paddingVertical: 14,
+  },
+  hardIcon: {
+    width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(232,161,0,0.16)',
+    alignItems: 'center', justifyContent: 'center', marginTop: 1,
+  },
+  hardTitle: { fontSize: font.small, fontWeight: '700', color: colors.text },
+  hardBody: { fontSize: 12, lineHeight: 18, color: colors.textSecondary, marginTop: 4 },
 
   btnRow: { flexDirection: 'row', gap: 10 },
   btnRowTop: { borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 14 },

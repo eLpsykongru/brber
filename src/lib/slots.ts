@@ -7,7 +7,7 @@ export type Block = { day: string | null; start_min: number; end_min: number };
 export type SlotStatus = 'free' | 'full' | 'past';
 export type Slot = { time: Date; status: SlotStatus };
 
-const SLOT_STEP_MIN = 30;
+export const SLOT_STEP_MIN = 30;
 
 function localDateStr(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -33,6 +33,40 @@ export function daySlots(day: Date, durationMin: number, windows: Window[], book
     }
   }
   return slots;
+}
+
+// 34c — "2 of 12 times today can hold 70 min." A 70-minute bundle needs three
+// consecutive 30-minute cells, so most of a busy day cannot take it while every
+// single service still fits. `all` counts the day's ordinary start times.
+export function fitCount(day: Date, durationMin: number, windows: Window[], booked: Range[], daysOff: string[], blocks: Block[] = [], bufferMin = 0): { fits: number; all: number } {
+  const free = (d: number) => daySlots(day, d, windows, booked, daysOff, blocks, bufferMin)
+    .filter((sl) => sl.status === 'free').length;
+  return { fits: free(durationMin), all: daySlots(day, SLOT_STEP_MIN, windows, booked, daysOff, blocks, bufferMin).length };
+}
+
+// 34c's caption under a slot that fits: why this one is worth taking. Null when
+// there is nothing interesting to say — an empty afternoon needs no note.
+export function slotNote(start: Date, durationMin: number, windows: Window[], booked: Range[], blocks: Block[] = []): string | null {
+  const startMin = start.getHours() * 60 + start.getMinutes();
+  const endMin = startMin + durationMin;
+  const dayBlocks = blocks.filter((b) => b.day === null || b.day === localDateStr(start));
+
+  // butting straight up against a break that just ended reads as a find
+  if (dayBlocks.some((b) => b.end_min === startMin)) return 'fits · straight after his break';
+
+  // the next thing that occupies the chair, in minutes-from-midnight
+  const edges: number[] = [];
+  for (const b of booked) {
+    const bs = new Date(b.starts_at);
+    if (bs.toDateString() === start.toDateString()) edges.push(bs.getHours() * 60 + bs.getMinutes());
+  }
+  for (const b of dayBlocks) edges.push(b.start_min);
+  for (const w of windows.filter((x) => x.weekday === start.getDay())) edges.push(w.end_min);
+
+  const next = edges.filter((e) => e >= endMin).sort((a, b) => a - b)[0];
+  if (next == null) return 'fits';
+  const gap = next - endMin;
+  return gap > 0 && gap < 60 ? `fits · leaves a ${gap}-min gap after` : 'fits';
 }
 
 // per-day busyness for the schedule strip. 'closed' = not a working weekday or a day off.

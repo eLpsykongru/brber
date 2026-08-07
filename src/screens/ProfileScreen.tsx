@@ -29,6 +29,7 @@ import PortfolioScreen from './PortfolioScreen';
 import AvailabilityScreen from './AvailabilityScreen';
 import SalonScreen from './SalonScreen';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
+import BundleEditorScreen from './BundleEditorScreen';
 import ServicesScreen from './ServicesScreen';
 import WalletScreen from './WalletScreen';
 
@@ -41,7 +42,7 @@ type MenuItem = { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: 
 type ProfileView =
   | 'menu' | 'edit' | 'bookings' | 'wallet' | 'coupons' | 'help' | 'faq' | 'invite' | 'support'
   | 'settings' | 'notifications' | 'password' | 'linked' | 'takedown' | 'appeal' | 'reply'
-  | 'preview' | 'services' | 'work' | 'schedule' | 'salon' | 'earnings';
+  | 'preview' | 'services' | 'bundles' | 'work' | 'schedule' | 'salon' | 'earnings';
 
 export default function ProfileScreen({ profile, barber, phone, onProfileChanged, onChromeHidden, onBack }: {
   profile: Profile; barber: Barber | null; phone: string | null;
@@ -199,6 +200,8 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   if (view === 'schedule' && barber) return <AvailabilityScreen barberId={barber.id} onBack={() => go('menu')} />;
   if (view === 'earnings' && barber) return <EarningsScreen barberId={barber.id} onBack={() => go('menu')} />;
   if (view === 'services' && barber) return <ServicesScreen barberId={barber.id} onBack={() => go('menu')} />;
+  // turn 7 — bundles are made of services, so the editor lives next to them
+  if (view === 'bundles' && barber) return <BundleEditorScreen onBack={() => go('menu')} />;
   if (view === 'work' && barber) return <PortfolioScreen barberId={barber.id} onBack={() => go('menu')} />;
 
   // TODO(backlog): Payment Methods / My Coupons / My Wallet — no payment rail yet
@@ -207,6 +210,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     ...(barber ? [
       { icon: 'calendar-outline', label: 'Schedule settings', onPress: () => go('schedule') },
       { icon: 'cut-outline', label: 'My Services', onPress: () => go('services') },
+      { icon: 'cube-outline', label: 'My Bundles', onPress: () => go('bundles') },
       { icon: 'images-outline', label: 'My Work', onPress: () => go('work') },
     ] as MenuItem[] : []),
     ...(barber?.salon_id ? [

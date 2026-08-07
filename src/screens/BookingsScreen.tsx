@@ -10,6 +10,7 @@ import BookingPanelSheet, { BookingRequestSheet, PanelBooking } from '../compone
 import CancelBookingSheet from '../components/CancelBookingSheet';
 import ClientSheet, { ClientRef } from '../components/ClientSheet';
 import RateClientSheet from '../components/RateClientSheet';
+import SettleBundleSheet from '../components/SettleBundleSheet';
 import SlotPicker from '../components/SlotPicker';
 import { PillButton } from '../components/ui';
 import { Block, daySlots, Window } from '../lib/slots';
@@ -107,6 +108,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   const [resched, setResched] = useState<BookingRow | null>(null);
   const [reschedAt, setReschedAt] = useState<Date | null>(null);
   const [completedB, setCompletedB] = useState<BookingRow | null>(null);
+  const [settleB, setSettleB] = useState<BookingRow | null>(null);
   const [cancelling, setCancelling] = useState<BookingRow | null>(null);
   const [showEarnings, setShowEarnings] = useState(false);
   const [showQueue, setShowQueue] = useState(false);
@@ -207,9 +209,12 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
 
   // stage transitions: confirm uses accept_booking; the rest go through advance_booking
   async function advance(b: BookingRow, stage: 'check_in' | 'start' | 'complete') {
+    // 34f — completing settles first: what was actually done decides the price,
+    // and a half-taken bundle loses its saving. The sheet runs advance_booking
+    // itself, and closes straight through when there is only one service.
+    if (stage === 'complete') return setSettleB(b);
     const { error } = await supabase.rpc('advance_booking', { p_booking: b.id, p_stage: stage });
     if (error) Alert.alert('Could not update', error.message);
-    else if (stage === 'complete') setCompletedB(b); // → 3a, rate the client
     load();
   }
 
@@ -579,6 +584,16 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
       <ClientSheet client={sheetClient} barberId={barberId}
         onClose={() => setSheetClient(null)}
         onChat={(id, title) => openChat({ id, title })} />
+
+      {/* 34f — tick off what was actually done, then complete. Hands off to 3a. */}
+      <SettleBundleSheet
+        booking={settleB && {
+          id: settleB.id,
+          starts_at: settleB.starts_at,
+          client: nameOf(settleB, barberId),
+        }}
+        onClose={() => setSettleB(null)}
+        onDone={() => { setCompletedB(settleB); setSettleB(null); load(); }} />
 
       {/* 3a–3c — rate the client, raised straight after MARK DONE */}
       <RateClientSheet

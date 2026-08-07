@@ -187,11 +187,9 @@ Still open:
   till has thousands of rows (client sums today).
 
 ## Salon screen  → `src/screens/SalonDetailScreen.tsx`
-- **Packages tab + "Packages" step in the booking sheet** — needs a `packages` table
-  (salon-level, name, price, "saved" amount) + `package_items` (services in it), and a
-  booking mapping (add nullable `package_id` to `bookings`, make `service_id` nullable,
-  trigger computes duration = sum of items / price = package price). DECISION PENDING:
-  how a package books against one barber + calendar slot.
+- **Packages → BUNDLES, REAL 2026-08-07 (0047)** — see "Bundles" below. The
+  DECISION PENDING ("how a package books against one barber + calendar slot") is
+  closed: turn 34 answers it — one booking, one barber, one sitting, n services.
 - **Intro video** — hero play button is a placeholder; needs a `video_url` on salons + `expo-av`.
 - **Website / Direction / Message actions** — Website opens `salons.website` if set (added
   in 0013); Direction opens the device maps app (done 2026-07-15); Message needs a
@@ -386,19 +384,71 @@ Still open:
   barber's own "pay up front" flag does not reach `fill_booking`; only the
   platform mark does. Wire it the same way if a barber asks.
 
+## Bundles  → `src/components/Bundles.tsx` — REAL 2026-08-07 (0047)
+Turn 34 of "Customer App 3.dc.html". Turn 33 drew option (b), the prepaid pass;
+the call was **(a), the one-visit bundle**: n services, one barber, one sitting.
+- **Schema** — `bundles` / `bundle_services` / `booking_services`, plus
+  `bookings.{bundle_id, duration_min, settled_at}`. `service_id` stays NOT NULL as
+  the **anchor** (first service) so every existing consumer — queue, calendar,
+  earnings, receipts, admin — keeps working untouched.
+- **34a** Bundles tab on the salon page (featured dark card + list + "Build your
+  own"). **34b/34c/34d** a three-step sheet: tick services → find a slot that
+  holds the whole sitting → overview + deposit. **34e** the My Bookings card
+  renders the running order with per-service start times. **34f** the barber
+  ticks off what he did; a half-taken bundle reprices to its parts and loses the
+  saving (`settle_booking_services`).
+- **"Build your own" is an ad-hoc bundle** (`bundles.is_adhoc`) priced at the sum
+  of its parts — one booking path, not a second rail.
+- **34c needed no backend**: `daySlots()` already takes a duration, so "N fit"
+  and the three-in-a-row grid are pure client math (`lib/slots.ts`).
+- **Bundle editor (barber turn 7), REAL 2026-08-07 (0048)** —
+  `src/screens/BundleEditorScreen.tsx`, on **Profile → My Bundles**, next to My
+  Services because a bundle is made of them. 7a the list (live/hidden toggles,
+  reorder, the "same services as your own X DH service" warning), 7b the editor
+  (service picker, price with the **% off he is choosing to pay**, giving-away
+  and chair-time breakdown), 7c **"Before you publish"** — a full day of bundles
+  against a full day of single cuts, computed from his own hours and buffer.
+  7c's two brakes are real columns enforced in `fill_booking`:
+  `bundles.{max_per_day, morning_only}` — a cap only the editor honours would
+  still lose the race to the customer's booking sheet.
+Still open:
+- **Only the dashboard raises 34f.** Completing from the Calendar or the day
+  timeline defaults to "everything was done" (a trigger stamps `done_at`), which
+  is right for the common case but never offers the reprice. Wire the sheet into
+  those two if barbers complete from there and clients skip services.
+- **34e's "There's one on Monday"** is not built — naming the next day that fits
+  needs a slot scan the card doesn't load. It says how big a gap is needed.
+- **Reorder is tap-⇅, not drag** (7a says "drag to reorder"). A real drag list is
+  a new dependency for a list two or three rows long; the on-screen label says
+  what it actually does. Swap if a barber ever has ten bundles.
+- **7c can't name the window.** The design says "09:30 – 19:00"; `my_bundles()`
+  returns the longest window's *length*, so the sheet says how much chair time
+  instead. Return `start_min` too if the edges matter.
+- **0047/0048 are unverified against a real Postgres** (no psql/CLI/docker on
+  this machine). Run them against a branch before trusting the money paths.
+
 ## Placeholder screens (UI built, not wired to backend)
 These exist as visual shells to implement later:
 - **WalletScreen** — REAL 2026-07-19 (0022): balance + transactions read the
   `wallet_transactions` ledger. Add-Money (card) still needs the payment rail;
   the fake Add Money / Top-Up Success screens were deleted.
-- **CouponsScreen** — static coupon cards; "Copy code" just alerts. Needs promotions table.
-- **HelpCenterScreen** — FAQ accordion + Contact Us; content is placeholder. Wire real links.
-- **CancelReasonScreen** — reason picker; created, NOT wired into My Bookings cancel yet.
-  To wire: add `bookings.cancel_reason`, pass through `cancel_booking()`.
-- **LeaveReviewScreen** — richer review form; real review submit still lives in My Bookings
-  → Rate. Needs specialist picker binding + photo attach to reviews.
+- **CouponsScreen** — REAL since 0038 (design 16a + 17c). There is no "Copy code"
+  button: the screen is a `claim_coupon` input plus active/used/expired cards.
+  Still missing is an **issuing/admin surface** — templates go in server-side.
+- **HelpCenterScreen** — REAL (design 16b + 22b). FAQ accordion + Contact Us are
+  built; what's missing is **article content**, not wiring. See "Support consoles".
+- **CancelReasonScreen** — GONE, and the feature shipped. It was barber design
+  **1r**, absorbed by the 3a–3e reliability turn that deleted the file (119ad26).
+  Live path: reason picker in `CalendarScreen.tsx` → `bookings.cancel_reason` →
+  rendered on the customer's card in `MyBookingsScreen.tsx`.
+- **LeaveReviewScreen** — ORPHAN, safe to delete. It is customer turn **4a**,
+  which **turn 5 superseded** by re-cutting the review as a sheet over the
+  Completed tab (that sheet is what ships, in `MyBookingsScreen.tsx`). Nothing
+  imports the file. Its only unique ideas are 4a's **specialist picker** and
+  **photo attach**, neither of which is in the shipped sheet — keep those two
+  here if they're still wanted, then delete the file.
 - **PermissionScreen** (+ Notification/Location presets) — onboarding prompts; wire to
-  expo-notifications / expo-location in the first-run flow.
+  expo-notifications / expo-location in the first-run flow. Also unrouted today.
 Wired now: My Wallet, My Coupons, Help Center (from the Profile menu).
 
 ## Strategy — differentiators (nothing built, decided 2026-07-13)

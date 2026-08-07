@@ -4,6 +4,7 @@ import {
   Alert, Image, Linking, Pressable, ScrollView, Share, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
 import BookingSheet from '../components/BookingSheet';
+import { Bundle, BundleSheet, BundlesTab } from '../components/Bundles';
 import { Empty, Field, Stars } from '../components/ui';
 import { openDirections, walkMin } from '../lib/geo';
 import { listPortfolio } from '../lib/portfolio';
@@ -23,7 +24,7 @@ export type SalonCard = {
   barbers: Specialist[];
 };
 
-type Tab = 'about' | 'services' | 'specialist' | 'package' | 'gallery' | 'review';
+type Tab = 'about' | 'services' | 'specialist' | 'bundles' | 'gallery' | 'review';
 type Review = { id: string; rating: number; comment: string | null; created_at: string; customer: { full_name: string | null } | null };
 
 function avgOf(reviews: { rating: number }[]): number | null {
@@ -49,6 +50,9 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
   const [bioExpanded, setBioExpanded] = useState(false);
   const [profileBarber, setProfileBarber] = useState<Specialist | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [bundles, setBundles] = useState<Bundle[]>([]);
+  const [bundleOpen, setBundleOpen] = useState(false);
+  const [sheetBundle, setSheetBundle] = useState<Bundle | null>(null);
 
   const allReviews = salon.barbers.flatMap((b) => b.reviews);
   const avg = avgOf(allReviews);
@@ -66,6 +70,8 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
       .in('barber_id', salon.barbers.map((b) => b.id))
       .order('created_at', { ascending: false }).limit(50)
       .then(({ data }) => setReviews((data as unknown as Review[]) ?? []));
+    supabase.rpc('salon_bundles', { p_salon: salon.id })
+      .then(({ data }) => setBundles((data as Bundle[]) ?? []));
   }, [salon.id]);
 
   if (profileBarber) {
@@ -83,6 +89,14 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
   }
   const serviceCount = new Set(salon.barbers.flatMap((b) => b.services.filter((sv) => sv.is_active).map((sv) => sv.name))).size;
 
+  // 34a/34b feed off one barber's own services — a bundle is booked into one chair
+  const flatServices = salon.barbers.flatMap((b) => b.services.filter((sv) => sv.is_active));
+  const bundleBarbers = salon.barbers.map((b) => ({
+    id: b.id,
+    name: b.profiles?.full_name ?? 'Barber',
+    services: b.services.filter((sv) => sv.is_active),
+  }));
+
   const filteredReviews = reviews.filter((r) => {
     const q = reviewQuery.trim().toLowerCase();
     return !q || r.comment?.toLowerCase().includes(q) || r.customer?.full_name?.toLowerCase().includes(q);
@@ -91,7 +105,7 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
   const hero = photos[0]?.url;
   const thumbs = photos.slice(1, 6);
   const moreCount = Math.max(0, photos.length - 6);
-  const TABS: Tab[] = ['about', 'services', 'specialist', 'package', 'gallery', 'review'];
+  const TABS: Tab[] = ['about', 'services', 'specialist', 'bundles', 'gallery', 'review'];
 
   function action(name: string, url?: string | null) {
     if (url) Linking.openURL(url).catch(() => Alert.alert(name, 'Could not open.'));
@@ -251,9 +265,11 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
             </>
           )}
 
-          {tab === 'package' && (
-            // TODO(backlog): packages table + package→booking mapping
-            <Empty text="Packages are coming soon." />
+          {/* 34a — bundles: n services, one barber, one sitting (0047) */}
+          {tab === 'bundles' && (
+            <BundlesTab bundles={bundles} allServices={flatServices}
+              onBook={(b) => { setSheetBundle(b); setBundleOpen(true); }}
+              onBuild={() => { setSheetBundle(null); setBundleOpen(true); }} />
           )}
 
           {tab === 'gallery' && (
@@ -306,6 +322,13 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
 
       <BookingSheet visible={sheetOpen} salon={salon}
         onClose={() => setSheetOpen(false)} onBooked={() => setSheetOpen(false)} />
+
+      {/* 34b/34c/34d — the bundle's own three steps: it picks its own slot,
+          because a 70-minute sitting can't use the ordinary time grid */}
+      <BundleSheet visible={bundleOpen} bundle={sheetBundle} barbers={bundleBarbers}
+        onClose={() => setBundleOpen(false)}
+        onBooked={() => setBundleOpen(false)}
+        onSplit={() => { setBundleOpen(false); setTab('services'); }} />
     </View>
   );
 }

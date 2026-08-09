@@ -8,9 +8,11 @@ import { colors, font, radius, shadow, sp } from '../theme';
 // Weekly day selector + time grid. Full slots are struck-through and disabled.
 // `markDay` rings a day and captions it NOW — the reschedule sheet (11a) uses it
 // to keep the appointment's current day visible while you pick a different one.
-export default function SlotPicker({ barberId, durationMin, selected, onSelect, label, markDay }: {
+export default function SlotPicker({ barberId, durationMin, selected, onSelect, label, markDay, renderFull }: {
   barberId: string; durationMin: number; selected: Date | null; onSelect: (t: Date) => void;
   label?: string; markDay?: Date | null;
+  /** 36a — drawn in place of the grid when the chosen day has nothing free at all */
+  renderFull?: (day: Date) => React.ReactNode;
 }) {
   const [windows, setWindows] = useState<Window[]>([]);
   const [daysOff, setDaysOff] = useState<string[]>([]);
@@ -39,7 +41,7 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect, 
     Promise.all([
       supabase.from('availability').select('weekday, start_min, end_min').eq('barber_id', barberId),
       supabase.from('days_off').select('day').eq('barber_id', barberId),
-      supabase.from('time_blocks').select('day, start_min, end_min').eq('barber_id', barberId),
+      supabase.from('time_blocks').select('day, start_min, end_min, kind').eq('barber_id', barberId),
       supabase.from('barbers').select('buffer_before_min, buffer_after_min').eq('id', barberId).single(),
     ]).then(([av, off, blk, buf]) => {
       setWindows(av.data ?? []);
@@ -99,6 +101,11 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect, 
         })}
       </View>
 
+      {/* a day that exists but has nothing left is a different thing from a day
+          off, and it's the only moment an ask makes sense */}
+      {renderFull && slots.length > 0 && !slots.some((sl) => sl.status === 'free')
+        ? renderFull(selectedDay)
+        : (
       <View style={s.slotGrid}>
         {slots.length === 0 && <Text style={s.empty}>Not working this day.</Text>}
         {slots.map(({ time, status }) => {
@@ -114,7 +121,8 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect, 
           );
         })}
       </View>
-      {slots.some((sl) => sl.status === 'full') && (
+        )}
+      {slots.some((sl) => sl.status === 'free') && slots.some((sl) => sl.status === 'full') && (
         <Text style={s.legend}>Crossed-out times are already booked.</Text>
       )}
     </View>

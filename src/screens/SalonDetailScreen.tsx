@@ -325,7 +325,7 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
 
       {/* 34b/34c/34d — the bundle's own three steps: it picks its own slot,
           because a 70-minute sitting can't use the ordinary time grid */}
-      <BundleSheet visible={bundleOpen} bundle={sheetBundle} barbers={bundleBarbers}
+      <BundleSheet visible={bundleOpen} bundle={sheetBundle} bundles={bundles} barbers={bundleBarbers}
         onClose={() => setBundleOpen(false)}
         onBooked={() => setBundleOpen(false)}
         onSplit={() => { setBundleOpen(false); setTab('services'); }} />

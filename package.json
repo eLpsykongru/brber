@@ -36,7 +36,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "check": "tsc src/lib/slots.ts src/lib/slots.check.ts --outDir .check --module commonjs --target es2020 --skipLibCheck && node .check/slots.check.js"
   },
   "private": true
 }

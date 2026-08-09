@@ -7,6 +7,7 @@ import { Block, daySlots, Range, Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, sp } from '../theme';
 import type { Specialist } from '../types';
+import { AskBlock, AskedSheet, type AskRecord } from './AskSheet';
 import { Chip, PillButton, Stars } from './ui';
 import SlotPicker from './SlotPicker';
 
@@ -54,6 +55,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
   const [adjustOpen, setAdjustOpen] = useState(false);
   // 8c — the receipt, once the row exists
   const [done, setDone] = useState<{ id: string; deposit: number } | null>(null);
+  const [asked, setAsked] = useState<AskRecord | null>(null);   // 36b
   const [failed, setFailed] = useState<'slot' | 'deposit' | null>(null); // 26a / 26b
   const [altCal, setAltCal] = useState<{
     windows: Window[]; booked: Range[]; daysOff: string[]; blocks: Block[]; buffer: number;
@@ -90,7 +92,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
     Promise.all([
       supabase.from('availability').select('weekday, start_min, end_min').eq('barber_id', id),
       supabase.from('days_off').select('day').eq('barber_id', id),
-      supabase.from('time_blocks').select('day, start_min, end_min').eq('barber_id', id),
+      supabase.from('time_blocks').select('day, start_min, end_min, kind').eq('barber_id', id),
       supabase.from('barbers').select('buffer_before_min, buffer_after_min').eq('id', id).single(),
       supabase.rpc('booked_ranges', {
         p_barber: id,
@@ -251,9 +253,27 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
             })
           )}
 
-          {/* STEP 3 — time */}
+          {/* STEP 3 — time. 36a takes over when the chosen day is full: that is
+              exactly the moment someone wants the day and can't have it. */}
           {step === 'time' && barber && svc && (
-            <SlotPicker barberId={barber.id} durationMin={svc.duration_min} selected={time} onSelect={setTime} />
+            <SlotPicker barberId={barber.id} durationMin={svc.duration_min}
+              selected={time} onSelect={setTime}
+              renderFull={(day) => (
+                <AskBlock
+                  salonId={(salon as any).id ?? null}
+                  barberId={barber.id}
+                  barberName={barber.profiles?.full_name ?? 'your barber'}
+                  salonName={salon.name}
+                  serviceId={svc.id}
+                  serviceName={svc.name}
+                  priceCents={svc.price_cents}
+                  day={day}
+                  coBarbers={salon.barbers
+                    .filter((b) => b.id !== barber.id)
+                    .map((b) => (b.profiles?.full_name ?? 'A barber').split(' ')[0])}
+                  closesMin={(salon as any).close_min ?? null}
+                  onAsked={setAsked} />
+              )} />
           )}
 
           {/* STEP 4 — summary */}
@@ -587,6 +607,10 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
           onClose={() => setAdjustOpen(false)}
           onPick={(c) => { setDepositCents(c); setAdjustOpen(false); }} />
       )}
+
+      {/* 36b — what the ask actually recorded, said back plainly */}
+      <AskedSheet rec={asked} onDone={() => { setAsked(null); onClose(); }}
+        onBookOther={() => setAsked(null)} />
     </Modal>
   );
 }

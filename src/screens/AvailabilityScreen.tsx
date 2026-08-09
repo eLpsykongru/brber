@@ -242,8 +242,10 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
     const [off, blk] = await Promise.all([
       supabase.from('days_off').select('id, day, label').eq('barber_id', barberId)
         .gte('day', isoOf(new Date())).order('day'),
+      // breaks only — an 'open' row (8k) is room he made on one date, not a
+      // recurring block, and it has no business in the breaks editor
       supabase.from('time_blocks').select('id, label, day, start_min, end_min')
-        .eq('barber_id', barberId).order('created_at'),
+        .eq('barber_id', barberId).eq('kind', 'block').order('created_at'),
     ]);
     setDaysOff((off.data ?? []) as OffRow[]);
     setBlocks((blk.data ?? []) as BlockRow[]);

@@ -137,7 +137,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
       supabase.from('availability').select('weekday, start_min, end_min').eq('barber_id', barberId),
       supabase.from('days_off').select('id, day').eq('barber_id', barberId)
         .gte('day', isoDay(new Date())),
-      supabase.from('time_blocks').select('day, start_min, end_min').eq('barber_id', barberId),
+      supabase.from('time_blocks').select('day, start_min, end_min, kind').eq('barber_id', barberId),
     ]);
     setWindows(av.data ?? []);
     setDaysOff(off.data ?? []);

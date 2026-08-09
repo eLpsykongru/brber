@@ -54,6 +54,57 @@ function stamp(iso: string) {
     + ` – ${d.toTimeString().slice(0, 5)}`;
 }
 
+// ---- 36c · my asks ---------------------------------------------------------
+type Ask = {
+  id: string; day: string; earliest_min: number | null; status: string;
+  salon: string | null; salon_id: string; barber: string | null;
+  service: string | null; price_cents: number | null;
+};
+
+function AsksSection({ asks, onCancel }: { asks: Ask[]; onCancel: (id: string) => void }) {
+  if (asks.length === 0) return null;
+  const live = asks.filter((a) => a.status === 'waiting').length;
+  return (
+    <View style={s.asksWrap}>
+      <View style={s.asksHead}>
+        <Text style={s.asksTitle}>ASKS · {live} WAITING</Text>
+      </View>
+      {asks.map((a) => {
+        const dead = a.status !== 'waiting';
+        const d = new Date(`${a.day}T00:00:00`);
+        return (
+          <View key={a.id} style={[s.askCard, dead && s.askDead]}>
+            <View style={[s.askIcon, dead && s.askIconDead]}>
+              <Ionicons name={dead ? 'close' : 'hourglass-outline'} size={17}
+                color={dead ? colors.textTertiary : colors.accent} />
+            </View>
+            <View style={s.grow}>
+              <Text style={[s.askDay, dead && s.askDayDead]}>
+                {d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                {' · '}
+                {a.earliest_min == null
+                  ? 'any time'
+                  : `after ${String(Math.floor(a.earliest_min / 60)).padStart(2, '0')}:00`}
+              </Text>
+              <Text style={s.askMeta}>
+                {dead
+                  ? 'Nothing opened up · expired'
+                  : `${a.barber ? `${a.barber.split(' ')[0]} only` : `Any barber${a.salon ? ` · ${a.salon}` : ''}`}`
+                    + (a.service ? ` · ${a.service}` : '')}
+              </Text>
+            </View>
+            {!dead && (
+              <Pressable onPress={() => onCancel(a.id)} hitSlop={8}>
+                <Text style={s.askCancel}>Cancel</Text>
+              </Pressable>
+            )}
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
 // ---- 34e · one booking, n services -----------------------------------------
 const multi = (r: Row) => (r.booking_services?.length ?? 0) > 1;
 // 0047 puts the sitting's length on the booking; older rows still only have the
@@ -137,6 +188,7 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook 
   const [filter, setFilter] = useState<Filter>('upcoming');
   const [receipt, setReceipt] = useState<Row | null>(null);
   const [review, setReview] = useState<Row | null>(null);           // 5a
+  const [asks, setAsks] = useState<Ask[]>([]);
   const [queue, setQueue] = useState<DayQueueRow[] | null>(null);
   const [queueOpen, setQueueOpen] = useState<Row | null>(null);
   const [detail, setDetail] = useState<{ id: string; initial?: 'cancel' | 'reschedule' } | null>(null);
@@ -157,6 +209,10 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook 
     if (bk.error) Alert.alert('Could not load bookings', bk.error.message);
     else setRows(bk.data as unknown as Row[]);
     if (rv.data) setRated(new Map(rv.data.map((r) => [r.booking_id, r.rating])));
+    // 36c — asks live alongside bookings because that's where you look for
+    // "am I getting a cut this week", and an ask is the answer "maybe"
+    const asks = await supabase.rpc('my_waitlist_asks');
+    if (asks.data) setAsks(asks.data as Ask[]);
   }, [customerId]);
 
   useEffect(() => { load(); }, [load]);
@@ -270,6 +326,13 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook 
         contentContainerStyle={s.list}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={<>{hero}{banner}</>}
+        ListFooterComponent={filter === 'upcoming'
+          ? <AsksSection asks={asks} onCancel={async (id) => {
+            const { error } = await supabase.rpc('cancel_ask', { p_id: id });
+            if (error) return Alert.alert('Could not cancel that', error.message);
+            load();
+          }} />
+          : null}
         ListEmptyComponent={
           <View style={s.emptyWrap}>
             <View style={s.emptyCircle}>
@@ -772,6 +835,25 @@ const s = StyleSheet.create({
     width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(232,161,0,0.16)',
     alignItems: 'center', justifyContent: 'center', marginTop: 1,
   },
+  // 36c
+  asksWrap: { gap: 10, marginTop: sp(5) },
+  asksHead: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
+  asksTitle: { fontSize: font.tiny, letterSpacing: 1.65, fontWeight: '700', color: colors.textSecondary },
+  askCard: {
+    flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.bg,
+    borderRadius: 20, paddingHorizontal: 16, paddingVertical: 14, ...shadow,
+  },
+  askDead: { opacity: 0.6 },
+  askIcon: {
+    width: 38, height: 38, borderRadius: 12, backgroundColor: colors.accentSoft,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  askIconDead: { backgroundColor: colors.surface },
+  askDay: { fontSize: 13.5, fontWeight: '700', color: colors.text },
+  askDayDead: { color: colors.textSecondary },
+  askMeta: { fontSize: 11.5, color: colors.textSecondary, marginTop: 3 },
+  askCancel: { fontSize: 12, fontWeight: '600', color: colors.textTertiary },
+
   hardTitle: { fontSize: font.small, fontWeight: '700', color: colors.text },
   hardBody: { fontSize: 12, lineHeight: 18, color: colors.textSecondary, marginTop: 4 },
 

@@ -230,7 +230,8 @@ export function AllChairsScreen({ salon, team, onBack, onAdd }: {
         .select('id, barber_id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, services(name), customer:profiles!customer_id(full_name)')
         .in('barber_id', ids)
         .gte('starts_at', day.toISOString()).lt('starts_at', to.toISOString()),
-      supabase.from('time_blocks').select('id, barber_id, label, day, start_min, end_min').in('barber_id', ids),
+      supabase.from('time_blocks').select('id, barber_id, label, day, start_min, end_min')
+        .eq('kind', 'block').in('barber_id', ids),
       supabase.from('days_off').select('barber_id, day').in('barber_id', ids).eq('day', isoDay(day)),
     ]);
     setRows((bk.data as unknown as LiveBooking[]) ?? []);

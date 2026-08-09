@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Alert, Image, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View,
+  Alert, Image, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import SlotPicker from '../components/SlotPicker';
 import { Display } from '../components/ui';
@@ -464,7 +464,7 @@ async function nextFreeSlots(barberId: string, durationMin: number, from: Date, 
   const [av, off, blk, buf, booked] = await Promise.all([
     supabase.from('availability').select('weekday, start_min, end_min').eq('barber_id', barberId),
     supabase.from('days_off').select('day').eq('barber_id', barberId),
-    supabase.from('time_blocks').select('day, start_min, end_min').eq('barber_id', barberId),
+    supabase.from('time_blocks').select('day, start_min, end_min, kind').eq('barber_id', barberId),
     supabase.from('barbers').select('buffer_before_min, buffer_after_min').eq('id', barberId).single(),
     supabase.rpc('booked_ranges', {
       p_barber: barberId,
@@ -487,20 +487,41 @@ async function nextFreeSlots(barberId: string, durationMin: number, from: Date, 
 // ---- 10a · cancel confirm -------------------------------------------------
 const REASONS = ['Something came up', 'Wrong time', 'Too far', 'Other'];
 
-function CancelSheet({ d, visible, onClose, onReschedule, onDone }: {
-  d: Detail; visible: boolean; onClose: () => void; onReschedule: () => void; onDone: () => void;
+const OTHER_MAX = 140;
+
+// 35a/35b. Two states of one sheet, because they are the same decision with
+// different stakes: a confirmed booking costs you the deposit, a pending request
+// costs nothing because the barber never answered. The reason stays OPTIONAL on
+// both — the deliberate asymmetry with the barber's required radio rows (1r/3a),
+// because nobody owes a shop an explanation.
+function CancelSheet({ d, pending, visible, onClose, onReschedule, onDone }: {
+  d: Detail; pending: boolean; visible: boolean;
+  onClose: () => void; onReschedule: () => void; onDone: (reason: string | null) => void;
 }) {
   const [reason, setReason] = useState<string | null>(null);
+  const [other, setOther] = useState('');
+  const [walletCents, setWalletCents] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const dep = d.deposit_cents / 100;
   const first = (d.barbers?.profiles?.full_name ?? 'your barber').split(' ')[0];
+  const isOther = reason === 'Other';
+  // "Other" without words says nothing the chip didn't; send the words instead.
+  const sent = isOther ? (other.trim() || null) : reason;
+
+  useEffect(() => {
+    if (!visible) { setReason(null); setOther(''); return; }
+    // 35b shows the wallet on both sides of a withdrawal to prove it didn't move
+    if (!pending) return;
+    supabase.from('wallet_transactions').select('amount_cents')
+      .then(({ data }) => setWalletCents((data ?? []).reduce((a, r: any) => a + r.amount_cents, 0)));
+  }, [visible, pending]);
 
   async function confirm() {
     setBusy(true);
-    const { error } = await supabase.rpc('cancel_booking', { p_booking: d.id, p_reason: reason });
+    const { error } = await supabase.rpc('cancel_booking', { p_booking: d.id, p_reason: sent });
     setBusy(false);
-    if (error) return Alert.alert('Could not cancel', error.message);
-    onDone();
+    if (error) return Alert.alert(pending ? 'Could not withdraw' : 'Could not cancel', error.message);
+    onDone(sent);
   }
 
   return (
@@ -509,30 +530,48 @@ function CancelSheet({ d, visible, onClose, onReschedule, onDone }: {
       <View style={s.sheetBottom}>
         <View style={s.grabber} />
         <View style={s.center}>
-          <View style={s.warnCircle}>
-            <Ionicons name="warning-outline" size={26} color={colors.accent} />
+          <View style={pending ? s.calmCircle : s.warnCircle}>
+            <Ionicons name={pending ? 'time-outline' : 'warning-outline'} size={26}
+              color={pending ? colors.textSecondary : colors.accent} />
           </View>
-          <Display size={24} style={s.sheetTitle}>Cancel booking?</Display>
+          <Display size={24} style={s.sheetTitle}>
+            {pending ? 'Withdraw request?' : 'Cancel booking?'}
+          </Display>
           <Text style={s.sheetSub}>
-            {d.services?.name ?? 'Your service'} with {first}, {whenLine(d.starts_at)}.
-            {' '}The slot goes back to the queue.
+            {pending
+              ? `${first} hasn't answered yet, so there's nothing to cancel — the request just disappears.`
+              : `${d.services?.name ?? 'Your service'} with ${first}, ${whenLine(d.starts_at)}. The slot goes back to the queue.`}
           </Text>
         </View>
 
         <View style={[s.card, s.cardTight]}>
           <View style={s.lockRow}>
-            <Ionicons name="lock-closed-outline" size={15} color={colors.accent} style={s.lockIcon} />
+            {pending
+              ? <View style={s.okDot}><Ionicons name="checkmark" size={12} color={colors.success} /></View>
+              : <Ionicons name="lock-closed-outline" size={15} color={colors.accent} style={s.lockIcon} />}
             <Text style={s.lockBody}>
-              {dep > 0
-                ? <><Text style={s.lockStrong}>Your {dep.toFixed(0)} DH deposit is not refunded</Text> when you
-                  cancel — it is only returned to your wallet if the barber cancels.</>
-                : <><Text style={s.lockStrong}>Nothing was charged for this booking</Text> — you pay at the
-                  shop, so cancelling costs you nothing.</>}
+              {pending
+                ? <><Text style={s.lockStrong}>Nothing was charged</Text> — your wallet is untouched and no
+                  deposit was held.</>
+                : dep > 0
+                  ? <><Text style={s.lockStrong}>Your {dep.toFixed(0)} DH deposit is not refunded</Text> when you
+                    cancel — it is only returned to your wallet if the barber cancels.</>
+                  : <><Text style={s.lockStrong}>Nothing was charged for this booking</Text> — you pay at the
+                    shop, so cancelling costs you nothing.</>}
             </Text>
           </View>
           <View style={s.hr} />
-          <Row label="Paid up front" value={`${dep.toFixed(0)} DH`} />
-          <Row label="Refund to wallet" value="0 DH" accent />
+          {pending ? (
+            <>
+              <Row label="Wallet before" value={`${((walletCents ?? 0) / 100).toFixed(0)} DH`} />
+              <Row label="Wallet after" value={`${((walletCents ?? 0) / 100).toFixed(0)} DH`} />
+            </>
+          ) : (
+            <>
+              <Row label="Paid up front" value={`${dep.toFixed(0)} DH`} />
+              <Row label="Refund to wallet" value="0 DH" accent />
+            </>
+          )}
         </View>
 
         <View style={s.reasonBlock}>
@@ -548,20 +587,117 @@ function CancelSheet({ d, visible, onClose, onReschedule, onDone }: {
               );
             })}
           </View>
+
+          {/* 35a — "Other" has to go somewhere, or the chip is a dead end */}
+          {isOther && (
+            <>
+              <TextInput value={other} onChangeText={(t) => setOther(t.slice(0, OTHER_MAX))}
+                multiline placeholder="What happened?" placeholderTextColor={colors.textTertiary}
+                style={s.otherInput} />
+              <View style={s.otherFoot}>
+                <Text style={s.otherCount}>
+                  {first} sees this · {other.length} / {OTHER_MAX}
+                </Text>
+                <Pressable onPress={() => setReason(null)} hitSlop={8}>
+                  <Text style={s.skip}>Skip</Text>
+                </Pressable>
+              </View>
+            </>
+          )}
         </View>
 
         <View style={s.sheetCtas}>
           <Pressable onPress={confirm} disabled={busy}
-            style={({ pressed }) => [s.dangerBtn, (pressed || busy) && s.pressed]}>
-            <Text style={s.dangerText}>CANCEL BOOKING</Text>
+            style={({ pressed }) => [pending ? s.inkBtn : s.dangerBtn, (pressed || busy) && s.pressed]}>
+            <Text style={pending ? s.inkText : s.dangerText}>
+              {pending ? 'WITHDRAW REQUEST' : 'CANCEL BOOKING'}
+            </Text>
           </Pressable>
-          <Pressable onPress={onReschedule}
+          <Pressable onPress={pending ? onClose : onReschedule}
             style={({ pressed }) => [s.keepBtn, pressed && s.pressed]}>
-            <Text style={s.keepText}>KEEP IT — RESCHEDULE INSTEAD</Text>
+            <Text style={s.keepText}>
+              {pending ? 'KEEP WAITING' : 'KEEP IT — RESCHEDULE INSTEAD'}
+            </Text>
           </Pressable>
         </View>
       </View>
     </Modal>
+  );
+}
+
+// ---- 35c · the receipt ----------------------------------------------------
+// Cancelling used to just pop you back to the list. This is what actually
+// happened, in the order you care about: it's done, the barber knows, here is
+// the money. The deposit line is the point — 35a warned you, and this is the
+// same number after the fact rather than a surprise in the wallet later.
+function CancelledScreen({ d, ticketNo, reason, withdrawn, onMessage, onBookAgain, onBack }: {
+  d: Detail; ticketNo: number | null; reason: string | null; withdrawn: boolean;
+  onMessage: () => void; onBookAgain: () => void; onBack: () => void;
+}) {
+  const first = (d.barbers?.profiles?.full_name ?? 'Your barber').split(' ')[0];
+  const dep = d.deposit_cents / 100;
+  const at = new Date(d.starts_at).toTimeString().slice(0, 5);
+
+  return (
+    <View style={s.screen}>
+      <View style={s.receiptHead}>
+        <Pressable onPress={onBack} hitSlop={8} style={s.receiptBack}>
+          <Ionicons name="chevron-back" size={20} color={colors.text} />
+        </Pressable>
+        <Text style={s.receiptRef}>{`#${d.id.replace(/-/g, '').slice(0, 8).toUpperCase()}`}</Text>
+        <View style={s.receiptBackGhost} />
+      </View>
+
+      <View style={s.receiptCenter}>
+        <View style={s.receiptIcon}>
+          <Ionicons name={withdrawn ? 'close' : 'calendar-clear-outline'} size={26}
+            color={colors.textSecondary} />
+        </View>
+        <Display size={24} style={s.outcomeTitle}>{withdrawn ? 'Withdrawn' : 'Cancelled'}</Display>
+        <Text style={s.receiptSub}>
+          {withdrawn
+            ? `Your request is gone. ${first} never saw it, and nothing was charged.`
+            : `${first} has been told.${ticketNo != null ? ` Your ticket Nº ${String(ticketNo).padStart(2, '0')} is released and` : ''} ${at} is back in his queue.`}
+        </Text>
+      </View>
+
+      <View style={s.receiptCard}>
+        <Row label="Was" value={whenLine(d.starts_at)} />
+        <Row label="Service"
+          value={`${d.services?.name ?? 'Service'} · ${(d.price_cents / 100).toFixed(0)} DH`} />
+        {!!reason && <Row label="You said" value={reason} />}
+        <View style={s.hr} />
+        <Row label="Deposit paid" value={`${dep.toFixed(0)} DH`} />
+        <View style={s.rowBase}>
+          <Text style={s.refundK}>Refunded to wallet</Text>
+          <Text style={s.refundV}>{withdrawn ? '0 DH' : '0 DH'}</Text>
+        </View>
+      </View>
+
+      {!withdrawn && (
+        <View style={s.mindCard}>
+          <View style={s.mindIcon}>
+            <Ionicons name="refresh-outline" size={15} color={colors.textSecondary} />
+          </View>
+          <View style={s.grow}>
+            <Text style={s.mindTitle}>Changed your mind?</Text>
+            <Text style={s.mindBody}>
+              {at} is free again for now.
+              {dep > 0 ? ` Rebooking it doesn't bring the ${dep.toFixed(0)} DH back.` : ''}
+            </Text>
+          </View>
+        </View>
+      )}
+
+      <View style={s.receiptCtas}>
+        <Pressable onPress={onMessage} style={({ pressed }) => [s.msgBtn, pressed && s.pressed]}>
+          <Text style={s.msgText}>MESSAGE {first.toUpperCase()}</Text>
+        </Pressable>
+        <Pressable onPress={onBookAgain} style={({ pressed }) => [s.againBtn, pressed && s.pressed]}>
+          <Text style={s.againText}>BOOK AGAIN</Text>
+        </Pressable>
+      </View>
+    </View>
   );
 }
 
@@ -775,6 +911,8 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
 }) {
   const { detail, request, rating, photo, queue, reload } = useBooking(bookingId);
   const [overlay, setOverlay] = useState<Overlay>(null);
+  // 35c — held after cancelling so the receipt can be shown instead of popping back
+  const [cancelled, setCancelled] = useState<{ reason: string | null; withdrawn: boolean } | null>(null);
 
   // 13a fires once per acceptance — the barber answers while the app is closed,
   // so the celebration is owed on the next open, not on the tap that caused it.
@@ -808,6 +946,12 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
   }
   if (overlay === 'moved' && request) {
     return <MovedScreen d={d} request={request} ticketNo={ticketNo} onDone={dismissMoved} />;
+  }
+  // 35c — the after-state. Cancelling used to pop straight back to the list.
+  if (cancelled) {
+    return <CancelledScreen d={d} ticketNo={ticketNo} reason={cancelled.reason}
+      withdrawn={cancelled.withdrawn} onBack={onBack} onBookAgain={onBack}
+      onMessage={() => { setCancelled(null); setOverlay('chat'); }} />;
   }
 
   async function askFor(iso: string) {
@@ -856,9 +1000,10 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
         </View>
       )}
 
-      <CancelSheet d={d} visible={overlay === 'cancel'} onClose={() => setOverlay(null)}
+      <CancelSheet d={d} pending={pending} visible={overlay === 'cancel'}
+        onClose={() => setOverlay(null)}
         onReschedule={() => setOverlay('reschedule')}
-        onDone={() => { setOverlay(null); onBack(); }} />
+        onDone={(reason) => { setOverlay(null); setCancelled({ reason, withdrawn: pending }); }} />
       <RescheduleSheet d={d} visible={overlay === 'reschedule'} onClose={() => setOverlay(null)}
         onSent={async () => { await reload(); setOverlay('requested'); }} />
     </View>
@@ -920,7 +1065,10 @@ function SheetBody({ bookingId, myId, initial, onClose, onQueue }: {
           }}
           onPickAnother={() => setOverlay('reschedule')} />
       </ScrollView>
-      <CancelSheet d={d} visible={overlay === 'cancel'} onClose={() => setOverlay(null)}
+      {/* ponytail: 35b works here, but 35c's receipt is a full screen — inside the
+          sheet the close still wins. Open the booking full-screen to get it. */}
+      <CancelSheet d={d} pending={d.status === 'pending'} visible={overlay === 'cancel'}
+        onClose={() => setOverlay(null)}
         onReschedule={() => setOverlay('reschedule')}
         onDone={() => { setOverlay(null); onClose(); }} />
       <RescheduleSheet d={d} visible={overlay === 'reschedule'} onClose={() => setOverlay(null)}
@@ -1160,6 +1308,77 @@ const s = StyleSheet.create({
     borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center',
   },
   keepText: { fontSize: font.small, fontWeight: '700', letterSpacing: 0.78, color: colors.text },
+
+  // 35a/35b — "Other" gets somewhere to go, and a withdrawal is calm, not alarming
+  calmCircle: {
+    width: 60, height: 60, borderRadius: radius.pill, backgroundColor: '#E9E6DE',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  okDot: {
+    width: 20, height: 20, borderRadius: radius.pill, backgroundColor: 'rgba(74,222,128,0.18)',
+    alignItems: 'center', justifyContent: 'center', marginTop: 1,
+  },
+  otherInput: {
+    backgroundColor: colors.bg, borderRadius: 18, minHeight: 64, paddingHorizontal: 16,
+    paddingVertical: 13, fontSize: 14, lineHeight: 21, color: colors.text,
+    textAlignVertical: 'top', ...shadow,
+  },
+  otherFoot: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  otherCount: { flex: 1, fontSize: font.tiny, color: colors.textTertiary },
+  skip: { fontSize: font.tiny, fontWeight: '600', color: colors.textSecondary },
+  inkBtn: {
+    height: 54, borderRadius: radius.pill, backgroundColor: colors.ink,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  inkText: { fontSize: font.small, fontWeight: '700', letterSpacing: 1.04, color: '#fff' },
+
+  // 35c — the receipt
+  receiptHead: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  receiptBack: {
+    width: 40, height: 40, borderRadius: radius.pill, backgroundColor: colors.bg,
+    alignItems: 'center', justifyContent: 'center', ...shadow,
+  },
+  receiptBackGhost: { width: 40 },
+  receiptRef: {
+    flex: 1, textAlign: 'center', fontSize: font.tiny, letterSpacing: 1.98,
+    fontWeight: '700', color: colors.textSecondary,
+  },
+  receiptCenter: { alignItems: 'center', gap: 13, paddingTop: 2 },
+  receiptIcon: {
+    width: 64, height: 64, borderRadius: radius.pill, backgroundColor: '#E9E6DE',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  receiptSub: {
+    fontSize: font.small, color: colors.textSecondary, lineHeight: 20,
+    textAlign: 'center', maxWidth: 272,
+  },
+  receiptCard: {
+    backgroundColor: colors.bg, borderRadius: 22, paddingHorizontal: 18, paddingVertical: 16,
+    gap: 11, ...shadow,
+  },
+  refundK: { fontSize: font.small, fontWeight: '700', color: colors.text },
+  refundV: { fontSize: 18, fontWeight: '800', color: colors.accent, fontVariant: ['tabular-nums'] },
+  mindCard: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: colors.bg,
+    borderRadius: 18, paddingHorizontal: 16, paddingVertical: 14, ...shadow,
+  },
+  mindIcon: {
+    width: 28, height: 28, borderRadius: radius.pill, backgroundColor: colors.surface,
+    alignItems: 'center', justifyContent: 'center', marginTop: 1,
+  },
+  mindTitle: { fontSize: font.small, fontWeight: '700', color: colors.text },
+  mindBody: { fontSize: 12, lineHeight: 18, color: colors.textSecondary, marginTop: 4 },
+  receiptCtas: { flexDirection: 'row', gap: 10 },
+  msgBtn: {
+    flex: 1, height: 52, borderRadius: radius.pill, backgroundColor: colors.bg,
+    borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center',
+  },
+  msgText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6, color: '#5C5C58' },
+  againBtn: {
+    flex: 1.2, height: 52, borderRadius: radius.pill, backgroundColor: colors.ink,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  againText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6, color: '#fff' },
 
   // 11a
   currentCard: {

@@ -14,6 +14,7 @@ import { supabase } from './src/lib/supabase';
 import { SessionExpiredSheet, SetPasswordScreen } from './src/screens/AccountScreens';
 import AuthScreen, { AuthView } from './src/screens/AuthScreen';
 import { biometricLockOn, LockScreen } from './src/screens/LinkedAccountsScreen';
+import SlotOfferSheet from './src/components/SlotOfferSheet';
 import HomeScreen from './src/screens/HomeScreen';
 import IntroScreen from './src/screens/IntroScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
@@ -125,6 +126,11 @@ export default function App() {
   return (
     <View style={styles.container}>
       {content}
+      {/* 8e — a slot Youssef just lost, offered to you. It rides above whatever
+          screen you're on, because the countdown doesn't care where you are. */}
+      {user && !user.barber && (
+        <SlotOfferSheet myId={user.profile.id} onTaken={() => loadUser(session!)} />
+      )}
       <SessionExpiredSheet visible={!!expired && !session} name={expired?.name ?? null}
         email={expired?.email ?? null}
         onSignIn={() => setExpired(null)} onNotYou={() => setExpired(null)} />

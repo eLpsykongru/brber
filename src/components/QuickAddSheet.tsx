@@ -43,7 +43,7 @@ export default function QuickAddSheet({ visible, barberId, onClose, onPick }: {
         supabase.from('services').select('id, name, price_cents, duration_min')
           .eq('barber_id', barberId).eq('is_active', true).order('created_at'),
         supabase.from('availability').select('weekday, start_min, end_min').eq('barber_id', barberId),
-        supabase.from('time_blocks').select('day, start_min, end_min').eq('barber_id', barberId),
+        supabase.from('time_blocks').select('day, start_min, end_min, kind').eq('barber_id', barberId),
         supabase.from('bookings').select('starts_at, ends_at').eq('barber_id', barberId)
           .in('status', ['pending', 'confirmed'])
           .gte('starts_at', new Date(new Date().setHours(0, 0, 0, 0)).toISOString()),

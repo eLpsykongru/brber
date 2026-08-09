@@ -142,12 +142,13 @@ export function BundlesTab({ bundles, allServices, onBook, onBuild }: {
 // ---------------------------------------------------------------------------
 // 34b / 34c / 34d — the three-step sheet
 // ---------------------------------------------------------------------------
-export function BundleSheet({ visible, bundle, barbers, onClose, onBooked, onSplit }: {
+export function BundleSheet({ visible, bundle, bundles, barbers, onClose, onBooked, onSplit }: {
   visible: boolean;
   /** a named bundle skips step 1; null = "Build your own" */
   bundle: Bundle | null;
-  barbers: BundleBarber[];
   /** every real bundle at this shop — a hand-picked set that matches one gets its price */
+  bundles: Bundle[];
+  barbers: BundleBarber[];
   onClose: () => void;
   onBooked: (bookingId: string) => void;
   onSplit: () => void;
@@ -189,7 +190,7 @@ export function BundleSheet({ visible, bundle, barbers, onClose, onBooked, onSpl
     const [av, off, blk, buf, bk] = await Promise.all([
       supabase.from('availability').select('weekday, start_min, end_min').eq('barber_id', id),
       supabase.from('days_off').select('day').eq('barber_id', id),
-      supabase.from('time_blocks').select('day, start_min, end_min').eq('barber_id', id),
+      supabase.from('time_blocks').select('day, start_min, end_min, kind').eq('barber_id', id),
       supabase.from('barbers').select('buffer_before_min, buffer_after_min').eq('id', id).single(),
       supabase.rpc('booked_ranges', { p_barber: id, p_from: from.toISOString(), p_to: to.toISOString() }),
     ]);
@@ -209,8 +210,13 @@ export function BundleSheet({ visible, bundle, barbers, onClose, onBooked, onSpl
   );
   const totalMin = chosen.reduce((a, sv) => a + sv.duration_min, 0);
   const listCents = chosen.reduce((a, sv) => a + sv.price_cents, 0);
-  // a hand-picked set that happens to BE a bundle gets the bundle's price (34b)
-  const price = bundle ? bundle.price_cents : listCents;
+  // 34b — a hand-picked set that happens to BE one of this barber's bundles is
+  // charged as that bundle. Without this the barber's published bundle is
+  // invisible to anyone who ticks the same three services themselves.
+  const matched = useMemo(() => bundle ?? bundles.find((b) =>
+    b.barber_id === barber?.id && sameSet(b.services.map((sv) => sv.id), picked)) ?? null,
+  [bundle, bundles, barber, picked]);
+  const price = matched ? matched.price_cents : listCents;
   const saving = Math.max(0, listCents - price);
 
   const days = useMemo(
@@ -242,7 +248,6 @@ export function BundleSheet({ visible, bundle, barbers, onClose, onBooked, onSpl
   async function confirm() {
     if (!time || !barber) return;
     setBusy(true);
-    const matched = bundle;
     const { data, error } = matched
       ? await supabase.rpc('book_bundle',
         { p_bundle: matched.id, p_starts_at: time.toISOString(), p_deposit_cents: deposit })
@@ -399,7 +404,7 @@ export function BundleSheet({ visible, bundle, barbers, onClose, onBooked, onSpl
               <>
                 <View style={s.summary}>
                   <View style={s.sumHead}>
-                    <Text style={s.sumEyebrow}>{(bundle?.name ?? 'One sitting').toUpperCase()}</Text>
+                    <Text style={s.sumEyebrow}>{(matched?.name ?? 'One sitting').toUpperCase()}</Text>
                     <Text style={s.sumWhen}>
                       {time.toTimeString().slice(0, 5)} – {new Date(time.getTime() + totalMin * 60_000).toTimeString().slice(0, 5)} · {totalMin} min
                     </Text>

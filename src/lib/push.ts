@@ -13,6 +13,10 @@ import { supabase } from './supabase';
 // inbox, the preferences, the handler — works in Expo Go.
 
 export const BOOKING_CATEGORY = 'BOOKING_REQUEST';
+// 8a — a cancellation banner carries the customer's own words and two ways out:
+// answer him, or refill the hole. Neither can be done from the lock screen, so
+// both open the app rather than resolving in place like Accept/Decline do.
+export const CANCELLED_CATEGORY = 'BOOKING_CANCELLED';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -38,6 +42,11 @@ async function registerCategory() {
       buttonTitle: 'Accept',
       options: { opensAppToForeground: false },
     },
+  ]);
+
+  await Notifications.setNotificationCategoryAsync(CANCELLED_CATEGORY, [
+    { identifier: 'REPLY', buttonTitle: 'Reply', options: { opensAppToForeground: true } },
+    { identifier: 'OFFER', buttonTitle: 'Offer the slot', options: { opensAppToForeground: true } },
   ]);
 }
 

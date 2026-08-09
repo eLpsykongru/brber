@@ -424,8 +424,143 @@ Still open:
 - **7c can't name the window.** The design says "09:30 – 19:00"; `my_bundles()`
   returns the longest window's *length*, so the sheet says how much chair time
   instead. Return `start_min` too if the edges matter.
-- **0047/0048 are unverified against a real Postgres** (no psql/CLI/docker on
-  this machine). Run them against a branch before trusting the money paths.
+- **0047 + 0048 are applied (2026-08-07) and verified live** — all 12 objects
+  answer over PostgREST, and applying them means their `do $$ assert $$` blocks
+  passed (0047's bundle/deposit money maths, 0048's 7c day maths). The JS half is
+  checked too: `npm run check` runs `src/lib/slots.check.ts` (no framework, no new
+  dep) and pins 7c's day maths and 34c's three-in-a-row rule to the drawn numbers.
+  **Not yet exercised end to end:** the probe ran as anon, so the triggers
+  (`fill_booking`'s bundle branch, `fill_booking_services`,
+  `default_settle_on_complete`) and the authenticated RLS paths still want one
+  real booking through the app.
+
+## Cancellations — customer turn 35 + barber turn 8, REAL 2026-08-07 (0049)
+Two ends of one story: the customer cancels (35), Youssef is left with a hole (8).
+- **35 is complete** (`MyBookingScreen.tsx`). The picker was already there (10a);
+  what was missing was everything round it. **35a** gives "Other" a free-text box
+  with the barber named and a 140-char counter, and a Skip that clears it — an
+  "Other" with no words is sent as no reason at all. **35b** is the *withdraw*
+  variant for a still-pending request: calm grey instead of the accent warning,
+  "Nothing was charged", wallet before/after, ink CTA. **35c** is the receipt —
+  cancelling used to pop straight back to the list with no record.
+  The reason stays **optional chips** on both, deliberately asymmetric with the
+  barber's required radio rows: nobody owes a shop an explanation.
+- **Turn 8's rail (0049), under all of 8a–8i.** `waitlist_requests`
+  ("asked about today" — 8d's green ASKED badge; the other three candidate kinds
+  derive from the book), `slot_offers` + `slot_offer_targets`, and
+  `offer_candidates` / `create_slot_offer` / `claim_slot_offer` /
+  `decline_slot_offer` / `my_slot_offers` / `cancellation_stats`.
+  An offer **never holds the slot** — 8d's "first to tap it gets it, nobody else
+  is charged or held" — so the claim goes through the ordinary booking insert and
+  `no_double_booking` (0001) is what actually settles the race.
+- **Turn 8's UI is built too (2026-08-07).**
+  - **8a** — `cancel_booking` never told the barber anything: the `cancellation`
+    kind existed since 0032 with nothing inserting it. An AFTER UPDATE trigger
+    (`notify_customer_cancel`) now writes it, his words first, then what it costs
+    the day. `push_dispatch` maps it to `BOOKING_CANCELLED`, whose Reply / Offer
+    the slot buttons both open the app — neither can be resolved from a banner.
+  - **8b/8f** — `components/CancelledGap.tsx`, rendered inside **My day**
+    (`DayScheduleScreen`). One component, two states: the hole (his words in a
+    quote box, the deposit that stays, the dashed freed slot with OFFER IT /
+    TAKE A BREAK, the waiting-list row) and, once taken, 8f's green banner plus
+    the booked-today / kept-deposit pair. TAKE A BREAK writes a `time_blocks` row
+    so the slot stops being offered at all.
+  - **8c** — `screens/CancellationsScreen.tsx`, on **Profile → Cancellations**.
+    30-day counts, the reason histogram (bars relative to the top reason, "Other"
+    ringed amber), and WORTH A LOOK over the written-in answers with a sheet that
+    shows them verbatim.
+  - **8d** — the offer sheet, in `CancelledGap.tsx`. Opens with the people who
+    actually asked pre-ticked; anyone with 2+ no-shows is dimmed and cannot be
+    selected, as the design draws.
+  - **8e** — `components/SlotOfferSheet.tsx`, mounted in `App.tsx` above every
+    customer screen because the countdown doesn't care what screen you're on.
+- **The ask — customer turn 36 + barber 8g/8h/8i, REAL 2026-08-07 (0050).**
+  This closes the hole 0049 left: 8d ranked candidates by evidence of wanting the
+  slot and put a green ASKED at the top, but nothing ever recorded an ask.
+  - **36a** is the **full-day state of the slot picker** (`SlotPicker` gained a
+    `renderFull` prop, so the ask lives exactly where the design puts it — the
+    moment you want a day and can't have it). Earliest-time chips, an
+    "any barber at &lt;shop&gt;" toggle, and copy that never implies a queue place.
+  - **36b** says back what was recorded, including when it expires and the honest
+    part: a freed slot can go to several people at once.
+  - **36c** is the ASKS section under My Bookings → Upcoming, with cancel and an
+    expired state.
+  - **8g** "Nobody took it" — the offer ran out and the slot is still his problem:
+    open it to everyone, ask someone else, or make it a break.
+  - **8h/8i** `screens/WaitingListScreen.tsx` on **Profile → Waiting list**: day
+    chips, asks grouped by day, and an OFFER button that only appears when a slot
+    is actually free *and* clears that person's earliest-time. 8i's empty state
+    explains that asks only happen on days with nothing left.
+  - 0050 also **teaches `offer_candidates` the real shape** — it keyed on
+    (barber, day) and knew nothing about `earliest_min`, any-barber asks, or
+    `status`, all three of which change who legitimately shows up as ASKED.
+Still open here:
+- **8b's "he messaged you and you didn't reply" nudge is not built.** It needs a
+  median-reply-time read over `messages`, which no RPC exposes yet.
+- **8c's insight text is generic.** The design reads "3 of the 4 Other answers
+  mention a message you didn't reply to" — matching *why* they cancelled against
+  chat history. Ours says how many wrote in and points at them, which is honest
+  without pretending to have done the correlation.
+Both closed (2026-08-08), with 0051:
+- **Asks now expire.** `expire_stale_asks()` flips a past-day `waiting` row to
+  `expired`. It is scheduled hourly when pg_cron exists (same conditional shape
+  as 0037's reminders) *and* called from `ask_for_day`, so the sweep happens on
+  this project whether or not the extension is ever enabled. Nothing on screen
+  changes — every read path already ignored past-day asks; what it fixes is a
+  status nothing ever left and the indexes that only cover live asks.
+- **8b's "Tell your waiting list" card now opens 8h**, carrying the freed slot
+  with it. That slot is what makes each row's OFFER button mean anything —
+  `create_slot_offer` is anchored to a booking somebody walked away from, so
+  without one in hand the button had nothing to send. Arriving with a slot also
+  fixes a label that would have lied: 8h sized OFFER from the day's *first* free
+  time, which is rarely the cancelled one. The chosen person lands pre-ticked in
+  8d rather than the sheet opening blank.
+- Same commit fixed the card's own counter: it read `waitlist_requests` directly
+  on `(barber_id, day)`, which after 0050 both misses any-barber asks and counts
+  cancelled ones. It calls `barber_waitlist()` now.
+- **Making room — barber 8j/8k/8l, REAL 2026-08-09 (0052).** The design answered
+  the question the previous entry left open, and answered it bigger: 8j names the
+  rule every offer screen had been assuming. **An offer anchors to a real gap in
+  the day.** A full day has no gap, so on one there is nothing to offer and the
+  only honest move is to make one.
+  - **One concept carries all of it.** A `time_blocks` row with `kind = 'open'` is
+    a block turned inside out: instead of taking time away it gives it back, on
+    one date, outranking the weekly hours, the breaks *and* the buffers — he
+    weighed all three when he chose to make room. The one thing it never outranks
+    is a booking: room he made can still only be taken once. That single row
+    covers all three of 8k's sources, which is why 8k can promise "your usual
+    hours don't change" — nothing recurring is edited.
+  - `fill_booking` carries the same exemption and `daySlots` reads the same rows
+    the same way, so the phone and the trigger agree on what is bookable. Picking
+    `time_blocks` for this was the whole trick: **every** slot computation in the
+    app already loads that table, so a made slot appears in the customer's picker,
+    the calendar, the day screen and the owner view with no new plumbing.
+  - **8j** is the Waiting list with nothing to give anyone: day cards headed
+    `FULL · CLOSES 19:00`, two named asks and the rest on one line, and either
+    MAKE ROOM or — when every source has already passed — "Too late to open
+    anything today" with a message button. 8h's chips are dropped there: with
+    nothing free anywhere, filtering to one day changes nothing.
+  - **8k** is `makeRoomOptions()` in `lib/slots.ts`, so the arithmetic behind
+    "3 can take it" is checkable and checked. The cleaning-time source is derived
+    rather than guessed: it is the first slot that is free at buffer 0 and full at
+    the real buffer, which is exactly what dropping the buffer would reveal.
+  - **8l** is the offer sheet in made-slot mode — green strip saying what the day
+    gave up, public toggle **off** by default (room made by hand is aimed at
+    someone), and no "take the break instead", because the alternative to offering
+    a slot he just made is not a break, it's nothing.
+  - **`create_open_offer`** is the missing half of `create_slot_offer`: an offer
+    with no cancellation behind it. It re-runs `fill_booking`'s checks minus the
+    money, because an offer that cannot be claimed is worse than no offer.
+    0052 also gives `offer_candidates` wording that reads right on a day that
+    isn't today, and `barber_waitlist` a `last_booking` so 8j's message button
+    has a thread to open.
+  - This closes the previous entry's open item outright: **8h reached from Profile
+    is now fully live** — it offers a day's own free slot when there is one, and
+    makes one when there isn't.
+Still open here:
+- **0051 and 0052 are not applied.** 0047–0050 are live. 0052 re-emits
+  `fill_booking` (last touched by 0048) and `expire_stale_asks` (0051), so it must
+  run after both.
 
 ## Placeholder screens (UI built, not wired to backend)
 These exist as visual shells to implement later:

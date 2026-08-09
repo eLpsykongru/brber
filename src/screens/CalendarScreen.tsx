@@ -29,7 +29,10 @@ type CalBooking = {
   services: { name: string } | null;
   customer: { full_name: string | null; phone: string | null; avatar_url: string | null } | null;
 };
-type BlockRow = { id: string; label: string | null; day: string | null; start_min: number; end_min: number };
+type BlockRow = {
+  id: string; label: string | null; day: string | null; start_min: number; end_min: number;
+  kind?: string | null;   // 'open' = room he made (8k), which draws as free, not as a break
+};
 type Service = { id: string; name: string; price_cents: number; duration_min: number };
 type ClientHit = { name: string; avatar: string | null; app: boolean };
 
@@ -176,7 +179,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
         .gte('starts_at', weekStart.toISOString()).lt('starts_at', to.toISOString())
         .in('status', ['pending', 'confirmed'])
         .order('starts_at'),
-      supabase.from('time_blocks').select('id, label, day, start_min, end_min').eq('barber_id', barberId),
+      supabase.from('time_blocks').select('id, label, day, start_min, end_min, kind').eq('barber_id', barberId),
       supabase.from('availability').select('weekday, start_min, end_min').eq('barber_id', barberId),
       supabase.from('days_off').select('day, label').eq('barber_id', barberId)
         .gte('day', isoOf(weekStart)).lt('day', isoOf(to)),
@@ -348,7 +351,8 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
   const rows = bookings ?? [];
   const ofDay = (d: Date) => rows.filter((b) => sameDay(new Date(b.starts_at), d));
   const dayAll = ofDay(selected);
-  const dayBlocks = blocks.filter((b) => b.day === null || b.day === isoOf(selected));
+  // 8k's openings ride in the same table but draw as free time, not as a break
+  const dayBlocks = blocks.filter((b) => b.kind !== 'open' && (b.day === null || b.day === isoOf(selected)));
   const offToday = daysOff.find((d) => d.day === isoOf(selected)) ?? null;
   const offOf = (d: Date) => daysOff.find((x) => x.day === isoOf(d)) ?? null;
 

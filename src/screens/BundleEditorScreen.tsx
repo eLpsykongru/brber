@@ -3,6 +3,7 @@ import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import {
   Btn, Card, Eyebrow, Ico, Screen, Sheet, SheetHead, T, TAB_INSET, Toggle, TopBar,
 } from '../components/dark';
+import { fitsPerDay } from '../lib/slots';
 import { supabase } from '../lib/supabase';
 import { dark as D, inter, serif } from '../theme';
 
@@ -296,7 +297,15 @@ function EditBundle({ bundle, menu, dayMin, bufferMin, onBack, onSaved }: {
           </View>
         )}
 
-        <Btn title="CHECK MY DAY" onPress={() => setChecking(true)} height={50} ls={0.78} />
+        {/* 7c reasons about a real sitting — it has nothing to say about an
+            empty pick or a bundle with no price on it yet */}
+        <Btn title="CHECK MY DAY" height={50} ls={0.78} onPress={() => {
+          if (picked.length < 2) {
+            return Alert.alert('Pick at least two', 'A bundle of one service is just a service.');
+          }
+          if (priceCents <= 0) return Alert.alert('Set a price', 'What does the whole sitting cost?');
+          setChecking(true);
+        }} />
       </Screen>
 
       <PublishCheck visible={checking} onClose={() => setChecking(false)}
@@ -325,10 +334,10 @@ function PublishCheck({
   const [morning, setMorning] = useState(true);
 
   // The arithmetic the turn is built around: a full day, back to back, with the
-  // barber's own buffer. How many of each fit, and what each pays.
-  const fit = (min: number) => (min + bufferMin > 0 ? Math.floor(dayMin / (min + bufferMin)) : 0);
-  const grooms = fit(durationMin);
-  const singles = anchor ? fit(anchor.duration_min) : 0;
+  // barber's own buffer. How many of each fit, and what each pays. The formula
+  // is `fitsPerDay` in lib/slots so slots.check.ts can hold it to these numbers.
+  const grooms = fitsPerDay(dayMin, durationMin, bufferMin);
+  const singles = anchor ? fitsPerDay(dayMin, anchor.duration_min, bufferMin) : 0;
   const groomCents = grooms * priceCents;
   const singleCents = anchor ? singles * anchor.price_cents : 0;
   const fewer = Math.max(0, singles - grooms);
@@ -339,6 +348,21 @@ function PublishCheck({
   // the longest window's LENGTH, not its edges, so this says how much chair time
   // rather than inventing a start hour. Return start_min too if the edges matter.
   const hours = dayMin > 0 ? `${Math.floor(dayMin / 60)}h ${dayMin % 60}m` : 'your day';
+
+  // Without working hours there is no day to reason about, and every figure
+  // below would be a confident zero. Say why instead.
+  if (dayMin <= 0) {
+    return (
+      <Sheet visible={visible} onClose={onClose} deep>
+        <SheetHead title="Before you publish" onClose={onClose} left />
+        <T size={13} c={D.sub} style={s.lh}>
+          Set your weekly hours first — without them there's no day to measure a
+          {' '}{durationMin}-min sitting against.
+        </T>
+        <Btn title="SAVE AS HIDDEN" onPress={onHide} ls={0.78} bg={D.card2} />
+      </Sheet>
+    );
+  }
 
   return (
     <Sheet visible={visible} onClose={onClose} deep>

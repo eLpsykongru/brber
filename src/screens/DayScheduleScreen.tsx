@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert, Animated, Image, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native';
+import CancelledGap, { FreedSlot } from '../components/CancelledGap';
 import ClientSheet, { ClientRef } from '../components/ClientSheet';
 import { Ico, Serif, T } from '../components/dark';
 import SlotPicker from '../components/SlotPicker';
@@ -12,6 +13,7 @@ import { Block, dayStatus, daySlots, sameDay, Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, inter, radius, sp } from '../theme';
 import ChatScreen from './ChatScreen';
+import WaitingListScreen from './WaitingListScreen';
 
 const STEP = 30;
 
@@ -105,6 +107,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
   const [usualServiceId, setUsualServiceId] = useState(prefillServiceId ?? null);
   const [addBusy, setAddBusy] = useState(false);
   const [chat, setChat] = useState<{ id: string; title: string } | null>(null);
+  const [waitlist, setWaitlist] = useState<FreedSlot | null>(null);
   const [sheetClient, setSheetClient] = useState<ClientRef | null>(null);
   const [toast, setToast] = useState<{ booking: DayBooking; clearStart: boolean; clearCheckin: boolean } | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -154,7 +157,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
         .order('starts_at'),
       supabase.from('availability').select('weekday, start_min, end_min').eq('barber_id', barberId),
       supabase.from('days_off').select('day').eq('barber_id', barberId).gte('day', isoOf(new Date())),
-      supabase.from('time_blocks').select('id, label, day, start_min, end_min').eq('barber_id', barberId),
+      supabase.from('time_blocks').select('id, label, day, start_min, end_min, kind').eq('barber_id', barberId),
       supabase.from('services').select('id, name, price_cents, duration_min')
         .eq('barber_id', barberId).eq('is_active', true).order('name'),
       supabase.from('barbers').select('buffer_before_min, buffer_after_min').eq('id', barberId).single(),
@@ -280,6 +283,14 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
       title={chat.title} onBack={() => openChat(null)} />;
   }
 
+  // 8b's "Tell your waiting list" → 8h. He arrives with a freed slot in hand,
+  // which is what makes the OFFER button on each row mean anything: an offer is
+  // always anchored to a slot somebody walked away from.
+  if (waitlist) {
+    return <WaitingListScreen barberId={barberId} slot={waitlist}
+      onBack={() => { setWaitlist(null); load(); }} />;
+  }
+
   // per-day status for the strip badges (no-shows don't hold a slot)
   const byDay = new Map<string, DayBooking[]>();
   for (const b of allBookings) {
@@ -290,7 +301,8 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
 
   const dayAll = allBookings.filter((b) => sameDay(new Date(b.starts_at), selectedDay));
   const dayLive = dayAll.filter((b) => b.status !== 'no_show');
-  const dayBlocks = blocks.filter((b) => b.day === null || b.day === isoOf(selectedDay));
+  // 8k's openings ride in the same table but show as a free tick, not as a break
+  const dayBlocks = blocks.filter((b) => b.kind !== 'open' && (b.day === null || b.day === isoOf(selectedDay)));
   const freeTicks = daySlots(selectedDay, STEP, windows, dayLive, daysOff, blocks, bufferMin)
     .filter((sl) => sl.status === 'free')
     .map((sl) => sl.time);
@@ -347,6 +359,25 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
             })}
           </View>
         </ScrollView>
+
+        {/* 8b/8f — a customer walked away from a slot on this day. The hole, his
+            words, and something to do about it; or, once refilled, who took it. */}
+        <CancelledGap barberId={barberId} day={selectedDay}
+          bookedTodayCents={dayLive.reduce((a, b) => a + b.price_cents, 0)}
+          onChat={(id, title) => setChat({ id, title })}
+          onBreak={async (at, minutes) => {
+            // 8b's TAKE A BREAK: the freed slot becomes a block, so nothing can
+            // be booked into it and the day stops offering it.
+            const start = at.getHours() * 60 + at.getMinutes();
+            const { error } = await supabase.from('time_blocks').insert({
+              barber_id: barberId, label: 'Break', day: isoOf(at),
+              start_min: start, end_min: start + minutes,
+            });
+            if (error) Alert.alert('Could not add the break', error.message);
+            load();
+          }}
+          onWaitingList={setWaitlist}
+          onReload={load} />
 
         {/* what the day adds up to */}
         <View style={s.summary}>

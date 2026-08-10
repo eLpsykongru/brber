@@ -40,6 +40,9 @@ export default function CheckInScreen({ onClose, onJoined }: {
   const [torch, setTorch] = useState(false);
 
   useEffect(() => { if (!permission?.granted) requestPermission(); }, [permission?.granted]);
+  // 38b — a blocked camera opens the typed path rather than parking him in front
+  // of a dead viewfinder with the way through as a footnote
+  useEffect(() => { if (permission && !permission.granted) setManual(true); }, [permission?.granted]);
 
   function take(raw: string) {
     const parsed = parseShopCode(raw);
@@ -83,11 +86,16 @@ export default function CheckInScreen({ onClose, onJoined }: {
       </View>
 
       <View style={s.scanCopy}>
-        <Display size={24} style={s.scanHead}>Scan the code{'\n'}at the counter</Display>
+        <Display size={24} style={s.scanHead}>
+          {permission?.granted ? 'Scan the code\nat the counter' : 'Shop code'}
+        </Display>
         <Text style={s.scanSub}>
           {permission?.granted
             ? 'Every Sterncut shop has one by the mirror. It puts you in today\'s queue.'
-            : 'Camera access is off — enter the shop code instead, or allow the camera in Settings.'}
+            // 38b — the QR is a convenience, not the mechanism. Six characters
+            // under the poster do the same job, so lead with that rather than
+            // with the permission he has already refused once.
+            : 'Six characters, printed under the QR on the shop\'s poster.'}
         </Text>
       </View>
 

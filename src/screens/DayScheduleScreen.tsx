@@ -5,6 +5,8 @@ import {
 } from 'react-native';
 import CancelledGap, { FreedSlot } from '../components/CancelledGap';
 import ClientSheet, { ClientRef } from '../components/ClientSheet';
+import { Clash, ConflictSheet, OfflineBar, OfflineLimits } from '../components/Trouble';
+import { drop, enqueue, useConnection, useOutbox } from '../lib/sync';
 import { Ico, Serif, T } from '../components/dark';
 import SlotPicker from '../components/SlotPicker';
 import { Field, PillButton } from '../components/ui';
@@ -14,6 +16,7 @@ import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, inter, radius, sp } from '../theme';
 import ChatScreen from './ChatScreen';
 import WaitingListScreen from './WaitingListScreen';
+import OutboxScreen from './OutboxScreen';
 
 const STEP = 30;
 
@@ -108,6 +111,11 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
   const [addBusy, setAddBusy] = useState(false);
   const [chat, setChat] = useState<{ id: string; title: string } | null>(null);
   const [waitlist, setWaitlist] = useState<FreedSlot | null>(null);
+  // turn 10 — the day has to keep running whether or not we can be reached
+  const { online, since: offlineSince } = useConnection();
+  const queued = useOutbox();
+  const [clash, setClash] = useState<Clash | null>(null);
+  const [outbox, setOutbox] = useState(false);
   const [sheetClient, setSheetClient] = useState<ClientRef | null>(null);
   const [toast, setToast] = useState<{ booking: DayBooking; clearStart: boolean; clearCheckin: boolean } | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -207,11 +215,28 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
 
   async function addWalkIn(service: Service) {
     if (!addAt) return;
-    setAddBusy(true);
-    const { error } = await supabase.from('bookings').insert({
+    const row = {
       customer_id: barberId, barber_id: barberId, service_id: service.id,
       starts_at: addAt.toISOString(), walk_in_name: walkInName.trim() || null,
-    });
+    };
+    const who = walkInName.trim() || 'Walk-in';
+
+    // 10a — the chair does not wait for the network. Offline this goes on the
+    // queue and onto his timeline immediately; `no_double_booking` still has the
+    // final say when it sends, and 10b is what that refusal looks like.
+    if (!online) {
+      await enqueue({
+        at: new Date().toISOString(), icon: 'plus',
+        label: `Walk-in added · ${who} ${hhmm(row.starts_at)}`,
+        meta: { startsAt: row.starts_at, who, service: service.name },
+        call: { insert: 'bookings', row },
+      });
+      setAddAt(null); setWalkInName(''); setUsualServiceId(null);
+      return;
+    }
+
+    setAddBusy(true);
+    const { error } = await supabase.from('bookings').insert(row);
     setAddBusy(false);
     if (error) {
       const msg = error.message.includes('no_double_booking')
@@ -231,6 +256,18 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
 
   // capture only what this call set, so undo restores the exact prior state
   async function markComplete(b: DayBooking) {
+    // 10a — marking a cut done is the one thing he does with a client standing
+    // up in front of him. It never blocks on a round trip.
+    if (!online) {
+      await enqueue({
+        at: new Date().toISOString(), icon: 'check', cents: b.price_cents,
+        label: `${nameOf(b, barberId)} marked done · ${Math.round(b.price_cents / 100)} DH`,
+        meta: { bookingId: b.id },
+        call: { rpc: 'advance_booking', args: { p_booking: b.id, p_stage: 'complete' } },
+      });
+      setSheetBooking(null);
+      return;
+    }
     const { error } = await supabase.rpc('advance_booking', { p_booking: b.id, p_stage: 'complete' });
     if (error) return Alert.alert('Could not complete', error.message);
     setToast({ booking: b, clearStart: !b.started_at, clearCheckin: !b.checked_in_at });
@@ -291,6 +328,30 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
       onBack={() => { setWaitlist(null); load(); }} />;
   }
 
+  // 10f — reached from the offline bar, because that is where he notices
+  if (outbox) return <OutboxScreen onBack={() => { setOutbox(false); load(); }} />;
+
+  // 10b — a queued walk-in that came back refused. The slot now belongs to
+  // whoever the server let in, and the two names, the deposit and the next free
+  // time are all already on this screen, which is why the sheet lives here.
+  function openClash(job: typeof queued[number]) {
+    const at = new Date(job.meta!.startsAt!);
+    const theirs = allBookings.find((b) =>
+      b.customer_id !== barberId && new Date(b.starts_at).getTime() === at.getTime());
+    setClash({
+      job,
+      at,
+      theirs: theirs ? {
+        name: nameOf(theirs, barberId),
+        bookedAt: hhmm(theirs.starts_at),
+        deposit_cents: 0,
+        visits: allBookings.filter((b) => b.customer_id === theirs.customer_id).length,
+      } : null,
+      mine: { name: job.meta?.who ?? 'Walk-in', addedAt: hhmm(job.at) },
+      freeAt: freeTicks.find((t) => t.getTime() > at.getTime()) ?? null,
+    });
+  }
+
   // per-day status for the strip badges (no-shows don't hold a slot)
   const byDay = new Map<string, DayBooking[]>();
   for (const b of allBookings) {
@@ -299,7 +360,24 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     (byDay.get(key) ?? byDay.set(key, []).get(key)!).push(b);
   }
 
-  const dayAll = allBookings.filter((b) => sameDay(new Date(b.starts_at), selectedDay));
+  // 10a's "TODAY · FROM MEMORY". What he did while offline is on this phone and
+  // nowhere else, so the timeline has to hold both or it would show him a day he
+  // has already changed. Queued walk-ins become rows; queued completions mark
+  // the row they belong to.
+  const pending = queued.filter((j) => !j.conflict);
+  const doneOffline = new Set(pending.map((j) => j.meta?.bookingId).filter(Boolean) as string[]);
+  const queuedRows: DayBooking[] = pending
+    .filter((j) => j.meta?.startsAt && sameDay(new Date(j.meta.startsAt), selectedDay))
+    .map((j) => ({
+      id: `queued:${j.id}`, starts_at: j.meta!.startsAt!,
+      ends_at: new Date(new Date(j.meta!.startsAt!).getTime() + STEP * 60_000).toISOString(),
+      status: 'confirmed', price_cents: 0, walk_in_name: j.meta?.who ?? 'Walk-in',
+      customer_id: barberId, checked_in_at: null, started_at: null, completed_at: null,
+      services: { name: j.meta?.service ?? 'Service' }, customer: null,
+    } as unknown as DayBooking));
+
+  const dayAll = [...allBookings.filter((b) => sameDay(new Date(b.starts_at), selectedDay)), ...queuedRows]
+    .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
   const dayLive = dayAll.filter((b) => b.status !== 'no_show');
   // 8k's openings ride in the same table but show as a free tick, not as a break
   const dayBlocks = blocks.filter((b) => b.kind !== 'open' && (b.day === null || b.day === isoOf(selectedDay)));
@@ -333,6 +411,27 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
             <Ico name="plus" size={16} />
           </Pressable>
         </View>
+
+        {/* 10a — the day still runs. This sits above the strip because it changes
+            what the timeline below it means, not what he can do with it. */}
+        {!online && (
+          <OfflineBar since={offlineSince} jobs={queued} onOpen={() => setOutbox(true)} />
+        )}
+
+        {/* 10b's way in. A refused walk-in must not sit silently in the outbox —
+            somebody is standing in his shop expecting that time. */}
+        {queued.filter((j) => j.conflict && j.meta?.startsAt).map((j) => (
+          <Pressable key={j.id} style={s.clashBar} onPress={() => openClash(j)}>
+            <Ico name="alert-triangle" size={16} color={D.amber} />
+            <View style={s.grow}>
+              <T w="b" size={13} c={D.amber}>
+                Two people at {hhmm(j.meta!.startsAt!)}
+              </T>
+              <T size={11} c={D.sub}>{j.meta?.who ?? 'Your walk-in'} couldn't be added — sort it</T>
+            </View>
+            <Ico name="chevron-right" size={16} color={D.sub} />
+          </Pressable>
+        ))}
 
         {/* day strip — a dot per day: coral when it has work, grey when it's clear */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -378,6 +477,10 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
           }}
           onWaitingList={setWaitlist}
           onReload={load} />
+
+        {/* 10a's honest footer — the two things that genuinely need a signal.
+            Below the day, because it is the last thing he needs, not the first. */}
+        {!online && <OfflineLimits />}
 
         {/* what the day adds up to */}
         <View style={s.summary}>
@@ -637,6 +740,42 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
         onClose={() => setSheetClient(null)}
         onChat={(id, title) => { setSheetClient(null); setChat({ id, title }); }} />
 
+      {/* 10b — two people, one slot */}
+      <ConflictSheet clash={clash} onClose={() => setClash(null)}
+        onResolve={async (choice) => {
+          const c = clash!;
+          setClash(null);
+          if (choice === 'both' || !c.freeAt) {
+            // he keeps both: the walk-in re-enters at the same time and the
+            // exclusion constraint will refuse it again, so put it in the only
+            // place it can go — a break he shortens by hand. Say so plainly.
+            await drop(c.job.id);
+            Alert.alert('Both kept',
+              'Add the second one at a time that is free — the book will not hold two people in one slot.');
+            return load();
+          }
+          if (choice === 'move-mine') {
+            const call = c.job.call;
+            if ('insert' in call) {
+              await drop(c.job.id);
+              const { error } = await supabase.from('bookings')
+                .insert({ ...call.row, starts_at: c.freeAt.toISOString() });
+              if (error) Alert.alert('Could not move him', error.message);
+            }
+            return load();
+          }
+          // move the paid booking instead — the customer gets told and can refuse
+          const theirs = allBookings.find((b) =>
+            b.customer_id !== barberId && new Date(b.starts_at).getTime() === c.at.getTime());
+          if (theirs) {
+            const { error } = await supabase.rpc('reschedule_booking',
+              { p_booking: theirs.id, p_starts_at: c.freeAt.toISOString() });
+            if (error) Alert.alert('Could not move it', error.message);
+          }
+          await drop(c.job.id);
+          load();
+        }} />
+
       {/* completion toast with undo */}
       {toast && (
         <View style={s.toast}>
@@ -690,6 +829,11 @@ const s = StyleSheet.create({
   summary: {
     flexDirection: 'row', alignItems: 'center', gap: 9, backgroundColor: D.card,
     borderRadius: 14, paddingVertical: 11, paddingHorizontal: 14,
+  },
+  clashBar: {
+    flexDirection: 'row', alignItems: 'center', gap: 11,
+    backgroundColor: D.amberSoft12, borderWidth: 1, borderColor: D.amberLine,
+    borderRadius: 16, paddingHorizontal: 15, paddingVertical: 13,
   },
   trow: { flexDirection: 'row', gap: 11, alignItems: 'stretch' },
   ttime: { width: 44, paddingTop: 14, fontVariant: ['tabular-nums'] },

@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as Print from 'expo-print';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Note, Serif, TAB_INSET } from '../components/dark';
+import { TopUpAttempt, TopUpFailedSheet } from '../components/Trouble';
+import { OPS_PHONE } from './BarberSupportScreens';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, inter, radius, sp } from '../theme';
 
@@ -64,6 +66,9 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
   const [hidden, setHidden] = useState(false);
   const [txs, setTxs] = useState<Tx[] | null>(null);
   const [sheet, setSheet] = useState(false);
+  // 10c — the last attempt, kept only long enough to tell him nothing moved
+  const [failed, setFailed] = useState<TopUpAttempt | null>(null);
+  const [lastTry, setLastTry] = useState<{ phone: string; dh: number } | null>(null);
   const [salon, setSalon] = useState<string | null>(null);
 
   useEffect(() => {
@@ -89,10 +94,21 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
   const float_ = (txs ?? []).reduce((a, t) => a + t.amount_cents, 0) / 100;
 
   async function topup(phone: string, amountDh: number) {
+    setLastTry({ phone, dh: amountDh });
     const { data, error } = await supabase.rpc('agent_cash_topup', {
       customer_phone: phone, topup_cents: amountDh * 100,
     });
-    if (error) { Alert.alert('Top-up failed', error.message); return; }
+    // 10c — he is holding this person's cash right now. An alert that says
+    // "failed" and nothing else leaves him guessing whether it went half through,
+    // so the sheet spells out that neither the wallet nor the float moved.
+    if (error) {
+      setFailed({
+        customer: { id: '', name: 'That client', phone },
+        cents: amountDh * 100, balance_cents: null,
+        float_cents: Math.round(float_ * 100), salon: salon ?? '',
+      });
+      return;
+    }
     setSheet(false);
     await load();
     const row = Array.isArray(data) ? data[0] : data;
@@ -171,6 +187,13 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
       </ScrollView>
 
       {sheet && <TopupSheet onClose={() => setSheet(false)} onConfirm={topup} />}
+
+      {/* 10c — the top-up that didn't land, and the two things he can do while
+          holding somebody's cash */}
+      <TopUpFailedSheet attempt={failed}
+        onClose={() => setFailed(null)}
+        onRetry={() => { setFailed(null); if (lastTry) topup(lastTry.phone, lastTry.dh); }}
+        onCallOps={() => { setFailed(null); Linking.openURL(`tel:${OPS_PHONE}`); }} />
     </View>
   );
 }

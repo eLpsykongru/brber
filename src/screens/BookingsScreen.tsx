@@ -17,8 +17,16 @@ import { Block, daySlots, Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, inter, radius, sp } from '../theme';
 import type { Barber, Profile } from '../types';
+
+/** 10d/10e read the same fact at two distances from the deadline (0054). */
+type Standing = {
+  hidden: boolean; expired: boolean;
+  licence_expires_at: string | null; days_left: number | null;
+};
+import { LicenceBanner } from '../components/Trouble';
 import BarberQueueScreen from './BarberQueueScreen';
 import ChatScreen from './ChatScreen';
+import { HiddenScreen } from './OutboxScreen';
 import EarningsScreen from './EarningsScreen';
 import NotificationsScreen from './NotificationsScreen';
 import ProfileScreen from './ProfileScreen';
@@ -100,6 +108,9 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [salonName, setSalonName] = useState<string | null>(null);
   const [inboxOpen, setInboxOpen] = useState(false);
+  // turn 10 — standing is a fact about the shop, so it loads with the day
+  const [standing, setStanding] = useState<Standing | null>(null);
+  const [hidden, setHidden] = useState(false);
   const [unread, setUnread] = useState(0);
   const [chat, setChat] = useState<{ id: string; title: string } | null>(null);
   const [sheetClient, setSheetClient] = useState<ClientRef | null>(null);
@@ -149,6 +160,10 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   }, [barberId]);
 
   useEffect(() => { load(); }, [load]);
+  // separate from load(): the day reloads constantly, standing changes weekly
+  useEffect(() => {
+    supabase.rpc('my_standing').then(({ data }) => { if (data) setStanding(data as Standing); });
+  }, [barberId]);
 
   async function accept(b: BookingRow) {
     const { error } = await supabase.rpc('accept_booking', { p_booking: b.id });
@@ -273,6 +288,11 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     ]);
   }
 
+  async function loadStanding() {
+    const { data } = await supabase.rpc('my_standing');
+    if (data) setStanding(data as Standing);
+  }
+
   if (chat) {
     return <ChatScreen dark bookingId={chat.id} myId={barberId}
       title={chat.title} onBack={() => openChat(null)} />;
@@ -292,6 +312,12 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   if (inboxOpen) {
     return <NotificationsScreen barberId={barberId}
       onBack={() => { setInboxOpen(false); onChromeHidden?.(false); load(); }} />;
+  }
+  // 10e — opened by hand from the banner, or the moment ops hides the shop.
+  // It is not a lock screen: he can always back out and keep cutting.
+  if (hidden || standing?.hidden) {
+    return <HiddenScreen onBack={() => { setHidden(false); loadStanding(); }}
+      onSent={loadStanding} />;
   }
 
   // ---- derive the dashboard ----
@@ -398,6 +424,13 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
             {unread > 0 && <View style={s.bellDot} />}
           </Pressable>
         </View>
+
+        {/* 10d — nine days out this is something he notices between clients, so
+            it is a banner over the day, not a screen in front of it. Once the
+            date has gone it stops being a warning and becomes 10e. */}
+        {standing && !standing.hidden && (
+          <LicenceBanner standing={standing} onSend={() => setHidden(true)} />
+        )}
 
         {/* 1s — the clocked-out banner replaces nothing, it sits above the number */}
         {todayOff && (

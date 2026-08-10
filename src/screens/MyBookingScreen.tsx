@@ -7,6 +7,7 @@ import {
 import SlotPicker from '../components/SlotPicker';
 import { Display } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
+import { UnderReviewStrip } from '../components/Failures';
 import { daySlots } from '../lib/slots';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, shadowLg, sp } from '../theme';
@@ -45,7 +46,7 @@ export type Detail = {
     id: string;
     specialty: string | null;
     profiles: { full_name: string | null } | null;
-    salon: { name: string; address: string | null } | null;
+    salon: { name: string; address: string | null; status?: string | null } | null;
   } | null;
 };
 
@@ -62,7 +63,9 @@ export type Request = {
 const SELECT =
   'id, starts_at, ends_at, status, price_cents, deposit_cents, created_at, completed_at, service_id,'
   + ' services(name, duration_min),'
-  + ' barbers(id, specialty, profiles(full_name), salon:salons!salon_id(name, address))';
+  // 38f needs the shop's status: a shop vanishing from search must never read as
+  // a booking vanishing, and the only way to say so is to know it happened.
+  + ' barbers(id, specialty, profiles(full_name), salon:salons!salon_id(name, address, status))';
 
 function initials(name: string) {
   return name.split(' ').filter(Boolean).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
@@ -356,6 +359,14 @@ function DetailBody({ d, request, photo, rating, queue, sheet, onQueue, onChat, 
       <SalonCard d={d} photo={photo} rating={rating} compact={sheet}
         photoSize={sheet ? 68 : 74} onChat={onChat}
         statusChip={pending ? 'PENDING' : declined ? 'STILL CONFIRMED' : 'CONFIRMED'} />
+
+      {/* 38f — the shop is hidden from search, and that is the one thing this
+          card must not let him confuse with his booking being gone. */}
+      {d.barbers?.salon?.status && d.barbers.salon.status !== 'live'
+        && d.status !== 'cancelled' && d.status !== 'completed' && (
+        <UnderReviewStrip barberName={d.barbers?.profiles?.full_name ?? 'your barber'}
+          onMessage={onChat} />
+      )}
 
       <Payment d={d} compact={sheet} />
 

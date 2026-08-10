@@ -11,6 +11,7 @@ import { DEFAULT_REGION, LatLng, haversineKm, openDirections, walkMin } from '..
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, shadow, shadowLg, sp } from '../theme';
+import { NoLocationBar } from '../components/Failures';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
 
 const CARD_W = 300;
@@ -60,6 +61,7 @@ export default function ExploreScreen({ onChromeHidden, onBookings }: {
   const [query, setQuery] = useState('');
   const [salon, setSalon] = useState<SalonCard | null>(null);
   const [userLoc, setUserLoc] = useState<LatLng | null>(null);
+  const [noLocation, setNoLocation] = useState(false);   // 38a
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
   const [minRating, setMinRating] = useState<number | null>(null);
@@ -87,9 +89,17 @@ export default function ExploreScreen({ onChromeHidden, onBookings }: {
   async function locate(recenter: boolean) {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') {
-      if (recenter) Alert.alert('Location', 'Allow location access to see distances and recenter the map.');
+      // 38a — Explore still works, it just can't sort by distance. The banner
+      // says so and offers the fix; an alert on first load would be a modal in
+      // front of a screen that is perfectly usable.
+      setNoLocation(true);
+      if (recenter) {
+        Alert.alert('Location is off',
+          'Turn it on in Settings to see distances and recenter the map.');
+      }
       return;
     }
+    setNoLocation(false);
     const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
     const loc = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
     setUserLoc(loc);
@@ -125,7 +135,12 @@ export default function ExploreScreen({ onChromeHidden, onBookings }: {
     return matchQ && matchR && matchD && matchP;
   });
   // nearby first; salons without a pin (or no user location) sink to the end
-  const sorted = [...visible].sort((a, b) => (kmFor(a) ?? Infinity) - (kmFor(b) ?? Infinity));
+  // 38a's "ALL SALONS · A–Z". Without a location every distance is Infinity and
+  // the sort silently degrades to fetch order, which looks arbitrary. Name the
+  // fallback instead: alphabetical is at least a rule the customer can see.
+  const sorted = userLoc
+    ? [...visible].sort((a, b) => (kmFor(a) ?? Infinity) - (kmFor(b) ?? Infinity))
+    : [...visible].sort((a, b) => a.name.localeCompare(b.name));
 
   if (salon) {
     return <SalonDetailScreen salon={salon} km={kmFor(salon)} onBack={() => open(null)}
@@ -192,7 +207,15 @@ export default function ExploreScreen({ onChromeHidden, onBookings }: {
         </Pressable>
       </View>
 
-      {/* bottom carousel — nearest first */}
+      {/* 38a — without a fix the carousel would silently stop being "nearest
+          first" and nobody would know why. It falls back to A–Z and says so. */}
+      {noLocation && (
+        <View style={styles.noLocWrap}>
+          <NoLocationBar onAsk={() => locate(true)} />
+        </View>
+      )}
+
+      {/* bottom carousel — nearest first, or A–Z when we can't tell */}
       <View style={styles.carousel}>
         <FlatList
           ref={listRef}
@@ -339,6 +362,7 @@ const styles = StyleSheet.create({
   },
 
   // carousel
+  noLocWrap: { paddingHorizontal: sp(5), paddingTop: sp(3) },
   carousel: { paddingVertical: sp(3) },
   carouselContent: { paddingHorizontal: sp(5), gap: CARD_GAP },
   card: {

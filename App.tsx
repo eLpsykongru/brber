@@ -8,7 +8,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Session } from '@supabase/supabase-js';
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, AppState, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, AppState, Linking, StyleSheet, View } from 'react-native';
+import { Suspended } from './src/components/Failures';
+import { SUPPORT_PHONE } from './src/screens/SupportScreens';
+
+/** 38h — what my_account_state() (0056) answers. */
+type Account = { suspended: boolean; reason: string | null; since: string | null };
 import { onBannerAction, registerPush } from './src/lib/push';
 import { supabase } from './src/lib/supabase';
 import { SessionExpiredSheet, SetPasswordScreen } from './src/screens/AccountScreens';
@@ -33,6 +38,7 @@ export default function App() {
   });
   const [booting, setBooting] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
+  const [account, setAccount] = useState<Account | null>(null);   // 38h
   const [user, setUser] = useState<{ profile: Profile; barber: Barber | null } | null>(null);
   const [intro, setIntro] = useState<{ show: boolean; next: AuthView }>({ show: false, next: 'welcome' });
   // 24a remembers who just got signed out; 23c is the emailed reset landing
@@ -64,6 +70,12 @@ export default function App() {
       barber = data;
     }
     setUser({ profile, barber }); // set once, so we never flash Home before the barber row arrives
+    // 38h — a paused account is a fact about booking, not about signing in, so it
+    // rides alongside the profile rather than gating the session.
+    if (!barber) {
+      const { data: state } = await supabase.rpc('my_account_state');
+      setAccount(state as Account);
+    }
   }, []);
 
   useEffect(() => {
@@ -118,6 +130,11 @@ export default function App() {
       : <AuthScreen initialView={intro.next} />;
   } else if (user.barber && !user.barber.id_document_path) {
     content = <OnboardingScreen barber={user.barber} onDone={() => loadUser(session)} />;
+  } else if (account?.suspended) {
+    // 38h — booking is paused, everything he already has still stands, and the
+    // reason is printed because 0056 refuses to record a suspension without one.
+    content = <Suspended reason={account.reason ?? 'Contact support to find out why.'}
+      onAppeal={() => Linking.openURL(`tel:${SUPPORT_PHONE}`)} />;
   } else {
     content = <HomeScreen profile={user.profile} barber={user.barber}
       phone={user.profile.phone} onProfileChanged={() => loadUser(session!)} />;

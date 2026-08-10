@@ -32,6 +32,9 @@ import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
 import BundleEditorScreen from './BundleEditorScreen';
 import CancellationsScreen from './CancellationsScreen';
 import WaitingListScreen from './WaitingListScreen';
+import ShopTasksScreen from './ShopTasksScreen';
+import ApplicationScreen from './ApplicationScreen';
+import SettleFloatScreen, { CollectionRoundScreen } from './SettleFloatScreen';
 import ServicesScreen from './ServicesScreen';
 import WalletScreen from './WalletScreen';
 
@@ -45,7 +48,9 @@ type ProfileView =
   | 'menu' | 'edit' | 'bookings' | 'wallet' | 'coupons' | 'help' | 'faq' | 'invite' | 'support'
   | 'settings' | 'notifications' | 'password' | 'linked' | 'takedown' | 'appeal' | 'reply'
   | 'preview' | 'services' | 'bundles' | 'work' | 'schedule' | 'salon' | 'earnings'
-  | 'cancellations' | 'waitlist';
+  | 'cancellations' | 'waitlist'
+  // turn 9 — where admin actions land in the shop
+  | 'tasks' | 'application' | 'float' | 'round';
 
 export default function ProfileScreen({ profile, barber, phone, onProfileChanged, onChromeHidden, onBack }: {
   profile: Profile; barber: Barber | null; phone: string | null;
@@ -212,6 +217,18 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     return <WaitingListScreen barberId={barber.id} onBack={() => go('menu')} />;
   }
   if (view === 'work' && barber) return <PortfolioScreen barberId={barber.id} onBack={() => go('menu')} />;
+  // 9a/9b — ops writes an obligation, this is where the shop reads it
+  if (view === 'tasks' && barber) {
+    return <ShopTasksScreen onBack={() => go('menu')} onChat={() => go('support')} />;
+  }
+  // 9c/9d — the applying shop's own status screen, behind admin 1f
+  if (view === 'application' && barber) {
+    return <ApplicationScreen onBack={() => go('menu')}
+      onGo={(w) => go(w === 'hours' ? 'schedule' : w === 'wallet' ? 'wallet' : 'preview')} />;
+  }
+  // 9e/9f — the float, hand to hand
+  if (view === 'float' && barber) return <SettleFloatScreen onBack={() => go('menu')} />;
+  if (view === 'round') return <CollectionRoundScreen onBack={() => go('menu')} />;
 
   // TODO(backlog): Payment Methods / My Coupons / My Wallet — no payment rail yet
   const items: MenuItem[] = [
@@ -223,6 +240,14 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
       { icon: 'hourglass-outline', label: 'Waiting list', onPress: () => go('waitlist') },
       { icon: 'close-circle-outline', label: 'Cancellations', onPress: () => go('cancellations') },
       { icon: 'images-outline', label: 'My Work', onPress: () => go('work') },
+      // turn 9 — ops was writing into a void; these are the three places it lands
+      { icon: 'checkbox-outline', label: 'To do', onPress: () => go('tasks') },
+      { icon: 'storefront-outline', label: 'Your shop', onPress: () => go('application') },
+      { icon: 'cash-outline', label: 'Settle up', onPress: () => go('float') },
+    ] as MenuItem[] : []),
+    // 9f is the collector's phone, not the shop's
+    ...(profile.role === 'admin' ? [
+      { icon: 'car-outline', label: 'Collection round', onPress: () => go('round') },
     ] as MenuItem[] : []),
     ...(barber?.salon_id ? [
       { icon: 'eye-outline', label: 'Preview my page', onPress: () => go('preview') },

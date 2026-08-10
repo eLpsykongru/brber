@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Alert, Animated, Dimensions, Modal, PanResponder, Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native';
+import { LowWalletBlock } from './Failures';
 import { Block, daySlots, Range, Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, sp } from '../theme';
@@ -53,6 +54,8 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
   const [depositOn, setDepositOn] = useState(true);
   const [depositCents, setDepositCents] = useState(0);
   const [adjustOpen, setAdjustOpen] = useState(false);
+  // 37b — the coupon he chose for this booking, priced against this service
+  const [coupon, setCoupon] = useState<UsableCoupon | null>(null);
   // 8c — the receipt, once the row exists
   const [done, setDone] = useState<{ id: string; deposit: number } | null>(null);
   const [asked, setAsked] = useState<AskRecord | null>(null);   // 36b
@@ -135,11 +138,18 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
     : [];
   const svc = barber?.services.find((sv) => sv.is_active && sv.name === serviceName) ?? null;
 
+  // 37b — the coupon comes off what HE pays. `price_cents` is the barber's money
+  // and never moves; Sterncut absorbs the difference. Every number below the
+  // service line is therefore computed from `payable`, not from the price, or a
+  // coupon would quietly raise his deposit share.
+  const discount = svc && coupon ? (coupon.worth_cents ?? 0) : 0;
+  const payable = svc ? svc.price_cents - discount : 0;
+
   // wallet deposit is offered only when the balance actually covers the floor
-  const floor = svc ? floorOf(svc.price_cents) : 0;
+  const floor = svc ? floorOf(payable) : 0;
   const canDeposit = !!svc && walletCents != null && walletCents >= floor;
   const deposit = canDeposit && depositOn
-    ? Math.min(Math.max(depositCents, floor), svc!.price_cents)
+    ? Math.min(Math.max(depositCents, floor), payable)
     : 0;
 
   async function confirm() {
@@ -149,6 +159,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
     const { data: row, error } = await supabase.from('bookings').insert({
       customer_id: auth.user!.id, barber_id: barber.id, service_id: svc.id,
       starts_at: time.toISOString(), deposit_cents: deposit,
+      coupon_id: coupon?.id ?? null,
     }).select('id, deposit_cents').single();
     setBusy(false);
     // 26 — the insert is atomic, so a failure means nothing moved. Two shapes:
@@ -363,6 +374,22 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
                 </>
               )}
 
+              {/* 37b — the coupon, above the money block it changes. Picking one
+                  is a tap, removing it is a tap, and the line item is spelled out
+                  in the total below so the discount is never a mystery. */}
+              {!upFront && svc && (
+                <CouponRow salonId={salon.id} priceCents={svc.price_cents}
+                  coupon={coupon} onPick={setCoupon} />
+              )}
+
+              {/* 38d — a short wallet is not a wall. The deposit is the barber's
+                  condition and one of his own options is to be asked without one,
+                  so this offers the booking rather than an apology. */}
+              {!upFront && svc && !canDeposit && walletCents != null && floor > 0 && (
+                <LowWalletBlock balanceCents={walletCents} floorCents={floor}
+                  onRequest={() => { setDepositOn(false); confirm(); }} />
+              )}
+
               {/* 8a — the wallet deposit block. Only when the balance clears the floor;
                   a short wallet just books the ordinary pay-at-the-shop way. */}
               {!upFront && svc && canDeposit && (
@@ -389,6 +416,21 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
                     {depositOn && (
                       <Pressable onPress={() => setAdjustOpen(true)} style={s.depSplit}
                         accessibilityLabel="Adjust the deposit">
+                        {/* 37b's breakdown. The coupon is a line, not a smaller
+                            headline number — he should see what came off. */}
+                        {discount > 0 && (
+                          <View style={s.breakdown}>
+                            <View style={s.cpnRow}>
+                              <Text style={s.cpnLabel}>{serviceName}</Text>
+                              <Text style={s.cpnValue}>{dh(svc.price_cents)} DH</Text>
+                            </View>
+                            <View style={s.cpnRow}>
+                              <Text style={s.cpnLabel}>Coupon</Text>
+                              <Text style={s.cpnOff}>− {dh(discount)} DH</Text>
+                            </View>
+                            <View style={s.cpnRule} />
+                          </View>
+                        )}
                         <View style={s.paySplitRow}>
                           <View>
                             <Text style={s.payLabel}>DEPOSIT NOW</Text>
@@ -396,12 +438,12 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
                           </View>
                           <View style={s.rightAlign}>
                             <Text style={s.payLabel}>AT THE SHOP</Text>
-                            <Text style={s.depDue}>{dh(svc.price_cents - deposit)} DH</Text>
+                            <Text style={s.depDue}>{dh(payable - deposit)} DH</Text>
                           </View>
                         </View>
                         <View style={s.depTrack}>
-                          <View style={[s.depFill, { width: `${(deposit / svc.price_cents) * 100}%` }]} />
-                          <View style={[s.depKnob, { left: `${(deposit / svc.price_cents) * 100}%` }]} />
+                          <View style={[s.depFill, { width: `${(deposit / payable) * 100}%` }]} />
+                          <View style={[s.depKnob, { left: `${(deposit / payable) * 100}%` }]} />
                         </View>
                         <View style={s.payFoot}>
                           <View style={s.payLockRow}>
@@ -409,13 +451,13 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
                             <Text style={s.payLock}>MIN {MIN_PCT}%</Text>
                           </View>
                           <Text style={s.payOf}>
-                            {Math.round((deposit / svc.price_cents) * 100)}% of {dh(svc.price_cents)} DH
+                            {Math.round((deposit / payable) * 100)}% of {dh(payable)} DH
                           </Text>
                           <Text style={s.payLock}>100%</Text>
                         </View>
                         <View style={s.quickRow}>
                           {[MIN_PCT, 50, 75, 100].map((p) => {
-                            const cents = Math.max(floor, Math.round((svc.price_cents * p) / 100));
+                            const cents = Math.max(floor, Math.round((payable * p) / 100));
                             const on = cents === deposit;
                             return (
                               <Pressable key={p} onPress={() => setDepositCents(cents)}
@@ -430,6 +472,20 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
                       </Pressable>
                     )}
                   </View>
+
+                  {/* the sentence the whole feature turns on. A barber who thinks
+                      the app is cutting his price is the fastest way to lose a shop. */}
+                  {discount > 0 && (
+                    <View style={s.fullPriceCard}>
+                      <View style={s.fullPriceTick}>
+                        <Ionicons name="checkmark" size={13} color="#16A34A" />
+                      </View>
+                      <Text style={s.fullPriceText}>
+                        {barber?.profiles?.full_name?.split(' ')[0] ?? 'Your barber'} is still paid{' '}
+                        {dh(svc.price_cents)} DH. Sterncut covers the {dh(discount)}.
+                      </Text>
+                    </View>
+                  )}
 
                   <View style={s.breakCard}>
                     <BreakRow k="Wallet deposit" v={`${dh(deposit)} DH`} />
@@ -735,6 +791,77 @@ function SummaryCard({ label, onEdit, children }: { label: string; onEdit?: () =
   );
 }
 
+// ---------------------------------------------------------------------------
+// 37b — the coupon row at checkout
+// ---------------------------------------------------------------------------
+export type UsableCoupon = {
+  id: string; code: string; title: string; blocked: string | null;
+  worth_cents: number | null; min_spend_cents: number | null;
+};
+
+function CouponRow({ salonId, priceCents, coupon, onPick }: {
+  salonId: string; priceCents: number;
+  coupon: UsableCoupon | null; onPick: (c: UsableCoupon | null) => void;
+}) {
+  const [all, setAll] = useState<UsableCoupon[] | null>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    // priced against THIS service at THIS shop, so "worth" and "blocked" are
+    // answers about the booking in front of him, not about the coupon in general
+    supabase.rpc('my_coupons', { p_salon: salonId, p_price_cents: priceCents })
+      .then(({ data }) => setAll((data as UsableCoupon[]) ?? []));
+  }, [salonId, priceCents]);
+
+  const usable = (all ?? []).filter((c) => !c.blocked && (c.worth_cents ?? 0) > 0);
+  if (all === null || (usable.length === 0 && !coupon)) return null;
+
+  if (coupon) {
+    return (
+      <View style={s.couponOn}>
+        <View style={s.couponIcon}>
+          <Ionicons name="pricetag-outline" size={16} color={colors.accent} />
+        </View>
+        <View style={s.grow}>
+          <Text style={s.couponTitle}>{coupon.code} applied</Text>
+          <Text style={s.couponSub}>
+            {dh(coupon.worth_cents ?? 0)} DH off
+            {coupon.min_spend_cents ? ' · min spend met' : ''}
+          </Text>
+        </View>
+        <Pressable onPress={() => onPick(null)} hitSlop={8}>
+          <Text style={s.couponRemove}>Remove</Text>
+        </Pressable>
+      </View>
+    );
+  }
+
+  return (
+    <>
+      <Pressable onPress={() => setOpen((v) => !v)} style={s.couponOff}>
+        <View style={s.couponIconIdle}>
+          <Ionicons name="pricetag-outline" size={16} color={colors.textSecondary} />
+        </View>
+        <View style={s.grow}>
+          <Text style={s.couponTitle}>
+            {usable.length} coupon{usable.length === 1 ? '' : 's'} you can use here
+          </Text>
+          <Text style={s.couponSub}>Comes off what you pay, not off the barber</Text>
+        </View>
+        <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={16}
+          color={colors.textTertiary} />
+      </Pressable>
+      {open && usable.map((c) => (
+        <Pressable key={c.id} onPress={() => { onPick(c); setOpen(false); }} style={s.couponPick}>
+          <Text style={s.couponCode}>{c.code}</Text>
+          <View style={s.grow} />
+          <Text style={s.couponWorth}>− {dh(c.worth_cents ?? 0)} DH</Text>
+        </Pressable>
+      ))}
+    </>
+  );
+}
+
 const s = StyleSheet.create({
   backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.45)' },
   sheet: {
@@ -842,6 +969,49 @@ const s = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: 3,
   },
   depToggleOn: { backgroundColor: colors.accent, justifyContent: 'flex-end' },
+  // 37b
+  couponOn: {
+    flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: colors.bg,
+    borderRadius: 20, paddingHorizontal: 16, paddingVertical: 14,
+    borderWidth: 2, borderColor: colors.ink, ...shadow,
+  },
+  couponOff: {
+    flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: colors.bg,
+    borderRadius: 20, paddingHorizontal: 16, paddingVertical: 14, ...shadow,
+  },
+  couponIcon: {
+    width: 34, height: 34, borderRadius: 11, backgroundColor: 'rgba(232,68,46,0.12)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  couponIconIdle: {
+    width: 34, height: 34, borderRadius: 11, backgroundColor: colors.surface,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  couponTitle: { fontSize: 13, fontWeight: '700', color: colors.text },
+  couponSub: { fontSize: 11, color: colors.textSecondary, marginTop: 2 },
+  couponRemove: { fontSize: 12, fontWeight: '700', color: colors.textSecondary },
+  couponPick: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: colors.bg,
+    borderRadius: 16, paddingHorizontal: 16, paddingVertical: 13, ...shadow,
+  },
+  couponCode: { fontSize: 13, fontWeight: '700', color: colors.text, letterSpacing: 0.6 },
+  couponWorth: { fontSize: 13, fontWeight: '700', color: colors.accent },
+  breakdown: { gap: 10, marginBottom: 12 },
+  cpnRow: { flexDirection: 'row', alignItems: 'center' },
+  cpnLabel: { flex: 1, fontSize: 12.5, color: 'rgba(255,255,255,0.6)' },
+  cpnValue: { fontSize: 12.5, fontWeight: '600', color: '#fff' },
+  cpnOff: { fontSize: 12.5, fontWeight: '700', color: '#4ADE80' },
+  cpnRule: { height: 1, backgroundColor: 'rgba(255,255,255,0.1)' },
+  fullPriceCard: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: colors.bg,
+    borderRadius: 18, paddingHorizontal: 15, paddingVertical: 13, ...shadow,
+  },
+  fullPriceTick: {
+    width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(74,222,128,0.18)',
+    alignItems: 'center', justifyContent: 'center', marginTop: 1,
+  },
+  fullPriceText: { flex: 1, fontSize: 11.5, lineHeight: 18, color: '#5c5c58' },
+
   depSplit: {
     borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)', paddingTop: 14, gap: 10,
   },

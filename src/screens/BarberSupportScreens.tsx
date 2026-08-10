@@ -15,7 +15,7 @@ import { dark as d, inter, radius, serif } from '../theme';
 // half of the same support_cases row. 6a/6b are what he is told when an appeal he
 // never sees goes against him — see 0045 for why he is not told there was one.
 
-const OPS_PHONE = '+212522000000';   // TODO(backlog): a real ops line
+export const OPS_PHONE = '+212522000000';   // TODO(backlog): a real ops line
 
 type CaseRow = {
   id: string; case_no: string; reason: string; detail: string | null;

@@ -408,7 +408,7 @@ const HELP = [
   'Joining a queue by QR',
 ];
 
-const SUPPORT_PHONE = '+212522000000';   // TODO(backlog): a real support line
+export const SUPPORT_PHONE = '+212522000000';   // TODO(backlog): a real support line
 
 export function SupportHomeScreen({ onBack, onOpenCase, onNewCase }: {
   onBack: () => void; onOpenCase: (c: CaseListRow) => void; onNewCase: () => void;

@@ -32,6 +32,7 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
 
   Open it: any static server from the repo root, e.g. `npx serve .` → /admin/
 -->
+<div id="inc-bar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:60;background:#2A1A12;border-bottom:1px solid #E8A100;padding:11px 20px;font-family:Inter,sans-serif;color:#fff;box-sizing:border-box"></div>
 <div class="scr" id="s1a">
 <div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
   <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
@@ -1344,6 +1345,265 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
     </div>
   </div>
 </div>
+<div class="scr" id="s3a">
+<div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:11px;color:#6B6B72">118</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">7</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons</span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">KM</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Karima Mansouri</span><span style="display:block;font-size:10px;color:#9A9CA3">Ops lead · appeals</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span>Reviews</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#9A9CA3">Appeals</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span id="ap-crumb" style="color:#fff;font-weight:600;font-family:ui-monospace,Menlo,monospace">—</span></span>
+      <span style="flex:1"></span>
+      <span id="ap-due" style="font-size:11px;color:#6B6B72"></span>
+      <span id="ap-pos" style="font-size:11px;color:#6B6B72"></span>
+    </div>
+    <div style="flex:1;min-width:0;display:flex;overflow:hidden">
+      <div style="width:280px;flex:none;border-right:1px solid #1E1E22;display:flex;flex-direction:column;overflow:auto;padding:16px 14px;gap:10px;box-sizing:border-box">
+        <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72">APPEAL QUEUE</span>
+        <div id="ap-queue" style="display:flex;flex-direction:column;gap:9px"></div>
+        <div style="flex:1"></div>
+        <div style="background:#17171A;border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:7px">
+          <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72">THIS MONTH</span>
+          <span id="ap-month" style="font-size:13px;font-weight:700"></span>
+          <span id="ap-rate" style="font-size:11px;line-height:1.5;color:#9A9CA3"></span>
+        </div>
+      </div>
+      <div id="ap-body" style="flex:1;min-width:0;overflow:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px"></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="scr" id="s3b">
+<div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:11px;color:#6B6B72">118</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">7</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons</span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">KM</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Karima Mansouri</span><span style="display:block;font-size:10px;color:#9A9CA3">Ops lead · appeals</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span>Customers</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span id="tr-crumb" style="color:#fff;font-weight:600">Flagged</span></span>
+      <span style="flex:1"></span>
+      <input id="tr-q" placeholder="Search customers" style="height:32px;width:220px;border-radius:9px;border:1px solid #26262B;background:#17171A;color:#fff;font-size:12px;padding:0 11px;box-sizing:border-box;outline:none">
+    </div>
+    <div style="flex:1;min-width:0;display:flex;overflow:hidden">
+      <div style="width:330px;flex:none;border-right:1px solid #1E1E22;display:flex;flex-direction:column;overflow:auto;padding:16px 14px;gap:10px;box-sizing:border-box">
+        <span id="tr-count" style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72"></span>
+        <div id="tr-list" style="display:flex;flex-direction:column;gap:9px"></div>
+      </div>
+      <div id="tr-body" style="flex:1;min-width:0;overflow:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px"></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="scr" id="s5a">
+<div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:11px;color:#6B6B72">118</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">7</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>Compliance</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons</span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">NL</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Nadia Lahlou</span><span style="display:block;font-size:10px;color:#9A9CA3">Ops · Tangier</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">Compliance</span>
+      <span id="cp-sub" style="font-size:12px;color:#6B6B72"></span>
+      <span style="flex:1"></span>
+      <span id="cp-scope" style="display:flex;gap:6px"></span>
+    </div>
+    <div style="flex:1;min-width:0;overflow:auto;padding:18px 24px;display:flex;flex-direction:column;gap:14px">
+      <div id="cp-kpis" style="display:flex;gap:12px"></div>
+      <div style="background:#17171A;border-radius:16px;overflow:hidden">
+        <div style="display:flex;align-items:center;height:38px;padding:0 16px;border-bottom:1px solid #1E1E22;font-size:10px;letter-spacing:.12em;font-weight:700;color:#6B6B72">
+          <span style="width:200px;flex:none">SHOP</span>
+          <span style="flex:1">OBLIGATION</span>
+          <span style="width:92px;flex:none">FROM</span>
+          <span style="width:132px;flex:none">DUE</span>
+          <span style="width:120px;flex:none;text-align:right">&nbsp;</span>
+        </div>
+        <div id="cp-rows"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="scr" id="s6a">
+<div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:11px;color:#6B6B72">118</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">7</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>Compliance</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons</span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">NL</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Nadia Lahlou</span><span style="display:block;font-size:10px;color:#9A9CA3">Ops · Tangier</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">Coupons</span>
+      <span id="cm-sub" style="font-size:12px;color:#6B6B72"></span>
+      <span style="flex:1"></span>
+      <span id="cm-new" style="height:32px;display:flex;align-items:center;padding:0 14px;border-radius:999px;background:#E8442E;font-size:11.5px;font-weight:700;letter-spacing:.05em;cursor:pointer">NEW CAMPAIGN</span>
+    </div>
+    <div style="flex:1;min-width:0;overflow:auto;padding:18px 24px;display:flex;flex-direction:column;gap:14px">
+      <div id="cm-build" style="display:none;flex-direction:column;gap:14px">
+        <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72">WHO PAYS FOR THE DISCOUNT</span>
+        <div id="cm-funder" style="display:flex;gap:12px"></div>
+        <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72">THE OFFER</span>
+        <div style="display:flex;gap:12px">
+          <span style="flex:1"><span style="display:block;font-size:9.5px;letter-spacing:.12em;font-weight:700;color:#6B6B72;margin-bottom:5px">AMOUNT OFF (DH)</span><input id="cm-amount" value="20" style="height:38px;border-radius:10px;border:1px solid #26262B;background:#17171A;color:#fff;font-size:12.5px;padding:0 11px;box-sizing:border-box;outline:none;width:100%"></span>
+          <span style="flex:1"><span style="display:block;font-size:9.5px;letter-spacing:.12em;font-weight:700;color:#6B6B72;margin-bottom:5px">MIN SPEND (DH)</span><input id="cm-min" value="60" style="height:38px;border-radius:10px;border:1px solid #26262B;background:#17171A;color:#fff;font-size:12.5px;padding:0 11px;box-sizing:border-box;outline:none;width:100%"></span>
+          <span style="flex:1"><span style="display:block;font-size:9.5px;letter-spacing:.12em;font-weight:700;color:#6B6B72;margin-bottom:5px">PER PERSON</span><input id="cm-per" value="1" style="height:38px;border-radius:10px;border:1px solid #26262B;background:#17171A;color:#fff;font-size:12.5px;padding:0 11px;box-sizing:border-box;outline:none;width:100%"></span>
+        </div>
+        <div style="display:flex;gap:12px">
+          <span style="flex:1"><span style="display:block;font-size:9.5px;letter-spacing:.12em;font-weight:700;color:#6B6B72;margin-bottom:5px">NAME</span><input id="cm-name" placeholder="Back to school" style="height:38px;border-radius:10px;border:1px solid #26262B;background:#17171A;color:#fff;font-size:12.5px;padding:0 11px;box-sizing:border-box;outline:none;width:100%"></span>
+          <span style="flex:1"><span style="display:block;font-size:9.5px;letter-spacing:.12em;font-weight:700;color:#6B6B72;margin-bottom:5px">CODE</span><input id="cm-code" placeholder="RENTREE20" style="height:38px;border-radius:10px;border:1px solid #26262B;background:#17171A;color:#fff;font-size:12.5px;padding:0 11px;box-sizing:border-box;outline:none;width:100%"></span>
+          <span style="flex:1"><span style="display:block;font-size:9.5px;letter-spacing:.12em;font-weight:700;color:#6B6B72;margin-bottom:5px">RUNS UNTIL</span><input id="cm-until" type="date" style="height:38px;border-radius:10px;border:1px solid #26262B;background:#17171A;color:#fff;font-size:12.5px;padding:0 11px;box-sizing:border-box;outline:none;width:100%"></span>
+        </div>
+        <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72">WHO GETS IT</span>
+        <div id="cm-audience" style="display:flex;flex-direction:column;gap:9px"></div>
+        <span id="cm-exclude" style="font-size:11.5px;color:#9A9CA3;line-height:1.5"></span>
+        <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72">WHAT IT COSTS US</span>
+        <div style="background:#17171A;border-radius:16px;padding:16px;display:flex;align-items:flex-end;gap:16px">
+          <span style="flex:none;width:170px"><span style="display:block;font-size:9.5px;letter-spacing:.12em;font-weight:700;color:#6B6B72;margin-bottom:5px">BUDGET CAP (DH)</span><input id="cm-cap" value="8000" style="height:38px;border-radius:10px;border:1px solid #26262B;background:#17171A;color:#fff;font-size:12.5px;padding:0 11px;box-sizing:border-box;outline:none;width:100%"></span>
+          <span id="cm-cuts" style="flex:1;font-size:12.5px;color:#9A9CA3"></span>
+        </div>
+        <span style="font-size:11.5px;color:#6B6B72;line-height:1.5">Stops issuing the moment the cap is hit. Codes already in a wallet still work.</span>
+        <div style="display:flex;gap:9px">
+          <span id="cm-save" style="height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:#E8442E;font-size:12px;font-weight:700;letter-spacing:.05em;cursor:pointer">SAVE &amp; SEND</span>
+          <span id="cm-cancel" style="height:44px;display:flex;align-items:center;padding:0 20px;border-radius:999px;background:#212125;font-size:12px;font-weight:700;letter-spacing:.05em;cursor:pointer">Cancel</span>
+        </div>
+      </div>
+      <div id="cm-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="scr" id="s4a">
+<div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8"></path><path d="M21 3h-6M21 3v6"></path></svg>Demand</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:11px;color:#6B6B72">118</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">7</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>Compliance</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons</span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">NL</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Nadia Lahlou</span><span style="display:block;font-size:10px;color:#9A9CA3">Ops · Tangier</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">Demand</span>
+      <span id="dm-sub" style="font-size:12px;color:#6B6B72"></span>
+      <span style="flex:1"></span>
+      <span id="dm-range" style="display:flex;gap:6px"></span>
+      <span id="dm-export" style="height:30px;display:flex;align-items:center;padding:0 12px;border-radius:8px;background:#212125;font-size:11.5px;font-weight:600;cursor:pointer">Export CSV</span>
+    </div>
+    <div style="flex:1;min-width:0;overflow:auto;padding:18px 24px;display:flex;flex-direction:column;gap:16px">
+      <div id="dm-kpis" style="display:flex;gap:12px"></div>
+      <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72">UNMET ASKS BY DISTRICT</span>
+      <div id="dm-districts" style="display:flex;flex-direction:column;gap:9px"></div>
+      <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72">WHEN THE ASKS LAND · ALL DISTRICTS</span>
+      <div id="dm-hours" style="background:#17171A;border-radius:16px;padding:16px"></div>
+      <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72">WHAT TO DO ABOUT IT</span>
+      <div id="dm-actions" style="display:flex;flex-direction:column;gap:10px"></div>
+      <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72">TOP SHOPS BY UNMET DEMAND</span>
+      <div id="dm-shops" style="background:#17171A;border-radius:16px;overflow:hidden"></div>
+    </div>
+  </div>
+</div>
+</div>
 <script>
 // ---------------------------------------------------------------- routing --
 // Route → screen id. Barbers, Customers and Coupons are in the sidebar but have
@@ -1351,6 +1611,7 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
 const ROUTES = {
   'overview': '1a', 'salons': '1b', 'bookings': '1c', 'wallets': '1d',
   'support': '1e', 'salons/pending': '1f', 'reviews': '2b', 'reviews/flagged': '2a',
+  'appeals': '3a', 'customers': '3b', 'compliance': '5a', 'coupons': '6a', 'demand': '4a',
 };
 // ponytail: the one check this wiring leaves behind. The screens are the design's
 // own markup and the renderers find their slots by id — nothing errors when an id
@@ -1360,7 +1621,14 @@ const SLOTS = ('a-kpis a-bars a-stats a-live a-needs a-top a-when b-sub b-chips 
   + 'e-side e-reply e-send f-crumb f-pos f-side f-head f-checkn f-checkbar f-check f-30 f-photos '
   + 'f-photon f-risk rv-side rv-pos rv-crumb rv-head rv-card rv-says rv-visit rv-signals rv-who '
   + 'rv-effect rv-30 rl-stats rl-chips rl-rows md-reasons md-sub md-effect md-note md-confirm '
-  + 'b-q b-export b-prev b-next c-q c-chips c-scope d-export rl-q rl-export rl-appeals').split(' ');
+  + 'b-q b-export b-prev b-next c-q c-chips c-scope d-export rl-q rl-export rl-appeals '
+  + 'ap-crumb ap-due ap-pos ap-queue ap-month ap-rate ap-body '
+  + 'tr-crumb tr-q tr-count tr-list tr-body '
+  + 'cp-sub cp-scope cp-kpis cp-rows '
+  + 'cm-sub cm-new cm-build cm-funder cm-amount cm-min cm-per cm-name cm-code cm-until '
+  + 'cm-audience cm-exclude cm-cap cm-cuts cm-save cm-cancel cm-list '
+  + 'dm-sub dm-range dm-export dm-kpis dm-districts dm-hours dm-actions dm-shops '
+  + 'inc-bar').split(' ');
 for (const id of Object.values(ROUTES)) if (!document.getElementById('s' + id)) console.error('admin: no screen', id);
 for (const id of SLOTS) if (!document.getElementById(id)) console.error('admin: markup is missing', id);
 
@@ -1381,19 +1649,33 @@ function show(route) {
   scrollTo(0, 0);
   const load = LOAD[route] || LOAD.overview;
   load().catch(fail);
+  // 7a — checked on every navigation, because the desk should not have to
+  // reload the page to find out that money is locked
+  loadIncident();
 }
 addEventListener('hashchange', () => show(location.hash.slice(2)));
 
 // The sidebar is the same nine items in the same order on every screen.
-const NAV = ['overview', 'salons', null, null, 'bookings', 'wallets', 'support', 'reviews', null];
+// index 3 is Customers, which turn 3b finally gives somewhere to go
+// turn 5 inserts Compliance before Coupons on every screen that has it; screens
+// built before it keep the nine-item list, so the map is applied by length.
+const NAV = ['overview', 'salons', null, 'customers', 'bookings', 'wallets', 'support', 'reviews', null];
+const NAV10 = ['overview', 'salons', null, 'customers', 'bookings', 'wallets', 'support', 'reviews', 'compliance', 'coupons'];
+const NAV11 = ['overview', 'demand', 'salons', null, 'customers', 'bookings', 'wallets', 'support', 'reviews', 'compliance', 'coupons'];
 const NAVS = [...document.querySelectorAll('.scr > div > div:first-child > div:nth-child(2)')];
-NAVS.forEach((nav) => [...nav.children].forEach((item, i) => { if (NAV[i]) item.dataset.go = NAV[i]; }));
+NAVS.forEach((nav) => {
+  const map = nav.children.length === 11 ? NAV11 : nav.children.length === 10 ? NAV10 : NAV;
+  [...nav.children].forEach((item, i) => { if (map[i]) item.dataset.go = map[i]; });
+});
 
 // …and the drill-downs the design draws between screens.
 byText('#s1a', 'See all 42').dataset.go = 'salons';
 byText('#s1a', 'All 10').dataset.go = 'support';
 byText('#s1f', 'Salons').dataset.go = 'salons';                              // breadcrumb
 byText('#s2a', 'Reviews').dataset.go = 'reviews';                            // breadcrumb
+// 3a's breadcrumb back to the list. The sidebar's own "Reviews" row carries a
+// badge, so its text is "Reviews3" and this finds the crumb, not the nav item.
+byText('#s3a', 'Reviews').dataset.go = 'reviews';
 
 addEventListener('click', (e) => {
   const hit = e.target.closest('[data-go]');
@@ -2465,11 +2747,666 @@ function gate(msg) {
   if (msg) set($('gate-msg'), msg);
 }
 
+// ---------------------------------------------------------------- turn 3a --
+// The appeal desk. The one rule that matters is enforced in the database
+// (0057's admin_decide_appeal refuses your own removal); this screen's job is
+// to show that refusal coming before you type a note, not after.
+let desk = null;
+
+async function loadAppeals(id) {
+  desk = await rpc('admin_appeal_desk', id ? { p_appeal: id } : {});
+  drawAppeals();
+}
+
+function drawAppeals() {
+  const d = desk?.detail;
+  const m = desk?.this_month || { total: 0, upheld: 0, overturn_pct: 0 };
+
+  set($('ap-crumb'), d ? d.ref : '—');
+  set($('ap-pos'), desk.queue.length ? ('1 of ' + desk.queue.length + ' appeals') : '');
+  set($('ap-due'), '');
+  set($('ap-month'), m.total + ' appeal' + (m.total === 1 ? '' : 's') + ' · ' + m.upheld + ' upheld');
+  // the design prints this back at the desk on purpose: a high overturn rate is
+  // a statement about the removal bar, not about the people appealing
+  set($('ap-rate'), m.total === 0 ? 'Nothing decided yet this month.'
+    : m.overturn_pct >= 30
+      ? m.overturn_pct + '% overturn rate is high — worth reviewing the removal bar.'
+      : m.overturn_pct + '% overturn rate.');
+
+  $('ap-queue').innerHTML = desk.queue.map((a) => {
+    const late = a.days_left <= 1;
+    return '<div data-appeal="' + a.id + '" style="background:#17171A;border-radius:14px;padding:12px 13px;display:flex;flex-direction:column;gap:7px;cursor:pointer;'
+      + (d && a.id === d.id ? 'outline:2px solid #E8442E;outline-offset:-2px' : '') + '">'
+      + '<div style="display:flex;align-items:center;gap:8px">'
+      + '<span style="font-size:11px;font-weight:700;font-family:ui-monospace,Menlo,monospace">' + esc(a.ref) + '</span>'
+      + '<span style="flex:1"></span>'
+      + '<span style="font-size:10px;font-weight:700;color:' + (late ? '#E8A100' : '#6B6B72') + '">'
+      + (a.days_left < 0 ? 'overdue' : a.days_left + 'd left') + '</span></div>'
+      + '<span style="font-size:12.5px;font-weight:600">' + esc(a.customer) + '</span>'
+      + '<span style="font-size:10px;letter-spacing:.06em;font-weight:700;color:'
+      + (a.mine ? '#6B6B72' : '#9A9CA3') + '">REMOVED BY ' + esc(String(a.removed_by).toUpperCase()) + '</span>'
+      + (a.mine ? '<span data-reassign="' + a.id + '" style="align-self:flex-start;font-size:10px;font-weight:700;letter-spacing:.06em;color:#E8442E;cursor:pointer">REASSIGN</span>' : '')
+      + '</div>';
+  }).join('') || '<span style="font-size:12px;color:#6B6B72">No appeals waiting.</span>';
+
+  if (!d) { $('ap-body').innerHTML = '<span style="font-size:13px;color:#6B6B72">Nothing to review.</span>'; return; }
+
+  const t = (x) => (x ? new Date(x).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '—');
+  const blocked = d.is_own_removal;
+
+  $('ap-body').innerHTML =
+    '<div style="display:flex;align-items:center;gap:10px">'
+    + '<span style="font-size:17px;font-weight:700">Appeal · ' + esc(d.ref) + '</span>'
+    + '<span style="font-size:9.5px;letter-spacing:.1em;font-weight:700;color:#E8A100;background:rgba(232,161,0,.14);border-radius:5px;padding:4px 8px">AWAITING SECOND REVIEW</span></div>'
+    + '<span style="font-size:12px;color:#9A9CA3">' + esc(d.customer) + ' · appealed '
+    + day(d.appealed_at) + ' · 1 appeal allowed, this is it</span>'
+
+    // THE FIRST DECISION · NOT YOURS
+    + card('THE FIRST DECISION · NOT YOURS',
+      '<span style="font-size:13px;font-weight:700">' + esc(d.removed_by) + ' removed it</span>'
+      + '<span style="font-size:11.5px;color:#9A9CA3;margin-top:4px;display:block">'
+      + (d.removed_at ? day(d.removed_at) + ' · ' : '') + esc(d.removal_reason || 'no reason recorded') + '</span>')
+
+    + card('WHAT ' + esc(String(d.customer).split(' ')[0].toUpperCase()) + ' SAYS',
+      '<span style="font-size:12.5px;line-height:1.55;color:#D8D8DC">' + esc(d.note || d.reason) + '</span>')
+
+    // WHAT THE LOG ACTUALLY PROVES — three stamps and where the poster is
+    + card('WHAT THE LOG ACTUALLY PROVES',
+      '<div style="display:flex;gap:22px">'
+      + stamp('SLOT', t(d.log.slot)) + stamp('QR SCAN', t(d.log.scan)) + stamp('IN CHAIR', t(d.log.chair))
+      + '</div>'
+      + '<span style="display:block;font-size:11.5px;color:#9A9CA3;margin-top:11px;line-height:1.5">'
+      + (d.log.poster_outside
+        ? 'The shop has since moved its QR poster outside.'
+        : "This shop's QR poster is registered <span style=\"color:#E8A100;font-weight:700\">indoors</span> — a scan says when someone reached the counter, not when they arrived.")
+      + '</span>')
+
+    // CONFLICT CHECK — computed, not asserted
+    + card('CONFLICT CHECK',
+      row(!blocked, blocked ? 'You made the first call on this one' : "You didn't make the first call")
+      + row(!d.open_case_with_shop, d.open_case_with_shop
+        ? 'There is an open support case against ' + esc(d.salon || 'this shop')
+        : 'No open case with ' + esc(d.salon || 'this shop')))
+
+    + (blocked
+      // the rule, visible before he types: the buttons are his to look at
+      ? '<div style="background:#17171A;border:1px solid #332124;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:9px">'
+        + '<span style="font-size:12.5px;font-weight:700;color:#E8A100">This one is yours already</span>'
+        + '<span style="font-size:12px;line-height:1.5;color:#9A9CA3">You removed the review, so you cannot be the second reviewer. Reassign it and somebody else will pick it up.</span>'
+        + '<span data-reassign="' + d.id + '" style="align-self:flex-start;height:36px;display:flex;align-items:center;padding:0 16px;border-radius:999px;background:#212125;font-size:11.5px;font-weight:700;letter-spacing:.05em;cursor:pointer">REASSIGN</span></div>'
+      : '<div style="display:flex;flex-direction:column;gap:11px">'
+        + '<span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72">YOUR DECISION</span>'
+        + '<textarea id="ap-note" placeholder="What the second reviewer found" style="min-height:74px;border-radius:12px;border:1px solid #26262B;background:#17171A;color:#fff;font-size:12.5px;padding:11px;font-family:inherit;outline:none;resize:vertical"></textarea>'
+        + '<input id="ap-action" placeholder="Ask the shop for something (optional) — e.g. Move your QR poster outside" style="height:40px;border-radius:12px;border:1px solid #26262B;background:#17171A;color:#fff;font-size:12.5px;padding:0 11px;outline:none">'
+        + '<div style="display:flex;gap:9px">'
+        + '<span data-decide="up" style="flex:1;height:46px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.05em;cursor:pointer">UPHOLD · RESTORE REVIEW</span>'
+        + '<span data-decide="keep" style="flex:1;height:46px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.05em;cursor:pointer">KEEP IT REMOVED</span></div>'
+        + '<span style="font-size:11px;color:#6B6B72;line-height:1.5">Either way, ' + esc(String(d.customer).split(' ')[0])
+        + ' and ' + esc(String(d.barber).split(' ')[0]) + ' are both told. Neither learns who decided.</span>'
+        + card('IF YOU UPHOLD · KNOCK-ONS',
+          row(true, 'Review goes public · ' + esc(d.barber) + ' ' + (d.rating_after ?? '—'))
+          + (d.mark_to_clear ? row(true, "Clear " + esc(String(d.customer).split(' ')[0]) + "'s late-arrival flag") : '')
+          + row(true, 'Anything you type above becomes a task in the shop\'s To do'))
+        + '</div>');
+
+  function card(label, inner) {
+    return '<div style="background:#17171A;border-radius:16px;padding:15px 16px">'
+      + '<span style="display:block;font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72;margin-bottom:9px">' + label + '</span>'
+      + inner + '</div>';
+  }
+  function stamp(k, v) {
+    return '<span><span style="display:block;font-size:9.5px;letter-spacing:.12em;font-weight:700;color:#6B6B72">' + k + '</span>'
+      + '<span style="display:block;font-size:17px;font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums">' + v + '</span></span>';
+  }
+  function row(ok, text) {
+    return '<div style="display:flex;align-items:center;gap:9px;padding:4px 0">'
+      + '<span style="width:17px;height:17px;border-radius:999px;background:' + (ok ? 'rgba(74,222,128,.16)' : 'rgba(232,161,0,.16)')
+      + ';display:flex;align-items:center;justify-content:center;flex:none;font-size:10px;color:' + (ok ? '#4ADE80' : '#E8A100') + '">'
+      + (ok ? '&#10003;' : '!') + '</span>'
+      + '<span style="font-size:12px;color:#D8D8DC">' + text + '</span></div>';
+  }
+}
+
+// ---------------------------------------------------------------- turn 3b --
+// Customer trust. The right-hand panel scores **the barber**, because a desk
+// that only ever looks at the flagged customer can never catch a shop flagging
+// punitively.
+let trust = null;
+let trustPick = null;
+
+async function loadTrust(id) {
+  trust = await rpc('admin_flagged_customers', id ? { p_customer: id } : {});
+  if (id) trustPick = id;
+  drawTrust();
+}
+
+function drawTrust() {
+  const q = ($('tr-q').value || '').toLowerCase();
+  const rows = (trust.flagged || []).filter((c) => !q || String(c.name).toLowerCase().includes(q));
+  set($('tr-count'), 'FLAGGED · ' + rows.length);
+
+  $('tr-list').innerHTML = rows.map((c) => {
+    const chip = c.suspended ? ['SUSPENDED', '#F87171']
+      : c.no_shows >= 4 ? [c.no_shows + ' NO-SHOWS', '#E8A100']
+        : c.blocked ? ['BLOCKED', '#F87171']
+          : c.full_payment ? ['PAY 100% UP FRONT', '#9A9CA3'] : null;
+    return '<div data-cust="' + c.id + '" style="background:#17171A;border-radius:14px;padding:12px 13px;display:flex;align-items:center;gap:11px;cursor:pointer;'
+      + (c.id === trustPick ? 'outline:2px solid #E8442E;outline-offset:-2px' : '') + '">'
+      + '<span style="width:32px;height:32px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">' + esc(initials(c.name)) + '</span>'
+      + '<span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">' + esc(c.name) + '</span>'
+      + '<span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">Flagged by ' + c.barbers + ' barber' + (c.barbers === 1 ? '' : 's') + '</span></span>'
+      + (chip ? '<span style="font-size:9.5px;letter-spacing:.06em;font-weight:700;color:' + chip[1] + ';flex:none">' + chip[0] + '</span>' : '')
+      + '</div>';
+  }).join('') || '<span style="font-size:12px;color:#6B6B72">Nobody is flagged.</span>';
+
+  const d = trust.detail;
+  if (!d) { $('tr-body').innerHTML = '<span style="font-size:13px;color:#6B6B72">Pick somebody to see who flagged them.</span>'; return; }
+
+  $('tr-body').innerHTML =
+    '<div style="display:flex;align-items:center;gap:11px">'
+    + '<span style="font-size:17px;font-weight:700">' + esc(d.name) + '</span>'
+    + (d.suspended ? '<span style="font-size:9.5px;letter-spacing:.1em;font-weight:700;color:#F87171;background:rgba(248,113,113,.14);border-radius:5px;padding:4px 8px">BOOKING PAUSED</span>' : '')
+    + '</div>'
+    + '<span style="font-size:12px;color:#9A9CA3">' + d.completed + ' completed · ' + d.no_shows + ' no-show' + (d.no_shows === 1 ? '' : 's') + '</span>'
+    + (d.suspended
+      ? '<div style="background:#17171A;border:1px solid #332124;border-radius:16px;padding:15px;display:flex;flex-direction:column;gap:9px">'
+        + '<span style="font-size:12px;color:#D8D8DC;line-height:1.5">' + esc(d.suspended_reason || '') + '</span>'
+        + '<span data-unsuspend="' + d.id + '" style="align-self:flex-start;height:34px;display:flex;align-items:center;padding:0 14px;border-radius:999px;background:#212125;font-size:11px;font-weight:700;letter-spacing:.05em;cursor:pointer">LET THEM BOOK AGAIN</span></div>'
+      : '<span data-suspend="' + d.id + '" style="align-self:flex-start;height:34px;display:flex;align-items:center;padding:0 14px;border-radius:999px;border:1px solid #332124;color:#F87171;font-size:11px;font-weight:700;letter-spacing:.05em;cursor:pointer">PAUSE BOOKING</span>')
+    + '<span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72;margin-top:4px">WHO FLAGGED THEM</span>'
+    + (d.flags || []).map((f) => {
+      // the number that matters is about the barber, not the customer
+      const heavy = f.barber_flags >= 5;
+      return '<div style="background:#17171A;border-radius:16px;padding:15px;display:flex;flex-direction:column;gap:9px">'
+        + '<div style="display:flex;align-items:center;gap:10px">'
+        + '<span style="font-size:13px;font-weight:700">' + esc(f.barber) + '</span>'
+        + '<span style="font-size:11px;color:#6B6B72">' + esc(f.salon || '') + '</span>'
+        + '<span style="flex:1"></span>'
+        + '<span data-clear="' + f.barber_id + '" style="font-size:11px;font-weight:700;color:#E8442E;cursor:pointer">CLEAR THIS FLAG</span></div>'
+        + '<span style="font-size:12px;color:#D8D8DC;line-height:1.5">' + esc(f.reason || 'No reason given') + '</span>'
+        + '<div style="display:flex;gap:16px;border-top:1px solid #26262B;padding-top:10px">'
+        + '<span style="font-size:11px;color:' + (heavy ? '#E8A100' : '#9A9CA3') + '">Has flagged ' + f.barber_flags + ' client' + (f.barber_flags === 1 ? '' : 's') + '</span>'
+        + '<span style="font-size:11px;color:' + (f.barber_overturned ? '#E8A100' : '#9A9CA3') + '">' + f.barber_overturned + ' of their removals overturned</span>'
+        + '</div></div>';
+    }).join('');
+}
+
+// ---------------------------------------------------------------- turn 5a --
+// The chase list. Its whole reason to exist is that a moderation decision
+// nobody chases is theatre — so every row carries the case it came from, the
+// date, and what happens by itself if the date passes.
+let comp = null;
+let compScope = 'open';
+
+async function loadCompliance() {
+  comp = await rpc('admin_compliance', { p_scope: compScope });
+  drawCompliance();
+}
+
+function drawCompliance() {
+  const st = comp.stats;
+  set($('cp-sub'), st.open + ' open · ' + st.overdue + ' overdue');
+
+  $('cp-scope').innerHTML = ['open', 'done'].map((s) =>
+    '<span data-scope="' + s + '" style="height:28px;display:flex;align-items:center;padding:0 12px;border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;'
+    + (compScope === s ? 'background:#212125;color:#fff' : 'color:#9A9CA3') + '">'
+    + (s === 'open' ? 'Open ' + st.open : 'Done ' + st.done) + '</span>').join('');
+
+  const kpi = (label, value, note, tone) =>
+    '<div style="flex:1;background:#17171A;border-radius:16px;padding:15px">'
+    + '<span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#6B6B72">' + label + '</span>'
+    + '<span style="display:block;font-size:26px;font-weight:700;margin-top:5px;font-variant-numeric:tabular-nums;color:' + (tone || '#fff') + '">' + value + '</span>'
+    + '<span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:3px">' + note + '</span></div>';
+
+  const trend = st.on_time_prev == null ? 'no month to compare with'
+    : st.on_time_pct == null ? 'nothing finished yet this month'
+      : (st.on_time_pct >= st.on_time_prev ? 'up from ' : 'down from ') + st.on_time_prev + '% last month';
+
+  $('cp-kpis').innerHTML =
+    kpi('OVERDUE', st.overdue, st.acts_tonight
+      ? st.acts_tonight + ' act' + (st.acts_tonight === 1 ? 's' : '') + ' by themselves tonight'
+      : 'none of them act by themselves', st.overdue ? '#E8A100' : '#fff')
+    + kpi('DUE THIS WEEK', st.due_week, st.reminded + ' reminder' + (st.reminded === 1 ? '' : 's') + ' already sent')
+    + kpi('DONE ON TIME', st.on_time_pct == null ? '—' : st.on_time_pct + '%', trend)
+    + kpi('REPEAT OFFENDERS', st.repeat_offenders, '3+ tasks missed', st.repeat_offenders ? '#E8A100' : '#fff');
+
+  $('cp-rows').innerHTML = (comp.rows || []).map((r) => {
+    const late = r.days_left != null && r.days_left < 0;
+    const due = r.due_at == null ? ['No date', '']
+      : late ? [Math.abs(r.days_left) + ' day' + (Math.abs(r.days_left) === 1 ? '' : 's') + ' late', 'was ' + day(r.due_at)]
+        : [r.days_left === 0 ? 'Today' : 'In ' + r.days_left + ' day' + (r.days_left === 1 ? '' : 's'), dayw(r.due_at) + ' ' + day(r.due_at)];
+
+    // the button is whatever this row actually needs next, not a menu
+    const act = r.status === 'done' ? null
+      : r.proof_at ? ['verify', 'VERIFY', '#E8442E']
+        : (late && r.on_overdue === 'hide_shop' && !r.enforced_at) ? ['hide', 'HIDE SHOP', '#F87171']
+          : ['remind', r.reminded_at ? 'REMIND AGAIN' : 'REMIND', '#212125'];
+
+    return '<div style="display:flex;align-items:center;min-height:64px;padding:12px 16px;border-bottom:1px solid #1E1E22">'
+      + '<span style="width:200px;flex:none;min-width:0">'
+      + '<span style="display:block;font-size:12.5px;font-weight:700">' + esc(r.salon || '—') + '</span>'
+      + '<span style="display:block;font-size:10.5px;color:' + (r.missed_before >= 2 ? '#E8A100' : '#6B6B72') + ';margin-top:2px">'
+      + (r.missed_before === 0 ? 'first task' : ordinal(r.missed_before + 1) + ' missed task') + '</span></span>'
+
+      + '<span style="flex:1;min-width:0;padding-right:14px">'
+      + '<span style="display:block;font-size:12.5px;font-weight:600">' + esc(r.title) + '</span>'
+      + '<span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">' + esc(r.body || '') + '</span>'
+      // consequences are stated up front, on the row, not in a tooltip
+      + (r.on_overdue !== 'none' && r.consequence
+        ? '<span style="display:block;font-size:10.5px;color:' + (r.enforced_at ? '#6B6B72' : '#E8A100') + ';margin-top:3px">'
+          + (r.enforced_at ? 'Already applied: ' : 'If missed: ') + esc(r.consequence) + '</span>'
+        : '')
+      + '</span>'
+
+      + '<span style="width:92px;flex:none;font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#9A9CA3">' + esc(r.ref) + '</span>'
+      + '<span style="width:132px;flex:none">'
+      + '<span style="display:block;font-size:12px;font-weight:600;color:' + (late ? '#E8A100' : '#fff') + '">' + due[0] + '</span>'
+      + '<span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">' + due[1] + '</span></span>'
+      + '<span style="width:120px;flex:none;display:flex;justify-content:flex-end">'
+      + (act
+        ? '<span data-task="' + r.id + '" data-act="' + act[0] + '" style="height:30px;display:flex;align-items:center;padding:0 13px;border-radius:999px;background:'
+          + (act[2] === '#212125' ? '#212125' : 'transparent') + ';border:1px solid ' + (act[2] === '#212125' ? '#212125' : act[2])
+          + ';color:' + (act[2] === '#212125' ? '#fff' : act[2]) + ';font-size:10.5px;font-weight:700;letter-spacing:.05em;cursor:pointer">' + act[1] + '</span>'
+        : '<span style="font-size:10.5px;color:#6B6B72">' + (r.status === 'done' ? 'done' : '') + '</span>')
+      + '</span></div>';
+  }).join('') || '<div style="padding:22px 16px;font-size:12.5px;color:#6B6B72">Nothing here.</div>';
+
+  function ordinal(n) {
+    return n + (n % 10 === 1 && n % 100 !== 11 ? 'st'
+      : n % 10 === 2 && n % 100 !== 12 ? 'nd'
+        : n % 10 === 3 && n % 100 !== 13 ? 'rd' : 'th');
+  }
+}
+
+// ---------------------------------------------------------------- turn 6 ---
+// The campaign builder. Everything on it is arranged around one question the
+// design puts first and keeps first: **who pays.** Sterncut takes no commission,
+// so a discount is real money leaving somebody's pocket, and the two answers
+// have completely different consequences for the barber.
+let camps = null;
+let aud = null;
+let funder = 'platform';
+let audience = 'lapsed';
+
+async function loadCampaigns() {
+  [camps, aud] = await Promise.all([rpc('admin_campaigns'), rpc('admin_campaign_audience', { p_audience: audience })]);
+  drawCampaigns();
+}
+
+function drawCampaigns() {
+  const live = camps.filter((c) => c.status === 'running').length;
+  set($('cm-sub'), camps.length + ' campaign' + (camps.length === 1 ? '' : 's') + ' · ' + live + ' running');
+
+  const fund = (key, title, body, foot, tone) =>
+    '<div data-funder="' + key + '" style="flex:1;background:#17171A;border-radius:16px;padding:15px;cursor:pointer;border:2px solid '
+    + (funder === key ? '#E8442E' : 'transparent') + '">'
+    + '<span style="display:block;font-size:13px;font-weight:700">' + title + '</span>'
+    + '<span style="display:block;font-size:11.5px;line-height:1.5;color:#9A9CA3;margin-top:6px">' + body + '</span>'
+    + '<span style="display:block;font-size:10.5px;color:' + tone + ';margin-top:9px">' + foot + '</span></div>';
+
+  $('cm-funder').innerHTML =
+    fund('platform', 'Sterncut pays',
+      "We credit the customer's wallet. The barber is handed full price in cash and never sees a discount.",
+      'Marketing spend · comes off the budget below', '#9A9CA3')
+    + fund('shop', 'Shops pay, opt-in',
+      'Each shop chooses to join and takes the cut itself. Costs us nothing, but most shops decline.',
+      "Needs 14 days' notice to shops", '#E8A100');
+
+  const pick = (key, title, note, count) =>
+    '<div data-aud="' + key + '" style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:14px;padding:13px 15px;cursor:pointer;border:2px solid '
+    + (audience === key ? '#E8442E' : 'transparent') + '">'
+    + '<span style="width:18px;height:18px;border-radius:999px;border:1.5px solid ' + (audience === key ? '#E8442E' : '#3A3A40')
+    + ';display:flex;align-items:center;justify-content:center;flex:none">'
+    + (audience === key ? '<span style="width:8px;height:8px;border-radius:999px;background:#E8442E"></span>' : '') + '</span>'
+    + '<span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">' + title + '</span>'
+    + '<span style="display:block;font-size:11px;color:#6B6B72;margin-top:2px">' + note + '</span></span>'
+    + '<span style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">' + num(count) + '</span></div>';
+
+  $('cm-audience').innerHTML =
+    pick('lapsed', 'Lapsed · no booking in 60 days', "They've used the app before, so they know how it works", aud.lapsed)
+    + pick('never_booked', 'Signed up, never booked', 'They got as far as an account and stopped', aud.never_booked)
+    + pick('city', 'Everyone in Tangier', 'Every customer account', aud.city);
+
+  // the exclusion, said out loud, because it is the difference between a
+  // campaign that creates cuts and one that lengthens a waiting list
+  set($('cm-exclude'), aud.full_shops
+    ? 'Not sent to people whose usual shop is one of the ' + aud.full_shops
+      + ' already full most days — a coupon there just makes the waitlist longer. '
+      + num(aud.reach) + ' would actually receive it.'
+    : num(aud.reach) + ' would receive it.');
+
+  cuts();
+
+  $('cm-list').innerHTML = camps.map((c) => {
+    const worth = c.amount_off_cents != null ? dh(c.amount_off_cents) + ' DH off' : c.percent_off + '% off';
+    const tone = { draft: '#6B6B72', running: '#4ADE80', stopped: '#E8A100', done: '#9A9CA3' }[c.status];
+    const capPct = c.budget_cap_cents ? Math.min(100, Math.round((c.issued_cents / c.budget_cap_cents) * 100)) : 0;
+    return '<div style="background:#17171A;border-radius:16px;padding:15px;display:flex;flex-direction:column;gap:10px">'
+      + '<div style="display:flex;align-items:center;gap:10px">'
+      + '<span style="font-size:13px;font-weight:700">' + esc(c.name) + '</span>'
+      + '<span style="font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#9A9CA3">' + esc(c.code) + '</span>'
+      + '<span style="font-size:9.5px;letter-spacing:.1em;font-weight:700;color:' + tone + '">' + c.status.toUpperCase() + '</span>'
+      + '<span style="flex:1"></span>'
+      + '<span style="font-size:10.5px;color:' + (c.funded_by === 'platform' ? '#9A9CA3' : '#E8A100') + '">'
+      + (c.funded_by === 'platform' ? 'Sterncut pays' : 'Shops pay') + '</span>'
+      + (c.status === 'draft'
+        ? '<span data-send="' + c.id + '" style="font-size:11px;font-weight:700;color:#E8442E;cursor:pointer;margin-left:10px">SEND</span>'
+        : c.status === 'running'
+          ? '<span data-stop="' + c.id + '" style="font-size:11px;font-weight:700;color:#9A9CA3;cursor:pointer;margin-left:10px">STOP</span>' : '')
+      + '</div>'
+      + '<span style="font-size:11.5px;color:#9A9CA3">' + worth
+      + (c.min_spend_cents ? ' · min ' + dh(c.min_spend_cents) + ' DH' : '')
+      + ' · sent to ' + num(c.issued_count) + ' · ' + num(c.redeemed) + ' used</span>'
+      + (c.budget_cap_cents
+        ? '<div><div style="height:5px;border-radius:3px;background:#212125;overflow:hidden">'
+          + '<div style="height:5px;width:' + capPct + '%;background:' + (capPct >= 100 ? '#E8A100' : '#E8442E') + '"></div></div>'
+          + '<span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:5px">'
+          + dh(c.issued_cents) + ' of ' + dh(c.budget_cap_cents) + ' DH committed · '
+          + dh(c.spent_cents) + ' DH actually spent</span></div>'
+        : '')
+      + '</div>';
+  }).join('') || '<span style="font-size:12.5px;color:#6B6B72">No campaigns yet.</span>';
+}
+
+// "400 cuts" is the budget divided by what one coupon reserves — the same
+// arithmetic admin_send_campaign uses, so the estimate cannot lie to the desk.
+function cuts() {
+  const cap = Number($('cm-cap').value || 0) * 100;
+  const amt = Number($('cm-amount').value || 0) * 100;
+  set($('cm-cuts'), amt > 0 && cap > 0
+    ? Math.floor(cap / amt) + ' cuts at ' + Math.round(amt / 100) + ' DH each'
+    : 'Set an amount and a cap.');
+}
+
+// ---------------------------------------------------------------- turn 4a --
+// The demand map. Every number here exists to answer one question — chairs or
+// hours — because those are two different phone calls.
+let dem = null;
+let demDays = 30;
+
+async function loadDemand() {
+  dem = await rpc('admin_demand', { p_days: demDays });
+  drawDemand();
+}
+
+function drawDemand() {
+  const t = dem.totals;
+  set($('dm-sub'), 'Tangier · ' + num(t.asks) + ' asks');
+
+  $('dm-range').innerHTML = [7, 30, 90].map((d) =>
+    '<span data-days="' + d + '" style="height:28px;display:flex;align-items:center;padding:0 11px;border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;'
+    + (demDays === d ? 'background:#212125;color:#fff' : 'color:#9A9CA3') + '">Last ' + d + 'd</span>').join('');
+
+  const kpi = (label, value, note, tone) =>
+    '<div style="flex:1;background:#17171A;border-radius:16px;padding:15px">'
+    + '<span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#6B6B72">' + label + '</span>'
+    + '<span style="display:block;font-size:26px;font-weight:700;margin-top:5px;font-variant-numeric:tabular-nums;color:' + (tone || '#fff') + '">' + value + '</span>'
+    + '<span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:3px">' + note + '</span></div>';
+
+  $('dm-kpis').innerHTML =
+    kpi('UNMET ASKS', num(t.unmet), 'people we turned away', t.unmet ? '#E8A100' : '#fff')
+    + kpi('FILLED FROM ASKS', num(t.filled), t.conversion_pct + '% conversion')
+    + kpi('EXPIRED UNFILLED', num(t.expired), 'the day came and went')
+    + kpi('SHOPS WITH ASKS', num(t.full_shops), t.outside_hours_pct + '% of asks fall outside opening hours');
+
+  const TONE = { supply: ['#E8442E', 'supply short'], hours: ['#E8A100', 'hours mismatch'], healthy: ['#4ADE80', 'healthy'] };
+  const max = Math.max(1, ...dem.districts.map((d) => d.unmet));
+
+  $('dm-districts').innerHTML = dem.districts.map((d) => {
+    const [colour, label] = TONE[d.verdict];
+    return '<div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:14px;padding:13px 15px">'
+      + '<span style="width:120px;flex:none;font-size:11.5px;letter-spacing:.08em;font-weight:700">' + esc(String(d.district).toUpperCase()) + '</span>'
+      + '<span style="flex:1;min-width:0"><span style="display:block;height:8px;border-radius:4px;background:#212125;overflow:hidden">'
+      + '<span style="display:block;height:8px;width:' + Math.round((d.unmet / max) * 100) + '%;background:' + colour + '"></span></span></span>'
+      + '<span style="width:74px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">' + num(d.unmet) + '</span>'
+      + '<span style="width:120px;flex:none;text-align:right;font-size:10.5px;font-weight:600;color:' + colour + '">' + label + '</span>'
+      + '</div>';
+  }).join('') || '<span style="font-size:12.5px;color:#6B6B72">No asks in this window.</span>';
+
+  // the histogram is what makes an hours problem visible at a glance: bars that
+  // pile up past the line where most shops shut
+  const hours = dem.by_hour || [];
+  const hmax = Math.max(1, ...hours.map((h) => h.asks));
+  $('dm-hours').innerHTML = hours.length
+    ? '<div style="display:flex;align-items:flex-end;gap:4px;height:120px">'
+      + hours.map((h) =>
+        '<span style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px">'
+        + '<span style="width:100%;height:' + Math.round((h.asks / hmax) * 96) + 'px;border-radius:3px;background:'
+        + (h.outside >= h.asks / 2 ? '#E8A100' : '#E8442E') + '"></span>'
+        + '<span style="font-size:9px;color:#6B6B72">' + String(h.hour).padStart(2, '0') + '</span></span>').join('')
+      + '</div>'
+      + '<span style="display:block;font-size:11.5px;color:#9A9CA3;margin-top:11px">'
+      + 'Amber bars are hours when the shop asked about was shut. '
+      + t.outside_hours_pct + '% of unmet asks are like that.</span>'
+    : '<span style="font-size:12.5px;color:#6B6B72">Nobody has named a time yet.</span>';
+
+  // one card per district that needs something, and the verb differs
+  $('dm-actions').innerHTML = dem.districts.filter((d) => d.verdict !== 'healthy').map((d) => {
+    const hours_ = d.verdict === 'hours';
+    return '<div style="background:#17171A;border-radius:16px;padding:15px;display:flex;flex-direction:column;gap:9px;border-left:3px solid '
+      + (hours_ ? '#E8A100' : '#E8442E') + '">'
+      + '<div style="display:flex;align-items:center;gap:10px">'
+      + '<span style="font-size:9.5px;letter-spacing:.1em;font-weight:700;color:' + (hours_ ? '#E8A100' : '#E8442E') + '">'
+      + (hours_ ? 'HOURS MISMATCH' : 'SUPPLY SHORT') + '</span>'
+      + '<span style="flex:1"></span>'
+      + '<span style="font-size:11px;color:#9A9CA3">' + num(d.unmet) + ' asks</span></div>'
+      + '<span style="font-size:13px;font-weight:700">' + esc(d.district) + ' · ' + d.shops + ' shop' + (d.shops === 1 ? '' : 's') + '</span>'
+      + '<span style="font-size:11.5px;line-height:1.5;color:#9A9CA3">'
+      + (hours_
+        ? d.hours_asks + ' of ' + d.unmet + ' unmet asks are for a time the shops are shut. The chairs exist — they are just closed.'
+        : d.unmet + ' unmet against ' + d.filled + ' filled, and the asks are for hours the shops are already open. This is a chairs problem, not an hours problem.')
+      + '</span>'
+      + '<span style="align-self:flex-start;height:32px;display:flex;align-items:center;padding:0 14px;border-radius:999px;background:'
+      + (hours_ ? '#212125' : '#E8442E') + ';font-size:11px;font-weight:700;letter-spacing:.05em">'
+      + (hours_ ? 'NUDGE ' + d.shops + ' SHOP' + (d.shops === 1 ? '' : 'S') : 'RECRUIT HERE') + '</span>'
+      + '</div>';
+  }).join('') || '<span style="font-size:12.5px;color:#6B6B72">Nothing needs a phone call.</span>';
+
+  $('dm-shops').innerHTML = (dem.top_shops || []).map((s, i) =>
+    '<div style="display:flex;align-items:center;gap:12px;height:48px;padding:0 16px;' + (i ? 'border-top:1px solid #1E1E22' : '') + '">'
+    + '<span style="flex:1;min-width:0;font-size:12.5px;font-weight:600">' + esc(s.salon) + '</span>'
+    + '<span style="width:120px;flex:none;font-size:11px;color:#6B6B72">' + esc(s.district) + '</span>'
+    + '<span style="width:110px;flex:none;font-size:11px;color:#9A9CA3">'
+    + (s.closes_min == null ? 'no hours set' : 'shuts ' + String(Math.floor(s.closes_min / 60)).padStart(2, '0') + ':' + String(s.closes_min % 60).padStart(2, '0')) + '</span>'
+    + '<span style="width:70px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">' + num(s.unmet) + '</span></div>').join('')
+    || '<div style="padding:18px 16px;font-size:12.5px;color:#6B6B72">No shops with asks.</div>';
+}
+
+// ---------------------------------------------------------------- turn 7a --
+// The incident banner. It rides above every screen because an incident that
+// only shows on its own page is one the desk walks past — and the rule is
+// "never hide the scale of what's broken".
+let incident = null;
+
+async function loadIncident() {
+  try {
+    incident = await rpc('admin_incident');
+  } catch (e) {
+    return;   // a desk that cannot read the incident table is not the emergency
+  }
+  drawIncident();
+}
+
+function drawIncident() {
+  const bar = $('inc-bar');
+  if (!incident || !incident.live) {
+    bar.style.display = 'none';
+    document.body.style.paddingTop = '';
+    return;
+  }
+  const im = incident.impact;
+  const mins = Math.floor((Date.now() - new Date(incident.started_at)) / 60000);
+  const since = new Date(incident.started_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+  const stat = (n, label, tone) =>
+    '<span style="display:flex;flex-direction:column;gap:1px">'
+    + '<span style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;color:' + (tone || '#fff') + '">' + num(n) + '</span>'
+    + '<span style="font-size:9.5px;letter-spacing:.06em;color:#9A9CA3">' + label + '</span></span>';
+
+  bar.innerHTML =
+    '<div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">'
+    + '<span style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1">'
+    + '<span style="font-size:13px;font-weight:700;color:#E8A100">' + esc(incident.title) + ' since ' + since + '</span>'
+    + '<span style="font-size:11px;color:#9A9CA3">' + esc(incident.detail || '') + '</span></span>'
+    + stat(im.bookings_stuck, 'BOOKINGS STUCK', '#E8A100')
+    + stat(im.topups_failed, 'TOP-UPS FAILED', '#E8A100')
+    // the zero is printed on purpose: it is the most reassuring line here
+    + stat(im.double_charged, 'DOUBLE-CHARGED', '#4ADE80')
+    + stat(im.tickets, 'TICKETS ABOUT IT')
+    + '<span style="font-size:10.5px;color:#6B6B72;font-family:ui-monospace,Menlo,monospace">'
+    + esc(incident.ref) + ' · ' + Math.floor(mins / 60) + 'h ' + (mins % 60) + 'm</span>'
+    + (incident.locks === 'money'
+      ? '<span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:5px;padding:4px 8px">MONEY LOCKED</span>'
+      : '')
+    + '<span data-close-inc="' + incident.id + '" style="font-size:11px;font-weight:700;color:#9A9CA3;cursor:pointer">RESOLVED</span>'
+    + '</div>';
+  bar.style.display = 'block';
+  // the banner must not sit on top of the screen it is warning about
+  document.body.style.paddingTop = bar.offsetHeight + 'px';
+}
+
 const LOAD = {
   overview: loadOverview, salons: loadSalons, bookings: loadBookings, wallets: loadWallets,
   support: loadSupport, 'salons/pending': loadApprovals,
   reviews: loadReviewList, 'reviews/flagged': loadReview,
+  appeals: loadAppeals, customers: loadTrust, compliance: loadCompliance,
+  coupons: loadCampaigns, demand: loadDemand,
 };
+
+// turn 3 clicks
+document.addEventListener('click', (e) => {
+  const q = (a) => e.target.closest('[' + a + ']');
+  const pick = q('data-appeal');
+  if (pick) return loadAppeals(pick.dataset.appeal).catch(fail);
+  const re = q('data-reassign');
+  if (re) {
+    return rpc('admin_reassign_appeal', { p_appeal: re.dataset.reassign })
+      .then(() => { toast('Back in the queue for somebody else.'); return loadAppeals(); })
+      .catch(fail);
+  }
+  const dec = q('data-decide');
+  if (dec) {
+    const note = ($('ap-note')?.value || '').trim();
+    if (!note) return toast('Say what the second reviewer found.');
+    const action = ($('ap-action')?.value || '').trim();
+    return rpc('admin_decide_appeal', {
+      p_appeal: desk.detail.id, p_upheld: dec.dataset.decide === 'up',
+      p_note: note, p_action: action || null,
+      p_due: action ? new Date(Date.now() + 6 * 864e5).toISOString().slice(0, 10) : null,
+    }).then(() => { toast('Decided. Both sides told.'); return loadAppeals(); }).catch(fail);
+  }
+  const cust = q('data-cust');
+  if (cust) return loadTrust(cust.dataset.cust).catch(fail);
+  const clr = q('data-clear');
+  if (clr) {
+    const why = prompt('Why is this flag going?');
+    if (!why) return;
+    return rpc('admin_clear_flag', {
+      p_barber: clr.dataset.clear, p_customer: trust.detail.id, p_note: why,
+    }).then(() => { toast('Flag cleared. Both told.'); return loadTrust(trust.detail.id); }).catch(fail);
+  }
+  const sus = q('data-suspend');
+  if (sus) {
+    const why = prompt('Why is booking paused? The customer sees this word for word.');
+    if (!why) return;
+    return rpc('admin_set_suspension', { p_customer: sus.dataset.suspend, p_suspend: true, p_reason: why })
+      .then(() => { toast('Booking paused.'); return loadTrust(sus.dataset.suspend); }).catch(fail);
+  }
+  const un = q('data-unsuspend');
+  if (un) {
+    return rpc('admin_set_suspension', { p_customer: un.dataset.unsuspend, p_suspend: false })
+      .then(() => { toast('They can book again.'); return loadTrust(un.dataset.unsuspend); }).catch(fail);
+  }
+});
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'tr-q' && trust) drawTrust();
+});
+
+// turn 5 clicks
+document.addEventListener('click', (e) => {
+  const sc = e.target.closest('[data-scope]');
+  if (sc) { compScope = sc.dataset.scope; return loadCompliance().catch(fail); }
+  const t = e.target.closest('[data-task]');
+  if (!t) return;
+  const act = t.dataset.act;
+  const ask = act === 'hide'
+    ? 'Hide this shop from search now? Bookings it already has are untouched.'
+    : act === 'verify' ? 'Mark this obligation sorted?' : null;
+  if (ask && !confirm(ask)) return;
+  rpc('admin_task_action', { p_task: t.dataset.task, p_action: act })
+    .then(() => {
+      toast(act === 'remind' ? 'Reminder sent.' : act === 'hide' ? 'Shop hidden.' : 'Marked done.');
+      return loadCompliance();
+    })
+    .catch(fail);
+});
+
+// turn 6 clicks
+document.addEventListener('click', (e) => {
+  const f = e.target.closest('[data-funder]');
+  if (f) { funder = f.dataset.funder; return drawCampaigns(); }
+  const a = e.target.closest('[data-aud]');
+  if (a) {
+    audience = a.dataset.aud;
+    return rpc('admin_campaign_audience', { p_audience: audience })
+      .then((r) => { aud = r; drawCampaigns(); }).catch(fail);
+  }
+  if (e.target.id === 'cm-new') { $('cm-build').style.display = 'flex'; return; }
+  if (e.target.id === 'cm-cancel') { $('cm-build').style.display = 'none'; return; }
+  if (e.target.id === 'cm-save') {
+    const dh2c = (id) => Math.round(Number($(id).value || 0) * 100) || null;
+    return rpc('admin_save_campaign', {
+      p_name: $('cm-name').value.trim() || 'Campaign',
+      p_code: $('cm-code').value.trim(),
+      p_funded_by: funder, p_audience: audience,
+      p_amount_off_cents: dh2c('cm-amount'), p_min_spend_cents: dh2c('cm-min'),
+      p_per_person: Number($('cm-per').value || 1),
+      p_expires_on: $('cm-until').value || null,
+      p_budget_cap_cents: dh2c('cm-cap'),
+    }).then((id) => rpc('admin_send_campaign', { p_campaign: id }))
+      .then((r) => { toast('Sent to ' + r.issued + ' people.'); $('cm-build').style.display = 'none'; return loadCampaigns(); })
+      .catch(fail);
+  }
+  const snd = e.target.closest('[data-send]');
+  if (snd) {
+    return rpc('admin_send_campaign', { p_campaign: snd.dataset.send })
+      .then((r) => { toast('Sent to ' + r.issued + ' people.'); return loadCampaigns(); }).catch(fail);
+  }
+  const stp = e.target.closest('[data-stop]');
+  if (stp) {
+    if (!confirm('Stop issuing? Coupons already in a wallet keep working.')) return;
+    return rpc('admin_stop_campaign', { p_campaign: stp.dataset.stop })
+      .then(() => { toast('Stopped issuing.'); return loadCampaigns(); }).catch(fail);
+  }
+});
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'cm-cap' || e.target.id === 'cm-amount') cuts();
+});
+
+// turn 4 clicks
+document.addEventListener('click', (e) => {
+  const d = e.target.closest('[data-days]');
+  if (d) { demDays = Number(d.dataset.days); return loadDemand().catch(fail); }
+  if (e.target.id === 'dm-export' && dem) {
+    const rows = [['district', 'asks', 'unmet', 'filled', 'outside_hours', 'shops', 'verdict']]
+      .concat(dem.districts.map((x) => [x.district, x.asks, x.unmet, x.filled, x.hours_asks, x.shops, x.verdict]));
+    const csv = rows.map((r) => r.join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = 'demand-' + demDays + 'd.csv';
+    a.click();
+  }
+});
+
+// turn 7 clicks
+document.addEventListener('click', (e) => {
+  const c = e.target.closest('[data-close-inc]');
+  if (!c) return;
+  if (!confirm('Mark the incident resolved? Money actions unlock immediately.')) return;
+  rpc('admin_close_incident', { p_incident: c.dataset.closeInc })
+    .then(() => { toast('Incident closed. Money actions are back.'); return loadIncident(); })
+    .catch(fail);
+});
 
 if (!CFG.url || !CFG.key) {
   gate('No Supabase project configured — copy admin/config.example.js to admin/config.js and fill it in.');

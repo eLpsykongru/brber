@@ -557,10 +557,258 @@ Both closed (2026-08-08), with 0051:
   - This closes the previous entry's open item outright: **8h reached from Profile
     is now fully live** — it offers a day's own free slot when there is one, and
     makes one when there isn't.
-Still open here:
-- **0051 and 0052 are not applied.** 0047–0050 are live. 0052 re-emits
-  `fill_booking` (last touched by 0048) and `expire_stale_asks` (0051), so it must
-  run after both.
+- **Where admin actions land in the shop — barber turn 9, REAL 2026-08-09 (0053).**
+  Turn 9's premise is that ops issues obligations and then counts the silence as
+  non-compliance, because the barber never had a surface. Three flows:
+  - **9a/9b** `screens/ShopTasksScreen.tsx` on **Profile → To do**. The turn note
+    claims "same records, no new tables — a task is a row ops already writes",
+    and that part was **wrong**: nothing in 0001–0052 wrote an obligation, so
+    `shop_tasks` is new. Admin 5a writes to it rather than inventing a second one.
+    A task always says what happens if it's ignored and when, and the barber can
+    **answer** but never close one — a self-closing obligation is decoration.
+    9b's proof carries the shop's location, because a poster photo without a
+    place is a photo of a poster. Bucket `task-proof`, folder-name authorisation,
+    same shape as 0007's chat-images.
+  - **9c/9d** `screens/ApplicationScreen.tsx` on **Profile → Your shop**, the
+    applicant's side of admin 1f. **Deliberate deviation:** the canvas draws four
+    checklist items; this shows the same **five** `admin_approvals` (0043)
+    actually approves against. Showing an applicant a list that isn't the one
+    gating him would have him tick every box and still be refused. Only the pin
+    row has a control — it's the only item he can satisfy from that screen — and
+    it's a real `react-native-maps` pin, draggable, with "I'm at the shop".
+  - **9e/9f** `screens/SettleFloatScreen.tsx` on **Profile → Settle up**, and the
+    collector's round for `role = 'admin'`. The float rail already existed
+    (0042/0044); what it could not do was let the two people in the shop agree a
+    handover happened — the console just asserted a collection. One 12-hour code
+    fixes it: he reads four digits out, she types them in, `agent_collect_float`
+    refuses without them. Neither side can record a handover alone, and the code
+    is what closes any open `float` task.
+- **When it breaks in the shop — barber turn 10, REAL 2026-08-09 (0054).**
+  The turn's rule is one line: **an error must never stop the queue moving.** He
+  is mid-cut, one-handed, with someone in the chair, so none of these six is a
+  modal that blocks the day and every one says what still works before what
+  doesn't.
+  - **The offline queue is the turn.** `lib/outbox.ts` is the pure half (types,
+    the cash/retry arithmetic, conflict detection) with its own runnable checks
+    in `npm run check`; `lib/sync.ts` is the half that touches AsyncStorage,
+    NetInfo and Supabase. Marking a cut done and adding a walk-in both go through
+    it, so neither waits on a round trip.
+    *ponytail: one key, whole array, rewritten on change — a bad morning is three
+    rows, not three thousand. SQLite when it outgrows a screenful.*
+  - **10a** `components/Trouble.tsx` — the bar, the two counters, and the honest
+    footer naming the only two things that genuinely need a signal. The day's
+    timeline merges queued work so "TODAY · FROM MEMORY" is literally true: a
+    walk-in he added offline is a row, a cut he finished is marked done.
+  - **10b** is what `no_double_booking` (0001) feels like from the chair. The
+    default is not "whoever I added" but **whoever paid**, said out loud at the
+    bottom. A refused walk-in raises a bar on the day screen rather than sitting
+    silently in the outbox — somebody is standing in the shop expecting that time.
+  - **10c** hangs off the real `agent_cash_topup` failure path in
+    `AgentWalletScreen`. Its whole job is "nothing was taken twice". The balance
+    row is **omitted** when the call failed before we learned it — a confident
+    `0 DH` next to the word "unchanged" would be worse than no row.
+  - **10d/10e** need one fact nothing recorded: **when the licence runs out.**
+    `id_document_path` said a licence had been seen, never until when, so nothing
+    could count down and ops had no date. 0054 adds `barbers.licence_expires_at`
+    and `my_standing()`, which both screens share because they are the same fact
+    at two distances from the deadline. `submit_licence()` deliberately **does
+    not un-hide the shop** — a barber who can lift his own suspension by
+    uploading a photo has no suspension. Hiding stays with `admin_salon_decide`.
+  - **10f** `screens/OutboxScreen.tsx`, reached from the offline bar. Only a job
+    that can *never* send offers a Drop; dropping a retryable one is how work
+    disappears silently.
+- **Where the coupon lands — customer turn 37, REAL 2026-08-09 (0055).** 0038
+  could claim and list coupons and nothing could **spend** one — no booking ever
+  knew about a discount. Turn 37 is the missing half, and it carries an
+  accounting decision rather than a label: *"comes off what you pay from your
+  wallet — your barber still gets the full price."*
+  - **`price_cents` does not move.** It is the barber's money, what Earnings
+    totals and what settlements compute from. `bookings.discount_cents` is a
+    second column that reduces what the **customer** owes; the platform absorbs
+    it. A barber who thinks the app is quietly cutting his prices is the fastest
+    way to lose a shop, which is why this is a column and not a smaller number.
+  - The knock-on the canvas draws out loud: **the deposit floor follows
+    `payable`, not price** — 37b reads "40% of 40 DH", not of 60. Otherwise a
+    coupon would quietly raise his deposit share. Every figure under the service
+    line in `BookingSheet` computes from payable now, and 0055's assertions pin
+    the drawn numbers (60 − 20 = 40, floor 16, 24 at the shop).
+  - **One booking per coupon**, via a partial unique index — the direction
+    "one coupon per booking, they can't be stacked" leaves implied.
+  - **A trigger, not three edits.** `coupon_follows_booking` returns the coupon
+    on cancel/no-show and spends it on completion, because the rule is about the
+    booking's *state*, not about which function changed it.
+  - `my_coupons(salon, price)` answers eligibility per shop, so 37a's greyed
+    "Le Fade doesn't take this one" is a real answer about the booking in front
+    of you rather than a flag on the coupon.
+- **The rest of the failures — customer turn 38, PARTLY REAL 2026-08-09.**
+  `components/Failures.tsx`, built to the turn's own rule: *every error names
+  what still works and offers the one action that actually helps.* A screen whose
+  only button is "Try again" has given up on the customer's behalf.
+  - All eight are built; 38c/38e/38g/38h share one `FullStop` frame because what
+    differs between them is copy, not structure.
+  - **Wired: 38a, 38b, 38d, 38f.**
+    - **38a** — Explore's sort silently degraded to fetch order without a
+      location (every distance `Infinity`), which looks arbitrary. It now sorts
+      A–Z and says why, with the fix on the banner.
+    - **38b** — a blocked camera opens the typed-code path instead of parking the
+      customer in front of a dead viewfinder with the way through as a footnote.
+    - **38d** — a short wallet offers the no-deposit request rather than hiding
+      the payment block.
+    - **38f** — `MyBookingScreen` now selects `salons.status`; a shop hidden from
+      search shows the strip rather than letting it read as a booking gone.
+  - **Deliberately not wired: 38g and 38h**, because both need a decision this
+    turn does not contain and inventing one silently would be worse:
+    - **38g** needs a source for "the minimum version we still talk to" — a
+      deploy/config question, not a screen. The component takes `version` and
+      `minimum` and is ready for it.
+    - **38h shipped with admin turn 3 (0056)**, as planned — the suspension and
+      the surface that lifts it landed together. Raised from `App.tsx` off
+      `my_account_state()`; `refuse_suspended_customer` is a separate BEFORE
+      INSERT trigger rather than a sixth re-emit of `fill_booking`, because it is
+      one rule about one column with nothing to say about price or slots.
+    - **38e** (server down) is built and unraised: it wants an app-shell health
+      check, which is the same shape of decision as 38g.
+- **Appeals & trust flags — admin turn 3, BACKEND REAL 2026-08-10 (0056).**
+  0045/0046 already restored a review, cleared the late mark and told both sides.
+  What they never had is the thing turn 3 is actually about:
+  > "The rule is enforced in the UI, not just in copy."
+  - **A second review by the first reviewer is not a second review**, and that now
+    lives in `admin_decide_appeal`, not only in the console. A desk rule enforced
+    in JavaScript is a desk rule until someone opens the network tab.
+    `admin_reassign_appeal` is the way out when it is your own.
+  - **The third knock-on became real.** 0046 could only write the sentence
+    "poster outside by Aug 15" into a free-text `barber_action`; 0053 gave it a
+    table, so an upheld appeal now inserts a genuine `shop_tasks` row that lands
+    in the barber's To do (9a) and can be answered with a photo.
+  - `admin_appeals()` carries the queue, the month's overturn rate (the design
+    prints it back at the desk on purpose) and 3a's evidence panel — slot, scan,
+    chair, and whether the shop's poster is outside yet.
+  - **3b scores the barber, not just the customer**: `admin_flagged_customers`
+    returns, per flag, how many clients that barber has flagged and how many of
+    his removals were overturned. That is the only way to catch punitive flagging.
+  - **Two things the canvas assumed that don't exist**, so I read them the honest
+    way rather than inventing columns: `support_cases` has no `salon_id` and no
+    assignee, so "no open case with Le Fade" resolves through the case's booking;
+    and the appeal deadline is derived from `created_at + 3 days`.
+  - **The console screens are built** (2026-08-10): `#/appeals` (3a) and
+    `#/customers` (3b) in `admin/index.html`, bringing it to 10 screens. The
+    sidebar is lifted from an existing screen rather than retyped — the file
+    repeats it per screen by design, but copying 23 lines of SVG twice is how
+    they drift. The Customers nav row finally has somewhere to go.
+  - 3a shows the conflict **before** he types: on his own removal the decision
+    buttons are replaced by REASSIGN, which is the design's "hers to look at, not
+    to press". The database refuses it too, so neither is load-bearing alone.
+  - **0057 fixes a collision 0056 caused.** `admin_appeals()` has existed since
+    0045 and the Reviews screen calls it; 0056 added
+    `admin_appeals(p_appeal uuid default null)`, and because the new argument has
+    a default, a no-argument call matched **both** — PostgREST answers that with
+    "Could not choose the best candidate function", which would have broken the
+    Reviews screen the moment anyone opened it. The desk is now
+    `admin_appeal_desk()` and the overload is dropped.
+- **Compliance follow-ups — admin turn 5, REAL 2026-08-10 (0058).** 0053 gave a
+  task a due date and nothing ever happened when it passed. Turn 5's rule is that
+  this *is* the point: *"consequences are automatic and stated up front, so ops
+  never has to argue."*
+  - **Two columns and one scheduled function carry it.** `shop_tasks.on_overdue`
+    (`none` / `hide_shop` / `block_topups`) and `consequence`, the sentence the
+    barber reads at the same moment he reads the ask. `enforce_overdue_tasks()`
+    rides the hourly job 0051 already created — one sweep now does the asks, the
+    made room and the obligations.
+  - **This closes a loop across four turns already built:** admin 5a sets the
+    obligation and its consequence → barber 9a counts down to it → nobody acts →
+    the shop is hidden → **barber 10e** is the screen that explains why and how to
+    get back. Nothing new was needed on the phone.
+  - `admin_issue_task()` is the writer 9a has been reading since 0053 — until now
+    the only thing that produced a task was an upheld appeal. It **refuses a
+    consequence with no sentence and no date**: an unstated consequence is a
+    surprise, which is the one thing turn 5 says it must not be.
+  - `block_topups` is enforced by a trigger on `wallet_transactions` rather than a
+    re-emit of `agent_cash_topup` — one rule about one shop's standing, and it
+    catches any other path that ever writes a cash row.
+  - Console screen at **`#/compliance`** (11 screens now). The sidebar grew a
+    tenth row, so `NAV` is applied by length: screens built before turn 5 keep the
+    nine-item map, 5a gets the ten-item one.
+- **Coupon campaigns — admin turn 6, REAL 2026-08-10 (0059).** The sidebar has
+  had a Coupons item since 1a and the customer app has had My coupons since turn
+  16, with nothing between them. 0055 made a coupon spendable; this issues one.
+  - **The builder is organised around one question: who pays.** A platform
+    campaign needs no new money path at all — 0055 already encodes it exactly
+    (`price_cents` untouched, `discount_cents` absorbed by us) — it only needs a
+    budget to spend against. Shop-funded is opt-in and `admin_send_campaign`
+    **refuses to send it before the 14 days' notice is up**, because the design
+    says shops get notice and a sentence nobody enforces is not notice.
+  - **The audience count and the send list come from one function**
+    (`campaign_targets`), so what 6a promises and what 6a does cannot disagree.
+  - **The exclusion is the interesting half.** "Not sent to shops already full
+    most days — a coupon there just makes the waitlist longer" is applied to
+    *people*: if the last place you went is one nobody can get into, a coupon is
+    not the help you need. *ponytail: "full" is read off turn 36's asks rather
+    than replaying every calendar — a shop people are asking about IS a shop with
+    nothing free. Swap for a real occupancy pass if the number looks wrong.*
+  - **The budget stops issuing, it never revokes.** "Codes already in a wallet
+    still work" falls straight out of that. A percentage coupon is reserved at
+    the most it can cost (against the min spend), so the cap cannot be overrun by
+    a generous redemption. The console's "400 cuts" estimate divides by the same
+    number the send loop uses, so it cannot flatter the desk.
+  - Console screen at **`#/coupons`** (12 screens).
+- **Waitlist demand map — admin turn 4, REAL 2026-08-10 (0060).** The read side
+  of `waitlist_requests` at platform scale. Customer 36a writes a row when a day
+  is full; barber 8h reads them one shop at a time; neither can see the thing
+  that decides what ops does next.
+  - **The whole turn is one computable distinction**: an ask whose
+    `earliest_min` (0050) falls outside the shop's `availability` for that
+    weekday is an **hours** problem — the chairs exist, they're shut. An ask for
+    a time the shop is open and full is a **supply** problem. Recruit in one,
+    nudge in the other, and the desk never has to guess which.
+  - The hour histogram makes it visible: amber bars are hours when the shop
+    asked about was closed. The action cards then say "RECRUIT HERE" or
+    "NUDGE N SHOPS" — different verbs because they are different phone calls.
+  - **One new column, and it is honest about why**: `salons.district`. Grouping
+    demand by area needs an area, and the free-text address is not something a
+    query can split truthfully. Ops names it (`admin_set_district`); unnamed
+    shops group under "Unassigned" rather than being guessed at.
+  - **One card from the canvas is deliberately not built.** 4a's third action is
+    "Beni Makada · no shop yet — these are searches that found nothing". An ask
+    is always made *against a salon whose day is full*, so a district with no
+    shop can produce none. Building that card would need a search log we do not
+    keep, and faking it from waitlist rows would put a number next to a sentence
+    that isn't true. It needs a `searches` table if it is wanted.
+  - Console screen at **`#/demand`** (13 screens). The sidebar is now eleven rows
+    on the newest screens, so `NAV` is chosen by length: 9, 10 or 11.
+- **When the desk breaks — admin turn 7, REAL 2026-08-10 (0061).** Ops errors are
+  a different shape: Nadia isn't blocked from a haircut, she's blocked from
+  *helping people who are*. Two rules, both enforced rather than written.
+  - **"Never let a stale desk act on stale data."** `platform_incidents` carries
+    a `money` lock, and it fires on **`wallet_transactions` and
+    `float_settlements`** — the two tables money can enter through — rather than
+    on the six functions that write them. A desk that can still settle a float
+    during a wallet incident is a desk with a lock *drawn* on it.
+  - **"Never hide the scale of what's broken."** The banner rides above every
+    screen and refreshes on every navigation, because an incident that only shows
+    on its own page is one the desk walks past. Every figure is counted, and the
+    **zero is printed on purpose** — "nothing taken twice" is the most reassuring
+    line there, so it is a counted fact rather than a hope.
+  - **7b is real concurrency control**, not a screen. Two operators opening the
+    same case and both deciding is how a review gets restored and removed in the
+    same minute. `admin_task_action` now refuses a task another desk already
+    closed *and says what they did*; `appeal_conflict()` returns who decided,
+    when and which way, so the second operator sees the other decision instead of
+    a bare error. Hiding a shop that is already hidden is refused too — 5a's
+    HIDE SHOP and 3a's knock-on can both fire on one shop within a minute.
+  - **0061 ships no assert block, deliberately.** Everything it adds is
+    behavioural — a lock that fires, a guard that refuses a stale write — and
+    `assert 0 = 0` would look like verification while checking nothing.
+
+**All 7 admin turns, all 3 barber turns and both customer turns are now built.**
+- **0051, 0052, 0053, 0054, 0055 and 0056 are not applied.** 0047–0050 are live. Order matters:
+  0052 re-emits `fill_booking` (0048) and `expire_stale_asks` (0051); 0053 leans
+  on 0042/0044's float functions and 0043's approval checklist.
+- **Nothing notifies a barber that a task was issued.** 9a is a pulled inbox. A
+  push would need a new `notifications.kind`, which needs its own migration
+  (enum ADD VALUE can't share a transaction with its use). Do it with admin 5a,
+  which is the turn that creates tasks in the first place.
+- **9e's "pay it in at the bank" is inert** and says so on screen. It needs a
+  slip upload and a clearing step; the code path covers the launch case.
 
 ## Placeholder screens (UI built, not wired to backend)
 These exist as visual shells to implement later:

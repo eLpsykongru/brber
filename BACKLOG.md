@@ -800,9 +800,11 @@ Both closed (2026-08-08), with 0051:
     `assert 0 = 0` would look like verification while checking nothing.
 
 **All 7 admin turns, all 3 barber turns and both customer turns are now built.**
-- **0051, 0052, 0053, 0054, 0055 and 0056 are not applied.** 0047–0050 are live. Order matters:
-  0052 re-emits `fill_booking` (0048) and `expire_stale_asks` (0051); 0053 leans
-  on 0042/0044's float functions and 0043's approval checklist.
+- **Everything through 0061 is applied (2026-08-10).** Still *unexercised*: the
+  authenticated paths. 0047/0048 were probed as anon, so `fill_booking`'s bundle
+  branch, `fill_booking_services` and `default_settle_on_complete` have never
+  actually fired — and nothing above 0050 has been through the app at all. One
+  real booking, one real task, one real settlement is what's left to trust them.
 - **Nothing notifies a barber that a task was issued.** 9a is a pulled inbox. A
   push would need a new `notifications.kind`, which needs its own migration
   (enum ADD VALUE can't share a transaction with its use). Do it with admin 5a,

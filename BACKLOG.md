@@ -799,6 +799,39 @@ Both closed (2026-08-08), with 0051:
     behavioural — a lock that fires, a guard that refuses a stale write — and
     `assert 0 = 0` would look like verification while checking nothing.
 
+- **Admin roles & permissions — MODEL ONLY 2026-08-10 (0062).** Lands the
+  "Roles & permissions" item deferred under *Salon management* above, scoped to
+  the ops desk rather than the salon. The desk had grown to 34 `admin_*` RPCs
+  behind a single bit, so a support hire could also settle a float.
+  - **`is_admin()` is deliberately untouched.** It is called from 70 places
+    across 17 migrations — RLS on profiles, barbers, reviews, bookings, storage,
+    plus the guard clause of nearly every admin RPC. Narrowing it would rewrite
+    all 70 and could lock the desk out of its own console. `admin_can(cap)` is
+    the new finer question and sits *beside* it.
+  - **This migration changes no behaviour, on purpose.** `profiles.admin_caps`
+    backfills every existing admin to `'{*}'`, so the desk works exactly as it
+    did the minute before. `admin_capabilities` is the catalogue (support,
+    moderation, shops, money, growth, incidents, plus `'*'`), `admin_cap_grants`
+    is the audit trail, `admin_set_caps()` is superadmin-only and refuses both
+    self-edits and removing the last `'*'` holder. `admin_staff()` is the read.
+  - **Trigger for the next step:** nothing calls `admin_can()` yet. Wiring it
+    into the write RPCs is what actually enforces the tiers, and it should go
+    domain by domain — money first (`admin_settle_float`), then moderation
+    (`admin_review_decide`, `admin_decide_appeal`, `admin_set_suspension`) —
+    each a visible change rather than a silent narrowing. Until then the tiers
+    are recorded but not enforced, and the console has no Roles screen.
+  - **Applied 2026-08-11.** Probed as anon: `admin_can` returns false (which also
+    proves the `admin_caps` column landed), `admin_staff` returns `[]`, and
+    `admin_set_caps` refuses — so all three internal guards hold for an
+    unauthenticated caller. Still *unexercised*: every authenticated path. The
+    `admin_set_caps` success path, the last-superadmin refusal, the self-edit
+    refusal and the `admin_caps_valid` trigger have never fired.
+  - **The backfill only covers admins who existed when it ran.** Anyone promoted
+    to `role = 'admin'` afterwards gets the column default `'{}'` — harmless
+    while nothing calls `admin_can()`, but they hold no capabilities, and if no
+    one holds `'*'` then `admin_set_caps` locks everybody out of granting and the
+    only way back is the SQL editor. Check `admin_caps` after every promotion.
+
 **All 7 admin turns, all 3 barber turns and both customer turns are now built.**
 - **Everything through 0061 is applied (2026-08-10).** Still *unexercised*: the
   authenticated paths. 0047/0048 were probed as anon, so `fill_booking`'s bundle

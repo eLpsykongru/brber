@@ -51,7 +51,7 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
 
   const load = useCallback(async () => {
     const { data } = await supabase.from('bookings')
-      .select('id, starts_at, services(name), barbers(profiles(full_name, avatar_url), salon:salons!salon_id(name))')
+      .select('id, starts_at, services(name), barbers(profiles!barbers_id_fkey(full_name, avatar_url), salon:salons!salon_id(name))')
       .eq('customer_id', customerId)
       .in('status', ['pending', 'confirmed'])
       .order('starts_at');

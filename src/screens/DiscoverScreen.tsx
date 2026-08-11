@@ -123,7 +123,7 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
       const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
       const dayEnd = new Date(dayStart.getTime() + 86_400_000);
       const { data } = await supabase.from('bookings')
-        .select('id, starts_at, barbers(id, profiles(full_name), salon:salons!salon_id(name))')
+        .select('id, starts_at, barbers(id, profiles!barbers_id_fkey(full_name), salon:salons!salon_id(name))')
         .eq('customer_id', customerId!)
         .eq('status', 'confirmed')
         .is('completed_at', null)
@@ -151,7 +151,7 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
   useEffect(() => {
     // barbers!salon_id: disambiguates from the salons.owner_id relationship
     supabase.from('salons')
-      .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, profiles(full_name, avatar_url, phone), reviews(rating), services(id, name, price_cents, duration_min, is_active, category))')
+      .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, profiles!barbers_id_fkey(full_name, avatar_url, phone), reviews!reviews_barber_id_fkey(rating), services(id, name, price_cents, duration_min, is_active, category))')
       .order('name')
       .then(({ data, error }) => {
         if (error) return Alert.alert('Could not load salons', error.message);

@@ -200,7 +200,7 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook 
           + ' cancelled_by, cancel_reason, duration_min, services(name, duration_min),'
           + ' bundle:bundles!bundle_id(name),'
           + ' booking_services(service_id, price_cents, duration_min, sort, done_at, services(name)),'
-          + ' barbers(id, profiles(full_name), salon:salons!salon_id(name, address))')
+          + ' barbers(id, profiles!barbers_id_fkey(full_name), salon:salons!salon_id(name, address))')
         .eq('customer_id', customerId)
         .order('starts_at', { ascending: false })
         .limit(50),

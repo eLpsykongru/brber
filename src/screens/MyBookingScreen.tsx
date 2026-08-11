@@ -65,7 +65,7 @@ const SELECT =
   + ' services(name, duration_min),'
   // 38f needs the shop's status: a shop vanishing from search must never read as
   // a booking vanishing, and the only way to say so is to know it happened.
-  + ' barbers(id, specialty, profiles(full_name), salon:salons!salon_id(name, address, status))';
+  + ' barbers(id, specialty, profiles!barbers_id_fkey(full_name), salon:salons!salon_id(name, address, status))';
 
 function initials(name: string) {
   return name.split(' ').filter(Boolean).map((w) => w[0]).slice(0, 2).join('').toUpperCase();

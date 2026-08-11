@@ -480,7 +480,7 @@ function PreviewPage({ salonId, onBack, onChromeHidden }: {
 
   useEffect(() => {
     supabase.from('salons')
-      .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, profiles(full_name, avatar_url, phone), reviews(rating), services(id, name, price_cents, duration_min, is_active, category))')
+      .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, profiles!barbers_id_fkey(full_name, avatar_url, phone), reviews!reviews_barber_id_fkey(rating), services(id, name, price_cents, duration_min, is_active, category))')
       .eq('id', salonId).single()
       .then(({ data, error }) => {
         if (error) { Alert.alert('Could not load preview', error.message); onBack(); return; }

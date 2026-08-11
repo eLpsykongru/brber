@@ -313,7 +313,7 @@ export function EditProfileScreen({ profile, onBack, onDone }: {
     const row = (sum ?? [])[0] as Summary | undefined;
     if (row?.top_barber_id) {
       const { data: b } = await supabase.from('barbers')
-        .select('profiles(full_name), salon:salons!salon_id(name)')
+        .select('profiles!barbers_id_fkey(full_name), salon:salons!salon_id(name)')
         .eq('id', row.top_barber_id).single();
       const rec = b as unknown as { profiles: { full_name: string | null } | null; salon: { name: string } | null } | null;
       if (rec) {

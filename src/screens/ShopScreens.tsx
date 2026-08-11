@@ -242,7 +242,7 @@ export function ReviewsInboxScreen({ salon, team, onBack }: {
   const load = useCallback(async () => {
     if (!ids.length) return;
     const { data, error } = await supabase.from('reviews')
-      .select('id, rating, comment, created_at, reply, replied_at, flagged_at, barber_id, barbers(profiles(full_name)), customer:profiles!customer_id(full_name)')
+      .select('id, rating, comment, created_at, reply, replied_at, flagged_at, barber_id, barbers!reviews_barber_id_fkey(profiles!barbers_id_fkey(full_name)), customer:profiles!customer_id(full_name)')
       .in('barber_id', ids).order('created_at', { ascending: false }).limit(100);
     if (error) return Alert.alert('Could not load reviews', error.message);
     setRows((data as unknown as ReviewRow[]) ?? []);

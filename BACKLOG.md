@@ -399,6 +399,31 @@ the call was **(a), the one-visit bundle**: n services, one barber, one sitting.
   saving (`settle_booking_services`).
 - **"Build your own" is an ad-hoc bundle** (`bundles.is_adhoc`) priced at the sum
   of its parts — one booking path, not a second rail.
+- **The ordinary booking sheet is multi-select now (2026-08-11, 0067).** Picking
+  several services was only reachable through the salon page's Bundles tab; the
+  main sheet let you pick exactly one cut. `BookingSheet`'s first step is a tick
+  list, and **the backend needed almost nothing** — n services in one sitting is
+  what `book_custom` (0047) has always done, so the sheet routes to it above one
+  service and keeps the plain insert at one, rather than minting a one-item
+  bundle for every booking in the app.
+  - **The barber step now requires the WHOLE sitting.** A barber who does two of
+    the three ticked services is not a shortlist candidate, so
+    `offeringBarbers` switched from `some` to `every`, and the step says so when
+    nobody in the shop can take the combination.
+  - **0067 exists because `book_custom` carried neither the note nor the
+    coupon.** Ticking a second service would have silently dropped the note the
+    customer had just written in 39d — the exact bug class barber 11 and
+    customer 39 were about. Both functions were **dropped and recreated** rather
+    than given defaulted arguments: 0057 is the standing lesson that a second
+    signature makes PostgREST refuse the call outright.
+  - **The Services/Packages chips are deleted.** "Packages are coming soon" had
+    been false since 0047, and ticking several services *is* what that chip was
+    promising. Priced bundles stay on the salon page, where a real saving can be
+    shown against the sum of the parts.
+  Still open:
+  - **The summary shows the sitting as "Fade + Beard", not a priced breakdown.**
+    Per-service lines with start times already exist on the My Bookings card
+    (34e), so the customer sees the running order once it is booked.
 - **34c needed no backend**: `daySlots()` already takes a duration, so "N fit"
   and the three-in-a-row grid are pure client math (`lib/slots.ts`).
 - **Bundle editor (barber turn 7), REAL 2026-08-07 (0048)** —

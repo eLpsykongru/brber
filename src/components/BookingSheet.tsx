@@ -10,7 +10,7 @@ import { colors, font, radius, serif, shadow, sp } from '../theme';
 import type { Specialist } from '../types';
 import { AskBlock, AskedSheet, type AskRecord } from './AskSheet';
 import BookingNoteSheet from './BookingNote';
-import { Chip, PillButton, Stars } from './ui';
+import { PillButton, Stars } from './ui';
 import SlotPicker from './SlotPicker';
 
 type SalonLike = { id: string; name: string; address: string | null; barbers: Specialist[] };
@@ -42,8 +42,10 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
   visible: boolean; salon: SalonLike; onClose: () => void; onBooked: () => void;
 }) {
   const [step, setStep] = useState<Step>('service');
-  const [mode, setMode] = useState<'service' | 'package'>('service');
-  const [serviceName, setServiceName] = useState<string | null>(null);
+  // multi-select: the cut is n services in one sitting, not one. Names rather
+  // than ids because a name is what the salon menu groups by — the ids only
+  // exist once a barber is chosen.
+  const [serviceNames, setServiceNames] = useState<string[]>([]);
   const [barber, setBarber] = useState<Specialist | null>(null);
   const [time, setTime] = useState<Date | null>(null);
   const [me, setMe] = useState<{ name: string | null; phone: string | null; email: string | null } | null>(null);
@@ -55,7 +57,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
   const [depositOn, setDepositOn] = useState(true);
   const [depositCents, setDepositCents] = useState(0);
   const [adjustOpen, setAdjustOpen] = useState(false);
-  // 37b — the coupon he chose for this booking, priced against this service
+  // 37b — the coupon he chose for this booking, priced against the whole sitting
   const [coupon, setCoupon] = useState<UsableCoupon | null>(null);
   // 8c — the receipt, once the row exists
   const [done, setDone] = useState<{ id: string; deposit: number } | null>(null);
@@ -73,7 +75,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
   useEffect(() => {
     if (visible) {
       // reset the wizard each open
-      setStep('service'); setMode('service'); setServiceName(null); setBarber(null); setTime(null);
+      setStep('service'); setServiceNames([]); setBarber(null); setTime(null);
       setDone(null); setAdjustOpen(false); setDepositOn(true);
       Animated.spring(translateY, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start();
       supabase.auth.getUser().then(async ({ data }) => {
@@ -116,8 +118,9 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
   }, [barber?.id]);
 
   // a new service resets the deposit to the floor — the mock's default position
-  const pickedPrice = barber?.services
-    .find((sv) => sv.is_active && sv.name === serviceName)?.price_cents ?? 0;
+  const pickedPrice = (barber?.services ?? [])
+    .filter((sv) => sv.is_active && serviceNames.includes(sv.name))
+    .reduce((n, sv) => n + sv.price_cents, 0);
   useEffect(() => {
     if (pickedPrice) setDepositCents(upFront ? pickedPrice : floorOf(pickedPrice));
   }, [pickedPrice, upFront]);
@@ -137,17 +140,31 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
   })).current;
 
   const menu = serviceMenu(salon);
-  const offeringBarbers = serviceName
-    ? salon.barbers.filter((b) => b.services.some((sv) => sv.is_active && sv.name === serviceName))
+  // a barber has to be able to do the WHOLE sitting — offering two of the three
+  // picked services is not a shortlist candidate, it is a different booking.
+  const offeringBarbers = serviceNames.length
+    ? salon.barbers.filter((b) =>
+      serviceNames.every((n) => b.services.some((sv) => sv.is_active && sv.name === n)))
     : [];
-  const svc = barber?.services.find((sv) => sv.is_active && sv.name === serviceName) ?? null;
+  const svcs = (barber?.services ?? [])
+    .filter((sv) => sv.is_active && serviceNames.includes(sv.name))
+    .sort((a, b) => serviceNames.indexOf(a.name) - serviceNames.indexOf(b.name));
+  // the anchor — 0047 keeps `bookings.service_id` NOT NULL and pointed at the
+  // first service, so every existing consumer (queue, calendar, earnings)
+  // keeps working without knowing a sitting can hold more than one.
+  const svc = svcs[0] ?? null;
+  const total = svcs.reduce((n, sv) => n + sv.price_cents, 0);
+  const mins = svcs.reduce((n, sv) => n + sv.duration_min, 0);
+  const serviceLabel = svcs.length > 1
+    ? svcs.map((sv) => sv.name).join(' + ')
+    : serviceNames[0] ?? '';
 
   // 37b — the coupon comes off what HE pays. `price_cents` is the barber's money
   // and never moves; Sterncut absorbs the difference. Every number below the
   // service line is therefore computed from `payable`, not from the price, or a
   // coupon would quietly raise his deposit share.
   const discount = svc && coupon ? (coupon.worth_cents ?? 0) : 0;
-  const payable = svc ? svc.price_cents - discount : 0;
+  const payable = svc ? total - discount : 0;
 
   // wallet deposit is offered only when the balance actually covers the floor
   const floor = svc ? floorOf(payable) : 0;
@@ -163,12 +180,31 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
     if (!barber || !svc || !time) return;
     setBusy(true);
     const { data: auth } = await supabase.auth.getUser();
-    const { data: row, error } = await supabase.from('bookings').insert({
-      customer_id: auth.user!.id, barber_id: barber.id, service_id: svc.id,
-      starts_at: time.toISOString(), deposit_cents: deposit,
-      coupon_id: coupon?.id ?? null,
-      notes: note ?? lastNote ?? null,
-    }).select('id, deposit_cents').single();
+    const notes = note ?? lastNote ?? null;
+
+    // Several services in one sitting is 0047's ad-hoc bundle, not a second
+    // booking rail: `book_custom` writes one booking, one barber, one slot, with
+    // a `booking_services` row each. A single service keeps the plain insert —
+    // it would otherwise mint a one-item bundle for every booking in the app.
+    const { data: row, error } = svcs.length > 1
+      ? await supabase.rpc('book_custom', {
+        p_barber: barber.id,
+        p_services: svcs.map((sv) => sv.id),
+        p_starts_at: time.toISOString(),
+        p_deposit_cents: deposit,
+        p_note: notes,
+        p_coupon: coupon?.id ?? null,
+      }).then((r) => ({
+        // book_custom returns the id; the deposit is what we asked for
+        data: r.data ? { id: r.data as string, deposit_cents: deposit } : null,
+        error: r.error,
+      }))
+      : await supabase.from('bookings').insert({
+        customer_id: auth.user!.id, barber_id: barber.id, service_id: svc.id,
+        starts_at: time.toISOString(), deposit_cents: deposit,
+        coupon_id: coupon?.id ?? null,
+        notes,
+      }).select('id, deposit_cents').single();
     setBusy(false);
     // 26 — the insert is atomic, so a failure means nothing moved. Two shapes:
     // the slot went while you were deciding, or the wallet could not cover it.
@@ -179,13 +215,13 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
         || m.includes('unavailable') || m.includes('future')) return setFailed('slot');
       return Alert.alert('Could not book', error.message);
     }
-    setDone({ id: row.id, deposit: row.deposit_cents }); // 8c
+    setDone({ id: row!.id, deposit: row!.deposit_cents }); // 8c
     onBooked();
   }
 
   // 26a's "closest openings" — the same free-slot maths the picker already runs
   const alternatives = svc && barber && time
-    ? daySlots(time, svc.duration_min, altCal.windows, altCal.booked, altCal.daysOff,
+    ? daySlots(time, mins, altCal.windows, altCal.booked, altCal.daysOff,
       altCal.blocks, altCal.buffer)
       .filter((sl) => sl.status === 'free' && sl.time.getTime() > time.getTime())
       .slice(0, 2)
@@ -218,31 +254,54 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
         </View>
 
         <ScrollView contentContainerStyle={s.body} showsVerticalScrollIndicator={false}>
-          {/* STEP 1 — service or package */}
+          {/* STEP 1 — the sitting: one service, or several */}
           {step === 'service' && (
             <>
-              <View style={s.modeRow}>
-                <Chip label="Services" active={mode === 'service'} onPress={() => setMode('service')} />
-                <Chip label="Packages" active={mode === 'package'} onPress={() => setMode('package')} />
-              </View>
-              {mode === 'package' ? (
-                // TODO(backlog): packages need their own table + booking mapping
-                <Text style={s.note}>Packages are coming soon.</Text>
-              ) : menu.length === 0 ? (
+              {/* The Services/Packages chips are gone. "Packages are coming
+                  soon" had been false since 0047 shipped bundles on the salon
+                  page, and ticking several services here is the ad-hoc bundle
+                  that chip was promising — a toggle between one live mode and
+                  one lie is not a choice. Priced bundles stay on the salon
+                  page's Bundles tab, where a real saving can be shown. */}
+              <Text style={s.pickHint}>Pick one, or several for a single sitting.</Text>
+              {menu.length === 0 ? (
                 <Text style={s.note}>No services listed yet.</Text>
-              ) : menu.map((m) => (
-                <Pressable key={m.name} onPress={() => { setServiceName(m.name); setBarber(null); setTime(null); setStep('barber'); }}
-                  style={({ pressed }) => [s.optRow, pressed && s.pressed]}>
-                  <View style={s.grow}>
-                    <Text style={s.optName}>{m.name}</Text>
-                    <Text style={s.optMeta}>{m.category}</Text>
-                  </View>
-                  <Text style={s.optPrice}>
-                    {m.min === m.max ? `${(m.min / 100).toFixed(0)}` : `${(m.min / 100).toFixed(0)}–${(m.max / 100).toFixed(0)}`} DH
-                  </Text>
-                  <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
-                </Pressable>
-              ))}
+              ) : menu.map((m) => {
+                const on = serviceNames.includes(m.name);
+                // ticking is the whole interaction now — no row navigates on its
+                // own, because the second tap has to be able to add rather than
+                // replace. The footer CTA is what moves you on.
+                const toggle = () => {
+                  setServiceNames((cur) =>
+                    cur.includes(m.name) ? cur.filter((n) => n !== m.name) : [...cur, m.name]);
+                  setBarber(null); setTime(null);
+                };
+                return (
+                  <Pressable key={m.name} onPress={toggle}
+                    accessibilityRole="checkbox" accessibilityState={{ checked: on }}
+                    accessibilityLabel={m.name}
+                    style={({ pressed }) => [s.optRow, on && s.optRowOn, pressed && s.pressed]}>
+                    <View style={[s.tick, on && s.tickOn]}>
+                      {on && <Ionicons name="checkmark" size={13} color={colors.onAccent} />}
+                    </View>
+                    <View style={s.grow}>
+                      <Text style={s.optName}>{m.name}</Text>
+                      <Text style={s.optMeta}>{m.category}</Text>
+                    </View>
+                    <Text style={s.optPrice}>
+                      {m.min === m.max ? `${(m.min / 100).toFixed(0)}` : `${(m.min / 100).toFixed(0)}–${(m.max / 100).toFixed(0)}`} DH
+                    </Text>
+                  </Pressable>
+                );
+              })}
+              {/* the honest warning: services exist per barber, so a combination
+                  can be one nobody in the shop does in a single sitting */}
+              {serviceNames.length > 1 && offeringBarbers.length === 0 && (
+                <Text style={s.note}>
+                  Nobody here does all {serviceNames.length} in one sitting. Untick one, or book
+                  them separately.
+                </Text>
+              )}
             </>
           )}
 
@@ -250,7 +309,10 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
           {step === 'barber' && (
             offeringBarbers.map((b) => {
               const a = b.reviews.length ? b.reviews.reduce((n, r) => n + r.rating, 0) / b.reviews.length : null;
-              const price = b.services.find((sv) => sv.name === serviceName)?.price_cents;
+              // what the whole sitting costs at this chair, not one line of it
+              const price = b.services
+                .filter((sv) => sv.is_active && serviceNames.includes(sv.name))
+                .reduce((n, sv) => n + sv.price_cents, 0);
               return (
                 <Pressable key={b.id} onPress={() => { setBarber(b); setTime(null); setStep('time'); }}
                   style={({ pressed }) => [s.optRow, pressed && s.pressed]}>
@@ -275,7 +337,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
           {/* STEP 3 — time. 36a takes over when the chosen day is full: that is
               exactly the moment someone wants the day and can't have it. */}
           {step === 'time' && barber && svc && (
-            <SlotPicker barberId={barber.id} durationMin={svc.duration_min}
+            <SlotPicker barberId={barber.id} durationMin={mins}
               selected={time} onSelect={setTime}
               renderFull={(day) => (
                 <AskBlock
@@ -284,8 +346,8 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
                   barberName={barber.profiles?.full_name ?? 'your barber'}
                   salonName={salon.name}
                   serviceId={svc.id}
-                  serviceName={svc.name}
-                  priceCents={svc.price_cents}
+                  serviceName={serviceLabel}
+                  priceCents={total}
                   day={day}
                   coBarbers={salon.barbers
                     .filter((b) => b.id !== barber.id)
@@ -304,8 +366,8 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
               </SummaryCard>
               <SummaryCard label="Service" onEdit={() => setStep('service')}>
                 <View style={s.sumLine}>
-                  <Text style={s.sumText}>{serviceName}</Text>
-                  <Text style={s.sumText}>{svc ? `${(svc.price_cents / 100).toFixed(0)} DH` : ''}</Text>
+                  <Text style={s.sumText}>{serviceLabel}</Text>
+                  <Text style={s.sumText}>{svc ? `${(total / 100).toFixed(0)} DH` : ''}</Text>
                 </View>
                 <Text style={s.optMeta}>{svc?.duration_min} min · paid at the shop</Text>
               </SummaryCard>
@@ -345,7 +407,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
                       <View style={s.paySplitRow}>
                         <View>
                           <Text style={s.payLabel}>DUE UP FRONT</Text>
-                          <Text style={s.payBig}>{(svc.price_cents / 100).toFixed(0)} DH</Text>
+                          <Text style={s.payBig}>{(total / 100).toFixed(0)} DH</Text>
                         </View>
                         <View style={{ alignItems: 'flex-end' }}>
                           <Text style={s.payLabel}>SPLIT LATER</Text>
@@ -362,7 +424,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
                           <Text style={s.payLock}>LOCKED AT 100%</Text>
                         </View>
                         <Text style={s.payOf}>
-                          {(svc.price_cents / 100).toFixed(0)} DH of {(svc.price_cents / 100).toFixed(0)} DH
+                          {(total / 100).toFixed(0)} DH of {(total / 100).toFixed(0)} DH
                         </Text>
                       </View>
                     </View>
@@ -386,7 +448,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
                   is a tap, removing it is a tap, and the line item is spelled out
                   in the total below so the discount is never a mystery. */}
               {!upFront && svc && (
-                <CouponRow salonId={salon.id} priceCents={svc.price_cents}
+                <CouponRow salonId={salon.id} priceCents={total}
                   coupon={coupon} onPick={setCoupon} />
               )}
 
@@ -429,8 +491,8 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
                         {discount > 0 && (
                           <View style={s.breakdown}>
                             <View style={s.cpnRow}>
-                              <Text style={s.cpnLabel}>{serviceName}</Text>
-                              <Text style={s.cpnValue}>{dh(svc.price_cents)} DH</Text>
+                              <Text style={s.cpnLabel}>{serviceLabel}</Text>
+                              <Text style={s.cpnValue}>{dh(total)} DH</Text>
                             </View>
                             <View style={s.cpnRow}>
                               <Text style={s.cpnLabel}>Coupon</Text>
@@ -490,14 +552,14 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
                       </View>
                       <Text style={s.fullPriceText}>
                         {barber?.profiles?.full_name?.split(' ')[0] ?? 'Your barber'} is still paid{' '}
-                        {dh(svc.price_cents)} DH. Sterncut covers the {dh(discount)}.
+                        {dh(total)} DH. Sterncut covers the {dh(discount)}.
                       </Text>
                     </View>
                   )}
 
                   <View style={s.breakCard}>
                     <BreakRow k="Wallet deposit" v={`${dh(deposit)} DH`} />
-                    <BreakRow k="Cash at the shop" v={`${dh(svc.price_cents - deposit)} DH`} />
+                    <BreakRow k="Cash at the shop" v={`${dh(total - deposit)} DH`} />
                     <View style={s.breakHr} />
                     <BreakRow k="Wallet after booking" v={`${dh(walletCents! - deposit)} DH`} />
                   </View>
@@ -508,6 +570,18 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
         </ScrollView>
 
         {/* footer CTA */}
+        {step === 'service' && (
+          <View style={s.footer}>
+            <PillButton
+              disabled={serviceNames.length === 0 || offeringBarbers.length === 0}
+              onPress={() => setStep('barber')}
+              title={serviceNames.length === 0
+                ? 'Pick a service'
+                : serviceNames.length === 1
+                  ? 'Continue'
+                  : `Continue · ${serviceNames.length} services`} />
+          </View>
+        )}
         {step === 'time' && (
           <View style={s.footer}>
             <PillButton title={time ? 'Review booking' : 'Select a time'}
@@ -521,7 +595,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
               title={deposit > 0
                 ? `Pay ${dh(deposit)} DH & confirm`
                 : upFront && svc
-                  ? `Request · ${dh(svc.price_cents)} DH up front`
+                  ? `Request · ${dh(total)} DH up front`
                   : 'Confirm booking'} />
           </View>
         )}
@@ -537,7 +611,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
               <Text style={s.doneSub}>
                 {done.deposit > 0
                   ? `Your ${dh(done.deposit)} DH deposit is paid from your wallet. Pay the remaining `
-                    + `${dh(svc.price_cents - done.deposit)} DH in cash at the shop.`
+                    + `${dh(total - done.deposit)} DH in cash at the shop.`
                   : 'The barber will confirm your booking shortly. Pay at the shop.'}
               </Text>
             </View>
@@ -549,7 +623,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
                 </View>
                 <View style={s.rightAlign}>
                   <Text style={s.payLabel}>DUE AT THE SHOP</Text>
-                  <Text style={s.doneDue}>{dh(svc.price_cents - done.deposit)} DH</Text>
+                  <Text style={s.doneDue}>{dh(total - done.deposit)} DH</Text>
                 </View>
               </View>
             )}
@@ -557,12 +631,12 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
               <BreakRow k="Booking ID" v={`#${done.id.replace(/-/g, '').slice(0, 8).toUpperCase()}`} light />
               <BreakRow k="Salon" v={salon.name} light />
               <BreakRow k="Specialist" v={barber?.profiles?.full_name ?? '—'} light />
-              <BreakRow k="Service" v={`${serviceName} · ${svc.duration_min} min`} light />
+              <BreakRow k="Service" v={`${serviceLabel} · ${mins} min`} light />
               <BreakRow k="When" v={`${time?.toDateString()} · ${time?.toTimeString().slice(0, 5)}`} light />
               {done.deposit > 0 && (
                 <>
                   <View style={s.breakHr} />
-                  <BreakRow k={`Deposit (${Math.round((done.deposit / svc.price_cents) * 100)}%)`}
+                  <BreakRow k={`Deposit (${Math.round((done.deposit / total) * 100)}%)`}
                     v={`${dh(done.deposit)} DH paid`} />
                   <BreakRow k="Wallet balance" v={`${dh((walletCents ?? 0) - done.deposit)} DH`} />
                 </>
@@ -641,7 +715,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
               </Text>
             </View>
             <View style={s.breakCard}>
-              <BreakRow k="Service" v={`${serviceName} · ${dh(svc.price_cents)} DH`} light />
+              <BreakRow k="Service" v={`${serviceLabel} · ${dh(total)} DH`} light />
               <BreakRow k="Slot" v={`${time?.toDateString().slice(0, 10)} · ${time?.toTimeString().slice(0, 5)}`} light />
               <BreakRow k="Deposit attempted" v={`${dh(deposit)} DH`} light />
               <View style={s.breakHr} />
@@ -668,7 +742,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
 
       {/* 8b — adjust the deposit */}
       {svc && (
-        <AdjustSheet visible={adjustOpen} price={svc.price_cents} floor={floor} value={deposit}
+        <AdjustSheet visible={adjustOpen} price={total} floor={floor} value={deposit}
           onClose={() => setAdjustOpen(false)}
           onPick={(c) => { setDepositCents(c); setAdjustOpen(false); }} />
       )}
@@ -685,7 +759,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
             weekday: 'short', month: 'short', day: 'numeric',
             hour: '2-digit', minute: '2-digit', hour12: false,
           })}
-          service={`${svc.name} · ${svc.duration_min} min`}
+          service={`${svc.name} · ${mins} min`}
           onSend={(note) => { setLastNote(note); confirm(note); }} />
       )}
     </Modal>
@@ -904,9 +978,15 @@ const s = StyleSheet.create({
   body: { padding: sp(5), gap: sp(2.5), paddingBottom: sp(10) },
   grow: { flex: 1 },
   pressed: { opacity: 0.7 },
-  modeRow: { flexDirection: 'row', gap: sp(2), marginBottom: sp(2) },
+  pickHint: { fontSize: font.small, color: colors.textSecondary, marginBottom: sp(1) },
   note: { textAlign: 'center', color: colors.textTertiary, marginVertical: sp(6), fontSize: font.body },
 
+  optRowOn: { borderColor: colors.accent, borderWidth: 1.5 },
+  tick: {
+    width: 22, height: 22, borderRadius: 7, borderWidth: 1.5, borderColor: colors.border,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  tickOn: { backgroundColor: colors.accent, borderColor: colors.accent },
   optRow: {
     flexDirection: 'row', alignItems: 'center', gap: sp(3),
     borderRadius: radius.lg, padding: sp(4), backgroundColor: colors.bg, ...shadow,

@@ -3,6 +3,7 @@ import * as Print from 'expo-print';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Note, Serif, TAB_INSET } from '../components/dark';
+import { CapHitSheet, FloatCapMeter, askCollection, isCapError, useFloatStatus } from '../components/FloatCap';
 import { TopUpAttempt, TopUpFailedSheet } from '../components/Trouble';
 import { OPS_PHONE } from './BarberSupportScreens';
 import { supabase } from '../lib/supabase';
@@ -10,8 +11,9 @@ import { colors, dark as D, font, inter, radius, sp } from '../theme';
 
 // REAL since 0022: float + activity read wallet_transactions; Top-up calls the
 // agent_cash_topup RPC (owner-only, phone lookup, no commission — decided 2026-07-19).
-// TODO(backlog): settlement/netting, card rail, and paying bookings from the wallet
-// are still open — the float only ever grows until settlement lands.
+// 11c/11d (0064) put the float cap on screen: the meter warns from 70% up, and a
+// refused top-up opens the cap sheet instead of the generic failure sheet.
+// TODO(backlog): the card rail and paying bookings from the wallet are still open.
 
 type Tx = { id: string; name: string; phone: string | null; amount_cents: number; created_at: string };
 
@@ -70,6 +72,11 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
   const [failed, setFailed] = useState<TopUpAttempt | null>(null);
   const [lastTry, setLastTry] = useState<{ phone: string; dh: number } | null>(null);
   const [salon, setSalon] = useState<string | null>(null);
+  // 11d — the top-up the cap refused. Different sheet from 10c's: nothing broke,
+  // the answer is "give it back", and there is somewhere else he can send them.
+  const [capHit, setCapHit] = useState<{ phone: string; cents: number } | null>(null);
+  const [tick, setTick] = useState(0);
+  const [float$] = useFloatStatus(tick);
 
   useEffect(() => {
     supabase.from('salons').select('name').eq('owner_id', barberId).maybeSingle()
@@ -91,7 +98,10 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
 
   useEffect(() => { load(); }, [load]);
 
-  const float_ = (txs ?? []).reduce((a, t) => a + t.amount_cents, 0) / 100;
+  // the server's float is the one the cap is measured against; the client sum is
+  // every top-up this agent ever took, which stops being the same number the
+  // first time ops collects. Prefer the server's and keep the sum as a fallback.
+  const float_ = (float$?.float_cents ?? (txs ?? []).reduce((a, t) => a + t.amount_cents, 0)) / 100;
 
   async function topup(phone: string, amountDh: number) {
     setLastTry({ phone, dh: amountDh });
@@ -102,6 +112,13 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
     // "failed" and nothing else leaves him guessing whether it went half through,
     // so the sheet spells out that neither the wallet nor the float moved.
     if (error) {
+      // 11d — the cap is not a failure, it is a rule, and it has its own answer.
+      if (isCapError(error.message)) {
+        setSheet(false);
+        setCapHit({ phone, cents: amountDh * 100 });
+        setTick((n) => n + 1);
+        return;
+      }
       setFailed({
         customer: { id: '', name: 'That client', phone },
         cents: amountDh * 100, balance_cents: null,
@@ -110,6 +127,7 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
       return;
     }
     setSheet(false);
+    setTick((n) => n + 1);
     await load();
     const row = Array.isArray(data) ? data[0] : data;
     const tx: Tx = {
@@ -143,7 +161,11 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
             </Pressable>
           </View>
           <Serif size={40} ls={0} style={s.floatValue}>{hidden ? '••  •••' : dh(float_)}</Serif>
-          <Text style={s.floatSub}>Cash collected for customer top-ups</Text>
+          {/* 11c — the limit, while there is still room to act on it */}
+          <FloatCapMeter st={float$} onAsk={askCollection} />
+          {(float$?.pct ?? 0) < 70 && (
+            <Text style={s.floatSub}>Cash collected for customer top-ups</Text>
+          )}
           <Pressable onPress={() => setSheet(true)} accessibilityLabel="Top-up"
             style={({ pressed }) => [s.topupBtn, pressed && s.pressed]}>
             <Ionicons name="arrow-down" size={18} color={colors.onAccent} />
@@ -194,6 +216,12 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
         onClose={() => setFailed(null)}
         onRetry={() => { setFailed(null); if (lastTry) topup(lastTry.phone, lastTry.dh); }}
         onCallOps={() => { setFailed(null); Linking.openURL(`tel:${OPS_PHONE}`); }} />
+
+      {/* 11d — the cap refused it. Nothing was written, so the only thing left
+          to do is hand the cash back and point them somewhere that can take it. */}
+      <CapHitSheet attempt={capHit} st={float$} opsPhone={OPS_PHONE}
+        onClose={() => setCapHit(null)}
+        onGaveBack={() => setTick((n) => n + 1)} />
     </View>
   );
 }

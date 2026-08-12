@@ -14,6 +14,7 @@ import SettleBundleSheet from '../components/SettleBundleSheet';
 import SlotPicker from '../components/SlotPicker';
 import { PillButton } from '../components/ui';
 import { Block, daySlots, Window } from '../lib/slots';
+import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, inter, radius, sp } from '../theme';
 import type { Barber, Profile } from '../types';
@@ -24,6 +25,7 @@ type Standing = {
   licence_expires_at: string | null; days_left: number | null;
 };
 import { LicenceBanner } from '../components/Trouble';
+import { ShopClosedBanner, ShopClosedTiles, ShopStatus } from '../components/ShopPause';
 import BarberQueueScreen from './BarberQueueScreen';
 import ChatScreen from './ChatScreen';
 import { HiddenScreen } from './OutboxScreen';
@@ -42,6 +44,7 @@ type BookingRow = {
   checked_in_at: string | null;
   started_at: string | null;
   completed_at: string | null;
+  notes: string | null;   // 39d
   services: { name: string } | null;
   customer: { full_name: string | null; avatar_url: string | null; phone: string | null } | null;
 };
@@ -110,6 +113,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   const [inboxOpen, setInboxOpen] = useState(false);
   // turn 10 — standing is a fact about the shop, so it loads with the day
   const [standing, setStanding] = useState<Standing | null>(null);
+  const [shop, setShop] = useState<ShopStatus | null>(null);   // 11b
   const [hidden, setHidden] = useState(false);
   const [unread, setUnread] = useState(0);
   const [chat, setChat] = useState<{ id: string; title: string } | null>(null);
@@ -137,7 +141,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     const from = new Date(); from.setHours(0, 0, 0, 0); from.setDate(from.getDate() - 6);
     const to = new Date(); to.setHours(0, 0, 0, 0); to.setDate(to.getDate() + 14);
     const { data, error } = await supabase.from('bookings')
-      .select('id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, services(name), customer:profiles!customer_id(full_name, avatar_url, phone)')
+      .select('id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, notes, services(name), customer:profiles!customer_id(full_name, avatar_url, phone)')
       .eq('barber_id', barberId)
       .gte('starts_at', from.toISOString()).lt('starts_at', to.toISOString())
       .in('status', ['pending', 'confirmed'])
@@ -164,6 +168,12 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   useEffect(() => {
     supabase.rpc('my_standing').then(({ data }) => { if (data) setStanding(data as Standing); });
   }, [barberId]);
+  // 11b — owner-only in practice: my_shop_status() answers { salon: null } for a
+  // co-barber, and every piece of the banner no-ops on that.
+  const loadShop = useCallback(() => {
+    supabase.rpc('my_shop_status').then(({ data }) => setShop((data as ShopStatus) ?? null));
+  }, []);
+  useEffect(() => { loadShop(); }, [loadShop, barberId]);
 
   async function accept(b: BookingRow) {
     const { error } = await supabase.rpc('accept_booking', { p_booking: b.id });
@@ -202,6 +212,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     checkedInAt: b.checked_in_at, startedAt: b.started_at,
     phone: b.customer_id === barberId ? null : b.customer?.phone ?? null,
     isWalkIn: b.customer_id === barberId,
+    notes: b.notes,
   });
 
   const clientRefOf = (b: BookingRow): ClientRef => ({
@@ -292,6 +303,21 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     const { data } = await supabase.rpc('my_standing');
     if (data) setStanding(data as Standing);
   }
+
+  // Android back, in the same order these early returns are checked. The
+  // dashboard itself is a tab root, so at the bottom it falls through to
+  // Android and backgrounds the app.
+  useAndroidBack(
+    chat ? () => openChat(null)
+      : showProfile ? () => openProfile(false)
+        : showEarnings ? () => openEarnings(false)
+          : showQueue ? () => { setShowQueue(false); onChromeHidden?.(false); load(); }
+            : inboxOpen ? () => { setInboxOpen(false); onChromeHidden?.(false); load(); }
+                // same condition as the render below, so back is never a
+                // no-op on a screen that is showing a back button
+                : (hidden || standing?.hidden) ? () => { setHidden(false); loadStanding(); }
+                  : null,
+  );
 
   if (chat) {
     return <ChatScreen dark bookingId={chat.id} myId={barberId}
@@ -432,6 +458,10 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
           <LicenceBanner standing={standing} onSend={() => setHidden(true)} />
         )}
 
+        {/* 11b — the shop is shut and he is still standing in it. Above the
+            clocked-out banner because closing the shop outranks clocking out. */}
+        {shop && <ShopClosedBanner st={shop} onReopened={loadShop} />}
+
         {/* 1s — the clocked-out banner replaces nothing, it sits above the number */}
         {todayOff && (
           <View style={s.clockedCard}>
@@ -450,7 +480,9 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
         {/* booked today + the 7-day sparkline */}
         <Pressable onPress={() => openEarnings(true)} accessibilityRole="button"
           accessibilityLabel="Earnings details" style={({ pressed }) => pressed && s.pressed}>
-          <Eyebrow ls={1.6}>BOOKED TODAY</Eyebrow>
+          {/* 11b relabels the same number rather than drawing a second one —
+              the reassurance is that this money did not go anywhere. */}
+          <Eyebrow ls={1.6}>{shop?.open === false ? 'STILL BOOKED TODAY' : 'BOOKED TODAY'}</Eyebrow>
           <Serif size={44} ls={0} style={[s.bigMoney, todayOff && { color: D.muted }]}>
             {dh(earnedToday)}
           </Serif>
@@ -459,7 +491,15 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
             <T size={11} c={D.sub}>{weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</T>
             <T size={11} c={D.sub}>Today</T>
           </View>
+          {shop?.open === false && (
+            <T size={12} c={D.sub} style={s.closedNote}>
+              Nothing was cancelled — closing only stops new ones
+            </T>
+          )}
         </Pressable>
+
+        {/* 11b — what closing switched off, and the two things it didn't */}
+        {shop && <ShopClosedTiles st={shop} />}
 
         {/* three-up tiles */}
         <View style={s.tileRow}>
@@ -780,6 +820,7 @@ const s = StyleSheet.create({
 
   headRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
   greet: { marginTop: 5 },
+  closedNote: { marginTop: 6 },   // 11b
   bell: {
     width: 38, height: 38, borderRadius: 999, backgroundColor: D.card,
     alignItems: 'center', justifyContent: 'center',

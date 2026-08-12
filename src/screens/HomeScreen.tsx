@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import QuickAddSheet, { QuickPick } from '../components/QuickAddSheet';
 import TabBar, { TabItem } from '../components/TabBar';
+import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { colors } from '../theme';
 import type { Barber, Profile } from '../types';
@@ -46,6 +47,12 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
   const tabs = barber ? (ownsSalon ? [...BARBER_TABS, WALLET_TAB] : BARBER_TABS) : CUSTOMER_TABS;
   const [tab, setTab] = useState(tabs[0].key);
   const [chromeHidden, setChromeHidden] = useState(false);
+
+  // the lowest handler in the app: from any other tab, back lands on the first
+  // one; from the first tab it returns null and Android backgrounds the app,
+  // which is what a tab root should do. Anything pushed over a tab registers
+  // later and therefore answers before this does.
+  useAndroidBack(tab !== tabs[0].key ? () => { setChromeHidden(false); setTab(tabs[0].key); } : null);
 
   useEffect(() => {
     if (!barber?.salon_id) return;

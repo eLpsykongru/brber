@@ -4,6 +4,7 @@ import {
   Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput,
   TextInputProps, View,
 } from 'react-native';
+import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, serifBlack, shadow, sp } from '../theme';
 import { ForgotPasswordScreen } from './AccountScreens';
@@ -14,6 +15,9 @@ export type AuthView = 'welcome' | 'signin' | 'register';
 // email sign-in, register. Email/password is the real rail; social is stubbed.
 export default function AuthScreen({ initialView = 'welcome' }: { initialView?: AuthView }) {
   const [view, setView] = useState<AuthView>(initialView);
+  // sign-in and register both back out to the welcome screen; from welcome
+  // there is nothing behind us but the launcher
+  useAndroidBack(view !== 'welcome' ? () => setView('welcome') : null);
   if (view === 'welcome') return <Welcome onEmail={() => setView('signin')} onRegister={() => setView('register')} />;
   if (view === 'signin') return <SignIn onBack={() => setView('welcome')} onRegister={() => setView('register')} />;
   return <Register onBack={() => setView('welcome')} onSignIn={() => setView('signin')} />;
@@ -115,6 +119,9 @@ function SignIn({ onBack, onRegister }: { onBack: () => void; onRegister: () => 
     setBusy(false);
     if (error) Alert.alert('Sign in failed', error.message);
   }
+
+  // deeper than AuthScreen's handler, so it registers later and wins
+  useAndroidBack(forgotOpen ? () => setForgotOpen(false) : null);
 
   // 23a/23b replace the one-shot alert: the wait state is most of the flow
   if (forgotOpen) {

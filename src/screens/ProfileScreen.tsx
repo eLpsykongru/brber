@@ -1,17 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import LocationPicker from '../components/LocationPicker';
-import { Eyebrow, Ico, IconName, Screen, Serif, T, TAB_INSET } from '../components/dark';
+import { Eyebrow, Ico, IconName, Screen, Serif, T, TAB_INSET, TopBar } from '../components/dark';
 import { Card, Chip, Field, PillButton, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
 import type { LatLng } from '../lib/geo';
 import { listPortfolio } from '../lib/portfolio';
+import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, radius, serif, shadow, sp } from '../theme';
 import type { Barber, Profile } from '../types';
 import { ActivityIndicator } from 'react-native';
 import CouponsScreen from './CouponsScreen';
+import SavedScreen from './SavedScreen';
+import StandingScreen from './StandingScreen';
 import EarningsScreen from './EarningsScreen';
 import HelpCenterScreen from './HelpCenterScreen';
 import { SetPasswordScreen } from './AccountScreens';
@@ -49,6 +52,8 @@ type ProfileView =
   | 'settings' | 'notifications' | 'password' | 'linked' | 'takedown' | 'appeal' | 'reply'
   | 'preview' | 'services' | 'bundles' | 'work' | 'schedule' | 'salon' | 'earnings'
   | 'cancellations' | 'waitlist'
+  // turn 39 — two things the app already half-had
+  | 'saved' | 'standing'
   // turn 9 — where admin actions land in the shop
   | 'tasks' | 'application' | 'float' | 'round';
 
@@ -96,10 +101,30 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   const initials = (profile.full_name ?? '?')
     .split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
+  // where each view came from, so hardware back retraces the way in rather
+  // than always dumping you at the menu. `faq` is reached from `help` and
+  // `appeal` from `takedown`; both would lose a step without this.
+  const trail = useRef<ProfileView[]>([]);
+
   function go(next: ProfileView) {
-    setView(next);
+    setView((cur) => {
+      if (next !== cur) {
+        if (next === 'menu') trail.current = [];
+        else trail.current.push(cur);
+      }
+      return next;
+    });
     onChromeHidden?.(next !== 'menu');
   }
+
+  // deepest first: an open case sits on top of whatever view opened it, and at
+  // the menu we hand back to whoever pushed us (the barber dashboard) or let
+  // Android have it (the customer's Profile is a tab root).
+  useAndroidBack(
+    openCase ? () => setOpenCase(null)
+      : view !== 'menu' ? () => go(trail.current.pop() ?? 'menu')
+        : onBack,
+  );
 
   function soon(feature: string) {
     Alert.alert(feature, 'Coming soon — see BACKLOG.md');
@@ -159,10 +184,13 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
       onDone={() => { Alert.alert('Password saved', 'You can now sign in with your email.'); go('settings'); }} />;
   }
   if (view === 'bookings') {
-    return <MyBookingsScreen customerId={profile.id} onChromeHidden={onChromeHidden} />;
+    return <MyBookingsScreen customerId={profile.id} onChromeHidden={onChromeHidden}
+      onBack={() => go('menu')} />;
   }
   if (view === 'wallet') return <WalletScreen customerId={profile.id} onBack={() => go('menu')} />;
   if (view === 'coupons') return <CouponsScreen onBack={() => go('menu')} />;
+  if (view === 'saved') return <SavedScreen onBack={() => go('menu')} />;
+  if (view === 'standing') return <StandingScreen onBack={() => go('menu')} onDispute={() => go('support')} />;
   // 30a / 5a — Help Center is now the support console; the FAQ article list it
   // sits on is the old screen, one tap deeper.
   if (view === 'help') {
@@ -258,6 +286,8 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     ...(barber ? [] : [
       { icon: 'card-outline', label: 'Payment Methods', onPress: () => soon('Payment Methods') },
       { icon: 'calendar-outline', label: 'My Bookings', onPress: () => go('bookings') },
+      { icon: 'heart-outline', label: 'Saved', onPress: () => go('saved') },
+      { icon: 'shield-checkmark-outline', label: 'Your standing', onPress: () => go('standing') },
       { icon: 'ticket-outline', label: 'My Coupons', onPress: () => go('coupons') },
       { icon: 'wallet-outline', label: 'My Wallet', onPress: () => go('wallet') },
       { icon: 'gift-outline', label: 'Invite friends', onPress: () => go('invite') },
@@ -280,7 +310,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   if (barber) {
     return <BarberProfile profile={profile} barber={barber} avatarUrl={avatarUrl}
       avatarBusy={avatarBusy} initials={initials} ownsSalon={ownsSalon}
-      onAvatar={changeAvatar} onSignOut={signOut} go={go} />;
+      onAvatar={changeAvatar} onSignOut={signOut} go={go} onBack={onBack} />;
   }
 
   return (
@@ -321,11 +351,12 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
 // 1q — the barber's profile. Same rows, dark canvas, with the numbers that
 // tell him whether his page is actually working.
 function BarberProfile({
-  profile, barber, avatarUrl, avatarBusy, initials, ownsSalon, onAvatar, onSignOut, go,
+  profile, barber, avatarUrl, avatarBusy, initials, ownsSalon, onAvatar, onSignOut, go, onBack,
 }: {
   profile: Profile; barber: Barber; avatarUrl: string | null; avatarBusy: boolean;
   initials: string; ownsSalon: boolean;
   onAvatar: () => void; onSignOut: () => void; go: (v: ProfileView) => void;
+  onBack?: () => void;
 }) {
   const [stats, setStats] = useState<{
     salon: string | null; rating: number | null; reviews: number;
@@ -370,7 +401,10 @@ function BarberProfile({
 
   return (
     <Screen gap={15} bottom={TAB_INSET}>
-      <Serif size={17} ls={0.18} style={{ textAlign: 'center' }}>Profile</Serif>
+      {/* The dashboard hides the tab bar when it opens this, so a bare centred
+          title left the barber with no way out at all. TopBar draws the same
+          title and adds the back puck when there is somewhere to go back to. */}
+      <TopBar title="Profile" onBack={onBack} />
 
       <View style={d.headRow}>
         <Pressable onPress={onAvatar} disabled={avatarBusy} accessibilityRole="button"

@@ -9,6 +9,7 @@ import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, sp } from '../theme';
 import type { Specialist } from '../types';
 import { AskBlock, AskedSheet, type AskRecord } from './AskSheet';
+import BookingNoteSheet from './BookingNote';
 import { Chip, PillButton, Stars } from './ui';
 import SlotPicker from './SlotPicker';
 
@@ -58,6 +59,9 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
   const [coupon, setCoupon] = useState<UsableCoupon | null>(null);
   // 8c — the receipt, once the row exists
   const [done, setDone] = useState<{ id: string; deposit: number } | null>(null);
+  // 39d — kept so a retry after a failed insert doesn't lose what he wrote
+  const [noteOpen, setNoteOpen] = useState(false);
+  const [lastNote, setLastNote] = useState<string | null>(null);
   const [asked, setAsked] = useState<AskRecord | null>(null);   // 36b
   const [failed, setFailed] = useState<'slot' | 'deposit' | null>(null); // 26a / 26b
   const [altCal, setAltCal] = useState<{
@@ -152,7 +156,10 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
     ? Math.min(Math.max(depositCents, floor), payable)
     : 0;
 
-  async function confirm() {
+  // 39d — the note travels with the insert, so a booking never exists without
+  // the thing the customer wanted said about it. `note` is undefined on the
+  // paths that skip the sheet (a retry, the no-deposit request).
+  async function confirm(note?: string | null) {
     if (!barber || !svc || !time) return;
     setBusy(true);
     const { data: auth } = await supabase.auth.getUser();
@@ -160,6 +167,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
       customer_id: auth.user!.id, barber_id: barber.id, service_id: svc.id,
       starts_at: time.toISOString(), deposit_cents: deposit,
       coupon_id: coupon?.id ?? null,
+      notes: note ?? lastNote ?? null,
     }).select('id, deposit_cents').single();
     setBusy(false);
     // 26 — the insert is atomic, so a failure means nothing moved. Two shapes:
@@ -508,7 +516,8 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
         )}
         {step === 'summary' && (
           <View style={s.footer}>
-            <PillButton loading={busy} onPress={confirm}
+            {/* 39d — one stop between deciding and booking, and it is skippable */}
+            <PillButton loading={busy} onPress={() => setNoteOpen(true)}
               title={deposit > 0
                 ? `Pay ${dh(deposit)} DH & confirm`
                 : upFront && svc
@@ -667,6 +676,18 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
       {/* 36b — what the ask actually recorded, said back plainly */}
       <AskedSheet rec={asked} onDone={() => { setAsked(null); onClose(); }}
         onBookOther={() => setAsked(null)} />
+
+      {/* 39d — "anything he should know?", the last step before the insert */}
+      {barber && svc && time && (
+        <BookingNoteSheet visible={noteOpen} onClose={() => setNoteOpen(false)}
+          who={barber.profiles?.full_name ?? 'Your barber'}
+          when={time.toLocaleString('en-US', {
+            weekday: 'short', month: 'short', day: 'numeric',
+            hour: '2-digit', minute: '2-digit', hour12: false,
+          })}
+          service={`${svc.name} · ${svc.duration_min} min`}
+          onSend={(note) => { setLastNote(note); confirm(note); }} />
+      )}
     </Modal>
   );
 }

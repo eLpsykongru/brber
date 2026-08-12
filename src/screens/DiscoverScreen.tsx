@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { Display, Field, Stars, TAB_BAR_INSET } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
+import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, sp } from '../theme';
 import { OfflineBanner, useOnline } from '../components/Offline';
@@ -204,6 +205,19 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
   const phase: 'next' | 'chair' | null = !mineQ ? null
     : mineQ.stage === 'in_chair' ? 'chair'
       : aheadOfMe === 0 ? 'next' : null;
+
+  // Home is a tab root, so the chain here only covers what is pushed over it,
+  // in the same order the early returns below are checked. 28a/28b (the
+  // you-are-next takeover) is deliberately absent: it is an alarm you
+  // acknowledge, not a screen you back out of.
+  useAndroidBack(
+    checkIn ? () => { setCheckIn(false); onChromeHidden?.(false); }
+      : inboxOpen ? () => { setInboxOpen(false); onChromeHidden?.(false); loadUnread(); }
+        : detailOpen ? () => { setDetailOpen(false); onChromeHidden?.(false); }
+          : queueOpen ? () => { setQueueOpen(false); onChromeHidden?.(false); }
+            : salon ? () => open(null)
+              : null,
+  );
 
   if (phase && booking && ackedTakeover !== `${booking.id}:${phase}`) {
     const bName = booking.barbers?.profiles?.full_name ?? 'Your barber';

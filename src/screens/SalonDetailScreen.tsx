@@ -5,10 +5,13 @@ import {
 } from 'react-native';
 import BookingSheet from '../components/BookingSheet';
 import { Bundle, BundleSheet, BundlesTab } from '../components/Bundles';
+import { ClosedBadge, ClosedCard, useClosure } from '../components/SalonClosed';
 import { Empty, Field, Stars } from '../components/ui';
 import { openDirections, walkMin } from '../lib/geo';
+import { useSaved } from '../lib/wishlist';
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
+import { useAndroidBack } from '../lib/back';
 import { colors, font, radius, serif, shadow, shadowLg, sp } from '../theme';
 import type { Specialist } from '../types';
 import BarberDetailScreen from './BarberDetailScreen';
@@ -53,6 +56,7 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
   const [bundles, setBundles] = useState<Bundle[]>([]);
   const [bundleOpen, setBundleOpen] = useState(false);
   const [sheetBundle, setSheetBundle] = useState<Bundle | null>(null);
+  const [saved, toggleSaved] = useSaved('salon', salon.id);   // 39c
 
   const allReviews = salon.barbers.flatMap((b) => b.reviews);
   const avg = avgOf(allReviews);
@@ -73,6 +77,9 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
     supabase.rpc('salon_bundles', { p_salon: salon.id })
       .then(({ data }) => setBundles((data as Bundle[]) ?? []));
   }, [salon.id]);
+
+  // a barber page opened from the salon page is one level deeper again
+  useAndroidBack(profileBarber ? () => setProfileBarber(null) : null);
 
   if (profileBarber) {
     return <BarberDetailScreen barber={profileBarber} salonName={salon.name}
@@ -112,6 +119,12 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
     else Alert.alert(name, 'Coming soon — see BACKLOG.md');
   }
 
+  // 39a — read the shop's own switch before offering a time. `salon_closure`
+  // and the booking trigger both go through `salon_open`, so the page can never
+  // offer what the insert will refuse.
+  const closure = useClosure(salon.id);
+  const shut = !!closure?.closed;
+
   return (
     <View style={s.screen}>
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
@@ -129,12 +142,16 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
                 style={s.circleBtn} hitSlop={8} accessibilityLabel="Share">
                 <Ionicons name="share-social-outline" size={18} color={colors.text} />
               </Pressable>
-              {/* TODO(backlog): wishlist */}
-              <Pressable onPress={() => action('Wishlist')} style={s.circleBtn} hitSlop={8} accessibilityLabel="Save">
-                <Ionicons name="heart-outline" size={18} color={colors.text} />
+              {/* 39c — real since 0065 */}
+              <Pressable onPress={toggleSaved} style={s.circleBtn} hitSlop={8}
+                accessibilityLabel={saved ? 'Remove from saved' : 'Save'}>
+                <Ionicons name={saved ? 'heart' : 'heart-outline'} size={18}
+                  color={saved ? colors.accent : colors.text} />
               </Pressable>
             </View>
           </View>
+          {/* 39a — over the photo, so it is read before anything else */}
+          <ClosedBadge c={closure} />
         </View>
 
         {/* thumbnail strip */}
@@ -183,6 +200,10 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
               </View>
             )}
           </View>
+
+          {/* 39a — what closed means here, and the two things still worth doing */}
+          <ClosedCard c={closure} salonId={salon.id}
+            onBookLater={() => setSheetOpen(true)} />
 
           {/* actions */}
           <View style={s.actions}>
@@ -314,9 +335,11 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
             </Text>
           )}
         </View>
-        <Pressable onPress={() => setSheetOpen(true)}
-          style={({ pressed }) => [s.bookBtn, pressed && s.pressed]}>
-          <Text style={s.bookText}>Book</Text>
+        {/* 39a — the pinned CTA is the one thing that must not stay bookable
+            while the shop is shut; the card above carries the way forward. */}
+        <Pressable onPress={() => setSheetOpen(true)} disabled={shut}
+          style={({ pressed }) => [s.bookBtn, shut && s.bookBtnOff, pressed && s.pressed]}>
+          <Text style={s.bookText}>{shut ? 'Closed' : 'Book'}</Text>
         </Pressable>
       </View>
 
@@ -444,6 +467,7 @@ const s = StyleSheet.create({
     minHeight: 52, borderRadius: radius.pill, backgroundColor: colors.ink,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: sp(8.5),
   },
+  bookBtnOff: { backgroundColor: colors.textTertiary },   // 39a
   bookText: {
     color: colors.onAccent, fontSize: font.small, fontWeight: '700',
     letterSpacing: 1, textTransform: 'uppercase',

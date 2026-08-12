@@ -9,6 +9,7 @@ import { Display } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
 import { UnderReviewStrip } from '../components/Failures';
 import { daySlots } from '../lib/slots';
+import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, shadowLg, sp } from '../theme';
 import ChatScreen from './ChatScreen';
@@ -938,6 +939,13 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
     if (request) await AsyncStorage.setItem(SEEN_KEY(request.id), '1');
     setOverlay(null);
   }
+
+  // the three overlays sit over the booking; under them, back leaves the
+  // booking itself. 13a (moved) is excluded on purpose — it is an
+  // acknowledgement, and dismissMoved is the only way through it.
+  useAndroidBack(
+    overlay === 'chat' || overlay === 'requested' ? () => setOverlay(null) : onBack,
+  );
 
   if (!detail) return <View style={s.screen} />;
   const d = detail;

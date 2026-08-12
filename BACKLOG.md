@@ -845,6 +845,154 @@ Both closed (2026-08-08), with 0051:
 - **9e's "pay it in at the bank" is inert** and says so on screen. It needs a
   slip upload and a clearing step; the code path covers the launch case.
 
+## Switches that were pretending — barber 11 · customer 39 · admin 8
+Three turns, one theme: **columns the code writes that nothing reads.** Every
+item below was already named in this file as a deferred trigger, which is why
+they landed together. Migrations 0063–0066, all written 2026-08-11, **none
+applied yet**.
+
+- **Barber 11 — two switches (0063 enum · 0064).**
+  - `salons.accepting_bookings` has existed since 0025 and **no booking path
+    ever read it**. Six re-emits of `fill_booking` between 0016 and 0055 each
+    check the *barber's* switch; none checked the shop's. An owner closed his
+    shop, watched the button go grey, and requests kept landing on his barbers.
+    This entry's own line 131 said "wire the check when the request path is next
+    touched" — 0052 and 0055 both touched it and didn't.
+  - The enforcement is a **separate BEFORE INSERT trigger** (`refuse_closed_shop`),
+    not a seventh re-emit — the same call 0056 made for
+    `refuse_suspended_customer`. It catches `join_queue` for free, which is 11a's
+    "the walk-in QR stops working".
+  - Closing gained an **end**: `salons.closed_until`, and openness is *derived*
+    (`salon_open()`) rather than swept, so "rest of today" reopens because the
+    date passed and not because a cron woke up. `close_shop` / `reopen_shop` are
+    owner-only because "only you can reopen it" is printed on the sheet.
+  - **11c/11d** put `float_cap_cents` (0044) on screen for the first time. The
+    meter appears from 70% and a refused top-up opens its own sheet — nothing
+    was recorded, hand the cash back, and here is the nearest till with room.
+  - `agent_round()` re-emitted so ops actually sees `collection_requested_at`;
+    a collection clears it by trigger.
+  Still open:
+  - **"Pick dates" is not built** — the third period chip alerts. The two that
+    matter (rest of today / until I reopen) are real; a range needs a calendar
+    the sheet doesn't have.
+  - **11d can't name the customer.** The cap check in `agent_cash_topup` runs
+    *before* the phone lookup, so at refusal time the server has never resolved
+    a name. The masked phone is shown instead of inventing one.
+  - **"Nadia has been told automatically" is sent by the app, not the DB** — the
+    cap refusal is an exception, so anything the function wrote would roll back
+    with it. `request_float_collection()` is called from the catch.
+  - **`agents_with_room` rounds a rival shop's headroom down to 100 DH.** The
+    design prints an exact figure; an exact figure tells any owner in the city
+    how much of our cash a competitor is holding.
+
+- **Customer 39 — four things the app already half-had (0065).** All four are
+  BACKLOG triggers being pulled at once.
+  - **39a** is the customer end of 11a: `salon_closure()` reads the same
+    `salon_open()` the trigger does, so the page can never offer what the insert
+    will refuse. The pinned Book CTA goes grey; "TELL ME IF THEY REOPEN" is a
+    `waitlist_requests` row, because `reopen_shop` already pings every live ask.
+  - **39b** closes *"Nothing surfaces the mark before it bites"*. It also adds a
+    rule 0046 never had — **three visits on time in a row clears a mark**, so a
+    marked customer has something to do besides wait ninety days.
+  - **39c** closes *"Wishlist → toggling does nothing yet"*. One `wishlists`
+    table for barbers and salons. **"Nobody is told you saved them" is the RLS
+    policy**, not a reassuring sentence.
+  - **39d** closes *"Appointment NOTES → needs a `bookings.notes` column"*. The
+    note travels with the insert, so a booking never exists without it, and it
+    renders on the barber's booking panel — the design parks that as "try next",
+    but a note nobody reads is the exact bug this turn is about.
+  Still open:
+  - **39a's "THESE BARBERS WORK ELSEWHERE TOO" is not built and cannot be.**
+    `barbers.salon_id` is a single column; a barber works at one shop. The
+    design's "Saturdays at Marina Barber Club" needs a barber↔salon join table.
+    Omitted rather than faked.
+  - **"Next free" is today only** (`barber_next_free_today`, 30-min steps,
+    ignoring service duration). The design's "Next free Fri 14:00" is a
+    multi-day scan per saved barber, which is not worth it on a list screen.
+  - **Disputing a mark opens a support case**, not a dedicated flow. 14 days is
+    the window, and it is another untuned guess.
+
+- **Admin 8 — the rules, the Barbers row, presence (0066).** Console at
+  **`#/reliability`**, **`#/barbers`** and **`#/desk`** (16 screens).
+  - **8a makes 0046's two guesses into settings.** `platform_settings` is one
+    row with three named columns — not a key/value bag, where a typo invents a
+    setting nobody reads. `customer_deposit_pct`, `customer_on_time_streak` and
+    `mark_late_arrival` all read it now. Every figure on the screen is
+    **counted against the last 90 days of real arrivals**, and
+    `settings_changes` is the "logged with who made it".
+  - **The 39b toggle defaults ON**, which is a deliberate deviation: the canvas
+    shows it off, but 0065 shipped a customer screen that counts to three, and a
+    ladder climbing towards nothing is the failure both turns exist to end.
+  - **8b fills the Barbers row**, inert in every sidebar since 1a — it was the
+    literal `null` in `NAV`, `NAV10` and `NAV11`. "WHY IT'S FLAGGED" is one
+    derived sentence, ordered money → cancellations → silence.
+  - **8b needed a column too**: nothing recorded *when* a booking was cancelled,
+    only that it had been. `bookings.cancelled_at` + a trigger, so "9 inside 2
+    hours" is countable. Historical rows have none and the clause is omitted
+    rather than guessed at.
+  - **8c is 7b answered a step earlier.** 0061 could only tell the second
+    operator that somebody had already decided; `desk_presence` says so before
+    she starts. The 15-minute release is **read at query time, not swept** — a
+    lock nobody is behind stops existing the moment somebody looks.
+  Still open:
+  - **8b's "cutting under the owner's login" row cannot be derived.** A person
+    with no account has no `barbers` row, so the list that would flag them is
+    the one place they are invisible.
+  - **8a's "TRY IT ON ONE DISTRICT"** is not wired — `salons.district` (0060)
+    exists, but a per-district rule needs the settings row to stop being one row.
+  - **8a's two NOT BUILT consequences stay not built**, as the canvas labels
+    them: barbers refusing a booking outright, and reliable clients getting
+    first refusal on freed slots.
+  - **Presence only updates on the `#/desk` route** — no polling, same "no
+    realtime" limit as the rest of the console.
+  - **None of the new admin RPCs call `admin_can()`.** They use `is_admin()`
+    like the other 34. That matches 0062's own note that wiring capabilities
+    should go domain by domain as a visible change — but `admin_save_reliability`
+    changes a platform-wide rule and is a good candidate for the first one.
+
+**Two dead ends fixed with them (2026-08-11).** Not from any turn — found by
+auditing every full-screen push in the app:
+- **The barber's Profile had no back control at all.** `BarberProfile` drew a
+  bare centred "Profile" title and was never handed `onBack`, while the
+  dashboard avatar that opens it calls `onChromeHidden(true)` and hides the tab
+  bar. There was no way out of that screen. It uses the dark kit's `TopBar` now.
+- **Profile → My Bookings was the same trap on the customer side.**
+  `MyBookingsScreen` is a bottom tab *and* a profile row, and had no `onBack`
+  prop at all. It takes an optional one and swaps the plain title for a
+  `ScreenHeader` only when it is opened from Profile.
+An audit script over every `return <Screen …/>` push now reports a back control
+on all of them; run it again after adding a screen.
+
+**Android hardware back — REAL 2026-08-11 (`src/lib/back.ts`).** Nothing had ever
+registered a `BackHandler`, so the system back button quit the app from any
+screen, however deep. There is still no navigator and this does not add one.
+- **`BackHandler` is already the stack.** Subscriptions fire
+  last-registered-first and the first to return true ends the chain; containers
+  mount parent-before-child, so the deepest screen showing is the one that
+  answers. `useAndroidBack(handler | null)` is the whole library — passing null
+  falls through to the next container up, and finally to Android, which
+  backgrounds the app the way a tab root should.
+- **Registered at the 18 places that own navigation state**, never on the leaf
+  screens: a child holding only an `onBack` prop cannot know what "back" means.
+  Each handler mirrors, in order, the early returns its own container renders.
+- **Modals are deliberately excluded.** React Native routes back on an open
+  `<Modal>` to its `onRequestClose`, which every sheet already wires to close.
+- `ProfileScreen` keeps a small `trail` of visited views so back retraces the
+  way in — `faq` returns to `help`, `appeal` to `takedown` — instead of always
+  dumping you at the menu.
+- From a non-first tab, back lands on the first tab before it will exit.
+- Two screens deliberately refuse it: 28a/28b's you-are-next takeover and 13a's
+  "moved" acknowledgement are alarms, not screens you back out of.
+- The audit script also checks the hook is never called after an early return
+  (it caught two); re-run both after adding a container.
+
+**0063–0066 are applied (2026-08-11)**, so their `do $$ assert $$` blocks passed.
+`npx tsc --noEmit` is clean, `npm run check` passes, and the console's own
+slot/screen self-check resolves all 126 ids. Still *unexercised*: every
+authenticated path — `close_shop`/`reopen_shop`, the cap refusal, `claim_case`,
+`admin_save_reliability`, and the `refuse_closed_shop` / `stamp_cancelled_at`
+triggers have not been fired by a real session.
+
 ## Placeholder screens (UI built, not wired to backend)
 These exist as visual shells to implement later:
 - **WalletScreen** — REAL 2026-07-19 (0022): balance + transactions read the

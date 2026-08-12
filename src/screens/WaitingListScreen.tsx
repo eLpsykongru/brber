@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { OfferSlotSheet, type FreedSlot } from '../components/CancelledGap';
 import { Ico, Screen, Sheet, T, TAB_INSET, TopBar } from '../components/dark';
+import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import {
   daySlots, makeRoomOptions, Block, Range, RoomOption, Window,
@@ -145,6 +146,9 @@ export default function WaitingListScreen({ barberId, onBack, slot }: {
       preselect: a?.customer_id,
     });
   }
+
+  // chat over the list, then the list hands back to whoever opened it
+  useAndroidBack(chat ? () => setChat(null) : onBack);
 
   if (chat) {
     return <ChatScreen dark bookingId={chat.id} myId={barberId}

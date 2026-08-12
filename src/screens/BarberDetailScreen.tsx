@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { Empty, Field, PillButton, ScreenHeader, Stars } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
+import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, sp } from '../theme';
 import type { Service, Specialist } from '../types';
@@ -211,6 +212,9 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
         },
       ]);
   }
+
+  // chat sits over the barber page; below it, back closes the page itself
+  useAndroidBack(chatBookingId ? () => { setChatBookingId(null); onChromeHidden?.(false); } : onBack);
 
   if (chatBookingId) {
     return <ChatScreen bookingId={chatBookingId} myId={meId} title={name}

@@ -4,6 +4,7 @@ import {
   FlatList, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { Empty } from '../components/ui';
+import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, sp } from '../theme';
 import ChatScreen from './ChatScreen';
@@ -80,6 +81,9 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
     setOpen(c);
     onChromeHidden(!!c);
   }
+
+  // Chats is a tab root; the open thread is the only level above it
+  useAndroidBack(open ? () => openChat(null) : null);
 
   if (open) {
     return <ChatScreen bookingId={open.id} myId={customerId}

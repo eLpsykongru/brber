@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import ClientSheet, { ClientRef } from '../components/ClientSheet';
 import { Avatar, Eyebrow, Ico, Serif, Stars, T, TAB_INSET } from '../components/dark';
+import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { dark as D, inter } from '../theme';
 import ChatScreen from './ChatScreen';
@@ -85,6 +86,9 @@ export default function ClientsScreen({ barberId, onChromeHidden }: {
     setChat(req);
     onChromeHidden?.(!!req);
   }
+
+  // Clients is a tab root; only the chat pushed over it answers
+  useAndroidBack(chat ? () => openChat(null) : null);
 
   if (chat) {
     return <ChatScreen dark bookingId={chat.id} myId={barberId}

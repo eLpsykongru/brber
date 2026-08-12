@@ -5,8 +5,10 @@ import {
   ScrollView, Share, StyleSheet, Switch, Text, TextInput, View,
 } from 'react-native';
 import { Eyebrow, Ico, IconName, Serif, T } from '../components/dark';
+import { ShopPauseSheet } from '../components/ShopPause';
 import { TAB_BAR_INSET } from '../components/ui';
 import { supabase } from '../lib/supabase';
+import { useAndroidBack } from '../lib/back';
 import { colors, dark as D, font, inter, radius, serif, sp } from '../theme';
 import { AllChairsScreen, OwnerBarberScreen, OwnerDashboard } from './OwnerScreens';
 import { ReviewsInboxScreen, ShopListingScreen, ShopReportScreen, WalkInPosterScreen, WallDisplayScreen } from './ShopScreens';
@@ -79,6 +81,7 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
   const [invite, setInvite] = useState(false);
   const [defCommOpen, setDefCommOpen] = useState(false);
   const [hoursOpen, setHoursOpen] = useState(false);
+  const [pauseOpen, setPauseOpen] = useState(false);   // 11a
 
   const load = useCallback(async () => {
     const [{ data: s }, { data: t }, { data: st }, { data: sv }, { data: ch }] = await Promise.all([
@@ -113,12 +116,15 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
 
   useEffect(() => { load(); }, [load]);
 
-  async function toggleShop() {
+  // 11a (0064) — the power button used to write `accepting_bookings` directly,
+  // and nothing in the booking path read it. Closing now goes through a sheet
+  // that says what it covers, and reopening is an RPC because "only you can
+  // reopen it" has to be enforced somewhere the barbers can't reach.
+  async function reopenShop() {
     if (!salon) return;
-    const next = !salon.accepting_bookings;
-    setSalon({ ...salon, accepting_bookings: next });
-    const { error } = await supabase.from('salons').update({ accepting_bookings: next }).eq('id', salon.id);
-    if (error) { setSalon({ ...salon, accepting_bookings: !next }); Alert.alert('Could not update', error.message); }
+    const { error } = await supabase.rpc('reopen_shop');
+    if (error) { Alert.alert('Could not reopen', error.message); return; }
+    setSalon({ ...salon, accepting_bookings: true });
   }
 
   async function toggleService(svc: Svc) {
@@ -126,6 +132,16 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
     const { error } = await supabase.from('services').update({ is_active: !svc.is_active }).eq('id', svc.id);
     if (error) { load(); Alert.alert('Could not update', error.message); }
   }
+
+  // the same order the early returns below run in: the two member screens sit
+  // over the hub, every other sub-view returns to it, and the hub itself hands
+  // back to Profile.
+  useAndroidBack(
+    payoutsFor ? () => setPayoutsFor(null)
+      : selected ? () => setSelected(null)
+        : view !== 'hub' ? () => setView('hub')
+          : onBack,
+  );
 
   if (!salon || !team || !stats || !services || !chairs) {
     return <View style={s.center}><ActivityIndicator color={colors.accent} /></View>;
@@ -141,6 +157,7 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
   }
 
   // ---- turn 2 · the shop screens behind this hub
+
   if (view === 'dashboard') {
     return <OwnerDashboard salon={salon} team={team} onBack={() => setView('hub')}
       onAllChairs={() => setView('allChairs')} onReports={() => setView('report')}
@@ -306,7 +323,8 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
               ))}
             </View>
 
-            <ShopHeader salon={salon} stats={stats} onToggleOpen={toggleShop} />
+            <ShopHeader salon={salon} stats={stats}
+              onPower={() => (salon.accepting_bookings ? setPauseOpen(true) : reopenShop())} />
 
             {seg === 'team' && <TeamTab team={team} onOpen={setSelected} onInvite={() => setInvite(true)} />}
             {seg === 'chairs' && (
@@ -344,6 +362,9 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
         <SalonHoursSheet salon={salon} onClose={() => setHoursOpen(false)}
           onSaved={() => { setHoursOpen(false); load(); }} />
       )}
+      {/* 11a — what closing actually covers, counted rather than promised */}
+      <ShopPauseSheet visible={pauseOpen} onClose={() => setPauseOpen(false)}
+        onClosed={() => { setSalon({ ...salon, accepting_bookings: false }); load(); }} />
     </View>
   );
 }
@@ -359,8 +380,8 @@ function HubTile({ label, value, unit }: { label: string; value: string; unit?: 
   );
 }
 
-function ShopHeader({ salon, stats, onToggleOpen }: {
-  salon: SalonMeta; stats: Stats; onToggleOpen: () => void;
+function ShopHeader({ salon, stats, onPower }: {
+  salon: SalonMeta; stats: Stats; onPower: () => void;
 }) {
   const open = salon.accepting_bookings;
   return (
@@ -369,9 +390,9 @@ function ShopHeader({ salon, stats, onToggleOpen }: {
         <View style={[s.dot, { backgroundColor: open ? '#3BD07A' : D.sub }]} />
         <Text style={s.shopStatus}>{open ? 'SHOP OPEN' : 'SHOP CLOSED'}</Text>
         <View style={s.grow} />
-        <Pressable onPress={() => Alert.alert(open ? 'Close shop?' : 'Open shop?',
-          open ? 'Stops new bookings for the whole salon.' : 'Salon starts taking bookings again.',
-          [{ text: 'Cancel', style: 'cancel' }, { text: open ? 'Close' : 'Open', onPress: onToggleOpen }])}
+        {/* 11a — closing opens the sheet that spells out what it covers; there
+            is nothing to confirm on the way back in, so reopening is one tap. */}
+        <Pressable onPress={onPower}
           accessibilityLabel={open ? 'Close shop' : 'Open shop'}
           style={({ pressed }) => [s.powerBtn, !open && s.powerBtnOff, pressed && s.pressed]}>
           <Ionicons name="power" size={18} color={open ? colors.onAccent : D.text} />

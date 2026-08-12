@@ -10,6 +10,8 @@ import { Chip, Display, Field, Stars } from '../components/ui';
 import { DEFAULT_REGION, LatLng, haversineKm, openDirections, walkMin } from '../lib/geo';
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
+import { useAndroidBack } from '../lib/back';
+import { useSaved } from '../lib/wishlist';
 import { colors, font, radius, shadow, shadowLg, sp } from '../theme';
 import { NoLocationBar } from '../components/Failures';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
@@ -28,6 +30,18 @@ function startingPrice(s: SalonCard): number | null {
 function avgOf(reviews: { rating: number }[]): number | null {
   if (!reviews.length) return null;
   return reviews.reduce((a, r) => a + r.rating, 0) / reviews.length;
+}
+
+/** 39c — one card's heart. Its own component because the hook can't run in a map. */
+function SaveHeart({ salonId }: { salonId: string }) {
+  const [saved, toggle] = useSaved('salon', salonId);
+  return (
+    <Pressable hitSlop={8} style={styles.heart} onPress={toggle}
+      accessibilityLabel={saved ? 'Remove from saved' : 'Save to saved'}>
+      <Ionicons name={saved ? 'heart' : 'heart-outline'} size={18}
+        color={saved ? colors.accent : colors.text} />
+    </Pressable>
+  );
 }
 
 function SalonPhoto({ salon, style }: { salon: SalonCard; style: object }) {
@@ -142,6 +156,9 @@ export default function ExploreScreen({ onChromeHidden, onBookings }: {
     ? [...visible].sort((a, b) => (kmFor(a) ?? Infinity) - (kmFor(b) ?? Infinity))
     : [...visible].sort((a, b) => a.name.localeCompare(b.name));
 
+  // the salon page is pushed over the tab; back closes it, not the app
+  useAndroidBack(salon ? () => open(null) : null);
+
   if (salon) {
     return <SalonDetailScreen salon={salon} km={kmFor(salon)} onBack={() => open(null)}
       onChromeHidden={onChromeHidden} />;
@@ -240,11 +257,8 @@ export default function ExploreScreen({ onChromeHidden, onBookings }: {
                     <Ionicons name="pricetag" size={11} color={colors.accent} />
                     <Text style={styles.offText}>5% OFF</Text>
                   </View>
-                  {/* TODO(backlog): wishlist table + toggle */}
-                  <Pressable hitSlop={8} style={styles.heart} accessibilityLabel="Save to wishlist"
-                    onPress={() => Alert.alert('Wishlist', 'Coming soon — see BACKLOG.md')}>
-                    <Ionicons name="heart-outline" size={18} color={colors.text} />
-                  </Pressable>
+                  {/* 39c — real since 0065 */}
+                  <SaveHeart salonId={item.id} />
                 </View>
                 <SalonPhoto salon={item} style={styles.cardPhoto} />
                 <View style={styles.cardNameRow}>

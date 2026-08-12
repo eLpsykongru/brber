@@ -9,6 +9,7 @@ import SlotPicker from '../components/SlotPicker';
 import { Field, PillButton, TAB_BAR_INSET } from '../components/ui';
 import { daySlots } from '../lib/slots';
 import type { Window } from '../lib/slots';
+import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, inter, radius, sp } from '../theme';
 import ChatScreen from './ChatScreen';
@@ -340,6 +341,9 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
         },
       ]);
   }
+
+  // the calendar is a tab root, so only the chat above it answers
+  useAndroidBack(chat ? () => openChat(null) : null);
 
   if (chat) {
     return <ChatScreen dark bookingId={chat.id} myId={barberId}

@@ -15,6 +15,7 @@ import { SUPPORT_PHONE } from './src/screens/SupportScreens';
 /** 38h — what my_account_state() (0056) answers. */
 type Account = { suspended: boolean; reason: string | null; since: string | null };
 import { onBannerAction, registerPush } from './src/lib/push';
+import { useAndroidBack } from './src/lib/back';
 import { supabase } from './src/lib/supabase';
 import { SessionExpiredSheet, SetPasswordScreen } from './src/screens/AccountScreens';
 import AuthScreen, { AuthView } from './src/screens/AuthScreen';
@@ -114,6 +115,10 @@ export default function App() {
     AsyncStorage.setItem(INTRO_SEEN_KEY, '1');
     setIntro({ show: false, next });
   }
+
+  // every other root view is terminal (auth, onboarding, suspended, lock):
+  // back there should leave the app, which is what returning null does.
+  useAndroidBack(recovering ? () => setRecovering(false) : null);
 
   let content;
   if (locked && user) {

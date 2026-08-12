@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { Display, Field, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
+import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, sp } from '../theme';
 import { BookingDetailSheet } from './MyBookingScreen';
@@ -180,8 +181,11 @@ function Btn({ title, dark, accent, icon, onPress }: {
   );
 }
 
-export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook }: {
+// `onBack` is only passed when this is opened from Profile → My Bookings. As a
+// bottom tab there is nowhere to go back to, so the header stays as drawn.
+export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook, onBack }: {
   customerId: string; onChromeHidden?: (hidden: boolean) => void; onRebook?: () => void;
+  onBack?: () => void;
 }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [rated, setRated] = useState<Map<string, number>>(new Map());
@@ -234,6 +238,14 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook 
   }, [ticketRow?.barbers?.id, ticketRow?.id]);
 
   function openOverlay(next: boolean) { onChromeHidden?.(next); }
+
+  // the detail sheet is a <Modal>, so Android routes back to its own
+  // onRequestClose — only these two full-screen pushes need a handler.
+  useAndroidBack(
+    queueOpen ? () => { setQueueOpen(null); openOverlay(false); }
+      : receipt ? () => { setReceipt(null); openOverlay(false); }
+        : onBack,
+  );
 
   if (queueOpen?.barbers?.id) {
     return <QueueScreen barberId={queueOpen.barbers.id} myBookingId={queueOpen.id}
@@ -309,7 +321,9 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook 
 
   return (
     <View style={s.screen}>
-      <Display size={24} style={s.title}>My bookings</Display>
+      {onBack
+        ? <ScreenHeader title="My bookings" onBack={onBack} />
+        : <Display size={24} style={s.title}>My bookings</Display>}
       <View style={s.tabsRow}>
         {(['upcoming', 'completed', 'cancelled'] as Filter[]).map((f) => (
           <Pressable key={f} onPress={() => setFilter(f)} style={s.tabBtn}

@@ -12,6 +12,7 @@ import SlotPicker from '../components/SlotPicker';
 import { Field, PillButton } from '../components/ui';
 import { takeLastFix } from '../lib/lastFix';
 import { Block, dayStatus, daySlots, sameDay, Window } from '../lib/slots';
+import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, inter, radius, sp } from '../theme';
 import ChatScreen from './ChatScreen';
@@ -314,6 +315,12 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     const y = timelineY.current + (rowY.current[b.id] ?? 0);
     scrollRef.current?.scrollTo({ y: Math.max(0, y - 90), animated: true });
   }
+
+  // three things can sit over the day, in the order they are checked below
+  useAndroidBack(chat ? () => openChat(null)
+      : waitlist ? () => { setWaitlist(null); load(); }
+        : outbox ? () => { setOutbox(false); load(); }
+          : onBack);
 
   if (chat) {
     return <ChatScreen dark bookingId={chat.id} myId={barberId}

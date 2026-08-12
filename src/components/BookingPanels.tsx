@@ -14,6 +14,7 @@ export type PanelBooking = {
   service: string; durationMin: number; whenLabel: string; timeLabel: string;
   priceCents: number; checkedInAt: string | null; startedAt: string | null;
   phone: string | null; isWalkIn: boolean;
+  notes?: string | null;   // 39d — what the customer wrote when booking
 };
 
 type Reliability = {
@@ -89,6 +90,8 @@ export default function BookingPanelSheet({
       <View style={s.detail}>
         <Row label="Service" value={`${b.service} · ${b.durationMin} min`} />
         <Row label="Slot" value={`${b.whenLabel} · ${b.timeLabel}`} />
+        {/* 39d — he reads this in the chair, which is why it sits with the service */}
+        {b.notes ? <Row label="They said" value={b.notes} /> : null}
         {b.checkedInAt && (
           <Row label="Checked in" color={D.green}
             value={`${hhmm(b.checkedInAt)}${b.startedAt ? ` · in chair ${hhmm(b.startedAt)}` : ''}`} />
@@ -178,6 +181,8 @@ export function BookingRequestSheet({
       <View style={s.detail}>
         <Row label="Service" value={`${b.service} · ${b.durationMin} min`} />
         <Row label="Slot" value={`${b.whenLabel} · ${b.timeLabel}`} />
+        {/* 39d — he reads this in the chair, which is why it sits with the service */}
+        {b.notes ? <Row label="They said" value={b.notes} /> : null}
         <Row label="Price" value={dh(b.priceCents)} />
       </View>
 

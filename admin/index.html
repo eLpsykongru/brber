@@ -657,12 +657,12 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
       <span style="font-size:15px;font-weight:700">Support</span>
       <span id="e-sub" style="font-size:12px;color:#6B6B72">7 open · median first reply 42 min</span>
       <span style="flex:1"></span>
-      <span style="display:flex;align-items:center;gap:7px;height:34px;background:#17171A;border:1px solid #26262B;border-radius:9px;padding:0 12px;font-size:12px;font-weight:600">Assigned to me<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></span>
+      <span style="display:flex;align-items:center;gap:7px;height:34px;background:#17171A;border:1px solid #26262B;border-radius:9px;padding:0 12px;font-size:12px;font-weight:600;cursor:pointer" id="e-mine">Assigned to me<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></span>
     </div>
 
     <div style="flex:1;display:flex;overflow:hidden">
       <div style="width:300px;flex:none;border-right:1px solid #1E1E22;display:flex;flex-direction:column">
-        <div style="display:flex;gap:7px;padding:14px 16px;border-bottom:1px solid #1E1E22">
+        <div id="e-chips" style="display:flex;gap:7px;padding:14px 16px;border-bottom:1px solid #1E1E22">
           <span style="height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;padding:0 11px;font-size:11px;font-weight:700">Open 7</span>
           <span style="height:28px;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 11px;font-size:11px;font-weight:600;color:#9A9CA3">Waiting 3</span>
           <span style="height:28px;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 11px;font-size:11px;font-weight:600;color:#9A9CA3">Closed</span>
@@ -1603,6 +1603,7 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
     </div>
   </div>
 </div>
+</div>
 <div class="scr" id="s8a">
 <div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
   <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
@@ -1637,8 +1638,8 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
       <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span>Settings</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">Reliability</span></span>
       <span style="flex:1"></span>
       <span style="font-size:11px;color:#E8A100">Unsaved changes</span>
-      <span style="height:32px;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:600;color:#9A9CA3">Discard</span>
-      <span style="height:32px;border-radius:8px;background:#E8442E;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:700">Save &amp; apply</span>
+      <span style="height:32px;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:600;color:#9A9CA3;cursor:pointer" id="rb-discard">Discard</span>
+      <span style="height:32px;border-radius:8px;background:#E8442E;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:700;cursor:pointer" id="rb-apply" data-save-rules="">Save &amp; apply</span>
     </div>
 
     <div style="flex:1;display:flex;overflow:hidden">
@@ -1770,10 +1771,10 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
     <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
       <span id="bb-sub" style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span>Barbers</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">Tangier · 118</span></span>
       <span style="flex:1"></span>
-      <span style="display:flex;align-items:center;gap:8px;background:#17171A;border:1px solid #26262B;border-radius:8px;height:32px;padding:0 12px;font-size:11.5px;color:#9A9CA3"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5 21 21"></path></svg>Search name or shop</span>
+      <span style="display:flex;align-items:center;gap:8px;background:#17171A;border:1px solid #26262B;border-radius:8px;height:32px;padding:0 12px;font-size:11.5px;color:#9A9CA3"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5 21 21"></path></svg<input id="bb-q" placeholder="Search name or shop" style="flex:1;min-width:0;background:transparent;border:0;outline:none;color:#fff;font:400 11.5px Inter,sans-serif"></span>
       <span style="display:flex;gap:5px;background:#17171A;border:1px solid #26262B;border-radius:9px;padding:3px">
-        <span style="height:26px;border-radius:7px;background:#E8442E;display:flex;align-items:center;padding:0 11px;font-size:11px;font-weight:700">Needs a look 5</span>
-        <span style="height:26px;border-radius:7px;display:flex;align-items:center;padding:0 11px;font-size:11px;font-weight:600;color:#9A9CA3">All</span>
+        <span style="height:26px;border-radius:7px;background:#E8442E;display:flex;align-items:center;padding:0 11px;font-size:11px;font-weight:700;cursor:pointer" id="bb-f-look" data-bfilter="look">Needs a look</span>
+        <span style="height:26px;border-radius:7px;display:flex;align-items:center;padding:0 11px;font-size:11px;font-weight:600;color:#9A9CA3;cursor:pointer" id="bb-f-all" data-bfilter="all">All</span>
       </span>
     </div>
 
@@ -1928,7 +1929,7 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
       <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">1</span></span>
     </div>
     <div style="flex:1"></div>
-    <div id="dk-table" id="dk-people" style="background:#17171A;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px">
+    <div id="dk-people" style="background:#17171A;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px">
       <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">ON THE DESK NOW</span>
       <div style="display:flex;align-items:center;gap:8px">
         <span style="position:relative;width:26px;height:26px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex:none">NL<span style="position:absolute;right:-1px;bottom:-1px;width:9px;height:9px;border-radius:999px;background:#4ADE80;border:2px solid #17171A"></span></span>
@@ -1950,7 +1951,7 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
       <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span>Support</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">Open cases</span></span>
       <span style="flex:1"></span>
       <span style="display:flex;align-items:center;gap:7px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.3);border-radius:8px;height:30px;padding:0 11px"><span style="width:7px;height:7px;border-radius:999px;background:#4ADE80"></span><span style="font-size:11px;font-weight:700;color:#4ADE80">Live · updates as they land</span></span>
-      <span style="height:32px;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:600;color:#9A9CA3">Oldest first</span>
+      <span style="height:32px;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:600;color:#9A9CA3;cursor:pointer" id="dk-sort">Oldest first</span>
     </div>
 
     <div style="flex:1;display:flex;overflow:hidden">
@@ -1961,7 +1962,7 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
           <span style="height:28px;border-radius:7px;background:#4ADE80;color:#0D0D0F;display:flex;align-items:center;padding:0 11px;font-size:10.5px;font-weight:800;flex:none">SHOW THEM</span>
         </div>
 
-        <div style="flex:1;min-height:0;background:#111113;border:1px solid #1E1E22;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+        <div id="dk-table" style="flex:1;min-height:0;background:#111113;border:1px solid #1E1E22;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
           <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22;flex:none">
             <span style="width:96px;flex:none;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">CASE</span>
             <span style="width:168px;flex:none;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">WHO</span>
@@ -2060,7 +2061,273 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
   </div>
 </div>
 </div>
+<div class="scr" id="s9a">
+<div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg>Demand<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:11px;color:#6B6B72">118</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">6</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">7</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg>Compliance<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">1</span></span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">NL</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Nadia Lahlou</span><span style="display:block;font-size:10px;color:#9A9CA3">Ops · Tangier</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span id="sl-crumb" style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span>Salons</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">Marina Barber Club</span></span>
+      <span style="flex:1"></span>
+      <span id="sl-standing" style="display:flex;align-items:center;gap:7px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.32);border-radius:8px;height:30px;padding:0 11px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2" style="flex:none"><path d="M2 12s3.5-7 10-7c2 0 3.7.6 5.2 1.5M22 12s-3.5 7-10 7c-2 0-3.7-.6-5.2-1.5"></path><path d="M3 3l18 18"></path></svg><span style="font-size:11px;font-weight:700;color:#F87171">Hidden from search since Aug 9, 23:00</span></span>
+      <span style="height:32px;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:600;color:#9A9CA3">Open the shop's page</span>
+    </div>
+
+    <div style="flex:1;display:flex;overflow:hidden">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;padding:20px 22px;gap:14px;overflow:hidden">
+        <div id="sl-head" style="display:flex;align-items:center;gap:14px;flex:none">
+          <span style="width:56px;height:56px;border-radius:14px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#9A9CA3;flex:none">MB</span>
+          <span style="flex:1;min-width:0">
+            <span style="display:flex;align-items:center;gap:9px"><span style="font-family:'Playfair Display',serif;font-weight:700;font-size:21px;letter-spacing:.02em;text-transform:uppercase">Marina Barber Club</span><span style="font-size:9px;letter-spacing:.08em;font-weight:700;color:#0D0D0F;background:#F87171;border-radius:5px;padding:3px 7px">SUSPENDED</span></span>
+            <span style="display:block;font-size:11.5px;color:#9A9CA3;margin-top:5px">Marina Bay, Tangier · owner Karim Idrissi · live since Mar 2026</span>
+          </span>
+          <span style="text-align:right;flex:none"><span style="display:block;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">RATING</span><span style="display:block;font-size:19px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">4.7 <span style="font-size:11px;font-weight:400;color:#9A9CA3">· 38</span></span></span>
+        </div>
+
+        <div id="sl-kpis" style="display:flex;gap:12px;flex:none">
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:13px 14px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">BARBERS</span><span style="font-size:21px;font-weight:700;font-variant-numeric:tabular-nums">3</span><span style="font-size:10px;color:#F87171">1 flagged</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:13px 14px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">BOOKINGS 30D</span><span style="font-size:21px;font-weight:700;font-variant-numeric:tabular-nums">142</span><span style="font-size:10px;color:#9A9CA3">8 420 DH</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:13px 14px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">FLOAT / CAP</span><span style="font-size:21px;font-weight:700;font-variant-numeric:tabular-nums">260<span style="font-size:11px;font-weight:400;color:#9A9CA3"> / 4 000</span></span><span style="font-size:10px;color:#4ADE80">since Aug 9</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:13px 14px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">UNMET ASKS</span><span style="font-size:21px;font-weight:700;font-variant-numeric:tabular-nums">24</span><span style="font-size:10px;color:#9A9CA3">2nd worst in city</span></div>
+        </div>
+
+        <div id="sl-banner" style="background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.28);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:13px;flex:none">
+          <div style="display:flex;align-items:center;gap:11px">
+            <span style="width:30px;height:30px;border-radius:999px;background:rgba(248,113,113,.18);display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg></span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:700;color:#F87171">Auto-hidden · licence 4 days overdue</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">AUD-118 · third missed task · no reply from Karim</span></span>
+            <span style="height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:10.5px;font-weight:700;color:#fff;flex:none">OPEN THE TASK</span>
+          </div>
+          <span style="font-size:11.5px;line-height:1.5;color:#D8D8DC;border-top:1px solid rgba(248,113,113,.2);padding-top:13px;text-wrap:pretty">Nobody new can find them. Their 7 remaining bookings are being honoured, and the shop un-hides itself the moment the licence lands.</span>
+        </div>
+
+        <div id="sl-team" style="flex:1;min-height:0;background:#111113;border:1px solid #1E1E22;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22;flex:none">
+            <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">THE TEAM</span>
+            <span style="flex:1"></span>
+            <span style="font-size:10.5px;color:#6B6B72">Suspending the shop suspends all three</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #1E1E22;background:rgba(248,113,113,.05)">
+            <span style="width:190px;flex:none;display:flex;align-items:center;gap:9px;min-width:0">
+              <span style="width:28px;height:28px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">KI</span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">Karim Idrissi</span><span style="display:block;font-size:10px;color:#E8442E;margin-top:1px">Owner</span></span>
+            </span>
+            <span style="flex:1;min-width:0;font-size:11.5px;color:#D8D8DC">18% cancel rate · 9 of 11 inside two hours</span>
+            <span style="width:62px;flex:none;text-align:right;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums">3.8</span>
+            <span style="width:88px;flex:none;text-align:right;font-size:11.5px;color:#9A9CA3">4 this week</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #1E1E22">
+            <span style="width:190px;flex:none;display:flex;align-items:center;gap:9px;min-width:0">
+              <span style="width:28px;height:28px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">ZB</span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;color:#D8D8DC">Zakaria Boukhris</span><span style="display:block;font-size:10px;color:#9A9CA3;margin-top:1px">Barber</span></span>
+            </span>
+            <span style="flex:1;min-width:0;font-size:11.5px;color:#6B6B72">Nothing flagged</span>
+            <span style="width:62px;flex:none;text-align:right;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums">4.9</span>
+            <span style="width:88px;flex:none;text-align:right;font-size:11.5px;color:#9A9CA3">2 this week</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 16px">
+            <span style="width:190px;flex:none;display:flex;align-items:center;gap:9px;min-width:0">
+              <span style="width:28px;height:28px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">TL</span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;color:#D8D8DC">Tarik Lamrani</span><span style="display:block;font-size:10px;color:#9A9CA3;margin-top:1px">Barber</span></span>
+            </span>
+            <span style="flex:1;min-width:0;font-size:11.5px;color:#6B6B72">Nothing flagged</span>
+            <span style="width:62px;flex:none;text-align:right;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums">4.6</span>
+            <span style="width:88px;flex:none;text-align:right;font-size:11.5px;color:#9A9CA3">1 this week</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:318px;flex:none;border-left:1px solid #1E1E22;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:14px 16px;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:8px">
+          <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHAT YOU CAN DO</span>
+        </div>
+
+        <div id="sl-suspend" style="padding:15px 16px;border-bottom:1px solid #1E1E22;display:flex;flex-direction:column;gap:11px;background:#17171A">
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">SUSPEND FOR REAL</span>
+          <span style="font-size:11.5px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">Hidden isn't suspended. Suspending cancels what's left and refunds it — that's a different, louder thing.</span>
+          <div style="background:#111113;border:1px solid #1E1E22;border-radius:11px;padding:12px;display:flex;flex-direction:column;gap:9px">
+            <span style="display:flex;justify-content:space-between;font-size:11.5px"><span style="color:#9A9CA3">Bookings cancelled</span><span style="font-weight:700">7</span></span>
+            <span style="display:flex;justify-content:space-between;font-size:11.5px"><span style="color:#9A9CA3">Deposits refunded</span><span style="font-weight:700;color:#E8A100">5 · 118 DH</span></span>
+            <span style="display:flex;justify-content:space-between;font-size:11.5px"><span style="color:#9A9CA3">Customers told</span><span style="font-weight:700">7 · push + SMS</span></span>
+          </div>
+          <span style="height:38px;border-radius:10px;background:#17171A;border:1px solid rgba(248,113,113,.42);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#F87171">SUSPEND THE SHOP</span>
+        </div>
+
+        <div id="sl-cap" style="padding:15px 16px;border-bottom:1px solid #1E1E22;display:flex;flex-direction:column;gap:11px">
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">FLOAT CAP</span>
+          <div style="display:flex;align-items:flex-end;gap:12px">
+            <span style="min-width:0"><span style="display:block;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums">4 000 DH</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:3px">holding 260 · 7%</span></span>
+            <span style="flex:1;min-width:0;height:6px;border-radius:3px;background:#212125;overflow:hidden;display:block;margin-bottom:6px"><span style="display:block;height:100%;width:7%;background:#4ADE80"></span></span>
+          </div>
+          <div style="display:flex;gap:7px">
+            <span style="flex:1;height:32px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#9A9CA3">3 000</span>
+            <span style="flex:1;height:32px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">4 000</span>
+            <span style="flex:1;height:32px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#9A9CA3">6 000</span>
+          </div>
+          <span style="font-size:10.5px;color:#6B6B72;line-height:1.45;text-wrap:pretty">Lowering it below 260 DH would stop top-ups tonight.</span>
+        </div>
+
+        <div id="sl-settle" style="padding:15px 16px;border-bottom:1px solid #1E1E22;display:flex;flex-direction:column;gap:10px">
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">SETTLE THE FLOAT</span>
+          <span style="font-size:11.5px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">Last collection 2 940 DH on Aug 9 at 13:20 by you, code confirmed. Only 260 DH has come in since — not worth a trip.</span>
+          <span style="height:36px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#6B6B72">NOTHING WORTH SETTLING</span>
+        </div>
+
+        <div style="flex:1"></div>
+        <div id="sl-contact" style="padding:15px 16px;display:flex;flex-direction:column;gap:9px">
+          <span style="height:40px;border-radius:10px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11.5px;font-weight:800;letter-spacing:.04em"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M5 4h4l2 5-3 2a12 12 0 0 0 5 5l2-3 5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"></path></svg>CALL KARIM</span>
+          <span style="height:38px;border-radius:10px;background:#212125;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11.5px;font-weight:700;color:#fff"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>MESSAGE THE OWNER</span>
+          <span style="font-size:10.5px;color:#6B6B72;line-height:1.45;text-align:center">Every action here is logged against your name.</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+</div>
+<div class="scr" id="s9b">
+<div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg>Demand<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:11px;color:#6B6B72">118</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">6</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">7</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg>Compliance<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">1</span></span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">NL</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Nadia Lahlou</span><span style="display:block;font-size:10px;color:#9A9CA3">Ops · Tangier</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span id="bk-crumb" style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span>Bookings</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600;font-family:ui-monospace,Menlo,monospace">#A3F29B71</span></span>
+      <span style="flex:1"></span>
+      <span id="bk-status" style="font-size:9px;letter-spacing:.08em;font-weight:700;color:#0D0D0F;background:#4ADE80;border-radius:5px;padding:4px 8px">COMPLETED</span>
+      <span id="bk-copy" style="height:32px;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:600;color:#9A9CA3">Copy ID</span>
+    </div>
+
+    <div style="flex:1;display:flex;overflow:hidden">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;padding:20px 22px;gap:13px;overflow:hidden">
+        <div style="display:flex;gap:12px;flex:none">
+          <div id="bk-cust" style="flex:1;background:#111113;border:1px solid #1E1E22;border-radius:14px;padding:15px;display:flex;align-items:center;gap:11px">
+            <span style="width:36px;height:36px;border-radius:999px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#E8442E;flex:none">AB</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">CUSTOMER</span><span style="display:block;font-size:13px;font-weight:700;margin-top:3px">Amine Berrada</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">5 visits · wallet 216 DH · no marks</span></span>
+          </div>
+          <div id="bk-barber" style="flex:1;background:#111113;border:1px solid #1E1E22;border-radius:14px;padding:15px;display:flex;align-items:center;gap:11px">
+            <span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#9A9CA3;flex:none">YE</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">BARBER</span><span style="display:block;font-size:13px;font-weight:700;margin-top:3px">Youssef El Amrani</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">Le Fade Tanger · 4.86 ★</span></span>
+          </div>
+        </div>
+
+        <div style="background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:17px;display:flex;flex-direction:column;gap:12px;flex:none">
+          <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">THE MONEY</span>
+          <div id="bk-money" style="display:flex;gap:11px">
+            <span style="flex:1;background:#17171A;border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.1em;font-weight:700;color:#6B6B72">SERVICE</span><span style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">60 DH</span><span style="font-size:10px;color:#9A9CA3">Classic Haircut · 30 min</span></span>
+            <span style="flex:1;background:#17171A;border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.1em;font-weight:700;color:#6B6B72">DEPOSIT · 40%</span><span style="font-size:16px;font-weight:700;color:#E8442E;font-variant-numeric:tabular-nums">24 DH</span><span style="font-size:10px;color:#9A9CA3">from wallet, Jul 29</span></span>
+            <span style="flex:1;background:#17171A;border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.1em;font-weight:700;color:#6B6B72">CASH AT SHOP</span><span style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">36 DH</span><span style="font-size:10px;color:#4ADE80">collected 11:34</span></span>
+            <span style="flex:1;background:#17171A;border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.1em;font-weight:700;color:#6B6B72">COUPON</span><span style="font-size:16px;font-weight:700;color:#6B6B72">—</span><span style="font-size:10px;color:#6B6B72">none used</span></span>
+          </div>
+          <span id="bk-note" style="font-size:11px;color:#6B6B72;line-height:1.45;border-top:1px solid #1E1E22;padding-top:12px;text-wrap:pretty">Sterncut took no commission. The deposit left Amine's wallet and the barber was paid in full.</span>
+        </div>
+
+        <div id="bk-timeline" style="flex:1;min-height:0;background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:17px;display:flex;flex-direction:column;gap:0;overflow:hidden">
+          <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72;flex:none;margin-bottom:14px">WHAT HAPPENED</span>
+          <div style="display:flex;gap:13px">
+            <span style="width:74px;flex:none;font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums;padding-top:1px">Jul 29 16:02</span>
+            <span style="width:18px;flex:none;display:flex;flex-direction:column;align-items:center"><span style="width:18px;height:18px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span><span style="flex:1;width:2px;background:#26262B"></span></span>
+            <span style="flex:1;min-width:0;padding-bottom:13px"><span style="display:block;font-size:12px;font-weight:600">Booked · 24 DH deposit taken</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Customer app · slot picker</span></span>
+          </div>
+          <div style="display:flex;gap:13px">
+            <span style="width:74px;flex:none;font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums;padding-top:1px">Jul 29 16:04</span>
+            <span style="width:18px;flex:none;display:flex;flex-direction:column;align-items:center"><span style="width:18px;height:18px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span><span style="flex:1;width:2px;background:#26262B"></span></span>
+            <span style="flex:1;min-width:0;padding-bottom:13px"><span style="display:block;font-size:12px;font-weight:600">Note from the customer</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">"Same as last time but leave the top a bit longer"</span></span>
+          </div>
+          <div style="display:flex;gap:13px">
+            <span style="width:74px;flex:none;font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums;padding-top:1px">Jul 30 10:58</span>
+            <span style="width:18px;flex:none;display:flex;flex-direction:column;align-items:center"><span style="width:18px;height:18px;border-radius:999px;background:rgba(74,222,128,.18);display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span><span style="flex:1;width:2px;background:#26262B"></span></span>
+            <span style="flex:1;min-width:0;padding-bottom:13px"><span style="display:block;font-size:12px;font-weight:600">Checked in · 2 min early</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">QR at Le Fade · poster still indoors at this point</span></span>
+          </div>
+          <div style="display:flex;gap:13px">
+            <span style="width:74px;flex:none;font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums;padding-top:1px">Jul 30 11:34</span>
+            <span style="width:18px;flex:none;display:flex;flex-direction:column;align-items:center"><span style="width:18px;height:18px;border-radius:999px;background:rgba(74,222,128,.18);display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span><span style="flex:1;width:2px;background:#26262B"></span></span>
+            <span style="flex:1;min-width:0;padding-bottom:13px"><span style="display:block;font-size:12px;font-weight:600">Done · 36 DH cash collected</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Barber marked it in the chair</span></span>
+          </div>
+          <div style="display:flex;gap:13px">
+            <span style="width:74px;flex:none;font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums;padding-top:1px">Jul 30 11:36</span>
+            <span style="width:18px;flex:none;display:flex;justify-content:center"><span style="width:18px;height:18px;border-radius:999px;background:rgba(232,161,0,.2);display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="#E8A100"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8L12 2z"></path></svg></span></span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Both rated 5★</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Customer review is public · barber's note is private</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:300px;flex:none;border-left:1px solid #1E1E22;display:flex;flex-direction:column;overflow:hidden">
+        <div id="bk-verdict" style="padding:14px 16px;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:8px">
+          <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">NOTHING TO FIX HERE</span>
+        </div>
+        <div id="bk-facts" style="padding:16px;border-bottom:1px solid #1E1E22;display:flex;flex-direction:column;gap:12px">
+          <span style="font-size:11.5px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">Paid, completed, rated both ways. Ops only needs this page when something went wrong — the actions stay available anyway.</span>
+          <div style="background:#17171A;border:1px solid #26262B;border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:10px">
+            <span style="display:flex;justify-content:space-between;font-size:11.5px"><span style="color:#9A9CA3">Linked case</span><span style="font-weight:700;color:#6B6B72">None</span></span>
+            <span style="display:flex;justify-content:space-between;font-size:11.5px"><span style="color:#9A9CA3">Review</span><span style="font-weight:700">RV-2288 · public</span></span>
+            <span style="display:flex;justify-content:space-between;font-size:11.5px"><span style="color:#9A9CA3">Refundable</span><span style="font-weight:700">24 DH deposit</span></span>
+          </div>
+        </div>
+        <div id="bk-actions" style="padding:16px;border-bottom:1px solid #1E1E22;display:flex;flex-direction:column;gap:10px">
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">IF A CUSTOMER COMPLAINS</span>
+          <span style="height:38px;border-radius:10px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#fff">REFUND THE 24 DH DEPOSIT</span>
+          <span style="height:38px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#9A9CA3">OPEN A CASE FROM THIS</span>
+          <span style="font-size:10.5px;color:#6B6B72;line-height:1.45;text-wrap:pretty">A refund here credits the wallet and leaves the booking completed.</span>
+        </div>
+        <div style="flex:1"></div>
+        <div id="bk-jump" style="padding:16px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">JUMP TO</span>
+          <span style="display:flex;align-items:center;gap:9px;height:34px;border-radius:9px;background:#17171A;padding:0 12px"><span style="flex:1;min-width:0;font-size:11.5px;color:#D8D8DC">Amine's account</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></span>
+          <span style="display:flex;align-items:center;gap:9px;height:34px;border-radius:9px;background:#17171A;padding:0 12px"><span style="flex:1;min-width:0;font-size:11.5px;color:#D8D8DC">Le Fade Tanger</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></span>
+          <span style="display:flex;align-items:center;gap:9px;height:34px;border-radius:9px;background:#17171A;padding:0 12px"><span style="flex:1;min-width:0;font-size:11.5px;color:#D8D8DC">Review RV-2288</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
 <script>
 // ---------------------------------------------------------------- routing --
 // Route → screen id. Barbers, Customers and Coupons are in the sidebar but have
@@ -2071,12 +2338,14 @@ const ROUTES = {
   'appeals': '3a', 'customers': '3b', 'compliance': '5a', 'coupons': '6a', 'demand': '4a',
   // turn 8 — the rules, the Barbers row that never went anywhere, and presence
   'reliability': '8a', 'barbers': '8b', 'desk': '8c',
+  // turn 9 — where the row actions land: the salon page and the booking row
+  'salon': '9a', 'booking': '9b',
 };
 // ponytail: the one check this wiring leaves behind. The screens are the design's
 // own markup and the renderers find their slots by id — nothing errors when an id
 // drifts, the panel just silently stops updating. This says so on load instead.
 const SLOTS = ('a-kpis a-bars a-stats a-live a-needs a-top a-when b-sub b-chips b-table b-count '
-  + 'c-sub c-kpis c-table d-sub d-kpis d-shops d-mismatch d-ledger e-sub e-list e-head e-thread '
+  + 'c-sub c-kpis c-table d-sub d-kpis d-shops d-mismatch d-ledger e-sub e-list e-head e-thread e-chips e-mine '
   + 'e-side e-reply e-send f-crumb f-pos f-side f-head f-checkn f-checkbar f-check f-30 f-photos '
   + 'f-photon f-risk rv-side rv-pos rv-crumb rv-head rv-card rv-says rv-visit rv-signals rv-who '
   + 'rv-effect rv-30 rl-stats rl-chips rl-rows md-reasons md-sub md-effect md-note md-confirm '
@@ -2088,9 +2357,12 @@ const SLOTS = ('a-kpis a-bars a-stats a-live a-needs a-top a-when b-sub b-chips 
   + 'cm-audience cm-exclude cm-cap cm-cuts cm-save cm-cancel cm-list '
   + 'dm-sub dm-range dm-export dm-kpis dm-districts dm-hours dm-actions dm-shops '
   + 'inc-bar '
-  + 'rb-when rb-stats rb-note rb-days rb-cleanrow rb-dry rb-summary rb-tell rb-save '
-  + 'bb-sub bb-kpis bb-table bb-detail '
-  + 'dk-people dk-new dk-table dk-panel').split(' ');
+  + 'rb-when rb-stats rb-note rb-days rb-cleanrow rb-dry rb-summary rb-tell rb-save rb-apply rb-discard '
+  + 'bb-sub bb-kpis bb-table bb-detail bb-q bb-f-look bb-f-all '
+  + 'dk-people dk-new dk-table dk-panel dk-sort '
+  + 'sl-crumb sl-standing sl-head sl-kpis sl-banner sl-team sl-suspend sl-cap sl-settle sl-contact '
+  + 'bk-crumb bk-status bk-copy bk-cust bk-barber bk-money bk-note bk-timeline bk-verdict bk-facts '
+  + 'bk-actions bk-jump').split(' ');
 for (const id of Object.values(ROUTES)) if (!document.getElementById('s' + id)) console.error('admin: no screen', id);
 for (const id of SLOTS) if (!document.getElementById(id)) console.error('admin: markup is missing', id);
 
@@ -2099,7 +2371,7 @@ const byText = (scope, t) => [...document.querySelectorAll(scope + ' span')].fin
 const nth = (sel, i) => document.querySelectorAll(sel)[i];
 
 // what a row click picked, so the detail screens know what to fetch
-const state = { caseId: null, reviewId: null, salonId: null };
+const state = { caseId: null, reviewId: null, salonId: null, bookingId: null };
 
 const modal = $('modal');
 const closeModal = () => { modal.hidden = true; };
@@ -2107,6 +2379,8 @@ const closeModal = () => { modal.hidden = true; };
 function show(route) {
   const id = ROUTES[route] || ROUTES.overview;
   document.querySelectorAll('.scr').forEach((s) => s.classList.toggle('on', s.id === 's' + id));
+  // sub-screens (salons/pending, reviews/flagged) light their parent's row
+  markNav((ROUTES[route] ? route : 'overview').split('/')[0]);
   closeModal();
   scrollTo(0, 0);
   const load = LOAD[route] || LOAD.overview;
@@ -2123,21 +2397,50 @@ addEventListener('hashchange', () => show(location.hash.slice(2)));
 // built before it keep the nine-item list, so the map is applied by length.
 // turn 8b finally gives the Barbers row somewhere to go — it was the null in
 // every one of these maps since 1a.
-const NAV = ['overview', 'salons', 'barbers', 'customers', 'bookings', 'wallets', 'support', 'reviews', null];
-const NAV10 = ['overview', 'salons', 'barbers', 'customers', 'bookings', 'wallets', 'support', 'reviews', 'compliance', 'coupons'];
-const NAV11 = ['overview', 'demand', 'salons', 'barbers', 'customers', 'bookings', 'wallets', 'support', 'reviews', 'compliance', 'coupons'];
-// 8a adds a twelfth row: Settings, whose only page so far is the reliability one
-const NAV12 = NAV11.concat(['reliability']);
+// Keyed on the row's own label, not its index. Sixteen screens were drawn across
+// eight design turns and they do not agree on how many sidebar rows there are;
+// an index map has to guess the list from its length, and every screen whose
+// count it fails to recognise silently loses Compliance, Coupons and Settings.
+// The labels never drifted, so they are what we match.
+const NAV_ROUTE = {
+  overview: 'overview', demand: 'demand', salons: 'salons', barbers: 'barbers',
+  customers: 'customers', bookings: 'bookings', wallets: 'wallets', support: 'support',
+  reviews: 'reviews', compliance: 'compliance', coupons: 'coupons',
+  settings: 'reliability',   // Settings' only page so far is the reliability one
+};
 const NAVS = [...document.querySelectorAll('.scr > div > div:first-child > div:nth-child(2)')];
+// Each of the sixteen screens hardcoded its own sidebar, and eight design turns
+// left them disagreeing: ten screens list nine rows, Compliance and Coupons ten,
+// Demand eleven, the reliability screen twelve. Demand, Compliance and Settings
+// were simply absent from most of them, so tabs appeared and vanished as you
+// moved around. The fullest rail wins and is cloned into all of them.
+const FULL_NAV = NAVS.reduce((a, b) => (b.children.length > a.children.length ? b : a));
+NAVS.forEach((nav) => { if (nav !== FULL_NAV) nav.innerHTML = FULL_NAV.innerHTML; });
 NAVS.forEach((nav) => {
-  const map = nav.children.length === 12 ? NAV12
-    : nav.children.length === 11 ? NAV11 : nav.children.length === 10 ? NAV10 : NAV;
-  [...nav.children].forEach((item, i) => { if (map[i]) item.dataset.go = map[i]; });
+  [...nav.children].forEach((item) => {
+    // rows carry a badge count ("Reviews3") and one is "Wallets & float"
+    const key = item.textContent.trim().toLowerCase().replace(/[0-9]+$/, '').split(' ')[0];
+    if (NAV_ROUTE[key]) item.dataset.go = NAV_ROUTE[key];
+  });
 });
+
+// One rail everywhere means the highlight can no longer be baked into the
+// markup — the cloned copy carries whichever row the source screen had lit.
+function markNav(route) {
+  NAVS.forEach((nav) => [...nav.children].forEach((item) => {
+    const on = item.dataset.go === route;
+    item.style.background = on ? '#212125' : 'transparent';
+    item.style.fontWeight = on ? '700' : '500';
+    item.style.color = on ? '#fff' : '#9A9CA3';
+    const svg = item.querySelector('svg');
+    if (svg) svg.setAttribute('stroke', on ? '#fff' : '#9A9CA3');
+  }));
+}
 
 // …and the drill-downs the design draws between screens.
 byText('#s1a', 'See all 42').dataset.go = 'salons';
 byText('#s1a', 'All 10').dataset.go = 'support';
+byText('#s1a', 'Open map').dataset.go = 'demand';            // 4a, built in turn 4
 byText('#s1f', 'Salons').dataset.go = 'salons';                              // breadcrumb
 byText('#s2a', 'Reviews').dataset.go = 'reviews';                            // breadcrumb
 // 3a's breadcrumb back to the list. The sidebar's own "Reviews" row carries a
@@ -2157,6 +2460,7 @@ addEventListener('input', (e) => {
   if (e.target.id === 'b-q') { view.salons.q = q; view.salons.page = 0; drawSalons(); }
   else if (e.target.id === 'c-q') { view.bookings.q = q; drawBookings(); }
   else if (e.target.id === 'rl-q') { view.reviews.q = q; drawReviews(); }
+  else if (e.target.id === 'bb-q' && barbers) { barberQ = q; drawBarberRows(); }
 });
 
 // ------------------------------------------------------------------- data --
@@ -2199,6 +2503,9 @@ async function rpc(fn, args = {}) {
 }
 
 function fail(e) {
+  // a 3.8s toast is not a trace: a panel that silently stops filling reads as
+  // "the console is dead", so every failure leaves something to read afterwards
+  console.error('admin:', e);
   if (e.status === 401) { forget(); return gate('Session expired — sign in again.'); }
   if (/Admins only/.test(e.message)) { return gate('That account is not an admin.'); }
   toast(e.message);
@@ -2275,12 +2582,16 @@ function toast(msg) {
   toast.t = setTimeout(() => { t.style.display = 'none'; }, 3800);
 }
 
-// the sidebar counters, on every screen at once
+// the sidebar counters, on every screen at once. Keyed on the row's route
+// rather than its index: the rail is now twelve rows everywhere, and the old
+// index map was written against the nine-row one — it would have numbered
+// Demand, Salons, Wallets and Support instead. Rows with no badge end in their
+// <svg>, which the SPAN guard rejects.
 function setNav(counts) {
-  const at = { 1: counts.salons, 2: counts.barbers, 6: counts.support, 7: counts.reviews };
-  NAVS.forEach((nav) => Object.entries(at).forEach(([i, v]) => {
+  NAVS.forEach((nav) => [...nav.children].forEach((item) => {
+    const v = counts[item.dataset.go];
     if (v == null) return;
-    const badge = nav.children[i]?.lastElementChild;
+    const badge = item.lastElementChild;
     if (badge && badge.tagName === 'SPAN') { badge.textContent = v; badge.style.display = v ? '' : 'none'; }
   }));
 }
@@ -2429,7 +2740,7 @@ function drawSalons() {
   fill('b-table',
     `<div style="${G};height:42px;border-bottom:1px solid #26262B"><span style="width:15px;height:15px;border-radius:4px;border:1.5px solid #3A3A40"></span>${h('SALON')}${h('OWNER')}${h('STATUS')}${h('CHAIRS', 1)}${h('BOOKINGS', 1)}${h('FLOAT HELD', 1)}${h('RATING', 1)}<span></span></div>`
     + (rows.length ? rows.map((s) => `
-      <div ${s.status === 'pending' ? `data-salon="${s.id}" data-go="salons/pending"` : ''} style="${G};height:58px;border-bottom:1px solid #1E1E22">
+      <div data-salon-page="${s.id}" ${s.status === 'pending' ? `data-salon="${s.id}"` : ''} style="cursor:pointer;${G};height:58px;border-bottom:1px solid #1E1E22">
         <span style="width:15px;height:15px;border-radius:4px;border:1.5px solid #3A3A40"></span>
         <span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="width:32px;height:32px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">${esc(initials(s.name))}</span><span style="min-width:0"><span style="display:block;font-size:13px;font-weight:700">${esc(s.name)}</span><span style="display:block;font-size:10px;color:#6B6B72">${esc(s.address || '—')}</span></span></span>
         <span style="font-size:12px;color:#D8D8DC">${esc(s.owner)}</span>
@@ -2493,7 +2804,7 @@ function drawBookings() {
     + (rows.length ? rows.map((b) => {
       const [label, colour, bg] = BK[b.state] || BK.confirmed;
       const disputed = b.disputed;
-      return `<div style="${G};height:54px;border-bottom:1px solid #1E1E22${disputed ? ';background:rgba(232,68,46,.05);margin:0 -18px;padding:0 18px' : ''}">
+      return `<div data-booking="${b.id}" style="cursor:pointer;${G};height:54px;border-bottom:1px solid #1E1E22${disputed ? ';background:rgba(232,68,46,.05);margin:0 -18px;padding:0 18px' : ''}">
         <span style="font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#D8D8DC">${esc(b.ref)}</span>
         <span style="font-size:12px;font-weight:600${b.walk_in ? ';color:#9A9CA3' : ''}">${b.walk_in ? 'Walk-in · ' : ''}${esc(b.customer)}</span>
         <span style="font-size:12px;color:#9A9CA3">${esc(b.salon)} · ${esc(b.barber.split(' ')[0])}</span>
@@ -2591,19 +2902,43 @@ const REASON = {
   wrong_service: 'Not the service booked', hygiene: 'Hygiene complaint', other: 'Something else',
 };
 
+// The status chips were the design's own markup and nothing ever rendered them,
+// so the list was pinned to 'open' forever. `support_cases.status` only ever
+// holds 'open' or 'resolved' (0042's check constraint) — the design's third
+// chip, "Waiting", has no state behind it, so it is not drawn rather than drawn
+// dead. "Assigned to me" filters what came back against case_holders(), the
+// same list 8c's desk already reads.
+let supportFilter = 'open';
+let supportMine = false;
+
 async function loadSupport() {
-  const d = await rpc('admin_support', { p_status: 'open' });
+  const [d, holders] = await Promise.all([
+    rpc('admin_support', { p_status: supportFilter }),
+    rpc('case_holders').catch(() => []),
+  ]);
+  const held = {};
+  (holders || []).forEach((h) => { held[h.ref] = h; });
+  const rows = supportMine ? d.rows.filter((r) => held[r.case_no] && held[r.case_no].mine) : d.rows;
+
   setNav({ support: d.counts.open });
   set($('e-sub'), `${d.counts.open} open · ${d.counts.resolved} closed`);
-  if (!d.rows.length) {
-    fill('e-list', empty('No open cases.'));
+
+  const schip = (label, key) => `<span data-sfilter="${key}" style="cursor:pointer;height:28px;border-radius:8px;`
+    + (supportFilter === key ? 'background:#E8442E;font-weight:700' : 'background:#17171A;border:1px solid #26262B;color:#9A9CA3;font-weight:600')
+    + `;display:flex;align-items:center;padding:0 11px;font-size:11px">${label}</span>`;
+  fill('e-chips', schip('Open ' + d.counts.open, 'open') + schip('Closed ' + d.counts.resolved, 'resolved'));
+  $('e-mine').style.borderColor = supportMine ? '#E8442E' : '#26262B';
+  $('e-mine').style.color = supportMine ? '#fff' : '#9A9CA3';
+
+  if (!rows.length) {
+    fill('e-list', empty(supportMine ? 'Nothing assigned to you.' : 'No cases here.'));
     fill('e-head', '<span style="font-size:13px;color:#6B6B72">Nothing to answer.</span>');
     fill('e-thread', ''); fill('e-side', '');
     return;
   }
-  if (!d.rows.some((r) => r.id === state.caseId)) state.caseId = d.rows[0].id;
+  if (!rows.some((r) => r.id === state.caseId)) state.caseId = rows[0].id;
 
-  fill('e-list', d.rows.map((c) => {
+  fill('e-list', rows.map((c) => {
     const on = c.id === state.caseId;
     return `<div data-case="${c.id}" style="padding:13px 16px;border-bottom:1px solid #1E1E22;cursor:pointer${on ? ';background:#17171A;border-left:3px solid #E8442E;box-sizing:border-box' : ''}">
       <div style="display:flex;align-items:center;gap:8px"><span style="font-size:10px;font-family:ui-monospace,Menlo,monospace;color:${on ? '#E8442E' : '#6B6B72'};font-weight:700">${esc(c.case_no)}</span><span style="flex:1"></span><span style="font-size:10px;color:#6B6B72">${ago(c.created_at)}</span></div>
@@ -2766,7 +3101,9 @@ async function loadReviewList() {
 // A customer gets one appeal (0045) and it has to land somewhere a human looks.
 // It rides above the list rather than on its own screen — the design predates
 // appeals, and a second screen for two rows a week is a screen nobody opens.
-function drawAppeals() {
+// Named apart from 3a's drawAppeals(): both are top-level, so the later
+// declaration won and opening Reviews threw on the desk's null `desk`.
+function drawAppealBar() {
   const bar = $('rl-appeals');
   if (!appeals.pending.length && !appeals.actions.length) { bar.style.display = 'none'; return; }
   bar.style.display = '';
@@ -2792,7 +3129,7 @@ function drawReviews() {
   const d = view.reviews.data;
   if (!d) return;
   const s = d.stats;
-  drawAppeals();
+  drawAppealBar();
   const card = (label, value, foot, colour) => `<div style="flex:1;background:#17171A;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:${colour || '#6B6B72'}">${label}</span><span style="font-family:'Playfair Display',serif;font-weight:700;font-size:28px;line-height:1;font-variant-numeric:tabular-nums${colour ? ';color:' + colour : ''}">${esc(value)}</span><span style="font-size:10px;color:#6B6B72">${foot}</span></div>`;
   const growth = pct(s.month - s.prev_month, s.prev_month || 1);
   fill('rl-stats',
@@ -3141,6 +3478,18 @@ document.addEventListener('click', async (e) => {
     return loadReview().catch(() => { location.hash = '#/reviews'; });
   }
 
+  const sfil = t.closest('[data-sfilter]');
+  if (sfil) {
+    supportFilter = sfil.dataset.sfilter;
+    state.caseId = null;
+    return loadSupport().catch(fail);
+  }
+  if (t.closest('#e-mine')) {
+    supportMine = !supportMine;
+    state.caseId = null;
+    return loadSupport().catch(fail);
+  }
+
   if (t.closest('#e-send')) {
     const body = $('e-reply').value.trim();
     if (!body) return toast('Nothing to send.');
@@ -3173,6 +3522,26 @@ document.addEventListener('click', async (e) => {
     return loadApprovals().catch(fail);
   }
 });
+
+// The design shipped a placeholder operator — "Nadia Lahlou", initials NL — in
+// all sixteen sidebars, and nothing ever replaced it, so every admin signed in
+// and was greeted as somebody else. The identity block is the last child of the
+// sidebar column on every screen.
+async function whoami() {
+  const me = await api('/auth/v1/user').catch(() => null);
+  if (!me) return;
+  const prof = await api('/rest/v1/profiles?select=full_name&id=eq.' + me.id).catch(() => null);
+  const name = (prof && prof[0] && prof[0].full_name) || me.email || 'Admin';
+  const initials = name.split(/[\s@._-]+/).filter(Boolean).slice(0, 2)
+    .map((w) => w[0].toUpperCase()).join('');
+  document.querySelectorAll('.scr > div > div:first-child').forEach((bar) => {
+    const box = bar.lastElementChild;
+    if (!box || box.children.length < 2) return;
+    box.children[0].textContent = initials;
+    const label = box.children[1].firstElementChild;
+    if (label) label.textContent = name;
+  });
+}
 
 // ------------------------------------------------------------------ gate ---
 function gate(msg) {
@@ -3207,6 +3576,7 @@ function gate(msg) {
         }));
       } catch (err) { return set($('gate-msg'), err.message); }
       g.remove();
+      whoami();
       show(location.hash.slice(2));
     });
   }
@@ -3838,10 +4208,16 @@ async function drawReliability() {
   $('rb-save').style.opacity = dirty ? '1' : '.45';
   $('rb-save').style.cursor = dirty ? 'pointer' : 'default';
   $('rb-save').dataset.saveRules = dirty ? '1' : '';
+  // the header pair the design draws above the fold — same save, same guard
+  $('rb-apply').dataset.saveRules = dirty ? '1' : '';
+  $('rb-apply').style.opacity = dirty ? '1' : '.45';
+  $('rb-discard').style.opacity = dirty ? '1' : '.45';
 }
 
 // --------------------------------------------------- turn 8 · the Barbers row --
 let barbers = null;
+let barberFilter = 'look';
+let barberQ = '';
 
 async function loadBarbers(id) {
   barbers = await rpc('admin_barbers');
@@ -3860,10 +4236,34 @@ async function loadBarbers(id) {
     + kpi('CANCEL RATE', (barbers.cancel_rate == null ? 0 : barbers.cancel_rate) + ' %', 'shop-side, last 30d')
     + kpi('NEW THIS MONTH', barbers.new_month, 'approved barbers');
 
+  drawBarberRows();
+  const shown = barberRows();
+  const first = shown.find((r) => r.flagged) || shown[0];
+  await drawBarberDetail(id || (first && first.id));
+}
+
+// The design ships this list filtered to the ones that need a look, with an
+// "All" beside it — both were static markup. The search runs over what came
+// back, like every other table here, so there is no round trip per keystroke.
+function barberRows() {
+  return barbers.rows.filter((b) =>
+    (barberFilter === 'all' || b.flagged)
+    && (!barberQ || (b.name + ' ' + b.shop).toLowerCase().includes(barberQ)));
+}
+
+function drawBarberRows() {
+  [[$('bb-f-look'), 'look'], [$('bb-f-all'), 'all']].forEach(([el, key]) => {
+    const on = barberFilter === key;
+    el.style.background = on ? '#E8442E' : 'transparent';
+    el.style.color = on ? '#fff' : '#9A9CA3';
+    el.style.fontWeight = on ? '700' : '600';
+  });
+  $('bb-f-look').textContent = 'Needs a look ' + barbers.rows.filter((b) => b.flagged).length;
+
   const ACT = { review: 'REVIEW', open: 'OPEN', message: 'MESSAGE' };
   const head = $('bb-table').firstElementChild;
   $('bb-table').innerHTML = head ? head.outerHTML : '';
-  $('bb-table').insertAdjacentHTML('beforeend', barbers.rows.map((b) =>
+  $('bb-table').insertAdjacentHTML('beforeend', barberRows().map((b) =>
     '<div data-barber="' + b.id + '" style="cursor:pointer;display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #1E1E22;box-sizing:border-box'
     + (b.flagged ? ';background:rgba(248,113,113,.06);border-left:3px solid #F87171' : '') + '">'
     + '<span style="width:224px;flex:none;display:flex;align-items:center;gap:9px;min-width:0">'
@@ -3885,10 +4285,7 @@ async function loadBarbers(id) {
     + (b.action
       ? '<span style="font-size:10px;font-weight:800;letter-spacing:.06em;color:#0D0D0F;background:#E8A100;border-radius:6px;padding:5px 9px">' + ACT[b.action] + '</span>'
       : '')
-    + '</span></div>').join(''));
-
-  const flagged = barbers.rows.find((r) => r.flagged);
-  await drawBarberDetail(id || (flagged && flagged.id));
+    + '</span></div>').join('') || empty('Nobody matches that.'));
 }
 
 async function drawBarberDetail(id) {
@@ -3930,6 +4327,7 @@ async function drawBarberDetail(id) {
 // 8c is 7b answered one step earlier: 0061 could only tell the second operator
 // that somebody had already decided. This tells her before she starts typing.
 let deskNow = null;
+let deskOldest = false;
 
 async function loadDesk() {
   const [d, cases, holders] = await Promise.all([
@@ -3957,7 +4355,13 @@ async function loadDesk() {
 
   const head = $('dk-table').firstElementChild;
   $('dk-table').innerHTML = head ? head.outerHTML : '';
-  $('dk-table').insertAdjacentHTML('beforeend', ((cases && cases.rows) || []).map((c) => {
+  // "Oldest first" was static too. admin_support already returns newest-first,
+  // so this only ever reverses what came back.
+  const deskRows = [...((cases && cases.rows) || [])]
+    .sort((a, b) => (deskOldest ? 1 : -1) * (new Date(b.created_at) - new Date(a.created_at)));
+  $('dk-sort').style.borderColor = deskOldest ? '#E8442E' : '#26262B';
+  $('dk-sort').style.color = deskOldest ? '#fff' : '#9A9CA3';
+  $('dk-table').insertAdjacentHTML('beforeend', deskRows.map((c) => {
     const h = held[c.case_no];
     return '<div data-case-ref="' + esc(c.case_no) + '" style="cursor:pointer;display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #1E1E22">'
       + '<span style="width:92px;flex:none;font-size:11.5px;font-family:ui-monospace,Menlo,monospace;color:#D8D8DC">' + esc(c.case_no) + '</span>'
@@ -3997,6 +4401,10 @@ document.addEventListener('click', (e) => {
     draft.clear_after_clean = clean.dataset.clean === 'off' ? null : Number(clean.dataset.clean);
     return drawReliability().catch(fail);
   }
+  if (e.target.closest('#rb-discard') && draft) {
+    draft = Object.assign({}, rules);
+    return drawReliability().catch(fail);
+  }
   const save = q('data-save-rules');
   if (save && save.dataset.saveRules) {
     return rpc('admin_save_reliability', {
@@ -4005,6 +4413,14 @@ document.addEventListener('click', (e) => {
     }).then(() => { toast('Applied. Everyone affected has been told.'); return loadReliability(); })
       .catch(fail);
   }
+
+  if (e.target.closest('#dk-sort')) {
+    deskOldest = !deskOldest;
+    return loadDesk().catch(fail);
+  }
+
+  const bfil = q('data-bfilter');
+  if (bfil && barbers) { barberFilter = bfil.dataset.bfilter; return drawBarberRows(); }
 
   const bar = q('data-barber');
   if (bar) return drawBarberDetail(bar.dataset.barber).catch(fail);
@@ -4020,6 +4436,316 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// turn 9 clicks — the four verbs, finally attached to something
+document.addEventListener('click', async (e) => {
+  const q = (a) => e.target.closest('[' + a + ']');
+
+  const sp = q('data-salon-page');
+  if (sp) { state.salonId = sp.dataset.salonPage; location.hash = '#/salon'; return; }
+  const bkr = q('data-booking');
+  if (bkr) { state.bookingId = bkr.dataset.booking; location.hash = '#/booking'; return; }
+
+  const cp = q('data-copy');
+  if (cp) {
+    if (navigator.clipboard) navigator.clipboard.writeText(cp.dataset.copy);
+    return toast('Copied ' + cp.dataset.copy);
+  }
+
+  const cap = q('data-cap');
+  if (cap && salon) {
+    const cents = Number(cap.dataset.cap);
+    // 0069 refuses a cap under the cash already in the till; the toast is its message
+    try { await rpc('admin_set_float_cap', { p_salon: salon.id, p_cents: cents }); }
+    catch (err) { return fail(err); }
+    toast('Cap set to ' + DH(cents));
+    return loadSalon().catch(fail);
+  }
+
+  const sus = q('data-suspend-shop');
+  if (sus && salon) {
+    const live = sus.dataset.suspendShop === '1';
+    const p = salon.suspend_preview;
+    const note = prompt(live
+      ? 'Suspending cancels ' + p.bookings + ' booking(s) and refunds ' + DH(p.deposits_cents)
+        + ' to ' + p.customers + ' customer(s). Why?'
+      : 'Restoring puts them back in Explore. Note (optional):', '');
+    if (note == null) return;
+    try {
+      await rpc('admin_salon_decide', {
+        p_salon: salon.id, p_action: live ? 'suspend' : 'restore', p_note: note,
+      });
+    } catch (err) { return fail(err); }
+    toast(live ? 'Suspended · customers told' : 'Back in Explore');
+    return loadSalon().catch(fail);
+  }
+
+  const stl = q('data-settle-shop');
+  if (stl && stl.dataset.settleShop && salon) {
+    if (!confirm('Settle ' + DH(salon.since_settled_cents) + ' from ' + salon.name + '?')) return;
+    try {
+      await rpc('admin_settle_float', {
+        p_salon: salon.id, p_amount_cents: salon.since_settled_cents,
+        p_note: 'Collected from the salon page',
+      });
+    } catch (err) { return fail(err); }
+    toast('Settled ' + DH(salon.since_settled_cents));
+    return loadSalon().catch(fail);
+  }
+
+  // "Message the owner" is barber turn 9's rail: ops does not have a chat with a
+  // shop, it issues something the shop sees in its To-do list.
+  const mo = q('data-message-owner');
+  if (mo && salon) {
+    const body = prompt('What should the shop see? It lands in their To-do list.', '');
+    if (!body) return;
+    try {
+      await rpc('admin_issue_task', {
+        p_salon: salon.id, p_kind: 'other', p_title: body, p_action: 'none',
+      });
+    } catch (err) { return fail(err); }
+    return toast('Sent to the shop');
+  }
+
+  if (q('data-task')) { location.hash = '#/compliance'; return; }
+
+  // 9b: a refund is audited through a case, because that is the only path that
+  // credits a wallet and leaves a trail. If the booking has no case, open one.
+  const rf = q('data-refund-booking');
+  if (rf && rf.dataset.refundBooking && bkg) {
+    if (!confirm('Refund ' + DH(bkg.refundable_cents) + ' to the wallet?')) return;
+    try {
+      let caseId = bkg.case && bkg.case.id;
+      if (!caseId) {
+        const opened = await rpc('admin_open_case', {
+          p_user: bkg.customer.id, p_reason: 'other',
+          p_detail: 'Refund issued from the booking page', p_booking: bkg.id,
+        });
+        caseId = opened.id;
+      }
+      await rpc('admin_support_resolve', { p_case: caseId, p_refund_cents: bkg.refundable_cents });
+    } catch (err) { return fail(err); }
+    toast('Refunded to the wallet');
+    return loadBookingDetail().catch(fail);
+  }
+
+  const oc = q('data-open-case');
+  if (oc && bkg) {
+    const detail = prompt('What went wrong?', '');
+    if (!detail) return;
+    try {
+      await rpc('admin_open_case', {
+        p_user: bkg.customer.id, p_reason: 'other', p_detail: detail, p_booking: bkg.id,
+      });
+    } catch (err) { return fail(err); }
+    toast('Case opened');
+    return loadBookingDetail().catch(fail);
+  }
+});
+
+// ---------------------------------------------------------------- turn 9a --
+// The salon page. Turn 9's rule is that none of the four verbs fires blind, so
+// each block carries the ledger it needs: suspending prints what it destroys,
+// the cap prints the cash it cannot go below, settling prints the last round.
+let salon = null;
+const CAPS = [300000, 400000, 600000];
+
+async function loadSalon() {
+  if (!state.salonId) { location.hash = '#/salons'; return; }
+  salon = await rpc('admin_salon', { p_salon: state.salonId });
+  drawSalon();
+}
+
+function drawSalon() {
+  const d = salon;
+  const live = d.status === 'live';
+
+  $('sl-crumb').innerHTML = '<span data-go="salons" style="cursor:pointer">Salons</span>'
+    + '<span style="margin:0 7px;color:#3A3A40">›</span>'
+    + '<span style="color:#fff;font-weight:600">' + esc(d.name) + '</span>';
+
+  set($('sl-standing'), d.status === 'suspended'
+    ? 'Hidden from search' + (d.hidden_since ? ' since ' + day(d.hidden_since) + ', ' + hhmm(d.hidden_since) : '')
+    : d.status === 'pending' ? 'Waiting on approval' : 'Live in Explore');
+
+  const pill = (txt, bg, fg) => '<span style="font-size:9px;letter-spacing:.1em;font-weight:800;background:'
+    + bg + ';color:' + fg + ';border-radius:5px;padding:4px 7px">' + txt + '</span>';
+  $('sl-head').innerHTML =
+    '<span style="width:44px;height:44px;border-radius:12px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none">'
+    + esc(initials(d.name)) + '</span>'
+    + '<span style="flex:1;min-width:0">'
+    + '<span style="display:flex;align-items:center;gap:9px"><span style="font-size:17px;font-weight:700">' + esc(d.name) + '</span>'
+    + (live ? pill('LIVE', 'rgba(74,222,128,.16)', '#4ADE80')
+      : d.status === 'suspended' ? pill('SUSPENDED', 'rgba(232,68,46,.16)', '#E8442E')
+        : pill(String(d.status).toUpperCase(), '#212125', '#9A9CA3')) + '</span>'
+    + '<span style="display:block;font-size:11.5px;color:#9A9CA3;margin-top:4px">' + esc(d.address || '—')
+    + ' · owner ' + esc(d.owner.name) + ' · live since ' + day(d.live_since) + '</span></span>';
+
+  const kpi = (label, value, sub, tone) =>
+    '<div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:13px 15px;display:flex;flex-direction:column;gap:4px">'
+    + '<span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">' + label + '</span>'
+    + '<span style="font-size:21px;font-weight:700;font-variant-numeric:tabular-nums' + (tone ? ';color:' + tone : '') + '">' + value + '</span>'
+    + '<span style="font-size:10.5px;color:#6B6B72">' + sub + '</span></div>';
+  $('sl-kpis').innerHTML =
+    kpi('RATING', d.rating == null ? '—' : d.rating + ' ★', '· ' + num(d.reviews_n))
+    + kpi('BARBERS', num(d.barbers_n), d.flagged_n + ' flagged', d.flagged_n ? '#E8A100' : null)
+    + kpi('BOOKINGS 30D', num(d.bookings_30d), DH(d.revenue_30d_cents))
+    + kpi('FLOAT / CAP', DH(d.float_cents), '/ ' + DH(d.cap_cents), d.gap_cents ? '#F87171' : null)
+    + kpi('UNMET ASKS', num(d.unmet_asks), d.asks_rank ? ordinalAsk(d.asks_rank) + ' worst in city' : '');
+
+  // the obligation that is usually the reason the shop is hidden
+  $('sl-banner').innerHTML = d.task
+    ? '<div style="display:flex;align-items:center;gap:12px;background:rgba(232,161,0,.08);border:1px solid rgba(232,161,0,.28);border-radius:12px;padding:12px 14px">'
+      + '<span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">'
+      + (d.licence_overdue_days ? 'Auto-hidden · licence ' + d.licence_overdue_days + ' days overdue' : esc(d.task.title))
+      + '</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">' + esc(d.task.ref)
+      + ' · ' + esc(d.task.because || d.task.title) + '</span></span>'
+      + '<span data-task="' + esc(d.task.id) + '" style="cursor:pointer;font-size:10px;font-weight:800;letter-spacing:.06em;color:#0D0D0F;background:#E8A100;border-radius:7px;padding:7px 11px;flex:none">OPEN THE TASK</span></div>'
+      + '<div style="font-size:11px;color:#9A9CA3;line-height:1.5;margin-top:9px">Nobody new can find them. Their remaining bookings are being honoured, and the shop un-hides itself the moment the licence lands.</div>'
+    : '<div style="font-size:11.5px;color:#6B6B72">Nothing outstanding against this shop.</div>';
+
+  const head = $('sl-team').firstElementChild;
+  $('sl-team').innerHTML = head ? head.outerHTML : '';
+  $('sl-team').insertAdjacentHTML('beforeend', d.team.map((b) =>
+    '<div data-barber="' + b.id + '" style="cursor:pointer;display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid #1E1E22">'
+    + '<span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">'
+    + esc(initials(b.name)) + '</span>'
+    + '<span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">' + esc(b.name) + '</span>'
+    + '<span style="display:block;font-size:10.5px;color:' + (b.flagged ? '#E8A100' : '#6B6B72') + ';margin-top:1px">'
+    + (b.owner ? 'Owner · ' : 'Barber · ') + esc(b.why) + '</span></span>'
+    + '<span style="width:44px;flex:none;font-size:12px;font-weight:700;text-align:right">' + (b.rating == null ? '—' : b.rating) + '</span>'
+    + '<span style="width:78px;flex:none;font-size:10.5px;color:#6B6B72;text-align:right">' + num(b.week_bookings) + ' this week</span>'
+    + '</div>').join('') || empty('Nobody on the team yet.'));
+
+  const p = d.suspend_preview;
+  $('sl-suspend').innerHTML =
+    '<span style="font-size:10px;letter-spacing:.1em;font-weight:800;color:#E8442E">SUSPEND FOR REAL</span>'
+    + '<div style="font-size:11.5px;color:#9A9CA3;line-height:1.5;margin-top:7px">Hidden isn\'t suspended. Suspending cancels what\'s left and refunds it — that\'s a different, louder thing.</div>'
+    + [['Bookings cancelled', num(p.bookings)], ['Deposits refunded', p.deposits_n + ' · ' + DH(p.deposits_cents)],
+      ['Customers told', num(p.customers)]].map(([k, v]) =>
+      '<div style="display:flex;align-items:center;padding:7px 0;border-bottom:1px solid #1E1E22">'
+      + '<span style="flex:1;font-size:11.5px;color:#9A9CA3">' + k + '</span>'
+      + '<span style="font-size:12px;font-weight:700">' + v + '</span></div>').join('')
+    + '<span data-suspend-shop="' + (live ? '1' : '') + '" style="cursor:pointer;display:flex;align-items:center;justify-content:center;height:38px;margin-top:11px;border-radius:10px;background:'
+    + (live ? '#E8442E' : '#212125') + ';font-size:11.5px;font-weight:800;letter-spacing:.05em;color:'
+    + (live ? '#fff' : '#9A9CA3') + '">' + (live ? 'SUSPEND THE SHOP' : 'RESTORE THE SHOP') + '</span>';
+
+  $('sl-cap').innerHTML =
+    '<span style="font-size:10px;letter-spacing:.1em;font-weight:800;color:#6B6B72">FLOAT CAP</span>'
+    + '<div style="display:flex;align-items:baseline;gap:9px;margin-top:7px">'
+    + '<span style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums">' + DH(d.cap_cents) + '</span>'
+    + '<span style="font-size:10.5px;color:#6B6B72">holding ' + DH(d.float_cents)
+    + (d.cap_cents ? ' · ' + Math.round(d.float_cents * 100 / d.cap_cents) + '%' : '') + '</span></div>'
+    + '<div style="display:flex;gap:7px;margin-top:10px">'
+    + CAPS.map((c) => '<span data-cap="' + c + '" style="cursor:pointer;flex:1;text-align:center;height:32px;line-height:32px;border-radius:9px;font-size:11.5px;font-weight:700;background:'
+      + (d.cap_cents === c ? '#E8442E' : '#212125') + ';color:' + (d.cap_cents === c ? '#fff' : '#9A9CA3') + '">'
+      + num(Math.round(c / 100)) + '</span>').join('')
+    + '</div>'
+    + '<div style="font-size:10.5px;color:#9A9CA3;line-height:1.45;margin-top:9px">Lowering it below ' + DH(d.float_cents)
+    + ' would stop top-ups tonight.</div>';
+
+  const f = d.last_settlement;
+  const worth = d.since_settled_cents > 0;
+  $('sl-settle').innerHTML =
+    '<span style="font-size:10px;letter-spacing:.1em;font-weight:800;color:#6B6B72">SETTLE THE FLOAT</span>'
+    + '<div style="font-size:11px;color:#9A9CA3;line-height:1.5;margin-top:7px">'
+    + (f ? 'Last collection ' + DH(f.amount_cents) + ' on ' + day(f.at) + ' at ' + hhmm(f.at)
+      + ' by ' + (f.mine ? 'you' : esc(f.by)) + '.' : 'Nothing has ever been collected here.')
+    + ' Only ' + DH(d.since_settled_cents) + ' has come in since.</div>'
+    + '<span data-settle-shop="' + (worth ? d.id : '') + '" style="cursor:pointer;display:flex;align-items:center;justify-content:center;height:38px;margin-top:11px;border-radius:10px;background:'
+    + (worth ? '#212125' : '#17171A') + ';font-size:11px;font-weight:800;letter-spacing:.05em;color:'
+    + (worth ? '#fff' : '#6B6B72') + '">' + (worth ? 'SETTLE ' + DH(d.since_settled_cents) : 'NOTHING WORTH SETTLING') + '</span>';
+
+  $('sl-contact').innerHTML =
+    '<span data-message-owner="' + esc(d.owner.id) + '" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;height:38px;border-radius:10px;background:#17171A;border:1px solid #26262B;font-size:11.5px;font-weight:700">MESSAGE THE OWNER</span>'
+    + '<span style="font-size:10.5px;color:#6B6B72;line-height:1.45;text-align:center;margin-top:9px;display:block">Every action here is logged against your name.</span>';
+}
+
+const ordinalAsk = (n) => n + (n % 10 === 1 && n !== 11 ? 'st' : n % 10 === 2 && n !== 12 ? 'nd'
+  : n % 10 === 3 && n !== 13 ? 'rd' : 'th');
+
+// ---------------------------------------------------------------- turn 9b --
+// One booking, end to end. 9b's own note: ops only needs this page when
+// something went wrong, so the actions stay available even when nothing did.
+let bkg = null;
+
+async function loadBookingDetail() {
+  if (!state.bookingId) { location.hash = '#/bookings'; return; }
+  bkg = await rpc('admin_booking', { p_booking: state.bookingId });
+  const d = bkg;
+
+  $('bk-crumb').innerHTML = '<span data-go="bookings" style="cursor:pointer">Bookings</span>'
+    + '<span style="margin:0 7px;color:#3A3A40">›</span>'
+    + '<span style="color:#fff;font-weight:600;font-family:ui-monospace,Menlo,monospace">' + esc(d.ref) + '</span>';
+  set($('bk-status'), String(d.status).replace('_', ' ').toUpperCase());
+  $('bk-copy').dataset.copy = d.ref;
+
+  const who = (label, name, sub) =>
+    '<span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#9A9CA3;flex:none">'
+    + esc(initials(name)) + '</span>'
+    + '<span style="flex:1;min-width:0"><span style="display:block;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">' + label + '</span>'
+    + '<span style="display:block;font-size:13px;font-weight:700;margin-top:2px">' + esc(name) + '</span>'
+    + '<span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">' + sub + '</span></span>';
+  const c = d.customer;
+  $('bk-cust').innerHTML = who('CUSTOMER', c.name, num(c.visits) + ' visits · wallet ' + DH(c.wallet_cents)
+    + ' · ' + (c.marks ? c.marks + ' mark' + (c.marks === 1 ? '' : 's') : 'no marks'));
+  const b = d.barber;
+  $('bk-barber').innerHTML = who('BARBER', b.name, esc(b.salon || '—') + (b.rating ? ' · ' + b.rating + ' ★' : ''));
+
+  const m = d.money;
+  const row = (label, value, sub) =>
+    '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #1E1E22">'
+    + '<span style="width:120px;flex:none;font-size:9px;letter-spacing:.13em;font-weight:700;color:#6B6B72">' + label + '</span>'
+    + '<span style="width:74px;flex:none;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">' + value + '</span>'
+    + '<span style="flex:1;min-width:0;font-size:11px;color:#9A9CA3">' + sub + '</span></div>';
+  $('bk-money').innerHTML =
+    row('SERVICE', DH(m.price_cents), esc(m.service) + ' · ' + m.duration_min + ' min')
+    + row('DEPOSIT · ' + m.deposit_pct + '%', DH(m.deposit_cents), 'from wallet')
+    + row('CASH AT SHOP', DH(m.cash_cents), d.status === 'completed' ? 'collected in the chair' : 'not collected')
+    + row('COUPON', m.coupon ? '−' + DH(m.discount_cents) : '—', m.coupon ? esc(m.coupon) : 'none used');
+  set($('bk-note'), 'Sterncut took no commission. The deposit left ' + c.name.split(' ')[0]
+    + '’s wallet and the barber was paid in full.');
+
+  const th = $('bk-timeline').firstElementChild;
+  $('bk-timeline').innerHTML = th ? th.outerHTML : '';
+  $('bk-timeline').insertAdjacentHTML('beforeend', d.timeline.map((t) =>
+    '<div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid #1E1E22">'
+    + '<span style="width:96px;flex:none;font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">'
+    + day(t.at) + ' ' + hhmm(t.at) + '</span>'
+    + '<span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">' + esc(t.what) + '</span>'
+    + (t.detail ? '<span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">' + esc(t.detail) + '</span>' : '')
+    + '</span></div>').join('') || empty('Nothing recorded.'));
+
+  const bad = d.case || d.status === 'cancelled' || d.status === 'no_show';
+  set($('bk-verdict'), bad ? 'SOMETHING WENT WRONG HERE' : 'NOTHING TO FIX HERE');
+  $('bk-facts').innerHTML =
+    '<span style="display:block;font-size:11.5px;color:#9A9CA3;line-height:1.5">'
+    + (bad ? 'This one has a case or ended badly — the actions below are the way out.'
+      : 'Paid, completed, rated both ways. Ops only needs this page when something went wrong — the actions stay available anyway.')
+    + '</span>'
+    + [['Linked case', d.case ? esc(d.case.case_no) : 'None'],
+      ['Review', d.review ? esc(d.review.ref) + ' · ' + esc(d.review.state) : 'None'],
+      ['Refundable', DH(d.refundable_cents)]].map(([k, v]) =>
+      '<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #1E1E22">'
+      + '<span style="flex:1;font-size:11px;color:#6B6B72">' + k + '</span>'
+      + '<span style="font-size:11.5px;font-weight:600">' + v + '</span></div>').join('');
+
+  $('bk-actions').innerHTML =
+    '<span style="font-size:10px;letter-spacing:.1em;font-weight:800;color:#6B6B72">IF A CUSTOMER COMPLAINS</span>'
+    + '<span data-refund-booking="' + (d.refundable_cents > 0 ? d.id : '') + '" style="cursor:pointer;display:flex;align-items:center;justify-content:center;height:38px;margin-top:9px;border-radius:10px;background:'
+    + (d.refundable_cents > 0 ? '#4ADE80;color:#0D0D0F' : '#17171A;color:#6B6B72')
+    + ';font-size:11px;font-weight:800;letter-spacing:.05em">'
+    + (d.refundable_cents > 0 ? 'REFUND THE ' + DH(d.refundable_cents) + ' DEPOSIT' : 'NOTHING LEFT TO REFUND') + '</span>'
+    + (d.case ? ''
+      : '<span data-open-case="' + d.id + '" style="cursor:pointer;display:flex;align-items:center;justify-content:center;height:38px;margin-top:8px;border-radius:10px;background:#17171A;border:1px solid #26262B;font-size:11px;font-weight:700">OPEN A CASE FROM THIS</span>')
+    + '<span style="display:block;font-size:10.5px;color:#6B6B72;line-height:1.45;margin-top:9px">A refund here credits the wallet and leaves the booking completed.</span>';
+
+  const jump = (label, attr) => '<span ' + attr + ' style="cursor:pointer;display:block;font-size:11.5px;color:#E8442E;padding:7px 0">' + label + '</span>';
+  $('bk-jump').innerHTML = '<span style="font-size:10px;letter-spacing:.1em;font-weight:800;color:#6B6B72">JUMP TO</span>'
+    + jump(esc(c.name.split(' ')[0]) + '’s account', 'data-go="customers"')
+    + (b.salon_id ? jump(esc(b.salon || 'The shop'), 'data-salon-page="' + b.salon_id + '"') : '')
+    + (d.review ? jump('Review ' + esc(d.review.ref), 'data-review="' + d.review.id + '"') : '');
+}
+
 const LOAD = {
   overview: loadOverview, salons: loadSalons, bookings: loadBookings, wallets: loadWallets,
   support: loadSupport, 'salons/pending': loadApprovals,
@@ -4027,6 +4753,7 @@ const LOAD = {
   appeals: loadAppeals, customers: loadTrust, compliance: loadCompliance,
   coupons: loadCampaigns, demand: loadDemand,
   reliability: loadReliability, barbers: loadBarbers, desk: loadDesk,
+  salon: loadSalon, booking: loadBookingDetail,
 };
 
 // turn 3 clicks
@@ -4170,6 +4897,7 @@ if (!CFG.url || !CFG.key) {
 } else if (!sess) {
   gate();
 } else {
+  whoami();
   show(location.hash.slice(2));
 }
 </script>

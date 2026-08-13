@@ -64,8 +64,8 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
       <span style="font-size:15px;font-weight:700">Overview</span>
       <span id="a-when" style="font-size:12px;color:#6B6B72">Thu, 30 Jul 2026 · 11:20</span>
       <span style="flex:1"></span>
-      <span style="display:flex;align-items:center;gap:8px;height:34px;background:#17171A;border:1px solid #26262B;border-radius:9px;padding:0 12px;width:230px;box-sizing:border-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5 21 21"></path></svg><span style="flex:1;font-size:12px;color:#6B6B72">Search salon, booking, phone…</span><span style="font-size:10px;font-weight:700;color:#6B6B72;background:#212125;border-radius:4px;padding:2px 5px">⌘K</span></span>
-      <span style="display:flex;align-items:center;gap:7px;height:34px;background:#17171A;border:1px solid #26262B;border-radius:9px;padding:0 12px;font-size:12px;font-weight:600">Last 7 days<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></span>
+      <span style="display:flex;align-items:center;gap:8px;height:34px;background:#17171A;border:1px solid #26262B;border-radius:9px;padding:0 12px;width:230px;box-sizing:border-box;position:relative"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5 21 21"></path></svg><input id="a-q" placeholder="Search salon, booking, phone…" style="flex:1;min-width:0;background:transparent;border:0;outline:none;color:#fff;font:400 12px Inter,sans-serif"><div id="a-results" style="display:none;position:absolute;top:38px;left:0;width:360px;max-height:340px;overflow:auto;background:#17171A;border:1px solid #26262B;border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.55);z-index:50;padding:6px"></div><span style="font-size:10px;font-weight:700;color:#6B6B72;background:#212125;border-radius:4px;padding:2px 5px">⌘K</span></span>
+      <span style="display:flex;align-items:center;gap:7px;height:34px;background:#17171A;border:1px solid #26262B;border-radius:9px;padding:0 12px;font-size:12px;font-weight:600;cursor:pointer" id="a-range">Last 7 days<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></span>
       <span style="position:relative;width:34px;height:34px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 8a6 6 0 0 1 12 0c0 7 2 7 2 9H4c0-2 2-2 2-9z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg><span style="position:absolute;top:7px;right:8px;width:6px;height:6px;border-radius:999px;background:#E8442E"></span></span>
     </div>
 
@@ -216,7 +216,7 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
       <span id="b-sub" style="font-size:12px;color:#6B6B72">42 live · 2 pending · 1 suspended</span>
       <span style="flex:1"></span>
       <span style="display:flex;align-items:center;gap:8px;height:34px;background:#17171A;border:1px solid #26262B;border-radius:9px;padding:0 12px;width:230px;box-sizing:border-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5 21 21"></path></svg><input id="b-q" placeholder="Search salon, owner, address…" style="flex:1;min-width:0;background:transparent;border:0;outline:none;color:#fff;font:400 12px Inter,sans-serif"></span>
-      <span style="display:flex;align-items:center;gap:7px;height:34px;background:#E8442E;border-radius:9px;padding:0 14px;font-size:12px;font-weight:700"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 5v14M5 12h14"></path></svg>Add salon</span>
+      <span style="display:flex;align-items:center;gap:7px;height:34px;background:#E8442E;border-radius:9px;padding:0 14px;font-size:12px;font-weight:700"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 5v14M5 12h14"></path></svg data-go="salons/new" >Add salon</span>
     </div>
 
     <div style="flex:1;padding:18px 24px;display:flex;flex-direction:column;gap:14px;overflow:hidden">
@@ -506,7 +506,7 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
       <span id="d-sub" style="font-size:12px;color:#6B6B72">Settlement run · Fri 31 Jul</span>
       <span style="flex:1"></span>
       <span id="d-export" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#9A9CA3"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><path d="M12 3v12M7 11l5 5 5-5M4 21h16"></path></svg>Ledger export</span>
-      <span style="display:flex;align-items:center;gap:7px;height:34px;background:#E8442E;border-radius:9px;padding:0 14px;font-size:12px;font-weight:700">Run settlement</span>
+      <span style="display:flex;align-items:center;gap:7px;height:34px;background:#E8442E;border-radius:9px;padding:0 14px;font-size:12px;font-weight:700;cursor:pointer" id="d-run">Run settlement</span>
     </div>
 
     <div style="flex:1;padding:20px 24px;display:flex;gap:16px;overflow:hidden">
@@ -2328,6 +2328,504 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
 </div>
 </div>
 
+<div class="scr" id="s11a">
+<div style="position:relative;display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg>Demand<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:11px;color:#6B6B72">118</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">6</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">7</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg>Compliance<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">1</span></span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">NL</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Nadia Lahlou</span><span style="display:block;font-size:10px;color:#9A9CA3">Ops · Tangier</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">Salons</span>
+      <span id="n-sub" style="font-size:12px;color:#6B6B72">41 live · 2 waiting · 1 hidden</span>
+      <span style="flex:1"></span>
+      <span style="height:32px;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:600;color:#9A9CA3">Export CSV</span>
+      <span style="height:32px;border-radius:8px;background:#E8442E;display:flex;align-items:center;gap:6px;padding:0 13px;font-size:11.5px;font-weight:700"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 5v14M5 12h14"></path></svg data-go="salons/new" >Add salon</span>
+    </div>
+    <div style="flex:1;padding:20px 22px;overflow:hidden;opacity:.3">
+      <div style="height:100%;background:#111113;border:1px solid #1E1E22;border-radius:16px"></div>
+    </div>
+  </div>
+
+  <span style="position:absolute;inset:0;background:rgba(0,0,0,.58)"></span>
+  <div style="position:absolute;top:56px;left:50%;transform:translateX(-50%);width:772px;max-height:740px;background:#151517;border:1px solid #26262B;border-radius:18px;box-shadow:0 30px 70px rgba(0,0,0,.65);display:flex;flex-direction:column;overflow:hidden">
+    <div style="flex:none;padding:17px 20px;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:11px">
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:700">Add a salon</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px">For a shop you've signed up in person — they finish it themselves</span></span>
+      <span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+    </div>
+
+    <div style="flex:1;min-height:0;display:flex;overflow:hidden">
+      <div style="flex:1;min-width:0;padding:18px 20px;display:flex;flex-direction:column;gap:14px;overflow:hidden">
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">THE SHOP</span>
+          <span id="n-name" style="display:flex;align-items:center;background:#17171A;border:1px solid #3A3A40;border-radius:10px;height:40px;padding:0 13px;font-size:13px;font-weight:600">Coiffure Atlas<span style="display:inline-block;width:2px;height:17px;background:#E8442E;margin-left:2px"></span></span>
+          <div id="n-where" style="display:flex;gap:9px">
+            <span style="flex:1.4;display:flex;align-items:center;background:#17171A;border:1px solid #26262B;border-radius:10px;height:40px;padding:0 13px;font-size:12.5px;color:#D8D8DC">18 Bd Moulay Youssef</span>
+            <span style="flex:1;display:flex;align-items:center;gap:7px;background:#17171A;border:1px solid #26262B;border-radius:10px;height:40px;padding:0 13px"><span style="flex:1;min-width:0;font-size:12.5px;color:#D8D8DC">Malabata</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg></span>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">WHO OWNS IT</span>
+          <div id="n-who" style="display:flex;gap:9px">
+            <span style="flex:1;display:flex;align-items:center;background:#17171A;border:1px solid #26262B;border-radius:10px;height:40px;padding:0 13px;font-size:12.5px;color:#D8D8DC">Brahim Ouazzani</span>
+            <span style="flex:1;display:flex;align-items:center;background:#17171A;border:1px solid #26262B;border-radius:10px;height:40px;padding:0 13px;font-size:12.5px;color:#D8D8DC">+212 664 887 210</span>
+          </div>
+          <div id="n-acct" style="display:flex;align-items:center;gap:10px;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.26);border-radius:10px;padding:11px 13px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.4" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg>
+            <span style="flex:1;min-width:0;font-size:11.5px;color:#D8D8DC">No account on this number yet — the invite creates one.</span>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">WHY WE'RE ADDING THEM</span>
+          <div id="n-why" style="display:flex;gap:8px">
+            <span style="flex:1;height:36px;border-radius:9px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700">Recruited · demand</span>
+            <span style="flex:1;height:36px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:600;color:#9A9CA3">Walked in</span>
+            <span style="flex:1;height:36px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:600;color:#9A9CA3">Moved shop</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:#17171A;border:1px solid #26262B;border-radius:10px;padding:11px 13px">
+            <span style="width:26px;height:26px;border-radius:8px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="1.9"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg></span>
+            <span style="flex:1;min-width:0;font-size:11.5px;color:#D8D8DC">Closes the Malabata lead · 118 unmet asks</span>
+            <span style="font-size:10.5px;font-weight:600;color:#6B6B72;flex:none">from Demand</span>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">FLOAT CAP TO START ON</span>
+          <div id="n-cap" style="display:flex;gap:8px">
+            <span style="flex:1;height:36px;border-radius:9px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700">1 500 DH</span>
+            <span style="flex:1;height:36px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:600;color:#9A9CA3">3 000</span>
+            <span style="flex:1;height:36px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:600;color:#9A9CA3">No top-ups yet</span>
+          </div>
+          <span style="font-size:10.5px;color:#6B6B72;line-height:1.45;text-wrap:pretty">New shops start low. Raise it once they've settled a float on time.</span>
+        </div>
+      </div>
+
+      <div style="width:296px;flex:none;border-left:1px solid #1E1E22;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:15px 17px;border-bottom:1px solid #1E1E22"><span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHAT YOU CAN'T DO FOR HIM</span></div>
+        <div style="padding:16px 17px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid #1E1E22">
+          <span style="font-size:11.5px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">Adding a shop doesn't list it. Brahim gets an SMS and finishes the same checklist an applicant does.</span>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <span style="display:flex;align-items:center;gap:9px"><span style="width:19px;height:19px;border-radius:999px;background:rgba(74,222,128,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span><span style="flex:1;min-width:0;font-size:11.5px;color:#9A9CA3">Name, address, owner — done here</span></span>
+            <span style="display:flex;align-items:center;gap:9px"><span style="width:19px;height:19px;border-radius:999px;border:1.5px dashed #3A3A40;flex:none"></span><span style="flex:1;min-width:0;font-size:11.5px;color:#9A9CA3">His licence photo</span></span>
+            <span style="display:flex;align-items:center;gap:9px"><span style="width:19px;height:19px;border-radius:999px;border:1.5px dashed #3A3A40;flex:none"></span><span style="flex:1;min-width:0;font-size:11.5px;color:#9A9CA3">The pin on his own door</span></span>
+            <span style="display:flex;align-items:center;gap:9px"><span style="width:19px;height:19px;border-radius:999px;border:1.5px dashed #3A3A40;flex:none"></span><span style="flex:1;min-width:0;font-size:11.5px;color:#9A9CA3">Services, prices, 4 photos</span></span>
+          </div>
+        </div>
+        <div style="padding:16px 17px;display:flex;flex-direction:column;gap:11px;border-bottom:1px solid #1E1E22">
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">THE SMS HE GETS</span>
+          <span id="n-sms" style="background:#111113;border:1px solid #1E1E22;border-radius:11px;padding:12px;font-size:11.5px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">"Salam Brahim — Nadia from Sterncut. Coiffure Atlas is ready for you: open this link and add your licence and location. sterncut.ma/c/8ZK4"</span>
+        </div>
+        <div style="flex:1"></div>
+        <div style="padding:16px 17px;display:flex;flex-direction:column;gap:9px">
+          <span id="n-create" style="height:40px;border-radius:10px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;letter-spacing:.04em">CREATE &amp; SEND THE INVITE</span>
+          <span id="n-save" style="height:38px;border-radius:10px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#fff">SAVE WITHOUT TELLING HIM</span>
+          <span style="font-size:10.5px;color:#6B6B72;line-height:1.45;text-align:center">Created by you · shows on the shop's record for good.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="scr" id="s11b">
+<div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg>Demand<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:11px;color:#6B6B72">118</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">6</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">7</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg>Compliance<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">1</span></span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">NL</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Nadia Lahlou</span><span style="display:block;font-size:10px;color:#9A9CA3">Ops · Tangier</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">Salons</span>
+      <span id="iv-sub" style="font-size:12px;color:#6B6B72">41 live · 3 waiting · 1 hidden</span>
+      <span style="flex:1"></span>
+      <span style="height:32px;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:600;color:#9A9CA3">Export CSV</span>
+      <span style="height:32px;border-radius:8px;background:#E8442E;display:flex;align-items:center;gap:6px;padding:0 13px;font-size:11.5px;font-weight:700"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 5v14M5 12h14"></path></svg data-go="salons/new" >Add salon</span>
+    </div>
+
+    <div id="iv-chips" style="flex:none;padding:13px 22px;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:9px">
+      <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:12px;font-weight:600;color:#9A9CA3">All 45</span>
+      <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:12px;font-weight:600;color:#9A9CA3">Live 41</span>
+      <span style="height:32px;border-radius:9px;background:#E8442E;display:flex;align-items:center;gap:7px;padding:0 14px;font-size:12px;font-weight:700">Waiting on them 3<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" style="flex:none;margin-left:2px"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+      <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:12px;font-weight:600;color:#9A9CA3">Hidden 1</span>
+      <span style="flex:1"></span>
+      <span id="iv-sort" style="font-size:11.5px;color:#6B6B72">Oldest invite first</span>
+    </div>
+
+    <div style="flex:1;display:flex;flex-direction:column;padding:18px 22px;gap:12px;overflow:hidden">
+      <div id="iv-banner" style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.26);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;flex:none">
+        <span style="width:32px;height:32px;border-radius:999px;background:rgba(74,222,128,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.4"><path d="M5 12l5 5L20 7"></path></svg></span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#4ADE80">Coiffure Atlas created · invite sent to Brahim</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px">Not visible to anyone until he adds his licence and pin</span></span>
+        <span style="height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:10.5px;font-weight:700;color:#fff;flex:none">OPEN THE SHOP</span>
+      </div>
+
+      <div id="iv-table" style="flex:1;min-height:0;background:#111113;border:1px solid #1E1E22;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22;flex:none">
+          <span style="width:216px;flex:none;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">SHOP</span>
+          <span style="width:132px;flex:none;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">HOW IT STARTED</span>
+          <span style="flex:1;min-width:0;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">WAITING ON THEM FOR</span>
+          <span style="width:104px;flex:none;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">SINCE</span>
+          <span style="width:112px;flex:none"></span>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #1E1E22;background:#17171A;border-left:3px solid #4ADE80;box-sizing:border-box">
+          <span style="width:216px;flex:none;display:flex;align-items:center;gap:9px;min-width:0">
+            <span style="width:30px;height:30px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">CA</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">Coiffure Atlas</span><span style="display:block;font-size:10px;color:#9A9CA3;margin-top:1px">Malabata · Brahim Ouazzani</span></span>
+          </span>
+          <span style="width:132px;flex:none;font-size:11px;font-weight:700;color:#E8442E">You added it</span>
+          <span style="flex:1;min-width:0;display:flex;align-items:center;gap:9px">
+            <span style="flex:1;max-width:120px;height:6px;border-radius:3px;background:#212125;overflow:hidden;display:block"><span style="display:block;height:100%;width:25%;background:#E8A100"></span></span>
+            <span style="font-size:11.5px;color:#D8D8DC">Licence, pin, services, photos</span>
+          </span>
+          <span style="width:104px;flex:none;font-size:11.5px;font-weight:700;color:#9A9CA3">2 minutes</span>
+          <span style="width:112px;flex:none;display:flex;justify-content:flex-end"><span style="height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 11px;font-size:10.5px;font-weight:700;color:#fff">RESEND SMS</span></span>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #1E1E22">
+          <span style="width:216px;flex:none;display:flex;align-items:center;gap:9px;min-width:0">
+            <span style="width:30px;height:30px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">TB</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;color:#D8D8DC">Tétouan Barbershop</span><span style="display:block;font-size:10px;color:#9A9CA3;margin-top:1px">Tétouan · applied themselves</span></span>
+          </span>
+          <span style="width:132px;flex:none;font-size:11px;color:#9A9CA3">They applied</span>
+          <span style="flex:1;min-width:0;display:flex;align-items:center;gap:9px">
+            <span style="flex:1;max-width:120px;height:6px;border-radius:3px;background:#212125;overflow:hidden;display:block"><span style="display:block;height:100%;width:100%;background:#4ADE80"></span></span>
+            <span style="font-size:11.5px;color:#4ADE80;font-weight:600">Nothing · ready for you</span>
+          </span>
+          <span style="width:104px;flex:none;font-size:11.5px;color:#9A9CA3">6 days</span>
+          <span style="width:112px;flex:none;display:flex;justify-content:flex-end"><span style="height:30px;border-radius:8px;background:#E8442E;display:flex;align-items:center;padding:0 11px;font-size:10.5px;font-weight:800;color:#fff">APPROVE</span></span>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #1E1E22">
+          <span style="width:216px;flex:none;display:flex;align-items:center;gap:9px;min-width:0">
+            <span style="width:30px;height:30px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">SB</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;color:#D8D8DC">Salon Bab Ceuta</span><span style="display:block;font-size:10px;color:#9A9CA3;margin-top:1px">Medina · Nabil Sefrioui</span></span>
+          </span>
+          <span style="width:132px;flex:none;font-size:11px;font-weight:700;color:#E8442E">Rida added it</span>
+          <span style="flex:1;min-width:0;display:flex;align-items:center;gap:9px">
+            <span style="flex:1;max-width:120px;height:6px;border-radius:3px;background:#212125;overflow:hidden;display:block"><span style="display:block;height:100%;width:50%;background:#F87171"></span></span>
+            <span style="font-size:11.5px;color:#F87171">Licence, pin · never opened the link</span>
+          </span>
+          <span style="width:104px;flex:none;font-size:11.5px;font-weight:700;color:#F87171">23 days</span>
+          <span style="width:112px;flex:none;display:flex;justify-content:flex-end"><span style="height:30px;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 11px;font-size:10.5px;font-weight:700;color:#9A9CA3">DROP IT</span></span>
+        </div>
+
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;padding:22px">
+          <span style="font-size:11.5px;color:#6B6B72;text-align:center;max-width:300px;line-height:1.5;text-wrap:pretty">Invites older than 30 days are dropped automatically. Nothing was ever shown to customers.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="scr" id="s10a">
+<div style="position:relative;display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg>Demand<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:11px;color:#6B6B72">118</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">6</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">7</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg>Compliance<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">1</span></span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">NL</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Nadia Lahlou</span><span style="display:block;font-size:10px;color:#9A9CA3">Ops · Tangier</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">Support</span>
+      <span id="bl-sub" style="font-size:12px;color:#6B6B72">7 open · 2 unassigned</span>
+      <span style="flex:1"></span>
+      <span id="bl-desk" style="display:flex;align-items:center;gap:7px;height:30px;background:#17171A;border:1px solid #26262B;border-radius:999px;padding:0 11px 0 8px">
+        <span style="display:flex;gap:-6px"><span style="width:20px;height:20px;border-radius:999px;background:#212125;border:2px solid #17171A;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#9A9CA3">RS</span><span style="width:20px;height:20px;border-radius:999px;background:#212125;border:2px solid #17171A;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#9A9CA3;margin-left:-7px">KM</span></span>
+        <span style="font-size:10.5px;font-weight:600;color:#9A9CA3">2 others on</span>
+      </span>
+      <span id="bl-count" data-bell="1" style="cursor:pointer;position:relative;width:34px;height:34px;border-radius:10px;background:#212125;border:1px solid #3A3A40;display:flex;align-items:center;justify-content:center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M6 8a6 6 0 0 1 12 0c0 7 2 7 2 9H4c0-2 2-2 2-9z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg>
+        <span style="position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;box-sizing:border-box;border-radius:999px;background:#E8442E;border:2px solid #0D0D0F;display:flex;align-items:center;justify-content:center;padding:0 4px;font-size:10px;font-weight:800">4</span>
+      </span>
+    </div>
+
+    <div style="flex:1;display:flex;flex-direction:column;padding:18px 22px;gap:11px;overflow:hidden;opacity:.38">
+      <div style="display:flex;gap:9px">
+        <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:12px;font-weight:600;color:#9A9CA3">All 7</span>
+        <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:12px;font-weight:600;color:#9A9CA3">Money 3</span>
+        <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:12px;font-weight:600;color:#9A9CA3">Bookings 2</span>
+        <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:12px;font-weight:600;color:#9A9CA3">Reviews 1</span>
+      </div>
+      <div style="flex:1;min-height:0;background:#111113;border:1px solid #1E1E22;border-radius:16px"></div>
+    </div>
+  </div>
+
+  <span style="position:absolute;inset:0;background:rgba(0,0,0,.34)"></span>
+  <div id="bl-panel" style="position:absolute;top:66px;right:18px;width:404px;max-height:756px;background:#151517;border:1px solid #26262B;border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.6);display:flex;flex-direction:column;overflow:hidden">
+    <div style="flex:none;padding:15px 17px;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:10px">
+      <span style="font-size:13.5px;font-weight:700">Notifications</span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:999px;background:#4ADE80"></span><span style="font-size:10.5px;font-weight:600;color:#9A9CA3">live</span></span>
+      <span id="bl-read" style="font-size:11px;font-weight:600;color:#E8442E">Mark all read</span>
+    </div>
+
+    <div style="flex:none;padding:12px 17px 9px;display:flex;align-items:center;gap:8px">
+      <span style="width:6px;height:6px;border-radius:999px;background:#E8442E"></span>
+      <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#E8442E">NEEDS A PERSON · 4</span>
+      <span style="flex:1"></span>
+      <span style="font-size:10px;color:#6B6B72">clears when someone acts</span>
+    </div>
+
+    <div style="flex:none;display:flex;flex-direction:column;gap:8px;padding:0 13px">
+      <div style="background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.28);border-radius:12px;padding:12px 13px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <span style="width:28px;height:28px;border-radius:9px;background:rgba(248,113,113,.16);display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01"></path></svg></span>
+          <span style="flex:1;min-width:0">
+            <span style="display:block;font-size:12.5px;font-weight:700">Rachid's 300 DH top-up failed</span>
+            <span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px;line-height:1.45;text-wrap:pretty">Le Fade hit its float cap mid-payment. Cash may be in the barber's hand.</span>
+          </span>
+          <span style="font-size:10px;color:#6B6B72;flex:none">4h</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="height:29px;border-radius:8px;background:#F87171;color:#0D0D0F;display:flex;align-items:center;padding:0 11px;font-size:10.5px;font-weight:800;letter-spacing:.03em">TAKE CS-4468</span>
+          <span style="height:29px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 11px;font-size:10.5px;font-weight:700;color:#9A9CA3">Call Rachid</span>
+          <span style="flex:1"></span>
+          <span style="font-size:10px;font-weight:600;color:#E8A100">Rida idle 12 min</span>
+        </div>
+      </div>
+
+      <div style="background:#17171A;border:1px solid #26262B;border-radius:12px;padding:12px 13px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <span style="width:28px;height:28px;border-radius:9px;background:rgba(74,222,128,.14);display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="1.9"><rect x="3" y="6" width="18" height="14" rx="3"></rect><circle cx="12" cy="13" r="3"></circle></svg></span>
+          <span style="flex:1;min-width:0">
+            <span style="display:block;font-size:12.5px;font-weight:700">Youssef sent the QR poster photo</span>
+            <span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px;line-height:1.45;text-wrap:pretty">RV-2291 · 6 days before it was due. Verify and the task closes.</span>
+          </span>
+          <span style="font-size:10px;color:#6B6B72;flex:none">2h</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="height:29px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 11px;font-size:10.5px;font-weight:700;color:#fff">VERIFY THE PHOTO</span>
+        </div>
+      </div>
+
+      <div style="background:#17171A;border:1px solid #26262B;border-radius:12px;padding:12px 13px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <span style="width:28px;height:28px;border-radius:9px;background:rgba(232,161,0,.16);display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="1.9"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4"></path></svg></span>
+          <span style="flex:1;min-width:0">
+            <span style="display:block;font-size:12.5px;font-weight:700">RENTREE20 caps out in 2 days</span>
+            <span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px;line-height:1.45;text-wrap:pretty">7 040 of 8 000 DH spent · redeeming better than planned.</span>
+          </span>
+          <span style="font-size:10px;color:#6B6B72;flex:none">Today</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="height:29px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 11px;font-size:10.5px;font-weight:700;color:#fff">ADD 4 000 DH</span>
+          <span style="height:29px;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 11px;font-size:10.5px;font-weight:700;color:#9A9CA3">Let it run out</span>
+        </div>
+      </div>
+
+      <div style="background:#17171A;border:1px solid #26262B;border-radius:12px;padding:12px 13px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:flex-start;gap:10px">
+          <span style="width:28px;height:28px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg></span>
+          <span style="flex:1;min-width:0">
+            <span style="display:block;font-size:12.5px;font-weight:700">Tétouan Barbershop dropped its pin</span>
+            <span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px;line-height:1.45;text-wrap:pretty">ONB-204 · last blocker cleared. Nothing else is waiting on them.</span>
+          </span>
+          <span style="font-size:10px;color:#6B6B72;flex:none">18m</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="height:29px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 11px;font-size:10.5px;font-weight:700;color:#fff">REVIEW &amp; APPROVE</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:none;padding:16px 17px 9px;display:flex;align-items:center;gap:8px">
+      <span style="width:6px;height:6px;border-radius:999px;background:#3A3A40"></span>
+      <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">JUST SO YOU KNOW</span>
+    </div>
+
+    <div style="flex:1;min-height:0;display:flex;flex-direction:column;gap:2px;padding:0 17px 14px">
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0">
+        <span style="width:6px;height:6px;border-radius:999px;background:#3A3A40;flex:none;margin-top:6px"></span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;color:#D8D8DC">Marina Barber Club was auto-hidden</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:2px">Licence overdue · 23:00 · no action needed</span></span>
+        <span style="font-size:10px;color:#6B6B72;flex:none">12h</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0">
+        <span style="width:6px;height:6px;border-radius:999px;background:#3A3A40;flex:none;margin-top:6px"></span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;color:#D8D8DC">Karima restored Anas's review</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:2px">RV-2291 · appeal upheld</span></span>
+        <span style="font-size:10px;color:#6B6B72;flex:none">Aug 8</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0">
+        <span style="width:6px;height:6px;border-radius:999px;background:#3A3A40;flex:none;margin-top:6px"></span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;color:#D8D8DC">You collected 2 940 DH from Marina</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:2px">Code confirmed 13:20</span></span>
+        <span style="font-size:10px;color:#6B6B72;flex:none">Aug 9</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;padding-top:10px;border-top:1px solid #1E1E22;margin-top:6px">
+        <span style="flex:1;min-width:0;font-size:10.5px;color:#6B6B72;line-height:1.45">Only money, compliance and applications ring. Everything else waits in the sidebar.</span>
+        <span style="font-size:10.5px;font-weight:600;color:#9A9CA3;flex:none">Settings</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<div class="scr" id="s10b">
+<div style="position:relative;display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg>Demand<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:11px;color:#6B6B72">118</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">6</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">6</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg>Compliance<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">1</span></span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">NL</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Nadia Lahlou</span><span style="display:block;font-size:10px;color:#9A9CA3">Ops · Tangier</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span>Support</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span id="hc-ref" style="color:#fff;font-weight:600;font-family:ui-monospace,Menlo,monospace">CS-4468</span></span>
+      <span style="flex:1"></span>
+      <span id="hc-who" style="display:flex;align-items:center;gap:8px;height:30px;background:rgba(232,161,0,.1);border:1px solid rgba(232,161,0,.32);border-radius:999px;padding:0 12px 0 8px">
+        <span style="width:20px;height:20px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-weight:700;color:#E8A100;flex:none">RS</span>
+        <span style="font-size:10.5px;font-weight:700;color:#E8A100">Rida is in this case</span>
+      </span>
+      <span style="position:relative;width:34px;height:34px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><path d="M6 8a6 6 0 0 1 12 0c0 7 2 7 2 9H4c0-2 2-2 2-9z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg>
+        <span style="position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;box-sizing:border-box;border-radius:999px;background:#E8442E;border:2px solid #0D0D0F;display:flex;align-items:center;justify-content:center;padding:0 4px;font-size:10px;font-weight:800">3</span>
+      </span>
+    </div>
+
+    <div style="flex:1;display:flex;overflow:hidden">
+      <div id="hc-banner" style="flex:1;min-width:0;display:flex;flex-direction:column;padding:20px 22px;gap:13px;overflow:hidden">
+        <div style="background:rgba(232,161,0,.08);border:1px solid rgba(232,161,0,.32);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;flex:none">
+          <span style="width:32px;height:32px;border-radius:999px;background:rgba(232,161,0,.18);display:flex;align-items:center;justify-content:center;flex:none;font-size:10px;font-weight:700;color:#E8A100">RS</span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#E8A100">Rida Skalli opened this 12 seconds ago</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px;line-height:1.45;text-wrap:pretty">Two people refunding the same 300 DH is how a customer gets paid twice. Read it, don't act on it.</span></span>
+          <span style="height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:10.5px;font-weight:700;color:#fff;flex:none">MESSAGE RIDA</span>
+        </div>
+
+        <div style="display:flex;gap:12px;flex:none">
+          <div id="hc-cust" style="flex:1;background:#111113;border:1px solid #1E1E22;border-radius:14px;padding:15px;display:flex;align-items:center;gap:11px">
+            <span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#9A9CA3;flex:none">RT</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">CUSTOMER</span><span style="display:block;font-size:13px;font-weight:700;margin-top:3px">Rachid Tahiri</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">Wallet 20 DH · 1 visit</span></span>
+          </div>
+          <div id="hc-shop" style="flex:1;background:#111113;border:1px solid #1E1E22;border-radius:14px;padding:15px;display:flex;align-items:center;gap:11px">
+            <span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#9A9CA3;flex:none">LF</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">SHOP</span><span style="display:block;font-size:13px;font-weight:700;margin-top:3px">Le Fade Tanger</span><span style="display:block;font-size:10.5px;color:#E8A100;margin-top:2px">Float at cap · 3 600 DH</span></span>
+          </div>
+          <div id="hc-stake" style="flex:1;background:#111113;border:1px solid #1E1E22;border-radius:14px;padding:15px;display:flex;flex-direction:column;justify-content:center;gap:4px">
+            <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">AT STAKE</span>
+            <span style="font-size:19px;font-weight:700;color:#E8442E;font-variant-numeric:tabular-nums">300 DH</span>
+            <span style="font-size:10px;color:#9A9CA3">cash, not credited</span>
+          </div>
+        </div>
+
+        <div id="hc-said" style="flex:1;min-height:0;background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:17px;display:flex;flex-direction:column;gap:12px">
+          <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHAT RACHID SAID</span>
+          <span style="align-self:flex-start;max-width:76%;background:#17171A;border-radius:14px 14px 14px 4px;padding:12px 14px;font-size:12.5px;line-height:1.5;color:#D8D8DC">Youssef took my 300 and the app said it failed. He gave it back but I want to know it's not going to happen again.</span>
+          <span style="font-size:10px;color:#6B6B72">Rachid · today 07:41</span>
+          <div style="background:#17171A;border:1px solid #26262B;border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:9px;margin-top:2px">
+            <span style="display:flex;align-items:center;gap:8px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.4" style="flex:none"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg><span style="font-size:10.5px;letter-spacing:.08em;font-weight:700;color:#4ADE80">LEDGER AGREES WITH HIM</span></span>
+            <span style="font-size:11.5px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">No credit was written and the float didn't move. Nothing to refund — this is a cap problem, not a money problem.</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="hc-locked" style="width:300px;flex:none;border-left:1px solid #1E1E22;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:14px 16px;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:8px">
+          <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">LOCKED WHILE RIDA IS IN</span>
+        </div>
+        <div style="padding:16px;border-bottom:1px solid #1E1E22;display:flex;flex-direction:column;gap:10px">
+          <span style="height:38px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11.5px;font-weight:700;color:#6B6B72"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.2" style="flex:none"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>CREDIT 300 DH</span>
+          <span style="height:38px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11.5px;font-weight:700;color:#6B6B72"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.2" style="flex:none"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>REPLY TO RACHID</span>
+          <span style="font-size:10.5px;color:#6B6B72;line-height:1.45;text-wrap:pretty">Unlocks by itself if Rida closes the tab or goes idle for 5 minutes.</span>
+        </div>
+        <div style="padding:16px;border-bottom:1px solid #1E1E22;display:flex;flex-direction:column;gap:11px">
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">YOU CAN STILL</span>
+          <span style="display:flex;align-items:center;gap:9px;height:34px;border-radius:9px;background:#212125;padding:0 12px"><span style="flex:1;min-width:0;font-size:11.5px;color:#D8D8DC">Raise Le Fade's float cap</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></span>
+          <span style="display:flex;align-items:center;gap:9px;height:34px;border-radius:9px;background:#212125;padding:0 12px"><span style="flex:1;min-width:0;font-size:11.5px;color:#D8D8DC">Send Nadia to collect today</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></span>
+          <span style="font-size:10.5px;color:#6B6B72;line-height:1.45;text-wrap:pretty">Neither touches the case — they fix the cause.</span>
+        </div>
+        <div style="flex:1"></div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:9px">
+          <span style="height:40px;border-radius:10px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#fff">TAKE IT FROM RIDA</span>
+          <span style="font-size:10.5px;color:#6B6B72;line-height:1.45;text-align:center">He gets told, and it lands on both your records.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
 <script>
 // ---------------------------------------------------------------- routing --
 // Route → screen id. Barbers, Customers and Coupons are in the sidebar but have
@@ -2340,11 +2838,16 @@ const ROUTES = {
   'reliability': '8a', 'barbers': '8b', 'desk': '8c',
   // turn 9 — where the row actions land: the salon page and the booking row
   'salon': '9a', 'booking': '9b',
+  // turn 10 — the bell, and the case somebody else is already in
+  'bell': '10a', 'support/held': '10b',
+  // turn 11 — ops opening a shop it recruited, and what it is waiting on
+  'salons/new': '11a', 'invites': '11b',
 };
 // ponytail: the one check this wiring leaves behind. The screens are the design's
 // own markup and the renderers find their slots by id — nothing errors when an id
 // drifts, the panel just silently stops updating. This says so on load instead.
-const SLOTS = ('a-kpis a-bars a-stats a-live a-needs a-top a-when b-sub b-chips b-table b-count '
+const SLOTS = ('a-kpis a-bars a-stats a-live a-needs a-top a-when a-q a-range a-results d-run '
+  + 'b-sub b-chips b-table b-count '
   + 'c-sub c-kpis c-table d-sub d-kpis d-shops d-mismatch d-ledger e-sub e-list e-head e-thread e-chips e-mine '
   + 'e-side e-reply e-send f-crumb f-pos f-side f-head f-checkn f-checkbar f-check f-30 f-photos '
   + 'f-photon f-risk rv-side rv-pos rv-crumb rv-head rv-card rv-says rv-visit rv-signals rv-who '
@@ -2362,7 +2865,11 @@ const SLOTS = ('a-kpis a-bars a-stats a-live a-needs a-top a-when b-sub b-chips 
   + 'dk-people dk-new dk-table dk-panel dk-sort '
   + 'sl-crumb sl-standing sl-head sl-kpis sl-banner sl-team sl-suspend sl-cap sl-settle sl-contact '
   + 'bk-crumb bk-status bk-copy bk-cust bk-barber bk-money bk-note bk-timeline bk-verdict bk-facts '
-  + 'bk-actions bk-jump').split(' ');
+  + 'bk-actions bk-jump '
+  + 'n-sub n-name n-where n-who n-acct n-why n-cap n-sms n-create n-save '
+  + 'iv-sub iv-chips iv-sort iv-banner iv-table '
+  + 'bl-sub bl-desk bl-count bl-panel bl-read '
+  + 'hc-ref hc-who hc-banner hc-cust hc-shop hc-stake hc-said hc-locked').split(' ');
 for (const id of Object.values(ROUTES)) if (!document.getElementById('s' + id)) console.error('admin: no screen', id);
 for (const id of SLOTS) if (!document.getElementById(id)) console.error('admin: markup is missing', id);
 
@@ -2423,6 +2930,18 @@ NAVS.forEach((nav) => {
     if (NAV_ROUTE[key]) item.dataset.go = NAV_ROUTE[key];
   });
 });
+
+// Turn 10 drew the bell on the two screens it needed to show it on. It belongs
+// on all of them — ops should not have to be on Support to be told. Same move as
+// the sidebar: build it once, put it in every header at boot. Every screen's
+// header bar is the first child of its content column, on all 22.
+const BELL = '<span data-bell="1" style="cursor:pointer;position:relative;width:34px;height:34px;border-radius:10px;background:#212125;border:1px solid #3A3A40;display:flex;align-items:center;justify-content:center;flex:none;margin-left:10px">'
+  + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M6 8a6 6 0 0 1 12 0c0 7 2 7 2 9H4c0-2 2-2 2-9z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg>'
+  + '<span style="position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;box-sizing:border-box;border-radius:999px;background:#E8442E;border:2px solid #0D0D0F;display:none;align-items:center;justify-content:center;padding:0 4px;font-size:10px;font-weight:700"></span></span>';
+document.querySelectorAll('.scr > div > div:nth-child(2) > div:first-child').forEach((bar) => {
+  if (!bar.querySelector('[data-bell]')) bar.insertAdjacentHTML('beforeend', BELL);
+});
+const BELLS = [...document.querySelectorAll('[data-bell]')];
 
 // One rail everywhere means the highlight can no longer be baked into the
 // markup — the cloned copy carries whichever row the source screen had lit.
@@ -2629,8 +3148,16 @@ const stat = (label, value) => `<span><span style="display:block;font-size:10px;
 
 const liveStat = (v, label) => `<span><span style="display:block;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums">${esc(v)}</span><span style="display:block;font-size:10px;letter-spacing:.1em;color:#9A9CA3;font-weight:700;margin-top:2px">${label}</span></span>`;
 
+// 1a's "Last 7 days" was decoration because admin_overview had no argument to
+// give it. 0071 parameterised the window; the control cycles the four the desk
+// actually asks for rather than opening a menu nobody designed.
+const RANGES = [7, 14, 30, 90];
+let overviewDays = 7;
+
 async function loadOverview() {
-  const d = await rpc('admin_overview');
+  const d = await rpc('admin_overview', { p_days: overviewDays });
+  // the label is a text node sitting beside the chevron svg — textContent would eat it
+  $('a-range').firstChild.nodeValue = 'Last ' + overviewDays + ' days';
   const k = d.kpi;
   set($('a-when'), new Date(d.now).toLocaleString('en-GB',
     { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) + ' · ' + hhmm(d.now));
@@ -4218,8 +4745,13 @@ async function drawReliability() {
 let barbers = null;
 let barberFilter = 'look';
 let barberQ = '';
+let pendingBarber = null;   // a barber picked from another screen, opened on arrival
 
 async function loadBarbers(id) {
+  id = id || pendingBarber;
+  pendingBarber = null;
+  // arriving from 9a means the flagged-only default would hide the man we came for
+  if (id) barberFilter = 'all';
   barbers = await rpc('admin_barbers');
   $('bb-sub').textContent = 'Tangier · ' + barbers.total;
 
@@ -4389,7 +4921,7 @@ async function loadDesk() {
 }
 
 // turn 8 clicks
-document.addEventListener('click', (e) => {
+document.addEventListener('click', async (e) => {
   const q = (a) => e.target.closest('[' + a + ']');
 
   const late = q('data-late');
@@ -4422,8 +4954,30 @@ document.addEventListener('click', (e) => {
   const bfil = q('data-bfilter');
   if (bfil && barbers) { barberFilter = bfil.dataset.bfilter; return drawBarberRows(); }
 
+  // 8b drew this button and emitted the hook, but nothing ever listened for it
+  const tf = q('data-task-for');
+  if (tf) {
+    const title = prompt('What is the shop being asked to do?', '');
+    if (!title) return;
+    try {
+      await rpc('admin_issue_task', {
+        p_salon: tf.dataset.taskFor, p_kind: 'other', p_title: title, p_action: 'photo',
+      });
+    } catch (err) { return fail(err); }
+    return toast('Task issued · it is in their To-do list');
+  }
+
   const bar = q('data-barber');
-  if (bar) return drawBarberDetail(bar.dataset.barber).catch(fail);
+  if (bar) {
+    // 9a's team rows carry this too, and the detail panel lives on 8b — from
+    // anywhere else, go there first or it renders into a hidden screen
+    if (location.hash !== '#/barbers') {
+      pendingBarber = bar.dataset.barber;
+      location.hash = '#/barbers';
+      return;
+    }
+    return drawBarberDetail(bar.dataset.barber).catch(fail);
+  }
 
   // 8c — taking a case is the claim, and the claim is what locks it for others
   const cref = q('data-case-ref');
@@ -4434,6 +4988,315 @@ document.addEventListener('click', (e) => {
         return loadDesk();
       }).catch(fail);
   }
+});
+
+// --------------------------------------------------------------- turn 11a --
+// Ops can start a shop but cannot finish one. Every field here is one of the
+// four things ops knows standing in the shop; the licence, the pin, the
+// services and the photos stay his, which is why none of them appear.
+const WHY = [['recruited', 'Recruited · demand'], ['walk_in', 'Walked in'], ['moved', 'Moved shop']];
+const START_CAPS = [150000, 300000, 600000];
+let draftShop = null;
+
+function loadNewSalon() {
+  draftShop = draftShop || { name: '', address: '', district: '', owner: '', phone: '', why: 'recruited', cap: 150000 };
+  drawNewSalon();
+  return Promise.resolve();
+}
+
+function drawNewSalon() {
+  const d = draftShop;
+  const inp = (id, ph, v) => '<input id="' + id + '" placeholder="' + ph + '" value="' + esc(v || '')
+    + '" style="width:100%;box-sizing:border-box;height:34px;background:#0D0D0F;border:1px solid #26262B;border-radius:9px;color:#fff;font:400 12.5px Inter,sans-serif;padding:0 11px;margin-top:6px">';
+  $('n-name').innerHTML = inp('f-name', 'Coiffure Atlas', d.name);
+  $('n-where').innerHTML = inp('f-addr', '18 Bd Moulay Youssef', d.address) + inp('f-district', 'Malabata', d.district);
+  $('n-who').innerHTML = inp('f-owner', 'Brahim Ouazzani', d.owner) + inp('f-phone', '+212 6…', d.phone);
+
+  set($('n-acct'), d.phone.length < 6 ? 'The invite creates the account if there is none.'
+    : 'If this number already has an account the shop is his the moment he opens the link.');
+
+  $('n-why').innerHTML = WHY.map(([k, label]) =>
+    '<span data-why="' + k + '" style="cursor:pointer;height:30px;display:inline-flex;align-items:center;padding:0 12px;margin:0 7px 0 0;border-radius:9px;font-size:11.5px;font-weight:'
+    + (d.why === k ? '700;background:#E8442E' : '600;background:#212125;color:#9A9CA3') + '">' + label + '</span>').join('');
+
+  $('n-cap').innerHTML = '<div style="display:flex;gap:7px;margin-top:6px">'
+    + START_CAPS.map((c) => '<span data-startcap="' + c + '" style="cursor:pointer;flex:1;text-align:center;height:32px;line-height:32px;border-radius:9px;font-size:11.5px;font-weight:700;background:'
+      + (d.cap === c ? '#E8442E' : '#212125') + ';color:' + (d.cap === c ? '#fff' : '#9A9CA3') + '">'
+      + num(Math.round(c / 100)) + '</span>').join('') + '</div>'
+    + '<div style="font-size:10.5px;color:#9A9CA3;margin-top:8px;line-height:1.45">New shops start low. Raise it once they have settled a float on time.</div>';
+
+  set($('n-sms'), '"Salam ' + (d.owner.split(' ')[0] || 'a sidi') + ' — Sterncut. '
+    + (d.name || 'The shop') + ' is ready for you: open this link and add your licence and location. sterncut.ma/c/…"');
+}
+
+// --------------------------------------------------------------- turn 11b --
+let invites = null;
+let inviteChip = 'waiting';
+
+async function loadInvites() {
+  invites = await rpc('admin_invites');
+  const c = invites.counts;
+  set($('iv-sub'), c.live + ' live · ' + c.waiting + ' waiting · ' + c.hidden + ' hidden');
+
+  const chip = (label, key) => '<span data-ivchip="' + key + '" style="cursor:pointer;height:30px;display:inline-flex;align-items:center;padding:0 12px;margin-right:7px;border-radius:9px;font-size:11.5px;font-weight:'
+    + (inviteChip === key ? '700;background:#E8442E' : '600;background:#17171A;border:1px solid #26262B;color:#9A9CA3') + '">' + label + '</span>';
+  $('iv-chips').innerHTML = chip('All ' + c.all, 'all') + chip('Live ' + c.live, 'live')
+    + chip('Waiting on them ' + c.waiting, 'waiting') + chip('Hidden ' + c.hidden, 'hidden');
+  $('iv-banner').style.display = 'none';
+
+  const MISSING = { licence: 'Licence', pin: 'pin', services: 'services' };
+  const head = $('iv-table').firstElementChild;
+  $('iv-table').innerHTML = head ? head.outerHTML : '';
+  $('iv-table').insertAdjacentHTML('beforeend', invites.rows.map((r) => {
+    const started = r.origin === 'applied' ? 'They applied' : r.origin === 'you' ? 'You added it' : r.origin + ' added it';
+    const waiting = r.origin === 'applied' && !r.missing.length ? 'Nothing · ready for you'
+      : r.missing.map((m) => MISSING[m] || m).join(', ') || 'Nothing · ready for you';
+    const act = r.origin === 'applied' && !r.missing.length ? ['approve', 'APPROVE']
+      : !r.opened && r.invited_at && (Date.now() - new Date(r.invited_at)) > 20 * 864e5 ? ['drop', 'DROP IT']
+        : ['resend', 'RESEND SMS'];
+    return '<div data-salon-page="' + r.id + '" style="cursor:pointer;display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22">'
+      + '<span style="width:30px;height:30px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">'
+      + esc(initials(r.name)) + '</span>'
+      + '<span style="width:200px;flex:none;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">' + esc(r.name) + '</span>'
+      + '<span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:1px">' + esc(r.district || '—') + ' · ' + esc(r.owner) + '</span></span>'
+      + '<span style="width:130px;flex:none;font-size:11.5px;color:#9A9CA3">' + esc(started) + '</span>'
+      + '<span style="flex:1;min-width:0;font-size:11.5px;color:' + (waiting.startsWith('Nothing') ? '#4ADE80' : '#D8D8DC') + '">' + esc(waiting) + '</span>'
+      + '<span style="width:80px;flex:none;font-size:11px;color:#6B6B72">' + ago(r.since) + '</span>'
+      + '<span data-invite="' + act[0] + ':' + r.id + '" style="cursor:pointer;flex:none;font-size:10px;font-weight:800;letter-spacing:.06em;background:#212125;border-radius:7px;padding:7px 10px">'
+      + act[1] + '</span></div>';
+  }).join('') || empty('Nobody is waiting on us.'));
+}
+
+// ---------------------------------------------------------------- turn 10a --
+// "Only money, compliance and applications ring. Everything else waits in the
+// sidebar." The split is on whether a person has to do something, so only the
+// top half carries actions — and a row somebody else is already in says so.
+let bell = null;
+
+async function loadBell() {
+  bell = await rpc('admin_bell');
+  const d = bell;
+  // every bell carries the same count; the badge is the span pinned to its corner
+  BELLS.forEach((b) => {
+    const badge = b.lastElementChild;
+    if (!badge || badge.tagName !== 'SPAN') return;
+    badge.textContent = d.act.length;
+    badge.style.display = d.act.length ? 'flex' : 'none';
+  });
+
+  const others = d.desk.filter((p) => !p.me);
+  $('bl-desk').innerHTML = others.slice(0, 2).map((p) =>
+    '<span style="width:24px;height:24px;border-radius:999px;background:#212125;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#9A9CA3;margin-right:-6px">'
+    + esc(initials(p.name)) + '</span>').join('')
+    + '<span style="font-size:11px;color:#6B6B72;margin-left:12px">'
+    + (others.length ? others.length + ' other' + (others.length === 1 ? '' : 's') + ' on' : 'only you') + '</span>';
+
+  const row = (r) => '<div style="display:flex;flex-direction:column;gap:8px;background:#17171A;border:1px solid #1E1E22;border-radius:12px;padding:12px 14px;margin-bottom:9px">'
+    + '<div style="display:flex;align-items:flex-start;gap:10px">'
+    + '<span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">' + esc(r.title) + '</span>'
+    + '<span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">' + esc(r.detail) + '</span></span>'
+    + '<span style="font-size:10px;color:#6B6B72;flex:none">' + ago(r.at) + '</span></div>'
+    + '<div style="display:flex;align-items:center;gap:9px">'
+    + '<span data-ring="' + esc(r.go) + ':' + esc(r.id) + ':' + esc(r.ref || '') + '" style="cursor:pointer;font-size:10px;font-weight:800;letter-spacing:.06em;background:#212125;border-radius:7px;padding:7px 10px">'
+    + esc(r.action) + '</span>'
+    + (r.held_by ? '<span style="font-size:10.5px;color:#E8A100">' + esc(r.held_by) + ' is in it</span>' : '')
+    + '</div></div>';
+  const fyiRow = (r) => '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 2px;border-bottom:1px solid #1E1E22">'
+    + '<span style="flex:1;min-width:0"><span style="display:block;font-size:12px;color:#D8D8DC">' + esc(r.title) + '</span>'
+    + '<span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">' + esc(r.detail) + '</span></span>'
+    + '<span style="font-size:10px;color:#6B6B72;flex:none">' + ago(r.at) + '</span></div>';
+
+  const bar = $('bl-panel').firstElementChild;          // the design's own header row
+  $('bl-panel').innerHTML = bar ? bar.outerHTML : '';
+  $('bl-panel').insertAdjacentHTML('beforeend',
+    '<div style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72;margin:14px 0 9px">NEEDS A PERSON · '
+    + d.act.length + '<span style="float:right;font-weight:500;letter-spacing:0;font-size:10px">clears when someone acts</span></div>'
+    + (d.act.length ? d.act.map(row).join('') : empty('Nothing needs a person.'))
+    + '<div style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72;margin:16px 0 4px">JUST SO YOU KNOW</div>'
+    + (d.fyi.length ? d.fyi.map(fyiRow).join('') : empty('Quiet.'))
+    + '<div style="font-size:10.5px;color:#6B6B72;line-height:1.5;margin-top:14px">Only money, compliance and applications ring. Everything else waits in the sidebar.</div>');
+}
+
+// ---------------------------------------------------------------- turn 10b --
+// The case somebody else is already in. The lock is real — 0066's claim_case
+// refuses — and this screen's job is to say so before you type, not after.
+let heldCase = null;
+
+async function loadHeldCase() {
+  if (!state.caseId) { location.hash = '#/support'; return; }
+  const [c, holders] = await Promise.all([
+    rpc('admin_support_case', { p_case: state.caseId }),
+    rpc('case_holders').catch(() => []),
+  ]);
+  heldCase = c;
+  const h = (holders || []).find((x) => x.ref === c.case.case_no && !x.mine);
+
+  set($('hc-ref'), c.case.case_no);
+  set($('hc-who'), h ? h.holder + ' is in this case' : 'Nobody else is in this case');
+  $('hc-banner').innerHTML = h
+    ? '<span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">'
+      + esc(h.holder) + ' opened this ' + (h.idle_min > 0 ? h.idle_min + ' min ago' : 'just now') + '</span>'
+      + '<span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px">Two people refunding the same money is how a customer gets paid twice. Read it, don\'t act on it.</span></span>'
+      + '<span data-take-case="' + esc(c.case.case_no) + '" style="cursor:pointer;flex:none;font-size:10px;font-weight:800;letter-spacing:.06em;background:#E8442E;border-radius:7px;padding:8px 11px">TAKE IT FROM ' + esc(h.holder.split(' ')[0].toUpperCase()) + '</span>'
+    : '<span style="font-size:12px;color:#4ADE80">It is yours — nobody else is in it.</span>';
+
+  set($('hc-cust'), (c.customer && c.customer.name) || 'Customer');
+  set($('hc-shop'), (c.salon && c.salon.name) || '—');
+  set($('hc-stake'), DH(c.case.amount_cents));
+  set($('hc-said'), c.case.detail || '—');
+
+  $('hc-locked').innerHTML = h
+    ? '<span style="font-size:10px;letter-spacing:.1em;font-weight:800;color:#E8A100">LOCKED WHILE ' + esc(h.holder.split(' ')[0].toUpperCase()) + ' IS IN</span>'
+      + '<div style="font-size:11px;color:#9A9CA3;line-height:1.5;margin-top:9px">Unlocks by itself if they close the tab or go idle for 5 minutes.</div>'
+    : '<span data-go="support" style="cursor:pointer;display:flex;align-items:center;justify-content:center;height:38px;border-radius:10px;background:#E8442E;font-size:11.5px;font-weight:800">OPEN IT ON THE SUPPORT DESK</span>';
+}
+
+// section B clicks — the three controls the design drew and no read supported
+document.addEventListener('click', async (e) => {
+  if (e.target.closest('#a-range')) {
+    overviewDays = RANGES[(RANGES.indexOf(overviewDays) + 1) % RANGES.length];
+    return loadOverview().catch(fail);
+  }
+
+  // "Run settlement" is a whole collection round. It prints what it is about to
+  // take before it takes it — the per-shop rows never had to, because one shop
+  // is a number you can read.
+  if (e.target.closest('#d-run')) {
+    const shops = (wallets && wallets.shops || []).filter((s) => s.float_cents > 0);
+    const total = shops.reduce((n, s) => n + s.float_cents, 0);
+    if (!shops.length) return toast('No shop is holding cash.');
+    if (!confirm('Settle ' + DH(total) + ' across ' + shops.length + ' shop(s)?')) return;
+    try {
+      const r = await rpc('admin_settle_all', { p_min_cents: 1, p_note: 'Collection round' });
+      toast('Settled ' + DH(r.total_cents) + ' from ' + r.shops + ' shop(s)');
+    } catch (err) { return fail(err); }
+    return loadWallets().catch(fail);
+  }
+
+  const hit = e.target.closest('[data-found]');
+  if (hit) {
+    const [kind, id] = hit.dataset.found.split(':');
+    $('a-results').style.display = 'none';
+    $('a-q').value = '';
+    if (kind === 'salon') { state.salonId = id; location.hash = '#/salon'; }
+    else if (kind === 'booking') { state.bookingId = id; location.hash = '#/booking'; }
+    else location.hash = '#/customers';
+    return;
+  }
+  if (!e.target.closest('#a-q')) { const r = $('a-results'); if (r) r.style.display = 'none'; }
+});
+
+// one read over shops, people and booking refs — debounced, because this one
+// does go back to the server per keystroke
+let searchT = null;
+addEventListener('input', (e) => {
+  if (e.target.id !== 'a-q') return;
+  clearTimeout(searchT);
+  const q = e.target.value.trim();
+  const box = $('a-results');
+  if (q.length < 2) { box.style.display = 'none'; return; }
+  searchT = setTimeout(() => {
+    rpc('admin_search', { p_q: q }).then((d) => {
+      const line = (found, title, sub) =>
+        '<div data-found="' + found + '" style="cursor:pointer;padding:8px 9px;border-radius:8px;display:flex;flex-direction:column;gap:2px">'
+        + '<span style="font-size:12px;font-weight:600">' + title + '</span>'
+        + '<span style="font-size:10.5px;color:#9A9CA3">' + sub + '</span></div>';
+      const group = (label, rows) => rows.length
+        ? '<div style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72;padding:7px 9px 3px">'
+          + label + '</div>' + rows.join('') : '';
+      const html =
+        group('SALONS', d.salons.map((s) => line('salon:' + s.id, esc(s.name), esc(s.address || '—') + ' · ' + s.status)))
+        + group('PEOPLE', d.people.map((p) => line('person:' + p.id, esc(p.name), p.role + (p.phone ? ' · ' + esc(p.phone) : ''))))
+        + group('BOOKINGS', d.bookings.map((b) => line('booking:' + b.id,
+          esc(b.ref) + ' · ' + esc(b.customer), esc(b.salon || '—') + ' · ' + day(b.starts_at) + ' · ' + b.status)));
+      box.innerHTML = html || '<div style="padding:12px 9px;font-size:11.5px;color:#6B6B72">Nothing matches that.</div>';
+      box.style.display = 'block';
+    }).catch(fail);
+  }, 220);
+});
+
+// turn 10 + 11 clicks
+document.addEventListener('click', async (e) => {
+  const q = (a) => e.target.closest('[' + a + ']');
+
+  if (q('data-bell')) { location.hash = '#/bell'; return; }
+  if (e.target.closest('#bl-read')) {
+    try { await rpc('admin_bell_seen'); } catch (err) { return fail(err); }
+    return loadBell().catch(fail);
+  }
+  const ring = q('data-ring');
+  if (ring) {
+    const [go, id, ref] = ring.dataset.ring.split(':');
+    if (go === 'support') { state.caseId = id; location.hash = '#/support'; }
+    else if (go === 'salons/pending') { state.salonId = id; location.hash = '#/salons/pending'; }
+    else location.hash = '#/' + go;
+    return;
+  }
+  const take = q('data-take-case');
+  if (take) {
+    if (!confirm('Take this case? They get told, and it lands on both your records.')) return;
+    try {
+      const r = await rpc('admin_take_case', { p_ref: take.dataset.takeCase });
+      toast(r.taken_from ? 'Taken from ' + r.taken_from : 'It is yours');
+    } catch (err) { return fail(err); }
+    return loadHeldCase().catch(fail);
+  }
+
+  // 11a — the form
+  const why = q('data-why');
+  if (why && draftShop) { draftShop.why = why.dataset.why; return drawNewSalon(); }
+  const sc = q('data-startcap');
+  if (sc && draftShop) { draftShop.cap = Number(sc.dataset.startcap); return drawNewSalon(); }
+
+  const mk = e.target.closest('#n-create') || e.target.closest('#n-save');
+  if (mk && draftShop) {
+    const send = !!e.target.closest('#n-create');
+    if (!draftShop.name || !draftShop.phone) return toast('It needs a name and a number.');
+    let r;
+    try {
+      r = await rpc('admin_create_salon', {
+        p_name: draftShop.name, p_address: draftShop.address, p_district: draftShop.district,
+        p_owner_name: draftShop.owner, p_owner_phone: draftShop.phone,
+        p_reason: draftShop.why, p_cap_cents: draftShop.cap, p_send: send,
+      });
+    } catch (err) { return fail(err); }
+    // there is no SMS rail — ops sends it, so hand over the exact words
+    if (send && navigator.clipboard) navigator.clipboard.writeText(r.sms);
+    toast(send ? 'Created · invite copied, send it to him' : 'Created · nobody told');
+    draftShop = null;
+    location.hash = '#/invites';
+    return;
+  }
+
+  const ivc = q('data-ivchip');
+  if (ivc) { inviteChip = ivc.dataset.ivchip; return loadInvites().catch(fail); }
+
+  const iva = q('data-invite');
+  if (iva) {
+    e.stopPropagation();
+    const [act, id] = iva.dataset.invite.split(':');
+    if (act === 'approve') { state.salonId = id; location.hash = '#/salons/pending'; return; }
+    if (act === 'drop' && !confirm('Drop this invite? Nothing was ever shown to customers.')) return;
+    try {
+      const r = await rpc('admin_invite_action', { p_salon: id, p_action: act });
+      if (act === 'resend' && navigator.clipboard && r.sms) navigator.clipboard.writeText(r.sms);
+      toast(act === 'drop' ? 'Dropped' : 'Invite copied — send it again');
+    } catch (err) { return fail(err); }
+    return loadInvites().catch(fail);
+  }
+});
+
+addEventListener('input', (e) => {
+  if (!draftShop) return;
+  const map = { 'f-name': 'name', 'f-addr': 'address', 'f-district': 'district', 'f-owner': 'owner', 'f-phone': 'phone' };
+  const k = map[e.target.id];
+  if (!k) return;
+  draftShop[k] = e.target.value;
+  // only the two derived lines redraw, so the caret stays where it is
+  set($('n-acct'), draftShop.phone.length < 6 ? 'The invite creates the account if there is none.'
+    : 'If this number already has an account the shop is his the moment he opens the link.');
+  set($('n-sms'), '"Salam ' + (draftShop.owner.split(' ')[0] || 'a sidi') + ' — Sterncut. '
+    + (draftShop.name || 'The shop') + ' is ready for you: open this link and add your licence and location. sterncut.ma/c/…"');
 });
 
 // turn 9 clicks — the four verbs, finally attached to something
@@ -4754,6 +5617,8 @@ const LOAD = {
   coupons: loadCampaigns, demand: loadDemand,
   reliability: loadReliability, barbers: loadBarbers, desk: loadDesk,
   salon: loadSalon, booking: loadBookingDetail,
+  bell: loadBell, 'support/held': loadHeldCase,
+  'salons/new': loadNewSalon, invites: loadInvites,
 };
 
 // turn 3 clicks
@@ -4898,6 +5763,9 @@ if (!CFG.url || !CFG.key) {
   gate();
 } else {
   whoami();
+  // the badge is the whole point of putting a bell on every screen, so it is
+  // filled once at boot rather than on every navigation — one read, not twenty
+  loadBell().catch(() => {});
   show(location.hash.slice(2));
 }
 </script>

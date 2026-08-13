@@ -19,6 +19,7 @@ import { useAndroidBack } from './src/lib/back';
 import { supabase } from './src/lib/supabase';
 import { SessionExpiredSheet, SetPasswordScreen } from './src/screens/AccountScreens';
 import AuthScreen, { AuthView } from './src/screens/AuthScreen';
+import ClaimShopScreen, { Invite } from './src/screens/ClaimShopScreen';
 import { biometricLockOn, LockScreen } from './src/screens/LinkedAccountsScreen';
 import SlotOfferSheet from './src/components/SlotOfferSheet';
 import HomeScreen from './src/screens/HomeScreen';
@@ -41,6 +42,7 @@ export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [account, setAccount] = useState<Account | null>(null);   // 38h
   const [user, setUser] = useState<{ profile: Profile; barber: Barber | null } | null>(null);
+  const [invite, setInvite] = useState<Invite | null>(null);            // turn 12
   const [intro, setIntro] = useState<{ show: boolean; next: AuthView }>({ show: false, next: 'welcome' });
   // 24a remembers who just got signed out; 23c is the emailed reset landing
   const [expired, setExpired] = useState<{ name: string | null; email: string | null } | null>(null);
@@ -71,6 +73,13 @@ export default function App() {
       barber = data;
     }
     setUser({ profile, barber }); // set once, so we never flash Home before the barber row arrives
+    // Barber turn 12 — a shop ops opened for him is waiting to be recognised.
+    // Matched on his phone as well as the token, so it finds him even though the
+    // SMS rail (BACKLOG) does not exist yet and nobody clicked a link.
+    if (!barber?.salon_id) {
+      const { data: inv } = await supabase.rpc('my_invite');
+      setInvite((inv as { invite: Invite | null } | null)?.invite ?? null);
+    }
     // 38h — a paused account is a fact about booking, not about signing in, so it
     // rides alongside the profile rather than gating the session.
     if (!barber) {
@@ -133,6 +142,11 @@ export default function App() {
     content = intro.show
       ? <IntroScreen onDone={finishIntro} />
       : <AuthScreen initialView={intro.next} />;
+  } else if (invite) {
+    // 12a/b/c — ahead of onboarding on purpose: his shop already exists, so the
+    // generic "create or join a salon" flow would ask him to invent a second one.
+    content = <ClaimShopScreen invite={invite}
+      onDone={() => { setInvite(null); loadUser(session!); }} />;
   } else if (user.barber && !user.barber.id_document_path) {
     content = <OnboardingScreen barber={user.barber} onDone={() => loadUser(session)} />;
   } else if (account?.suspended) {

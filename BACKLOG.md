@@ -1162,3 +1162,33 @@ difference between "an app" and "our app". Booksy will never do this well.
 - **Settings** — placeholder. Likely: notification prefs (push), password change
   (`supabase.auth.updateUser`), language (ar/fr/en).
 - **Help Center** — placeholder. Static FAQ + contact links (WhatsApp/phone).
+
+## SMS rail — BLOCKED, needed by admin turn 11 (0072)
+Admin 11a's **"CREATE & SEND THE INVITE"** is the first thing in the product that
+has to reach somebody who has **no account yet**, so push (0037) cannot carry it:
+Expo push tokens key on `user_id`, and an invited shop owner has no user row
+until he opens the link. It has to be SMS.
+
+**Nothing sends today, and 0072 does not pretend to.** `admin_create_salon()` and
+`admin_invite_action()` return the exact message and the `sterncut.ma/c/<token>`
+link, and the console copies it to the clipboard for ops to send by hand
+(WhatsApp or the phone's own SMS app). `salons.invite_sent_at` records *that ops
+sent it*, which is true — it does not claim the platform did.
+
+**What a real rail needs:**
+- A Moroccan-reachable provider. Twilio bills MAD fine but the sender ID has to
+  be registered with the ANRT to avoid being filtered; the local resellers
+  (Mobiblanc, Cynoia) are cheaper per segment and already ANRT-registered.
+- The same `pg_net` extension push is waiting on, or an Edge Function — the
+  send has to happen server-side so the token is never handed to a browser.
+- A `sms_outbox` table for retries and delivery state. An invite that silently
+  failed looks identical to one the owner ignored, and 11b's "never opened the
+  link · 23 days" column would be lying about which of the two happened.
+- Darija copy, not the English placeholder in 11a's preview.
+
+**Trigger:** the first time ops adds a shop it did not recruit in person — i.e.
+when somebody is expected to receive the link without Nadia standing next to
+them. Until then hand-sending is honest and costs nothing.
+
+**Second caller, once it exists:** OTP at signup (`OtpScreen.tsx`) is still on
+Supabase's own provider; a single owned SMS rail would serve both.

@@ -100,11 +100,67 @@ export function Empty({ text, title, icon }: {
   );
 }
 
+// SYS-01 — the Home skeleton. §3: "Poor 3G is the normal case, not the edge",
+// so the first paint is the shape of the screen rather than an empty canvas or
+// a spinner that says nothing about what is coming.
+//
+// ponytail: static blocks, exactly as drawn. A pulse is one Animated.loop on
+// the wrapper's opacity if it ever reads as a broken render instead of a
+// loading one — don't animate each block.
+export function HomeSkeleton() {
+  return (
+    <View style={s.skWrap} accessibilityLabel="Loading" accessibilityRole="progressbar">
+      <View style={s.skHead}>
+        <View style={s.skGap8}>
+          <View style={[s.sk, { width: 56, height: 8, borderRadius: 4 }]} />
+          <View style={[s.sk, { width: 140, height: 14, borderRadius: 7 }]} />
+        </View>
+        <View style={[s.sk, { width: 40, height: 40, borderRadius: radius.pill }]} />
+      </View>
+
+      <View style={s.skGap8}>
+        <View style={[s.sk, { width: 250, height: 26, borderRadius: 8 }]} />
+        <View style={[s.sk, { width: 130, height: 26, borderRadius: 8 }]} />
+      </View>
+
+      <View style={[s.skSoft, { height: 50, borderRadius: radius.pill }]} />
+
+      <View style={s.skCats}>
+        {[0, 1, 2, 3].map((i) => (
+          <View key={i} style={s.skCat}>
+            <View style={[s.skSoft, { width: 54, height: 54, borderRadius: radius.pill }]} />
+            <View style={[s.sk, { width: 38, height: 7, borderRadius: 4 }]} />
+          </View>
+        ))}
+      </View>
+
+      {/* the queue card's footprint — the tallest thing on Home */}
+      <View style={[s.sk, { height: 196, borderRadius: 24 }]} />
+      <View style={[s.sk, { width: 90, height: 9, borderRadius: 4 }]} />
+      <View style={s.skCards}>
+        {[0, 1].map((i) => (
+          <View key={i} style={[s.skSoft, { width: 168, height: 150, borderRadius: 20 }]} />
+        ))}
+      </View>
+    </View>
+  );
+}
+
 // list content bottom inset so nothing hides behind the floating tab bar
 export const TAB_BAR_INSET = 104;
 
 const s = StyleSheet.create({
   display: { fontFamily: serif, color: colors.text, textTransform: 'uppercase' },
+
+  // SYS-01 — two greys, both measured off the design
+  sk: { backgroundColor: colors.skeleton },
+  skSoft: { backgroundColor: colors.skeletonSoft },
+  skWrap: { paddingHorizontal: sp(5), paddingTop: sp(14), gap: sp(4) },
+  skHead: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
+  skGap8: { gap: 8 },
+  skCats: { flexDirection: 'row', gap: 18 },
+  skCat: { alignItems: 'center', gap: 8 },
+  skCards: { flexDirection: 'row', gap: sp(3) },
 
   header: { flexDirection: 'row', alignItems: 'center', paddingBottom: sp(3), gap: sp(2) },
   backBtn: {

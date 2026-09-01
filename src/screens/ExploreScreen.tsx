@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { NoConnection, useOnline } from '../components/Offline';
-import { Chip, Display, Field, Stars } from '../components/ui';
+import { Chip, Display, Stars } from '../components/ui';
 import { DEFAULT_REGION, LatLng, haversineKm, openDirections, walkMin } from '../lib/geo';
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
@@ -15,6 +15,7 @@ import { useSaved } from '../lib/wishlist';
 import { colors, font, radius, shadow, shadowLg, sp } from '../theme';
 import { NoLocationBar } from '../components/Failures';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
+import SearchScreen from './SearchScreen';
 
 const CARD_W = 300;
 const CARD_GAP = sp(3);
@@ -72,7 +73,8 @@ export default function ExploreScreen({ onChromeHidden, onBookings }: {
   onChromeHidden?: (hidden: boolean) => void; onBookings?: () => void;
 }) {
   const [salons, setSalons] = useState<SalonCard[]>([]);
-  const [query, setQuery] = useState('');
+  // EXPL-13 — typing moved to its own screen; the map keeps the filter sheet
+  const [searchOpen, setSearchOpen] = useState(false);
   const [salon, setSalon] = useState<SalonCard | null>(null);
   const [userLoc, setUserLoc] = useState<LatLng | null>(null);
   const [noLocation, setNoLocation] = useState(false);   // 38a
@@ -88,7 +90,7 @@ export default function ExploreScreen({ onChromeHidden, onBookings }: {
 
   useEffect(() => {
     supabase.from('salons')
-      .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, profiles!barbers_id_fkey(full_name, avatar_url, phone), reviews!reviews_barber_id_fkey(rating), services(id, name, price_cents, duration_min, is_active, category))')
+      .select('id, name, address, district, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, profiles!barbers_id_fkey(full_name, avatar_url, phone), reviews!reviews_barber_id_fkey(rating), services(id, name, price_cents, duration_min, is_active, category))')
       .order('name')
       .then(({ data, error }) => {
         if (error) return Alert.alert('Could not load salons', error.message);
@@ -136,9 +138,6 @@ export default function ExploreScreen({ onChromeHidden, onBookings }: {
   }
 
   const visible = salons.filter((s) => {
-    const q = query.trim().toLowerCase();
-    const matchQ = !q || s.name.toLowerCase().includes(q)
-      || s.barbers.some((b) => b.profiles?.full_name?.toLowerCase().includes(q));
     const avg = avgOf(s.barbers.flatMap((b) => b.reviews));
     const matchR = minRating == null || (avg != null && avg >= minRating);
     const km = kmFor(s);
@@ -146,7 +145,7 @@ export default function ExploreScreen({ onChromeHidden, onBookings }: {
     const matchD = maxKm == null || !userLoc || (km != null && km <= maxKm);
     const price = startingPrice(s);
     const matchP = maxPrice == null || (price != null && price <= maxPrice);
-    return matchQ && matchR && matchD && matchP;
+    return matchR && matchD && matchP;
   });
   // nearby first; salons without a pin (or no user location) sink to the end
   // 38a's "ALL SALONS · A–Z". Without a location every distance is Infinity and
@@ -157,8 +156,17 @@ export default function ExploreScreen({ onChromeHidden, onBookings }: {
     : [...visible].sort((a, b) => a.name.localeCompare(b.name));
 
   // the salon page is pushed over the tab; back closes it, not the app
-  useAndroidBack(salon ? () => open(null) : null);
+  useAndroidBack(
+    searchOpen ? () => { setSearchOpen(false); onChromeHidden?.(false); }
+      : salon ? () => open(null)
+        : null,
+  );
 
+  if (searchOpen) {
+    return <SearchScreen salons={salons} kmFor={userLoc ? kmFor : undefined}
+      onPick={(sal) => { setSearchOpen(false); open(sal); }}
+      onClose={() => { setSearchOpen(false); onChromeHidden?.(false); }} />;
+  }
   if (salon) {
     return <SalonDetailScreen salon={salon} km={kmFor(salon)} onBack={() => open(null)}
       onChromeHidden={onChromeHidden} />;
@@ -181,10 +189,12 @@ export default function ExploreScreen({ onChromeHidden, onBookings }: {
     <View style={styles.screen}>
       {/* search + filter */}
       <View style={styles.searchRow}>
-        <View style={styles.grow}>
-          <Field placeholder="Search Salon or Specialist" value={query} onChangeText={setQuery}
-            style={styles.searchPill} />
-        </View>
+        <TouchableOpacity style={[styles.grow, styles.searchPill]} activeOpacity={0.8}
+          accessibilityRole="search" accessibilityLabel="Search salon or specialist"
+          onPress={() => { setSearchOpen(true); onChromeHidden?.(true); }}>
+          <Ionicons name="search" size={17} color={colors.textSecondary} />
+          <Text style={styles.searchPlaceholder}>Search Salon or Specialist</Text>
+        </TouchableOpacity>
         <Pressable style={({ pressed }) => [styles.filterBtn, pressed && styles.pressed]}
           accessibilityLabel="Filters" onPress={() => setFilterOpen(true)}>
           <Ionicons name="options-outline" size={22} color={colors.onAccent} />
@@ -347,7 +357,11 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.7 },
 
   searchRow: { flexDirection: 'row', gap: sp(2.5), paddingHorizontal: sp(5), marginBottom: sp(3) },
-  searchPill: { borderRadius: radius.pill, minHeight: 48 },
+  searchPill: {
+    flexDirection: 'row', alignItems: 'center', gap: sp(2.5), height: 48,
+    paddingHorizontal: sp(4.5), borderRadius: radius.pill, backgroundColor: colors.bg, ...shadow,
+  },
+  searchPlaceholder: { fontSize: 14, color: colors.textSecondary },
   filterBtn: {
     width: 48, height: 48, borderRadius: radius.md, backgroundColor: colors.ink,
     alignItems: 'center', justifyContent: 'center',

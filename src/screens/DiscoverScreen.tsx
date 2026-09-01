@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   Alert, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
-import { Display, Field, Stars, TAB_BAR_INSET } from '../components/ui';
+import { Display, HomeSkeleton, Stars, TAB_BAR_INSET } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
 import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
@@ -15,6 +15,7 @@ import MyBookingScreen from './MyBookingScreen';
 import CheckInScreen, { WalkInTicketScreen, YoureNextScreen } from './QueueScreens';
 import QueueScreen, { DayQueueRow, minutesUntil, QUEUE_POLL_MS } from './QueueScreen';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
+import SearchScreen from './SearchScreen';
 
 // category chips filter by service-name keywords — no category column needed
 const CATEGORIES: { label: string; icon: keyof typeof Ionicons.glyphMap; re: RegExp }[] = [
@@ -100,7 +101,11 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
 }) {
   const [salons, setSalons] = useState<SalonCard[]>([]);
   const [salon, setSalon] = useState<SalonCard | null>(null);
-  const [query, setQuery] = useState('');
+  // EXPL-13 — the search pill on Home is a button, not a field. Typing happens
+  // on the search screen, where an empty result can become a demand signal.
+  const [searchOpen, setSearchOpen] = useState(false);
+  // SYS-01 — the first paint on 3G is the shape of the screen, not a blank one
+  const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState<string | null>(null);
   const [booking, setBooking] = useState<MyBooking | null>(null);
   const [dayQueue, setDayQueue] = useState<DayQueueRow[]>([]);
@@ -151,10 +156,12 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
 
   useEffect(() => {
     // barbers!salon_id: disambiguates from the salons.owner_id relationship
+    setLoading(true);
     supabase.from('salons')
-      .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, profiles!barbers_id_fkey(full_name, avatar_url, phone), reviews!reviews_barber_id_fkey(rating), services(id, name, price_cents, duration_min, is_active, category))')
+      .select('id, name, address, district, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, profiles!barbers_id_fkey(full_name, avatar_url, phone), reviews!reviews_barber_id_fkey(rating), services(id, name, price_cents, duration_min, is_active, category))')
       .order('name')
       .then(({ data, error }) => {
+        setLoading(false);
         if (error) return Alert.alert('Could not load salons', error.message);
         const cards = (data as unknown as SalonCard[])
           .map((s) => ({ ...s, barbers: s.barbers.filter((b) => b.status === 'approved' && b.salon_status === 'approved') }))
@@ -178,15 +185,9 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
   }
 
   const cat = CATEGORIES.find((c) => c.label === category);
-  const visible = salons.filter((s) => {
-    const q = query.trim().toLowerCase();
-    const matchQ = !q
-      || s.name.toLowerCase().includes(q)
-      || s.barbers.some((b) => b.profiles?.full_name?.toLowerCase().includes(q));
-    const matchC = !cat
-      || s.barbers.some((b) => b.services.some((sv) => sv.is_active && cat.re.test(sv.name)));
-    return matchQ && matchC;
-  });
+  const visible = cat
+    ? salons.filter((s) => s.barbers.some((b) => b.services.some((sv) => sv.is_active && cat.re.test(sv.name))))
+    : salons;
 
   const topRated = salons
     .map((s) => ({ s, avg: avgOf(s.barbers.flatMap((b) => b.reviews)) }))
@@ -215,8 +216,9 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
       : inboxOpen ? () => { setInboxOpen(false); onChromeHidden?.(false); loadUnread(); }
         : detailOpen ? () => { setDetailOpen(false); onChromeHidden?.(false); }
           : queueOpen ? () => { setQueueOpen(false); onChromeHidden?.(false); }
-            : salon ? () => open(null)
-              : null,
+            : searchOpen ? () => { setSearchOpen(false); onChromeHidden?.(false); }
+              : salon ? () => open(null)
+                : null,
   );
 
   if (phase && booking && ackedTakeover !== `${booking.id}:${phase}`) {
@@ -265,6 +267,16 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
       onBack={() => { setQueueOpen(false); onChromeHidden?.(false); }}
       onBookings={() => { setQueueOpen(false); setDetailOpen(true); onChromeHidden?.(true); }} />;
   }
+  // SYS-01 — only the first load. A reload with rows already on screen keeps
+  // them: replacing real content with grey blocks is a downgrade, not a state.
+  if (loading && salons.length === 0) {
+    return <View style={styles.tabScreen}><HomeSkeleton /></View>;
+  }
+  if (searchOpen) {
+    return <SearchScreen salons={salons}
+      onPick={(sal) => { setSearchOpen(false); open(sal); }}
+      onClose={() => { setSearchOpen(false); onChromeHidden?.(false); }} />;
+  }
   if (salon) {
     return <SalonDetailScreen salon={salon} onBack={() => open(null)} onChromeHidden={onChromeHidden} />;
   }
@@ -301,8 +313,12 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
         {greeting()},{'\n'}{(name ?? 'there').split(' ')[0]}
       </Display>
 
-      <Field placeholder="Search salon or barber…" value={query} onChangeText={setQuery}
-        style={styles.searchPill} />
+      <TouchableOpacity style={styles.searchPill} activeOpacity={0.8}
+        accessibilityRole="search" accessibilityLabel="Search salon or barber"
+        onPress={() => { setSearchOpen(true); onChromeHidden?.(true); }}>
+        <Ionicons name="search" size={17} color={colors.textSecondary} />
+        <Text style={styles.searchPlaceholder}>Search salon or barber…</Text>
+      </TouchableOpacity>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.catStrip}>
         <View style={styles.catRow}>
@@ -366,7 +382,7 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
         );
       })()}
 
-      {topRated.length > 0 && !query && !category && (
+      {topRated.length > 0 && !category && (
         <>
           <View style={styles.sectionRow}>
             <Text style={styles.section}>Top rated</Text>
@@ -446,7 +462,11 @@ const styles = StyleSheet.create({
   },
   locationText: { fontSize: font.body, fontWeight: '700', color: colors.text },
   greeting: { lineHeight: 34, marginTop: sp(1) },
-  searchPill: { borderRadius: radius.pill },
+  searchPill: {
+    flexDirection: 'row', alignItems: 'center', gap: sp(2.5), height: 50,
+    paddingHorizontal: sp(4.5), borderRadius: radius.pill, backgroundColor: colors.bg, ...shadow,
+  },
+  searchPlaceholder: { fontSize: 14, color: colors.textSecondary },
   catStrip: { marginHorizontal: -sp(5) },
   catRow: { flexDirection: 'row', gap: sp(4), paddingHorizontal: sp(5) },
   catItem: { alignItems: 'center', gap: sp(1.5), width: 64 },

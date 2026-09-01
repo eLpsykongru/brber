@@ -20,6 +20,9 @@ export type SalonCard = {
   id: string;
   name: string;
   address: string | null;
+  // 0060's ops-named area. EXPL-15 groups a search miss by it, so a salon
+  // without one simply never matches a district search rather than being guessed at.
+  district?: string | null;
   lat: number | null;
   lng: number | null;
   bio: string | null;

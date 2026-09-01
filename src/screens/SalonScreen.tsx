@@ -12,6 +12,7 @@ import { useAndroidBack } from '../lib/back';
 import { colors, dark as D, font, inter, radius, serif, sp } from '../theme';
 import { AllChairsScreen, OwnerBarberScreen, OwnerDashboard } from './OwnerScreens';
 import { ReviewsInboxScreen, ShopListingScreen, ShopReportScreen, WalkInPosterScreen, WallDisplayScreen } from './ShopScreens';
+import DepositScreen from './DepositScreen';
 
 // Owner-only Salon screen — TEAM / SERVICES / SETTINGS. Real backend (0025):
 // salon_team()/salon_stats() RPCs (owner-only, privacy rule baked in — a rent
@@ -33,7 +34,8 @@ type SalonMeta = {
 
 // the turn-2 screens that sit behind this hub
 type OwnerView =
-  | 'hub' | 'dashboard' | 'allChairs' | 'report' | 'reviews' | 'listing' | 'poster' | 'wall';
+  | 'hub' | 'dashboard' | 'allChairs' | 'report' | 'reviews' | 'listing' | 'poster' | 'wall'
+  | 'deposit';   // OSH-11/12/13
 
 const hhmm = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 type Member = {
@@ -69,6 +71,8 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
 }) {
   const [seg, setSeg] = useState<'team' | 'chairs' | 'services' | 'settings'>('team');
   const [view, setView] = useState<OwnerView>('hub');
+  // OSH-11's value on the menu row. Null while loading — never guess 40 on screen.
+  const [depositPct, setDepositPct] = useState<number | null>(null);
   const [tabs, setTabs] = useState(false); // the old TEAM/CHAIRS/SERVICES/SETTINGS detail sheet
   const [salon, setSalon] = useState<SalonMeta | null>(null);
   const [team, setTeam] = useState<Member[] | null>(null);
@@ -115,6 +119,11 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
   }, [barberId]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    if (!salon?.id) return;
+    supabase.rpc('shop_deposit_pct', { p_salon: salon.id })
+      .then(({ data }) => setDepositPct(typeof data === 'number' ? data : null));
+  }, [salon?.id, view]);
 
   // 11a (0064) — the power button used to write `accepting_bookings` directly,
   // and nothing in the booking path read it. Closing now goes through a sheet
@@ -178,6 +187,7 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
       onSaved={() => { setView('hub'); load(); }} />;
   }
   if (view === 'poster') return <WalkInPosterScreen salon={salon} onBack={() => setView('hub')} />;
+  if (view === 'deposit') return <DepositScreen onBack={() => { setView('hub'); load(); }} />;
   if (view === 'wall') {
     return <WallDisplayScreen salon={salon} team={team} onBack={() => setView('hub')} />;
   }
@@ -191,6 +201,9 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
 
   const shopRows: { icon: IconName; label: string; value?: string; accent?: boolean; onPress: () => void }[] = [
     { icon: 'clock', label: 'Opening hours', value: `${hhmm(salon.open_min)} – ${hhmm(salon.close_min)}`, onPress: () => setHoursOpen(true) },
+    // OSH-11 — the shop's own deposit (0076). Sits with the shop's other terms,
+    // not under Settings, because it is the number customers meet at checkout.
+    { icon: 'lock', label: 'Deposit', value: depositPct == null ? '—' : depositPct === 0 ? 'None' : `${depositPct}%`, onPress: () => setView('deposit') },
     { icon: 'map-pin', label: 'Address & map pin', value: salon.address ?? 'Not set', onPress: () => setView('listing') },
     { icon: 'eye', label: 'Shop listing', onPress: () => setView('listing') },
     { icon: 'grid', label: 'Walk-in QR poster', value: 'Print', accent: true, onPress: () => setView('poster') },

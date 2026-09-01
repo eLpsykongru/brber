@@ -6,7 +6,7 @@
 // here. The SQL half has its own `assert` block in 0047/0048; this is the half
 // that runs on the phone, and the numbers it pins are the ones both designs draw.
 
-import { Block, daySlots, fitCount, fitsPerDay, makeRoomOptions, Range, slotNote, Window } from './slots';
+import { Block, daySlots, fitCount, fitsPerDay, makeRoomOptions, mergeSlots, nextFree, Range, slotNote, Slot, Window } from './slots';
 
 let failures = 0;
 function ok(label: string, cond: boolean, got?: unknown) {
@@ -148,6 +148,73 @@ const past = new Date();
 past.setHours(0, 0, 0, 0);
 eq('a day whose sources have all passed offers none',
   makeRoomOptions(past, 30, [{ weekday: past.getDay(), start_min: 0, end_min: 1 }], [], [], [], 0).length, 0);
+
+// ---- BOOK-21 · "Anyone free" merges several chairs into one grid ------------
+const hourAt = (h: number) => new Date(2026, 0, 5, h, 0, 0, 0);
+const slot = (h: number, status: Slot['status']): Slot => ({ time: hourAt(h), status });
+
+// one chair free beats every other chair being busy — that IS "anyone free"
+{
+  const { slots, freeBy } = mergeSlots([
+    { id: 'A', slots: [slot(10, 'full'), slot(11, 'free')] },
+    { id: 'B', slots: [slot(10, 'free'), slot(11, 'full')] },
+  ]);
+  eq('two half-full chairs make a full grid', slots.length, 2);
+  eq('10:00 is free because B is', slots[0].status, 'free');
+  eq('and the booking goes to B', freeBy.get(hourAt(10).getTime()), 'B');
+  eq('11:00 is free because A is', slots[1].status, 'free');
+  eq('and that one goes to A', freeBy.get(hourAt(11).getTime()), 'A');
+}
+
+// the first chair free at a time owns it, whatever order the others arrive in
+eq('the earlier chair in the list wins a tie',
+  mergeSlots([
+    { id: 'A', slots: [slot(9, 'free')] },
+    { id: 'B', slots: [slot(9, 'free')] },
+  ]).freeBy.get(hourAt(9).getTime()), 'A');
+
+// a time nobody has is still shown, and 'full' is the more useful of the two
+// unavailable reasons — "already booked" beats "gone by" whichever order it lands in
+eq('full beats past', mergeSlots([
+  { id: 'A', slots: [slot(9, 'past')] },
+  { id: 'B', slots: [slot(9, 'full')] },
+]).slots[0].status, 'full');
+eq('full beats past in the other order', mergeSlots([
+  { id: 'A', slots: [slot(9, 'full')] },
+  { id: 'B', slots: [slot(9, 'past')] },
+]).slots[0].status, 'full');
+
+// a free time never has a chair recorded for a *different* time
+eq('nobody is recorded for a time no chair had free',
+  mergeSlots([{ id: 'A', slots: [slot(9, 'full')] }]).freeBy.size, 0);
+
+// times come back in order however the chairs were listed
+eq('merged slots are sorted by time',
+  mergeSlots([
+    { id: 'A', slots: [slot(16, 'free'), slot(9, 'free')] },
+    { id: 'B', slots: [slot(12, 'free')] },
+  ]).slots.map((sl) => sl.time.getHours()).join(','), '9,12,16');
+
+// ---- BOOK-21 · the next free time on a chair -------------------------------
+// `day` is 30 days out with 09:30–19:00 hours, so a scan starting there lands
+// on its first slot; `fullBooked` + lunch is the day with nothing left.
+{
+  const first = nextFree(day, 7, 30, windows, [], [], [], 0);
+  eq('an empty day answers with its first slot', first?.getHours(), 9);
+  eq('and the first slot is on the half hour', first?.getMinutes(), 30);
+
+  // a full day rolls forward: the same weekly window applies 7 days later
+  const rolled = nextFree(day, 8, 30, windows, fullBooked, [], lunch, 0);
+  ok('a full day rolls on to the next one that fits', !!rolled);
+  ok('and that is a later day', !!rolled && rolled.getTime() > day.getTime() + 86_400_000);
+
+  eq('a chair with no hours has no next free time',
+    nextFree(day, 7, 30, [], [], [], [], 0), null);
+  eq('a zero-length sitting is not a bookable thing',
+    nextFree(day, 7, 0, windows, [], [], [], 0), null);
+  eq('scanning no days finds nothing',
+    nextFree(day, 0, 30, windows, [], [], [], 0), null);
+}
 
 // ---- done ------------------------------------------------------------------
 if (failures > 0) {

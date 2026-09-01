@@ -4,7 +4,7 @@ import {
   Alert, Animated, Dimensions, Modal, PanResponder, Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native';
 import { LowWalletBlock } from './Failures';
-import { Block, daySlots, Range, Window } from '../lib/slots';
+import { Block, daySlots, nextFree, Range, Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, sp } from '../theme';
 import type { Specialist } from '../types';
@@ -17,12 +17,27 @@ type SalonLike = { id: string; name: string; address: string | null; barbers: Sp
 type Step = 'service' | 'barber' | 'time' | 'summary';
 const SCREEN_H = Dimensions.get('window').height;
 
-// 8a/8b — the deposit floor, mirrored from 0035's fill_booking. Both sides
-// enforce it; this copy only exists so the UI can grey out what the server
-// would reject anyway.
-const MIN_PCT = 40;
-const floorOf = (priceCents: number) => Math.ceil((priceCents * MIN_PCT) / 100);
+// 8a/8b — the deposit floor, mirrored from fill_booking. Both sides enforce it;
+// this copy only exists so the UI can grey out what the server would reject.
+//
+// OSH-11 (0076) moved the percentage to the shop, so it is no longer a constant:
+// the sheet asks `booking_deposit_pct` for the resolved number — the greater of
+// the shop's policy and this customer's late-arrival floor, or 0 at a shop that
+// asks for no deposit at all. 40 is only the value before the answer arrives,
+// which is what every shop without a policy still resolves to.
+const floorAt = (priceCents: number, pct: number) => Math.ceil((priceCents * pct) / 100);
 const dh = (cents: number) => (cents / 100).toFixed(0);
+const hhmm = (d: Date) => d.toTimeString().slice(0, 5);
+
+/** BOOK-21's green line. Names the day only when it isn't today or tomorrow. */
+function freeLabel(t: Date): string {
+  const midnight = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const days = Math.round((midnight(t) - midnight(new Date())) / 86_400_000);
+  const when = days === 0 ? 'today'
+    : days === 1 ? 'tomorrow'
+      : t.toLocaleDateString('en-US', { weekday: 'short' });
+  return `Free at ${hhmm(t)} ${when}`;
+}
 
 // distinct active service names across the salon, with price range
 function serviceMenu(salon: SalonLike) {
@@ -47,6 +62,13 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
   // exist once a barber is chosen.
   const [serviceNames, setServiceNames] = useState<string[]>([]);
   const [barber, setBarber] = useState<Specialist | null>(null);
+  // BOOK-21 — "Anyone free" is the default. It is not a booking against nobody:
+  // the grid shows every chair's free times at once and picking one *resolves*
+  // `barber` to whoever actually had it, so confirm, deposit and price all run
+  // against a real specialist with no second code path.
+  const [anyBarber, setAnyBarber] = useState(true);
+  // BOOK-21 — first bookable start per chair, for the green line under each row
+  const [nextFreeBy, setNextFreeBy] = useState<Record<string, Date | null>>({});
   const [time, setTime] = useState<Date | null>(null);
   const [me, setMe] = useState<{ name: string | null; phone: string | null; email: string | null } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -55,6 +77,8 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
   const [walletCents, setWalletCents] = useState<number | null>(null);
   // 8a — wallet deposit. `on` is the toggle; `cents` is what the slider settled on.
   const [depositOn, setDepositOn] = useState(true);
+  // resolved by 0076 once the sheet opens; 40 until then
+  const [minPct, setMinPct] = useState(40);
   const [depositCents, setDepositCents] = useState(0);
   const [adjustOpen, setAdjustOpen] = useState(false);
   // 37b — the coupon he chose for this booking, priced against the whole sitting
@@ -76,6 +100,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
     if (visible) {
       // reset the wizard each open
       setStep('service'); setServiceNames([]); setBarber(null); setTime(null);
+      setAnyBarber(true);
       setDone(null); setAdjustOpen(false); setDepositOn(true);
       Animated.spring(translateY, { toValue: 0, useNativeDriver: true, bounciness: 4 }).start();
       supabase.auth.getUser().then(async ({ data }) => {
@@ -122,8 +147,26 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
     .filter((sv) => sv.is_active && serviceNames.includes(sv.name))
     .reduce((n, sv) => n + sv.price_cents, 0);
   useEffect(() => {
-    if (pickedPrice) setDepositCents(upFront ? pickedPrice : floorOf(pickedPrice));
-  }, [pickedPrice, upFront]);
+    if (pickedPrice) setDepositCents(upFront ? pickedPrice : floorAt(pickedPrice, minPct));
+  }, [pickedPrice, upFront, minPct]);
+
+  // the shop's own floor for THIS customer (0076). Asked once the sheet opens,
+  // because the answer decides whether a deposit block is offered at all.
+  useEffect(() => {
+    const sid = (salon as any).id;
+    if (!visible || !sid) return;
+    let alive = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) return;
+      supabase.rpc('booking_deposit_pct', { p_customer: data.user.id, p_salon: sid })
+        .then(({ data: p }) => {
+          if (!alive || typeof p !== 'number') return;
+          setMinPct(p);
+          setDepositOn(p > 0);   // OSH-13: a shop at 0 holds nothing
+        });
+    });
+    return () => { alive = false; };
+  }, [visible, (salon as any).id]);
 
   function close() {
     Animated.timing(translateY, { toValue: SCREEN_H, duration: 180, useNativeDriver: true }).start(onClose);
@@ -146,7 +189,11 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
     ? salon.barbers.filter((b) =>
       serviceNames.every((n) => b.services.some((sv) => sv.is_active && sv.name === n)))
     : [];
-  const svcs = (barber?.services ?? [])
+  // On "Anyone free" nobody is chosen yet, so the first offering chair stands in
+  // for display — the service ids, the duration line, the anchor. The moment a
+  // slot is tapped `barber` is set and this becomes that same barber.
+  const refBarber = barber ?? (anyBarber ? offeringBarbers[0] ?? null : null);
+  const svcs = (refBarber?.services ?? [])
     .filter((sv) => sv.is_active && serviceNames.includes(sv.name))
     .sort((a, b) => serviceNames.indexOf(a.name) - serviceNames.indexOf(b.name));
   // the anchor — 0047 keeps `bookings.service_id` NOT NULL and pointed at the
@@ -159,6 +206,49 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
     ? svcs.map((sv) => sv.name).join(' + ')
     : serviceNames[0] ?? '';
 
+  /** what the whole sitting costs and takes at one chair */
+  const sittingAt = (b: Specialist) => b.services
+    .filter((sv) => sv.is_active && serviceNames.includes(sv.name))
+    .reduce((n, sv) => ({ price: n.price + sv.price_cents, mins: n.mins + sv.duration_min }),
+      { price: 0, mins: 0 });
+  // BOOK-21's "from 40 DH" — the cheapest chair that can do the whole sitting
+  const fromPrice = offeringBarbers.length
+    ? Math.min(...offeringBarbers.map((b) => sittingAt(b).price)) : 0;
+  // ponytail: on "Anyone free" the grid is computed at the LONGEST chair's
+  // duration, so a slot offered always fits whoever ends up taking it. It can
+  // hide a slot only a faster barber could have done — trade a missed slot for
+  // never offering one that doesn't fit. Per-chair durations if it bites.
+  const pickMins = barber ? mins
+    : Math.max(0, ...offeringBarbers.map((b) => sittingAt(b).mins));
+
+  // BOOK-21's "Free at 15:30 today" — the one number that makes the rows
+  // comparable. Loaded only on the barber step, and only for chairs that can do
+  // the whole sitting, so a shop's other calendars are never fetched.
+  // ponytail: N chairs × 5 small queries. Same shape SlotPicker already runs;
+  // fold both into one RPC if a shop is ever big enough for it to show.
+  const offeringKey = offeringBarbers.map((b) => b.id).join(',');
+  useEffect(() => {
+    if (step !== 'barber' || !offeringBarbers.length) return;
+    let alive = true;
+    const from = new Date();
+    const to = new Date(Date.now() + 7 * 86_400_000);
+    Promise.all(offeringBarbers.map(async (b) => {
+      const need = sittingAt(b).mins;
+      const [av, off, blk, buf, bk] = await Promise.all([
+        supabase.from('availability').select('weekday, start_min, end_min').eq('barber_id', b.id),
+        supabase.from('days_off').select('day').eq('barber_id', b.id),
+        supabase.from('time_blocks').select('day, start_min, end_min, kind').eq('barber_id', b.id),
+        supabase.from('barbers').select('buffer_before_min, buffer_after_min').eq('id', b.id).single(),
+        supabase.rpc('booked_ranges',
+          { p_barber: b.id, p_from: from.toISOString(), p_to: to.toISOString() }),
+      ]);
+      return [b.id, nextFree(from, 7, need, av.data ?? [], bk.data ?? [],
+        (off.data ?? []).map((d) => d.day), blk.data ?? [],
+        buf.data ? buf.data.buffer_before_min + buf.data.buffer_after_min : 0)] as const;
+    })).then((rows) => { if (alive) setNextFreeBy(Object.fromEntries(rows)); });
+    return () => { alive = false; };
+  }, [step, offeringKey, serviceNames.join(',')]);
+
   // 37b — the coupon comes off what HE pays. `price_cents` is the barber's money
   // and never moves; Sterncut absorbs the difference. Every number below the
   // service line is therefore computed from `payable`, not from the price, or a
@@ -167,8 +257,9 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
   const payable = svc ? total - discount : 0;
 
   // wallet deposit is offered only when the balance actually covers the floor
-  const floor = svc ? floorOf(payable) : 0;
-  const canDeposit = !!svc && walletCents != null && walletCents >= floor;
+  const floor = svc ? floorAt(payable, minPct) : 0;
+  // a shop asking for nothing offers no deposit block at all — OSH-13
+  const canDeposit = !!svc && minPct > 0 && walletCents != null && walletCents >= floor;
   const deposit = canDeposit && depositOn
     ? Math.min(Math.max(depositCents, floor), payable)
     : 0;
@@ -228,7 +319,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
     : [];
 
   const STEP_TITLE: Record<Step, string> = {
-    service: 'Choose a service', barber: 'Choose a specialist', time: 'Pick a time', summary: 'Appointment overview',
+    service: 'Choose a service', barber: 'Who cuts', time: 'Pick a time', summary: 'Overview',
   };
   const stepIndex = ['service', 'barber', 'time', 'summary'].indexOf(step);
 
@@ -240,7 +331,13 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
           <View style={s.handle} />
           <View style={s.headRow}>
             {step !== 'service'
-              ? <Pressable onPress={() => setStep(['service', 'barber', 'time', 'summary'][stepIndex - 1] as Step)}
+              ? <Pressable onPress={() => {
+                  const prev = ['service', 'barber', 'time', 'summary'][stepIndex - 1] as Step;
+                  // stepping back onto BOOK-21 un-resolves an "Anyone free" pick,
+                  // or the radio would show a person the customer never chose
+                  if (prev === 'barber' && anyBarber) { setBarber(null); setTime(null); }
+                  setStep(prev);
+                }}
                   hitSlop={8} style={s.headBtn}><Ionicons name="chevron-back" size={20} color={colors.text} /></Pressable>
               : <View style={s.headBtn} />}
             <Text style={s.headTitle}>{STEP_TITLE[step]}</Text>
@@ -305,52 +402,88 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
             </>
           )}
 
-          {/* STEP 2 — barber */}
+          {/* STEP 2 — BOOK-21. "Anyone free" sits above the list and is ticked
+              by default: it is the option with the most times in it, and making
+              the customer choose a person first is what empties a shop's day. */}
           {step === 'barber' && (
-            offeringBarbers.map((b) => {
-              const a = b.reviews.length ? b.reviews.reduce((n, r) => n + r.rating, 0) / b.reviews.length : null;
-              // what the whole sitting costs at this chair, not one line of it
-              const price = b.services
-                .filter((sv) => sv.is_active && serviceNames.includes(sv.name))
-                .reduce((n, sv) => n + sv.price_cents, 0);
-              return (
-                <Pressable key={b.id} onPress={() => { setBarber(b); setTime(null); setStep('time'); }}
-                  style={({ pressed }) => [s.optRow, pressed && s.pressed]}>
-                  <View style={[s.avatar, s.avatarFallback]}>
-                    <Text style={s.avatarText}>
-                      {(b.profiles?.full_name ?? 'B').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
-                    </Text>
-                  </View>
-                  <View style={s.grow}>
-                    <Text style={s.optName}>{b.profiles?.full_name ?? 'Barber'}</Text>
-                    <Text style={s.optMeta}>{b.specialty ?? 'Barber'}</Text>
-                  </View>
-                  <View style={s.barberRight}>
-                    {a != null ? <Stars rating={a} /> : <Text style={s.optMeta}>New</Text>}
-                    {price != null && <Text style={s.optPrice}>{(price / 100).toFixed(0)} DH</Text>}
-                  </View>
-                </Pressable>
-              );
-            })
+            <>
+              <Pressable onPress={() => { setAnyBarber(true); setBarber(null); setTime(null); }}
+                accessibilityRole="radio" accessibilityState={{ selected: anyBarber && !barber }}
+                style={({ pressed }) => [s.anyCard, pressed && s.pressed]}>
+                <View style={s.anyIcon}>
+                  <Ionicons name="people-outline" size={19} color={colors.onAccent} />
+                </View>
+                <View style={s.grow}>
+                  <Text style={s.anyName}>Anyone free</Text>
+                  <Text style={s.anyMeta}>
+                    More times to choose from{fromPrice > 0 ? ` · from ${dh(fromPrice)} DH` : ''}
+                  </Text>
+                </View>
+                {anyBarber && !barber
+                  ? <View style={s.anyTick}><Ionicons name="checkmark" size={12} color={colors.onAccent} /></View>
+                  : <View style={s.radio} />}
+              </Pressable>
+
+              <Text style={s.pickEyebrow}>Or pick someone</Text>
+              {offeringBarbers.map((b) => {
+                const a = b.reviews.length ? b.reviews.reduce((n, r) => n + r.rating, 0) / b.reviews.length : null;
+                const { price } = sittingAt(b);
+                const on = barber?.id === b.id;
+                return (
+                  <Pressable key={b.id}
+                    onPress={() => { setBarber(b); setAnyBarber(false); setTime(null); }}
+                    accessibilityRole="radio" accessibilityState={{ selected: on }}
+                    style={({ pressed }) => [s.optRow, on && s.optRowOn, pressed && s.pressed]}>
+                    <View style={[s.avatar, s.avatarFallback]}>
+                      <Text style={s.avatarText}>
+                        {(b.profiles?.full_name ?? 'B').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
+                      </Text>
+                    </View>
+                    <View style={s.grow}>
+                      <Text style={s.optName}>{b.profiles?.full_name ?? 'Barber'}</Text>
+                      <Text style={s.optMeta}>
+                        {[a != null ? `${a.toFixed(1)} ★` : 'New', b.specialty,
+                          price > 0 ? `${dh(price)} DH` : null].filter(Boolean).join(' · ')}
+                      </Text>
+                      {/* undefined = still loading, null = nothing in 7 days.
+                          Neither prints a time we don't have. */}
+                      {nextFreeBy[b.id] && <Text style={s.freeAt}>{freeLabel(nextFreeBy[b.id]!)}</Text>}
+                      {nextFreeBy[b.id] === null && <Text style={s.freeNone}>Nothing free this week</Text>}
+                    </View>
+                    {on
+                      ? <View style={s.radioOn}><Ionicons name="checkmark" size={12} color={colors.onAccent} /></View>
+                      : <View style={s.radio} />}
+                  </Pressable>
+                );
+              })}
+            </>
           )}
 
           {/* STEP 3 — time. 36a takes over when the chosen day is full: that is
               exactly the moment someone wants the day and can't have it. */}
-          {step === 'time' && barber && svc && (
-            <SlotPicker barberId={barber.id} durationMin={mins}
-              selected={time} onSelect={setTime}
+          {step === 'time' && refBarber && svc && (
+            <SlotPicker
+              barberId={barber ? barber.id : offeringBarbers.map((b) => b.id)}
+              durationMin={pickMins}
+              selected={time}
+              // the grid answers *who* was free at that time, so choosing a slot
+              // is what turns "anyone" into a person — no guess, no second pass
+              onSelect={(t, bid) => {
+                setTime(t);
+                if (!barber) setBarber(offeringBarbers.find((b) => b.id === bid) ?? null);
+              }}
               renderFull={(day) => (
                 <AskBlock
                   salonId={(salon as any).id ?? null}
-                  barberId={barber.id}
-                  barberName={barber.profiles?.full_name ?? 'your barber'}
+                  barberId={refBarber.id}
+                  barberName={refBarber.profiles?.full_name ?? 'your barber'}
                   salonName={salon.name}
                   serviceId={svc.id}
                   serviceName={serviceLabel}
                   priceCents={total}
                   day={day}
                   coBarbers={salon.barbers
-                    .filter((b) => b.id !== barber.id)
+                    .filter((b) => b.id !== refBarber.id)
                     .map((b) => (b.profiles?.full_name ?? 'A barber').split(' ')[0])}
                   closesMin={(salon as any).close_min ?? null}
                   onAsked={setAsked} />
@@ -518,7 +651,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
                         <View style={s.payFoot}>
                           <View style={s.payLockRow}>
                             <Ionicons name="lock-closed" size={10} color="rgba(255,255,255,0.45)" />
-                            <Text style={s.payLock}>MIN {MIN_PCT}%</Text>
+                            <Text style={s.payLock}>MIN {minPct}%</Text>
                           </View>
                           <Text style={s.payOf}>
                             {Math.round((deposit / payable) * 100)}% of {dh(payable)} DH
@@ -526,7 +659,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
                           <Text style={s.payLock}>100%</Text>
                         </View>
                         <View style={s.quickRow}>
-                          {[MIN_PCT, 50, 75, 100].map((p) => {
+                          {[minPct, 50, 75, 100].map((p) => {
                             const cents = Math.max(floor, Math.round((payable * p) / 100));
                             const on = cents === deposit;
                             return (
@@ -582,9 +715,20 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
                   : `Continue · ${serviceNames.length} services`} />
           </View>
         )}
+        {step === 'barber' && (
+          <View style={s.footer}>
+            <PillButton
+              disabled={!barber && !anyBarber}
+              onPress={() => { setTime(null); setStep('time'); }}
+              title={barber
+                ? `Continue with ${(barber.profiles?.full_name ?? 'them').split(' ')[0]}`
+                : 'Continue · anyone free'} />
+          </View>
+        )}
         {step === 'time' && (
           <View style={s.footer}>
-            <PillButton title={time ? 'Review booking' : 'Select a time'}
+            {/* BOOK-02's CTA carries the time, so the button says what it books */}
+            <PillButton title={time ? `Review booking · ${hhmm(time)}` : 'Select a time'}
               disabled={!time} onPress={() => setStep('summary')} />
           </View>
         )}
@@ -743,6 +887,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
       {/* 8b — adjust the deposit */}
       {svc && (
         <AdjustSheet visible={adjustOpen} price={total} floor={floor} value={deposit}
+          minPct={minPct}
           onClose={() => setAdjustOpen(false)}
           onPick={(c) => { setDepositCents(c); setAdjustOpen(false); }} />
       )}
@@ -776,8 +921,10 @@ function BreakRow({ k, v, light }: { k: string; v: string; light?: boolean }) {
 }
 
 // 8b · the 40% floor drawn as a locked stretch of track you cannot drag into.
-function AdjustSheet({ visible, price, floor, value, onClose, onPick }: {
+function AdjustSheet({ visible, price, floor, value, minPct, onClose, onPick }: {
   visible: boolean; price: number; floor: number; value: number;
+  /** the shop's resolved floor (0076) — BOOK-06's track is locked below it */
+  minPct: number;
   onClose: () => void; onPick: (cents: number) => void;
 }) {
   const [draft, setDraft] = useState(value);
@@ -837,13 +984,13 @@ function AdjustSheet({ visible, price, floor, value, onClose, onPick }: {
         <View style={s.adjustFoot}>
           <View style={s.payLockRow}>
             <Ionicons name="lock-closed" size={11} color={colors.textTertiary} />
-            <Text style={s.adjustFootText}>{MIN_PCT}% minimum</Text>
+            <Text style={s.adjustFootText}>{minPct}% minimum</Text>
           </View>
           <Text style={s.adjustFootText}>100% · {dh(price)} DH</Text>
         </View>
 
         <View style={s.adjustChips}>
-          {[MIN_PCT, 50, 75, 100].map((p) => {
+          {[minPct, 50, 75, 100].map((p) => {
             const cents = Math.max(floor, Math.round((price * p) / 100));
             const on = cents === draft;
             return (
@@ -860,7 +1007,7 @@ function AdjustSheet({ visible, price, floor, value, onClose, onPick }: {
         <View style={s.adjustNote}>
           <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary} />
           <Text style={s.adjustNoteText}>
-            A deposit of at least {MIN_PCT}% holds your slot. Refunded to your wallet if the barber
+            A deposit of at least {minPct}% holds your slot. Refunded to your wallet if the barber
             cancels.
           </Text>
         </View>
@@ -979,6 +1126,33 @@ const s = StyleSheet.create({
   grow: { flex: 1 },
   pressed: { opacity: 0.7 },
   pickHint: { fontSize: font.small, color: colors.textSecondary, marginBottom: sp(1) },
+
+  // BOOK-21 — the default sits on the dark surface, the alternatives on white
+  anyCard: {
+    flexDirection: 'row', alignItems: 'center', gap: sp(3),
+    backgroundColor: colors.ink, borderRadius: radius.lg, padding: sp(4),
+  },
+  anyIcon: {
+    width: 44, height: 44, borderRadius: radius.pill, backgroundColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center', justifyContent: 'center',
+  },
+  anyName: { fontSize: 14.5, fontWeight: '700', color: colors.onAccent },
+  anyMeta: { fontSize: 11.5, color: '#9A9A95', marginTop: 3 },
+  anyTick: {
+    width: 22, height: 22, borderRadius: radius.pill, backgroundColor: colors.accent,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  radio: { width: 22, height: 22, borderRadius: radius.pill, borderWidth: 2, borderColor: '#D8D4CA' },
+  radioOn: {
+    width: 22, height: 22, borderRadius: radius.pill, backgroundColor: colors.accent,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  freeAt: { fontSize: 10.5, fontWeight: '700', color: colors.success, marginTop: 2 },
+  freeNone: { fontSize: 10.5, fontWeight: '700', color: colors.textTertiary, marginTop: 2 },
+  pickEyebrow: {
+    fontSize: font.tiny, fontWeight: '700', color: colors.textSecondary,
+    letterSpacing: 1.65, textTransform: 'uppercase', marginTop: sp(2),
+  },
   note: { textAlign: 'center', color: colors.textTertiary, marginVertical: sp(6), fontSize: font.body },
 
   optRowOn: { borderColor: colors.accent, borderWidth: 1.5 },

@@ -798,6 +798,9 @@ Both closed (2026-08-08), with 0051:
     shop can produce none. Building that card would need a search log we do not
     keep, and faking it from waitlist rows would put a number next to a sentence
     that isn't true. It needs a `searches` table if it is wanted.
+    **TRIGGER PULLED 2026-08-31 (0074)** — the table exists and the customer app
+    writes to it (see "Search screen" below). The admin card itself is still
+    unbuilt: `admin_demand` does not read `searches` yet.
   - Console screen at **`#/demand`** (13 screens). The sidebar is now eleven rows
     on the newest screens, so `NAV` is chosen by length: 9, 10 or 11.
 - **When the desk breaks — admin turn 7, REAL 2026-08-10 (0061).** Ops errors are
@@ -1192,3 +1195,339 @@ them. Until then hand-sending is honest and costs nothing.
 
 **Second caller, once it exists:** OTP at signup (`OtpScreen.tsx`) is still on
 Supabase's own provider; a single owned SMS rail would serve both.
+
+## Search screen — EXPL-13/14/15, REAL 2026-08-31 (0074)
+`src/screens/SearchScreen.tsx`, from the Sterncut slice-1 handoff
+(`design_handoff_slice1/`). The search field on Home and Explore had been an
+inline filter over the list already on screen; it is now a button that opens a
+real search, and the three designed states are one screen because they are one
+moment — you tap, you type, and either something comes back or nothing does.
+- **The whole point is the empty result.** Handoff §7.4: "a failed search is the
+  most valuable event in the app." `searches` (0074) is the table 0060 said it
+  would need, and the write happens **when the result comes back empty**, not
+  when the customer taps NOTIFY ME — a miss nobody acts on is still the signal.
+  `set_search_notify` is a second call precisely so the first one is unconditional.
+- **Not `waitlist_requests`.** That row needs a barber and a day (0049); a search
+  that found nothing has neither, and widening it to nullable would make every
+  existing waitlist read lie. The handoff calls the table `SearchMiss`; the name
+  here is the one 0060 asked for.
+- **A district is only ever named if a salon already carries it** (`salons.district`,
+  0060). Splitting a free-text query into a place name would put a real district
+  next to an invented number — the same rule 0060 set when it refused to guess.
+- Salons/specialists in **one list, not tabs**: in Tangier people search a
+  barber's name as often as a shop's, and tabs make them guess which they meant.
+Still open:
+- **The admin end.** `admin_demand` doesn't read `searches`, so 4a's "no shop
+  yet" card is still missing — the data is accruing but nothing shows it. That
+  is the next thing worth building here, and it is now ~10 lines.
+- **EXPL-14's availability badge** ("Free at 15:30" / "Next: tomorrow") is not
+  built: it needs a `daySlots` pass per salon in the result list, which is a
+  per-barber availability + bookings + time_blocks load per row. Wrong trade on
+  3G for a launch-size list. Revisit with a cached next-free-slot column.
+- **EXPL-14's chip row** (Nearest / Filters / Open now) is dropped. Filters
+  already exist on Explore's sheet, and duplicating them in search would be two
+  places to change one thing. Sort is nearest-first when a location is known.
+- **EXPL-13's "BUSY NEAR YOU" says "Suggested"** and sorts by rating. Nothing
+  measures how busy a shop is; README §3 calls the strip "suggested" anyway.
+- **Recent searches are per-device** (AsyncStorage), not synced. A `searches`
+  row exists for misses only, deliberately — logging every successful search
+  would be a tracking table nobody asked for.
+- **0074 applied 2026-08-31.** `log_search_miss` / `set_search_notify` are live.
+  Not yet exercised end to end: the misses accrue, but no admin surface reads
+  them (see the demand-map item above).
+
+## "Anyone free" — BOOK-21, REAL 2026-08-31
+The booking sheet's barber step made you choose a person before you could see a
+time. The handoff names the fix as the design decision of that screen: **"Anyone
+free" is the default**, because the option with the most times in it is the one
+that fills a shop's day, and making the customer pick a face first is what
+empties it.
+- **It is not a booking against nobody.** `SlotPicker.barberId` now takes a list
+  as well as an id; with several it lays every chair's day over itself and
+  `onSelect` says *who* was free at the time tapped. That resolves `barber` to a
+  real specialist before the summary, so price, terms, deposit and `confirm`
+  run on one code path with no "any" branch anywhere near the money.
+- **The merge is in `lib/slots.ts`** (`mergeSlots`), not in the component, so
+  `npm run check` pins it: a free chair beats busy ones, the earliest chair in
+  the list wins a tie, and `full` beats `past` when chairs disagree — a time
+  somebody booked is better described as taken than as gone by.
+- Existing single-barber callers were not touched: `string` still satisfies
+  `string | string[]`, and a handler ignoring the second argument still fits.
+Still open:
+- **The grid uses the LONGEST chair's duration** for the sitting, so a slot
+  offered always fits whoever takes it. It can hide a slot only a faster barber
+  could have done. Per-chair durations if a shop's timings really diverge.
+- **"Free at 15:30 today" is built (2026-08-31).** `nextFree()` in `lib/slots.ts`
+  scans 7 days per offering chair when the barber step opens, and is pinned in
+  `npm run check`. Undefined prints nothing while it loads; null says "Nothing
+  free this week" — neither invents a time. Costs N×5 small queries on that step
+  only; fold into one RPC if a shop ever gets big enough to notice.
+- **`renderFull` (36a's ask) anchors to the first offering chair** when nobody
+  is chosen. The ask sheet's own "any barber at <shop>" toggle covers the rest.
+- **BOOK-01 keeps its multi-select ticks.** The handoff draws single-select with
+  a chevron; 0067 made the sitting n services on purpose, and reverting it would
+  be a regression, not a redesign.
+
+## Loading skeleton — SYS-01, REAL 2026-08-31
+`HomeSkeleton` in `components/ui.tsx` (no new file — it belongs with `Empty` and
+the other shared primitives), raised by `DiscoverScreen` on first load only.
+The handoff's §3 reason is the whole point: *"Poor 3G is the normal case, not
+the edge"*, so the first paint is the shape of the screen rather than a blank
+canvas or a spinner that says nothing about what is coming.
+- **First load only.** A reload with rows already on screen keeps them —
+  replacing real content with grey blocks is a downgrade, not a loading state.
+- Two new tokens, both measured off the design: `colors.skeleton` (#E3E0D8) and
+  `colors.skeletonSoft` (#E9E6DE).
+Still open:
+- **Static, exactly as drawn.** If grey blocks ever read as a broken render
+  rather than a loading one, the fix is one `Animated.loop` on the wrapper's
+  opacity — not a per-block animation.
+- **Only Home has one.** Explore, the salon page and My Bookings still go from
+  empty to full. Home was the screen the design drew; the others want the same
+  treatment if 3G testing shows the gap.
+
+## Slice-1 handoff — what the customer redesign actually needed
+Closing note on `design_handoff_slice1/`, so the next person doesn't re-audit it.
+**The design files are a recreation of this repo** — they say so in every turn
+note ("faithful recreation of every customer screen in the repo"). So most of
+the 16 customer screens were already built to them. Verified, not changed:
+`HOME-01` (DiscoverScreen), `BOOK-01/02/03/04` (BookingSheet + SlotPicker),
+`BKG-03/07/16` (MyBookings + MyBooking's 35c), `SYS-05` (Offline.NoConnection),
+`SYS-06` (26a), `AUTH-05/06/07/09` (AuthScreen + OtpScreen).
+Genuinely new: the search screen + `searches` (0074), `BOOK-21`'s "Anyone free"
+and its "Free at…" line, and `SYS-01`.
+**Where README.md and the designs disagree, the designs won**, because the
+README describes a greenfield cash-only slice this app is years past:
+- §3 "hide the queue card" — queue mode is shipped; hiding it is a regression.
+- §5 "no money tables" / `BOOK-03` cash-only — deposits are real and enforced in
+  `fill_booking`, so the screen keeps the deposit block. **Decided by the repo
+  owner**, 2026-08-31.
+- §7.1/§7.7 `BKG-16` "counts against you for nothing" — false once a deposit can
+  be forfeited. The design's own BKG-16 is deposit-aware and that is what is built.
+- §7.3 "no password field, no reset, no email" — contradicted by the design's own
+  `AUTH-06` (email+password) and `AUTH-11` (set a password).
+- §3 `BOOK-01` "single select" — 0067 made a sitting n services deliberately.
+**Still genuinely missing from the handoff, and all of it blocked on one thing:**
+French/Arabic copy with RTL, the four SMS templates, and phone-OTP as the auth
+rail. `AUTH-07` has no "STEP 2 OF 3" and no "we'll text a code" precisely because
+there is no step 3 until an SMS provider exists. **Trigger: an SMS account.**
+
+## Slice 2 step 1 — the ledger (0075, 2026-08-31)
+`design_handoff_slice2` §9 step 1. No UI.
+- **The ledger was single-entry.** A deposit was one negative row on the customer
+  and nothing anywhere else; the shop's claim was derived (`salon_owed_cents`).
+  So a *held* deposit sat in neither position and "who holds this" needed logic,
+  not a row. `deposit_holds` posts the missing side — **one table, no rewrite**:
+  every existing read (0022/0035/0043/0044/0061/0069) is untouched, and the
+  nightly check asserts posted and derived agree.
+- **Idempotency was a live bug**, not a slice-2 feature: `agent_cash_topup` had
+  no key, so a double-tap credited real money twice. Key minted per attempt in
+  `AgentWalletScreen`, reused by 10c's retry. Replay is answered *before* the cap
+  so a retry returns the original receipt instead of a refusal the first tap caused.
+- **Append-only is a trigger now**, not just withheld grants (0024 deleted ledger
+  rows once). `float_settlements` got the same lock (§6.7).
+- `ledger_check()`: `cash_in + platform_credits = balances + held + to_shops`.
+  Referral credits (0038) count as money entering — they are platform-funded with
+  no cash behind them. Scheduled 02:30 on the conditional pg_cron shape (0037/0051).
+Still open:
+- **0075 is NOT APPLIED.** Its assertions are the test — the drift check runs
+  against real rows at apply time and fails the migration if the backfill is wrong.
+- **The free-cancellation window does not exist** (§6.4). `resolve_deposit_hold`
+  encodes today's shipped behaviour: customer cancels → forfeit, whatever the
+  timing. Step 4 splits that branch; it is the only edit needed there.
+- **Deposit policy is on the wrong axis for §5.** `customer_deposit_pct` (0046) is
+  a *customer* late-arrival penalty (40/100), not a shop policy. Both must live:
+  the floor is `max(shop %, customer %)`, or a shop setting 0% silently disables
+  the only anti-no-show mechanism in the product.
+- **Blocked on unbuilt designs (§4):** G3/G4 gate the deposit-policy UI (step 3),
+  G2 the short-wallet exit (`LowWalletBlock` in Failures.tsx is close but was
+  drawn for 38d), G5 cash-out has nothing. The four §7 SMS need the same provider
+  still blocking slice 1's RTL and OTP.
+
+## Slice 2 step 2 — cash in (2026-08-31)
+Almost entirely already built. `BCF-01`/`BCF-02` are `AgentWalletScreen`,
+`BCF-03`/`BCF-04` the 4-digit handover (0053), `BCF-05` `TopUpFailedSheet` (10c),
+`BCF-06` `FloatCapMeter` (warns from 70%), `BCF-07` `CapHitSheet` — and the cap
+already refuses rather than warns (0044/0069). §6.2's atomicity holds trivially:
+cash-in is ONE row, read as the customer's credit and the shop's float liability
+from the same place. Step 1 added the missing key.
+- **`WAL-01` needs nothing removed** — the customer wallet never had a card row.
+- **`WAL-03` already says how to put money in** ("top up with cash at your barber").
+- **One false promise deleted:** ADD MONEY said "card top-ups are coming soon".
+  §1/§8 say there is no processor and won't be one this slice, so that was a
+  promise the product has decided not to keep.
+Still open:
+- **G1 is that button's real destination** ("Pay at a Sterncut shop" — where and
+  how). Not invented; the alert now names the one path that actually works.
+
+## Slice 2 step 3 — BLOCKED
+Deposit policy. The model can land without UI (§9 step 3 says so), but the
+screens need **G3** (owner sets the deposit, on `Owner - Shop`) and **G4**
+(platform floor/ceiling on ops `SET-01`), both still being designed.
+Also unresolved before the model is safe to write: §5's shop percentage and
+`customer_deposit_pct` (0046) are different axes and both must survive —
+floor = `max(shop %, customer %)`.
+
+## Slice 2 step 3 — the shop's own deposit (0076, 2026-08-31)
+Owner · Shop **turn 6 · OSH-11/12/13**, gap G3. `src/screens/DepositScreen.tsx`
+on **Salon management → Deposit**. G3 is no longer blocked; **G4 still is**.
+- **The floor moved from the platform to the shop.** It was 40% hardcoded in
+  `fill_booking` and again in `BookingSheet`. Now `shop_deposit_policies` is
+  append-only and versioned, so OSH-12's "23 keep their 40%" is a counted fact:
+  a booking keeps the number it was taken under.
+- **Composition, decided with the owner:** `customer_deposit_pct` (0046) is a
+  *late-arrival penalty*, not a baseline — its 40 was the platform number that
+  is now the shop's job. So `booking_deposit_pct = greatest(shop, customer)`,
+  **except a shop at 0, which stays 0 even for a marked customer**. Forcing 100%
+  at a shop that declined deposits is the platform protecting someone who asked
+  not to be. §5's "behaves exactly like slice 1" only holds that way.
+- **Enforced by a separate trigger, not a seventh re-emit of `fill_booking`** —
+  0056's precedent for `refuse_suspended_customer`. `before_booking_shop_floor`
+  sorts after `before_booking_insert`, so it sees the price, discount and deposit
+  fill_booking already settled, and applies the floor to **payable** (37b's rule:
+  a coupon must never raise the deposit share).
+- **G4's bounds are data with no UI** — `platform_settings`, defaulting to the
+  drawn 20%/60%. Ops sets them in SQL, exactly as `float_cap_cents` did (0044).
+- Amber everywhere on the shop's side, per the turn note: a deposit is **held**,
+  not earned. Green would say the money is already his.
+Still open:
+- **0076 is NOT APPLIED.** Its assertions pin OSH-11's drawn arithmetic
+  (50% of 60 = 30; a 45 DH kids cut rounds UP to 23 held, 22 cash).
+- **G4 — the ops screen** for the floor and ceiling. Until it exists nobody can
+  change 20/60 from a UI.
+- **A shop at 0% cannot take a voluntary partial deposit.** `fill_booking` still
+  refuses anything under 40% when a deposit is offered at all, and the new
+  trigger can only tighten, never loosen. The sheet hides the block entirely at
+  a 0% shop so the case can't be reached — fix properly when fill_booking is next
+  re-emitted for step 4.
+- **The preset chips are five taps, not a drag.** A gesture dependency for a
+  control with five legal values isn't worth it.
+
+## G4 — deposit floor & ceiling (0077, 2026-08-31)
+Sterncut Ops · Settings turn **S2 · SET-11/12/13**. Console screen `s12a` at
+`#/reliability/deposit`, reached from the Settings screen's header. 0076 shipped
+the two integers with no screen and no history; this is the desk for them.
+- **Narrowing strands, it never clamps.** Nothing here touches a shop's saved
+  percentage — the bounds are checked only when an owner saves (0076), so a
+  stranded shop keeps its number until its next edit. The design is explicit
+  that there is **no "clamp all"**: silently moving a shop's number changes what
+  a customer is asked for tomorrow without the owner knowing.
+- **A reason is mandatory when either bound narrows, optional when it widens**,
+  and that rule is in `admin_set_deposit_bounds`, not only in the console — the
+  same lesson 0056 wrote down about desk rules living in JavaScript.
+- **The audit is 0066's `settings_changes`, not a new table** — it was built for
+  this exact settings row and already promised "every change is logged with who
+  made it". Bounds go in as typed JSON: before {floor, ceiling}, after adds the
+  count outside **at that moment** (frozen — the answer drifts as shops edit) and
+  how many owners were told; `note` is the reason. 0077 also gives it 0075's
+  append-only trigger, so its immutability is a rule and not a habit.
+- **A shop at 0% is never "outside".** The bounds do not touch that choice (§5).
+- The histogram's 0% column is hatched grey, not coral: it is a choice, not the
+  bottom of a scale.
+Still open:
+- **0077 is NOT APPLIED.** Its assertions pin SET-11's card arithmetic (12 DH at
+  20%, 36 at 60%, 54 on cut and beard) and SET-12/13's drawn cohorts.
+- **"Tell the owners" is an in-app notification, not the SMS the design draws** —
+  the SMS rail is the same one blocking slice 1's OTP and RTL. The audience query
+  is the part that matters and it is already right; swap the insert for a send.
+- **Five of the six Settings sub-tabs are inert** (Team & roles, Permissions,
+  Audit log, Message templates, Districts). Those are turns B3/B7, not G4. Left
+  visible-but-dead rather than removed, as the console did for Barbers/Customers.
+- **The dials step in fives.** The design draws −/+ buttons without naming a
+  step; five matches the presets OSH-11 offers an owner.
+- **0076/0077 first apply failed and was fixed, not worked around (2026-08-31).**
+  `platform_settings` already existed — 0066 created it for the reliability rules
+  — so `create table if not exists` silently did nothing and the two bound
+  columns were never added. 0076 now ALTERs that table instead of trying to own
+  it, and 0077 writes to its existing `settings_changes` audit. Neither file had
+  applied (the failure rolled the whole script back), so editing them rather than
+  adding 0078 keeps the rule intact: **an applied migration is never edited.**
+  Both are idempotent, so re-running is safe either way.
+
+## Slice 2 step 4 — the deposit resolves on a deadline (0078, 2026-08-31)
+§6.3 lists four outcomes; the repo only ever had two. `cancel_booking` (0035)
+refunded when the **barber** cancelled and forfeited every time the customer did,
+whatever the timing. 0078 splits that: a customer who cancels **inside the free
+window** gets the hold back. This is a behaviour change to shipped money code.
+- **One predicate, two callers.** `cancel_is_free(starts_at)` is read by both
+  `cancel_booking` and 0075's `resolve_deposit_hold`, so the refund row and the
+  hold's state can never disagree about whether a cancellation was free.
+- **§6.4 is rendered as a TIME.** `booking_free_until()` returns the moment;
+  BKG-07 prints "Free to cancel until 13:30 today", and once it has passed it
+  says so rather than going quiet — that is the sentence the customer is about
+  to make a decision against. The subtraction happens once, on the server.
+- **35c stopped lying.** The receipt hardcoded "Refunded to wallet · 0 DH",
+  which was true only while every customer cancellation forfeited. It now reads
+  `deposit_holds.state` after the cancel — what the ledger did, not what the
+  screen thinks the rule was — and "rebooking doesn't bring it back" is
+  suppressed when it already came back.
+Still open:
+- **DEVIATION: the window is platform-wide, not per shop.** §6.4 says it must
+  come from the shop's policy. Nothing designed can set that — G3 (OSH-11) is
+  only about the percentage, and §4's seven gaps don't include a window screen.
+  It sits on `platform_settings.free_cancel_min` (120, the value ops SET-01
+  draws) until a surface exists. **This wants a decision.**
+- **`fill_booking` still refuses a deposit under 40%**, so a shop at 0% cannot
+  take a voluntary partial one. The sheet hides the block entirely at a 0% shop
+  so the case is unreachable; the real fix is the re-emit, still deferred.
+- **BKG-16 (§3: "rewrite from slice 1") is step 5**, not done here.
+
+## Slice 2 step 5 — the deposit resolves (2026-08-31)
+`BTD-03` mark-done routing. No migration: the numbers were all there, the panel
+just wasn't reading them.
+- **A real money bug, found by building it.** `BookingPanels` said
+  "Collect in cash · **{full price}**" and the CTA read "MARK DONE · COLLECT 60 DH"
+  — it never looked at `deposit_cents`. A barber reading that aloud takes 60 when
+  24 is already out of the customer's wallet, so the customer pays 84 for a 60 DH
+  cut. Now: a "Deposit paid" row, and `collect = price − deposit` behind both the
+  figure and the button, which is exactly what BTD-03 draws.
+- **The same bug was on the dashboard's next-up card** (`BookingsScreen`), fixed
+  with it. `SettleBundleSheet` (34f, 0047) already had it right — bundles were
+  the only path that subtracted the deposit.
+- **BKG-16 needed no rewrite.** Slice 2's design file is byte-identical to slice
+  1's and draws only the forfeit case; §3's "rewrite from slice 1" is aimed at
+  slice 1's *README* §7.1 ("cancelling costs nothing"), which the design never
+  followed. Step 4 already made the receipt read the hold, so both outcomes are
+  now true — the drawn state is still exactly what renders on a forfeit.
+Still open:
+- **BKG-21 ("Your visit") is NOT built.** It needs the booked-vs-actual chair
+  time (`started_at` / `completed_at` exist since 0018) and a new one-tap
+  duration verdict — too long / right / rushed — which is a table nothing has:
+  the design is explicit that it "goes to the shop as a number, not as a review".
+  Left for its own increment rather than half-built.
+- **G6 blocks the no-show forfeit receipt.** §4: "BKG-21 is close but is written
+  for a completed cut." Still being designed.
+- **The four §7 messages stay unwritten** — copy is not mine to draft.
+
+## Slice 2 step 6 — ops can see it (0079, 2026-08-31)
+Reads only; nothing in this file moves a dirham.
+- **BKN-02 gains custody.** The money block already had service / deposit / cash
+  / coupon. What it could not say is **who holds the deposit right now** — the
+  question the desk opens the page to settle. `admin_booking_hold` reads 0075's
+  hold: NOBODY / SHOP / CUSTOMER, with 0078's reason beside it.
+- **BKN-04 is a new screen** at `#/bookings/refunds`, linked from Bookings.
+  §6.3's rule is the whole design: "who bore it" is derived from which
+  resolution fired, so the screen has no dropdown and nothing typed. Three
+  causes — shop cancelled, cancelled inside the free window, ops override — and
+  only the third costs Sterncut anything.
+- **OVW-02's two rows** ride `admin_money_alerts`: shops over the float cap
+  (unshifted to the top — §6.6 calls these the fastest way to lose real money)
+  and shops unsettled past one cycle. The hold limit is **7 days because §6.7
+  settles weekly**; the design names no number.
+- **SAL-10** gained deposits earned / still held / days since settled. Float cap
+  and last settlement were already there from 0069.
+Still open — and one of these is a real hole:
+- **Recovering a refund from a shop does not exist.** BKN-04 draws a fourth row:
+  "refunded in the hour, recovered from the shop eleven days later on Friday".
+  Nothing here can claw money back once a shop has been settled —
+  `salon_owed_cents` (0044) has no deduction term. So every refund the ledger
+  can show cost either nobody or Sterncut. The screen **says so** rather than
+  printing a zero that reads as good news. **This wants building before a shop
+  ever shuts with no notice.**
+- **BKN-06's "money stuck until a person decides" has no state.** The screen
+  itself is BKN-02 with a linked case, which the console already renders, and
+  its actions (refund the deposit, open a case) were built in 0069. But a hold
+  resolves on completion whatever the customer says — there is no disputed state
+  that parks the money. Needs a decision before it needs code.
+- **OVW-02's rows are appended client-side**, not part of `admin_overview`.
+  Fold them in whenever that function is next re-emitted.

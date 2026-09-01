@@ -2,23 +2,33 @@ import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { supabase } from '../lib/supabase';
-import { Block, daySlots, Range, sameDay, weekStartOf, Window } from '../lib/slots';
+import { Block, daySlots, mergeSlots, Range, sameDay, weekStartOf, Window } from '../lib/slots';
 import { colors, font, radius, shadow, sp } from '../theme';
+
+type Chair = { windows: Window[]; daysOff: string[]; blocks: Block[]; bufferMin: number; booked: Range[] };
+const EMPTY_CHAIR: Chair = { windows: [], daysOff: [], blocks: [], bufferMin: 0, booked: [] };
 
 // Weekly day selector + time grid. Full slots are struck-through and disabled.
 // `markDay` rings a day and captions it NOW — the reschedule sheet (11a) uses it
 // to keep the appointment's current day visible while you pick a different one.
+//
+// BOOK-21 — `barberId` takes a list as well as one id. With several, a time is
+// free if *anyone* is free then, and `onSelect` says who: that is what "Anyone
+// free" means, and resolving it here rather than at confirm time keeps the grid
+// and the booking from ever disagreeing about who was actually available.
+// Existing single-barber callers are unaffected — a `string` still satisfies the
+// type, and a handler that ignores the second argument is still assignable.
 export default function SlotPicker({ barberId, durationMin, selected, onSelect, label, markDay, renderFull }: {
-  barberId: string; durationMin: number; selected: Date | null; onSelect: (t: Date) => void;
+  barberId: string | string[]; durationMin: number; selected: Date | null;
+  onSelect: (t: Date, barberId: string) => void;
   label?: string; markDay?: Date | null;
   /** 36a — drawn in place of the grid when the chosen day has nothing free at all */
   renderFull?: (day: Date) => React.ReactNode;
 }) {
-  const [windows, setWindows] = useState<Window[]>([]);
-  const [daysOff, setDaysOff] = useState<string[]>([]);
-  const [blocks, setBlocks] = useState<Block[]>([]);
-  const [bufferMin, setBufferMin] = useState(0);
-  const [booked, setBooked] = useState<Range[]>([]);
+  const ids = useMemo(() => (Array.isArray(barberId) ? barberId : [barberId]), [
+    Array.isArray(barberId) ? barberId.join(',') : barberId,
+  ]);
+  const [chairs, setChairs] = useState<Record<string, Chair>>({});
   const [weekStart, setWeekStart] = useState<Date>(() => weekStartOf(new Date()));
   const [selectedDay, setSelectedDay] = useState<Date>(() => new Date());
 
@@ -29,28 +39,50 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect, 
   );
   const canGoPrev = weekStart.getTime() > weekStartOf(today).getTime();
 
+  // ponytail: one round of queries per chair. At launch a shop has a handful of
+  // barbers, so N small queries beats an RPC nobody has written yet — revisit if
+  // "Anyone free" ever runs against a twenty-chair shop.
   const loadBooked = useCallback(async (ws: Date) => {
     const from = new Date(Math.max(ws.getTime(), Date.now()));
     const to = new Date(ws.getTime() + 7 * 86_400_000);
-    const { data } = await supabase.rpc('booked_ranges',
-      { p_barber: barberId, p_from: from.toISOString(), p_to: to.toISOString() });
-    setBooked(data ?? []);
-  }, [barberId]);
+    const rows = await Promise.all(ids.map(async (id) => {
+      const { data } = await supabase.rpc('booked_ranges',
+        { p_barber: id, p_from: from.toISOString(), p_to: to.toISOString() });
+      return [id, (data ?? []) as Range[]] as const;
+    }));
+    setChairs((cur) => {
+      const next = { ...cur };
+      for (const [id, booked] of rows) next[id] = { ...(next[id] ?? EMPTY_CHAIR), booked };
+      return next;
+    });
+  }, [ids]);
 
   useEffect(() => {
-    Promise.all([
-      supabase.from('availability').select('weekday, start_min, end_min').eq('barber_id', barberId),
-      supabase.from('days_off').select('day').eq('barber_id', barberId),
-      supabase.from('time_blocks').select('day, start_min, end_min, kind').eq('barber_id', barberId),
-      supabase.from('barbers').select('buffer_before_min, buffer_after_min').eq('id', barberId).single(),
-    ]).then(([av, off, blk, buf]) => {
-      setWindows(av.data ?? []);
-      setDaysOff((off.data ?? []).map((d) => d.day));
-      setBlocks(blk.data ?? []);
-      if (buf.data) setBufferMin(buf.data.buffer_before_min + buf.data.buffer_after_min);
+    let alive = true;
+    Promise.all(ids.map(async (id) => {
+      const [av, off, blk, buf] = await Promise.all([
+        supabase.from('availability').select('weekday, start_min, end_min').eq('barber_id', id),
+        supabase.from('days_off').select('day').eq('barber_id', id),
+        supabase.from('time_blocks').select('day, start_min, end_min, kind').eq('barber_id', id),
+        supabase.from('barbers').select('buffer_before_min, buffer_after_min').eq('id', id).single(),
+      ]);
+      return [id, {
+        windows: av.data ?? [],
+        daysOff: (off.data ?? []).map((d) => d.day),
+        blocks: blk.data ?? [],
+        bufferMin: buf.data ? buf.data.buffer_before_min + buf.data.buffer_after_min : 0,
+      }] as const;
+    })).then((rows) => {
+      if (!alive) return;
+      setChairs((cur) => {
+        const next = { ...cur };
+        for (const [id, d] of rows) next[id] = { ...(next[id] ?? EMPTY_CHAIR), ...d };
+        return next;
+      });
     });
     loadBooked(weekStart);
-  }, [barberId]);
+    return () => { alive = false; };
+  }, [ids]);
 
   function changeWeek(dir: 'prev' | 'next') {
     if (dir === 'prev' && !canGoPrev) return;
@@ -61,7 +93,12 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect, 
     loadBooked(ws);
   }
 
-  const slots = daySlots(selectedDay, durationMin, windows, booked, daysOff, blocks, bufferMin);
+  // One grid over every chair asked about — the merge itself lives in
+  // lib/slots.ts so `npm run check` can pin it.
+  const { slots, freeBy } = useMemo(() => mergeSlots(ids.map((id) => {
+    const c = chairs[id] ?? EMPTY_CHAIR;
+    return { id, slots: daySlots(selectedDay, durationMin, c.windows, c.booked, c.daysOff, c.blocks, c.bufferMin) };
+  })), [ids, chairs, selectedDay, durationMin]);
 
   return (
     <View>
@@ -111,7 +148,8 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect, 
         {slots.map(({ time, status }) => {
           const isSel = selected?.getTime() === time.getTime();
           return (
-            <Pressable key={time.getTime()} disabled={status !== 'free'} onPress={() => onSelect(time)}
+            <Pressable key={time.getTime()} disabled={status !== 'free'}
+              onPress={() => onSelect(time, freeBy.get(time.getTime()) ?? ids[0])}
               style={[s.slot, isSel && s.slotSel, status === 'full' && s.slotFull, status === 'past' && s.slotPast]}>
               <Text style={[s.slotText, isSel && s.slotTextSel,
                 status === 'full' && s.slotTextFull, status === 'past' && s.slotTextPast]}>

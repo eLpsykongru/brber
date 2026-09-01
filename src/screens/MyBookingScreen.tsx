@@ -163,12 +163,35 @@ function Pill({ title, dark, wide, onPress }: {
   );
 }
 
+/** §6.4 — "free until 13:30 today", never "up to 2 hours before". */
+function freeAt(t: Date) {
+  const midnight = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const days = Math.round((midnight(t) - midnight(new Date())) / 86_400_000);
+  const hhmm = t.toTimeString().slice(0, 5);
+  return days === 0 ? `${hhmm} today`
+    : days === 1 ? `${hhmm} tomorrow`
+      : `${hhmm} on ${t.toLocaleDateString('en-GB', { weekday: 'long' })}`;
+}
+
 // PAYMENT card — 9a / 10b / 10c. Mock shape, real numbers.
 function Payment({ d, compact }: { d: Detail; compact?: boolean }) {
   const total = d.price_cents / 100;
   const dep = d.deposit_cents / 100;
   const pct = dep > 0 ? Math.round((d.deposit_cents / d.price_cents) * 100) : 0;
   const pending = d.status === 'pending';
+
+  // BKG-07 / §6.4 — the free-cancellation deadline, as a moment. The server
+  // does the subtraction (`booking_free_until`, 0078) so the screen and
+  // `cancel_booking` can never disagree about whether it has passed.
+  const [freeUntil, setFreeUntil] = useState<Date | null>(null);
+  useEffect(() => {
+    if (dep <= 0) return;
+    let alive = true;
+    supabase.rpc('booking_free_until', { p_booking: d.id })
+      .then(({ data }) => { if (alive && data) setFreeUntil(new Date(data as string)); });
+    return () => { alive = false; };
+  }, [d.id, dep]);
+  const stillFree = !!freeUntil && freeUntil.getTime() > Date.now();
 
   return (
     <View style={[s.card, compact && s.cardTight, { gap: compact ? sp(2.25) : sp(2.5) }]}>
@@ -192,7 +215,11 @@ function Payment({ d, compact }: { d: Detail; compact?: boolean }) {
           {dep > 0
             ? (pending
               ? 'Nothing leaves your wallet until the barber accepts'
-              : 'Deposit refunded to your wallet if the barber cancels')
+              : freeUntil
+                ? (stillFree
+                  ? `Free to cancel until ${freeAt(freeUntil)} — the deposit comes back to your wallet`
+                  : `Free cancellation ended at ${freeAt(freeUntil)}. Cancelling now leaves the deposit with the shop.`)
+                : 'Deposit refunded to your wallet if the shop cancels')
             : 'No deposit is taken — you pay the full price at the shop'}
         </Text>
       </View>
@@ -642,8 +669,12 @@ function CancelSheet({ d, pending, visible, onClose, onReschedule, onDone }: {
 // happened, in the order you care about: it's done, the barber knows, here is
 // the money. The deposit line is the point — 35a warned you, and this is the
 // same number after the fact rather than a surprise in the wallet later.
-function CancelledScreen({ d, ticketNo, reason, withdrawn, onMessage, onBookAgain, onBack }: {
+function CancelledScreen({ d, ticketNo, reason, withdrawn, refunded, onMessage, onBookAgain, onBack }: {
   d: Detail; ticketNo: number | null; reason: string | null; withdrawn: boolean;
+  /** 0078 — whether the hold went back to the wallet. Read off `deposit_holds`
+   *  after the cancel, never recomputed here: the receipt must say what the
+   *  ledger did, not what this screen thinks the rule was. */
+  refunded: boolean;
   onMessage: () => void; onBookAgain: () => void; onBack: () => void;
 }) {
   const first = (d.barbers?.profiles?.full_name ?? 'Your barber').split(' ')[0];
@@ -682,7 +713,9 @@ function CancelledScreen({ d, ticketNo, reason, withdrawn, onMessage, onBookAgai
         <Row label="Deposit paid" value={`${dep.toFixed(0)} DH`} />
         <View style={s.rowBase}>
           <Text style={s.refundK}>Refunded to wallet</Text>
-          <Text style={s.refundV}>{withdrawn ? '0 DH' : '0 DH'}</Text>
+          <Text style={[s.refundV, refunded && s.refundBack]}>
+            {refunded ? `${dep.toFixed(0)} DH` : '0 DH'}
+          </Text>
         </View>
       </View>
 
@@ -695,7 +728,8 @@ function CancelledScreen({ d, ticketNo, reason, withdrawn, onMessage, onBookAgai
             <Text style={s.mindTitle}>Changed your mind?</Text>
             <Text style={s.mindBody}>
               {at} is free again for now.
-              {dep > 0 ? ` Rebooking it doesn't bring the ${dep.toFixed(0)} DH back.` : ''}
+              {dep > 0 && !refunded ? ` Rebooking it doesn't bring the ${dep.toFixed(0)} DH back.` : ''}
+              {dep > 0 && refunded ? ` Your ${dep.toFixed(0)} DH is back in your wallet to spend on it.` : ''}
             </Text>
           </View>
         </View>
@@ -924,7 +958,7 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
   const { detail, request, rating, photo, queue, reload } = useBooking(bookingId);
   const [overlay, setOverlay] = useState<Overlay>(null);
   // 35c — held after cancelling so the receipt can be shown instead of popping back
-  const [cancelled, setCancelled] = useState<{ reason: string | null; withdrawn: boolean } | null>(null);
+  const [cancelled, setCancelled] = useState<{ reason: string | null; withdrawn: boolean; refunded: boolean } | null>(null);
 
   // 13a fires once per acceptance — the barber answers while the app is closed,
   // so the celebration is owed on the next open, not on the tap that caused it.
@@ -969,7 +1003,8 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
   // 35c — the after-state. Cancelling used to pop straight back to the list.
   if (cancelled) {
     return <CancelledScreen d={d} ticketNo={ticketNo} reason={cancelled.reason}
-      withdrawn={cancelled.withdrawn} onBack={onBack} onBookAgain={onBack}
+      withdrawn={cancelled.withdrawn} refunded={cancelled.refunded}
+      onBack={onBack} onBookAgain={onBack}
       onMessage={() => { setCancelled(null); setOverlay('chat'); }} />;
   }
 
@@ -1022,7 +1057,14 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
       <CancelSheet d={d} pending={pending} visible={overlay === 'cancel'}
         onClose={() => setOverlay(null)}
         onReschedule={() => setOverlay('reschedule')}
-        onDone={(reason) => { setOverlay(null); setCancelled({ reason, withdrawn: pending }); }} />
+        onDone={async (reason) => {
+          setOverlay(null);
+          // 0075's hold is the record of where the money went. Asking it beats
+          // re-deriving the window here and getting a different answer.
+          const { data: hold } = await supabase.from('deposit_holds')
+            .select('state').eq('booking_id', d.id).maybeSingle();
+          setCancelled({ reason, withdrawn: pending, refunded: hold?.state === 'to_customer' });
+        }} />
       <RescheduleSheet d={d} visible={overlay === 'reschedule'} onClose={() => setOverlay(null)}
         onSent={async () => { await reload(); setOverlay('requested'); }} />
     </View>
@@ -1377,6 +1419,7 @@ const s = StyleSheet.create({
   },
   refundK: { fontSize: font.small, fontWeight: '700', color: colors.text },
   refundV: { fontSize: 18, fontWeight: '800', color: colors.accent, fontVariant: ['tabular-nums'] },
+  refundBack: { color: colors.success },
   mindCard: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: colors.bg,
     borderRadius: 18, paddingHorizontal: 16, paddingVertical: 14, ...shadow,

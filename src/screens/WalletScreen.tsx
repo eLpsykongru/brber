@@ -96,10 +96,14 @@ export default function WalletScreen({ customerId, onBack }: {
               <Text style={s.balanceNote}>{heldTotal} DH paid toward an upcoming booking</Text>
             )}
           </View>
-          {/* 7b — the honest alert. Card top-ups need the rail that isn't here yet. */}
+          {/* Slice 2 §1/§8: there is no card processor and there is not going to
+              be one this slice, so "coming soon" was a promise the product has
+              decided not to keep. Cash over a counter is the only way in.
+              TODO(backlog): this button's real destination is G1 ("Pay at a
+              Sterncut shop" — where, and how), which is still being designed. */}
           <Pressable accessibilityRole="button"
             onPress={() => Alert.alert('Add money',
-              'Card top-ups are coming soon — for now, top up with cash at your barber.')}
+              'Hand cash to your barber and he adds it to your balance on the spot.')}
             style={({ pressed }) => [s.addBtn, pressed && s.pressed]}>
             <Text style={s.addText}>ADD MONEY</Text>
           </Pressable>

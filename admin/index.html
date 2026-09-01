@@ -229,7 +229,7 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
         <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;gap:7px;padding:0 12px;font-size:12px;font-weight:600;color:#9A9CA3">City: Tangier<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></span>
         <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;gap:7px;padding:0 12px;font-size:12px;font-weight:600;color:#9A9CA3">Agent: any<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></span>
         <span style="flex:1"></span>
-        <span id="b-export" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#9A9CA3"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><path d="M12 3v12M7 11l5 5 5-5M4 21h16"></path></svg>Export CSV</span>
+        <span data-go="bookings/refunds" style="cursor:pointer;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#9A9CA3;margin-right:14px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><path d="M3 10h13a4 4 0 0 1 0 8h-3"></path><path d="M7 6 3 10l4 4"></path></svg>Refunds</span><span id="b-export" style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#9A9CA3"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><path d="M12 3v12M7 11l5 5 5-5M4 21h16"></path></svg>Export CSV</span>
       </div>
 
       <div id="b-table" style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:16px;padding:0 18px;box-sizing:border-box;overflow:hidden">
@@ -1613,7 +1613,7 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
     </div>
     <div style="display:flex;flex-direction:column;gap:2px">
       <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
-      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg>Demand<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg>Demand<span data-go="reliability/deposit" style="cursor:pointer;height:28px;border-radius:8px;background:#212125;display:flex;align-items:center;gap:6px;padding:0 11px;font-size:11.5px;font-weight:700;color:#fff">Deposit bounds<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></span><span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
       <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
       <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:11px;color:#6B6B72">118</span></span>
       <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">6</span></span>
@@ -2826,6 +2826,203 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
 </div>
 </div>
 
+
+<!-- G4 · SET-11/12/13 — the bounds every shop's deposit sits inside.
+     The dialog is an overlay inside this screen, as the design draws it, rather
+     than the shared #modal (which is the review-removal dialog and owns its own
+     slots). Sidebar and header bell are cloned in at boot like every screen. -->
+<div class="scr" id="s12a">
+<div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden;position:relative">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px"></div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">OP</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Ops</span><span style="display:block;font-size:10px;color:#9A9CA3">Sterncut</span></span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:14px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">Settings</span>
+      <span style="font-size:12px;color:#6B6B72">Changes here affect every shop and every phone</span>
+    </div>
+    <!-- The five unbuilt sub-tabs are inert rather than removed, the same call
+         the console made for Barbers/Customers/Coupons before they existed. -->
+    <div style="height:46px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:5px;padding:0 24px">
+      <span style="height:28px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:700">Rules</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#3A3A40">Team &amp; roles</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#3A3A40">Permissions</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#3A3A40">Audit log</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#3A3A40">Message templates</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#3A3A40">Districts</span>
+    </div>
+
+    <div style="flex:1;min-height:0;padding:22px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:auto">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
+
+        <div style="background:#17171A;border:1px solid #26262B;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:16px;outline:1px solid rgba(232,68,46,.35);outline-offset:-1px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between">
+            <span style="display:flex;align-items:baseline;gap:9px"><span style="font-size:13px;font-weight:700">Deposit floor &amp; ceiling</span><span style="font-size:9.5px;letter-spacing:.1em;font-weight:700;color:#E8442E;background:rgba(232,68,46,.14);border-radius:5px;padding:3px 7px">PLATFORM-WIDE</span></span>
+            <span style="font-size:11px;color:#6B6B72">Checked when an owner saves — never applied retroactively</span>
+          </div>
+
+          <div style="display:flex;gap:14px">
+            <div style="flex:1;background:#111113;border:1px solid #26262B;border-radius:11px;padding:13px 14px;display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">FLOOR</span>
+              <span style="display:flex;align-items:baseline;gap:4px"><span id="db-floor" style="font-size:26px;font-weight:800;font-variant-numeric:tabular-nums">—</span><span style="font-size:13px;color:#9A9CA3">%</span></span>
+              <span id="db-floor-sub" style="font-size:10.5px;color:#6B6B72;line-height:1.4">The least a shop may require</span>
+            </div>
+            <div style="flex:1;background:#111113;border:1px solid #26262B;border-radius:11px;padding:13px 14px;display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">CEILING</span>
+              <span style="display:flex;align-items:baseline;gap:4px"><span id="db-ceil" style="font-size:26px;font-weight:800;font-variant-numeric:tabular-nums">—</span><span style="font-size:13px;color:#9A9CA3">%</span></span>
+              <span id="db-ceil-sub" style="font-size:10.5px;color:#6B6B72;line-height:1.4">The most</span>
+            </div>
+            <div style="flex:1;background:#111113;border:1px solid #26262B;border-radius:11px;padding:13px 14px;display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">OR EXACTLY</span>
+              <span style="display:flex;align-items:baseline;gap:4px"><span style="font-size:26px;font-weight:800;color:#9A9CA3;font-variant-numeric:tabular-nums">0</span><span style="font-size:13px;color:#6B6B72">%</span></span>
+              <span style="font-size:10.5px;color:#6B6B72;line-height:1.4">A shop may take no deposit at all. The bounds do not touch that choice.</span>
+            </div>
+          </div>
+
+          <div style="background:#111113;border:1px solid #26262B;border-radius:11px;padding:16px 18px 14px;display:flex;flex-direction:column;gap:10px">
+            <div id="db-band" style="position:relative;height:8px;border-radius:4px;background:#212125;margin:32px 0 0"></div>
+            <div style="display:flex;justify-content:space-between;margin-top:26px">
+              <span style="font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">0%</span>
+              <span style="font-size:10px;color:#6B6B72">Owners choose anywhere in the coral band</span>
+              <span style="font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">100%</span>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="flex:1;font-size:11px;line-height:1.5;color:#6B6B72">A shop's percentage is versioned with an effective date, so moving these numbers can never reach a booking already taken.</span>
+            <span id="db-change" style="height:36px;flex:none;border-radius:9px;background:#E8442E;color:#fff;display:flex;align-items:center;padding:0 16px;font-size:11.5px;font-weight:700;letter-spacing:.06em;cursor:pointer">CHANGE BOUNDS</span>
+          </div>
+        </div>
+
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between">
+            <span id="db-total" style="font-size:13px;font-weight:700">Where the shops actually sit</span>
+            <span style="font-size:11px;color:#6B6B72">Their own deposit percentage, today</span>
+          </div>
+          <div id="db-hist" style="display:flex;align-items:flex-end;gap:6px;height:132px;padding:0 2px"></div>
+          <div id="db-stats" style="display:flex;gap:10px;border-top:1px solid #1E1E22;padding-top:13px"></div>
+        </div>
+      </div>
+
+      <div style="width:300px;flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:13px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:12.5px;font-weight:700">Bound changes</span><span id="db-changes-n" style="font-size:10.5px;color:#6B6B72"></span></div>
+          <div id="db-changes" style="display:flex;flex-direction:column;gap:13px"></div>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:11px">
+          <span style="font-size:12.5px;font-weight:700">What the audit records</span>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <span style="display:flex;gap:9px;font-size:11px;line-height:1.45;color:#9A9CA3"><span style="color:#4ADE80;flex:none">✓</span>Who, to the second</span>
+            <span style="display:flex;gap:9px;font-size:11px;line-height:1.45;color:#9A9CA3"><span style="color:#4ADE80;flex:none">✓</span>Both numbers before and after, even if only one moved</span>
+            <span style="display:flex;gap:9px;font-size:11px;line-height:1.45;color:#9A9CA3"><span style="color:#4ADE80;flex:none">✓</span>How many shops were outside the new band at that moment</span>
+            <span style="display:flex;gap:9px;font-size:11px;line-height:1.45;color:#9A9CA3"><span style="color:#4ADE80;flex:none">✓</span>A reason — <strong style="color:#D8D8DC">mandatory when either bound narrows</strong>, optional when it widens</span>
+          </div>
+          <span style="font-size:11px;line-height:1.5;color:#6B6B72;border-top:1px solid #1E1E22;padding-top:11px">Widening can only give owners more room, so it needs no defence. Narrowing takes a choice away from a shop that already made it, and that is the entry someone will read back in six months.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SET-12 / SET-13 -->
+  <div id="db-dlg" hidden style="position:absolute;inset:0;left:216px;background:rgba(0,0,0,.66);display:flex;align-items:center;justify-content:center;padding:26px;box-sizing:border-box;z-index:20">
+    <div style="width:560px;max-height:100%;overflow:auto;background:#17171A;border:1px solid #26262B;border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.6);padding:22px;display:flex;flex-direction:column;gap:15px;box-sizing:border-box">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+        <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:20px">Change deposit bounds</span><span id="db-dlg-sub" style="display:block;font-size:11.5px;color:#9A9CA3;margin-top:4px"></span></span>
+        <span data-db-close style="cursor:pointer;flex:none;margin-top:4px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+      </div>
+      <div id="db-dials" style="display:flex;gap:12px"></div>
+      <div id="db-impact"></div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span id="db-reason-label" style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">REASON</span>
+        <textarea id="db-reason" rows="3" placeholder="Why this band" style="background:#111113;border:1px solid #26262B;border-radius:11px;padding:12px 14px;font-size:12px;line-height:1.55;color:#D8D8DC;font-family:Inter,sans-serif;resize:none;outline:none"></textarea>
+      </div>
+      <div id="db-notify-row" style="display:flex;align-items:center;gap:12px;background:#111113;border:1px solid #26262B;border-radius:11px;padding:12px 14px">
+        <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span id="db-notify-title" style="font-size:12px;font-weight:600">Tell the owners the range moved</span><span style="font-size:10.5px;color:#6B6B72">They find out now, not the next time they try to save.</span></span>
+        <span id="db-notify" data-on="1" style="cursor:pointer;width:38px;height:22px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:flex-end;padding:0 3px;flex:none"><span style="width:16px;height:16px;border-radius:999px;background:#fff"></span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;border-top:1px solid #1E1E22;padding-top:14px">
+        <span id="db-log-line" style="flex:1;font-size:10.5px;line-height:1.45;color:#6B6B72;font-variant-numeric:tabular-nums"></span>
+        <span data-db-close style="height:38px;flex:none;border-radius:9px;background:#212125;color:#fff;display:flex;align-items:center;padding:0 15px;font-size:11.5px;font-weight:700;letter-spacing:.06em;cursor:pointer">CANCEL</span>
+        <span id="db-save" style="height:38px;flex:none;border-radius:9px;background:#E8442E;color:#fff;display:flex;align-items:center;padding:0 16px;font-size:11.5px;font-weight:700;letter-spacing:.06em;cursor:pointer">SAVE BOUNDS</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- BKN-04 · Refunds, by who bore it. §6.3: the attribution is DERIVED from
+     which resolution fired, never typed. Sidebar and bell are cloned in at boot. -->
+<div class="scr" id="s13a">
+<div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px"></div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">OP</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Ops</span><span style="display:block;font-size:10px;color:#9A9CA3">Sterncut</span></span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span data-go="bookings" style="cursor:pointer;font-size:12px;color:#6B6B72">Bookings</span>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg>
+      <span style="font-size:15px;font-weight:700">Refunds</span>
+      <span id="rf-sub" style="font-size:12px;color:#6B6B72"></span>
+      <span style="flex:1"></span>
+      <span id="rf-range" style="display:flex;gap:5px"></span>
+    </div>
+
+    <div style="flex:1;min-height:0;padding:22px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:auto">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div id="rf-kpis" style="display:flex;gap:12px"></div>
+
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid #1E1E22;background:#141416">
+            <span style="flex:1;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">CAUSE</span>
+            <span style="width:44px;flex:none;text-align:right;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">N</span>
+            <span style="width:92px;flex:none;text-align:right;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">VALUE</span>
+            <span style="width:190px;flex:none;text-align:right;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">WHO BORE IT</span>
+          </div>
+          <div id="rf-rows"></div>
+        </div>
+
+        <div id="rf-gap" style="background:rgba(232,161,0,.08);border:1px solid rgba(232,161,0,.28);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:9px"></div>
+      </div>
+
+      <div style="width:300px;flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:11px">
+          <span style="font-size:12.5px;font-weight:700">What is never deducted</span>
+          <div style="display:flex;flex-direction:column;gap:11px">
+            <span style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11.5px;font-weight:700">A cancellation with real notice</span><span style="font-size:10.5px;line-height:1.45;color:#9A9CA3">Nothing was owed yet. Charging for it would be inventing a fee.</span></span>
+            <span style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11.5px;font-weight:700">A customer who did not turn up</span><span style="font-size:10.5px;line-height:1.45;color:#9A9CA3">The shop keeps the money. There is no refund to fund.</span></span>
+            <span style="display:flex;flex-direction:column;gap:3px"><span style="font-size:11.5px;font-weight:700">Anything we got wrong</span><span style="font-size:10.5px;line-height:1.45;color:#9A9CA3">Including when a shop's action triggered our bug.</span></span>
+          </div>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:11px">
+          <span style="font-size:12.5px;font-weight:700">Why most refunds cost a shop nothing</span>
+          <span id="rf-note" style="font-size:11px;line-height:1.5;color:#9A9CA3"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
 <script>
 // ---------------------------------------------------------------- routing --
 // Route → screen id. Barbers, Customers and Coupons are in the sidebar but have
@@ -2844,6 +3041,10 @@ const ROUTES = {
   'support/held': '10b',
   // turn 11 — ops opening a shop it recruited, and what it is waiting on
   'salons/new': '11a', 'invites': '11b',
+  // G4 — the deposit bounds, under Settings alongside the reliability rules
+  'reliability/deposit': '12a',
+  // BKN-04 — refunds by who bore it, a sub-screen of Bookings
+  'bookings/refunds': '13a',
 };
 // ponytail: the one check this wiring leaves behind. The screens are the design's
 // own markup and the renderers find their slots by id — nothing errors when an id
@@ -2871,6 +3072,10 @@ const SLOTS = ('a-kpis a-bars a-stats a-live a-needs a-top a-when a-q a-range a-
   + 'n-sub n-name n-where n-who n-acct n-why n-cap n-sms n-create n-save '
   + 'iv-sub iv-chips iv-sort iv-banner iv-table '
   + 'bl-count '
+  + 'rf-sub rf-range rf-kpis rf-rows rf-gap rf-note '
+  + 'db-floor db-ceil db-floor-sub db-ceil-sub db-band db-total db-hist db-stats '
+  + 'db-changes db-changes-n db-change db-dlg db-dlg-sub db-dials db-impact '
+  + 'db-reason-label db-reason db-notify db-notify-row db-notify-title db-log-line db-save '
   + 'hc-ref hc-who hc-banner hc-cust hc-shop hc-stake hc-said hc-locked').split(' ');
 for (const id of Object.values(ROUTES)) if (!document.getElementById('s' + id)) console.error('admin: no screen', id);
 for (const id of SLOTS) if (!document.getElementById(id)) console.error('admin: markup is missing', id);
@@ -3208,6 +3413,17 @@ async function loadOverview() {
     'Support queue', n.cases_since, 'support'));
   if (n.pending) rows.push(needRow('grey', 'shop', n.pending + ' salon' + (n.pending > 1 ? 's' : '') + ' awaiting approval',
     n.pending_where || 'Application queue', n.pending_since, 'salons/pending'));
+  // Slice 2 · §6.6 — cap breaches and long holds are "the fastest way to lose
+  // real money", so they belong above the review queue, not behind Wallets.
+  const alerts = await rpc('admin_money_alerts');
+  (alerts.over_cap || []).forEach((x) => rows.unshift(needRow('red', 'card',
+    x.name + ' is over its float cap',
+    DH(x.net_cents) + ' of ours against a ' + DH(x.cap_cents) + ' cap · top-ups are refusing',
+    null, 'wallets')));
+  (alerts.stale || []).forEach((x) => rows.push(needRow('amber', 'card',
+    x.name + ' has not settled in ' + x.days + ' days',
+    DH(x.net_cents) + ' outstanding · one cycle is 7', null, 'wallets')));
+
   fill('a-needs', rows.join('') || '<span style="font-size:12px;color:#6B6B72">Nothing needs a human right now.</span>');
 
   const head = (t, right) => `<span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72${right ? ';text-align:right' : ''}">${t}</span>`;
@@ -5638,6 +5854,22 @@ function drawSalon() {
     + '<div style="font-size:10.5px;color:#9A9CA3;line-height:1.45;margin-top:9px">Lowering it below ' + DH(d.float_cents)
     + ' would stop top-ups tonight.</div>';
 
+  // SAL-10 · §3 — "float held, deposits earned, days since settlement". The
+  // first and third were already here; deposits earned is what 0075 can answer.
+  // drawSalon is not async — the paint stays synchronous and this lands after
+  rpc('admin_salon_money', { p_salon: d.id }).then((sm) => $('sl-cap').insertAdjacentHTML('beforeend',
+    '<div style="display:flex;gap:12px;border-top:1px solid #26262B;margin-top:11px;padding-top:11px">'
+    + '<span style="flex:1;display:flex;flex-direction:column;gap:2px">'
+    + '<span style="font-size:9px;letter-spacing:.13em;font-weight:700;color:#6B6B72">DEPOSITS EARNED</span>'
+    + '<span style="font-size:14px;font-weight:700;color:#4ADE80;font-variant-numeric:tabular-nums">' + DH(sm.earned_cents) + '</span></span>'
+    + '<span style="flex:1;display:flex;flex-direction:column;gap:2px">'
+    + '<span style="font-size:9px;letter-spacing:.13em;font-weight:700;color:#6B6B72">STILL HELD</span>'
+    + '<span style="font-size:14px;font-weight:700;color:#E8A100;font-variant-numeric:tabular-nums">' + DH(sm.held_cents) + '</span></span>'
+    + '<span style="flex:1;display:flex;flex-direction:column;gap:2px">'
+    + '<span style="font-size:9px;letter-spacing:.13em;font-weight:700;color:#6B6B72">SINCE SETTLED</span>'
+    + '<span style="font-size:14px;font-weight:700;font-variant-numeric:tabular-nums">'
+    + (sm.days_since == null ? 'never' : sm.days_since + 'd') + '</span></span></div>')).catch(fail);
+
   const f = d.last_settlement;
   const worth = d.since_settled_cents > 0;
   $('sl-settle').innerHTML =
@@ -5697,6 +5929,21 @@ async function loadBookingDetail() {
     + row('DEPOSIT · ' + m.deposit_pct + '%', DH(m.deposit_cents), 'from wallet')
     + row('CASH AT SHOP', DH(m.cash_cents), d.status === 'completed' ? 'collected in the chair' : 'not collected')
     + row('COUPON', m.coupon ? '−' + DH(m.discount_cents) : '—', m.coupon ? esc(m.coupon) : 'none used');
+
+  // Slice 2 · §3 — "deposit state, who holds it now". The amounts were always
+  // here; custody is what 0075's hold made answerable, and it is the one
+  // question the desk actually opens this page to settle.
+  const hold = await rpc('admin_booking_hold', { p_booking: state.bookingId });
+  if (hold) {
+    const tint = hold.state === 'held' ? '#E8A100' : hold.state === 'to_shop' ? '#4ADE80' : '#9A9CA3';
+    $('bk-money').insertAdjacentHTML('beforeend',
+      '<div style="display:flex;align-items:center;gap:12px;padding:10px 0">'
+      + '<span style="width:120px;flex:none;font-size:9px;letter-spacing:.13em;font-weight:700;color:#6B6B72">HELD BY</span>'
+      + '<span style="width:74px;flex:none;font-size:13px;font-weight:700;color:' + tint + '">'
+      + (hold.state === 'held' ? 'NOBODY' : hold.state === 'to_shop' ? 'SHOP' : 'CUSTOMER') + '</span>'
+      + '<span style="flex:1;min-width:0;font-size:11px;color:#9A9CA3">' + esc(hold.holder)
+      + (hold.reason ? ' · ' + esc(hold.reason) : '') + '</span></div>');
+  }
   set($('bk-note'), 'Sterncut took no commission. The deposit left ' + c.name.split(' ')[0]
     + '’s wallet and the barber was paid in full.');
 
@@ -5741,6 +5988,278 @@ async function loadBookingDetail() {
     + (d.review ? jump('Review ' + esc(d.review.ref), 'data-review="' + d.review.id + '"') : '');
 }
 
+
+// ------------------------------------------------- G4 · deposit bounds (S2) --
+// SET-11 the row at rest, SET-12 a narrowing that strands five shops, SET-13 one
+// that strands two thirds of the network and refuses to save without a reason.
+//
+// The rules live in `admin_set_deposit_bounds` (0077), not here: a desk rule
+// enforced only in JavaScript is a desk rule until somebody opens the network
+// tab. This screen shows the same answers so the desk is never surprised by one.
+const bounds = { data: null, floor: 20, ceiling: 60, notify: true };
+
+// the drawn reference cut — every bound card prices itself against one service
+const SAMPLE = 6000;
+const pctDh = (cents, pct) => Math.ceil((cents * pct) / 100) / 100;
+
+function bandTrack(floor, ceiling, shops) {
+  const hatch = 'repeating-linear-gradient(135deg,#26262B 0 4px,#1A1A1D 4px 8px)';
+  // one tick per distinct percentage that a live shop actually sits on, so the
+  // band is read against where the network is rather than in the abstract
+  const marks = [...new Set((shops || []).filter((s) => s.pct > 0).map((s) => s.pct))]
+    .sort((a, b) => a - b).slice(0, 6);
+  return `
+    <span style="position:absolute;left:0;top:0;bottom:0;width:${floor}%;border-radius:4px 0 0 4px;background:${hatch}"></span>
+    <span style="position:absolute;left:${ceiling}%;right:0;top:0;bottom:0;border-radius:0 4px 4px 0;background:${hatch}"></span>
+    <span style="position:absolute;left:${floor}%;width:${ceiling - floor}%;top:0;bottom:0;background:#E8442E"></span>
+    <span style="position:absolute;left:${floor}%;top:-7px;bottom:-7px;width:3px;background:#fff;border-radius:2px;margin-left:-1px"></span>
+    <span style="position:absolute;left:${ceiling}%;top:-7px;bottom:-7px;width:3px;background:#fff;border-radius:2px;margin-left:-1px"></span>
+    <span style="position:absolute;left:${floor}%;top:-26px;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums">${floor}%</span>
+    <span style="position:absolute;left:${ceiling}%;top:-26px;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums">${ceiling}%</span>
+    ${marks.map((p) => `<span style="position:absolute;left:${p}%;top:12px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:3px"><span style="width:1px;height:6px;background:#3A3A40"></span><span style="font-size:9.5px;color:#6B6B72;font-variant-numeric:tabular-nums">${p}%</span></span>`).join('')}`;
+}
+
+async function loadBounds() {
+  const data = await rpc('admin_deposit_bounds');
+  bounds.data = data;
+  bounds.floor = data.floor_pct;
+  bounds.ceiling = data.ceiling_pct;
+
+  $('db-floor').textContent = data.floor_pct;
+  $('db-ceil').textContent = data.ceiling_pct;
+  fill('db-floor-sub', `The least a shop may require · <span style="font-variant-numeric:tabular-nums">${pctDh(SAMPLE, data.floor_pct)} DH</span> on a <span style="font-variant-numeric:tabular-nums">60 DH</span> skin fade`);
+  fill('db-ceil-sub', `The most · <span style="font-variant-numeric:tabular-nums">${pctDh(SAMPLE, data.ceiling_pct)} DH</span> on the same cut, <span style="font-variant-numeric:tabular-nums">${pctDh(9000, data.ceiling_pct)} DH</span> on cut and beard`);
+  fill('db-band', bandTrack(data.floor_pct, data.ceiling_pct, data.shops));
+
+  $('db-total').textContent = `Where ${data.total} shop${data.total === 1 ? '' : 's'} actually sit${data.total === 1 ? 's' : ''}`;
+
+  // the histogram, one column per percentage anyone is on. 0% is hatched grey:
+  // it is a choice, not a low number, and it must not read as the bottom of a scale.
+  const byPct = {};
+  (data.shops || []).forEach((s) => { byPct[s.pct] = (byPct[s.pct] || 0) + 1; });
+  const cols = Object.keys(byPct).map(Number).sort((a, b) => a - b);
+  const top = Math.max(1, ...cols.map((p) => byPct[p]));
+  fill('db-hist', cols.length ? cols.map((p) => {
+    const n = byPct[p];
+    const h = Math.max(6, Math.round((n / top) * 75));
+    const zero = p === 0;
+    const bg = zero ? 'repeating-linear-gradient(135deg,#3A3A40 0 4px,#2A2A2F 4px 8px)' : '#E8442E';
+    const c = zero ? '#9A9CA3' : '#D8D8DC';
+    return `<span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px">
+      <span style="font-size:12px;font-weight:700;color:${c};font-variant-numeric:tabular-nums">${n}</span>
+      <span style="width:100%;max-width:38px;height:${h}px;border-radius:5px 5px 0 0;background:${bg}"></span>
+      <span style="font-size:10.5px;font-weight:700;color:${c};font-variant-numeric:tabular-nums">${p}%</span></span>`;
+  }).join('') : '<span style="font-size:11.5px;color:#6B6B72">No live shops yet.</span>');
+
+  const stat = (v, label, colour) => `<span style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums${colour ? ';color:' + colour : ''}">${v}</span><span style="font-size:10.5px;color:#9A9CA3;line-height:1.4">${label}</span></span>`;
+  fill('db-stats',
+    stat(data.at_zero, 'at 0% — took the opt-out, no deposit at all', '#3A3A40')
+    + stat(data.inside, `inside the band${data.median != null ? `, median <span style="font-variant-numeric:tabular-nums">${data.median}%</span>` : ''}`)
+    + stat(data.on_floor, 'sitting exactly on the floor')
+    + stat(data.on_ceiling, 'sitting exactly on the ceiling'));
+
+  $('db-changes-n').textContent = data.changes_total === 1 ? '1 ever' : `${data.changes_total} ever`;
+  fill('db-changes', (data.changes || []).length ? data.changes.map((c, i) => {
+    const moved = c.floor_before !== c.floor_after
+      ? `Floor <strong style="font-variant-numeric:tabular-nums">${c.floor_before}% → ${c.floor_after}%</strong>`
+      : `Ceiling <strong style="font-variant-numeric:tabular-nums">${c.ceiling_before}% → ${c.ceiling_after}%</strong>`;
+    const both = c.floor_before !== c.floor_after && c.ceiling_before !== c.ceiling_after;
+    return `<div style="display:flex;gap:10px;align-items:flex-start">
+      <span style="width:26px;height:26px;border-radius:999px;background:${i === 0 ? '#E8442E' : '#212125'};display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex:none">${esc(initials(c.who))}</span>
+      <span style="flex:1;display:flex;flex-direction:column;gap:3px">
+        <span style="font-size:11.5px;line-height:1.4">${both ? `Band <strong style="font-variant-numeric:tabular-nums">${c.floor_after}% – ${c.ceiling_after}%</strong>` : moved}</span>
+        <span style="font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">${esc(c.who)} · ${dbWhen(c.at)} · ${c.outside} shop${c.outside === 1 ? '' : 's'} outside</span>
+        ${c.reason ? `<span style="font-size:10.5px;line-height:1.45;color:#9A9CA3">“${esc(c.reason)}”</span>` : ''}
+      </span></div>`;
+  }).join('') : '<span style="font-size:11px;color:#6B6B72">Never changed. The bounds are what 0076 shipped.</span>');
+}
+
+function dbWhen(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+    + ', ' + d.toTimeString().slice(0, 5);
+}
+
+// ---- the dialog ------------------------------------------------------------
+function dial(label, value, was, red) {
+  const c = red ? '#F87171' : '#fff';
+  const border = red ? 'rgba(248,113,113,.45)' : '#26262B';
+  return `<div style="flex:1;background:#111113;border:1px solid ${border};border-radius:11px;padding:13px 14px;display:flex;flex-direction:column;gap:9px">
+    <span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:${red ? '#F87171' : '#9A9CA3'}">${label}</span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span data-db-step="${label.toLowerCase()}:-5" style="cursor:pointer;width:30px;height:30px;flex:none;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.4"><path d="M5 12h14"></path></svg></span>
+      <span style="flex:1;text-align:center;display:flex;align-items:baseline;justify-content:center;gap:3px"><span style="font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;color:${c}">${value}</span><span style="font-size:13px;color:#9A9CA3">%</span></span>
+      <span data-db-step="${label.toLowerCase()}:5" style="cursor:pointer;width:30px;height:30px;flex:none;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M12 5v14M5 12h14"></path></svg></span>
+    </div>
+    <span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">was ${was}%</span>
+  </div>`;
+}
+
+async function drawBoundsDialog() {
+  const d = bounds.data;
+  const narrowing = bounds.floor > d.floor_pct || bounds.ceiling < d.ceiling_pct;
+  const imp = await rpc('admin_bounds_impact',
+    { p_floor: bounds.floor, p_ceiling: bounds.ceiling });
+
+  // SET-13's threshold: once most of the network is stranded the panel turns red
+  const heavy = imp.outside > 0 && imp.outside >= Math.ceil((d.total - imp.at_zero) / 2);
+  const tint = heavy ? '#F87171' : '#E8A100';
+  const bg = heavy ? 'rgba(248,113,113,.09)' : 'rgba(232,161,0,.08)';
+  const line = heavy ? 'rgba(248,113,113,.4)' : 'rgba(232,161,0,.28)';
+
+  $('db-dlg-sub').textContent = heavy
+    ? 'This band strands most of the network.'
+    : !narrowing ? 'Widening. Every shop keeps what it has.'
+      : bounds.floor > d.floor_pct && bounds.ceiling < d.ceiling_pct ? 'Both bounds narrowing.'
+        : bounds.floor > d.floor_pct ? 'Raising the floor. Ceiling untouched.'
+          : 'Lowering the ceiling. Floor untouched.';
+  $('db-dlg-sub').style.color = heavy ? '#F87171' : '#9A9CA3';
+
+  fill('db-dials', dial('FLOOR', bounds.floor, d.floor_pct, heavy)
+    + dial('CEILING', bounds.ceiling, d.ceiling_pct, heavy));
+
+  const chip = (n, label, muted) => `<span style="flex:1;background:${muted ? 'rgba(255,255,255,.04)' : (heavy ? 'rgba(248,113,113,.1)' : 'rgba(232,161,0,.1)')};border-radius:8px;padding:9px 11px;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:800;color:${muted ? '#9A9CA3' : tint};font-variant-numeric:tabular-nums">${n}</span><span style="font-size:10px;color:${muted ? '#6B6B72' : (heavy ? '#F0A9A9' : '#C79A3E')}">${label}</span></span>`;
+
+  fill('db-impact', imp.outside === 0
+    ? `<div style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.28);border-radius:11px;padding:14px 15px;display:flex;align-items:center;gap:10px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.2" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg>
+        <span style="flex:1;font-size:12px;font-weight:700;color:#4ADE80">No shop falls outside ${bounds.floor}% – ${bounds.ceiling}%</span></div>`
+    : `<div style="background:${bg};border:1px solid ${line};border-radius:11px;padding:14px 15px;display:flex;flex-direction:column;gap:11px">
+        <div style="display:flex;align-items:center;gap:10px">
+          ${heavy ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.1" style="flex:none"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg>' : ''}
+          <span style="flex:1;font-size:12.5px;font-weight:700;color:${tint}"><span style="font-variant-numeric:tabular-nums">${imp.outside}${heavy ? ' of ' + d.total : ''}</span> shop${imp.outside === 1 ? '' : 's'} would sit outside <span style="font-variant-numeric:tabular-nums">${bounds.floor}% – ${bounds.ceiling}%</span></span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          ${(imp.buckets || []).map((b) => chip(b.n, `at ${b.pct}%`)).join('')}
+          ${chip(imp.at_zero, 'at 0% · unaffected', true)}
+          ${chip(imp.inside, 'already inside', true)}
+        </div>
+        ${(imp.named || []).length ? `<div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid ${line};padding-top:11px">
+          ${imp.named.map((s) => `<span style="display:flex;align-items:baseline;gap:8px;font-size:11.5px"><span style="flex:1;color:#D8D8DC">${esc(s.name)}</span><span style="font-weight:700;color:${tint};font-variant-numeric:tabular-nums">${s.pct}% · outside</span></span>`).join('')}
+        </div>` : ''}
+        <span style="font-size:11.5px;line-height:1.55;color:${heavy ? '#F0A9A9' : '#C79A3E'}">Each of them keeps its own percentage until its owner next opens the deposit screen — nothing is clamped, and no booking already taken changes. At that edit, <span style="font-variant-numeric:tabular-nums">${bounds.floor}%</span> becomes his lowest option.</span>
+      </div>`);
+
+  // the reason is required exactly when the server will require it
+  $('db-reason-label').textContent = narrowing
+    ? `REASON · REQUIRED, ${bounds.floor > d.floor_pct && bounds.ceiling < d.ceiling_pct ? 'BOTH BOUNDS ARE' : 'THE BAND IS'} NARROWING`
+    : 'REASON · OPTIONAL, THIS IS A WIDENING';
+  $('db-reason-label').style.color = narrowing ? (heavy ? '#F87171' : '#9A9CA3') : '#6B6B72';
+
+  $('db-notify-row').style.display = imp.outside > 0 ? 'flex' : 'none';
+  $('db-notify-title').textContent = `Tell the ${imp.outside} owner${imp.outside === 1 ? '' : 's'} the range moved`;
+
+  const blocked = narrowing && !$('db-reason').value.trim();
+  $('db-save').style.background = blocked ? '#212125' : '#E8442E';
+  $('db-save').style.color = blocked ? '#6B6B72' : '#fff';
+  $('db-save').dataset.blocked = blocked ? '1' : '';
+  fill('db-log-line', blocked
+    ? '<span style="color:#F87171;font-weight:700">A reason is required before this can be saved</span>'
+    : `Will be logged as — floor ${d.floor_pct} → ${bounds.floor} · ceiling ${d.ceiling_pct} → ${bounds.ceiling} · ${imp.outside} outside`);
+}
+
+document.addEventListener('click', async (e) => {
+  if (e.target.closest('#db-change')) {
+    bounds.floor = bounds.data.floor_pct;
+    bounds.ceiling = bounds.data.ceiling_pct;
+    bounds.notify = true;
+    $('db-reason').value = '';
+    $('db-dlg').hidden = false;
+    return drawBoundsDialog().catch(fail);
+  }
+  if (e.target.closest('[data-db-close]')) { $('db-dlg').hidden = true; return; }
+
+  const step = e.target.closest('[data-db-step]');
+  if (step) {
+    const [which, by] = step.dataset.dbStep.split(':');
+    const next = Math.min(100, Math.max(0, bounds[which === 'floor' ? 'floor' : 'ceiling'] + Number(by)));
+    if (which === 'floor') bounds.floor = Math.min(next, bounds.ceiling);
+    else bounds.ceiling = Math.max(next, bounds.floor);
+    return drawBoundsDialog().catch(fail);
+  }
+
+  if (e.target.closest('#db-notify')) {
+    bounds.notify = !bounds.notify;
+    const el = $('db-notify');
+    el.style.background = bounds.notify ? '#E8442E' : '#3A3A40';
+    el.style.justifyContent = bounds.notify ? 'flex-end' : 'flex-start';
+    return;
+  }
+
+  if (e.target.closest('#db-save')) {
+    if ($('db-save').dataset.blocked) { toast('Narrowing needs a reason.'); return; }
+    try {
+      await rpc('admin_set_deposit_bounds', {
+        p_floor: bounds.floor, p_ceiling: bounds.ceiling,
+        p_reason: $('db-reason').value.trim() || null, p_notify: bounds.notify,
+      });
+    } catch (err) { toast(err.message); return; }
+    $('db-dlg').hidden = true;
+    toast(`Bounds are now ${bounds.floor}% – ${bounds.ceiling}%.`);
+    return loadBounds().catch(fail);
+  }
+});
+
+// typing a reason is what unblocks SAVE on a narrowing
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'db-reason' && !$('db-dlg').hidden) drawBoundsDialog().catch(fail);
+});
+
+// ------------------------------------------------ BKN-04 · refunds (slice 2) --
+// §6.3: "who bore it" is derived from which resolution fired, never a dropdown.
+// The whole screen is one read; nothing here can be typed in.
+let refundDays = 30;
+
+async function loadRefunds() {
+  const d = await rpc('admin_refund_ledger', { p_days: refundDays });
+
+  $('rf-sub').textContent = d.count
+    ? DH(d.total_cents) + ' across ' + d.count + ' refund' + (d.count === 1 ? '' : 's')
+    : 'nothing refunded in this window';
+
+  fill('rf-range', [30, 90].map((n) => '<span data-rf-days="' + n + '" style="cursor:pointer;height:28px;border-radius:8px;background:'
+    + (refundDays === n ? '#212125' : 'transparent') + ';display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:'
+    + (refundDays === n ? '700' : '500') + ';color:' + (refundDays === n ? '#fff' : '#9A9CA3') + '">' + n + ' days</span>').join(''));
+
+  const tile = (label, value, sub, colour) => '<div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:15px 16px;display:flex;flex-direction:column;gap:5px">'
+    + '<span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">' + label + '</span>'
+    + '<span style="font-size:20px;font-weight:800;font-variant-numeric:tabular-nums' + (colour ? ';color:' + colour : '') + '">' + value + '</span>'
+    + '<span style="font-size:10.5px;color:#6B6B72;line-height:1.4">' + sub + '</span></div>';
+  fill('rf-kpis',
+    tile('REFUNDED', DH(d.total_cents), d.count + ' booking' + (d.count === 1 ? '' : 's'))
+    + tile('NEVER PAID OUT', DH(d.never_paid_cents), 'caught before settlement')
+    + tile('STERNCUT BORE', DH(d.sterncut_cents), 'desk decisions in the customer’s favour', '#F87171'));
+
+  fill('rf-rows', (d.rows || []).length ? d.rows.map((r) => {
+    const ours = r.bore === 'STERNCUT';
+    return '<div style="display:flex;align-items:flex-start;gap:12px;padding:13px 18px;border-bottom:1px solid #1E1E22">'
+      + '<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">'
+      + '<span style="font-size:12.5px;font-weight:700">' + esc(r.label) + '</span>'
+      + '<span style="font-size:10.5px;line-height:1.45;color:#6B6B72">' + esc(r.why) + '</span></span>'
+      + '<span style="width:44px;flex:none;text-align:right;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums">' + r.n + '</span>'
+      + '<span style="width:92px;flex:none;text-align:right;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums">' + DH(r.cents) + '</span>'
+      + '<span style="width:190px;flex:none;text-align:right;font-size:10.5px;font-weight:700;color:'
+      + (ours ? '#F87171' : '#6B6B72') + '">' + esc(r.bore) + '</span></div>';
+  }).join('') : '<div style="padding:16px 18px;font-size:12px;color:#6B6B72">No refunds in this window.</div>');
+
+  // The fourth bucket BKN-04 draws — "recovered from the shop" — has no
+  // mechanism here, and a silent zero would read as good news.
+  fill('rf-gap',
+    '<span style="font-size:12.5px;font-weight:700;color:#E8A100">Recovering from a shop is not built</span>'
+    + '<span style="font-size:11px;line-height:1.55;color:#C79A3E">BKN-04 draws a fourth row — refunded in the hour, recovered from the shop on Friday. Nothing here can claw money back once a shop has been settled: <span style="font-family:ui-monospace,Menlo,monospace">salon_owed_cents</span> has no deduction term. Every refund above therefore cost either nobody or us. When a refund has to come out of a shop, it needs building first.</span>');
+
+  set($('rf-note'), d.count
+    ? 'Most refunds cost a shop nothing, which is worth saying out loud to owners who assume a refund is a fine. The ones that would cost are the ones where somebody stood outside a locked door — and those are exactly the ones we cannot yet recover.'
+    : 'Nothing has been refunded in this window.');
+}
+
+document.addEventListener('click', (e) => {
+  const r = e.target.closest('[data-rf-days]');
+  if (!r) return;
+  refundDays = Number(r.dataset.rfDays);
+  loadRefunds().catch(fail);
+});
+
 const LOAD = {
   overview: loadOverview, salons: loadSalons, bookings: loadBookings, wallets: loadWallets,
   support: loadSupport, 'salons/pending': loadApprovals,
@@ -5751,6 +6270,8 @@ const LOAD = {
   salon: loadSalon, booking: loadBookingDetail,
   'support/held': loadHeldCase,
   'salons/new': loadNewSalon, invites: loadInvites,
+  'reliability/deposit': loadBounds,
+  'bookings/refunds': loadRefunds,
 };
 
 // turn 3 clicks

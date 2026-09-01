@@ -217,3 +217,53 @@ export function weekStartOf(d: Date): Date {
 export function sameDay(a: Date, b: Date) {
   return a.toDateString() === b.toDateString();
 }
+
+// ---- BOOK-21 · one grid over several chairs ---------------------------------
+// "Anyone free" is not a booking against nobody: it is every chair's day laid
+// over itself. A time is free if *someone* is free then, and the caller needs to
+// know who, or the booking would go to whichever barber happened to be first in
+// the list rather than one who actually had the slot.
+//
+// When chairs disagree about an unavailable time, 'full' wins over 'past': a
+// time somebody has booked is better described as taken than as gone by.
+export function mergeSlots(perChair: { id: string; slots: Slot[] }[]): {
+  slots: Slot[]; freeBy: Map<number, string>;
+} {
+  const merged = new Map<number, SlotStatus>();
+  const freeBy = new Map<number, string>();
+  for (const { id, slots } of perChair) {
+    for (const { time, status } of slots) {
+      const t = time.getTime();
+      const prev = merged.get(t);
+      if (status === 'free') {
+        if (!freeBy.has(t)) freeBy.set(t, id);
+        merged.set(t, 'free');
+      } else if (prev !== 'free' && !(prev === 'full' && status === 'past')) {
+        merged.set(t, status);
+      }
+    }
+  }
+  return {
+    slots: [...merged.entries()].sort((a, b) => a[0] - b[0])
+      .map(([t, status]) => ({ time: new Date(t), status })),
+    freeBy,
+  };
+}
+
+// ---- BOOK-21 · "Free at 15:30 today" ---------------------------------------
+// The first bookable start from `from` onward, scanning at most `days` days.
+// Returns null when the chair has nothing in that window — which is the honest
+// answer for a barber on holiday, not an excuse to show a stale time.
+export function nextFree(
+  from: Date, days: number, durationMin: number,
+  windows: Window[], booked: Range[], daysOff: string[], blocks: Block[] = [], bufferMin = 0,
+): Date | null {
+  if (durationMin <= 0) return null;
+  for (let i = 0; i < days; i++) {
+    const day = new Date(from.getFullYear(), from.getMonth(), from.getDate() + i);
+    const hit = daySlots(day, durationMin, windows, booked, daysOff, blocks, bufferMin)
+      .find((sl) => sl.status === 'free');
+    if (hit) return hit.time;
+  }
+  return null;
+}

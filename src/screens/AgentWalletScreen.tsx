@@ -70,7 +70,9 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
   const [sheet, setSheet] = useState(false);
   // 10c — the last attempt, kept only long enough to tell him nothing moved
   const [failed, setFailed] = useState<TopUpAttempt | null>(null);
-  const [lastTry, setLastTry] = useState<{ phone: string; dh: number } | null>(null);
+  // §6.1 — the key is minted once per attempt and reused by every retry of it,
+  // so 10c's "try again" over a request that actually landed credits once.
+  const [lastTry, setLastTry] = useState<{ phone: string; dh: number; key: string } | null>(null);
   const [salon, setSalon] = useState<string | null>(null);
   // 11d — the top-up the cap refused. Different sheet from 10c's: nothing broke,
   // the answer is "give it back", and there is somewhere else he can send them.
@@ -103,10 +105,11 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
   // first time ops collects. Prefer the server's and keep the sum as a fallback.
   const float_ = (float$?.float_cents ?? (txs ?? []).reduce((a, t) => a + t.amount_cents, 0)) / 100;
 
-  async function topup(phone: string, amountDh: number) {
-    setLastTry({ phone, dh: amountDh });
+  async function topup(phone: string, amountDh: number, retryKey?: string) {
+    const key = retryKey ?? `topup:${barberId}:${Date.now()}:${Math.random().toString(36).slice(2, 10)}`;
+    setLastTry({ phone, dh: amountDh, key });
     const { data, error } = await supabase.rpc('agent_cash_topup', {
-      customer_phone: phone, topup_cents: amountDh * 100,
+      customer_phone: phone, topup_cents: amountDh * 100, p_idem: key,
     });
     // 10c — he is holding this person's cash right now. An alert that says
     // "failed" and nothing else leaves him guessing whether it went half through,
@@ -214,7 +217,7 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
           holding somebody's cash */}
       <TopUpFailedSheet attempt={failed}
         onClose={() => setFailed(null)}
-        onRetry={() => { setFailed(null); if (lastTry) topup(lastTry.phone, lastTry.dh); }}
+        onRetry={() => { setFailed(null); if (lastTry) topup(lastTry.phone, lastTry.dh, lastTry.key); }}
         onCallOps={() => { setFailed(null); Linking.openURL(`tel:${OPS_PHONE}`); }} />
 
       {/* 11d — the cap refused it. Nothing was written, so the only thing left

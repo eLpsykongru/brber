@@ -5,10 +5,16 @@
 export const colors = {
   bg: '#FFFFFF',            // cards, sheets, white surfaces
   surface: '#F2F0EB',       // warm canvas + subtle fills on white cards
+  cardAlt: '#FAF9F6',       // nested / inset panels
   border: '#E5E2DB',
+  hairline: 'rgba(0,0,0,0.06)',  // row dividers
+  borderSoft: 'rgba(0,0,0,0.12)', // input + chip borders
+  slotEmpty: '#EDEAE3',     // image placeholders — never a stock photo
+  skeleton: '#E3E0D8',      // SYS-01 loading blocks
+  skeletonSoft: '#E9E6DE',  // the lighter of the two, for large surfaces
   text: '#111111',
   textSecondary: '#8A8A85',
-  textTertiary: '#B9B6AD',
+  textTertiary: '#B0AFAA',
 
   accent: '#E8442E',        // coral — chips, arrows, small highlights only
   accentSoft: 'rgba(232,68,46,0.12)',
@@ -19,7 +25,9 @@ export const colors = {
   tabActive: '#2B2B28',
   tabInactiveText: '#9A9A95',
 
-  success: '#1E8E4F',
+  success: '#1F7A4D',
+  // ponytail: handoff §10 says warning #E8A100, but that's 2.4:1 on white — fails
+  // AA for text. Kept the darker amber for text; #E8A100 lives on as `star` for fills.
   warning: '#9A6B00',
   danger: '#D23B3B',
   star: '#E8A100',
@@ -38,6 +46,7 @@ export const dark = {
   text: '#FFFFFF',
   textDim: '#D8D8DC',
   sub: '#9A9CA3',
+  faint: '#6B6B72',         // §10 "Faint" — labels and disabled, a step below sub
   scrim: 'rgba(0,0,0,0.6)',
   scrimDeep: 'rgba(0,0,0,0.62)',
 

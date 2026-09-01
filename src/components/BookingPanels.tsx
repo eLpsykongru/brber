@@ -12,10 +12,18 @@ import {
 export type PanelBooking = {
   id: string; customerId: string; name: string; initials: string;
   service: string; durationMin: number; whenLabel: string; timeLabel: string;
-  priceCents: number; checkedInAt: string | null; startedAt: string | null;
+  priceCents: number;
+  /** BTD-03 — already held from the wallet. `collect` is price minus this, and
+   *  it is the number he says out loud; the full price would charge it twice. */
+  depositCents?: number;
+  checkedInAt: string | null; startedAt: string | null;
   phone: string | null; isWalkIn: boolean;
   notes?: string | null;   // 39d — what the customer wrote when booking
 };
+
+/** What is still owed in the chair. A deposit is already out of his customer's
+ *  wallet (0035/0075), so collecting the full price would take it twice. */
+const collect = (b: PanelBooking) => Math.max(0, b.priceCents - (b.depositCents ?? 0));
 
 type Reliability = {
   visits: number; no_shows: number; avg_rating: number | null;
@@ -97,9 +105,12 @@ export default function BookingPanelSheet({
             value={`${hhmm(b.checkedInAt)}${b.startedAt ? ` · in chair ${hhmm(b.startedAt)}` : ''}`} />
         )}
         <View style={s.rule} />
+        {(b.depositCents ?? 0) > 0 && (
+          <Row label="Deposit paid" value={dh(b.depositCents!)} />
+        )}
         <View style={s.detailRowBase}>
           <T w="b" size={13}>Collect in cash</T>
-          <T w="eb" size={20} c={D.accent} style={s.tnum}>{dh(b.priceCents)}</T>
+          <T w="eb" size={20} c={D.accent} style={s.tnum}>{dh(collect(b))}</T>
         </View>
       </View>
 
@@ -113,7 +124,7 @@ export default function BookingPanelSheet({
           onPress={() => Alert.alert('Coupons', 'Coming soon — see BACKLOG.md')} />
       </View>
 
-      <Btn title={`MARK DONE · COLLECT ${dh(b.priceCents)}`} height={54} icon="check"
+      <Btn title={`MARK DONE · COLLECT ${dh(collect(b))}`} height={54} icon="check"
         bg={D.green} fg={D.bg} onPress={onDone} />
       <View style={s.footRow}>
         <GhostBtn title="RESCHEDULE" height={48} style={s.grow} onPress={onReschedule} />

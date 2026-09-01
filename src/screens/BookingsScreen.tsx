@@ -39,6 +39,7 @@ type BookingRow = {
   ends_at: string;
   status: string;
   price_cents: number;
+  deposit_cents: number;   // BTD-03 — what is already held, so "collect" is the rest
   walk_in_name: string | null;
   customer_id: string;
   checked_in_at: string | null;
@@ -141,7 +142,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     const from = new Date(); from.setHours(0, 0, 0, 0); from.setDate(from.getDate() - 6);
     const to = new Date(); to.setHours(0, 0, 0, 0); to.setDate(to.getDate() + 14);
     const { data, error } = await supabase.from('bookings')
-      .select('id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, notes, services(name), customer:profiles!customer_id(full_name, avatar_url, phone)')
+      .select('id, starts_at, ends_at, status, price_cents, deposit_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, notes, services(name), customer:profiles!customer_id(full_name, avatar_url, phone)')
       .eq('barber_id', barberId)
       .gte('starts_at', from.toISOString()).lt('starts_at', to.toISOString())
       .in('status', ['pending', 'confirmed'])
@@ -209,6 +210,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     whenLabel: new Date(b.starts_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
     timeLabel: hhmm(b.starts_at),
     priceCents: b.price_cents,
+    depositCents: b.deposit_cents ?? 0,
     checkedInAt: b.checked_in_at, startedAt: b.started_at,
     phone: b.customer_id === barberId ? null : b.customer?.phone ?? null,
     isWalkIn: b.customer_id === barberId,
@@ -555,7 +557,9 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
           const when = st === 'in_chair' ? 'IN CHAIR'
             : mins <= 0 ? 'NOW' : mins < 60 ? `IN ${mins} MIN` : `IN ${Math.round(mins / 60)} H`;
           const cta = st === 'check_in' ? 'CHECK IN'
-            : st === 'start' ? 'START' : `MARK DONE · COLLECT ${dh(nextUp.price_cents)}`;
+            : st === 'start' ? 'START'
+              // same rule as BTD-03: a held deposit is already out of the wallet
+              : `MARK DONE · COLLECT ${dh(Math.max(0, nextUp.price_cents - (nextUp.deposit_cents ?? 0)))}`;
           const dur = Math.round(
             (new Date(nextUp.ends_at).getTime() - new Date(nextUp.starts_at).getTime()) / 60_000);
           return (

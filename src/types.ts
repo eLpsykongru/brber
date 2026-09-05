@@ -3,7 +3,9 @@ export type Profile = {
   full_name: string | null;
   phone: string | null;
   avatar_url: string | null;
-  role: 'customer' | 'barber' | 'admin';
+  // 'agent' is a field collector: he moves cash a released run already
+  // decided, and cannot change a cap, a bound, a shop's standing or a run (0089)
+  role: 'customer' | 'barber' | 'admin' | 'agent';
   // 19a/19b — settings and the customer's own profile (0039). Optional because
   // most callers select the short column list above.
   email?: string | null;         // from auth, not a column; filled where known

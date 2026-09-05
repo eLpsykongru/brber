@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+html{background:#111114}
+body{margin:0;background:#111114;font-family:Inter,system-ui,sans-serif}
+a{color:#E8442E;text-decoration:none}a:hover{color:#C33421}
+.dv-turn{padding:38px 44px 30px;scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#fff;color:#111;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 14px/1.2 Inter,sans-serif;color:#fff}
+.dv-note{font:400 12px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:760px;margin:0 0 26px}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(255,255,255,.12);color:#fff;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 Inter,sans-serif;color:rgba(255,255,255,.6)}
+.dv-opt:target .dv-oid{background:#E8442E;color:#fff}
+.dv-next{flex-basis:100%;margin:24px 0 0;font:12px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6)}
+.dv-nav{display:flex;flex-wrap:wrap;gap:6px;padding:12px 44px 0}
+</style>
+</helmet>
+<div style="padding:32px 44px 0">
+<a href="./Index.dc.html" style="font:600 10px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.6)">← All pages</a>
+<div style="font-family:'Playfair Display',serif;font-weight:700;font-size:27px;letter-spacing:.02em;text-transform:uppercase;color:#fff;margin:10px 0 0">Sterncut Ops · Finance</div>
+<div style="font:400 12px Inter,sans-serif;color:rgba(255,255,255,.6);margin:6px 0 0">10 screens · 4 new in slice 2 settlement</div>
+</div>
+<div class="dv-nav"><a href="./Sterncut Ops - Overview.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Overview</a><a href="./Sterncut Ops - Demand.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Demand</a><a href="./Sterncut Ops - Salons.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Salons</a><a href="./Sterncut Ops - Barbers.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Barbers</a><a href="./Sterncut Ops - Bookings.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Bookings</a><a href="./Sterncut Ops - Reviews.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Reviews</a><a href="./Sterncut Ops - Customers.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Customers</a><a href="./Sterncut Ops - Coupons.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Coupons</a><a href="./Sterncut Ops - Support.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Support</a><a href="./Sterncut Ops - Compliance.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Compliance</a><a href="./Sterncut Ops - Finance.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:#E8442E;color:#fff;text-decoration:none">Finance</a><a href="./Sterncut Ops - Settings.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Settings</a><a href="./Sterncut Head of Ops.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Head of Ops</a></div>
+<div style="height:1px;background:rgba(255,255,255,.14);margin:20px 0 0"></div>
+
+<section class="dv-turn" id="F4">
+<div class="dv-thd"><a class="dv-tid" href="#F4">F4</a><span class="dv-tname">The week &middot; a run that can be released, and a statement that closes</span></div>
+<p class="dv-note">The money rail existed and the period did not, so nothing could be shown to an owner and nothing could be released. Four decisions are baked into this layout.<br><br><strong>A run is a draft that gets released, not a thing agents build as they go.</strong> The alternative was tempting &mdash; agents collect through the week, the run assembles itself &mdash; but then the second total does not exist until Thursday, and the second total is the only thing that answers the question Karima actually has on Friday: is Sterncut collecting this week or paying? A draft can be read whole before anyone presses anything; a run that grows cannot. Cost of the choice: a shop that goes live mid-week has no line at all (<a class="dv-oid" href="#FIN-14">FIN-14</a>, Nord Barbier), and that has to be said in words rather than left as a missing row.<br><br><strong>Exclusions get sentences, not a count.</strong> &ldquo;38 of 42&rdquo; is the number that gets a run released by mistake. Four shops are out for four unrelated reasons, and one of them &mdash; Barbier Mesnana, suspended &mdash; is money we owe and are holding, which is the sentence most likely to become a theft accusation if it is left implicit. So it carries the amount, the date it unlocks, and the name of the person who tells the owner.<br><br><strong>The header equals the sum of the lines.</strong> <a class="dv-oid" href="#FIN-16">FIN-16</a> answers the <span style="font-variant-numeric:tabular-nums">1 566</span>&thinsp;/&thinsp;<span style="font-variant-numeric:tabular-nums">1 514</span> question by refusing the premise: <span style="font-variant-numeric:tabular-nums">1 566 DH</span> is what crosses the counter and is the only number the owner is asked to trust; <span style="font-variant-numeric:tabular-nums">1 514 DH</span> earns its place only as a <em>named</em> subtotal &mdash; this week&rsquo;s movement &mdash; because a carried line follows it. A difference with no line under it is a bug, not a rounding.<br><br><strong>The clock runs from the oldest uncollected dirham.</strong> Measuring from the previous collection would restart the 14 days every time a barber takes a cash top-up, and Le Fade takes one most days &mdash; a daily top-up shop could hold our money forever and never be late. So the age of a shop&rsquo;s float is the age of its oldest unsettled movement, which makes Le Fade day 6 of 14 on Friday, not day 0.<br><br><strong>Rejected:</strong> a minus sign. The owing direction (<a class="dv-oid" href="./Owner - Shop.dc.html#OSH-17">OSH-17</a>) is a different sentence with a different action &mdash; have cash ready in the till by Friday evening &mdash; not the paid layout with a sign flipped. Also rejected: editing a released week to fix a late refund (<a class="dv-oid" href="#FIN-17">FIN-17</a>), which would make a document we already handed over disagree with itself.</p>
+<p class="dv-note" style="color:#E8A100"><strong>Not drawn, on purpose:</strong> no fee or commission line anywhere in this run &mdash; v1 charges nothing, and the run moves exactly two kinds of money past each other. No prepaid passes. No RIB, no batch file, no account-name matching: releasing a run dispatches agent visits, not a bank instruction. <strong>Standing contradictions:</strong> <a class="dv-oid" href="#FIN-01">FIN-01</a> still shows an <span style="font-variant-numeric:tabular-nums">8%</span> &ldquo;our fee&rdquo; column, a bank batch and a missing-RIB exclusion, and <a class="dv-oid" href="#FIN-02">FIN-02</a> prices commission &mdash; both are superseded by <a class="dv-oid" href="#FIN-14">FIN-14</a>&ndash;<strong>15</strong> and should be cut or rebuilt, not read.<br><strong>Tables the backend does not have:</strong> <code>settlement_run</code> (week, state draft&thinsp;|&thinsp;released&thinsp;|&thinsp;closed, released_at, released_by) and <code>settlement_line</code> (run, shop, direction, amount, visit state) &mdash; the run being a draft is what makes those two rows rather than one; <code>statement_item</code> (line, kind, booking_ref, occurred_at, amount, source_week) append-only, where <code>source_week</code> is what lets a carried correction name where it came from; and a per-shop <code>oldest_uncollected_at</code>, which no current float table can answer. <strong>Missing state:</strong> there is no dispute anywhere in the product, so &ldquo;I disagree with this deduction&rdquo; can only open a support case (<a class="dv-oid" href="./Sterncut Ops - Support.dc.html#SUP-05">SUP-05</a>) that ends in another line next week. I have said that on the screen instead of inventing a dispute flow.</p>
+<p class="dv-src">slice 2 &middot; settlement</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="FIN-14"><div class="dv-olabel"><a class="dv-oid" href="#FIN-14">FIN-14</a>The run &mdash; week 36, draft, before anyone presses anything</div>
+<x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 1400 }}" height="{{ 940 }}" url="admin.sterncut.ma/finance/settlement/2026-W36" tabs="{{ adminTabs }}" hint-size="1400px,940px">
+<div data-screen-label="FIN-14" style="position:relative;display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+<dc-import name="Ops Chrome" hint-size="216px,852px" style="flex:none;width:216px"></dc-import>
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">Settlement run &middot; week 36</span>
+      <span style="font-size:11.5px;color:#6B6B72;font-variant-numeric:tabular-nums">Draft &middot; covers Fri 28 Aug 21:00 &rarr; Fri 4 Sep 21:00</span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;padding:0 12px;font-size:11.5px;font-weight:600;color:#9A9CA3">Print agent sheets</span>
+      <span style="display:flex;align-items:center;height:32px;border-radius:9px;background:#E8442E;padding:0 14px;font-size:12px;font-weight:700">Release 38 statements</span>
+    </div>
+    <div style="height:46px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:5px;padding:0 24px">
+      <span style="height:28px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:700">Settlement runs</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">Statements</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;gap:7px;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">Corrections<span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 6px">1</span></span>
+    </div>
+    <div style="flex:1;min-height:0;padding:20px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:hidden">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:13px">
+        <div style="display:flex;gap:12px">
+          <div style="width:190px;flex:none;background:#17171A;border:1px solid #1E1E22;border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:6px"><span style="font-size:10px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">IN THE RUN</span><span style="font-size:21px;font-weight:800;font-variant-numeric:tabular-nums">38 shops</span><span style="font-size:10.5px;color:#E8A100;font-weight:600">4 excluded &middot; named below</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:6px"><span style="font-size:10px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">TO COLLECT &mdash; AGENT TAKES CASH OUT</span><span style="font-size:21px;font-weight:800;font-variant-numeric:tabular-nums">21 480 DH</span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">from 26 shops</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:6px"><span style="font-size:10px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">TO PAY OUT &mdash; AGENT HANDS CASH OVER</span><span style="font-size:21px;font-weight:800;font-variant-numeric:tabular-nums">9 340 DH</span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">to 12 shops</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;background:#141416;border:1px solid #1E1E22;border-radius:10px;padding:10px 15px">
+          <span style="font-size:11.5px;color:#9A9CA3">Net across the city this week</span>
+          <span style="font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">12 140 DH in</span>
+          <span style="flex:1"></span>
+          <span style="font-size:10.5px;color:#6B6B72">One number per shop &middot; float we are owed minus deposits the shop earned</span>
+        </div>
+        <div style="flex:1;min-height:0;background:#17171A;border:1px solid #1E1E22;border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 18px;border-bottom:1px solid #1E1E22;background:#141416;flex:none">
+            <span style="width:190px;flex:none;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">SHOP</span>
+            <span style="width:100px;flex:none;text-align:right;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">THEY HOLD</span>
+            <span style="width:100px;flex:none;text-align:right;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">THEY EARNED</span>
+            <span style="width:78px;flex:none;text-align:right;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">CARRIED</span>
+            <span style="width:115px;flex:none;text-align:right;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">ONE NUMBER</span>
+            <span style="flex:1;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3;padding-left:14px">VISIT</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid #1E1E22">
+            <span style="width:190px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">LF</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:12.5px;font-weight:700">Le Fade Tanger</span><span style="font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">38 cuts &middot; tops up daily</span></span></span>
+            <span style="width:100px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">2 910 DH</span>
+            <span style="width:100px;flex:none;text-align:right;font-size:12.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">&minus; 1 396 DH</span>
+            <span style="width:78px;flex:none;text-align:right;font-size:12px;color:#E8A100;font-variant-numeric:tabular-nums">+ 52 DH</span>
+            <span style="width:115px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">1 566 DH</span>
+            <span style="flex:1;padding-left:14px;display:flex;flex-direction:column;gap:1px"><span style="font-size:11px;font-weight:700;color:#E8442E">Collect</span><span style="font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">Hicham &middot; Fri 17:00&ndash;20:00</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid #1E1E22">
+            <span style="width:190px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">MB</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:12.5px;font-weight:700">Marina Barber Club</span><span style="font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">84 cuts &middot; 40% deposit</span></span></span>
+            <span style="width:100px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">640 DH</span>
+            <span style="width:100px;flex:none;text-align:right;font-size:12.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">&minus; 4 210 DH</span>
+            <span style="width:78px;flex:none;text-align:right;font-size:12px;color:#3A3A40">&mdash;</span>
+            <span style="width:115px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">3 570 DH</span>
+            <span style="flex:1;padding-left:14px;display:flex;flex-direction:column;gap:1px"><span style="font-size:11px;font-weight:700;color:#4ADE80">Pay out</span><span style="font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">Yassine &middot; Sat 10:00</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid #1E1E22">
+            <span style="width:190px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">AB</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:12.5px;font-weight:700">Atlas Barbershop</span><span style="font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">71 cuts</span></span></span>
+            <span style="width:100px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">3 480 DH</span>
+            <span style="width:100px;flex:none;text-align:right;font-size:12.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">&minus; 1 240 DH</span>
+            <span style="width:78px;flex:none;text-align:right;font-size:12px;color:#3A3A40">&mdash;</span>
+            <span style="width:115px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">2 240 DH</span>
+            <span style="flex:1;padding-left:14px;display:flex;flex-direction:column;gap:1px"><span style="font-size:11px;font-weight:700;color:#E8442E">Collect</span><span style="font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">Hicham &middot; Mon 09:00</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid #1E1E22">
+            <span style="width:190px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">MC</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:12.5px;font-weight:700">Medina Cuts</span><span style="font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">63 cuts</span></span></span>
+            <span style="width:100px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">2 060 DH</span>
+            <span style="width:100px;flex:none;text-align:right;font-size:12.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">&minus; 2 060 DH</span>
+            <span style="width:78px;flex:none;text-align:right;font-size:12px;color:#3A3A40">&mdash;</span>
+            <span style="width:115px;flex:none;text-align:right;font-size:13px;font-weight:700;color:#6B6B72;font-variant-numeric:tabular-nums">0 DH</span>
+            <span style="flex:1;padding-left:14px;display:flex;flex-direction:column;gap:1px"><span style="font-size:11px;font-weight:700;color:#6B6B72">No visit</span><span style="font-size:10px;color:#6B6B72">Statement still issued, and reads nil</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid #1E1E22">
+            <span style="width:190px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">RG</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:12.5px;font-weight:700">Rif Gentlemen</span><span style="font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">58 cuts</span></span></span>
+            <span style="width:100px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">380 DH</span>
+            <span style="width:100px;flex:none;text-align:right;font-size:12.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">&minus; 2 480 DH</span>
+            <span style="width:78px;flex:none;text-align:right;font-size:12px;color:#3A3A40">&mdash;</span>
+            <span style="width:115px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">2 100 DH</span>
+            <span style="flex:1;padding-left:14px;display:flex;flex-direction:column;gap:1px"><span style="font-size:11px;font-weight:700;color:#4ADE80">Pay out</span><span style="font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">Hicham &middot; Fri 18:30</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid #1E1E22">
+            <span style="width:190px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">KC</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:12.5px;font-weight:700">Kasbah Classics</span><span style="font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">47 cuts</span></span></span>
+            <span style="width:100px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">1 910 DH</span>
+            <span style="width:100px;flex:none;text-align:right;font-size:12.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">&minus; 1 130 DH</span>
+            <span style="width:78px;flex:none;text-align:right;font-size:12px;color:#3A3A40">&mdash;</span>
+            <span style="width:115px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">780 DH</span>
+            <span style="flex:1;padding-left:14px;display:flex;flex-direction:column;gap:1px"><span style="font-size:11px;font-weight:700;color:#E8442E">Collect</span><span style="font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">Yassine &middot; Fri 19:00</span></span>
+          </div>
+          <div style="flex:1;display:flex;align-items:center;padding:11px 18px"><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">32 more lines &middot; 20 to collect, 10 to pay, 2 nil</span></div>
+        </div>
+      </div>
+      <div style="width:308px;flex:none;display:flex;flex-direction:column;gap:13px">
+        <div style="background:#17171A;border:1px solid rgba(248,113,113,.28);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:11px">
+          <span style="font-size:12.5px;font-weight:700;color:#F87171">4 shops are not in this run</span>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty"><strong style="color:#fff">Barbier Mesnana</strong> &mdash; suspended Tuesday. We owe them <span style="font-variant-numeric:tabular-nums">2 180 DH</span>; it is held, not kept. It releases the day the suspension lifts, review <strong>18 September</strong>. Nadia Alaoui tells the owner today by message, and the amount and that date sit on his own statement while he waits.</span>
+            <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty"><strong style="color:#fff">Nord Barbier</strong> &mdash; went live Wednesday. Its first covered week opens tonight at 21:00, so there is no full week to state.</span>
+            <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty"><strong style="color:#fff">Beni Makada Barbier</strong> &mdash; nobody can reach the till: Hicham covers that route alone and is off all week. Their <span style="font-variant-numeric:tabular-nums">1 240 DH</span> stays with them and the clock keeps running &mdash; day 9 of 14.</span>
+            <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty"><strong style="color:#fff">Iberia Fade House</strong> &mdash; Yassine&rsquo;s Thursday visit is still open on his phone. Until his wallet closes, this shop&rsquo;s float is a guess, and a guess cannot go on a statement.</span>
+          </div>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px"><span style="font-size:12.5px;font-weight:700">A run is a draft, then released</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">It is cut at Friday 21:00 and read whole. Agents do not build it as they collect &mdash; if they did, the pay-out total would not exist until Thursday, and that total is the only thing that says whether Sterncut is collecting this week or paying.</span></div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px"><span style="font-size:12.5px;font-weight:700">Nothing is skimmed on the way past</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Two kinds of money cross here and no third: our float out of their till, their deposits out of our wallet. There is no fee column because v1 charges nothing.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:1400px;padding-top:2px">Release 38 statements &middot; <a class="dv-oid" href="#FIN-15">FIN-15</a></div></div>
+
+<div class="dv-opt" id="FIN-15"><div class="dv-olabel"><a class="dv-oid" href="#FIN-15">FIN-15</a>The same run, released &mdash; 38 statements out, 26 visits to make</div>
+<x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 1400 }}" height="{{ 940 }}" url="admin.sterncut.ma/finance/settlement/2026-W36" tabs="{{ adminTabs }}" hint-size="1400px,940px">
+<div data-screen-label="FIN-15" style="position:relative;display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+<dc-import name="Ops Chrome" hint-size="216px,852px" style="flex:none;width:216px"></dc-import>
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">Settlement run &middot; week 36</span>
+      <span style="font-size:11.5px;color:#6B6B72;font-variant-numeric:tabular-nums">Released Fri 4 Sep 21:04 by Karima Bennis</span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;padding:0 12px;font-size:11.5px;font-weight:600;color:#9A9CA3"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>Locked &middot; append only</span>
+      <span style="display:flex;align-items:center;height:32px;border-radius:9px;background:#212125;padding:0 14px;font-size:12px;font-weight:700">Agent sheets &middot; 38</span>
+    </div>
+    <div style="height:46px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:5px;padding:0 24px">
+      <span style="height:28px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:700">Settlement runs</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">Statements</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">Corrections</span>
+    </div>
+    <div style="flex:1;min-height:0;padding:20px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:hidden">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:13px">
+        <div style="display:flex;gap:12px">
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:7px"><span style="font-size:10px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">COLLECTED</span><span style="font-size:21px;font-weight:800;font-variant-numeric:tabular-nums">8 940 DH</span><span style="height:4px;border-radius:3px;background:#26262B;overflow:hidden"><span style="display:block;width:42%;height:100%;background:#4ADE80"></span></span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">of 21 480 DH &middot; 11 of 26 visits</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:7px"><span style="font-size:10px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">PAID OUT</span><span style="font-size:21px;font-weight:800;font-variant-numeric:tabular-nums">9 340 DH</span><span style="height:4px;border-radius:3px;background:#26262B;overflow:hidden"><span style="display:block;width:100%;height:100%;background:#4ADE80"></span></span><span style="font-size:10.5px;color:#4ADE80;font-variant-numeric:tabular-nums">all 12 shops &middot; done Saturday</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid rgba(232,161,0,.3);border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:7px"><span style="font-size:10px;letter-spacing:.13em;font-weight:700;color:#E8A100">STILL WITH THE SHOPS</span><span style="font-size:21px;font-weight:800;font-variant-numeric:tabular-nums">12 540 DH</span><span style="height:4px;border-radius:3px;background:#26262B;overflow:hidden"><span style="display:block;width:58%;height:100%;background:#E8A100"></span></span><span style="font-size:10.5px;color:#C79A3E;font-variant-numeric:tabular-nums">15 shops &middot; oldest dirham day 9 of 14</span></div>
+        </div>
+        <div style="flex:1;min-height:0;background:#17171A;border:1px solid #1E1E22;border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:10px;padding:11px 18px;border-bottom:1px solid #1E1E22;background:#141416;flex:none">
+            <span style="width:200px;flex:none;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">SHOP</span>
+            <span style="width:120px;flex:none;text-align:right;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">ONE NUMBER</span>
+            <span style="width:96px;flex:none;text-align:center;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">DIRECTION</span>
+            <span style="flex:1;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3;padding-left:16px">WHAT HAPPENED</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid #1E1E22">
+            <span style="width:200px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">LF</span><span style="font-size:12.5px;font-weight:700">Le Fade Tanger</span></span>
+            <span style="width:120px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">1 566 DH</span>
+            <span style="width:96px;flex:none;text-align:center;font-size:11px;font-weight:700;color:#E8442E">Collect</span>
+            <span style="flex:1;padding-left:16px;display:flex;align-items:center;gap:8px"><span style="font-size:11.5px;font-weight:700;color:#4ADE80">Collected</span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">Hicham, Fri 17:42 &middot; receipt SR-1181</span><span style="flex:1"></span><a href="#FIN-16" style="font-size:10.5px;font-weight:700;color:#fff;background:#212125;border-radius:7px;padding:4px 9px;text-decoration:none">Statement</a></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid #1E1E22">
+            <span style="width:200px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">MB</span><span style="font-size:12.5px;font-weight:700">Marina Barber Club</span></span>
+            <span style="width:120px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">3 570 DH</span>
+            <span style="width:96px;flex:none;text-align:center;font-size:11px;font-weight:700;color:#4ADE80">Pay out</span>
+            <span style="flex:1;padding-left:16px;display:flex;align-items:center;gap:8px"><span style="font-size:11.5px;font-weight:700;color:#4ADE80">Handed over</span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">Yassine, Sat 10:12 &middot; owner signed</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid #1E1E22">
+            <span style="width:200px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">AB</span><span style="font-size:12.5px;font-weight:700">Atlas Barbershop</span></span>
+            <span style="width:120px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">2 240 DH</span>
+            <span style="width:96px;flex:none;text-align:center;font-size:11px;font-weight:700;color:#E8442E">Collect</span>
+            <span style="flex:1;padding-left:16px;display:flex;align-items:center;gap:8px"><span style="font-size:11.5px;font-weight:700;color:#E8A100">Open</span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">Hicham, Mon 09:00 &middot; oldest dirham day 4 of 14</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid #1E1E22">
+            <span style="width:200px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">KC</span><span style="font-size:12.5px;font-weight:700">Kasbah Classics</span></span>
+            <span style="width:120px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">780 DH</span>
+            <span style="width:96px;flex:none;text-align:center;font-size:11px;font-weight:700;color:#E8442E">Collect</span>
+            <span style="flex:1;padding-left:16px;display:flex;align-items:center;gap:8px"><span style="font-size:11.5px;font-weight:700;color:#E8A100">Part paid</span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">300 DH taken Fri 19:05 &middot; 480 DH open</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid #1E1E22">
+            <span style="width:200px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">RG</span><span style="font-size:12.5px;font-weight:700">Rif Gentlemen</span></span>
+            <span style="width:120px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">2 100 DH</span>
+            <span style="width:96px;flex:none;text-align:center;font-size:11px;font-weight:700;color:#4ADE80">Pay out</span>
+            <span style="flex:1;padding-left:16px;display:flex;align-items:center;gap:8px"><span style="font-size:11.5px;font-weight:700;color:#4ADE80">Handed over</span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">Hicham, Fri 18:30 &middot; owner signed</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid #1E1E22">
+            <span style="width:200px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">MC</span><span style="font-size:12.5px;font-weight:700">Medina Cuts</span></span>
+            <span style="width:120px;flex:none;text-align:right;font-size:13px;font-weight:700;color:#6B6B72;font-variant-numeric:tabular-nums">0 DH</span>
+            <span style="width:96px;flex:none;text-align:center;font-size:11px;font-weight:700;color:#6B6B72">Nil</span>
+            <span style="flex:1;padding-left:16px;display:flex;align-items:center;gap:8px"><span style="font-size:11.5px;font-weight:700;color:#6B6B72">Closed</span><span style="font-size:10.5px;color:#6B6B72">Statement sent anyway &middot; a nil week is a fact, not a gap</span></span>
+          </div>
+          <div style="flex:1;display:flex;align-items:center;padding:11px 18px"><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">32 more lines</span></div>
+        </div>
+      </div>
+      <div style="width:308px;flex:none;display:flex;flex-direction:column;gap:13px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px"><span style="font-size:12.5px;font-weight:700">What release did at 21:04</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">38 statements went to owners. 26 collections and 12 handovers appeared on the agents&rsquo; phones with an address and a window each. The week&rsquo;s lines locked. No payment file was written, because there is nothing to write it to.</span></div>
+        <div style="background:#17171A;border:1px solid rgba(232,161,0,.3);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px"><span style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:#E8A100"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2"><path d="M12 9v4M12 17h.01"></path><path d="M10.3 3.9 2.5 18a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg>Kasbah paid 300 of 780 DH</span><span style="font-size:11px;line-height:1.5;color:#C79A3E;text-wrap:pretty">The remaining <span style="font-variant-numeric:tabular-nums">480 DH</span> stays open on this line until day 14. It then carries onto week 37 as its own line &mdash; it does not move into a separate debt ledger, because a second ledger is a second truth.</span></div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px"><span style="font-size:12.5px;font-weight:700">Nothing here can be edited</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">A wrong line is answered by a new line on week 37 &mdash; see <a class="dv-oid" href="#FIN-17">FIN-17</a>. Release wrote 38 rows to the audit trail at <a class="dv-oid" href="./Sterncut Ops - Settings.dc.html#SET-04">SET-04</a>; a partial undo does not exist.</span></div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px"><span style="font-size:12.5px;font-weight:700">Mesnana&rsquo;s 2 180 DH, day 3 of hold</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Still ours to hand over and still not handed over. It sits outside this run, visible to the owner with its unlock date, and it will appear as a line on whichever week the suspension lifts in.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:1400px;padding-top:2px">One line, opened &middot; <a class="dv-oid" href="#FIN-16">FIN-16</a></div></div>
+
+<div class="dv-opt" id="FIN-16"><div class="dv-olabel"><a class="dv-oid" href="#FIN-16">FIN-16</a>One shop&rsquo;s statement &mdash; ops side, with every reference on it</div>
+<x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 1400 }}" height="{{ 940 }}" url="admin.sterncut.ma/finance/statements/2026-W36-014" tabs="{{ adminTabs }}" hint-size="1400px,940px">
+<div data-screen-label="FIN-16" style="position:relative;display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+<dc-import name="Ops Chrome" hint-size="216px,852px" style="flex:none;width:216px"></dc-import>
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">Le Fade Tanger &middot; week 36</span>
+      <span style="font-size:11.5px;color:#6B6B72;font-variant-numeric:tabular-nums">2026-W36-014 &middot; released Fri 4 Sep 21:04 &middot; collected Fri 17:42</span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;padding:0 12px;font-size:11.5px;font-weight:600;color:#9A9CA3">Owner&rsquo;s view</span>
+      <span style="display:flex;align-items:center;height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;padding:0 12px;font-size:11.5px;font-weight:600;color:#9A9CA3">Message Youssef</span>
+    </div>
+    <div style="height:46px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:5px;padding:0 24px">
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">Settlement runs</span>
+      <span style="height:28px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:700">Statements</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">Corrections</span>
+    </div>
+    <div style="flex:1;min-height:0;padding:20px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:hidden">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:12px">
+        <div style="background:#17171A;border:1px solid #26262B;border-radius:14px;padding:17px 18px;display:flex;align-items:flex-end;gap:18px">
+          <span style="flex:1;display:flex;flex-direction:column;gap:5px"><span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">TO COLLECT FROM THIS SHOP</span><span style="font-family:'Playfair Display',serif;font-weight:700;font-size:38px;line-height:1;font-variant-numeric:tabular-nums">1 566 DH</span></span>
+          <span style="flex:1;font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Hicham Rami counted it out of the till on Friday at 17:42 and left receipt <strong style="color:#fff">SR-1181</strong>. This is the only number Youssef is asked to trust; everything below explains it and nothing below contradicts it.</span>
+        </div>
+        <div style="flex:1;min-height:0;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:4px 18px 0;display:flex;flex-direction:column;overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 0 9px"><span style="font-size:10px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">OUR FLOAT SITTING IN THEIR TILL</span><span style="font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">2 910 DH</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid #1E1E22"><span style="flex:1;font-size:11.5px;color:#D8D8DC">Cash top-up taken by Youssef</span><span style="width:118px;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">WLT-8841</span><span style="width:150px;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">Sat 29 Aug 11:20</span><span style="width:96px;text-align:right;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums">400 DH</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid #1E1E22"><span style="flex:1;font-size:11.5px;color:#D8D8DC">Cash top-up taken by Karim</span><span style="width:118px;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">WLT-8877</span><span style="width:150px;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">Mon 31 Aug 16:05</span><span style="width:96px;text-align:right;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums">1 200 DH</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid #1E1E22"><span style="flex:1;font-size:11.5px;color:#D8D8DC">Cash top-up taken by Youssef</span><span style="width:118px;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">WLT-8902</span><span style="width:150px;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">Wed 2 Sep 09:48</span><span style="width:96px;text-align:right;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums">810 DH</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid #1E1E22"><span style="flex:1;font-size:11.5px;color:#D8D8DC">Cash top-up taken by Anas</span><span style="width:118px;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">WLT-8930</span><span style="width:150px;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">Thu 3 Sep 20:11</span><span style="width:96px;text-align:right;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums">500 DH</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 0 9px;margin-top:4px;border-top:1px solid #26262B"><span style="font-size:10px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">DEPOSITS THE SHOP EARNED</span><span style="font-size:13px;font-weight:700;color:#9A9CA3;font-variant-numeric:tabular-nums">&minus; 1 396 DH</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid #1E1E22"><span style="flex:1;font-size:11.5px;color:#D8D8DC">38 cuts marked done in the window</span><span style="width:118px;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">STC-5102 &rarr; 5188</span><span style="width:150px;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">Sat 29 Aug &rarr; Fri 4 Sep</span><span style="width:96px;text-align:right;font-size:12px;font-weight:600;color:#9A9CA3;font-variant-numeric:tabular-nums">&minus; 1 456 DH</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-top:1px solid #1E1E22"><span style="flex:1;font-size:11.5px;color:#D8D8DC">Refund &middot; deposit returned to the customer</span><span style="width:118px;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">STC-5140</span><span style="width:150px;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">Tue 1 Sep 18:20</span><span style="width:96px;text-align:right;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums">+ 60 DH</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 0;margin-top:4px;border-top:1px solid #26262B;border-bottom:1px solid #26262B"><span style="font-size:12px;font-weight:600;color:#9A9CA3">This week&rsquo;s movement</span><span style="font-size:14px;font-weight:700;color:#9A9CA3;font-variant-numeric:tabular-nums">1 514 DH</span></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid #1E1E22"><span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:11.5px;font-weight:600;color:#E8A100">Carried from week 35 &middot; refund after settlement</span><span style="font-size:10.5px;color:#6B6B72">Cut Thu 27 Aug 18:20 &middot; refunded Tue 1 Sep 14:06 &middot; case SUP-3312</span></span><span style="width:118px;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">STC-4471</span><span style="width:150px;font-size:11px;color:#6B6B72"><a href="#FIN-17" style="font-weight:700">how it was cut</a></span><span style="width:96px;text-align:right;font-size:12px;font-weight:700;color:#E8A100;font-variant-numeric:tabular-nums">+ 52 DH</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 0"><span style="font-size:13.5px;font-weight:700">To collect</span><span style="font-size:20px;font-weight:800;font-variant-numeric:tabular-nums">1 566 DH</span></div>
+        </div>
+        <div style="flex:none;display:flex;align-items:center;gap:12px;background:#141416;border:1px solid #1E1E22;border-radius:12px;padding:11px 15px">
+          <span style="font-size:10.5px;letter-spacing:.1em;font-weight:700;color:#6B6B72">LAST WEEK</span>
+          <span style="font-size:11.5px;color:#9A9CA3">Week 35 &middot; we handed this shop <span style="font-weight:700;color:#fff;font-variant-numeric:tabular-nums">1 720 DH</span> &mdash; a different sentence and a different visit, drawn at <a class="dv-oid" href="./Owner - Shop.dc.html#OSH-16">OSH-16</a></span>
+          <span style="flex:1"></span>
+          <span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">Closed &middot; untouched by the 52 DH above</span>
+        </div>
+      </div>
+      <div style="width:308px;flex:none;display:flex;flex-direction:column;gap:13px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:11px">
+          <span style="font-size:12.5px;font-weight:700">Where the week ends</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">A line lands in the week that contains the <strong style="color:#fff">moment it happened</strong>: for a cut, the moment the barber marked it done; for float, the moment he took the cash. Cut-off Friday 21:00.</span>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="background:#141416;border:1px solid #1E1E22;border-radius:10px;padding:10px 11px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10.5px;font-weight:700;color:#4ADE80">In week 36</span><span style="font-size:10.5px;line-height:1.45;color:#9A9CA3;font-variant-numeric:tabular-nums">STC-5188 &middot; chair Thu 3 Sep 21:40, marked done Fri 4 Sep 09:10. The tap is inside the window.</span></span>
+            <span style="background:#141416;border:1px solid #1E1E22;border-radius:10px;padding:10px 11px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10.5px;font-weight:700;color:#E8A100">In week 37</span><span style="font-size:10.5px;line-height:1.45;color:#9A9CA3;font-variant-numeric:tabular-nums">STC-5191 &middot; chair Fri 4 Sep 20:50, marked done Sat 5 Sep 08:02. This week&rsquo;s chair, next week&rsquo;s money.</span></span>
+          </div>
+          <span style="font-size:10.5px;line-height:1.5;color:#6B6B72;text-wrap:pretty">A late tap moves money a week, and that is the price. Stamping the line with the appointment time instead would mean reopening a released week, and a released week cannot be reopened.</span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px"><span style="font-size:12.5px;font-weight:700">Two numbers, one of them trusted</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty"><span style="font-variant-numeric:tabular-nums">1 566 DH</span> is what crosses the counter. <span style="font-variant-numeric:tabular-nums">1 514 DH</span> is a named subtotal &mdash; this week&rsquo;s movement &mdash; and it is only on the page because a carried line follows it. The bottom number always equals the lines above it; if it does not, that is a bug, not a rounding.</span></div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px"><span style="font-size:12.5px;font-weight:700">On time, from the oldest dirham</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">The clock starts at <span style="font-variant-numeric:tabular-nums">Sat 29 Aug 11:20</span>, the first movement nobody has settled &mdash; day 6 of 14 when Hicham arrived. Measuring from the last collection would restart the 14 days at every top-up, and this shop tops up most days: it could hold our money forever and never be late.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:1400px;padding-top:2px">Owner&rsquo;s side of this exact statement &middot; <a class="dv-oid" href="./Owner - Shop.dc.html#OSH-17">OSH-17</a></div></div>
+
+<div class="dv-opt" id="FIN-17"><div class="dv-olabel"><a class="dv-oid" href="#FIN-17">FIN-17</a>The correction &mdash; a refund that arrived after the week was settled</div>
+<x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 1400 }}" height="{{ 940 }}" url="admin.sterncut.ma/finance/corrections/new?refund=STC-4471" tabs="{{ adminTabs }}" hint-size="1400px,940px">
+<div data-screen-label="FIN-17" style="position:relative;display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+<dc-import name="Ops Chrome" hint-size="216px,852px" style="flex:none;width:216px"></dc-import>
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">Correction &middot; STC-4471</span>
+      <span style="font-size:11.5px;color:#6B6B72">Le Fade Tanger &middot; refunded after week 35 was settled</span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;padding:0 12px;font-size:11.5px;font-weight:600;color:#9A9CA3">Cancel</span>
+      <span style="display:flex;align-items:center;height:32px;border-radius:9px;background:#E8442E;padding:0 14px;font-size:12px;font-weight:700">Cut the line onto week 36</span>
+    </div>
+    <div style="height:46px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:5px;padding:0 24px">
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">Settlement runs</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">Statements</span>
+      <span style="height:28px;border-radius:8px;background:#212125;display:flex;align-items:center;gap:7px;padding:0 12px;font-size:12px;font-weight:700">Corrections<span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 6px">1</span></span>
+    </div>
+    <div style="flex:1;min-height:0;padding:20px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:hidden">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:13px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px 18px;display:flex;flex-direction:column;gap:13px">
+          <span style="font-size:12.5px;font-weight:700">What happened, in order</span>
+          <div style="display:flex;flex-direction:column;gap:0">
+            <span style="display:flex;gap:13px;align-items:flex-start"><span style="width:118px;flex:none;font-size:10.5px;font-weight:700;color:#6B6B72;font-variant-numeric:tabular-nums;padding-top:1px">Thu 27 Aug 18:20</span><span style="flex:1;font-size:11.5px;line-height:1.5;color:#D8D8DC">Cut done. <span style="font-variant-numeric:tabular-nums">52 DH</span> of deposit released to Le Fade Tanger.</span></span>
+            <span style="width:1px;height:12px;background:#26262B;margin:3px 0 3px 58px"></span>
+            <span style="display:flex;gap:13px;align-items:flex-start"><span style="width:118px;flex:none;font-size:10.5px;font-weight:700;color:#6B6B72;font-variant-numeric:tabular-nums;padding-top:1px">Fri 28 Aug 21:03</span><span style="flex:1;font-size:11.5px;line-height:1.5;color:#D8D8DC">Week 35 closed and statement 2026-W35-014 released, that <span style="font-variant-numeric:tabular-nums">52 DH</span> inside it.</span></span>
+            <span style="width:1px;height:12px;background:#26262B;margin:3px 0 3px 58px"></span>
+            <span style="display:flex;gap:13px;align-items:flex-start"><span style="width:118px;flex:none;font-size:10.5px;font-weight:700;color:#6B6B72;font-variant-numeric:tabular-nums;padding-top:1px">Sat 29 Aug 12:40</span><span style="flex:1;font-size:11.5px;line-height:1.5;color:#D8D8DC">Hicham handed the shop <span style="font-variant-numeric:tabular-nums">1 720 DH</span>. Week 35 is now cash in someone&rsquo;s hand.</span></span>
+            <span style="width:1px;height:12px;background:#26262B;margin:3px 0 3px 58px"></span>
+            <span style="display:flex;gap:13px;align-items:flex-start"><span style="width:118px;flex:none;font-size:10.5px;font-weight:700;color:#E8A100;font-variant-numeric:tabular-nums;padding-top:1px">Tue 1 Sep 14:06</span><span style="flex:1;font-size:11.5px;line-height:1.5;color:#fff">Rida refunded the customer <span style="font-variant-numeric:tabular-nums">52 DH</span> on case <strong>SUP-3312</strong> &mdash; wrong length, barber agreed. The shop was paid for a cut the customer did not pay for.</span></span>
+          </div>
+        </div>
+        <div style="display:flex;gap:13px">
+          <div style="flex:1;background:#141416;border:1px dashed #3A3A40;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:9px">
+            <span style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#6B6B72"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M6.5 6.5l11 11"></path></svg>Edit week 35</span>
+            <span style="font-size:11px;line-height:1.5;color:#6B6B72;text-wrap:pretty">Refused, and not offered as a permission. The statement is released and the cash is counted; changing it now makes a document we handed over disagree with itself, and leaves the receipt in the owner&rsquo;s drawer describing a week that no longer exists.</span>
+          </div>
+          <div style="flex:1;background:#17171A;border:1px solid #E8442E;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:9px">
+            <span style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2.2"><path d="M4 12.5l5 5L20 6.5"></path></svg>Carry it onto week 36</span>
+            <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">One new line on the next statement, carrying the old booking&rsquo;s reference and both times. Last week stays exactly as the owner received it. This is the only way money moves backwards in Sterncut.</span>
+          </div>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px 18px;display:flex;flex-direction:column;gap:12px">
+          <span style="font-size:12.5px;font-weight:700">The line this will create</span>
+          <div style="background:#141416;border:1px solid #26262B;border-radius:11px;padding:12px 14px;display:flex;align-items:center;gap:12px">
+            <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:11.5px;font-weight:600;color:#E8A100">Carried from week 35 &middot; refund after settlement</span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">Cut Thu 27 Aug 18:20 &middot; refunded Tue 1 Sep 14:06 &middot; case SUP-3312</span></span>
+            <span style="width:110px;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">STC-4471</span>
+            <span style="width:96px;text-align:right;font-size:12.5px;font-weight:700;color:#E8A100;font-variant-numeric:tabular-nums">+ 52 DH</span>
+          </div>
+          <div style="display:flex;gap:13px">
+            <span style="flex:1;font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty"><strong style="color:#fff">On the owner&rsquo;s statement</strong> it reads the same, in his language, with both times &mdash; <a class="dv-oid" href="./Owner - Shop.dc.html#OSH-18">OSH-18</a>. He is told once, when week 36 is cut. Not now: a mid-week message about <span style="font-variant-numeric:tabular-nums">52 DH</span> is a fright, not a service.</span>
+            <span style="flex:1;font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty"><strong style="color:#fff">The amount is not typed.</strong> It is the refunded amount, taken from SUP-3312. Ops picks which week the line lands in and nothing else, so nobody can invent <span style="font-variant-numeric:tabular-nums">52 DH</span> against a shop.</span>
+          </div>
+        </div>
+      </div>
+      <div style="width:308px;flex:none;display:flex;flex-direction:column;gap:13px">
+        <div style="background:#17171A;border:1px solid rgba(248,113,113,.28);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px"><span style="font-size:12.5px;font-weight:700;color:#F87171">There is no dispute state</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">If Youssef says this deduction is wrong, the product has nowhere to put that. The button on his statement can only open a support case, and the case can only end in another line on another week. Drawn honestly as <em>message us</em> rather than a dispute flow that does not exist &mdash; if a real one is wanted, it needs a state on the line and a rule about who wins.</span></div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px"><span style="font-size:12.5px;font-weight:700">Both directions, same line</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">On a shop we owe, this line lands with the opposite sign and shrinks what we hand over. It never becomes a separate debt to chase &mdash; there is one number per shop per week and this is part of it.</span></div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px"><span style="font-size:12.5px;font-weight:700">If the week never comes</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">A shop that leaves the platform before week 36 is cut takes the <span style="font-variant-numeric:tabular-nums">52 DH</span> with it. Under <span style="font-variant-numeric:tabular-nums">100 DH</span> nothing is chased and nothing is suspended, which is the same rule the charge run uses.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:1400px;padding-top:2px">Lands as a line at <a class="dv-oid" href="#FIN-16">FIN-16</a> &middot; owner&rsquo;s side <a class="dv-oid" href="./Owner - Shop.dc.html#OSH-18">OSH-18</a></div></div>
+
+</div>
+<p class="dv-next">Owner&rsquo;s side of the same week &middot; <a class="dv-oid" href="./Owner - Shop.dc.html#OSH-16">OSH-16</a> paid, <a class="dv-oid" href="./Owner - Shop.dc.html#OSH-17">OSH-17</a> owing, <a class="dv-oid" href="./Owner - Shop.dc.html#OSH-18">OSH-18</a> the carried line. Still unbuilt: the agent&rsquo;s own collection screen &mdash; <a class="dv-oid" href="./Barber - Float.dc.html#BCF-04">BCF-04</a> collects from a barber, not a shop settlement.</p>
+</section>
+
+<section class="dv-turn" id="F3">
+<div class="dv-thd"><a class="dv-tid" href="#F3">F3</a><span class="dv-tname">Slice 3 &middot; the one amount netting cannot carry</span></div>
+<p class="dv-note">Netting works because it moves one number between two businesses. A tip is owed to <strong>a named man with no account</strong>, so it rides inside the shop's Friday number and is then handed over by someone who is not entitled to it. <a class="dv-oid" href="#FIN-13">FIN-13</a> is built around that: received and earmarked must always match to the dirham because Sterncut takes nothing, and <strong>barber confirmation is the only evidence the money finished its journey</strong> &mdash; no bank line can prove it. The pattern it exists to catch is on screen: two barbers at one shop, <span style="font-variant-numeric:tabular-nums">40 DH</span> short between them, in the same week. The recommended remedy is to pay the shortfall out of Sterncut's own pocket, because arguing costs more &mdash; withholding a shop's whole net over <span style="font-variant-numeric:tabular-nums">20 DH</span> is not on the screen.</p>
+<p class="dv-src">slice 3 &middot; money out</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="FIN-13"><div class="dv-olabel"><a class="dv-oid" href="#FIN-13">FIN-13</a>Tips &mdash; routed, earmarked, confirmed</div>
+<x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 1400 }}" height="{{ 940 }}" url="admin.sterncut.ma/finance/tips/2026-W42" tabs="{{ adminTabs }}" hint-size="1400px,940px">
+<div data-screen-label="FIN-13" style="position:relative;display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+<div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg>Demand<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">6</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M12 3v18M5 8h9a3.5 3.5 0 0 1 0 7H5"></path></svg>Finance</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">7</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg>Compliance<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2 2 2 0 1 1-4 0 1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 2.6 15a2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 4.6a2 2 0 1 1 4 0 1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21.4 11a2 2 0 1 1 0 4z"></path></svg>Settings</span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">KB</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Karima Bennis</span><span style="display:block;font-size:10px;color:#9A9CA3">Head of Ops</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">Tips</span>
+      <span style="font-size:12px;color:#6B6B72">Money owed to a person, routed through a business</span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;padding:0 12px;font-size:11.5px;font-weight:600;color:#9A9CA3;font-variant-numeric:tabular-nums">Week 42 &middot; 12&ndash;16 Oct</span>
+    </div>
+    <div style="height:46px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:5px;padding:0 24px">
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">Payout run</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">Charge run</span>
+      <span style="height:28px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:700">Tips</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">VAT</span>
+    </div>
+    <div style="flex:1;min-height:0;padding:22px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:hidden">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid #26262B;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;outline:1px solid rgba(232,68,46,.35);outline-offset:-1px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between">
+            <span style="font-size:13px;font-weight:700">This week's tips</span>
+            <span style="font-size:11px;color:#6B6B72">Earmarked by barber, paid by the shop, confirmed by the barber</span>
+          </div>
+          <div style="display:flex;gap:10px">
+            <span style="flex:1;background:#111113;border:1px solid #26262B;border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#6B6B72">RECEIVED FROM WALLETS</span><span style="font-size:19px;font-weight:800;font-variant-numeric:tabular-nums">2 340 DH</span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">218 tips &middot; 96 barbers</span></span>
+            <span style="flex:1;background:#111113;border:1px solid #26262B;border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#6B6B72">SENT TO SHOPS, EARMARKED</span><span style="font-size:19px;font-weight:800;font-variant-numeric:tabular-nums">2 340 DH</span><span style="font-size:10.5px;color:#6B6B72">inside the Friday net, as its own line</span></span>
+            <span style="flex:1;background:#111113;border:1px solid rgba(74,222,128,.3);border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#4ADE80">CONFIRMED BY BARBERS</span><span style="font-size:19px;font-weight:800;color:#4ADE80;font-variant-numeric:tabular-nums">2 186 DH</span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">89 of 96 barbers</span></span>
+            <span style="flex:1;background:#111113;border:1px solid rgba(232,161,0,.35);border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#E8A100">NOT CONFIRMED</span><span style="font-size:19px;font-weight:800;color:#E8A100;font-variant-numeric:tabular-nums">154 DH</span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">7 barbers &middot; 4 said they got less</span></span>
+          </div>
+          <span style="font-size:10.5px;line-height:1.45;color:#6B6B72;text-wrap:pretty">Sterncut takes nothing from a tip, so the first two numbers must always match. The third is the only real signal it has that the money finished its journey &mdash; a tip is the one amount here whose delivery cannot be proved by a bank line.</span>
+        </div>
+
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between">
+            <span style="font-size:13px;font-weight:700">Barbers who said they got less</span>
+            <span style="font-size:11px;color:#6B6B72">Not an accusation &mdash; a mismatch, with the tips attached</span>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #1E1E22">
+              <span style="flex:1;min-width:0;font-size:12px;font-weight:600">Youssef Amrani <span style="color:#6B6B72;font-weight:400">&middot; Le Fade Tanger</span></span>
+              <span style="width:70px;text-align:right;font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums">55 DH</span>
+              <span style="width:70px;text-align:right;font-size:11.5px;font-weight:700;color:#E8A100;font-variant-numeric:tabular-nums">40 DH</span>
+              <span style="width:132px;text-align:right;font-size:10.5px;color:#E8A100">1st</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #1E1E22">
+              <span style="flex:1;min-width:0;font-size:12px;font-weight:600">Karim Haddad <span style="color:#6B6B72;font-weight:400">&middot; Salon Kasbah</span></span>
+              <span style="width:70px;text-align:right;font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums">80 DH</span>
+              <span style="width:70px;text-align:right;font-size:11.5px;font-weight:700;color:#9A9CA3;font-variant-numeric:tabular-nums">80 DH</span>
+              <span style="width:132px;text-align:right;font-size:10.5px;color:#6B6B72">confirmed late</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #1E1E22">
+              <span style="flex:1;min-width:0;font-size:12px;font-weight:600">Anas Belhaj <span style="color:#6B6B72;font-weight:400">&middot; Kasbah Classics</span></span>
+              <span style="width:70px;text-align:right;font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums">45 DH</span>
+              <span style="width:70px;text-align:right;font-size:11.5px;font-weight:700;color:#F87171;font-variant-numeric:tabular-nums">25 DH</span>
+              <span style="width:132px;text-align:right;font-size:10.5px;color:#F87171">2nd this month</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #1E1E22">
+              <span style="flex:1;min-width:0;font-size:12px;font-weight:600">Mehdi Ouali <span style="color:#6B6B72;font-weight:400">&middot; Kasbah Classics</span></span>
+              <span style="width:70px;text-align:right;font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums">30 DH</span>
+              <span style="width:70px;text-align:right;font-size:11.5px;font-weight:700;color:#F87171;font-variant-numeric:tabular-nums">10 DH</span>
+              <span style="width:132px;text-align:right;font-size:10.5px;color:#F87171">2nd this month</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #1E1E22">
+              <span style="flex:1;min-width:0;font-size:12px;font-weight:600">Rachid Tazi <span style="color:#6B6B72;font-weight:400">&middot; Coiffure Atlas</span></span>
+              <span style="width:70px;text-align:right;font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums">25 DH</span>
+              <span style="width:70px;text-align:right;font-size:11.5px;font-weight:700;color:#9A9CA3;font-variant-numeric:tabular-nums">&mdash;</span>
+              <span style="width:132px;text-align:right;font-size:10.5px;color:#6B6B72">no answer yet</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding-top:2px">
+            <span style="flex:1;font-size:10.5px;color:#6B6B72">Earmarked &middot; what he says he got &middot; standing</span>
+            <span style="font-size:11px;font-weight:700;color:#F87171">Kasbah Classics: 2 barbers, both short</span>
+          </div>
+        </div>
+
+        <div style="background:rgba(248,113,113,.09);border:1px solid rgba(248,113,113,.4);border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:10px">
+          <span style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:#F87171"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.1"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg>One shop, two barbers, same week</span>
+          <span style="font-size:11.5px;line-height:1.55;color:#F0A9A9;text-wrap:pretty">A single mismatch is a miscount or a bad memory. Two barbers in one shop reporting <span style="font-variant-numeric:tabular-nums">40 DH</span> missing between them is the pattern this screen exists to catch &mdash; and the reason the earmarked list reaches the barber <strong>before</strong> the shop pays him rather than after.</span>
+          <div style="display:flex;gap:9px">
+            <span style="flex:1;height:38px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700">CALL THE OWNER</span>
+            <span style="flex:1;height:38px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums">PAY THE 40 DH OURSELVES</span>
+            <span style="flex:1;height:38px;border-radius:9px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;letter-spacing:.05em">OPEN A CASE</span>
+          </div>
+        </div>
+      </div>
+      <div style="width:300px;flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+          <span style="font-size:12.5px;font-weight:700">Why a tip cannot be netted</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Netting works because it moves <strong style="color:#D8D8DC">one number between two businesses</strong>. A tip is owed to a named man who has no account with Sterncut, so it has to travel inside the shop's number and then be handed over by someone not entitled to it. Every control on this screen exists because of that one sentence.</span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+          <span style="font-size:12.5px;font-weight:700">What would fix it properly</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">A barber balance he can withdraw from &mdash; which needs a payout rail to a person, the thing slice 2 was built to avoid. Tips are the strongest argument for <strong style="color:#D8D8DC">WAL-13/14/15</strong>: not so customers can pay by card, but so Sterncut can pay a barber without asking his boss to do it.</span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+          <span style="font-size:12.5px;font-weight:700">Deliberately not here</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">No tip on the platform's own cut, no &ldquo;suggested&rdquo; percentage, no withholding a shop's whole net over a <span style="font-variant-numeric:tabular-nums">20 DH</span> dispute. Sterncut can pay a short tip out of its own pocket for less than the cost of arguing, and that is the recommended action above.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:1400px;padding-top:2px">Barber side &middot; <a class="dv-oid" href="./Barber - Earnings.dc.html#BER-13">BER-13</a></div></div>
+
+<p class="dv-next">Last in slice 3: cards (<strong>WAL-13/14/15</strong>) &mdash; and tips, not customer convenience, are the argument for them.</p>
+</div>
+</section>
+
+<section class="dv-turn" id="F2">
+<div class="dv-thd"><a class="dv-tid" href="#F2">F2</a><span class="dv-tname">Slice 3 &middot; the charge run, and the money that will not net</span></div>
+<p class="dv-note">The reconciliation half of <a class="dv-oid" href="./Sterncut Ops - Settings.dc.html#SET-18">SET-18</a> &mdash; <span style="font-variant-numeric:tabular-nums">40 DH</span> a barber plus <span style="font-variant-numeric:tabular-nums">1 DH</span> a cut, deducted from deposits Sterncut already holds. <a class="dv-oid" href="#FIN-11">FIN-11</a> separates <strong>accrued</strong> from <strong>charged</strong>, because the gap between them is the free period rather than a discount, and shows the deduction landing inside the Friday net so one number still crosses the counter. <a class="dv-oid" href="#FIN-12">FIN-12</a> is the case the model cannot net: two shops on <span style="font-variant-numeric:tabular-nums">0%</span> deposit hold nothing to deduct from, so Sterncut must ask for <span style="font-variant-numeric:tabular-nums">210 DH</span> in cash. That surfaces the real finding &mdash; deposits are how Sterncut gets paid without a processor, so a <span style="font-variant-numeric:tabular-nums">0%</span> shop is one it cannot bill cleanly, and the fix is probably a longer free period rather than a collections process. Ops gets carry, collect and waive; suspension and late fees are deliberately absent.</p>
+<p class="dv-note" style="color:#E8A100"><strong>Contradiction left standing:</strong> <a class="dv-oid" href="#FIN-02">FIN-02</a> prices commission at <span style="font-variant-numeric:tabular-nums">8%</span> per booking and <a class="dv-oid" href="#FIN-03">FIN-03</a> has now been rebuilt on the real model &mdash; October, <span style="font-variant-numeric:tabular-nums">1 630 DH</span> charged, <span style="font-variant-numeric:tabular-nums">0 DH</span> owed to the DGI, receipts instead of TVA invoices. <strong>FIN-02 is the one still standing</strong>: it prices commission at <span style="font-variant-numeric:tabular-nums">8%</span> per booking, which nothing in slice 3 charges. Retiring a shipped screen is your call &mdash; say the word.</p>
+<p class="dv-src">slice 3 &middot; money out</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="FIN-11"><div class="dv-olabel"><a class="dv-oid" href="#FIN-11">FIN-11</a>Charge run &mdash; October, closed</div>
+<x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 1400 }}" height="{{ 940 }}" url="admin.sterncut.ma/finance/charges/2026-10" tabs="{{ adminTabs }}" hint-size="1400px,940px">
+<div data-screen-label="FIN-11" style="position:relative;display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+<div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg>Demand<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">6</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M12 3v18M5 8h9a3.5 3.5 0 0 1 0 7H5"></path></svg>Finance</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">7</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg>Compliance<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2 2 2 0 1 1-4 0 1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 2.6 15a2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 4.6a2 2 0 1 1 4 0 1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21.4 11a2 2 0 1 1 0 4z"></path></svg>Settings</span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">KB</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Karima Bennis</span><span style="display:block;font-size:10px;color:#9A9CA3">Head of Ops</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">Charge run</span>
+      <span style="font-size:12px;color:#6B6B72">What Sterncut charged, and how it reached us</span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;padding:0 12px;font-size:11.5px;font-weight:600;color:#9A9CA3;font-variant-numeric:tabular-nums">October 2026</span>
+    </div>
+    <div style="height:46px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:5px;padding:0 24px">
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">Payout run</span>
+      <span style="height:28px;border-radius:8px;background:#212125;font-weight:700;display:flex;align-items:center;padding:0 12px;font-size:12px">Charge run</span>
+      <span style="height:28px;border-radius:8px;font-weight:500;color:#9A9CA3;display:flex;align-items:center;padding:0 12px;font-size:12px">To collect</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">VAT</span>
+    </div>
+    <div style="flex:1;min-height:0;padding:22px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:hidden">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid #26262B;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;outline:1px solid rgba(232,68,46,.35);outline-offset:-1px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between">
+            <span style="display:flex;align-items:baseline;gap:9px"><span style="font-size:13px;font-weight:700">October, closed</span><span style="font-size:9.5px;letter-spacing:.1em;font-weight:700;color:#4ADE80;background:rgba(74,222,128,.14);border-radius:5px;padding:3px 7px">SETTLED FRI 30 OCT</span></span>
+            <span style="font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">40 DH per barber &middot; 1 DH per completed cut</span>
+          </div>
+          <div style="display:flex;gap:10px">
+          <span style="flex:1;background:#111113;border:1px solid #26262B;border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#6B6B72">ACCRUED</span><span style="font-size:19px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums">10 450 DH</span><span style="font-size:10.5px;line-height:1.35;color:#6B6B72">5 120 DH subscription + 5 330 DH cuts</span></span>
+          <span style="flex:1;background:#111113;border:1px solid #26262B;border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#6B6B72">WAIVED</span><span style="font-size:19px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums">8 820 DH</span><span style="font-size:10.5px;line-height:1.35;color:#6B6B72">35 shops still inside their free months</span></span>
+          <span style="flex:1;background:#111113;border:1px solid rgba(74,222,128,.3);border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#4ADE80">CHARGED</span><span style="font-size:19px;font-weight:800;color:#4ADE80;font-variant-numeric:tabular-nums">1 630 DH</span><span style="font-size:10.5px;line-height:1.35;color:#6B6B72">the 6 shops out of the free period</span></span>
+          <span style="flex:1;background:#111113;border:1px solid rgba(74,222,128,.3);border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#4ADE80">NETTED OFF DEPOSITS</span><span style="font-size:19px;font-weight:800;color:#4ADE80;font-variant-numeric:tabular-nums">1 420 DH</span><span style="font-size:10.5px;line-height:1.35;color:#6B6B72">taken from money already held</span></span>
+          <span style="flex:1;background:#111113;border:1px solid rgba(232,161,0,.35);border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#E8A100">LEFT TO COLLECT</span><span style="font-size:19px;font-weight:800;color:#E8A100;font-variant-numeric:tabular-nums">210 DH</span><span style="font-size:10.5px;line-height:1.35;color:#6B6B72">2 shops hold no deposits</span></span>
+        </div>
+          <span style="font-size:10.5px;line-height:1.45;color:#6B6B72;text-wrap:pretty">Accrued is the honest cost of running the network; charged is what left a shop. The gap is the free period, not a discount &mdash; and it closes on its own as each shop reaches month four.</span>
+        </div>
+
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between">
+            <span style="font-size:13px;font-weight:700">The six shops charged</span>
+            <span style="font-size:11px;color:#6B6B72">Deducted from the last Friday net of the month</span>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #1E1E22">
+              <span style="flex:1;min-width:0;font-size:12px;font-weight:600">Le Fade Tanger <span style="color:#6B6B72;font-weight:400">&middot; Malabata</span></span>
+              <span style="width:146px;text-align:right;font-size:11px;color:#9A9CA3;font-variant-numeric:tabular-nums">3 barbers · 370 cuts</span>
+              <span style="width:62px;text-align:right;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums">490 DH</span>
+              <span style="width:84px;text-align:right;font-size:11px;color:#9A9CA3;font-variant-numeric:tabular-nums">10 730 DH</span>
+              <span style="width:88px;text-align:right;font-size:12px;font-weight:700;color:#4ADE80;font-variant-numeric:tabular-nums">10 240 DH</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #1E1E22">
+              <span style="flex:1;min-width:0;font-size:12px;font-weight:600">Salon Kasbah <span style="color:#6B6B72;font-weight:400">&middot; Kasbah</span></span>
+              <span style="width:146px;text-align:right;font-size:11px;color:#9A9CA3;font-variant-numeric:tabular-nums">4 barbers · 412 cuts</span>
+              <span style="width:62px;text-align:right;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums">572 DH</span>
+              <span style="width:84px;text-align:right;font-size:11px;color:#9A9CA3;font-variant-numeric:tabular-nums">9 180 DH</span>
+              <span style="width:88px;text-align:right;font-size:12px;font-weight:700;color:#4ADE80;font-variant-numeric:tabular-nums">8 608 DH</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #1E1E22">
+              <span style="flex:1;min-width:0;font-size:12px;font-weight:600">Rif Coiffure <span style="color:#6B6B72;font-weight:400">&middot; Malabata</span></span>
+              <span style="width:146px;text-align:right;font-size:11px;color:#9A9CA3;font-variant-numeric:tabular-nums">2 barbers · 244 cuts</span>
+              <span style="width:62px;text-align:right;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums">324 DH</span>
+              <span style="width:84px;text-align:right;font-size:11px;color:#9A9CA3;font-variant-numeric:tabular-nums">6 240 DH</span>
+              <span style="width:88px;text-align:right;font-size:12px;font-weight:700;color:#4ADE80;font-variant-numeric:tabular-nums">5 916 DH</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #1E1E22">
+              <span style="flex:1;min-width:0;font-size:12px;font-weight:600">Coiffure Atlas <span style="color:#6B6B72;font-weight:400">&middot; Souani</span></span>
+              <span style="width:146px;text-align:right;font-size:11px;color:#9A9CA3;font-variant-numeric:tabular-nums">2 barbers · 188 cuts</span>
+              <span style="width:62px;text-align:right;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums">268 DH</span>
+              <span style="width:84px;text-align:right;font-size:11px;color:#9A9CA3;font-variant-numeric:tabular-nums">3 960 DH</span>
+              <span style="width:88px;text-align:right;font-size:12px;font-weight:700;color:#4ADE80;font-variant-numeric:tabular-nums">3 692 DH</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #1E1E22">
+              <span style="flex:1;min-width:0;font-size:12px;font-weight:600">Chez Nabil <span style="color:#6B6B72;font-weight:400">&middot; Iberia</span></span>
+              <span style="width:146px;text-align:right;font-size:11px;color:#9A9CA3;font-variant-numeric:tabular-nums">1 barber · 96 cuts</span>
+              <span style="width:62px;text-align:right;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums">136 DH</span>
+              <span style="width:84px;text-align:right;font-size:11px;color:#E8A100;font-variant-numeric:tabular-nums">0 DH</span>
+              <span style="width:88px;text-align:right;font-size:12px;font-weight:700;color:#6B6B72;font-variant-numeric:tabular-nums">&mdash;</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #1E1E22">
+              <span style="flex:1;min-width:0;font-size:12px;font-weight:600">Barbier Medina <span style="color:#6B6B72;font-weight:400">&middot; Medina</span></span>
+              <span style="width:146px;text-align:right;font-size:11px;color:#9A9CA3;font-variant-numeric:tabular-nums">1 barber · 34 cuts</span>
+              <span style="width:62px;text-align:right;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums">74 DH</span>
+              <span style="width:84px;text-align:right;font-size:11px;color:#E8A100;font-variant-numeric:tabular-nums">0 DH</span>
+              <span style="width:88px;text-align:right;font-size:12px;font-weight:700;color:#6B6B72;font-variant-numeric:tabular-nums">&mdash;</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding-top:2px">
+            <span style="flex:1;font-size:10.5px;color:#6B6B72">Charge &middot; deposits held in October &middot; what the shop collected</span>
+            <span style="font-size:11px;font-weight:700;font-variant-numeric:tabular-nums">1 630 DH charged</span>
+          </div>
+        </div>
+
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:11px">
+          <span style="font-size:13px;font-weight:700">Why this reconciles without a processor</span>
+          <div style="display:flex;align-items:center;gap:9px">
+            <span style="flex:1;background:#111113;border:1px solid #26262B;border-radius:10px;padding:11px 13px;display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;font-weight:700">Sterncut holds deposits</span><span style="font-size:10.5px;color:#E8A100;font-variant-numeric:tabular-nums">30 110 DH across 6 shops</span></span>
+            <span style="font-size:14px;color:#3A3A40;flex:none">&minus;</span>
+            <span style="flex:1;background:#111113;border:1px solid #26262B;border-radius:10px;padding:11px 13px;display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;font-weight:700">Its own charge</span><span style="font-size:10.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">1 420 DH deductible</span></span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.2" style="flex:none"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+            <span style="flex:1;background:#111113;border:1px solid rgba(74,222,128,.3);border-radius:10px;padding:11px 13px;display:flex;flex-direction:column;gap:3px"><span style="font-size:11px;font-weight:700;color:#4ADE80">One number over the counter</span><span style="font-size:10.5px;color:#4ADE80;font-variant-numeric:tabular-nums">28 690 DH paid out</span></span>
+          </div>
+          <span style="font-size:10.5px;line-height:1.45;color:#6B6B72;text-wrap:pretty">Sterncut deducts from money it already has in hand, so nothing has to be charged to a card and no shop hands over cash for the fee. That only holds while a shop takes deposits &mdash; which is what the next tab is about.</span>
+        </div>
+      </div>
+      <div style="width:300px;flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid rgba(232,161,0,.3);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+          <span style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:#E8A100"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2.1"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg>One screen still contradicts this</span>
+          <span style="font-size:11px;line-height:1.5;color:#C79A3E"><a class="dv-oid" href="#FIN-02">FIN-02</a> still prices commission at <span style="font-variant-numeric:tabular-nums">8%</span> per booking, which nothing in slice 3 charges. It predates the subscription model and is left standing on purpose &mdash; retiring a shipped screen is your call, not mine. <a class="dv-oid" href="#FIN-03">FIN-03</a> is rebuilt.</span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:12.5px;font-weight:700">VAT</span><span style="font-size:9.5px;letter-spacing:.1em;font-weight:700;color:#9A9CA3;background:#212125;border-radius:5px;padding:3px 7px">MODELLED, NOT CHARGED</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="display:flex;align-items:baseline;gap:8px;font-size:11.5px"><span style="flex:1;color:#9A9CA3">Would have been at 20%</span><span style="font-weight:700;color:#9A9CA3;font-variant-numeric:tabular-nums">326 DH</span></span>
+            <span style="display:flex;align-items:baseline;gap:8px;font-size:11.5px"><span style="flex:1;color:#9A9CA3">Charged</span><span style="font-weight:700;color:#6B6B72;font-variant-numeric:tabular-nums">0 DH</span></span>
+            <span style="display:flex;align-items:baseline;gap:8px;font-size:11.5px"><span style="flex:1;color:#9A9CA3">Owed to the DGI</span><span style="font-weight:700;color:#6B6B72;font-variant-numeric:tabular-nums">0 DH</span></span>
+          </div>
+          <span style="font-size:11px;line-height:1.5;color:#6B6B72;border-top:1px solid #1E1E22;padding-top:10px">Every statement carries the line at <span style="font-variant-numeric:tabular-nums">0 DH</span> from week one, so registration adds a number to an existing row and reissues nothing.</span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+          <span style="font-size:12.5px;font-weight:700">Not built here, on purpose</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3">No filing, no bank reconciliation, no ledger. Ops needs the number and the invoices; accounting happens in accounting software.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:1400px;padding-top:2px">Leads to &middot; <a class="dv-oid" href="#FIN-12">the 210 DH that will not net</a></div></div>
+
+<div class="dv-opt" id="FIN-12"><div class="dv-olabel"><a class="dv-oid" href="#FIN-12">FIN-12</a>To collect &mdash; the two shops holding no deposits</div>
+<x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 1400 }}" height="{{ 940 }}" url="admin.sterncut.ma/finance/charges/2026-10/collect" tabs="{{ adminTabs }}" hint-size="1400px,940px">
+<div data-screen-label="FIN-12" style="position:relative;display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+<div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg>Demand<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">6</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M12 3v18M5 8h9a3.5 3.5 0 0 1 0 7H5"></path></svg>Finance</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">7</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg>Compliance<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2 2 2 0 1 1-4 0 1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 2.6 15a2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 4.6a2 2 0 1 1 4 0 1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21.4 11a2 2 0 1 1 0 4z"></path></svg>Settings</span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">KB</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Karima Bennis</span><span style="display:block;font-size:10px;color:#9A9CA3">Head of Ops</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">To collect</span>
+      <span style="font-size:12px;color:#6B6B72">Charges no deposit could cover</span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;padding:0 12px;font-size:11.5px;font-weight:600;color:#9A9CA3;font-variant-numeric:tabular-nums">October 2026</span>
+    </div>
+    <div style="height:46px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:5px;padding:0 24px">
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">Payout run</span>
+      <span style="height:28px;border-radius:8px;font-weight:500;color:#9A9CA3;display:flex;align-items:center;padding:0 12px;font-size:12px">Charge run</span>
+      <span style="height:28px;border-radius:8px;background:#212125;font-weight:700;display:flex;align-items:center;padding:0 12px;font-size:12px">To collect</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">VAT</span>
+    </div>
+    <div style="flex:1;min-height:0;padding:22px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:hidden">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div style="background:rgba(232,161,0,.08);border:1px solid rgba(232,161,0,.3);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:11px">
+          <span style="display:flex;align-items:center;gap:9px;font-size:13px;font-weight:700;color:#E8A100"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2.1"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg>The netting runs backwards for the first time</span>
+          <span style="font-size:11.5px;line-height:1.55;color:#C79A3E;text-wrap:pretty">Both shops take <strong style="font-variant-numeric:tabular-nums">0%</strong> deposit, which is legitimate and always was (<a class="dv-oid" href="./Sterncut Ops - Settings.dc.html#SET-11">SET-11</a>). Sterncut holds nothing of theirs, so there is nothing to deduct from and it has to ask for <span style="font-variant-numeric:tabular-nums">210 DH</span> in cash. Every other shop pays without a conversation.</span>
+        </div>
+
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:11px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:13px;font-weight:700">The two shops</span><span style="font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">Both 0% deposit &middot; nothing held to net against</span></div>
+          <div style="display:flex;gap:10px">
+            <div style="flex:1;background:#111113;border:1px solid #26262B;border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:7px">
+              <span style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:12px;font-weight:700">Chez Nabil</span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">1 barber &middot; 96 cuts</span></span>
+              <span style="display:flex;align-items:baseline;gap:8px"><span style="font-size:19px;font-weight:800;font-variant-numeric:tabular-nums">136 DH</span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">40 + 96</span></span>
+              <span style="font-size:10.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">1.42 DH a haircut &mdash; survivable</span>
+            </div>
+            <div style="flex:1;background:#111113;border:1px solid rgba(248,113,113,.4);border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:7px">
+              <span style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:12px;font-weight:700;color:#F87171">Barbier Medina</span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">1 barber &middot; 34 cuts</span></span>
+              <span style="display:flex;align-items:baseline;gap:8px"><span style="font-size:19px;font-weight:800;color:#F87171;font-variant-numeric:tabular-nums">74 DH</span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">40 + 34</span></span>
+              <span style="font-size:10.5px;color:#F0A9A9;font-variant-numeric:tabular-nums">2.18 DH a haircut &mdash; subscription is 54% of it</span>
+            </div>
+          </div>
+          <span style="font-size:10.5px;line-height:1.45;color:#6B6B72;text-wrap:pretty">Barbier Medina pays <span style="font-variant-numeric:tabular-nums">40 DH</span> to exist and <span style="font-variant-numeric:tabular-nums">34 DH</span> to work, in cash, because it holds no deposits. It is the shop the model is worst for and the likeliest to leave. If <span style="font-variant-numeric:tabular-nums">40 DH</span> is wrong anywhere, it is wrong here.</span>
+        </div>
+
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:11px">
+          <span style="font-size:13px;font-weight:700">What ops can do about it &mdash; pick one, per shop</span>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <div style="display:flex;align-items:center;gap:12px;background:#111113;border:1px solid #26262B;border-radius:11px;padding:10px 14px">
+              <span style="flex:1;min-width:0;font-size:12px;font-weight:700">Carry it to next month <span style="font-weight:400;color:#6B6B72">&middot; waits for a month with deposits, never compounds</span></span>
+              <span style="height:32px;flex:none;border-radius:9px;background:#212125;display:flex;align-items:center;padding:0 13px;font-size:11px;font-weight:700">CARRY</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;background:#111113;border:1px solid #26262B;border-radius:11px;padding:12px 14px">
+              <span style="flex:1;min-width:0;font-size:12px;font-weight:700">Collect in cash on the next visit <span style="font-weight:400;color:#6B6B72">&middot; a field round, expensive for <span style="font-variant-numeric:tabular-nums">74 DH</span></span></span>
+              <span style="height:32px;flex:none;border-radius:9px;background:#212125;display:flex;align-items:center;padding:0 13px;font-size:11px;font-weight:700">SCHEDULE</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;background:#111113;border:1px solid rgba(74,222,128,.3);border-radius:11px;padding:12px 14px">
+              <span style="flex:1;min-width:0;font-size:12px;font-weight:700;color:#4ADE80">Waive it, with a reason <span style="font-weight:400;color:#6B6B72">&middot; recommended under <span style="font-variant-numeric:tabular-nums">100 DH</span>; chasing costs more</span></span>
+              <span style="height:32px;flex:none;border-radius:9px;background:#4ADE80;color:#0D0D0F;display:flex;align-items:center;padding:0 13px;font-size:11px;font-weight:700">WAIVE</span>
+            </div>
+          </div>
+          <span style="font-size:10.5px;line-height:1.45;color:#6B6B72;text-wrap:pretty">Deliberately not here: suspending the shop, blocking its calendar, or charging a late fee. A <span style="font-variant-numeric:tabular-nums">74 DH</span> debt is not worth a closed shop, and a late fee on the smallest shop in the network is the wrong first use of fees.</span>
+        </div>
+      </div>
+      <div style="width:300px;flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:12.5px;font-weight:700">How big does this get</span><span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">9 shops at 0%</span></div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <span style="display:flex;align-items:baseline;gap:9px"><span style="flex:1;font-size:11px;color:#9A9CA3;line-height:1.35">Uncollectible this month</span><span style="font-size:14px;font-weight:800;color:#E8A100;font-variant-numeric:tabular-nums;flex:none">210 DH</span></span>
+            <span style="display:flex;align-items:baseline;gap:9px"><span style="flex:1;font-size:11px;color:#9A9CA3;line-height:1.35">By February, if all 9 are billing</span><span style="font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;flex:none">870 DH</span></span>
+            <span style="display:flex;align-items:baseline;gap:9px"><span style="flex:1;font-size:11px;color:#9A9CA3;line-height:1.35">Share of monthly charges</span><span style="font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;flex:none">3.4%</span></span>
+          </div>
+          <span style="font-size:11px;line-height:1.5;color:#6B6B72;border-top:1px solid #1E1E22;padding-top:10px">Small enough to waive and watch. If it passes <span style="font-variant-numeric:tabular-nums">10%</span>, the answer is not collections &mdash; it is that the subscription needs a different shape for shops that take no deposit.</span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+          <span style="font-size:12.5px;font-weight:700">The choice this exposes</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3">Deposits are how Sterncut gets paid without a processor. So a shop on <span style="font-variant-numeric:tabular-nums">0%</span> is not just a shop with more no-shows &mdash; it is a shop Sterncut cannot bill cleanly. Worth deciding whether the free period should simply run longer for them, rather than inventing a collections process.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:1400px;padding-top:2px">Carry, collect or waive &middot; no suspension, no late fee</div></div>
+
+<p class="dv-next">Barber side shipped at <a class="dv-oid" href="./Barber - Earnings.dc.html#BER-11">BER-11</a>&ndash;<strong>13</strong> &middot; tips at <a class="dv-oid" href="#FIN-13">FIN-13</a> &middot; last is cards (<strong>WAL-13/14/15</strong>).</p>
+</div>
+</section>
+
+<section class="dv-turn" id="B4">
+<div class="dv-thd"><a class="dv-tid" href="#B4">B4</a><span class="dv-tname">Sterncut paying the shops — the money the product has never shown</span></div>
+<p class="dv-note">Build plan block 4, item 79. Every settlement screen so far has been a <em>shop</em> paying a <em>barber</em> &mdash; <a class="dv-oid" href="./Barber - Earnings.dc.html#BER-04">BER-04</a>, <a class="dv-oid" href="./Owner - Reports.dc.html#ORP-01">ORP-01</a>, <a class="dv-oid" href="./Sterncut Ops - Bookings.dc.html#BKN-05">BKN-05</a>. Nothing showed Sterncut paying the shops, which is the transaction the whole business rests on.<br><br>Two positions worth arguing. First, <strong>held is not forfeited</strong> (<a class="dv-oid" href="#FIN-01">FIN-01</a>): Le Fade Tanger is suspended and its 6 661 DH is held, not kept &mdash; a platform that quietly keeps a suspended shop&rsquo;s earnings is stealing with a policy on top, so the amount and its unlock date show on the owner&rsquo;s own reports. Second, <strong>walk-ins through the queue are charged 0%</strong> (<a class="dv-oid" href="#FIN-02">FIN-02</a>): Sterncut did not bring that customer through the door, and charging for the privilege of logging him would make the queue &mdash; the one feature that gets shops onto the platform at all &mdash; something they route around.<br><br><a class="dv-oid" href="#FIN-03">FIN-03</a> exists mainly to hold one line: wallet balances are a liability, not revenue. Counting customer money as income inflates the top line and generates a tax bill on money we may have to hand back.</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="FIN-01"><div class="dv-olabel"><a class="dv-oid" href="#FIN-01">FIN-01</a>Payout run — 39 of 42 shops</div>
+<x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 1400 }}" height="{{ 940 }}" url="admin.sterncut.ma/finance/payouts/2026-W25" tabs="{{ adminTabs }}" hint-size="1400px,940px">
+<div style="position:relative;display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+<div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg>Demand<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">6</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M12 3v18M5 8h9a3.5 3.5 0 0 1 0 7H5"></path></svg>Finance</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">7</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg>Compliance<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2 2 2 0 1 1-4 0 1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 2.6 15a2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 4.6a2 2 0 1 1 4 0 1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21.4 11a2 2 0 1 1 0 4z"></path></svg>Settings</span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">KB</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Karima Bennis</span><span style="display:block;font-size:10px;color:#9A9CA3">Head of Ops</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">Payout run · week 25</span>
+      <span style="font-size:12px;color:#6B6B72">Closes Friday 21:00 · 42 shops</span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;padding:0 12px;font-size:11.5px;font-weight:600;color:#9A9CA3">Export CSV</span>
+      <span style="display:flex;align-items:center;gap:7px;height:32px;border-radius:9px;background:#E8442E;padding:0 14px;font-size:12px;font-weight:700">Release 39 payouts</span>
+    </div>
+    <div style="height:46px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:5px;padding:0 24px">
+      <span style="height:28px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:700">Payout run</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">Commission &amp; fees</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">VAT</span>
+    </div>
+    <div style="flex:1;min-height:0;padding:20px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:hidden">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;gap:12px">
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:6px"><span style="font-size:10px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">TAKEN THIS WEEK</span><span style="font-size:21px;font-weight:800;font-variant-numeric:tabular-nums">86 420 DH</span><span style="font-size:10.5px;color:#6B6B72">1 284 bookings</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:6px"><span style="font-size:10px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">STERNCUT KEEPS</span><span style="font-size:21px;font-weight:800;font-variant-numeric:tabular-nums">6 913 DH</span><span style="font-size:10.5px;color:#4ADE80">8% of gross</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:12px;padding:15px;display:flex;flex-direction:column;gap:6px"><span style="font-size:10px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">GOES TO SHOPS</span><span style="font-size:21px;font-weight:800;font-variant-numeric:tabular-nums">79 507 DH</span><span style="font-size:10.5px;color:#6B6B72">39 of 42 clear</span></div>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid #1E1E22;background:#141416">
+            <span style="width:210px;flex:none;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">SHOP</span>
+            <span style="width:110px;flex:none;text-align:right;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">GROSS</span>
+            <span style="width:110px;flex:none;text-align:right;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">OUR FEE</span>
+            <span style="width:120px;flex:none;text-align:right;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">TO PAY</span>
+            <span style="flex:1;text-align:right;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">STATE</span>
+          </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid #1E1E22">
+          <span style="width:210px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">LF</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:12.5px;font-weight:700">Le Fade Tanger</span><span style="font-size:10px;color:#6B6B72">96 bookings</span></span></span>
+          <span style="width:110px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">7 240 DH</span>
+          <span style="width:110px;flex:none;text-align:right;font-size:12.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">&minus; 579 DH</span>
+          <span style="width:120px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">6 661 DH</span>
+          <span style="flex:1;text-align:right;font-size:11px;font-weight:700;color:#F87171">Held · suspended</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid #1E1E22">
+          <span style="width:210px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">MB</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:12.5px;font-weight:700">Marina Barber Club</span><span style="font-size:10px;color:#6B6B72">84 bookings</span></span></span>
+          <span style="width:110px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">6 180 DH</span>
+          <span style="width:110px;flex:none;text-align:right;font-size:12.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">&minus; 494 DH</span>
+          <span style="width:120px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">5 686 DH</span>
+          <span style="flex:1;text-align:right;font-size:11px;font-weight:700;color:#4ADE80">Ready</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid #1E1E22">
+          <span style="width:210px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">AB</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:12.5px;font-weight:700">Atlas Barbershop</span><span style="font-size:10px;color:#6B6B72">71 bookings</span></span></span>
+          <span style="width:110px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">5 320 DH</span>
+          <span style="width:110px;flex:none;text-align:right;font-size:12.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">&minus; 426 DH</span>
+          <span style="width:120px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">4 894 DH</span>
+          <span style="flex:1;text-align:right;font-size:11px;font-weight:700;color:#4ADE80">Ready</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid #1E1E22">
+          <span style="width:210px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">MC</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:12.5px;font-weight:700">Medina Cuts</span><span style="font-size:10px;color:#6B6B72">63 bookings</span></span></span>
+          <span style="width:110px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">4 740 DH</span>
+          <span style="width:110px;flex:none;text-align:right;font-size:12.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">&minus; 379 DH</span>
+          <span style="width:120px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">4 361 DH</span>
+          <span style="flex:1;text-align:right;font-size:11px;font-weight:700;color:#4ADE80">Ready</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid #1E1E22">
+          <span style="width:210px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">RG</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:12.5px;font-weight:700">Rif Gentlemen</span><span style="font-size:10px;color:#6B6B72">58 bookings</span></span></span>
+          <span style="width:110px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">4 410 DH</span>
+          <span style="width:110px;flex:none;text-align:right;font-size:12.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">&minus; 353 DH</span>
+          <span style="width:120px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">4 057 DH</span>
+          <span style="flex:1;text-align:right;font-size:11px;font-weight:700;color:#E8A100">No RIB on file</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid #1E1E22">
+          <span style="width:210px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">IF</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:12.5px;font-weight:700">Iberia Fade House</span><span style="font-size:10px;color:#6B6B72">52 bookings</span></span></span>
+          <span style="width:110px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">3 980 DH</span>
+          <span style="width:110px;flex:none;text-align:right;font-size:12.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">&minus; 318 DH</span>
+          <span style="width:120px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">3 662 DH</span>
+          <span style="flex:1;text-align:right;font-size:11px;font-weight:700;color:#4ADE80">Ready</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:13px 18px;border-bottom:1px solid #1E1E22">
+          <span style="width:210px;flex:none;display:flex;align-items:center;gap:11px"><span style="width:30px;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">KC</span><span style="display:flex;flex-direction:column;gap:1px"><span style="font-size:12.5px;font-weight:700">Kasbah Classics</span><span style="font-size:10px;color:#6B6B72">47 bookings</span></span></span>
+          <span style="width:110px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">3 520 DH</span>
+          <span style="width:110px;flex:none;text-align:right;font-size:12.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">&minus; 282 DH</span>
+          <span style="width:120px;flex:none;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">3 238 DH</span>
+          <span style="flex:1;text-align:right;font-size:11px;font-weight:700;color:#4ADE80">Ready</span>
+        </div>
+        </div>
+      </div>
+      <div style="width:300px;flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid rgba(248,113,113,.28);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+          <span style="font-size:12.5px;font-weight:700;color:#F87171">3 shops will not be paid</span>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <span style="font-size:11px;line-height:1.5;color:#9A9CA3"><strong style="color:#fff">Le Fade Tanger</strong> &mdash; suspended Tuesday. Money is theirs and is held, not kept; it releases when the suspension lifts.</span>
+            <span style="font-size:11px;line-height:1.5;color:#9A9CA3"><strong style="color:#fff">Rif Gentlemen</strong> &mdash; no RIB. Chased three weeks running.</span>
+            <span style="font-size:11px;line-height:1.5;color:#9A9CA3"><strong style="color:#fff">Nord Barbier</strong> &mdash; owner name does not match the account name.</span>
+          </div>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:11px"><span style="font-size:12.5px;font-weight:700">Held is not forfeited</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3">A suspended shop still earned the money. Sterncut holding it indefinitely would be theft dressed as policy &mdash; the balance shows on the owner&rsquo;s reports with the reason and the date it unlocks.</span></div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:11px"><span style="font-size:12.5px;font-weight:700">One button, 39 transfers</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3">Releasing writes a single batch to the bank and 39 lines to the audit log at <strong>SET-04</strong>. It cannot be partially undone; a wrong payout is recovered by invoice, not by reversal.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<div class="dv-opt" id="FIN-02"><div class="dv-olabel"><a class="dv-oid" href="#FIN-02">FIN-02</a>Commission &amp; fees — and what we refuse to charge for</div>
+<x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 1400 }}" height="{{ 940 }}" url="admin.sterncut.ma/finance/commission" tabs="{{ adminTabs }}" hint-size="1400px,940px">
+<div style="position:relative;display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+<div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg>Demand<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">6</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M12 3v18M5 8h9a3.5 3.5 0 0 1 0 7H5"></path></svg>Finance</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">7</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg>Compliance<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2 2 2 0 1 1-4 0 1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 2.6 15a2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 4.6a2 2 0 1 1 4 0 1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21.4 11a2 2 0 1 1 0 4z"></path></svg>Settings</span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">KB</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Karima Bennis</span><span style="display:block;font-size:10px;color:#9A9CA3">Head of Ops</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">Commission &amp; fees</span>
+      <span style="font-size:12px;color:#6B6B72">What Sterncut charges a shop</span>
+      <span style="flex:1"></span>
+      <span style="font-size:11px;font-weight:700;color:#E8442E;display:flex;align-items:center;gap:6px">Head of Ops only<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span>
+    </div>
+    <div style="height:46px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:5px;padding:0 24px">
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">Payout run</span>
+      <span style="height:28px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:700">Commission &amp; fees</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">VAT</span>
+    </div>
+    <div style="flex:1;min-height:0;padding:22px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:hidden">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:15px">
+          <span style="font-size:13px;font-weight:700">Standard rate</span>
+          <div style="display:flex;gap:14px">
+            <div style="flex:1;background:#111113;border:1px solid #26262B;border-radius:11px;padding:14px;display:flex;flex-direction:column;gap:9px">
+              <span style="font-size:10px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">PER BOOKING</span>
+              <span style="display:flex;align-items:baseline;gap:4px"><span style="font-size:26px;font-weight:800;font-variant-numeric:tabular-nums">8</span><span style="font-size:13px;color:#9A9CA3">%</span></span>
+              <span style="height:4px;border-radius:2px;background:#26262B;position:relative"><span style="position:absolute;left:0;top:0;bottom:0;width:32%;background:#E8442E;border-radius:2px"></span></span>
+              <span style="font-size:10.5px;color:#6B6B72;line-height:1.4">Taken from the shop&rsquo;s side, never added to the customer&rsquo;s price</span>
+            </div>
+            <div style="flex:1;background:#111113;border:1px solid #26262B;border-radius:11px;padding:14px;display:flex;flex-direction:column;gap:9px">
+              <span style="font-size:10px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">WALK-INS VIA QUEUE</span>
+              <span style="display:flex;align-items:baseline;gap:4px"><span style="font-size:26px;font-weight:800;font-variant-numeric:tabular-nums">0</span><span style="font-size:13px;color:#9A9CA3">%</span></span>
+              <span style="height:4px;border-radius:2px;background:#26262B"></span>
+              <span style="font-size:10.5px;color:#6B6B72;line-height:1.4">We did not bring that customer. Charging for it would kill queue adoption.</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;background:rgba(232,161,0,.08);border:1px solid rgba(232,161,0,.22);border-radius:10px;padding:11px 13px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="1.9" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5h.01"></path></svg>
+            <span style="font-size:11.5px;line-height:1.45;color:#C79A3E">A rate change applies from the next Friday, never to the week in progress. 42 shops are told the Monday before.</span>
+          </div>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:13px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:13px;font-weight:700">Shops on a different rate</span><span style="font-size:11px;color:#6B6B72">4 of 42</span></div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <div style="display:flex;align-items:center;gap:12px;background:#111113;border:1px solid #26262B;border-radius:11px;padding:12px 14px"><span style="flex:1;font-size:12.5px;font-weight:600">Le Fade Tanger</span><span style="font-size:11px;color:#9A9CA3">Launch shop · until 12/26</span><span style="font-size:13px;font-weight:800;font-variant-numeric:tabular-nums">5%</span></div>
+            <div style="display:flex;align-items:center;gap:12px;background:#111113;border:1px solid #26262B;border-radius:11px;padding:12px 14px"><span style="flex:1;font-size:12.5px;font-weight:600">Marina Barber Club</span><span style="font-size:11px;color:#9A9CA3">Launch shop · until 12/26</span><span style="font-size:13px;font-weight:800;font-variant-numeric:tabular-nums">5%</span></div>
+            <div style="display:flex;align-items:center;gap:12px;background:#111113;border:1px solid #26262B;border-radius:11px;padding:12px 14px"><span style="flex:1;font-size:12.5px;font-weight:600">Atlas Barbershop</span><span style="font-size:11px;color:#9A9CA3">Recruited by referral</span><span style="font-size:13px;font-weight:800;font-variant-numeric:tabular-nums">6%</span></div>
+            <div style="display:flex;align-items:center;gap:12px;background:#111113;border:1px solid #26262B;border-radius:11px;padding:12px 14px"><span style="flex:1;font-size:12.5px;font-weight:600">Kasbah Classics</span><span style="font-size:11px;color:#E8A100">Renegotiated after a dispute</span><span style="font-size:13px;font-weight:800;font-variant-numeric:tabular-nums">6.5%</span></div>
+          </div>
+          <span style="font-size:11px;line-height:1.45;color:#6B6B72">Every exception carries a reason and an end date. A permanent special rate is a pricing decision, not an ops one.</span>
+        </div>
+      </div>
+      <div style="width:300px;flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:11px"><span style="font-size:12.5px;font-weight:700">The fee is invisible to customers</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3">60 DH is 60 DH on the phone. Sterncut&rsquo;s 8% comes out of the shop&rsquo;s settlement, which is why <strong>BER-04</strong> shows a barber his shop&rsquo;s split and not ours.</span></div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:11px"><span style="font-size:12.5px;font-weight:700">No per-transaction card fee passed on</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3">Card processing costs us about 1.4%. Passing it to shops would make wallet top-ups look like a tax on paying properly, so it sits inside the 8%.</span></div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:11px"><span style="font-size:12.5px;font-weight:700">What is deliberately not here</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3">No listing fees, no promoted placement, no charge for a coupon a shop funds itself. Each of those would make the ranking on <strong>EXPL-14</strong> something Sterncut sells rather than something it measures.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<div class="dv-opt" id="FIN-03"><div class="dv-olabel"><a class="dv-oid" href="#FIN-03">FIN-03</a>VAT — the line that is zero on purpose</div>
+<x-import component-from-global-scope="ChromeWindow" from="./browser-window.jsx" width="{{ 1400 }}" height="{{ 940 }}" url="admin.sterncut.ma/finance/vat?month=10" tabs="{{ adminTabs }}" hint-size="1400px,940px">
+<div style="position:relative;display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+<div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="2"></rect><rect x="14" y="3" width="7" height="7" rx="2"></rect><rect x="3" y="14" width="7" height="7" rx="2"></rect><rect x="14" y="14" width="7" height="7" rx="2"></rect></svg>Overview</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg>Demand<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg>Salons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg>Barbers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>Customers<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">6</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Bookings</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg>Wallets &amp; float</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M12 3v18M5 8h9a3.5 3.5 0 0 1 0 7H5"></path></svg>Finance</span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Support<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">7</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg>Reviews<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">3</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg>Compliance<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8zM4 8l2-4h12l2 4M12 12v4"></path></svg>Coupons<span style="flex:1"></span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">1</span></span>
+      <span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2 2 2 0 1 1-4 0 1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 2.6 15a2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 4.6a2 2 0 1 1 4 0 1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21.4 11a2 2 0 1 1 0 4z"></path></svg>Settings</span>
+    </div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">KB</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Karima Bennis</span><span style="display:block;font-size:10px;color:#9A9CA3">Head of Ops</span></span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M6 9l6 6 6-6"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">VAT</span>
+      <span style="font-size:12px;color:#6B6B72">Morocco &middot; TVA 20% modelled, not charged</span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;padding:0 12px;font-size:11.5px;font-weight:600;color:#9A9CA3;font-variant-numeric:tabular-nums">October 2026</span>
+    </div>
+    <div style="height:46px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:5px;padding:0 24px">
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">Payout run</span>
+      <span style="height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:500;color:#9A9CA3">Commission &amp; fees</span>
+      <span style="height:28px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:12px;font-weight:700">VAT</span>
+    </div>
+    <div style="flex:1;min-height:0;padding:22px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:hidden">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px">
+          <span style="font-size:13px;font-weight:700">What would be taxed, once Sterncut registers</span>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:12px;background:#111113;border:1px solid #26262B;border-radius:11px;padding:13px 14px">
+              <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">Subscription and per-cut charge</span><span style="font-size:10.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">40 DH a barber + 1 DH a cut &mdash; a service Sterncut sells to the shop</span></span>
+              <span style="font-size:12px;font-weight:700;color:#9A9CA3">TVA 20% &middot; not yet</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;background:#111113;border:1px solid #26262B;border-radius:11px;padding:13px 14px">
+              <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">The cut itself</span><span style="font-size:10.5px;color:#9A9CA3">Sold by the shop to the customer &mdash; their VAT position, not ours</span></span>
+              <span style="font-size:12px;font-weight:700;color:#6B6B72">Not ours</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;background:#111113;border:1px solid #26262B;border-radius:11px;padding:13px 14px">
+              <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">Tips</span><span style="font-size:10.5px;color:#9A9CA3">Pass straight through to the barber</span></span>
+              <span style="font-size:12px;font-weight:700;color:#6B6B72">Untaxed by us</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;background:#111113;border:1px solid #26262B;border-radius:11px;padding:13px 14px">
+              <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">Wallet balances</span><span style="font-size:10.5px;color:#9A9CA3">Customer money we hold, never revenue</span></span>
+              <span style="font-size:12px;font-weight:700;color:#6B6B72">Not revenue</span>
+            </div>
+          </div>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px">
+          <span style="font-size:13px;font-weight:700">October</span>
+          <div style="display:flex;flex-direction:column;gap:0">
+            <div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid #26262B"><span style="font-size:12px;color:#9A9CA3">Gross booked through Sterncut</span><span style="font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums">71 920 DH</span></div>
+            <div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid #26262B"><span style="font-size:12px;color:#9A9CA3">Charged to shops &mdash; <span style="font-variant-numeric:tabular-nums">1 630 DH</span> of <span style="font-variant-numeric:tabular-nums">10 450 DH</span> accrued</span><span style="font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums">1 630 DH</span></div>
+            <div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid #26262B"><span style="font-size:12px;color:#9A9CA3">TVA it would have carried at 20%</span><span style="font-size:12.5px;font-weight:700;color:#9A9CA3;font-variant-numeric:tabular-nums">326 DH</span></div>
+            <div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid #26262B"><span style="font-size:12px;color:#9A9CA3">TVA actually collected</span><span style="font-size:12.5px;font-weight:700;color:#6B6B72;font-variant-numeric:tabular-nums">0 DH</span></div>
+            <div style="display:flex;justify-content:space-between;padding:13px 0"><span style="font-size:13px;font-weight:700">Owed to the DGI</span><span style="font-size:18px;font-weight:800;color:#6B6B72;font-variant-numeric:tabular-nums">0 DH</span></div>
+          </div>
+          <span style="font-size:11px;color:#6B6B72;line-height:1.45;text-wrap:pretty">Nothing to file: Sterncut is not registered and charges no TVA. The <span style="font-variant-numeric:tabular-nums">326 DH</span> is carried so the day registration lands, the shape of the number is already known and no statement has to be reissued.</span>
+        </div>
+      </div>
+      <div style="width:300px;flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:11px"><span style="font-size:12.5px;font-weight:700">Receipts, not TVA invoices</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3">An unregistered company must not issue a TVA invoice. Each shop gets a monthly receipt in French showing barbers, cuts and the amount deducted, with a <span style="font-variant-numeric:tabular-nums">0 DH</span> tax line &mdash; enough for their accountant, and not a document that claims tax was charged.</span></div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:11px"><span style="font-size:12.5px;font-weight:700">Wallet money is not ours</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3">Customer balances sit as a liability, not income. Counting them as revenue would inflate the top line and create a tax bill on money we may have to hand back.</span></div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:11px"><span style="font-size:12.5px;font-weight:700">What changes at registration</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3">One flag: the tax line stops being <span style="font-variant-numeric:tabular-nums">0 DH</span>, receipts become TVA invoices with an ICE number, and the charge to a shop rises by <span style="font-variant-numeric:tabular-nums">20%</span> unless the rate is cut to absorb it. That last decision is a pricing one, and it is not made here.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+</div>
+<p class="dv-next">Releasing a run writes 39 lines to <a class="dv-oid" href="./Sterncut Ops - Settings.dc.html#SET-04">SET-04</a>. Still open in the console: the Overview home with real numbers, ops sign-in and 2FA, and the message-template editor.</p>
+</section>
+</x-dc>
+</body>
+</html>

@@ -1531,3 +1531,467 @@ Still open — and one of these is a real hole:
   that parks the money. Needs a decision before it needs code.
 - **OVW-02's rows are appended client-side**, not part of `admin_overview`.
   Fold them in whenever that function is next re-emitted.
+
+## Slice 2 step 7 — the settlement number was wrong (0080, 2026-09-02)
+Two bugs in `salon_owed_cents` (0044) were moving real money, both found by
+reading BKN-05 and FIN-01 against the repo.
+- **Forfeits were missing.** It counted deposits only `where completed_at is not
+  null`, and its own comment called that "an open product decision". §6.3 and
+  0075 had since decided it — no-show and cancel-after-window both resolve
+  `to_shop` — so every forfeit a shop earned was missing from what we settled.
+  We were **under-paying**.
+- **Refunds were subtracted that were never added.** It subtracted every
+  `deposit_refund` for the salon unconditionally, but a refund only happens on a
+  booking that did NOT complete, whose deposit was never in the sum. Each one
+  pushed `owed` down and `net` up, so we **over-collected** by the refund. 0078
+  made in-window refunds routine, so this had started firing in normal use.
+- **The fix is one source, not two more terms.** `deposit_holds` already records
+  §6.3's outcome for every deposit ever taken, so `owed` is now "the holds that
+  resolved the shop's way". Forfeits are in and refunds are out by construction,
+  and `salon_owed_cents`, `admin_salon_money.earned_cents` and `ledger_check`
+  now agree — they were three answers to one question.
+- **`admin_settle_all` had never run.** It called the 3-argument
+  `admin_settle_float` that 0044:183 dropped, so "Run settlement" raised
+  "function does not exist" on the first shop. It also iterated the gross
+  drawer, ignoring the netting §6.7 is about. Both fixed; the console's preview
+  now shows the same net the round takes.
+- **The owner's settle screen contradicted itself**: it drew "We owe you for
+  finished cuts −X" and then "You hand over {gross float}". Both ends now read
+  `net_cents`, and a negative renders as "WE OWE YOU" per §6.7.
+
+## Slice 2 step 7 — SAL-21, raising a cap (0080)
+§3 and §6.6 both say a cap raise needs a reason. Nothing enforced it: one chip
+click wrote the column, with no reason, no audit row and no word to the owner.
+- **A reason is mandatory in the risk-increasing direction.** 0077 made it
+  mandatory on *narrowing* the deposit bounds; here it is mandatory on
+  *raising* a cap. Not an inconsistency — what makes a reason mandatory is the
+  direction that increases exposure, not the direction of travel.
+- **The audit is 0066's `settings_changes` again**, with the shop inside the
+  JSON since that table has no `salon_id`, plus `admin_cap_history` to read it
+  back. A log nothing can read is not a log.
+- **The percentage was measured against the wrong thing.** The console printed
+  `float / cap`; `agent_cash_topup` refuses on `net + topup > cap`. Since
+  net = float − owed, the display read *higher* than reality, so any raise
+  argued off it over-provisioned. Both the panel and the dialog now use net.
+- **`float_hold_days`** (default 14) is a real setting now. "the cap is 14" had
+  existed only as a literal inside an assertion and in one line of copy.
+- **`float_refusals`** finally makes "top-ups the cap turned away" countable.
+  The refusal is a `raise exception`, so nothing written inside it survives —
+  the row is written client-side from `CapHitSheet`, the same place
+  `request_float_collection` already rides. Undercounts if the app dies between
+  the refusal and the log.
+Deviations from the drawn card, deliberate:
+- **"SETTLE FIRST, THEN RAISE" settles; it does not queue a raise.** The card's
+  copy ("Collect Thursday, then raise it") implies a pending conditional cap
+  change. No such table exists and it is settlement-run-shaped work — it belongs
+  with FIN-01, not bolted on here. The button collects and says so.
+- **"Busiest shop in the Kasbah" is not drawn.** Nothing ranks a shop by volume
+  within its district. The subtitle says what the repo can prove: bookings in 30
+  days, and the current cap.
+- **The owner's settle screen still hardcodes "the cap is 14"** in copy;
+  `my_float` does not return `float_hold_days`. One line, next time it moves.
+Still open:
+- **`fill_booking` still refuses deposits under 40%**, so a 0%-deposit shop
+  cannot take a voluntary partial. Unchanged since 0076.
+- **The free-cancel window is platform-wide** (0078) though §6.4 says per shop.
+  Still no screen that could set it.
+
+## Trigger: slice 2 step 7 is only half done
+T3 of the step-7 report is unbuilt and needs design before code:
+- **No settlement period.** `float_settlements` has `covers_to` and nothing
+  else — no period start, no week key, no `unique (salon_id, week)`. §6.7's
+  "one settlement per shop per week" is unenforceable and BKN-05's
+  `/settlements/2026-W48` address resolves to nothing.
+- **No settlement lines.** Nothing links a resolved hold, a refund or a top-up
+  to the settlement that discharged it, so "tap any line to see it", "a
+  deduction must be traceable to a booking reference", and "corrections are new
+  lines in the next one" have no join to stand on.
+- **No settlement run and no release.** FIN-01 needs a `settlement_runs` entity,
+  an idempotency key (a double-tapped Release writes the run twice today and the
+  append-only trigger makes the duplicate permanent), a per-shop exclusion state
+  with a reason, and a `finance` route — `NAV_ROUTE` has no `finance` key at all.
+- **Paying a shop is not in any round.** `admin_settle_all` collects only;
+  shops we owe are counted and reported, not paid.
+Three drawn things contradict the spec and were NOT built:
+- **"Sterncut fee · 8%"** — §1 says zero commission, §8 puts fees in slice 3.
+- **BKN-05's −1 056 DH pass-cut hold** — prepaid passes were declined at 0047
+  and cut from v1 in §8.
+- **FIN-01's RIB / bank batch release** — §1: "No money moves through a bank, a
+  gateway or a border in slice 2."
+And BKN-05's own arithmetic does not close: the header chip says 1 566 DH, the
+itemisation totals 1 514 DH. One of the two is wrong; the build needs telling
+which before it can be drawn.
+
+## Settlement step 1 — the period exists (0081, 2026-09-04)
+`design_handoff_slice2_settlement/` §4's three tables, plus exclusions.
+- **A run is a row because it is a draft first** (§2.1). A run that assembles
+  itself as agents collect has no pay-out total until Thursday, and that total
+  is Friday's whole question.
+- **The week key is the Friday 21:00 cut**, Africa/Casablanca. The ISO week of
+  that instant is the number the screens print — Fri 4 Sep 2026 is W36 and Fri
+  28 Aug is W35, exactly as FIN-14 and OSH-16 are labelled — so the label is
+  derived and there is no second week column to disagree with it.
+- **§2.4 is enforced at two grains.** Per line, `hold − earned + carried =
+  amount` is a CHECK constraint. Per statement, `settlement_run_imbalance`
+  names any shop whose items do not sum to its line, and release will refuse.
+  A difference with no line under it cannot reach an owner.
+- **Append-only is a trigger, not a habit.** `statement_items` refuse update and
+  delete outright and refuse insert against a non-draft run. `settlement_lines`
+  freeze their money columns on write while leaving the visit columns movable —
+  freezing the whole row would make FIN-15 impossible, freezing nothing would
+  make a released week editable. Runs go draft → released → closed and never
+  back, and their window cannot be moved.
+- **Exclusion reasons are a typed enum with the sentence in SQL** (§2.2/§4), so
+  the console and the owner's surface cannot render two versions of why a shop
+  is out.
+- **`float_settlements` is NOT duplicated.** It already records "we collected X
+  from shop Y", and a second writer of that truth is the "second ledger is a
+  second truth" failure §3.2 warns about. Step 4's release writes it *from* the
+  settlement line, in one function.
+Two of the four exclusion reasons cannot be derived and are ops-declared:
+- **`unreachable`** — there is no route or agent-assignment table anywhere.
+- **`wallet_open`** — an agent's cash has no open/closed session in 81
+  migrations. Both were left declarable rather than invented.
+
+## Settlement step 2 — "on time" was measured from the wrong moment (0082)
+§2.6 says the clock runs from the oldest uncollected dirham. **Three shipped
+functions already asked that question and all three answered it wrong.**
+- `my_float().held_days`, `my_float().topups` and `agent_round().stops[]` all
+  used a **timestamp cut line**: the oldest top-up after `max(covers_to)`. That
+  is only correct if every settlement collected everything.
+- It doesn't. `covers_to` is `default now()` and **nothing has ever set it** —
+  0044's insert does not list the column — while `admin_settle_float` has always
+  accepted an amount below expected. So a part collection stamps
+  `covers_to = now()` and **resets the shop's float age to zero with our cash
+  still in the till**, and the round then de-prioritises the shop it should be
+  visiting. Step 7 makes partials routine, so this goes from latent to constant.
+- Replaced with **FIFO by amount**: consume the shop's top-ups oldest-first with
+  what we actually collected; the first one not fully consumed is the answer.
+  This reproduces FIN-16's worked case exactly — Le Fade's clock starts Sat 29
+  Aug 11:20, day 6 of 14 on Friday, not day 0.
+- **A shortfall keeps ageing.** FIFO consumes on what the agent took, so
+  `salon_gap_cents` is never consumed. Deliberate: it is still our money and it
+  is still missing. The alternative makes a shop look current because we failed
+  to find its cash.
+- `my_float` now returns `hold_limit_days` — the owner's screen had been
+  hardcoding "the cap is 14" while 0080 made it a real setting.
+
+## Trigger: FIN-16 and slice 2 §6.3 disagree about who bears a refund
+**Blocking step 3.** FIN-16's earned section reads `1 456 DH` for 38 cuts marked
+done, then `Refund · deposit returned to the customer · STC-5140 · + 60 DH`,
+totalling `1 396 DH`. STC-5140 is inside the range STC-5102 → 5188, so it is one
+of the 38: the cut was done, the deposit was earned, and **the shop then loses
+it**. Slice 2 §6.3 says the opposite — a completed cut's deposit is the shop's,
+and "Sterncut bears a refund only when ops overrides in the customer's favour"
+(`admin_refund_ledger`'s `ops_override` bucket, 0079:96, calls it "the honest
+cost of support"). Both cannot be true and `earned_cents` on every line depends
+on which is. Needs a decision before the draft run can be built.
+
+## Settlement step 2b/3 — refunds, references, and the draft run (0083, 0084)
+### The refund question, decided
+FIN-16 and slice 2 §6.3 disagreed about who bears a refund on a cut that was
+already marked done. **The screen won, narrowly scoped**: a refund is subtracted
+from what the shop is owed only when that booking's hold resolved `to_shop` — so
+it reverses an earning the shop actually had, while a refund on a booking that
+never completed still takes nothing off it (0080's second bug stays fixed, and
+this is emphatically not 0044's "subtract every refund").
+- **Consequence worth naming: a support decision now costs the shop, not us.**
+  0079's `admin_refund_ledger` still buckets an override as borne by Sterncut,
+  which is now only true of refunds against bookings that never completed. That
+  screen's copy is a step-6 problem; the money is right.
+- **§6.8's nightly identity had the same hole and it predates all of this**: an
+  ops refund on a completed booking credits a wallet without touching the hold,
+  so `balances` rose while `to_shops` did not and the books drifted by exactly
+  the refund. Only visible on an override, which is why nobody hit it.
+  `ledger_check` now subtracts reversals from `to_shops`.
+
+### References
+`bookings.ref` (`STC-5102`) and `wallet_transactions.ref` (`WLT-8841`), sequence
+backed, house pattern from 0038's `case_no`. §3.3's whole thesis is that a line
+is defensible because it carries a reference and a time, and a uuid is not a
+reference. Backfilled in `created_at` order via `row_number()` — a sequence read
+through a subquery is not consumed in the subquery's order, and an out-of-order
+`STC-5102 → 5188` range is worse than none. **The wallet backfill drops the
+append-only trigger for the length of the migration and puts it back**, asserted;
+writing the update so it slipped past the barrier would have been worse.
+
+### The draft run (FIN-14)
+`admin_cut_run` builds the week, `admin_run` reads it, `admin_exclude_shop`
+handles the two reasons nothing can derive. New `finance` route, and the
+**Finance row had to be appended to the rail** — no design turn ever drew it, so
+the clone-the-fullest-sidebar trick could not find it.
+- **The one thing §2 does not spell out**: a refund whose earning belongs to an
+  already-released week. §2.8 makes it a carried line and FIN-17 draws ops
+  choosing the week — but if that hand-run screen is the *only* path, a refund
+  nobody processes vanishes from every statement while `salon_owed_cents` has
+  already dropped by it, and the running total drifts from the sum of the weeks
+  permanently. So **the cut writes the carried line automatically**; FIN-17
+  moves one to a different week rather than creating it.
+- **§2.3 read narrowly**: a suspended shop is excluded only when we OWE it.
+  A suspended shop holding our cash stays in the run — suspending a shop is not
+  a reason to leave our float in its till. Only the owed case is drawn.
+- **§2.5 deviation**: a no-show and a cancel-after-window have no "marked done"
+  moment, so a forfeit's week is stamped from `deposit_holds.resolved_at` — when
+  the outcome was recorded. That is the fragility §2.5 exists to avoid, and the
+  alternative is leaving forfeits out of every statement.
+- **The first run covers one week**, so float older than the first cut stays on
+  the pre-period `admin_settle_float` path. A migration-day artifact, not a
+  model gap, but it means the first week's statements will look thin.
+- `settlement_items_for` is **not granted** to authenticated — it reads any
+  shop's movements and is called only from functions that check admin first.
+
+## Settlement step 4 — release, and the two records become one (0085)
+`admin_release_run` is the single act §2.1 asks for, and `admin_settle_line`
+closes one visit.
+- **§2.4 is a refusal at the gate, not a warning.** Release recomputes
+  `settlement_run_imbalance` and raises with the shop's NAME if any statement
+  disagrees with its own items. A run of 38 with an unnamed mismatch is a search,
+  not a fix.
+- **`float_settlements` now has one writer.** `admin_settle_line` closes the
+  visit and calls `admin_settle_float` — where the money rules have always lived
+  (refuses to collect more than the drawer holds, refuses to pay more than we
+  owe, subtracts the known gap so a shortfall is not counted short twice). This
+  is 0081's promise kept: the settlement line is the record, the float row is
+  written from it.
+- **The sign is the line's, never the caller's.** `admin_settle_line` takes a
+  positive magnitude and derives the direction from the line, so a handover
+  cannot be recorded as a collection by a caller getting a sign backwards.
+- **A part payment stays on its line** — `visit = 'part'`, `collected_cents`
+  accumulating, remainder rendered as "480 DH open". It never moves to a
+  separate debt ledger. Step 7 carries what is still open at day 14.
+- **A nil line is left at `pending` and reads "Closed" off its direction.**
+  Marking it collected would be a small lie in the data, and adding a `closed`
+  visit state would be an enum ADD VALUE needing its own migration for one word
+  the UI can derive.
+- The release audit rides in `settings_changes` again, subject in the JSON,
+  read back by `admin_run_history` — same shape as 0080's cap change.
+
+**Deliberately not built: the agent's collection screen.** §5 says `BCF-04`
+collects a float from a *barber*, not a settlement from a *shop*, and the
+difference is a receipt, a signature and the possibility of a partial. The
+dispatch is the run's open lines, which `admin_run` already returns; ops records
+the visit from the console for now. **Stop here and ask before drawing it.**
+
+Still to build: step 5 (`FIN-16` + `OSH-16`/`OSH-17` from one fixture), step 6
+(`FIN-17` → `OSH-18`), step 7 (the day-14 carry).
+
+## Settlement step 5 — one statement, three surfaces (0086)
+§3's own test: "FIN-16, OSH-17 and OSH-18 are the same statement on two
+surfaces. They must agree line for line; a fixture that renders all three from
+one row set is the right test."
+- **There is exactly one builder.** `statement_json(line)` assembles it;
+  `admin_statement` and `my_statement` differ only in who they let in and
+  neither assembles anything. If the two screens ever disagree it is a rendering
+  bug, because there is no second query to disagree through. The builder is
+  revoked from `authenticated` — it carries no authorisation of its own.
+- **§2.4 in the shape of the return value.** `total_cents` is what crosses the
+  counter. `subtotal_cents` is returned always but **rendered only when a
+  carried line follows it** — on both surfaces. No carry, no subtotal, and the
+  statement is one number with its lines under it. A bare smaller number above
+  the total is the failure mode every decision in §2 exists to prevent.
+- **§2.7: the owing direction is a different screen, not a minus sign.** Both
+  surfaces branch on `direction` and print an unsigned amount. The owner's
+  owing screen carries the `This is not a bill` panel the paid one does not
+  need, and reverses the section order — the earning line first and largest
+  when we owe him, our float first when he owes us.
+- **§2.3 lands on the owner's own statement**: `my_statement` returns the
+  suspension exclusion with the amount, the unlock date and the contact, so a
+  held balance is visible while he waits. A held balance he cannot see is
+  indistinguishable from a confiscated one.
+- A draft is **not** readable by the owner: it can still change, and §2.1 is
+  that a run is read whole and released as one act.
+- New: `src/screens/StatementScreen.tsx` (Profile → Weekly statement) and
+  console screen `s14b` at `#/finance/statement`, reached by clicking a run
+  line. The run table's rows now carry the LINE id — a statement is the thing
+  that has to be checkable, so a row opens its statement rather than the shop.
+
+Still to build: step 6 (`FIN-17` → `OSH-18`, ops moving a carried line to a
+different week) and step 7 (the day-14 carry of a part payment).
+
+## Settlement step 6 — the correction (0087)
+§2.8: a refund that arrives after a week was settled becomes its own line on the
+next statement. The released week is never edited, and **the amount is read off
+the refund record, never typed** — ops chooses the week and nothing else.
+- **The freeze moved from insert to release.** 0081 froze a line's money the
+  moment it was written; FIN-17's whole action is putting a line onto a week
+  that has not gone out yet, and a draft that cannot be corrected is not a
+  draft. Everything §2 actually promises — "the released week is never edited",
+  "immutable once confirmed" — is about the released week, so that is where the
+  barrier belongs. A draft line can now also be deleted; a released one cannot.
+- **The two paths cannot double-write.** 0084's cut picks up carried refunds
+  automatically and ops can now place one by hand, so both branches skip a
+  refund whose booking reference already appears on a carried item.
+- **`admin_carry_correction` moves the line with it.** §2.4 means the header is
+  the sum of the lines, so adding a carried item has to move `carried_cents`,
+  `amount_cents` and possibly `direction` — a big enough correction turns a
+  pay-out week into a collection and the word follows the money. Only possible
+  because the run is a draft.
+- The timeline on FIN-17 is **joined, not narrated**: the cut being marked done,
+  the week closing, the cash actually changing hands, and the refund. The fourth
+  is why the other three are a problem.
+- New console screen `s14c` at `#/finance/corrections`, with a Corrections tab
+  on the run screen. "Edit week 35" is drawn struck-through and dashed — refused,
+  and **not offered as a permission**.
+- **OSH-18** is a sub-view of the owner's statement: tapping a carried row opens
+  the facts, why it is on this week and not the last one, and the earlier week
+  marked UNCHANGED. `THIS ISN'T RIGHT` files a support case and says on screen
+  that that is all it does — §5's "no dispute state anywhere in the product",
+  drawn honestly rather than as a flow that does not exist.
+  - It files with `p_booking: null`: `file_support_case` checks the caller is
+    the booking's customer or barber, and a shop owner is usually neither, so
+    the reference rides in the detail.
+
+Left: step 7 — a part payment's remainder carrying onto the next run at day 14.
+
+## Settlement step 7 — the part payment and day 14 (0088)
+§3.2's rail says a remainder "carries onto week 37 as its own line"; the brief
+says it carries "at day 14". **Those are the two ends of one rule**: the
+remainder stays on its own line while the visit is live, and carries onto the
+week being cut once its own week is `float_hold_days` old.
+- **Why it has to carry at all**, which the brief leaves implicit: if the agent
+  takes 300 of a 780 line, the other 480 is still physically in the till and
+  therefore still inside `salon_float_cents`. Leave it on a closed line and the
+  shop's running total and the sum of its statements diverge by 480 DH forever
+  — the same drift the refund carry exists to stop, arriving by another door.
+- **Day 14 runs from the week closing**, not from the shop's float age. Both are
+  defensible, but the week's closing date is already printed on the statement
+  the owner is holding, and a second clock would be one more thing to argue about.
+- **`statement_items.source_line`**, plus a unique partial index, so a remainder
+  can be carried exactly once. The line's printed reference (`2026-W36-014`) is
+  a row_number over salon NAME and would move if a shop were renamed — not an
+  identity to hang money on, though it is still what the owner reads back.
+- A pay-out we never delivered carries the same way with its sign intact: we
+  still owe it, and it should appear on the week it is finally handed over.
+- `admin_open_lines` feeds a rail panel on the run screen so a remainder is seen
+  walking towards day 14 rather than met as a surprise line on next Friday's run.
+
+**§9's seven steps are done.** What is deliberately not built, and why:
+- **The agent's collection screen** (§5). `BCF-04` collects a float from a
+  barber, not a settlement from a shop — different receipt, different signature,
+  a partial is possible. Ops records every visit from the console until this is
+  drawn. This is the one thing blocking a real Friday round.
+- **A dispute state** (§5). `THIS ISN'T RIGHT` opens a support case and says so.
+- **`FIN-01` / `FIN-02`** (§6) are still in the design file with an 8% fee
+  column, a bank batch and a missing-RIB exclusion. Superseded, never read.
+
+## The agent's phone — role split, visits, receipts (0089–0091)
+`design_handoff_agent_collection/`. Built after the settlement period, which had
+dispatched agent visits and then had nowhere to send them.
+
+### 0089 — a field agent is not the head of ops
+Before the screen, the permission it runs under. Every field verb checked
+`is_admin()`, and so did every rule-changing one: **the same credential that let
+a man collect 1 100 DH from a till also let him suspend a shop, move the
+platform-wide deposit floor and release a settlement run** — on a phone carried
+round Tangier with a bag of cash. The split is by CONSEQUENCE:
+- moves cash a released run already decided → `is_agent()`
+- changes a rule, a policy or a shop's standing → `is_admin()`
+`is_agent()` is true for admins, so every shipped ops login keeps working.
+`admin_settle_float` stays admin-only: an agent reaches it only THROUGH
+`admin_settle_line`, which is security definer, so the money rules apply but he
+cannot call it directly with an amount of his choosing against any shop.
+The role CHECK is dropped by **what it checks, not its name** — an inline column
+check gets an auto-generated name, and guessing wrong would have left the old
+three-role constraint rejecting every agent while the migration reported success.
+
+### 0090 — visits, receipts, codes
+- **The round is a query over visits, not lines** (§5): one line can take two
+  visits — a partial, then a return — and 0085 put the visit state ON the line.
+- **§3's two proofs are not unified, by design.** Collect takes the owner's
+  4-digit code (a signature drawn on the agent's phone is drawn by whoever holds
+  the phone, so it cannot prove he was in the shop — which is the fraud in that
+  direction). Hand over takes the signature and asks for no code. A CHECK makes
+  each `verified_by` carry its own evidence.
+- **A receipt carries the LINE as well as the visit** — not in the spec, but
+  §5's "sum of a line's receipts never exceeds the line amount" has to be
+  enforceable in one place and a visit is not it. That and "a hand-over is never
+  partial" are triggers, not tests.
+- **The bag is derived, never stored.** AGT-01's strip and AGT-03's "into your
+  bag" row call one function over receipts since the last drop, so they cannot
+  drift. §6.1's "no balance column anyone updates", applied to his own risk.
+- The code uses `random()`, not pgcrypto: `gen_random_bytes` lives in the
+  extensions schema and `search_path` is empty in these functions. Four digits,
+  read aloud, single use, two-hour expiry, bound to one visit AND one amount,
+  spent on use — guessing is not the attack.
+
+### 0091 + `src/screens/AgentRoundScreen.tsx`
+- **The code's amount binding is a CEILING, not an equality.** The owner reads
+  it out for what he owes and a partial is normal, so exact binding would make
+  every short payment fail. As a maximum it still stops a replay for more than
+  he ever saw.
+- **A partial closes the visit.** The shortfall rides on the LINE and returns on
+  a later statement (0088); a visit left open would be a second place the same
+  debt lived.
+- The round sorts by **day first, then age of money** — a Monday visit stays
+  below today's even when its money is older, which is why AGT-01 draws it
+  sunken. Distance is not returned at all (§2.2).
+- **The cap warning is about the round, not the next tap**: the collections
+  still ahead of the next hand-over, taken together. `bag + next visit` would
+  stay quiet until he was already over — 9 700 + 1 240 fits, 9 700 + 1 240 +
+  1 566 does not.
+- Signature capture is `PanResponder` + `react-native-svg` (already installed).
+- Profile now shows **Your round** for `agent` or `admin`; the old float pickup
+  (BCF-04) stays, relabelled, because it is a different act.
+
+**Blocking, owner-side, not built (§3 says flag and stop):**
+- **The 4-digit code on the owner's own statement.** `my_visit_code()` exists
+  and returns it; nothing renders it. Until it does, an agent cannot complete a
+  collection — this is the one thing stopping the surface working end to end.
+- **The *received* confirmation** AGT-05 promises ("his app shows it as received
+  within a minute").
+- **Offline and no-code fallbacks** (§3). Both need `verified_by: ops_call` —
+  the enum value exists and nothing writes it — and a state visible on FIN-15.
+
+## The owner's half of the visit (0092)
+The two things the agent handoff said were missing and blocking. Both are on his
+existing statement screen rather than new ones — he opens the week, and the
+proof of the week is on it.
+- **The 4-digit code.** `my_visit_code()` existed and nothing rendered it, so an
+  agent literally could not complete a collection. It now appears under this
+  week's statement when there is an open collect visit, with the agent's name
+  and the amount he is coming for.
+  - **The mint and the read are separate functions on purpose.** `my_visit_code`
+    is volatile (it writes); `my_visit_status` is stable. Opening the statement
+    asks the stable one first, so the screen never rotates the digits while the
+    agent is standing there copying them down.
+- **The received confirmation.** AGT-05 tells the agent to say "his app shows it
+  as received within a minute — if it does not, do not tap again, call ops."
+  That was not true. `agent_hand_over` now writes the owner a notification and
+  the receipt shows on his statement with the agent, the time and how it was
+  proved. A promise the agent reads aloud has to be one the product keeps, and
+  it is the only reason he has not to tap twice when unsure.
+- `agent_collect` notifies too — AGT-04 tells him "he already has the receipt in
+  his app", which was also not true.
+
+**Still not built, deliberately (§3 says flag, don't invent):**
+- **No phone / no code fallback.** Needs `verified_by: 'ops_call'` — the enum
+  value exists and nothing writes it — plus a person answering on a Friday
+  evening and a state Karima can see on FIN-15.
+- **Offline collection.** A device can queue a settlement but cannot verify a
+  code it has never seen, so a queued collection is unverified until it syncs,
+  and that state has to be visible to ops. Undesigned.
+
+## Wiring the round (0093)
+The three things that existed in SQL and had no surface.
+- **Ops plans the round.** `admin_plan_visits` had shipped in 0091 with nothing
+  calling it, so every agent's phone was empty and all of AGT-01…05 was
+  unreachable. The released run screen now has PLAN N VISITS, an agent picker
+  showing **what each one is already carrying**, and an optional time window.
+  §2.4 again: nobody is sent out on a round that breaches his cap before he
+  starts, so the picker warns when `already carrying + this round > cap`.
+- **The agent's drop.** `agent_drop` existed with no button, so the bag only
+  ever grew and the cap warning could never clear. A keypad sheet, not an
+  all-or-nothing button — he may leave part of it and keep what the hand-overs
+  still on his round need.
+  - Not `Alert.prompt`: it is iOS-only, and because it returns void a
+    `?? Alert.alert(...)` fallback fires **both** dialogs on iOS.
+- **Ops sees the proof.** FIN-15 read the line's `visit` column, which says
+  "collected" and nothing else. Each row now carries its receipts with
+  `verified_by` — code, signed, or by ops call — because that is what makes a
+  receipt evidence rather than a note, and it is the screen a dispute is settled
+  on. Rows also say whose round an unvisited line is on.
+
+Two prompts written for Claude Design, for the §3 gaps that must not be
+invented: the **no-phone/no-code fallback** (`verified_by: 'ops_call'`, which
+exists in the enum and nothing writes) and **offline collection** (a queued
+collection is unverified until it syncs, and that state has to reach FIN-15).

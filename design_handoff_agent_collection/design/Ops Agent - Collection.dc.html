@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+html{background:#0D0D0F}
+body{margin:0;background:#0D0D0F;font-family:Inter,system-ui,sans-serif}
+a{color:#E8442E;text-decoration:none}a:hover{color:#C33421}
+.dv-turn{padding:38px 44px 30px;scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#fff;color:#111;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 14px/1.2 Inter,sans-serif;color:#fff}
+.dv-note{font:400 12px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:760px;margin:0 0 26px}
+.dv-src{font:400 10.5px/1.4 Inter,sans-serif;color:rgba(255,255,255,.6);opacity:.55;margin:-18px 0 22px}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(255,255,255,.12);color:#fff;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 Inter,sans-serif;color:rgba(255,255,255,.6)}
+.dv-opt:target .dv-oid{background:#E8442E;color:#fff}
+.dv-next{flex-basis:100%;margin:24px 0 0;font:12px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6)}
+.dv-nav{display:flex;flex-wrap:wrap;gap:6px;padding:12px 44px 0}
+</style>
+</helmet>
+<div style="padding:32px 44px 0">
+<a href="./Index.dc.html" style="font:600 10px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.6)">&larr; All pages</a>
+<div style="font-family:'Playfair Display',serif;font-weight:700;font-size:27px;letter-spacing:.02em;text-transform:uppercase;color:#fff;margin:10px 0 0">Ops Agent &middot; Collection</div>
+<div style="font:400 12px Inter,sans-serif;color:rgba(255,255,255,.6);margin:6px 0 0">5 screens &middot; new surface in slice 2 settlement</div>
+</div>
+<div class="dv-nav">
+<a href="./Sterncut Ops - Finance.dc.html" style="font:600 10.5px Inter,sans-serif;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Ops &middot; Finance</a>
+<a href="./Owner - Shop.dc.html" style="font:600 10.5px Inter,sans-serif;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Owner &middot; Shop</a>
+<a href="./Barber - Float.dc.html" style="font:600 10.5px Inter,sans-serif;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Barber &middot; Float</a>
+<a href="./Ops Agent - Collection.dc.html" style="font:600 10.5px Inter,sans-serif;padding:6px 11px;border-radius:7px;background:#E8442E;color:#fff;text-decoration:none">Ops Agent</a>
+</div>
+<div style="height:1px;background:rgba(255,255,255,.14);margin:20px 0 0"></div>
+
+<section class="dv-turn" id="A1">
+<div class="dv-thd"><a class="dv-tid" href="#A1">A1</a><span class="dv-tname">The agent&rsquo;s round &mdash; a settlement is not a float pickup</span></div>
+<p class="dv-note"><a class="dv-oid" href="./Barber - Float.dc.html#BCF-04">BCF-04</a> takes a float off a barber: one person, one amount, no counterparty who could disagree. This is a different act and it needed its own screens &mdash; a shop rather than a person, a number that can point either way, a partial that is normal rather than an error, and a piece of paper at the end.<br><br><strong>Direction is the row&rsquo;s first fact, not its colour.</strong> <em>Collect</em> and <em>Hand over</em> are words on every row and on every button, because the agent reads this list on a scooter in the sun and colour is the first thing that goes. Green and amber only reinforce.<br><br><strong>The round is ordered by age, not by geography.</strong> The oldest uncollected dirham is what the 14-day promise is measured against (slice 2 &sect;2.6), so day 9 sits above day 4 even if it is across town. Route optimisation would quietly re-sort the list against the only deadline the business has.<br><br><strong>Hand-over rows have no age, and that is shown rather than faked.</strong> Age measures how long a shop has held <em>our</em> money. When we owe them, nothing of ours is late &mdash; so the row says how long <em>they</em> have been waiting instead. Same list, two different clocks, both named.<br><br><strong>The bag is on the screen.</strong> He is walking around with cash and the amount is his personal risk, so it is stated at the top with its cap and its drop-off, split into what he has collected and what he is still carrying to give away. This is the number that makes him choose to go to the office before the last visit.<br><br><strong>The confirm is a code, not a checkbox.</strong> <a class="dv-oid" href="#AGT-03">AGT-03</a> is the immutable moment, so the friction is placed there and nowhere else: the owner reads out the 4-digit code his own app is showing, which is the same mechanism the shop side already uses. See the note below on what that does and does not prove.<br><br><strong>Partial is the same path as full.</strong> One field, a keypad, and a <em>Full amount</em> chip. Typing less than the full number is not an error state &mdash; it changes one sentence on the screen, which tells him what happens to the rest, in words he can repeat to the owner.<br><br><strong>Rejected:</strong> an undo. There is none, so the design does not imply one; instead the receipt screen says plainly that a mistake becomes a line on next week&rsquo;s statement and links to the support case that starts it. Also rejected: a signature on the collect direction &mdash; asking a man who has just handed over his cash to sign for it is theatre, and it would let the real proof (his code) look optional.</p>
+<p class="dv-note" style="color:#E8A100"><strong>What stops him recording a collection he didn&rsquo;t make &mdash; both, on different directions.</strong> The 4-digit code survives, and it belongs to <em>Collect</em>: the owner reads it out of his app, it is tied to that visit and that amount, and it rotates. It proves the agent was standing in the shop with a consenting owner &mdash; which is exactly the fraud in that direction, an agent inventing a collection from his scooter. The signature cannot do that job, because a signature on the agent&rsquo;s own phone is drawn by whoever is holding the phone.<br>On <em>Hand over</em> the code proves nothing worth having &mdash; the owner being present is not in question, the money reaching him is. So that direction takes the owner&rsquo;s signature plus a <em>received</em> confirmation in his own app, and the code is not asked for. Neither mechanism covers both directions, which is why both exist.<br><strong>Still open, and not drawn:</strong> an owner with no phone or no signal cannot read out a code. The honest fallback is an ops call, which needs a state on the line (<code>verified_by: code | ops_call</code>) and a person to answer the phone on a Friday evening &mdash; I have not designed it. Offline collection has the same gap: the device can queue a settlement, but it cannot verify a code it has never seen, so a queued collection is unverified until it syncs and that has to be visible to Karima. <strong>Not drawn at all:</strong> no fee, no commission, no bank field, no RIB &mdash; the agent never types a number that isn&rsquo;t cash he can see.<br><strong>Tables the backend does not have:</strong> <code>settlement_visit</code> (line, agent, direction, window, state) &mdash; the round is a query over this, not over <code>settlement_line</code>, because one line can take two visits; <code>settlement_receipt</code> (visit, ref, amount, recorded_at, device, geo, <code>verified_by</code>, code_ref or signature blob); and <code>agent_bag</code> (running held total, drops) which the bag strip reads.</p>
+<p class="dv-src">slice 2 &middot; settlement &middot; agent surface</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="AGT-01"><div class="dv-olabel"><a class="dv-oid" href="#AGT-01">AGT-01</a>His round &mdash; oldest money first</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="AGT-01" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:58px 18px 0;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:flex-end;gap:10px">
+      <span style="flex:1"><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:24px;line-height:1.1">Your round</span><span style="display:block;font-size:11.5px;color:#6B6B72;margin-top:3px;font-variant-numeric:tabular-nums">Friday 4 September &middot; week 36 &middot; 4 visits left</span></span>
+      <span style="width:36px;height:36px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">HR</span>
+    </div>
+
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:18px;padding:14px 15px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:flex-end;gap:10px">
+        <span style="flex:1"><span style="display:block;font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">IN YOUR BAG NOW</span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:30px;line-height:1.15;margin-top:3px;font-variant-numeric:tabular-nums">9 700 DH</span></span>
+        <span style="text-align:right;flex:none"><span style="display:block;font-size:10px;color:#6B6B72">Cap</span><span style="display:block;font-size:12px;font-weight:700;color:#9A9CA3;font-variant-numeric:tabular-nums">12 000 DH</span></span>
+      </div>
+      <span style="height:5px;border-radius:3px;background:#26262B;overflow:hidden"><span style="display:block;width:81%;height:100%;background:#E8A100"></span></span>
+      <div style="display:flex;gap:8px">
+        <span style="flex:1;background:#141416;border-radius:11px;padding:9px 10px"><span style="display:block;font-size:9.5px;color:#6B6B72">Collected today</span><span style="display:block;font-size:12.5px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums">6 130 DH</span></span>
+        <span style="flex:1;background:#141416;border-radius:11px;padding:9px 10px"><span style="display:block;font-size:9.5px;color:#6B6B72">Still to hand over</span><span style="display:block;font-size:12.5px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums">3 570 DH</span></span>
+      </div>
+      <span style="font-size:10.5px;line-height:1.45;color:#C79A3E;text-wrap:pretty">One more collection puts you over the cap. Drop at the office on rue de Fès first &mdash; open until 20:00.</span>
+    </div>
+
+    <div style="display:flex;align-items:baseline;gap:8px;margin-top:2px">
+      <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#9A9CA3">NEXT VISITS</span>
+      <span style="flex:1"></span>
+      <span style="font-size:10px;color:#6B6B72">Oldest money first</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <a href="#AGT-02" style="display:flex;flex-direction:column;gap:9px;background:#17171A;border:1px solid rgba(248,113,113,.34);border-radius:18px;padding:13px 14px;text-decoration:none;color:inherit">
+        <span style="display:flex;align-items:flex-start;gap:10px">
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:700">Beni Makada Barbier</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Bd Moulay Youssef &middot; 2.4 km</span></span>
+          <span style="text-align:right;flex:none"><span style="display:block;font-size:9px;letter-spacing:.13em;font-weight:700;color:#E8442E">COLLECT</span><span style="display:block;font-size:17px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums">1 240 DH</span></span>
+        </span>
+        <span style="display:flex;align-items:center;gap:8px;border-top:1px solid #1E1E22;padding-top:9px">
+          <span style="font-size:10.5px;font-weight:700;color:#F87171;font-variant-numeric:tabular-nums">Day 9 of 14</span>
+          <span style="flex:1;height:4px;border-radius:3px;background:#26262B;overflow:hidden"><span style="display:block;width:64%;height:100%;background:#F87171"></span></span>
+          <span style="font-size:10px;color:#6B6B72">Do this one first</span>
+        </span>
+      </a>
+
+      <a href="#AGT-02" style="display:flex;flex-direction:column;gap:9px;background:#17171A;border:1px solid #26262B;border-radius:18px;padding:13px 14px;text-decoration:none;color:inherit">
+        <span style="display:flex;align-items:flex-start;gap:10px">
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:700">Le Fade Tanger</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Rue de la Liberté &middot; 0.8 km &middot; window 17:00&ndash;20:00</span></span>
+          <span style="text-align:right;flex:none"><span style="display:block;font-size:9px;letter-spacing:.13em;font-weight:700;color:#E8442E">COLLECT</span><span style="display:block;font-size:17px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums">1 566 DH</span></span>
+        </span>
+        <span style="display:flex;align-items:center;gap:8px;border-top:1px solid #1E1E22;padding-top:9px">
+          <span style="font-size:10.5px;font-weight:700;color:#E8A100;font-variant-numeric:tabular-nums">Day 6 of 14</span>
+          <span style="flex:1;height:4px;border-radius:3px;background:#26262B;overflow:hidden"><span style="display:block;width:43%;height:100%;background:#E8A100"></span></span>
+          <span style="font-size:10px;color:#6B6B72">Youssef, owner</span>
+        </span>
+      </a>
+
+      <a href="#AGT-05" style="display:flex;flex-direction:column;gap:9px;background:#17171A;border:1px solid rgba(74,222,128,.3);border-radius:18px;padding:13px 14px;text-decoration:none;color:inherit">
+        <span style="display:flex;align-items:flex-start;gap:10px">
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:700">Marina Barber Club</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Av. Mohammed VI &middot; 3.1 km</span></span>
+          <span style="text-align:right;flex:none"><span style="display:block;font-size:9px;letter-spacing:.13em;font-weight:700;color:#4ADE80">HAND OVER</span><span style="display:block;font-size:17px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums">3 570 DH</span></span>
+        </span>
+        <span style="display:flex;align-items:center;gap:8px;border-top:1px solid #1E1E22;padding-top:9px">
+          <span style="font-size:10.5px;color:#9A9CA3">No age &mdash; they hold nothing of ours</span>
+          <span style="flex:1"></span>
+          <span style="font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">Waiting 3 days</span>
+        </span>
+      </a>
+
+      <a href="#AGT-02" style="display:flex;align-items:flex-start;gap:10px;background:#141416;border:1px solid #1E1E22;border-radius:18px;padding:13px 14px;text-decoration:none;color:inherit">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:700;color:#D8D8DC">Atlas Barbershop</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px;font-variant-numeric:tabular-nums">Monday 09:00 &middot; day 4 of 14</span></span>
+        <span style="text-align:right;flex:none"><span style="display:block;font-size:9px;letter-spacing:.13em;font-weight:700;color:#9A9CA3">COLLECT</span><span style="display:block;font-size:14px;font-weight:700;margin-top:2px;color:#D8D8DC;font-variant-numeric:tabular-nums">2 240 DH</span></span>
+      </a>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:9px;background:#141416;border:1px solid #1E1E22;border-radius:14px;padding:11px 13px;margin-top:2px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.2" style="flex:none"><path d="M4 12.5l5 5L20 6.5"></path></svg>
+      <span style="flex:1;font-size:11px;line-height:1.45;color:#9A9CA3;text-wrap:pretty">3 done today &mdash; Kasbah Classics was <span style="font-variant-numeric:tabular-nums">300</span> of <span style="font-variant-numeric:tabular-nums">780 DH</span>.</span>
+      <span style="font-size:10.5px;font-weight:700;color:#fff;flex:none">See</span>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:392px;padding-top:2px">Tap a collect row &middot; <a class="dv-oid" href="#AGT-02">AGT-02</a></div></div>
+
+<div class="dv-opt" id="AGT-02"><div class="dv-olabel"><a class="dv-oid" href="#AGT-02">AGT-02</a>Collecting &mdash; counting it with the owner</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="AGT-02" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:58px 18px 0;display:flex;flex-direction:column;gap:11px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:14.5px;font-weight:700">Le Fade Tanger</span><span style="display:block;font-size:10.5px;color:#6B6B72">Youssef Amrani &middot; owner</span></span>
+      <span style="font-size:9px;letter-spacing:.13em;font-weight:700;color:#E8442E;background:rgba(232,68,46,.16);border-radius:5px;padding:4px 8px;flex:none">COLLECT</span>
+    </div>
+
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:18px;padding:14px 15px;display:flex;align-items:flex-end;gap:10px">
+      <span style="flex:1"><span style="display:block;font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">HE OWES THIS WEEK</span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:32px;line-height:1.1;margin-top:3px;font-variant-numeric:tabular-nums">1 566 DH</span></span>
+      <span style="text-align:right;flex:none;font-size:10px;line-height:1.5;color:#6B6B72;font-variant-numeric:tabular-nums">Week 36<br>Day 6 of 14</span>
+    </div>
+
+    <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#9A9CA3">COUNT IT WITH HIM, THEN TYPE WHAT YOU HAVE</span>
+
+    <div style="background:#17171A;border:1px solid #E8442E;border-radius:18px;padding:15px;display:flex;align-items:center;gap:10px">
+      <span style="flex:1;font-family:'Playfair Display',serif;font-weight:700;font-size:34px;line-height:1;font-variant-numeric:tabular-nums">1 100 <span style="font-size:19px;color:#9A9CA3">DH</span></span>
+      <span style="width:2px;height:32px;background:#E8442E;flex:none"></span>
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <span style="flex:1;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700">Full amount &middot; 1 566 DH</span>
+      <span style="width:96px;flex:none;height:36px;border-radius:999px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:600;color:#9A9CA3">Clear</span>
+    </div>
+
+    <div style="background:rgba(232,161,0,.08);border:1px solid rgba(232,161,0,.28);border-radius:16px;padding:13px 14px;display:flex;flex-direction:column;gap:6px">
+      <span style="display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg><span style="font-size:12px;font-weight:700;color:#E8A100">466 DH short &mdash; that is fine</span></span>
+      <span style="font-size:11.5px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">Tell him: the <span style="font-variant-numeric:tabular-nums">466 DH</span> stays on this week&rsquo;s line and comes back on next Friday&rsquo;s statement. Nothing is added for being short, and nobody will call him about it.</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:1px">
+      <span style="height:46px;border-radius:12px;background:#17171A;border:1px solid #1E1E22;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums">1</span>
+      <span style="height:46px;border-radius:12px;background:#17171A;border:1px solid #1E1E22;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums">2</span>
+      <span style="height:46px;border-radius:12px;background:#17171A;border:1px solid #1E1E22;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums">3</span>
+      <span style="height:46px;border-radius:12px;background:#17171A;border:1px solid #1E1E22;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums">4</span>
+      <span style="height:46px;border-radius:12px;background:#17171A;border:1px solid #1E1E22;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums">5</span>
+      <span style="height:46px;border-radius:12px;background:#17171A;border:1px solid #1E1E22;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums">6</span>
+      <span style="height:46px;border-radius:12px;background:#17171A;border:1px solid #1E1E22;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums">7</span>
+      <span style="height:46px;border-radius:12px;background:#17171A;border:1px solid #1E1E22;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums">8</span>
+      <span style="height:46px;border-radius:12px;background:#17171A;border:1px solid #1E1E22;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums">9</span>
+      <span style="height:46px;border-radius:12px;background:#141416;border:1px solid #1E1E22;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#6B6B72">00</span>
+      <span style="height:46px;border-radius:12px;background:#17171A;border:1px solid #1E1E22;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums">0</span>
+      <span style="height:46px;border-radius:12px;background:#141416;border:1px solid #1E1E22;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2"><path d="M20 6H9.5L3 12l6.5 6H20a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1zM17 9.5l-5 5M12 9.5l5 5"></path></svg></span>
+    </div>
+
+    <a href="#AGT-03" style="height:54px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:800;letter-spacing:.05em;color:#fff;text-decoration:none;margin-top:2px">TAKE 1 100 DH<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg></a>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:392px;padding-top:2px">The moment that cannot be undone &middot; <a class="dv-oid" href="#AGT-03">AGT-03</a></div></div>
+
+<div class="dv-opt" id="AGT-03"><div class="dv-olabel"><a class="dv-oid" href="#AGT-03">AGT-03</a>The confirm &mdash; his code, and no undo after it</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="AGT-03" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.55)"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#141416;border-top:1px solid #26262B;border-radius:26px 26px 0 0;padding:18px 18px 26px;display:flex;flex-direction:column;gap:13px">
+    <span style="width:38px;height:4px;border-radius:3px;background:#3A3A40;align-self:center"></span>
+
+    <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:21px;line-height:1.25;text-wrap:pretty">You are recording cash you have already counted</span>
+
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:18px;padding:14px 15px;display:flex;flex-direction:column;gap:0">
+      <span style="display:flex;align-items:center;gap:10px;padding-bottom:11px"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Taking from Le Fade Tanger</span><span style="font-size:19px;font-weight:800;font-variant-numeric:tabular-nums">1 100 DH</span></span>
+      <span style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #1E1E22"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Direction</span><span style="font-size:12px;font-weight:700;color:#E8442E">Collect</span></span>
+      <span style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #1E1E22"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Stays on the line for next week</span><span style="font-size:12px;font-weight:700;color:#E8A100;font-variant-numeric:tabular-nums">466 DH</span></span>
+      <span style="display:flex;align-items:center;gap:10px;padding-top:10px;border-top:1px solid #1E1E22"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Into your bag</span><span style="font-size:12px;font-weight:700;font-variant-numeric:tabular-nums">7 230 DH</span></span>
+    </div>
+
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:18px;padding:14px 15px;display:flex;flex-direction:column;gap:11px">
+      <span style="font-size:12px;font-weight:700">Ask Youssef for the 4 digits on his phone</span>
+      <div style="display:flex;gap:9px">
+        <span style="flex:1;height:56px;border-radius:14px;background:#0D0D0F;border:1px solid #3A3A40;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums">4</span>
+        <span style="flex:1;height:56px;border-radius:14px;background:#0D0D0F;border:1px solid #3A3A40;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums">1</span>
+        <span style="flex:1;height:56px;border-radius:14px;background:#0D0D0F;border:1px solid #3A3A40;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums">9</span>
+        <span style="flex:1;height:56px;border-radius:14px;background:#0D0D0F;border:1px solid #E8442E;display:flex;align-items:center;justify-content:center"><span style="width:2px;height:24px;background:#E8442E"></span></span>
+      </div>
+      <span style="font-size:10.5px;line-height:1.45;color:#6B6B72;text-wrap:pretty">His app shows it under this week&rsquo;s statement. It changes every visit, and it is what proves you were standing in his shop.</span>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:9px;background:rgba(232,68,46,.07);border:1px solid rgba(232,68,46,.26);border-radius:16px;padding:12px 13px">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2" style="margin-top:1px;flex:none"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+      <span style="flex:1;font-size:11.5px;line-height:1.45;color:#D8D8DC;text-wrap:pretty"><strong>There is no undo.</strong> The moment you tap, this is on his statement and in our books. A wrong number can only be fixed by a new line next week &mdash; so count it twice, not once.</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <a href="#AGT-04" style="height:56px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;letter-spacing:.05em;color:#fff;text-decoration:none">RECORD 1 100 DH COLLECTED</a>
+      <a href="#AGT-02" style="height:48px;border-radius:999px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#9A9CA3;text-decoration:none">Go back and count again</a>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:392px;padding-top:2px">Recorded &middot; <a class="dv-oid" href="#AGT-04">AGT-04</a></div></div>
+
+<div class="dv-opt" id="AGT-04"><div class="dv-olabel"><a class="dv-oid" href="#AGT-04">AGT-04</a>The receipt &mdash; a partial, and what happens to the rest</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="AGT-04" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:58px 18px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:11px;padding:6px 0 0">
+      <span style="width:56px;height:56px;border-radius:999px;background:rgba(74,222,128,.14);border:1px solid rgba(74,222,128,.4);display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.6"><path d="M4 12.5l5 5L20 6.5"></path></svg></span>
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:30px;line-height:1;font-variant-numeric:tabular-nums">1 100 DH</span>
+      <span style="font-size:12px;color:#9A9CA3;font-variant-numeric:tabular-nums">Collected from Le Fade Tanger &middot; 17:42</span>
+    </div>
+
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:18px;padding:3px 15px">
+      <span style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #1E1E22"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Receipt</span><span style="font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums">SR-1184</span></span>
+      <span style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #1E1E22"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Confirmed by</span><span style="font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums">Youssef&rsquo;s code &middot; 4192</span></span>
+      <span style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #1E1E22"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Taken by</span><span style="font-size:12.5px;font-weight:600">Hicham Rami</span></span>
+      <span style="display:flex;align-items:center;gap:10px;padding:12px 0"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Week</span><span style="font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums">36 &middot; line 014</span></span>
+    </div>
+
+    <div style="background:rgba(232,161,0,.08);border:1px solid rgba(232,161,0,.28);border-radius:18px;padding:14px 15px;display:flex;flex-direction:column;gap:7px">
+      <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:12px;font-weight:700;color:#E8A100">466 DH still with the shop</span><span style="font-size:10.5px;color:#C79A3E;font-variant-numeric:tabular-nums">Day 6 of 14</span></span>
+      <span style="font-size:11.5px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">It stays on week 36&rsquo;s line. If it is still there at day 14 it moves onto next Friday&rsquo;s statement as its own line. You do not need to come back for it &mdash; the run will put it on someone&rsquo;s round.</span>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:9px;background:#141416;border:1px solid #1E1E22;border-radius:16px;padding:12px 13px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="margin-top:2px;flex:none"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="M8 9h8M8 13h5"></path></svg>
+      <span style="flex:1;font-size:11px;line-height:1.45;color:#9A9CA3;text-wrap:pretty">Youssef already has this receipt in his app, and on his statement the line now reads <span style="font-variant-numeric:tabular-nums">1 100 DH</span> paid. He gets no message from you.</span>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:9px;background:#141416;border:1px dashed #3A3A40;border-radius:16px;padding:12px 13px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="margin-top:2px;flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M6.5 6.5l11 11"></path></svg>
+      <span style="flex:1;font-size:11px;line-height:1.45;color:#9A9CA3;text-wrap:pretty">Typed the wrong number? It cannot be changed here. Tell ops &mdash; they add a correcting line to next week&rsquo;s statement and it will say your name. <a href="./Sterncut Ops - Support.dc.html" style="font-weight:700;color:#fff">Report it now</a></span>
+    </div>
+
+    <div style="display:flex;gap:9px;margin-top:2px">
+      <a href="#AGT-01" style="flex:1;height:54px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;letter-spacing:.05em;color:#fff;text-decoration:none">NEXT VISIT</a>
+      <span style="width:120px;flex:none;height:54px;border-radius:999px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#9A9CA3">Print slip</span>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:392px;padding-top:2px">The other direction &middot; <a class="dv-oid" href="#AGT-05">AGT-05</a></div></div>
+
+<div class="dv-opt" id="AGT-05"><div class="dv-olabel"><a class="dv-oid" href="#AGT-05">AGT-05</a>Handing over &mdash; the owner counts it and signs</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="AGT-05" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:58px 18px 0;display:flex;flex-direction:column;gap:11px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:14.5px;font-weight:700">Marina Barber Club</span><span style="display:block;font-size:10.5px;color:#6B6B72">Ahmed Ouazzani &middot; owner</span></span>
+      <span style="font-size:9px;letter-spacing:.13em;font-weight:700;color:#4ADE80;background:rgba(74,222,128,.14);border-radius:5px;padding:4px 8px;flex:none">HAND OVER</span>
+    </div>
+
+    <div style="background:#17171A;border:1px solid rgba(74,222,128,.32);border-radius:18px;padding:14px 15px;display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">COUNT OUT OF YOUR BAG AND GIVE HIM</span>
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:34px;line-height:1.05;font-variant-numeric:tabular-nums">3 570 DH</span>
+      <span style="font-size:11px;line-height:1.45;color:#9A9CA3;text-wrap:pretty">All of it, or nothing. A hand-over is not partial &mdash; if you are short, close the visit and ops puts it on another round.</span>
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <span style="flex:1;background:#141416;border:1px solid #1E1E22;border-radius:12px;padding:10px 11px"><span style="display:block;font-size:9.5px;color:#6B6B72">In your bag</span><span style="display:block;font-size:12.5px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums">7 230 DH</span></span>
+      <span style="flex:1;background:#141416;border:1px solid #1E1E22;border-radius:12px;padding:10px 11px"><span style="display:block;font-size:9.5px;color:#6B6B72">After this</span><span style="display:block;font-size:12.5px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums">3 660 DH</span></span>
+    </div>
+
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:18px;padding:14px 15px;display:flex;flex-direction:column;gap:11px">
+      <span style="display:flex;align-items:center;gap:9px"><span style="width:20px;height:20px;border-radius:999px;background:rgba(74,222,128,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="3"><path d="M4 12.5l5 5L20 6.5"></path></svg></span><span style="flex:1;font-size:11.5px;color:#D8D8DC">He counted it himself</span><span style="font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">10:11</span></span>
+      <span style="display:flex;align-items:center;gap:9px"><span style="width:20px;height:20px;border-radius:999px;background:#212125;border:1px solid #3A3A40;display:flex;align-items:center;justify-content:center;flex:none;font-size:9.5px;font-weight:700;color:#9A9CA3">2</span><span style="flex:1;font-size:11.5px;font-weight:700">Hand him the phone to sign</span></span>
+      <div style="background:#0D0D0F;border:1px solid #3A3A40;border-radius:14px;height:132px;position:relative;overflow:hidden">
+        <span style="position:absolute;left:14px;right:14px;bottom:34px;height:1px;background:#26262B"></span>
+        <svg viewBox="0 0 340 120" style="position:absolute;inset:0;width:100%;height:100%" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round"><path d="M32 84c14-30 22-46 30-46s6 30 2 44c-2 8 0 10 6 4 10-10 16-30 24-30 6 0 4 18 8 22 4 4 10-2 16-14 8-16 14-34 22-34 6 0 2 26-2 40-2 8 2 10 8 4 8-8 14-22 22-22 6 0 6 12 12 14 8 2 16-8 26-24M186 92c22 4 60 2 96-10"></path></svg>
+        <span style="position:absolute;left:14px;bottom:11px;font-size:9.5px;color:#6B6B72;font-variant-numeric:tabular-nums">Ahmed Ouazzani &middot; on this phone &middot; 10:12</span>
+        <span style="position:absolute;right:12px;top:10px;font-size:10px;font-weight:700;color:#9A9CA3;background:#17171A;border:1px solid #26262B;border-radius:999px;padding:4px 10px">Clear</span>
+      </div>
+      <span style="font-size:10.5px;line-height:1.45;color:#6B6B72;text-wrap:pretty">The signature is saved with the time, this phone&rsquo;s id and where you are standing. No code is asked for here &mdash; a code proves he was present, and that was never the question. What needs proving is that he got the money.</span>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:9px;background:rgba(232,68,46,.07);border:1px solid rgba(232,68,46,.26);border-radius:16px;padding:12px 13px">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2" style="margin-top:1px;flex:none"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+      <span style="flex:1;font-size:11.5px;line-height:1.45;color:#D8D8DC;text-wrap:pretty"><strong>No undo.</strong> Tapping this says the cash left your hand. His app will show <em>received</em> within a minute &mdash; if it does not, do not tap again, call ops.</span>
+    </div>
+
+    <a href="#AGT-01" style="height:56px;border-radius:999px;background:#4ADE80;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;letter-spacing:.05em;color:#0D0D0F;text-decoration:none;margin-top:1px">RECORD 3 570 DH HANDED OVER</a>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:392px;padding-top:2px">Back to the round &middot; <a class="dv-oid" href="#AGT-01">AGT-01</a></div></div>
+
+</div>
+<p class="dv-next">Ops side of these visits &middot; <a class="dv-oid" href="./Sterncut Ops - Finance.dc.html#FIN-15">FIN-15</a> (the released run, where <span style="font-variant-numeric:tabular-nums">300 of 780 DH</span> already shows as <em>part paid</em>). Owner&rsquo;s side &middot; <a class="dv-oid" href="./Owner - Shop.dc.html#OSH-17">OSH-17</a>. Not built: the owner&rsquo;s 4-digit code on his own statement screen, and the <em>received</em> confirmation <a class="dv-oid" href="#AGT-05">AGT-05</a> waits for &mdash; both are owner-side screens.</p>
+</section>
+</x-dc>
+</body>
+</html>

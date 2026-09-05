@@ -38,6 +38,8 @@ import WaitingListScreen from './WaitingListScreen';
 import ShopTasksScreen from './ShopTasksScreen';
 import ApplicationScreen from './ApplicationScreen';
 import SettleFloatScreen, { CollectionRoundScreen } from './SettleFloatScreen';
+import StatementScreen from './StatementScreen';
+import AgentRoundScreen from './AgentRoundScreen';
 import ServicesScreen from './ServicesScreen';
 import WalletScreen from './WalletScreen';
 
@@ -55,7 +57,7 @@ type ProfileView =
   // turn 39 — two things the app already half-had
   | 'saved' | 'standing'
   // turn 9 — where admin actions land in the shop
-  | 'tasks' | 'application' | 'float' | 'round';
+  | 'tasks' | 'application' | 'float' | 'round' | 'statement' | 'agent';
 
 export default function ProfileScreen({ profile, barber, phone, onProfileChanged, onChromeHidden, onBack }: {
   profile: Profile; barber: Barber | null; phone: string | null;
@@ -257,6 +259,11 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   // 9e/9f — the float, hand to hand
   if (view === 'float' && barber) return <SettleFloatScreen onBack={() => go('menu')} />;
   if (view === 'round') return <CollectionRoundScreen onBack={() => go('menu')} />;
+  // AGT-01 - the settlement round. Not the float pickup above it: a shop rather
+  // than a person, a number that points either way, and a partial that is normal.
+  if (view === 'agent') return <AgentRoundScreen onBack={() => go('menu')} />;
+  // OSH-16/17 — the week that closed, and which way it points
+  if (view === 'statement' && barber) return <StatementScreen onBack={() => go('menu')} />;
 
   // TODO(backlog): Payment Methods / My Coupons / My Wallet — no payment rail yet
   const items: MenuItem[] = [
@@ -272,10 +279,14 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
       { icon: 'checkbox-outline', label: 'To do', onPress: () => go('tasks') },
       { icon: 'storefront-outline', label: 'Your shop', onPress: () => go('application') },
       { icon: 'cash-outline', label: 'Settle up', onPress: () => go('float') },
+      { icon: 'receipt-outline', label: 'Weekly statement', onPress: () => go('statement') },
     ] as MenuItem[] : []),
     // 9f is the collector's phone, not the shop's
+    ...(profile.role === 'admin' || profile.role === 'agent' ? [
+      { icon: 'car-outline', label: 'Your round', onPress: () => go('agent') },
+    ] as MenuItem[] : []),
     ...(profile.role === 'admin' ? [
-      { icon: 'car-outline', label: 'Collection round', onPress: () => go('round') },
+      { icon: 'cash-outline', label: 'Float pickup (BCF-04)', onPress: () => go('round') },
     ] as MenuItem[] : []),
     ...(barber?.salon_id ? [
       { icon: 'eye-outline', label: 'Preview my page', onPress: () => go('preview') },

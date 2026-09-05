@@ -71,14 +71,19 @@ export default function SettleFloatScreen({ onBack }: { onBack?: () => void }) {
 
   const late = f.held_days != null && f.held_days > 14;
   const nothing = f.float_cents <= 0;
+  // §6.7 — the settlement is ONE number: the float we're owed minus the deposits
+  // the shop earned. This screen printed the deduction and then handed over the
+  // gross float anyway, so the owner was asked for money the line above had just
+  // told him he could keep. `my_float` has returned net_cents since 0053.
+  const ours = f.net_cents >= 0;
 
   return (
     <Screen bottom={TAB_INSET}>
       <TopBar title="Settle up" onBack={onBack} />
 
       <View style={[s.handOver, late && s.handOverLate]}>
-        <T w="b" size={10} c={D.sub} ls={1.5}>HAND OVER</T>
-        <T style={s.huge}>{dh(f.float_cents)} DH</T>
+        <T w="b" size={10} c={D.sub} ls={1.5}>{ours ? 'HAND OVER' : 'WE OWE YOU'}</T>
+        <T style={s.huge}>{dh(Math.abs(f.net_cents))} DH</T>
         {f.held_days != null && (
           <View style={[s.heldRow, late && s.heldRowLate]}>
             <Ico name="clock" size={13} color={late ? D.amber : D.sub} />
@@ -110,8 +115,8 @@ export default function SettleFloatScreen({ onBack }: { onBack?: () => void }) {
         )}
         <View style={s.rule} />
         <View style={s.line}>
-          <T w="b" size={12.5} style={s.grow}>You hand over</T>
-          <T w="eb" size={18} style={s.num}>{dh(f.float_cents)} DH</T>
+          <T w="b" size={12.5} style={s.grow}>{ours ? 'You hand over' : 'We hand over'}</T>
+          <T w="eb" size={18} style={s.num}>{dh(Math.abs(f.net_cents))} DH</T>
         </View>
         <T size={11} c={D.muted} style={s.fine}>
           It isn't your money — customers paid you cash and we credited their wallets

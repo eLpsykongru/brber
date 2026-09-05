@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Noto+Kufi+Arabic:wght@400;500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+html{background:#0D0D0F}
+body{margin:0;background:#0D0D0F;font-family:Inter,system-ui,sans-serif}
+a{color:#E8442E;text-decoration:none}a:hover{color:#C33421}
+.dv-turn{padding:38px 44px 30px;scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#fff;color:#111;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 14px/1.2 Inter,sans-serif;color:#fff}
+.dv-note{font:400 12px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:760px;margin:0 0 26px}
+.dv-src{font:400 10.5px/1.4 Inter,sans-serif;color:rgba(255,255,255,.6);opacity:.55;margin:-18px 0 22px}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(255,255,255,.12);color:#fff;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 Inter,sans-serif;color:rgba(255,255,255,.6)}
+.dv-opt:target .dv-oid{background:#E8442E;color:#fff}
+.dv-next{flex-basis:100%;margin:24px 0 0;font:12px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6)}
+.dv-nav{display:flex;flex-wrap:wrap;gap:6px;padding:12px 44px 0}
+</style>
+</helmet>
+<div style="padding:32px 44px 0">
+<a href="./Index.dc.html" style="font:600 10px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.6)">← All pages</a>
+<div style="font-family:'Playfair Display',serif;font-weight:700;font-size:27px;letter-spacing:.02em;text-transform:uppercase;color:#fff;margin:10px 0 0">Barber · Cash & Float</div>
+<div style="font:400 12px Inter,sans-serif;color:rgba(255,255,255,.6);margin:6px 0 0">7 current</div>
+</div>
+<div class="dv-nav"><a href="./Barber - Onboarding.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Onboarding</a><a href="./Barber - Today.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Today</a><a href="./Barber - My Day.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">My day</a><a href="./Barber - Clients.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Clients</a><a href="./Barber - Messages.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Messages</a><a href="./Barber - My Services.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">My services</a><a href="./Barber - My Work.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">My work</a><a href="./Barber - Reviews.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Reviews</a><a href="./Barber - Float.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:#E8442E;color:#fff;text-decoration:none">Float</a><a href="./Barber - Earnings.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Earnings</a><a href="./Barber - Waitlist.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Waitlist</a><a href="./Barber - Notifications.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Notifs</a><a href="./Barber - Support.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Support</a><a href="./Barber - Profile.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Profile</a><a href="./Barber - System States.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">System</a></div>
+<div class="dv-nav" style="padding-top:0;opacity:.75"><span style="font:700 9.5px Inter,sans-serif;letter-spacing:.14em;color:rgba(255,255,255,.6);align-self:center;margin-right:4px">OWNER</span><a href="./Owner - Shop.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Shop</a><a href="./Owner - Barbers.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Barbers</a><a href="./Owner - Services.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Services</a><a href="./Owner - Reviews.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Reviews</a><a href="./Owner - Reports.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Reports</a></div>
+<div style="height:1px;background:rgba(255,255,255,.14);margin:20px 0 0"></div>
+<section class="dv-turn" id="T1">
+<div class="dv-thd"><a class="dv-tid" href="#T1">T1</a><span class="dv-tname">Sterncut — barber side, dark dashboard skin</span></div>
+<p class="dv-note">Every barber screen from the repo, rebuilt on the dark surfaces the code already declares (<code>theme.ts → dark</code>: canvas #0D0D0F, cards #17171A, raised #212125, sub #9A9CA3) with the Rentra display type and coral kept for money and live state only. Tabs are the barber set — Home · Calendar · Clients · Wallet · Profile with a centre Quick&nbsp;add. Currency MAD, Tangier data, same fixtures as the customer canvas so the two sides line up.</p>
+<p class="dv-src">from Barber App - Foundations · turn 1</p>
+<div class="dv-opts">
+<div class="dv-opt" id="BCF-01"><div class="dv-olabel"><a class="dv-oid" href="#BCF-01">BCF-01</a>Agent wallet — float</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 104px;display:flex;flex-direction:column;gap:14px">
+    <div>
+      <span style="display:block;font-size:10px;letter-spacing:.18em;font-weight:700;color:#9A9CA3">AGENT · LE FADE TANGER</span>
+      <span style="display:block;font-size:17px;font-weight:700;margin-top:3px">Wallet</span>
+    </div>
+    <div style="background:#1D1416;border:1px solid #332124;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="width:34px;height:34px;border-radius:10px;background:rgba(232,68,46,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="1.9"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg></span>
+        <span style="flex:1;font-size:10px;letter-spacing:.16em;font-weight:700;color:#9A9CA3">FLOAT BALANCE</span>
+        <span style="width:32px;height:32px;border-radius:999px;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+      </div>
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:40px;line-height:1.05;font-variant-numeric:tabular-nums">3 240 DH</span>
+      <span style="font-size:12px;color:#9A9CA3">Cash collected for customer top-ups</span>
+      <span style="height:52px;border-radius:16px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-size:14px;font-weight:700"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 5v14M6 13l6 6 6-6"></path></svg>Top-up</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:2px">
+      <span style="flex:1;font-size:15px;font-weight:700">Activity</span>
+      <span style="display:flex;align-items:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><path d="M3 5h18l-7 8v6l-4-2v-4z"></path></svg><span style="font-size:12px;color:#9A9CA3">Export</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:16px;padding:13px 14px">
+        <span style="width:36px;height:36px;border-radius:999px;background:rgba(232,68,46,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2.2"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></span>
+        <span style="flex:1"><span style="display:block;font-size:14px;font-weight:700">Amine Berrada</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">+212 661••• 567</span></span>
+        <span style="text-align:right;flex:none"><span style="display:block;font-size:14px;font-weight:700;color:#E8442E;font-variant-numeric:tabular-nums">+200 DH</span><span style="display:block;font-size:10px;color:#9A9CA3;margin-top:2px">11:42</span></span>
+        <span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M6 9V4h12v5M6 18H4v-6h16v6h-2M8 14h8v6H8z"></path></svg></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:16px;padding:13px 14px">
+        <span style="width:36px;height:36px;border-radius:999px;background:rgba(232,68,46,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2.2"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></span>
+        <span style="flex:1"><span style="display:block;font-size:14px;font-weight:700">Mehdi Kabbaj</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">+212 662••• 512</span></span>
+        <span style="text-align:right;flex:none"><span style="display:block;font-size:14px;font-weight:700;color:#E8442E;font-variant-numeric:tabular-nums">+100 DH</span><span style="display:block;font-size:10px;color:#9A9CA3;margin-top:2px">10:04</span></span>
+        <span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M6 9V4h12v5M6 18H4v-6h16v6h-2M8 14h8v6H8z"></path></svg></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:16px;padding:13px 14px">
+        <span style="width:36px;height:36px;border-radius:999px;background:rgba(232,68,46,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2.2"><path d="M12 5v14M6 13l6 6 6-6"></path></svg></span>
+        <span style="flex:1"><span style="display:block;font-size:14px;font-weight:700">Yassine Bennis</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">+212 663••• 880</span></span>
+        <span style="text-align:right;flex:none"><span style="display:block;font-size:14px;font-weight:700;color:#E8442E;font-variant-numeric:tabular-nums">+300 DH</span><span style="display:block;font-size:10px;color:#9A9CA3;margin-top:2px">Jul 29</span></span>
+        <span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M6 9V4h12v5M6 18H4v-6h16v6h-2M8 14h8v6H8z"></path></svg></span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:9px;background:#17171A;border-radius:16px;padding:13px 15px;margin-top:2px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2" style="margin-top:1px;flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+      <span style="font-size:12px;line-height:1.5;color:#9A9CA3">The float only grows until settlement — no commission is taken on top-ups.</span>
+    </div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center;z-index:5">
+    <div style="display:flex;align-items:center;gap:2px;background:#17171A;border:1px solid #26262B;border-radius:999px;padding:6px;box-shadow:0 10px 28px rgba(0,0,0,.5)">
+      <span style="width:42px;height:42px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg></span>
+      <span style="width:42px;height:42px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg></span>
+      <span style="width:48px;height:48px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(232,68,46,.5)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><path d="M12 5v14M5 12h14"></path></svg></span>
+      <span style="width:42px;height:42px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg></span>
+      <span style="display:flex;align-items:center;gap:7px;background:#212125;border-radius:999px;height:44px;padding:0 15px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg><span style="color:#fff;font-size:12px;font-weight:700">Wallet</span></span>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<div class="dv-opt" id="BCF-02"><div class="dv-olabel"><a class="dv-oid" href="#BCF-02">BCF-02</a>Cash top-up sheet</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.6)"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#151517;border-radius:26px 26px 0 0;padding:12px 22px 34px;display:flex;flex-direction:column;gap:14px">
+    <span style="align-self:center;width:40px;height:4px;border-radius:2px;background:#333"></span>
+    <div style="display:flex;align-items:center">
+      <span style="flex:1;font-size:17px;font-weight:700">Cash top-up</span>
+      <span style="width:32px;height:32px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+    </div>
+    <div style="display:flex;background:#212125;border-radius:999px;padding:4px;gap:4px">
+      <span style="flex:1;height:40px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700;color:#fff"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M5 4h4l2 5-3 2a12 12 0 0 0 5 5l2-3 5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"></path></svg>Phone</span>
+      <span style="flex:1;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;font-weight:700;color:#9A9CA3"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="4" y="4" width="7" height="7" rx="1"></rect><rect x="13" y="4" width="7" height="7" rx="1"></rect><rect x="4" y="13" width="7" height="7" rx="1"></rect><path d="M13 13h3v3h-3z"></path></svg>Scan QR</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">CUSTOMER PHONE</span>
+      <span style="display:flex;align-items:center;gap:10px;background:#212125;border-radius:16px;height:48px;padding:0 16px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5 21 21"></path></svg><span style="font-size:14px;font-weight:500">+212 661 234 567</span></span>
+      <div style="display:flex;align-items:center;gap:11px;background:#17171A;border-radius:16px;padding:12px 14px;margin-top:2px">
+        <span style="width:36px;height:36px;border-radius:999px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#E8442E;flex:none">AB</span>
+        <span style="flex:1"><span style="display:block;font-size:13px;font-weight:700">Amine Berrada</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Wallet 216 DH · 4 visits with you</span></span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.6" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">AMOUNT (DH)</span>
+      <span style="display:flex;align-items:center;background:#212125;border-radius:16px;height:60px;padding:0 16px;font-size:30px;font-weight:700;font-variant-numeric:tabular-nums">200<span style="display:inline-block;width:2px;height:30px;background:#E8442E;margin-left:3px"></span></span>
+      <div style="display:flex;gap:8px;margin-top:2px">
+        <span style="border:1px solid #333;border-radius:999px;padding:9px 16px;font-size:12px;font-weight:700">+50</span>
+        <span style="border:1px solid #333;border-radius:999px;padding:9px 16px;font-size:12px;font-weight:700">+100</span>
+        <span style="border:1px solid #333;border-radius:999px;padding:9px 16px;font-size:12px;font-weight:700">+200</span>
+        <span style="border:1px solid #333;border-radius:999px;padding:9px 16px;font-size:12px;font-weight:700">+500</span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;background:#17171A;border-radius:16px;padding:14px 16px">
+      <span style="font-size:12px;color:#9A9CA3">Their balance after</span>
+      <span style="font-size:14px;font-weight:800;font-variant-numeric:tabular-nums">416 DH</span>
+    </div>
+    <span style="height:52px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700">Confirm cash received</span>
+    <span style="display:flex;align-items:center;justify-content:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg><span style="font-size:11px;color:#9A9CA3">Credited to the customer's wallet instantly</span></span>
+  </div>
+</div>
+</x-import></div>
+
+<p class="dv-next">Try next: "make the barber app a working prototype" · "add the salon-owner screens"</p>
+</div>
+</section>
+
+<section class="dv-turn" id="T2">
+<div class="dv-thd"><a class="dv-tid" href="#T2">T2</a><span class="dv-tname">The receiving end — where admin actions land in the shop</span></div>
+<p class="dv-note">Admin <a class="dv-oid" href="./Barber - Support.dc.html#BSP-01">BSP-01</a> issues obligations and <a class="dv-oid" href="./Barber - My Day.dc.html#BDY-03">BDY-03</a> blocks approval on a map pin, but neither had a barber-side surface — ops was writing into a void, then counting the silence as non-compliance. Marina's owner "ignored 3 reminders"; this is what he'd actually have seen. <a class="dv-oid" href="./Barber - Support.dc.html#BSP-03">BSP-03</a> is the task inbox, <a class="dv-oid" href="./Barber - Support.dc.html#BSP-04">BSP-04</a> proof of the poster moved (which is what flips the VERIFY row in 5a), <a class="dv-oid" href="./Barber - Onboarding.dc.html#BON-01">BON-01</a> the applying shop's status screen behind 1f. Same records, no new tables — a task is a row ops already writes.</p>
+<p class="dv-src">from Barber App - Foundations · turn 9</p>
+<div class="dv-opts">
+<div class="dv-opt" id="BCF-03"><div class="dv-olabel"><a class="dv-oid" href="#BCF-03">BCF-03</a>Settle the float · barber</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;letter-spacing:.14em;text-transform:uppercase">Settle up</span>
+      <span style="width:38px"></span>
+    </div>
+    <div style="background:#1D1416;border:1px solid #332124;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px">
+      <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#9A9CA3">HAND OVER</span>
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:40px;line-height:1.05;font-variant-numeric:tabular-nums">3 240 DH</span>
+      <span style="display:flex;align-items:center;gap:8px;border-top:1px solid #332124;padding-top:12px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span style="font-size:11.5px;color:#E8A100">Held 19 days · the cap is 14</span></span>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:11px">
+      <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">WHAT MAKES IT UP</span>
+      <span style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:#9A9CA3">31 top-ups</span><span style="font-weight:700;font-variant-numeric:tabular-nums">3 240 DH</span></span>
+      <span style="display:flex;justify-content:space-between;font-size:12.5px"><span style="color:#9A9CA3">Commission</span><span style="font-weight:700;color:#4ADE80">0 DH</span></span>
+      <span style="height:1px;background:#26262B"></span>
+      <span style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12.5px;font-weight:700">You hand over</span><span style="font-size:18px;font-weight:800;font-variant-numeric:tabular-nums">3 240 DH</span></span>
+      <span style="font-size:11px;color:#6B6B72;line-height:1.5;text-wrap:pretty">It isn't your money — customers paid you cash and we credited their wallets on the spot.</span>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">HOW</span>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:18px;padding:14px 15px;outline:2px solid #E8442E;outline-offset:-2px">
+        <span style="width:20px;height:20px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4"><path d="M5 12l5 5L20 7"></path></svg></span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:700">Nadia collects it</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">She's in the Kasbah Mon &amp; Thu afternoons</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:18px;padding:14px 15px">
+        <span style="width:20px;height:20px;border-radius:999px;border:1.5px solid #3A3A40;flex:none"></span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:600">Pay it in at the bank</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Slip photo needed · clears next day</span></span>
+      </div>
+    </div>
+    <div style="background:#101010;border:1px solid #26262B;border-radius:20px;padding:17px;display:flex;flex-direction:column;gap:12px;align-items:center">
+      <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#9A9CA3">SHOW HER THIS CODE</span>
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:38px;line-height:1;letter-spacing:.22em;font-variant-numeric:tabular-nums;padding-left:.22em">7 4 2 9</span>
+      <span style="font-size:11px;color:#6B6B72;text-align:center;line-height:1.5;text-wrap:pretty">She types it in to confirm she has the cash. Don't hand anything over without it.</span>
+    </div>
+    <span style="height:52px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.05em;color:#fff">SHE'S NOT COMING TODAY</span>
+  </div>
+</div>
+</x-import></div>
+
+<div class="dv-opt" id="BCF-04"><div class="dv-olabel"><a class="dv-oid" href="#BCF-04">BCF-04</a>Collecting · agent's phone</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:700">Collection round</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Thu 9 Aug · Kasbah · 4 stops</span></span>
+      <span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#9A9CA3;background:#212125;border-radius:6px;padding:5px 9px;flex:none">2 DONE</span>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:16px;display:flex;align-items:flex-end;justify-content:space-between">
+      <span style="min-width:0"><span style="display:block;font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">CARRYING</span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:30px;line-height:1.05;margin-top:5px;font-variant-numeric:tabular-nums">5 180 DH</span></span>
+      <span style="text-align:right;flex:none"><span style="display:block;font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">STILL TO GET</span><span style="display:block;font-size:17px;font-weight:700;color:#E8A100;margin-top:6px;font-variant-numeric:tabular-nums">5 420 DH</span></span>
+    </div>
+    <div style="background:#17171A;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:14px;outline:2px solid #E8442E;outline-offset:-2px">
+      <div style="display:flex;align-items:center;gap:11px">
+        <span style="width:38px;height:38px;border-radius:999px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#E8442E;flex:none">KC</span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:700">Kasbah Cuts</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Omar Tazi · 3 Av. Mohammed VI</span></span>
+        <span style="font-size:10px;letter-spacing:.06em;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:6px;padding:4px 8px;flex:none">OVERDUE</span>
+      </div>
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;border-top:1px solid #26262B;padding-top:14px">
+        <span style="min-width:0"><span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#9A9CA3">COUNT OUT</span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:32px;line-height:1.05;margin-top:4px;font-variant-numeric:tabular-nums">2 180 DH</span></span>
+        <span style="font-size:11px;color:#6B6B72;flex:none">21 top-ups</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">HIS CODE</span>
+        <div style="display:flex;gap:9px">
+          <span style="flex:1;height:56px;border-radius:12px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums">7</span>
+          <span style="flex:1;height:56px;border-radius:12px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums">4</span>
+          <span style="flex:1;height:56px;border-radius:12px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums">2</span>
+          <span style="flex:1;height:56px;border-radius:12px;background:#17171A;border:2px solid #E8442E;display:flex;align-items:center;justify-content:center"><span style="width:2px;height:24px;background:#E8442E"></span></span>
+        </div>
+      </div>
+      <a href="#BCF-01" style="height:52px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;letter-spacing:.05em;opacity:.45;text-decoration:none">CONFIRM 2 180 DH RECEIVED</a>
+      <span style="text-align:center;font-size:11px;color:#6B6B72;line-height:1.5;text-wrap:pretty">Confirming moves his float to 0 and clears FLT-882. It can't be undone in the shop.</span>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">NEXT STOPS</span>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:18px;padding:13px 15px">
+        <span style="width:32px;height:32px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">LF</span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">Le Fade Tanger</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">3 240 DH · 19 days held</span></span>
+        <span style="font-size:11px;color:#6B6B72;flex:none">400 m</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:18px;padding:13px 15px;opacity:.55">
+        <span style="width:32px;height:32px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="3"><path d="M5 12l5 5L20 7"></path></svg></span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;color:#9A9CA3">Marina Barber Club</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">2 940 DH · collected 13:20</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#BCF-01">CONFIRM 2 180 DH …</a></div></div>
+
+<p class="dv-next">Try next: "add the coupon campaign screens" · "make the barber app a working prototype"</p>
+</div>
+</section>
+
+<section class="dv-turn" id="T3">
+<div class="dv-thd"><a class="dv-tid" href="#T3">T3</a><span class="dv-tname">When it breaks in the shop</span></div>
+<p class="dv-note">The barber's failures are not the customer's. He's mid-cut, one-handed, with someone in the chair and three waiting — so the rule from Customer <a class="dv-oid" href="./Customer - System States.dc.html#SYS-08">SYS-08</a> gets sharper here: <strong>an error must never stop the queue moving.</strong> Every screen keeps the chair working offline and syncs later; none of them asks him to stop and fix something while a client watches. Six states — connection, double-booking, a failed collection, an expiring licence, a suspended shop, and a stale app.</p>
+<p class="dv-src">from Barber App - Foundations · turn 10</p>
+<div class="dv-opts">
+<div class="dv-opt" id="BCF-05"><div class="dv-olabel"><a class="dv-oid" href="#BCF-05">BCF-05</a>Top-up didn't go through</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.62)"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#151517;border-radius:26px 26px 0 0;padding:12px 22px 34px;display:flex;flex-direction:column;gap:13px">
+    <span style="align-self:center;width:40px;height:4px;border-radius:2px;background:#333"></span>
+    <div style="text-align:center;padding:2px 0 0">
+      <span style="width:56px;height:56px;border-radius:999px;background:rgba(248,113,113,.14);display:inline-flex;align-items:center;justify-content:center"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+      <span style="display:block;font-size:19px;font-weight:700;margin-top:12px">Didn't go through</span>
+      <span style="display:block;font-size:12.5px;color:#9A9CA3;margin-top:7px;line-height:1.5;text-wrap:pretty">Amine's wallet was <strong style="color:#fff">not</strong> credited. If you've taken his 200 DH, give it back or try again now.</span>
+    </div>
+    <div style="background:#17171A;border-radius:18px;padding:15px 16px;display:flex;flex-direction:column;gap:11px">
+      <div style="display:flex;align-items:center;gap:11px">
+        <span style="width:36px;height:36px;border-radius:999px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#E8442E;flex:none">AB</span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:700">Amine Berrada</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">+212 661••• 567</span></span>
+        <span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;flex:none">200 DH</span>
+      </div>
+      <span style="display:flex;justify-content:space-between;border-top:1px solid #26262B;padding-top:11px;font-size:12px"><span style="color:#9A9CA3">His balance now</span><span style="font-weight:700">40 DH · unchanged</span></span>
+      <span style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#9A9CA3">Your float</span><span style="font-weight:700">3 240 DH · unchanged</span></span>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:9px;background:#212125;border-radius:14px;padding:12px 14px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.2" style="flex:none;margin-top:1px"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg>
+      <span style="flex:1;min-width:0;font-size:11.5px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Nothing was taken twice. A top-up only counts once we've confirmed it.</span>
+    </div>
+    <a href="#BCF-02" style="height:52px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-decoration:none">TRY AGAIN · 200 DH</a>
+    <div style="display:flex;gap:9px">
+      <span style="flex:1;height:48px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.04em;color:#fff">GAVE IT BACK</span>
+      <span style="flex:1;height:48px;border-radius:999px;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.04em;color:#9A9CA3">CALL OPS</span>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#BCF-02">TRY AGAIN · 200 DH</a></div></div>
+
+<p class="dv-next">Try next: "do the admin error states" · "wire packages into the customer prototype"</p>
+</div>
+</section>
+
+<section class="dv-turn" id="T4">
+<div class="dv-thd"><a class="dv-tid" href="#T4">T4</a><span class="dv-tname">Two switches that were only pretending</span></div>
+<p class="dv-note">Both of these are columns the code writes and the UI never reflects. <code>salons.accepting_bookings</code> is written by the header power button and read by nothing — so the owner thinks he closed the shop and requests keep landing on his barbers. <code>salons.float_cap_cents</code> is enforced in SQL with no screen, which means the stop lands while a customer's cash is already in the barber's hand. <strong>A switch has to say what it actually does, and a limit has to warn before it bites.</strong> <a class="dv-oid" href="./Owner - Shop.dc.html#OSH-09">OSH-09</a>–<a class="dv-oid" href="./Barber - Today.dc.html#BTD-07">BTD-07</a> are the pause; <a class="dv-oid" href="#BCF-06">BCF-06</a>–<a class="dv-oid" href="#BCF-07">BCF-07</a> are the cap.</p>
+<p class="dv-src">from Barber App - Foundations · turn 11</p>
+<div class="dv-opts">
+<div class="dv-opt" id="BCF-06"><div class="dv-olabel"><a class="dv-oid" href="#BCF-06">BCF-06</a>Close to the cap</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 104px;display:flex;flex-direction:column;gap:14px">
+    <div>
+      <span style="display:block;font-size:10px;letter-spacing:.18em;font-weight:700;color:#9A9CA3">AGENT · LE FADE TANGER</span>
+      <span style="display:block;font-size:17px;font-weight:700;margin-top:3px">Wallet</span>
+    </div>
+    <div style="background:#1D1416;border:1px solid #332124;border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="width:34px;height:34px;border-radius:10px;background:rgba(232,68,46,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="1.9"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg></span>
+        <span style="flex:1;min-width:0;font-size:10px;letter-spacing:.16em;font-weight:700;color:#9A9CA3">FLOAT BALANCE</span>
+        <span style="font-size:10px;letter-spacing:.06em;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:6px;padding:4px 8px;flex:none">90% OF CAP</span>
+      </div>
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:40px;line-height:1.05;font-variant-numeric:tabular-nums">3 240 DH</span>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden;display:block"><span style="display:block;height:100%;width:90%;background:#E8A100"></span></span>
+        <div style="display:flex;justify-content:space-between"><span style="font-size:11px;color:#9A9CA3">Room for 360 DH more</span><span style="font-size:11px;font-weight:700;color:#9A9CA3">Cap 3 600 DH</span></div>
+      </div>
+      <span style="font-size:12px;line-height:1.5;color:#D8D8DC;border-top:1px solid #332124;padding-top:14px;text-wrap:pretty">Once you hit the cap you can't take top-ups until Nadia collects. That's about 2 more customers.</span>
+      <span style="height:50px;border-radius:16px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-size:13.5px;font-weight:700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M5 4h4l2 5-3 2a12 12 0 0 0 5 5l2-3 5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"></path></svg>ASK HER TO COME TODAY</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:11px;background:#17171A;border-radius:18px;padding:14px 16px">
+      <span style="width:32px;height:32px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">She's due Thursday afternoon</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Kasbah round · you're her second stop</span></span>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">TODAY'S TOP-UPS</span>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:16px;padding:13px 14px">
+        <span style="width:34px;height:34px;border-radius:999px;background:rgba(232,68,46,.16);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#E8442E;flex:none">AB</span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:700">Amine Berrada</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">11:42</span></span>
+        <span style="font-size:13.5px;font-weight:700;color:#E8442E;font-variant-numeric:tabular-nums;flex:none">+200 DH</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:16px;padding:13px 14px">
+        <span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">MK</span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:700">Mehdi Kabbaj</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">10:04</span></span>
+        <span style="font-size:13.5px;font-weight:700;color:#E8442E;font-variant-numeric:tabular-nums;flex:none">+100 DH</span>
+      </div>
+    </div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center;z-index:5">
+    <div style="display:flex;align-items:center;gap:2px;background:#17171A;border:1px solid #26262B;border-radius:999px;padding:6px;box-shadow:0 10px 28px rgba(0,0,0,.5)">
+      <span style="width:42px;height:42px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg></span>
+      <span style="width:42px;height:42px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg></span>
+      <span style="width:48px;height:48px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(232,68,46,.5)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><path d="M12 5v14M5 12h14"></path></svg></span>
+      <span style="width:42px;height:42px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg></span>
+      <span style="display:flex;align-items:center;gap:7px;background:#212125;border-radius:999px;height:44px;padding:0 15px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg><span style="color:#fff;font-size:12px;font-weight:700">Wallet</span></span>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<div class="dv-opt" id="BCF-07"><div class="dv-olabel"><a class="dv-oid" href="#BCF-07">BCF-07</a>Cap hit · cash in hand</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.62)"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#151517;border-radius:26px 26px 0 0;padding:12px 22px 34px;display:flex;flex-direction:column;gap:13px">
+    <span style="align-self:center;width:40px;height:4px;border-radius:2px;background:#333"></span>
+    <div style="text-align:center;padding:2px 0 0">
+      <span style="width:56px;height:56px;border-radius:999px;background:rgba(232,161,0,.14);display:inline-flex;align-items:center;justify-content:center"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span>
+      <span style="display:block;font-size:19px;font-weight:700;margin-top:12px">Can't take this one</span>
+      <span style="display:block;font-size:12.5px;color:#9A9CA3;margin-top:7px;line-height:1.5;text-wrap:pretty">You're holding 3 600 DH — the most we let a shop carry. <strong style="color:#fff">Give Rachid his 300 DH back.</strong></span>
+    </div>
+    <div style="background:#17171A;border-radius:18px;padding:15px 16px;display:flex;flex-direction:column;gap:11px">
+      <div style="display:flex;align-items:center;gap:11px">
+        <span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#9A9CA3;flex:none">RT</span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:700">Rachid Tahiri</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Wallet 20 DH · not credited</span></span>
+        <span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;flex:none">300 DH</span>
+      </div>
+      <span style="display:flex;align-items:center;gap:8px;border-top:1px solid #26262B;padding-top:11px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.4" style="flex:none"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg><span style="flex:1;min-width:0;font-size:11.5px;color:#9A9CA3">Nothing was recorded. His balance is unchanged.</span></span>
+    </div>
+    <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">WHAT HE CAN DO INSTEAD</span>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="background:#17171A;border-radius:16px;padding:14px 15px;display:flex;align-items:center;gap:11px;outline:2px solid #E8442E;outline-offset:-2px">
+        <span style="width:32px;height:32px;border-radius:10px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="1.9"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg></span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">Top up at Kasbah Cuts</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">400 m · Omar has room for 1 700 DH</span></span>
+      </div>
+      <div style="background:#17171A;border-radius:16px;padding:14px 15px;display:flex;align-items:center;gap:11px">
+        <span style="width:32px;height:32px;border-radius:10px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18"></path></svg></span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">Just pay you at the shop</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">He books with no deposit and pays cash</span></span>
+      </div>
+    </div>
+    <div style="background:rgba(232,161,0,.1);border:1px solid rgba(232,161,0,.3);border-radius:16px;padding:13px 15px;display:flex;align-items:center;gap:11px">
+      <span style="width:30px;height:30px;border-radius:999px;background:rgba(232,161,0,.2);display:flex;align-items:center;justify-content:center;flex:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:700;color:#E8A100">Nadia has been told automatically</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">She'll come today instead of Thursday</span></span>
+    </div>
+    <a href="#BCF-01" style="height:52px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;letter-spacing:.06em;text-decoration:none">I GAVE THE 300 DH BACK</a>
+    <span style="text-align:center;font-size:12px;font-weight:600;color:#9A9CA3">Call Nadia now</span>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#BCF-01">I GAVE THE 300 DH…</a></div></div>
+
+<p class="dv-next">Try next: "add the pass editor for option (b)" · "wire packages into the customer prototype"</p>
+</div>
+</section>
+
+
+</x-dc>
+</body>
+</html>

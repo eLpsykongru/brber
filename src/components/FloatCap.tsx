@@ -99,6 +99,10 @@ export function CapHitSheet({ attempt, st, onClose, onGaveBack, opsPhone }: {
     // cap refusal is an exception inside agent_cash_topup, so anything that
     // function wrote would roll back with it.
     supabase.rpc('request_float_collection');
+    // ...and for the same reason, this is the only place the refusal itself can
+    // be counted. SAL-21 argues a cap raise from "top-ups they turned away";
+    // without this line that number does not exist anywhere (0080).
+    supabase.rpc('log_float_refusal', { p_cents: attempt.cents });
   }, [attempt]);
 
   if (!attempt) return null;

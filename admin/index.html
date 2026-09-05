@@ -2205,6 +2205,33 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
       </div>
     </div>
   </div>
+
+  <!-- SAL-21 · raising a cap is an argument, not a chip -->
+  <div id="cap-dlg" hidden style="position:absolute;inset:0;left:216px;background:rgba(0,0,0,.66);display:flex;align-items:center;justify-content:center;padding:26px;box-sizing:border-box;z-index:20">
+      <div style="width:568px;max-height:100%;overflow:auto;background:#17171A;border:1px solid #26262B;border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.6);padding:22px;display:flex;flex-direction:column;gap:15px;box-sizing:border-box">
+        <span id="cap-crumb" style="font-size:10.5px;color:#6B6B72"></span>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+          <span><span id="cap-title" style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:20px"></span><span id="cap-sub" style="display:block;font-size:11.5px;color:#9A9CA3;margin-top:4px"></span></span>
+          <span data-cap-close style="cursor:pointer;flex:none;margin-top:4px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">NEW CAP</span>
+          <div id="cap-opts" style="display:flex;gap:9px"></div>
+        </div>
+        <div id="cap-proj"></div>
+        <div id="cap-trade"></div>
+        <div id="cap-warn"></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span id="cap-reason-label" style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">REASON</span>
+          <textarea id="cap-reason" rows="2" placeholder="Why this shop, why now" style="background:#111113;border:1px solid #26262B;border-radius:11px;padding:12px 14px;font-size:12px;line-height:1.55;color:#D8D8DC;font-family:Inter,sans-serif;resize:none;outline:none"></textarea>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;border-top:1px solid #1E1E22;padding-top:14px">
+          <span id="cap-log" style="flex:1;font-size:10.5px;line-height:1.45;color:#6B6B72"></span>
+          <span id="cap-save" style="height:38px;flex:none;border-radius:9px;display:flex;align-items:center;padding:0 16px;font-size:11.5px;font-weight:700;letter-spacing:.06em;cursor:pointer"></span>
+          <span id="cap-settle" hidden style="height:38px;flex:none;border-radius:9px;background:#E8442E;color:#fff;display:flex;align-items:center;padding:0 16px;font-size:11.5px;font-weight:700;letter-spacing:.06em;cursor:pointer">SETTLE FIRST</span>
+        </div>
+      </div>
+  </div>
 </div>
 </div>
 <div class="scr" id="s9b">
@@ -3023,6 +3050,162 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
 </div>
 </div>
 
+<!-- FIN-14 / FIN-15 · the settlement run. §2.1: a run is a draft that gets
+     released, so both totals exist before anyone presses anything. -->
+<div class="scr" id="s14a">
+<div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px"></div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">OP</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Ops</span><span style="display:block;font-size:10px;color:#9A9CA3">Sterncut</span></span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700">Settlement run</span>
+      <span id="fn-week" style="font-size:15px;font-weight:700;color:#9A9CA3"></span>
+      <span id="fn-state"></span>
+      <span style="flex:1"></span>
+      <span id="fn-cut" style="cursor:pointer;height:34px;border-radius:9px;background:#212125;display:flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:700;letter-spacing:.05em;color:#fff">CUT THIS WEEK</span>
+      <span id="fn-plan" style="cursor:pointer;height:34px;border-radius:9px;background:#212125;display:flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:700;letter-spacing:.05em;color:#fff;margin-left:9px">PLAN THE ROUND</span>
+      <span id="fn-release" style="cursor:pointer;height:34px;border-radius:9px;background:#E8442E;display:flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:800;letter-spacing:.05em;color:#fff;margin-left:9px"></span>
+    </div>
+    <div style="height:46px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:6px;padding:0 24px">
+      <span style="height:28px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:700">Settlement runs</span>
+      <span data-go="finance/corrections" style="cursor:pointer;height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:500;color:#9A9CA3">Corrections</span>
+      <span id="fn-sub" style="margin-left:12px;font-size:11.5px;color:#6B6B72"></span>
+    </div>
+
+    <div style="flex:1;min-height:0;padding:22px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:auto">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div id="fn-stats" style="display:flex;gap:12px"></div>
+        <div id="fn-net"></div>
+        <div id="fn-table" style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;overflow:hidden"></div>
+      </div>
+      <div style="width:308px;flex:none;display:flex;flex-direction:column;gap:14px">
+        <div id="fn-excl"></div>
+        <div id="fn-open"></div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:12.5px;font-weight:700">A run is a draft, then released</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3">It is cut at Friday 21:00 and read whole before anyone presses anything. A run that assembles itself as agents collect has no pay-out total until Thursday &mdash; and that total is the only thing that answers Friday's question: is Sterncut collecting this week, or paying?</span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:12.5px;font-weight:700">Nothing is skimmed on the way past</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3">There is no fee column here and there is not going to be one. The run moves exactly two kinds of money past each other: our float out of their till, and the deposits they earned back to them. Releasing dispatches agent visits, not a bank instruction.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- FIN-16 · one shop's statement, ops side. The same row set the owner sees. -->
+<div class="scr" id="s14b">
+<div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px"></div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">OP</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Ops</span><span style="display:block;font-size:10px;color:#9A9CA3">Sterncut</span></span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span data-go="finance" style="cursor:pointer;font-size:12px;color:#6B6B72">Settlement runs</span>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg>
+      <span id="sm-name" style="font-size:15px;font-weight:700"></span>
+      <span id="sm-ref" style="font-size:11.5px;color:#6B6B72"></span>
+      <span style="flex:1"></span>
+      <span id="sm-shop" style="cursor:pointer;height:32px;border-radius:9px;background:#212125;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:700;color:#fff">THE SHOP</span>
+    </div>
+
+    <div style="flex:1;min-height:0;padding:22px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:auto">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div id="sm-hero"></div>
+        <div id="sm-body" style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;overflow:hidden"></div>
+        <div id="sm-last"></div>
+      </div>
+      <div style="width:308px;flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:12.5px;font-weight:700">Where the week ends</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3">A line lands in the week that contains <strong style="color:#D8D8DC">the moment it happened</strong>: for a cut, the moment the barber marked it done; for float, the moment he took the cash. Cut-off Friday 21:00.</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3;border-top:1px solid #1E1E22;padding-top:9px">A late tap moves money a week, and that is the price. Stamping the line with the appointment time instead would mean reopening a released week, and a released week cannot be reopened.</span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:12.5px;font-weight:700">Two numbers, one of them trusted</span>
+          <span id="sm-trust" style="font-size:11px;line-height:1.5;color:#9A9CA3"></span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:12.5px;font-weight:700">On time, from the oldest dirham</span>
+          <span id="sm-age" style="font-size:11px;line-height:1.5;color:#9A9CA3"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- FIN-17 · a refund that arrived after the week was settled. The released
+     week is never edited; the correction is a new line on the next one. -->
+<div class="scr" id="s14c">
+<div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px"></div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">OP</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Ops</span><span style="display:block;font-size:10px;color:#9A9CA3">Sterncut</span></span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span data-go="finance" style="cursor:pointer;font-size:12px;color:#6B6B72">Settlement runs</span>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg>
+      <span style="font-size:15px;font-weight:700">Corrections</span>
+      <span id="cx-sub" style="font-size:12px;color:#6B6B72"></span>
+    </div>
+
+    <div style="flex:1;min-height:0;padding:22px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:auto">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div id="cx-list" style="display:flex;flex-direction:column;gap:14px"></div>
+      </div>
+      <div style="width:308px;flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:12.5px;font-weight:700">There is no dispute state</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3">If an owner says a deduction is wrong, the product has nowhere to put that. The button on his statement can only open a support case, and the case can only end in another line on another week. That is drawn honestly rather than as a dispute flow that does not exist &mdash; a real one needs a state on the line and a rule about who wins.</span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:12.5px;font-weight:700">Both directions, same line</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3">On a shop we owe, this line lands with the same sign and shrinks what we hand over. It never becomes a separate debt to chase &mdash; there is one number per shop per week and this is part of it.</span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:12.5px;font-weight:700">The amount is not typed</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3">It is the refunded amount, read off the refund row. Ops picks which week the line lands in and nothing else, so nobody can invent a number against a shop.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
 <script>
 // ---------------------------------------------------------------- routing --
 // Route → screen id. Barbers, Customers and Coupons are in the sidebar but have
@@ -3045,11 +3228,17 @@ const ROUTES = {
   'reliability/deposit': '12a',
   // BKN-04 — refunds by who bore it, a sub-screen of Bookings
   'bookings/refunds': '13a',
+  // the settlement period — FIN-14/15. The sidebar had no Finance row at all,
+  // so this is a route AND a rail entry.
+  'finance': '14a', 'finance/statement': '14b', 'finance/corrections': '14c',
 };
 // ponytail: the one check this wiring leaves behind. The screens are the design's
 // own markup and the renderers find their slots by id — nothing errors when an id
 // drifts, the panel just silently stops updating. This says so on load instead.
-const SLOTS = ('a-kpis a-bars a-stats a-live a-needs a-top a-when a-q a-range a-results d-run '
+const SLOTS = ('fn-plan fn-open cx-sub cx-list '
+  + 'sm-name sm-ref sm-hero sm-body sm-last sm-trust sm-age sm-shop '
+  + 'fn-week fn-state fn-sub fn-cut fn-release fn-stats fn-net fn-table fn-excl '
+  + 'a-kpis a-bars a-stats a-live a-needs a-top a-when a-q a-range a-results d-run '
   + 'b-sub b-chips b-table b-count '
   + 'c-sub c-kpis c-table d-sub d-kpis d-shops d-mismatch d-ledger e-sub e-list e-head e-thread e-chips e-mine '
   + 'e-side e-reply e-send f-crumb f-pos f-side f-head f-checkn f-checkbar f-check f-30 f-photos '
@@ -3121,6 +3310,7 @@ const NAV_ROUTE = {
   customers: 'customers', bookings: 'bookings', wallets: 'wallets', support: 'support',
   reviews: 'reviews', compliance: 'compliance', coupons: 'coupons',
   settings: 'reliability',   // Settings' only page so far is the reliability one
+  finance: 'finance',
 };
 const NAVS = [...document.querySelectorAll('.scr > div > div:first-child > div:nth-child(2)')];
 // Each of the sixteen screens hardcoded its own sidebar, and eight design turns
@@ -3129,6 +3319,13 @@ const NAVS = [...document.querySelectorAll('.scr > div > div:first-child > div:n
 // were simply absent from most of them, so tabs appeared and vanished as you
 // moved around. The fullest rail wins and is cloned into all of them.
 const FULL_NAV = NAVS.reduce((a, b) => (b.children.length > a.children.length ? b : a));
+// Finance is the one row no design turn ever drew into the rail, so the clone
+// below cannot find it. Added once, to the winner, before it is copied out.
+if (!/Finance/.test(FULL_NAV.textContent)) {
+  FULL_NAV.insertAdjacentHTML('beforeend',
+    '<span style="display:flex;align-items:center;gap:10px;height:38px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3">'
+    + '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8"></path><path d="M14 7h7v7"></path></svg>Finance</span>');
+}
 NAVS.forEach((nav) => { if (nav !== FULL_NAV) nav.innerHTML = FULL_NAV.innerHTML; });
 NAVS.forEach((nav) => {
   [...nav.children].forEach((item) => {
@@ -5485,13 +5682,19 @@ document.addEventListener('click', async (e) => {
   // take before it takes it — the per-shop rows never had to, because one shop
   // is a number you can read.
   if (e.target.closest('#d-run')) {
-    const shops = (wallets && wallets.shops || []).filter((s) => s.float_cents > 0);
-    const total = shops.reduce((n, s) => n + s.float_cents, 0);
-    if (!shops.length) return toast('No shop is holding cash.');
-    if (!confirm('Settle ' + DH(total) + ' across ' + shops.length + ' shop(s)?')) return;
+    // §6.7: a round settles the NET, not the gross drawer. The preview has to
+    // be the same number the round takes, or the desk is shown one figure and a
+    // different one is collected. 0080 fixed the function; this is its preview.
+    const shops = (wallets && wallets.shops || []).filter((s) => s.net_cents > 0);
+    const owedTo = (wallets && wallets.shops || []).filter((s) => s.net_cents < 0);
+    const total = shops.reduce((n, s) => n + s.net_cents, 0);
+    if (!shops.length) return toast('No shop owes us a net amount.');
+    if (!confirm('Collect ' + DH(total) + ' across ' + shops.length + ' shop(s)?'
+      + (owedTo.length ? '\n\n' + owedTo.length + ' shop(s) we OWE are not in this round — paying out is a cash-out-of-the-bag act and has no run yet.' : ''))) return;
     try {
       const r = await rpc('admin_settle_all', { p_min_cents: 1, p_note: 'Collection round' });
-      toast('Settled ' + DH(r.total_cents) + ' from ' + r.shops + ' shop(s)');
+      toast('Collected ' + DH(r.total_cents) + ' from ' + r.shops + ' shop(s)'
+        + (r.we_owe_shops ? ' · ' + r.we_owe_shops + ' still to be paid ' + DH(r.we_owe_cents) : ''));
     } catch (err) { return fail(err); }
     return loadWallets().catch(fail);
   }
@@ -5664,12 +5867,10 @@ document.addEventListener('click', async (e) => {
 
   const cap = q('data-cap');
   if (cap && salon) {
-    const cents = Number(cap.dataset.cap);
-    // 0069 refuses a cap under the cash already in the till; the toast is its message
-    try { await rpc('admin_set_float_cap', { p_salon: salon.id, p_cents: cents }); }
-    catch (err) { return fail(err); }
-    toast('Cap set to ' + DH(cents));
-    return loadSalon().catch(fail);
+    // SAL-21: a cap change is an argument with a name on it, not a chip that
+    // writes on click. The dialog shows the projection and the trade first, and
+    // 0080 refuses a raise with no reason even if this never asked for one.
+    return openCapDialog(Number(cap.dataset.cap)).catch(fail);
   }
 
   const sus = q('data-suspend-shop');
@@ -5753,12 +5954,161 @@ document.addEventListener('click', async (e) => {
   }
 });
 
+// ------------------------------------------------------ SAL-21 · the cap ----
+// "Four of these eight talk ops out of the thing they clicked." The cap should
+// be raised after collecting rather than before, so when an old float is still
+// sitting there the RAISE button is demoted and SETTLE takes the loud colour.
+
+// The chips are relative to THIS shop, not a platform preset list: the current
+// cap, then two steps up rounded to the nearest 500 DH. A 3 600 shop offers
+// 3 600 / 5 000 / 6 500, which is exactly what SAL-21 draws.
+function capSteps(cap) {
+  const nice = (c) => Math.max(50000, Math.round(c / 50000) * 50000);
+  const out = [cap];
+  for (const m of [1.4, 1.8]) { const v = nice(cap * m); if (!out.includes(v)) out.push(v); }
+  return out;
+}
+
+let capDlg = null;
+
+async function openCapDialog(cents) {
+  capDlg = { cents, impact: null };
+  $('cap-reason').value = '';
+  $('cap-dlg').hidden = false;
+  await drawCapDialog();
+}
+
+async function drawCapDialog() {
+  const d = salon;
+  const imp = await rpc('admin_cap_impact', { p_salon: d.id, p_cents: capDlg.cents });
+  capDlg.impact = imp;
+  const up = imp.raising;
+  const same = capDlg.cents === imp.cap_cents;
+
+  $('cap-crumb').innerHTML = '<span data-go="salons" style="cursor:pointer">Salons</span>'
+    + '<span style="margin:0 7px;color:#3A3A40">›</span><span style="color:#9A9CA3">' + esc(d.name) + '</span>';
+  $('cap-title').textContent = same
+    ? 'Leave ' + esc(d.name) + ' at ' + DH(imp.cap_cents)
+    : (up ? 'Raise ' : 'Lower ') + esc(d.name) + ' to ' + DH(capDlg.cents);
+  $('cap-sub').textContent = num(d.bookings_30d) + ' bookings in 30 days · currently '
+    + DH(imp.cap_cents);
+
+  $('cap-opts').innerHTML = capSteps(imp.cap_cents).map((c) =>
+    '<span data-capopt="' + c + '" style="cursor:pointer;flex:1;text-align:center;height:44px;line-height:44px;border-radius:11px;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;background:'
+    + (capDlg.cents === c ? '#E8442E' : '#212125') + ';color:'
+    + (capDlg.cents === c ? '#fff' : '#9A9CA3') + '">' + num(Math.round(c / 100)) + '</span>').join('');
+
+  // the projection, on the denominator that actually refuses
+  const pct = imp.pct_new == null ? 0 : Math.min(imp.pct_new, 100);
+  $('cap-proj').innerHTML = same ? '' :
+    '<div style="background:#111113;border:1px solid #26262B;border-radius:11px;padding:14px">'
+    + '<div style="display:flex;align-items:baseline;gap:8px">'
+    + '<span style="font-size:26px;font-weight:800;color:#4ADE80;font-variant-numeric:tabular-nums">' + (imp.pct_new == null ? '—' : imp.pct_new + '%') + '</span>'
+    + '<span style="font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">was ' + (imp.pct_now == null ? '—' : imp.pct_now + '%') + '</span></div>'
+    + '<div style="height:6px;border-radius:3px;background:#212125;margin-top:10px;overflow:hidden">'
+    + '<span style="display:block;height:6px;border-radius:3px;background:#4ADE80;width:' + pct + '%"></span></div>'
+    + '<div style="font-size:11.5px;color:#9A9CA3;line-height:1.5;margin-top:10px">At ' + DH(capDlg.cents)
+    + ' their current ' + DH(imp.net_cents) + ' sits at ' + (imp.pct_new == null ? '—' : imp.pct_new + '%')
+    + ' instead of ' + (imp.pct_now == null ? '—' : imp.pct_now + '%') + '. '
+    + (up ? 'They stop turning away top-ups on a busy Saturday.'
+          : 'Less of our cash sits in their till.') + '</div></div>';
+
+  // THE TRADE — the three figures the raise is argued from
+  const ta = imp.turned_away, ot = imp.ontime;
+  const trade = [
+    ['Top-ups the cap turned away · 30 days',
+      ta.n ? num(ta.n) + ' · ' + DH(ta.cents) : 'none logged', '#fff'],
+    ['Our cash exposed at this shop',
+      (imp.exposure_delta_cents >= 0 ? '+' : '−') + DH(Math.abs(imp.exposure_delta_cents)), up ? '#E8A100' : '#4ADE80'],
+    ['Collected on time, last ' + ot.n,
+      ot.n ? ot.on_time + ' of ' + ot.n : 'never collected', ot.n && ot.on_time === ot.n ? '#4ADE80' : '#E8A100'],
+  ];
+  $('cap-trade').innerHTML =
+    '<div style="background:#111113;border:1px solid #26262B;border-radius:11px;padding:6px 14px">'
+    + trade.map(([k, v, c], i) => '<div style="display:flex;align-items:center;padding:9px 0'
+      + (i < 2 ? ';border-bottom:1px solid #1E1E22' : '') + '">'
+      + '<span style="flex:1;font-size:11.5px;color:#9A9CA3">' + k + '</span>'
+      + '<span style="font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums;color:' + c + '">'
+      + v + '</span></div>').join('') + '</div>';
+
+  // "Raising the cap while a 19-day float is sitting there rewards the delay."
+  const gate = imp.settle_first && up;
+  $('cap-warn').innerHTML = !gate ? '' :
+    '<div style="background:rgba(232,161,0,.09);border:1px solid rgba(232,161,0,.28);border-radius:11px;padding:13px 14px">'
+    + '<span style="display:block;font-size:12px;font-weight:700;color:#E8A100">Settle the ' + DH(imp.net_cents) + ' first</span>'
+    + '<span style="display:block;font-size:11.5px;color:#9A9CA3;line-height:1.5;margin-top:5px">Raising the cap while a '
+    + (imp.days_since == null ? 'never-collected' : imp.days_since + '-day') + ' float is sitting there rewards the delay. '
+    + 'Collect, then raise it — the shop keeps the headroom either way.</span></div>';
+
+  // a reason is mandatory on the RISK-INCREASING direction. 0080 enforces it in
+  // SQL too; this only stops the desk finding out by way of an exception.
+  const need = up && !$('cap-reason').value.trim();
+  $('cap-reason-label').textContent = up ? 'REASON · REQUIRED' : 'REASON · OPTIONAL';
+  $('cap-reason-label').style.color = need ? '#E8A100' : '#9A9CA3';
+
+  const save = $('cap-save');
+  save.textContent = same ? 'NO CHANGE' : (up ? 'RAISE IT NOW' : 'LOWER THE CAP');
+  save.dataset.blocked = (need || same) ? '1' : '';
+  // inverted on purpose when the gate fires: the quiet button is the one that
+  // does what they clicked, and the loud one is the better idea.
+  const loud = !gate && !same && !need;
+  save.style.background = loud ? '#E8442E' : '#212125';
+  save.style.color = loud ? '#fff' : '#9A9CA3';
+  $('cap-settle').hidden = !gate;
+  $('cap-settle').textContent = 'SETTLE ' + DH(imp.net_cents) + ' FIRST';
+
+  const owner = d.owner && d.owner.name;
+  $('cap-log').textContent = 'Logged as ' + ((me && me.name) || 'ops')
+    + ' · ' + (owner ? esc(owner) : 'the owner') + ' is told the new limit.';
+}
+
+document.addEventListener('click', async (e) => {
+  if ($('cap-dlg').hidden) return;
+  if (e.target.closest('[data-cap-close]')) { $('cap-dlg').hidden = true; return; }
+
+  const opt = e.target.closest('[data-capopt]');
+  if (opt) { capDlg.cents = Number(opt.dataset.capopt); return drawCapDialog().catch(fail); }
+
+  if (e.target.closest('#cap-settle')) {
+    const net = capDlg.impact.net_cents;
+    if (!confirm('Settle ' + DH(net) + ' from ' + salon.name + ' now?')) return;
+    try {
+      await rpc('admin_settle_float', {
+        p_salon: salon.id, p_amount_cents: net, p_note: 'Collected before a cap change',
+      });
+    } catch (err) { return fail(err); }
+    $('cap-dlg').hidden = true;
+    toast('Collected ' + DH(net) + ' · raise it now if you still want to');
+    return loadSalon().catch(fail);
+  }
+
+  if (e.target.closest('#cap-save')) {
+    if ($('cap-save').dataset.blocked) {
+      return toast(capDlg.cents === capDlg.impact.cap_cents
+        ? 'That is already the cap.' : 'Raising a cap needs a reason.');
+    }
+    try {
+      await rpc('admin_set_float_cap', {
+        p_salon: salon.id, p_cents: capDlg.cents,
+        p_reason: $('cap-reason').value.trim() || null, p_notify: true,
+      });
+    } catch (err) { return fail(err); }
+    $('cap-dlg').hidden = true;
+    toast('Cap is now ' + DH(capDlg.cents) + ' · the owner was told');
+    return loadSalon().catch(fail);
+  }
+});
+
+// typing the reason is what unblocks a raise
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'cap-reason' && !$('cap-dlg').hidden) drawCapDialog().catch(fail);
+});
+
 // ---------------------------------------------------------------- turn 9a --
 // The salon page. Turn 9's rule is that none of the four verbs fires blind, so
 // each block carries the ledger it needs: suspending prints what it destroys,
 // the cap prints the cash it cannot go below, settling prints the last round.
 let salon = null;
-const CAPS = [300000, 400000, 600000];
 
 async function loadSalon() {
   if (!state.salonId) { location.hash = '#/salons'; return; }
@@ -5840,14 +6190,18 @@ function drawSalon() {
     + (live ? '#E8442E' : '#212125') + ';font-size:11.5px;font-weight:800;letter-spacing:.05em;color:'
     + (live ? '#fff' : '#9A9CA3') + '">' + (live ? 'SUSPEND THE SHOP' : 'RESTORE THE SHOP') + '</span>';
 
+  // SAL-21 — the percentage the desk reads must be the one the cap ENFORCES.
+  // `agent_cash_topup` refuses on `net + topup > cap`; this panel printed
+  // float/cap, which reads higher than reality and over-provisions a raise.
+  const capNet = d.float_cents - d.owed_cents;
   $('sl-cap').innerHTML =
     '<span style="font-size:10px;letter-spacing:.1em;font-weight:800;color:#6B6B72">FLOAT CAP</span>'
     + '<div style="display:flex;align-items:baseline;gap:9px;margin-top:7px">'
     + '<span style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums">' + DH(d.cap_cents) + '</span>'
-    + '<span style="font-size:10.5px;color:#6B6B72">holding ' + DH(d.float_cents)
-    + (d.cap_cents ? ' · ' + Math.round(d.float_cents * 100 / d.cap_cents) + '%' : '') + '</span></div>'
+    + '<span style="font-size:10.5px;color:#6B6B72">net ' + DH(capNet)
+    + (d.cap_cents ? ' · ' + Math.round(capNet * 100 / d.cap_cents) + '%' : '') + '</span></div>'
     + '<div style="display:flex;gap:7px;margin-top:10px">'
-    + CAPS.map((c) => '<span data-cap="' + c + '" style="cursor:pointer;flex:1;text-align:center;height:32px;line-height:32px;border-radius:9px;font-size:11.5px;font-weight:700;background:'
+    + capSteps(d.cap_cents).map((c) => '<span data-cap="' + c + '" style="cursor:pointer;flex:1;text-align:center;height:32px;line-height:32px;border-radius:9px;font-size:11.5px;font-weight:700;background:'
       + (d.cap_cents === c ? '#E8442E' : '#212125') + ';color:' + (d.cap_cents === c ? '#fff' : '#9A9CA3') + '">'
       + num(Math.round(c / 100)) + '</span>').join('')
     + '</div>'
@@ -6272,7 +6626,550 @@ const LOAD = {
   'salons/new': loadNewSalon, invites: loadInvites,
   'reliability/deposit': loadBounds,
   'bookings/refunds': loadRefunds,
+  finance: loadFinance,
+  'finance/statement': loadStatement,
+  'finance/corrections': loadCorrections,
 };
+
+// ------------------------------------------------ FIN-14/15 · the run (slice 2) --
+// §2.4: the header equals the sum of the lines. The run refuses to release while
+// any statement disagrees with its own items, and says which shop.
+let run = null;
+let prog = null;
+let openLines = [];
+
+// §7, not negotiable: times read Fri 4 Sep 21:04.
+const FN_D = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const FN_M = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function fnWhen(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return FN_D[d.getDay()] + ' ' + d.getDate() + ' ' + FN_M[d.getMonth()] + ' '
+    + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
+async function loadFinance() {
+  run = await rpc('admin_run', {});
+  // FIN-15 replaces the three totals with three progress bars, so the progress
+  // read only happens once there is something to have progressed.
+  prog = run && run.state !== 'draft'
+    ? await rpc('admin_run_progress', { p_run: run.id })
+    : null;
+  // step 7 — remainders walking towards day 14. Better seen coming than met as
+  // a surprise line on next Friday's run.
+  openLines = await rpc('admin_open_lines', {});
+  drawRun();
+}
+
+const DIRW = { collect: ['Collect', '#E8442E'], pay_out: ['Pay out', '#4ADE80'], nil: ['No visit', '#6B6B72'] };
+const VISITW = {
+  pending: 'Not yet visited', collected: 'Collected', part: 'Part paid',
+  paid: 'Handed over', open: 'Open',
+};
+
+function statCard(label, sub, value, colour, foot) {
+  return '<div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:15px 16px;display:flex;flex-direction:column;gap:5px">'
+    + '<span style="font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#6B6B72">' + label + '</span>'
+    + (sub ? '<span style="font-size:10px;color:#6B6B72;line-height:1.4">' + sub + '</span>' : '')
+    + '<span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;color:' + colour + ';margin-top:2px">' + value + '</span>'
+    + (foot ? '<span style="font-size:10.5px;color:#9A9CA3">' + foot + '</span>' : '')
+    + '</div>';
+}
+
+function drawRun() {
+  if (!run) {
+    $('fn-week').textContent = '';
+    $('fn-state').innerHTML = '';
+    $('fn-release').style.display = 'none';
+    $('fn-sub').textContent = 'No week has been cut yet.';
+    $('fn-stats').innerHTML = '';
+    $('fn-net').innerHTML = '';
+    $('fn-table').innerHTML = '<div style="padding:26px;font-size:12px;color:#6B6B72;line-height:1.6">'
+      + 'Cut this week to build the draft. Every live shop gets a line, including the ones where nothing moved &mdash; a nil week is a fact, not a gap.</div>';
+    $('fn-excl').innerHTML = '';
+    return;
+  }
+  const d = run;
+  const draft = d.state === 'draft';
+
+  $('fn-week').textContent = '\u00b7 week ' + d.week.slice(-2);
+  $('fn-state').innerHTML = draft
+    ? '<span style="height:22px;border-radius:999px;background:#212125;display:flex;align-items:center;padding:0 10px;font-size:10px;font-weight:700;letter-spacing:.08em;color:#9A9CA3">DRAFT</span>'
+    : '<span style="height:22px;border-radius:999px;background:rgba(74,222,128,.12);display:flex;align-items:center;gap:5px;padding:0 10px;font-size:10px;font-weight:700;letter-spacing:.08em;color:#4ADE80">'
+      + '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.4"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>LOCKED &middot; APPEND ONLY</span>';
+
+  $('fn-sub').textContent = draft
+    ? 'Draft \u00b7 covers ' + fnWhen(d.covers_from) + ' \u2192 ' + fnWhen(d.covers_to)
+    : 'Released ' + fnWhen(d.released_at) + (d.released_by ? ' by ' + d.released_by : '');
+
+  $('fn-release').style.display = draft ? 'flex' : 'none';
+  $('fn-release').textContent = 'RELEASE ' + d.shops + ' STATEMENTS';
+  $('fn-cut').style.display = draft ? 'none' : 'flex';
+
+  // Nothing can be collected until someone is given the round: `admin_plan_visits`
+  // existed from the start and had no caller, so every agent's phone was empty.
+  const needsRound = d.lines.filter((l) => l.direction !== 'nil'
+    && l.visit !== 'collected' && l.visit !== 'paid' && !l.on_round).length;
+  $('fn-plan').style.display = draft ? 'none' : 'flex';
+  $('fn-plan').textContent = needsRound
+    ? 'PLAN ' + needsRound + ' VISIT' + (needsRound === 1 ? '' : 'S')
+    : 'ROUND IS PLANNED';
+  $('fn-plan').style.background = needsRound ? '#E8442E' : '#212125';
+  $('fn-plan').style.color = needsRound ? '#fff' : '#6B6B72';
+
+  $('fn-stats').innerHTML = draft
+    ? statCard('IN THE RUN', '', num(d.shops) + ' shops', '#fff',
+        d.exclusions.length
+          ? '<span style="color:#E8A100">' + d.exclusions.length + ' excluded \u00b7 named beside</span>' : '')
+      + statCard('TO COLLECT', 'AGENT TAKES CASH OUT', DH(d.collect_cents), '#E8442E',
+        'from ' + d.collect_shops + ' shops')
+      + statCard('TO PAY OUT', 'AGENT HANDS CASH OVER', DH(d.pay_cents), '#4ADE80',
+        'to ' + d.pay_shops + ' shops')
+    : progCards();
+
+  const net = d.collect_cents - d.pay_cents;
+  $('fn-net').innerHTML =
+    '<div style="background:#141416;border:1px solid #1E1E22;border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:12px">'
+    + '<span style="font-size:12px;font-weight:700">Net across the city this week</span>'
+    + '<span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:'
+    + (net >= 0 ? '#E8442E' : '#4ADE80') + '">' + DH(Math.abs(net)) + (net >= 0 ? ' in' : ' out') + '</span>'
+    + '<span style="flex:1"></span>'
+    + '<span style="font-size:10.5px;color:#6B6B72;text-align:right;line-height:1.45;max-width:320px">'
+    + 'What the shops hold of ours, less the deposits they earned. One number per shop, and it can point either way.</span></div>';
+
+  // §2.4 surfaced BEFORE the button rather than at it
+  const bad = d.imbalance || [];
+  const head = '<div style="display:flex;align-items:center;height:34px;padding:0 16px;background:#141416;border-bottom:1px solid #1E1E22;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#6B6B72">'
+    + '<span style="width:190px">SHOP</span><span style="width:100px;text-align:right">THEY HOLD</span>'
+    + '<span style="width:100px;text-align:right">THEY EARNED</span><span style="width:78px;text-align:right">CARRIED</span>'
+    + '<span style="width:115px;text-align:right">ONE NUMBER</span><span style="flex:1;padding-left:16px">VISIT</span></div>';
+
+  $('fn-table').innerHTML = head + (d.lines.length ? d.lines.map((l) => {
+    const [word, colour] = DIRW[l.direction];
+    const late = l.age_days != null && l.age_days > 14;
+    return '<div data-line="' + l.id + '" style="cursor:pointer;display:flex;align-items:center;min-height:44px;padding:0 16px;border-bottom:1px solid #1E1E22;font-variant-numeric:tabular-nums">'
+      + '<span style="width:190px;font-size:12px;font-weight:600">' + esc(l.salon)
+      + '<span style="display:block;font-size:9.5px;color:#3A3A40;font-weight:400">' + l.ref + '</span></span>'
+      + '<span style="width:100px;text-align:right;font-size:11.5px;color:#9A9CA3">' + DH(l.hold_cents) + '</span>'
+      + '<span style="width:100px;text-align:right;font-size:11.5px;color:#9A9CA3">' + DH(l.earned_cents) + '</span>'
+      + '<span style="width:78px;text-align:right;font-size:11.5px;color:' + (l.carried_cents ? '#E8A100' : '#3A3A40') + '">'
+      + (l.carried_cents ? DH(l.carried_cents) : '\u2014') + '</span>'
+      + '<span style="width:115px;text-align:right;font-size:12.5px;font-weight:700;color:' + colour + '">'
+      + DH(Math.abs(l.amount_cents)) + '</span>'
+      + '<span style="flex:1;padding-left:16px;display:flex;align-items:center;gap:8px">'
+      + '<span style="font-size:11px;font-weight:700;color:' + colour + '">' + word + '</span>'
+      + '<span style="font-size:10.5px;color:#6B6B72">' + (draft
+          ? (l.age_days == null ? '' : (late ? '' : '') + 'oldest dirham day ' + l.age_days + ' of 14')
+          : (l.direction === 'nil' ? 'Closed'
+             : VISITW[l.visit]
+               + (l.collected_cents != null ? ' \u00b7 ' + DH(l.collected_cents) + ' taken' : '')
+               + (l.visit === 'part'
+                   ? ' \u00b7 ' + DH(Math.abs(l.amount_cents) - l.collected_cents) + ' open' : '')
+               + (l.agent ? ' \u00b7 ' + l.agent : '')
+               + (l.settled_at ? ' \u00b7 ' + fnWhen(l.settled_at) : '')
+               + ((l.receipts || []).length
+                   ? ' \u00b7 ' + l.receipts.map((rc) => rc.ref + ' '
+                       + (rc.verified_by === 'signature' ? 'signed'
+                          : rc.verified_by === 'ops_call' ? 'by ops call' : 'code')).join(' \u00b7 ')
+                   : '')
+               + (l.on_round && l.visit !== 'collected' && l.visit !== 'paid'
+                   ? ' \u00b7 with ' + esc(l.on_round) : ''))) + '</span>'
+      + (late && draft ? '<span style="font-size:10px;font-weight:700;color:#E8A100">OVER 14</span>' : '')
+      + (!draft && l.direction !== 'nil' && l.visit !== 'collected' && l.visit !== 'paid'
+          ? '<span data-settle-line="' + l.id + '" data-open="'
+            + (Math.abs(l.amount_cents) - (l.collected_cents || 0)) + '" data-word="'
+            + (l.direction === 'collect' ? 'Collect' : 'Hand over')
+            + '" style="cursor:pointer;height:24px;border-radius:7px;background:#212125;display:flex;align-items:center;padding:0 10px;font-size:10px;font-weight:700;color:#fff">'
+            + (l.direction === 'collect' ? 'RECORD COLLECTION' : 'RECORD HANDOVER') + '</span>'
+          : '')
+      + '</span></div>';
+  }).join('') : '<div style="padding:24px;font-size:12px;color:#6B6B72">No shop had a line this week.</div>');
+
+  // §2.2 — sentences, not a count. "38 of 42" is the number that gets a run
+  // released by mistake.
+  $('fn-excl').innerHTML = (bad.length ? '<div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.4);border-radius:14px;padding:15px 16px;display:flex;flex-direction:column;gap:8px;margin-bottom:14px">'
+      + '<span style="font-size:12px;font-weight:700;color:#F87171">This run cannot be released</span>'
+      + bad.map((b) => '<span style="font-size:11px;line-height:1.5;color:#9A9CA3">'
+        + esc(b.salon) + '\u2019s statement says ' + DH(b.line_cents) + ' but its lines add to '
+        + DH(b.items_cents) + '. A difference with no line under it is a bug, not a rounding.</span>').join('')
+      + '</div>' : '')
+    + (d.exclusions.length
+      ? '<div style="background:#17171A;border:1px solid rgba(248,113,113,.4);border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:11px">'
+        + '<span style="font-size:12.5px;font-weight:700;color:#F87171">' + d.exclusions.length + ' shops are not in this run</span>'
+        + d.exclusions.map((x) => '<span style="font-size:11px;line-height:1.55;color:#9A9CA3;padding-top:9px;border-top:1px solid #1E1E22">'
+          + esc(x.sentence) + '</span>').join('')
+        + '</div>'
+      : '');
+
+  // §3.2: the remainder stays on its own line, then carries — it never becomes a
+  // separate debt to chase, because a second ledger is a second truth.
+  $('fn-open').innerHTML = !(openLines || []).length ? '' :
+    '<div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:10px">'
+    + '<span style="font-size:12.5px;font-weight:700">Still open from earlier weeks</span>'
+    + openLines.slice(0, 6).map((o) => '<div style="display:flex;flex-direction:column;gap:3px;padding-top:9px;border-top:1px solid #1E1E22">'
+      + '<div style="display:flex;align-items:baseline;gap:7px">'
+      + '<span style="flex:1;font-size:11.5px;font-weight:600">' + esc(o.salon) + '</span>'
+      + '<span style="font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;color:'
+      + (o.days > o.limit_days ? '#E8A100' : '#fff') + '">' + DH(o.open_cents) + '</span></div>'
+      + '<span style="font-size:10.5px;color:#6B6B72;line-height:1.45">Week ' + o.week.slice(-2)
+      + ' · ' + (o.visit === 'part' ? DH(o.collected_cents) + ' already taken · ' : '')
+      + 'day ' + o.days + ' of ' + o.limit_days
+      + (o.carried ? ' · already carried forward'
+         : o.days > o.limit_days ? ' · carries at the next cut'
+         : ' · carries ' + o.carries_on) + '</span></div>').join('')
+    + '<span style="font-size:10.5px;line-height:1.5;color:#6B6B72;border-top:1px solid #1E1E22;padding-top:9px">A remainder stays on its own line until its week is '
+    + (openLines[0] ? openLines[0].limit_days : 14) + ' days old, then carries onto the week being cut. It never moves into a separate debt to chase — there is one number per shop per week and this is part of it.</span></div>';
+}
+
+// FIN-15: 8 940 collected + 12 540 still with the shops = the 21 480 run. The
+// third card is amber because that is our cash in someone else's till, not a
+// balance.
+function bar(pct, colour) {
+  return '<div style="height:5px;border-radius:3px;background:#212125;margin-top:8px;overflow:hidden">'
+    + '<span style="display:block;height:5px;border-radius:3px;background:' + colour
+    + ';width:' + Math.max(0, Math.min(100, pct)) + '%"></span></div>';
+}
+
+function progCards() {
+  const p = prog || {};
+  const cpct = p.collect_cents ? Math.round(p.collected_cents * 100 / p.collect_cents) : 0;
+  const ppct = p.pay_cents ? Math.round(p.paid_cents * 100 / p.pay_cents) : 0;
+  const opct = p.collect_cents ? Math.round(p.open_cents * 100 / p.collect_cents) : 0;
+  return statCard('COLLECTED', '', DH(p.collected_cents), '#4ADE80',
+      'of ' + DH(p.collect_cents) + ' \u00b7 ' + p.collect_done + ' of ' + p.collect_shops + ' visits'
+      + bar(cpct, '#4ADE80'))
+    + statCard('PAID OUT', '', DH(p.paid_cents), '#4ADE80',
+      (p.pay_done === p.pay_shops && p.pay_shops ? 'all ' : '') + p.pay_done + ' of ' + p.pay_shops + ' shops'
+      + bar(ppct, '#4ADE80'))
+    + statCard('STILL WITH THE SHOPS', '', DH(p.open_cents), '#E8A100',
+      p.open_shops + ' shops'
+      + (p.oldest_days != null ? ' \u00b7 oldest dirham day ' + p.oldest_days + ' of 14' : '')
+      + bar(opct, '#E8A100'));
+}
+
+document.addEventListener('click', async (e) => {
+  if (e.target.closest('#fn-cut')) {
+    if (!confirm('Cut the week that just closed? Every live shop gets a line, and the draft can be read before anything is released.')) return;
+    try {
+      const r = await rpc('admin_cut_run', {});
+      toast('Week ' + r.week.slice(-2) + ' cut \u00b7 ' + r.lines + ' lines, ' + r.excluded + ' excluded');
+    } catch (err) { return fail(err); }
+    return loadFinance().catch(fail);
+  }
+  if (e.target.closest('#fn-release') && run) {
+    if ((run.imbalance || []).length) {
+      return toast('A statement disagrees with its own lines. Nothing can be released.');
+    }
+    if (!confirm('Release ' + run.shops + ' statements for week ' + run.week.slice(-2) + '?\n\n'
+      + DH(run.collect_cents) + ' to collect from ' + run.collect_shops + ' shops, '
+      + DH(run.pay_cents) + ' to hand over to ' + run.pay_shops + '.\n\n'
+      + 'This cannot be partially undone. A correction after this is a new line on the next week.')) return;
+    try {
+      const r = await rpc('admin_release_run', { p_run: run.id });
+      toast('Week ' + r.week.slice(-2) + ' released \u00b7 ' + r.shops + ' statements');
+    } catch (err) { return fail(err); }
+    return loadFinance().catch(fail);
+  }
+
+  const st = e.target.closest('[data-settle-line]');
+  if (st) {
+    const open = Number(st.dataset.open);
+    // §3.2's part payment: what actually crossed, which is not always the line.
+    const said = prompt(st.dataset.word + ' how much? ' + DH(open) + ' is open on this line.\n'
+      + 'A smaller amount is recorded as a part payment and the rest stays on the line.',
+      String(Math.round(open / 100)));
+    if (said == null) return;
+    const cents = Math.round(Number(said) * 100);
+    if (!cents || cents <= 0) return toast('That is not an amount.');
+    const receipt = prompt('Receipt reference (optional)', '') || null;
+    try {
+      const r = await rpc('admin_settle_line', {
+        p_line: st.dataset.settleLine, p_cents: cents,
+        p_declared_cents: null, p_receipt: receipt,
+      });
+      toast(r.open_cents > 0
+        ? DH(r.taken_cents) + ' taken \u00b7 ' + DH(r.open_cents) + ' still open'
+        : r.salon + ' is settled');
+    } catch (err) { return fail(err); }
+    return loadFinance().catch(fail);
+  }
+
+  // a line row opens its own statement, not the shop page: the statement is
+  // the thing that has to be checkable line by line.
+  const ln = e.target.closest('[data-line]');
+  if (ln) {
+    state.lineId = ln.dataset.line;
+    location.hash = '#/finance/statement';
+  }
+});
+
+// --------------------------------------------------- FIN-16 · the statement --
+// §3: FIN-16 and the owner's OSH-17 are the same statement on two surfaces, and
+// they read the same builder (statement_json). If they ever disagree it is a
+// rendering bug, because there is no second query to disagree through.
+let stmt = null;
+
+async function loadStatement() {
+  if (!state.lineId) { location.hash = '#/finance'; return; }
+  stmt = await rpc('admin_statement', { p_line: state.lineId });
+  drawStatement();
+}
+
+function smRow(label, ref, at, cents, opts) {
+  const o = opts || {};
+  return '<div style="display:flex;align-items:center;min-height:38px;padding:0 18px;border-bottom:1px solid #1E1E22;font-variant-numeric:tabular-nums">'
+    + '<span style="flex:1;min-width:0;font-size:11.5px;color:' + (o.strong ? '#fff' : '#9A9CA3') + '">' + esc(label) + '</span>'
+    + '<span style="width:118px;font-size:10.5px;color:#6B6B72">' + esc(ref || '') + '</span>'
+    + '<span style="width:150px;font-size:10.5px;color:#6B6B72">' + (at ? fnWhen(at) : '') + '</span>'
+    + '<span style="width:96px;text-align:right;font-size:12px;font-weight:700;color:' + (o.colour || '#fff') + '">'
+    + (o.sign || '') + DH(Math.abs(cents)) + '</span></div>';
+}
+
+function smHead(label, total, colour) {
+  return '<div style="display:flex;align-items:center;height:34px;padding:0 18px;background:#141416;border-top:1px solid #1E1E22;border-bottom:1px solid #1E1E22">'
+    + '<span style="flex:1;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#6B6B72">' + label + '</span>'
+    + '<span style="font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:' + colour + '">'
+    + total + '</span></div>';
+}
+
+function drawStatement() {
+  const d = stmt;
+  if (!d) { $('sm-body').innerHTML = '<div style="padding:24px;font-size:12px;color:#6B6B72">No statement.</div>'; return; }
+  const collect = d.direction === 'collect';
+  const nil = d.direction === 'nil';
+  const accent = nil ? '#6B6B72' : (collect ? '#E8442E' : '#4ADE80');
+
+  $('sm-name').textContent = d.salon + ' \u00b7 week ' + d.week.slice(-2);
+  $('sm-ref').textContent = d.ref + (d.released_at ? ' \u00b7 released ' + fnWhen(d.released_at) : '')
+    + (d.settled_at ? ' \u00b7 ' + (collect ? 'collected ' : 'handed over ') + fnWhen(d.settled_at) : '');
+
+  // §2.7 — the owing direction is a different sentence, not a sign
+  $('sm-hero').innerHTML =
+    '<div style="background:#17171A;border:1px solid ' + (nil ? '#1E1E22' : accent + '55')
+    + ';border-radius:14px;padding:19px 20px;display:flex;flex-direction:column;gap:7px">'
+    + '<span style="font-size:9.5px;letter-spacing:.13em;font-weight:700;color:' + accent + '">'
+    + (nil ? 'NOTHING MOVED THIS WEEK' : collect ? 'TO COLLECT FROM THIS SHOP' : 'TO HAND OVER TO THIS SHOP') + '</span>'
+    + '<span style="font-family:\'Playfair Display\',serif;font-weight:700;font-size:38px;font-variant-numeric:tabular-nums;line-height:1.1">'
+    + DH(d.total_cents) + '</span>'
+    + '<span style="font-size:11.5px;line-height:1.55;color:#9A9CA3">'
+    + (d.settled_at
+        ? esc(d.agent || 'An agent') + (collect ? ' counted it out of the till ' : ' handed it over ')
+          + fnWhen(d.settled_at) + (d.receipt_ref ? ' and left receipt ' + esc(d.receipt_ref) : '') + '. '
+        : '')
+    + (nil ? 'A nil week is a fact, not a gap \u2014 the shop still gets a statement saying so.'
+           : 'This is the only number the owner is asked to trust; everything below explains it and nothing below contradicts it.')
+    + '</span></div>';
+
+  const fl = d.float_lines || [], el = d.earned_lines || [], cl = d.carried_lines || [];
+  let body = smHead(collect ? 'OUR FLOAT SITTING IN THEIR TILL' : 'OUR FLOAT IN THEIR TILL',
+                    DH(d.hold_cents), '#fff')
+    + fl.map((x) => smRow(x.label, x.ref, x.at, x.cents)).join('')
+    + smHead('DEPOSITS THE SHOP EARNED', '\u2212 ' + DH(d.earned_cents), '#fff')
+    + el.map((x) => smRow(x.label, x.ref, x.at, x.cents,
+        x.kind === 'refund' ? { colour: '#4ADE80', sign: '+ ' } : { sign: '\u2212 ' })).join('');
+
+  // §2.4: the subtotal is named, and it is only on the page because a carried
+  // line follows it. No carry, no subtotal — one number with its lines under it.
+  if (cl.length) {
+    body += '<div style="display:flex;align-items:center;height:40px;padding:0 18px;border-bottom:1px solid #1E1E22;font-variant-numeric:tabular-nums">'
+      + '<span style="flex:1;font-size:12px;font-weight:600">This week\u2019s movement</span>'
+      + '<span style="width:96px;text-align:right;font-size:13px;font-weight:700">' + DH(d.subtotal_cents) + '</span></div>'
+      + cl.map((x) => smRow(x.label, x.ref, x.at, x.cents,
+          { colour: '#E8A100', sign: x.cents >= 0 ? '+ ' : '\u2212 ', strong: true })).join('');
+  }
+
+  body += '<div style="display:flex;align-items:center;height:52px;padding:0 18px;background:#141416;font-variant-numeric:tabular-nums">'
+    + '<span style="flex:1;font-size:13px;font-weight:700">' + (collect ? 'To collect' : nil ? 'Nothing to move' : 'To hand over') + '</span>'
+    + '<span style="font-size:17px;font-weight:800;color:' + accent + '">' + DH(d.total_cents) + '</span></div>';
+  $('sm-body').innerHTML = body;
+
+  const lw = d.last_week;
+  $('sm-last').innerHTML = !lw ? '' :
+    '<div style="background:#141416;border:1px solid #1E1E22;border-radius:12px;padding:13px 16px;display:flex;align-items:center;gap:12px">'
+    + '<span style="font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#6B6B72">LAST WEEK</span>'
+    + '<span style="font-size:11.5px;color:#9A9CA3">Week ' + lw.week.slice(-2) + ' \u00b7 '
+    + (lw.direction === 'collect' ? 'this shop handed us ' : 'we handed this shop ')
+    + '<strong style="color:#fff;font-variant-numeric:tabular-nums">' + DH(lw.total_cents) + '</strong></span>'
+    + '<span style="flex:1"></span>'
+    + '<span style="font-size:10.5px;color:#6B6B72">Closed'
+    + (cl.length ? ' \u00b7 untouched by the ' + DH(Math.abs(cl[0].cents)) + ' above' : '') + '</span></div>';
+
+  $('sm-trust').innerHTML = cl.length
+    ? '<strong style="color:#fff">' + DH(d.total_cents) + '</strong> is what crosses the counter. '
+      + '<strong style="color:#D8D8DC">' + DH(d.subtotal_cents) + '</strong> is a named subtotal \u2014 this week\u2019s movement \u2014 '
+      + 'and it is only on the page because a carried line follows it. The bottom number always equals the lines above it; if it does not, that is a bug, not a rounding.'
+    : 'One number, and the lines under it add to exactly that. Nothing was carried into this week, so there is no subtotal to name \u2014 a smaller number at the top with no line explaining it is the failure mode, not a rounding.';
+
+  $('sm-age').innerHTML = d.oldest_at == null
+    ? 'Nothing of ours is sitting in this till.'
+    : 'The clock starts at <strong style="color:#fff">' + fnWhen(d.oldest_at) + '</strong>, the first movement nobody has settled \u2014 <strong style="color:'
+      + (d.age_days > d.hold_limit_days ? '#E8A100' : '#fff') + '">day ' + d.age_days + ' of ' + d.hold_limit_days
+      + '</strong>. Measuring from the last collection would restart the clock at every top-up, and a shop that tops up most days could hold our money forever and never be late.';
+}
+
+document.addEventListener('click', (e) => {
+  const sh = e.target.closest('#sm-shop');
+  if (sh && stmt) { state.salonId = stmt.salon_id; location.hash = '#/salon'; }
+});
+
+// --------------------------------------------------- FIN-17 · corrections --
+// §2.8: the released week is never edited. A refund that arrives after a week
+// went out becomes its own line on the next one, carrying the old booking's
+// reference and both times. Ops chooses the week and nothing else.
+let corrections = null;
+
+async function loadCorrections() {
+  const [rows, r] = await Promise.all([
+    rpc('admin_corrections', { p_limit: 20 }),
+    rpc('admin_run', {}),
+  ]);
+  corrections = rows || [];
+  run = r;
+  drawCorrections();
+}
+
+function drawCorrections() {
+  const draft = run && run.state === 'draft' ? run : null;
+  const pending = corrections.filter((c) => !c.landed);
+  $('cx-sub').textContent = pending.length
+    ? pending.length + ' waiting for a week to land on'
+    : 'Nothing waiting';
+
+  $('cx-list').innerHTML = corrections.length ? corrections.map((c) => {
+    const tl = (c.timeline || []).filter((x) => x.at || x.what);
+    return '<div style="background:#17171A;border:1px solid ' + (c.landed ? '#1E1E22' : 'rgba(232,161,0,.34)')
+      + ';border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:14px">'
+
+      // header
+      + '<div style="display:flex;align-items:baseline;gap:10px">'
+      + '<span style="font-size:13px;font-weight:700">' + esc(c.salon) + '</span>'
+      + '<span style="font-size:11px;color:#6B6B72">' + esc(c.booking_ref)
+      + ' \u00b7 refunded after week ' + c.source_week.slice(-2) + ' was settled</span>'
+      + '<span style="flex:1"></span>'
+      + '<span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:#E8A100">+ '
+      + DH(c.amount_cents) + '</span></div>'
+
+      // 1 · what happened, in order
+      + '<div style="display:flex;flex-direction:column">'
+      + tl.map((x, i) => '<div style="display:flex;gap:14px;padding:7px 0">'
+        + '<span style="width:118px;flex:none;font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">'
+        + (x.at ? fnWhen(x.at) : '\u2014') + '</span>'
+        + '<span style="width:1px;flex:none;background:' + (i === tl.length - 1 ? 'transparent' : '#26262B') + ';position:relative">'
+        + '<span style="position:absolute;left:-2px;top:4px;width:5px;height:5px;border-radius:999px;background:'
+        + (i === tl.length - 1 ? '#E8A100' : '#3A3A40') + '"></span></span>'
+        + '<span style="flex:1;font-size:11.5px;line-height:1.5;color:'
+        + (i === tl.length - 1 ? '#D8D8DC' : '#9A9CA3') + '">' + esc(x.what) + '</span></div>').join('')
+      + '</div>'
+
+      // 2 · two ways out, and one of them is not offered as a permission
+      + (c.landed ? '' :
+        '<div style="display:flex;gap:12px">'
+        + '<div style="flex:1;border:1px dashed #3A3A40;border-radius:12px;padding:13px 14px;display:flex;flex-direction:column;gap:6px;opacity:.62">'
+        + '<span style="font-size:11.5px;font-weight:700;color:#6B6B72;text-decoration:line-through">Edit week '
+        + c.source_week.slice(-2) + '</span>'
+        + '<span style="font-size:10.5px;line-height:1.5;color:#6B6B72">Refused, and not offered as a permission. The statement is released and the cash is counted; changing it now leaves the receipt in the owner\u2019s drawer describing a week that no longer exists.</span></div>'
+        + '<div style="flex:1;border:1px solid #E8442E;border-radius:12px;padding:13px 14px;display:flex;flex-direction:column;gap:6px">'
+        + '<span style="font-size:11.5px;font-weight:700">Carry it onto '
+        + (draft ? 'week ' + draft.week.slice(-2) : 'the next week') + '</span>'
+        + '<span style="font-size:10.5px;line-height:1.5;color:#9A9CA3">One new line on the next statement, carrying the old booking\u2019s reference and both times. Last week stays exactly as the owner received it. This is the only way money moves backwards in Sterncut.</span></div>'
+        + '</div>')
+
+      // 3 · the line this will create, or did
+      + '<div style="background:#141416;border:1px solid #1E1E22;border-radius:11px;padding:12px 14px">'
+      + '<span style="display:block;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#6B6B72;margin-bottom:9px">'
+      + (c.landed ? 'THE LINE ON THE STATEMENT' : 'THE LINE THIS WILL CREATE') + '</span>'
+      + '<div style="display:flex;align-items:center;font-variant-numeric:tabular-nums">'
+      + '<span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;color:#D8D8DC">'
+      + esc(c.label) + '</span>'
+      + '<span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">'
+      + esc(c.booking_ref) + (c.case_no ? ' \u00b7 case ' + esc(c.case_no) : '') + '</span></span>'
+      + '<span style="font-size:12.5px;font-weight:700;color:#E8A100">+ ' + DH(c.amount_cents) + '</span></div></div>'
+
+      // 4 · the act
+      + (c.landed
+        ? '<span style="font-size:10.5px;color:#4ADE80">Already on a statement. The owner is told once, when that week is cut \u2014 a mid-week message about '
+          + DH(c.amount_cents) + ' is a fright, not a service.</span>'
+        : '<div style="display:flex;align-items:center;gap:12px">'
+          + '<span style="flex:1;font-size:10.5px;line-height:1.45;color:#6B6B72">The amount is read off the refund, never typed. You are choosing the week and nothing else.</span>'
+          + (draft
+            ? '<span data-carry="' + c.booking_id + '" style="cursor:pointer;height:34px;flex:none;border-radius:9px;background:#E8442E;color:#fff;display:flex;align-items:center;padding:0 15px;font-size:11.5px;font-weight:800;letter-spacing:.05em">CUT THE LINE ONTO WEEK '
+              + draft.week.slice(-2) + '</span>'
+            : '<span style="height:34px;flex:none;border-radius:9px;background:#212125;color:#6B6B72;display:flex;align-items:center;padding:0 15px;font-size:11.5px;font-weight:700">NO DRAFT WEEK YET</span>'))
+      + '</div>';
+  }).join('')
+    : '<div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:26px;font-size:12px;line-height:1.6;color:#6B6B72">'
+      + 'No refund has landed against a week that was already settled. A refund inside its own week nets out on that week\u2019s statement and never becomes a correction.</div>';
+}
+
+document.addEventListener('click', async (e) => {
+  const cy = e.target.closest('[data-carry]');
+  if (!cy || !run) return;
+  const c = corrections.find((x) => x.booking_id === cy.dataset.carry);
+  if (!confirm('Put ' + DH(c.amount_cents) + ' on ' + c.salon + '\u2019s week '
+    + run.week.slice(-2) + ' statement?\n\nWeek ' + c.source_week.slice(-2)
+    + ' is not touched. The owner is told when this week is cut.')) return;
+  try {
+    await rpc('admin_carry_correction', { p_booking: c.booking_id, p_run: run.id });
+    toast('Carried onto week ' + run.week.slice(-2));
+  } catch (err) { return fail(err); }
+  return loadCorrections().catch(fail);
+});
+
+// --------------------------------------------- planning a round (slice 2) --
+// `admin_plan_visits` has existed since 0091 with nothing calling it, which
+// means every agent's phone has been empty and none of AGT-01…05 could be
+// reached. One picker closes that.
+async function planRound() {
+  if (!run || run.state === 'draft') return toast('Release the week first.');
+  const agents = await rpc('admin_agents', {});
+  if (!agents.length) {
+    return toast('Nobody has the agent role yet. Set one in Barbers first.');
+  }
+  const list = agents.map((a, i) =>
+    (i + 1) + ') ' + a.name + ' \u2014 carrying ' + DH(a.in_bag_cents)
+    + (a.open_visits ? ' \u00b7 ' + a.open_visits + ' still open' : '')).join('\n');
+  const pick = prompt('Who is driving this round?\n\n' + list + '\n\nType a number:', '1');
+  if (pick == null) return;
+  const a = agents[Number(pick) - 1];
+  if (!a) return toast('No agent with that number.');
+
+  // §2.4: a round is planned against what he is ALREADY carrying, so nobody is
+  // sent out already over the cap.
+  const toCollect = run.lines
+    .filter((l) => l.direction === 'collect' && !l.on_round
+      && l.visit !== 'collected' && l.visit !== 'paid')
+    .reduce((n, l) => n + (Math.abs(l.amount_cents) - (l.collected_cents || 0)), 0);
+  const cap = (run.cap_cents || 1200000);
+  const warn = a.in_bag_cents + toCollect > cap
+    ? '\n\nHe is carrying ' + DH(a.in_bag_cents) + ' and this round collects '
+      + DH(toCollect) + '. He will need to drop at the office partway.'
+    : '';
+
+  const win = prompt('Visit window today, as HH:MM-HH:MM. Leave blank for no window.', '17:00-20:00');
+  if (win == null) return;
+  let from = null, to = null;
+  const m = /^(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})$/.exec(win.trim());
+  if (win.trim() && !m) return toast('Windows read like 17:00-20:00.');
+  if (m) {
+    const d0 = new Date(); d0.setHours(Number(m[1]), Number(m[2]), 0, 0);
+    const d1 = new Date(); d1.setHours(Number(m[3]), Number(m[4]), 0, 0);
+    from = d0.toISOString(); to = d1.toISOString();
+  }
+
+  if (!confirm('Give ' + a.name + ' this round?' + warn
+    + '\n\nEvery unvisited shop on week ' + run.week.slice(-2) + ' goes on his phone.')) return;
+  try {
+    const r = await rpc('admin_plan_visits', {
+      p_run: run.id, p_agent: a.id, p_from: from, p_to: to,
+    });
+    toast(r.planned ? r.planned + ' visit(s) on ' + a.name + "'s phone" : 'Nothing left to plan');
+  } catch (err) { return fail(err); }
+  return loadFinance().catch(fail);
+}
+
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#fn-plan')) planRound().catch(fail);
+});
 
 // turn 3 clicks
 document.addEventListener('click', (e) => {

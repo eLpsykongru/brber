@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Noto+Kufi+Arabic:wght@400;500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+html{background:#0D0D0F}
+body{margin:0;background:#0D0D0F;font-family:Inter,system-ui,sans-serif}
+a{color:#E8442E;text-decoration:none}a:hover{color:#C33421}
+.dv-turn{padding:38px 44px 30px;scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#fff;color:#111;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 14px/1.2 Inter,sans-serif;color:#fff}
+.dv-note{font:400 12px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:760px;margin:0 0 26px}
+.dv-src{font:400 10.5px/1.4 Inter,sans-serif;color:rgba(255,255,255,.6);opacity:.55;margin:-18px 0 22px}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(255,255,255,.12);color:#fff;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 Inter,sans-serif;color:rgba(255,255,255,.6)}
+.dv-opt:target .dv-oid{background:#E8442E;color:#fff}
+.dv-next{flex-basis:100%;margin:24px 0 0;font:12px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6)}
+.dv-nav{display:flex;flex-wrap:wrap;gap:6px;padding:12px 44px 0}
+</style>
+</helmet>
+<div style="padding:32px 44px 0">
+<a href="./Index.dc.html" style="font:600 10px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.6)">← All pages</a>
+<div style="font-family:'Playfair Display',serif;font-weight:700;font-size:27px;letter-spacing:.02em;text-transform:uppercase;color:#fff;margin:10px 0 0">Owner · Shop</div>
+<div style="font:400 12px Inter,sans-serif;color:rgba(255,255,255,.6);margin:6px 0 0">18 current · 3 new in slice 2 settlement</div>
+</div>
+<div class="dv-nav"><a href="./Owner - Shop.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:#E8442E;color:#fff;text-decoration:none">Shop</a><a href="./Owner - Barbers.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Barbers</a><a href="./Owner - Services.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Services</a><a href="./Owner - Reviews.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Reviews</a><a href="./Owner - Reports.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Reports</a></div>
+<div class="dv-nav" style="padding-top:0;opacity:.75"><span style="font:700 9.5px Inter,sans-serif;letter-spacing:.14em;color:rgba(255,255,255,.6);align-self:center;margin-right:4px">BARBER</span><a href="./Barber - Onboarding.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Onboarding</a><a href="./Barber - Today.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Today</a><a href="./Barber - My Day.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">My day</a><a href="./Barber - Clients.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Clients</a><a href="./Barber - Messages.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Messages</a><a href="./Barber - My Services.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">My services</a><a href="./Barber - My Work.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">My work</a><a href="./Barber - Reviews.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Reviews</a><a href="./Barber - Float.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Float</a><a href="./Barber - Earnings.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Earnings</a><a href="./Barber - Waitlist.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Waitlist</a><a href="./Barber - Notifications.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Notifs</a><a href="./Barber - Support.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Support</a><a href="./Barber - Profile.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Profile</a><a href="./Barber - System States.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">System</a></div>
+<div style="height:1px;background:rgba(255,255,255,.14);margin:20px 0 0"></div>
+<section class="dv-turn" id="T8">
+<div class="dv-thd"><a class="dv-tid" href="#T8">T8</a><span class="dv-tname">Slice 2 &middot; the Friday number, in both directions</span></div>
+<p class="dv-note">The owner&rsquo;s side of <a class="dv-oid" href="./Sterncut Ops - Finance.dc.html#FIN-16">FIN-16</a>. One number per week, and it can point either way: <a class="dv-oid" href="#OSH-16">OSH-16</a> is the week Sterncut hands Youssef cash, <a class="dv-oid" href="#OSH-17">OSH-17</a> is the week he hands cash back.<br><br><strong>The owing direction is not a minus sign on the paid layout.</strong> It is a different sentence, a different colour and a different action &mdash; nothing to receive and sign for, but an amount to have ready in the till before Friday evening. It also needs a sentence the paid screen does not: this is not a bill. Sterncut charges nothing; the money going back is our own float, which his barbers took over the counter as wallet top-ups. Getting that wrong turns a bookkeeping event into a fee, and a fee he never agreed to.<br><br><strong>Every deduction carries a reference and a time.</strong> Four cash top-ups with the barber&rsquo;s name and the minute he took the money, and a refund with the booking, the cut time and the refund time. A smaller number at the top with no lines under it is what makes an owner call the office; the point of the lines is that he can check any one of them against his own day.<br><br><strong>The total is the sum of the lines, always.</strong> <span style="font-variant-numeric:tabular-nums">1 566 DH</span> is what he puts on the counter. <span style="font-variant-numeric:tabular-nums">1 514 DH</span> is labelled <em>this week</em> and exists only because a carried line follows it &mdash; see <a class="dv-oid" href="#OSH-18">OSH-18</a>, where a refund issued after week 35 had already been paid out comes back as its own line rather than as an edit to a week he has already counted in his hand.</p>
+<p class="dv-note" style="color:#E8A100"><strong>Not drawn:</strong> no Sterncut fee or commission line on either statement &mdash; v1 charges nothing, and the whole design rests on that being visibly true. No pass balances. No bank or RIB anywhere: both directions are an agent, a till and a signature. <strong>Missing state:</strong> the &ldquo;this isn&rsquo;t right&rdquo; button on <a class="dv-oid" href="#OSH-18">OSH-18</a> opens a support case, because the product has no dispute state on a statement line. That is what is drawn; a real dispute needs a state on the line, a rule about who decides, and a message when it closes.</p>
+<p class="dv-src">slice 2 &middot; settlement</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="OSH-16"><div class="dv-olabel"><a class="dv-oid" href="#OSH-16">OSH-16</a>Week 35 &mdash; Sterncut hands him cash</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="OSH-16" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:60px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:17px;font-weight:700">Friday statement</span>
+      <span style="width:38px;flex:none"></span>
+    </div>
+
+    <div style="background:#17171A;border:1px solid rgba(74,222,128,.32);border-radius:22px;padding:18px 16px 16px;display:flex;flex-direction:column;gap:11px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:9.5px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WEEK 35 &middot; WE OWE YOU</span>
+        <span style="font-size:9px;letter-spacing:.1em;font-weight:700;color:#4ADE80;background:rgba(74,222,128,.14);border-radius:5px;padding:3px 7px">PAID</span>
+      </div>
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:46px;line-height:1;letter-spacing:.01em;font-variant-numeric:tabular-nums">1 720 DH</span>
+      <span style="font-size:12px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">Hicham brought it on <strong>Saturday at 12:40</strong>. You counted it with him and signed. Receipt <span style="font-variant-numeric:tabular-nums">SR-1104</span>.</span>
+      <span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">Covers Fri 21 Aug 21:00 &rarr; Fri 28 Aug 21:00</span>
+    </div>
+
+    <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">HOW IT ADDS UP</span>
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:18px;padding:3px 15px">
+      <div style="display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid #1E1E22">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">Deposits you earned</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px;font-variant-numeric:tabular-nums">41 cuts &middot; STC-4402 &rarr; 4488</span></span>
+        <span style="font-size:14px;font-weight:700;flex:none;font-variant-numeric:tabular-nums">3 240 DH</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #1E1E22">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Cash top-up &middot; Youssef</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:2px;font-variant-numeric:tabular-nums">WLT-8712 &middot; Sat 22 Aug 10:40</span></span>
+        <span style="font-size:12.5px;font-weight:600;color:#9A9CA3;flex:none;font-variant-numeric:tabular-nums">&minus; 300 DH</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #1E1E22">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Cash top-up &middot; Karim</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:2px;font-variant-numeric:tabular-nums">WLT-8748 &middot; Mon 24 Aug 17:15</span></span>
+        <span style="font-size:12.5px;font-weight:600;color:#9A9CA3;flex:none;font-variant-numeric:tabular-nums">&minus; 560 DH</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #1E1E22">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Cash top-up &middot; Anas</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:2px;font-variant-numeric:tabular-nums">WLT-8790 &middot; Thu 27 Aug 19:02</span></span>
+        <span style="font-size:12.5px;font-weight:600;color:#9A9CA3;flex:none;font-variant-numeric:tabular-nums">&minus; 600 DH</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #1E1E22">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Refund &middot; deposit given back</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:2px;font-variant-numeric:tabular-nums">STC-5040 &middot; cut Tue 25 Aug 15:30 &middot; refunded Wed 26 Aug 09:12</span></span>
+        <span style="font-size:12.5px;font-weight:600;color:#9A9CA3;flex:none;font-variant-numeric:tabular-nums">&minus; 60 DH</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 0">
+        <span style="flex:1;font-size:13px;font-weight:700">We handed you</span>
+        <span style="font-size:17px;font-weight:800;flex:none;font-variant-numeric:tabular-nums">1 720 DH</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:9px;background:#141416;border:1px solid #26262B;border-radius:16px;padding:12px 14px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="margin-top:2px;flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+      <span style="flex:1;font-size:11.5px;line-height:1.45;color:#9A9CA3;text-wrap:pretty">The top-ups are our money your barbers took over the counter, so they come off what we owe you. Sterncut takes no fee from either side.</span>
+    </div>
+
+    <div style="display:flex;gap:9px;margin-top:2px">
+      <a href="#OSH-17" style="flex:1;height:52px;border-radius:999px;background:#212125;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.07em;text-decoration:none">THIS WEEK</a>
+      <a href="#OSH-16" style="flex:1;height:52px;border-radius:999px;background:#17171A;border:1px solid #26262B;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.07em;text-decoration:none">SEND ME A COPY</a>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:392px;padding-top:2px">The other direction &middot; <a class="dv-oid" href="#OSH-17">OSH-17</a></div></div>
+
+<div class="dv-opt" id="OSH-17"><div class="dv-olabel"><a class="dv-oid" href="#OSH-17">OSH-17</a>Week 36 &mdash; he hands the cash back</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="OSH-17" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:60px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:17px;font-weight:700">Friday statement</span>
+      <span style="width:38px;flex:none"></span>
+    </div>
+
+    <div style="background:#17171A;border:1px solid rgba(232,68,46,.42);border-radius:22px;padding:18px 16px 16px;display:flex;flex-direction:column;gap:11px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:9.5px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WEEK 36 &middot; YOU ARE HOLDING OURS</span>
+        <span style="font-size:9px;letter-spacing:.1em;font-weight:700;color:#E8442E;background:rgba(232,68,46,.16);border-radius:5px;padding:3px 7px">DUE FRIDAY</span>
+      </div>
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:46px;line-height:1;letter-spacing:.01em;font-variant-numeric:tabular-nums">1 566 DH</span>
+      <span style="font-size:12px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">Have it ready in the till. <strong>Hicham comes Friday between 17:00 and 20:00</strong>, counts it with you and leaves a receipt.</span>
+      <span style="font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">Covers Fri 28 Aug 21:00 &rarr; Fri 4 Sep 21:00</span>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:9px;background:rgba(232,68,46,.07);border:1px solid rgba(232,68,46,.24);border-radius:16px;padding:12px 14px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2" style="margin-top:2px;flex:none"><path d="M12 8v4M12 16h.01"></path><circle cx="12" cy="12" r="9"></circle></svg>
+      <span style="flex:1;font-size:11.5px;line-height:1.45;color:#D8D8DC;text-wrap:pretty"><strong>This is not a bill.</strong> Your barbers took <span style="font-variant-numeric:tabular-nums">2 910 DH</span> of customers&rsquo; wallet money over the counter this week. That cash is ours and is in your till; you earned less in deposits than you took in, so some of it goes back.</span>
+    </div>
+
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:18px;padding:3px 15px">
+      <div style="display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid #1E1E22">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">Our cash in your till</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px;font-variant-numeric:tabular-nums">4 top-ups &middot; WLT-8841, 8877, 8902, 8930</span></span>
+        <span style="font-size:14px;font-weight:700;flex:none;font-variant-numeric:tabular-nums">2 910 DH</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #1E1E22">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Deposits you earned</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:2px;font-variant-numeric:tabular-nums">38 cuts &middot; STC-5102 &rarr; 5188</span></span>
+        <span style="font-size:12.5px;font-weight:600;color:#9A9CA3;flex:none;font-variant-numeric:tabular-nums">&minus; 1 456 DH</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #1E1E22">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Refund &middot; deposit given back</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:2px;font-variant-numeric:tabular-nums">STC-5140 &middot; cut Mon 31 Aug 12:10 &middot; refunded Tue 1 Sep 18:20</span></span>
+        <span style="font-size:12.5px;font-weight:600;flex:none;font-variant-numeric:tabular-nums">+ 60 DH</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #26262B">
+        <span style="flex:1;font-size:12px;font-weight:600;color:#9A9CA3">This week</span>
+        <span style="font-size:13.5px;font-weight:700;color:#9A9CA3;flex:none;font-variant-numeric:tabular-nums">1 514 DH</span>
+      </div>
+      <a href="#OSH-18" style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #1E1E22;text-decoration:none;color:inherit">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:700;color:#E8A100">From last week &middot; a refund</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:2px;font-variant-numeric:tabular-nums">STC-4471 &middot; cut Thu 27 Aug 18:20 &middot; refunded Tue 1 Sep 14:06</span></span>
+        <span style="font-size:12.5px;font-weight:700;color:#E8A100;flex:none;font-variant-numeric:tabular-nums">+ 52 DH</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg>
+      </a>
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 0">
+        <span style="flex:1;font-size:13px;font-weight:700">You put on the counter</span>
+        <span style="font-size:17px;font-weight:800;flex:none;font-variant-numeric:tabular-nums">1 566 DH</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:9px;margin-top:2px">
+      <a href="#OSH-17" style="flex:1;height:52px;border-radius:999px;background:#212125;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.07em;text-decoration:none">SEND ME A COPY</a>
+      <a href="#OSH-18" style="flex:1;height:52px;border-radius:999px;background:#17171A;border:1px solid #26262B;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.07em;text-decoration:none">ASK ABOUT A LINE</a>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:392px;padding-top:2px">The carried line, opened &middot; <a class="dv-oid" href="#OSH-18">OSH-18</a></div></div>
+
+<div class="dv-opt" id="OSH-18"><div class="dv-olabel"><a class="dv-oid" href="#OSH-18">OSH-18</a>The 52 DH from a week he was already paid for</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="OSH-18" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:60px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:17px;font-weight:700">One line explained</span>
+      <span style="width:38px;flex:none"></span>
+    </div>
+
+    <div style="background:#17171A;border:1px solid rgba(232,161,0,.32);border-radius:22px;padding:18px 16px 16px;display:flex;flex-direction:column;gap:10px">
+      <span style="font-size:9.5px;letter-spacing:.16em;font-weight:700;color:#6B6B72">ON WEEK 36 &middot; CARRIED FROM WEEK 35</span>
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:40px;line-height:1;font-variant-numeric:tabular-nums">+ 52 DH</span>
+      <span style="font-size:12px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">A customer got his deposit back after we had already settled that week with you. The deposit had been counted as yours; now it is his again.</span>
+    </div>
+
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:18px;padding:3px 15px">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #1E1E22"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Booking</span><span style="font-size:12px;font-weight:700;font-variant-numeric:tabular-nums">STC-4471</span></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #1E1E22"><span style="flex:1;font-size:11.5px;color:#9A9CA3">The cut</span><span style="font-size:12px;font-weight:600;font-variant-numeric:tabular-nums">Thu 27 Aug 18:20 &middot; Karim</span></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #1E1E22"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Refunded</span><span style="font-size:12px;font-weight:600;font-variant-numeric:tabular-nums">Tue 1 Sep 14:06</span></div>
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:12px 0"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Why</span><span style="max-width:212px;text-align:right;font-size:11.5px;font-weight:600;line-height:1.4">Wrong length. Karim agreed at the time &middot; case SUP-3312</span></div>
+    </div>
+
+    <div style="background:#141416;border:1px solid #26262B;border-radius:18px;padding:15px;display:flex;flex-direction:column;gap:11px">
+      <span style="font-size:12.5px;font-weight:700">Why it is on this week and not last week</span>
+      <span style="font-size:11.5px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Your week 35 statement is closed and the <span style="font-variant-numeric:tabular-nums">1 720 DH</span> you counted with Hicham on Saturday was right when you counted it. We do not go back and change a week you have already been paid for &mdash; you would be holding a receipt that no longer matches. Money that moves late arrives as its own line on the next statement, with the old booking on it.</span>
+      <a href="#OSH-16" style="display:flex;align-items:center;gap:10px;background:#17171A;border:1px solid #1E1E22;border-radius:12px;padding:11px 13px;text-decoration:none;color:inherit">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;font-weight:700">Week 35 &middot; 1 720 DH</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:2px;font-variant-numeric:tabular-nums">Paid Sat 29 Aug 12:40 &middot; unchanged</span></span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg>
+      </a>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:2px">
+      <a href="#OSH-18" style="height:52px;border-radius:999px;background:#212125;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.07em;text-decoration:none">THIS ISN&rsquo;T RIGHT</a>
+      <span style="font-size:10.5px;line-height:1.45;color:#6B6B72;text-align:center;text-wrap:pretty">It sends a message to Sterncut and opens a case. If we agree with you, the money comes back the same way this line arrived &mdash; a line on next Friday&rsquo;s statement.</span>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:392px;padding-top:2px">Ops side of this line &middot; <a class="dv-oid" href="./Sterncut Ops - Finance.dc.html#FIN-17">FIN-17</a></div></div>
+
+</div>
+<p class="dv-next">Ops side &middot; <a class="dv-oid" href="./Sterncut Ops - Finance.dc.html#FIN-14">FIN-14</a> the run before release, <a class="dv-oid" href="./Sterncut Ops - Finance.dc.html#FIN-15">FIN-15</a> after, <a class="dv-oid" href="./Sterncut Ops - Finance.dc.html#FIN-16">FIN-16</a> this statement with every reference on it.</p>
+</section>
+
+<section class="dv-turn" id="T7">
+<div class="dv-thd"><a class="dv-tid" href="#T7">T7</a><span class="dv-tname">Slice 3 &middot; what my shop pays Sterncut</span></div>
+<p class="dv-note">The owner's side of <a class="dv-oid" href="./Sterncut Ops - Settings.dc.html#SET-17">SET-17</a>. The whole design problem is the waived month: a bill for <span style="font-variant-numeric:tabular-nums">0 DH</span> that must not read as a bill, and must not read as free forever either. So <a class="dv-oid" href="#OSH-14">OSH-14</a> shows the real <span style="font-variant-numeric:tabular-nums">490 DH</span> struck through beside the <span style="font-variant-numeric:tabular-nums">0 DH</span>, names the date it starts (<strong>1 October</strong>, his own, not a platform date), and says plainly that the three free months are never owed later. <a class="dv-oid" href="#OSH-15">OSH-15</a> is the same arithmetic once it bites &mdash; and the thing it has to prove is that nothing new crosses the counter: the whole charge lands in one of the four Friday nets he already collects &mdash; the last of the month &mdash; not a second payment. Both screens repeat one sentence, because it is the one an owner will not take on trust: Sterncut never touches the cash handed over in the chair.</p>
+<p class="dv-src">slice 3 &middot; money out</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="OSH-14"><div class="dv-olabel"><a class="dv-oid" href="#OSH-14">OSH-14</a>Free month &mdash; the bill he does not pay</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="OSH-14" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:60px 20px 0;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:17px;font-weight:700">What I pay Sterncut</span>
+      <span style="width:38px;flex:none"></span>
+    </div>
+
+    <div style="background:#17171A;border:1px solid rgba(232,161,0,.3);border-radius:22px;padding:18px 16px 16px;display:flex;flex-direction:column;gap:13px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:9.5px;letter-spacing:.16em;font-weight:700;color:#6B6B72">SEPTEMBER &middot; DUE NOW</span>
+        <span style="font-size:9px;letter-spacing:.1em;font-weight:700;color:#E8A100;background:rgba(232,161,0,.14);border-radius:5px;padding:3px 7px">FREE MONTH 3 OF 3</span>
+      </div>
+      <span style="display:flex;align-items:baseline;gap:10px"><span style="font-family:'Playfair Display',serif;font-weight:700;font-size:46px;line-height:1;letter-spacing:.01em;font-variant-numeric:tabular-nums">0 DH</span><span style="font-size:13px;color:#9A9CA3;text-decoration:line-through;font-variant-numeric:tabular-nums">490 DH</span></span>
+      <span style="font-size:12px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">This is what your shop would have paid. You pay nothing until <strong>1 October</strong> &mdash; three months from your first booking.</span>
+    </div>
+
+    <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">HOW IT IS COUNTED</span>
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:18px;padding:4px 15px">
+      <div style="display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid #1E1E22">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">3 barbers this month</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px;font-variant-numeric:tabular-nums">40 DH each &middot; Youssef, Karim, Anas</span></span>
+        <span style="font-size:13px;font-weight:700;flex:none;font-variant-numeric:tabular-nums">120 DH</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid #1E1E22">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">370 cuts finished</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px;font-variant-numeric:tabular-nums">1 DH each &middot; no-shows charge nothing</span></span>
+        <span style="font-size:13px;font-weight:700;flex:none;font-variant-numeric:tabular-nums">370 DH</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:13px 0">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">VAT</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Sterncut is not registered yet</span></span>
+        <span style="font-size:13px;font-weight:700;color:#6B6B72;flex:none;font-variant-numeric:tabular-nums">0 DH</span>
+      </div>
+    </div>
+
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px">
+      <span style="font-size:12.5px;font-weight:700">Your three free months</span>
+      <div style="display:flex;gap:7px">
+        <span style="flex:1;display:flex;flex-direction:column;gap:6px"><span style="height:7px;border-radius:4px;background:#3A3A40"></span><span style="font-size:10.5px;font-weight:700;color:#9A9CA3">Jul</span></span>
+        <span style="flex:1;display:flex;flex-direction:column;gap:6px"><span style="height:7px;border-radius:4px;background:#3A3A40"></span><span style="font-size:10.5px;font-weight:600;color:#9A9CA3">Aug</span></span>
+        <span style="flex:1;display:flex;flex-direction:column;gap:6px"><span style="height:7px;border-radius:4px;background:#E8A100"></span><span style="font-size:10.5px;font-weight:700;color:#E8A100">Sep</span></span>
+        <span style="flex:1;display:flex;flex-direction:column;gap:6px"><span style="height:7px;border-radius:4px;background:repeating-linear-gradient(135deg,#E8442E 0 4px,#B0301F 4px 8px)"></span><span style="font-size:10.5px;font-weight:700;color:#E8442E">Oct</span></span>
+      </div>
+      <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">In October this bill starts coming out of the deposits Sterncut holds for you. Nothing is owed for July, August or September &mdash; not later, not ever.</span>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:9px;background:#141416;border:1px solid #26262B;border-radius:16px;padding:12px 14px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="margin-top:2px;flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+      <span style="flex:1;font-size:11.5px;line-height:1.45;color:#9A9CA3;text-wrap:pretty">Sterncut never takes anything from the cash your customer hands you in the chair. Only from the deposit half it already holds.</span>
+    </div>
+
+    <div style="display:flex;gap:9px;margin-top:2px">
+      <a href="#OSH-15" style="flex:1;height:52px;border-radius:999px;background:#212125;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.07em;text-decoration:none">STATEMENTS</a>
+      <a href="#OSH-14" style="flex:1;height:52px;border-radius:999px;background:#17171A;border:1px solid #26262B;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.07em;text-decoration:none">ASK A QUESTION</a>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:392px;padding-top:2px">Leads to &middot; <a class="dv-oid" href="#OSH-15">STATEMENTS</a></div></div>
+
+<div class="dv-opt" id="OSH-15"><div class="dv-olabel"><a class="dv-oid" href="#OSH-15">OSH-15</a>October &mdash; the first month that costs him</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="OSH-15" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:60px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:17px;font-weight:700">October statement</span>
+      <span style="width:38px;flex:none"></span>
+    </div>
+
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:22px;padding:18px 16px 16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:9.5px;letter-spacing:.16em;font-weight:700;color:#6B6B72">1 &ndash; 31 OCTOBER</span>
+        <span style="font-size:9px;letter-spacing:.1em;font-weight:700;color:#fff;background:#E8442E;border-radius:5px;padding:3px 7px">FIRST PAID MONTH</span>
+      </div>
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:46px;line-height:1;letter-spacing:.01em;font-variant-numeric:tabular-nums">490 DH</span>
+      <span style="font-size:12px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">Taken out of the deposits Sterncut holds for you, in one piece, on the last Friday of the month. Nothing to pay at the counter.</span>
+    </div>
+
+    <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:1px">HOW IT IS COUNTED</span>
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:18px;padding:4px 15px">
+      <div style="display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid #1E1E22">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">3 barbers this month</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px;font-variant-numeric:tabular-nums">40 DH each &middot; Youssef, Karim, Anas</span></span>
+        <span style="font-size:13px;font-weight:700;flex:none;font-variant-numeric:tabular-nums">120 DH</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid #1E1E22">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">370 cuts finished</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px;font-variant-numeric:tabular-nums">1 DH each &middot; no-shows charge nothing</span></span>
+        <span style="font-size:13px;font-weight:700;flex:none;font-variant-numeric:tabular-nums">370 DH</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:13px 0">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">VAT</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Sterncut is not registered yet</span></span>
+        <span style="font-size:13px;font-weight:700;color:#6B6B72;flex:none;font-variant-numeric:tabular-nums">0 DH</span>
+      </div>
+    </div>
+
+    <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:1px">WHAT CHANGES HANDS OVER OCTOBER</span>
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:18px;padding:4px 15px">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #1E1E22">
+        <span style="flex:1;font-size:12.5px;font-weight:600">Deposits held for you in October</span>
+        <span style="font-size:13px;font-weight:700;color:#E8A100;flex:none;font-variant-numeric:tabular-nums">10 730 DH</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #1E1E22">
+        <span style="flex:1;font-size:12.5px;font-weight:600">Less what Sterncut charges</span>
+        <span style="font-size:13px;font-weight:700;flex:none;font-variant-numeric:tabular-nums">&minus; 490 DH</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:13px 0">
+        <span style="flex:1;font-size:12.5px;font-weight:700">You collect across the month</span>
+        <span style="font-size:15px;font-weight:800;color:#4ADE80;flex:none;font-variant-numeric:tabular-nums">10 240 DH</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:9px;background:#141416;border:1px solid #26262B;border-radius:16px;padding:12px 14px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.2" style="margin-top:2px;flex:none"><path d="M4 7h16M4 12h16M4 17h10"></path></svg>
+      <span style="flex:1;font-size:11.5px;line-height:1.45;color:#9A9CA3;text-wrap:pretty">Still one number over the counter every Friday. The whole <span style="font-variant-numeric:tabular-nums">490 DH</span> comes out of the last Friday net of the month &mdash; a line inside it, never a second payment.</span>
+    </div>
+
+    <div style="display:flex;gap:9px;margin-top:1px">
+      <a href="#OSH-14" style="flex:1;height:52px;border-radius:999px;background:#212125;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.07em;text-decoration:none">SEP &middot; 0 DH</a>
+      <a href="#OSH-15" style="flex:1;height:52px;border-radius:999px;background:#212125;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.07em;text-decoration:none">SEND TO MY BOOKKEEPER</a>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:392px;padding-top:2px">Still one number over the counter &middot; <span style="font-variant-numeric:tabular-nums">10 240 DH</span></div></div>
+
+<p class="dv-next">Next: fees (<strong>FIN-03</strong>) on the same net &middot; then barber payouts (<strong>BER-02</strong>&ndash;<strong>05</strong>), which reverse the direction Sterncut pays in and need your facts first.</p>
+</div>
+</section>
+
+<section class="dv-turn" id="T6">
+<div class="dv-thd"><a class="dv-tid" href="#T6">T6</a><span class="dv-tname">Slice 2 · the owner sets his own deposit</span></div>
+<p class="dv-note">Gap <strong>G3</strong> from <code>design_handoff_slice2/README.md</code> §5. The deposit percentage belongs to the <strong>shop</strong>, not the platform — Youssef picks it inside a floor and ceiling ops controls (<strong>G4</strong>, 20%–60% here), and <a class="dv-oid" href="./Customer - Booking Flow.dc.html#BOOK-06">BOOK-06</a>'s hardcoded 40% floor becomes whatever this screen last saved. Three things the model forces into the pixels: the value is <strong>versioned with an effective date</strong>, so a change never reaches a booking already taken; a deposit is <strong>held, not paid</strong>, so every amount on the shop's side of the loop is amber, not green; and <strong>zero is a legitimate answer</strong> — <a class="dv-oid" href="#OSH-13">OSH-13</a> is not an error state.</p>
+<p class="dv-src">slice 2 · money</p>
+<div class="dv-opts">
+<div class="dv-opt" id="OSH-11"><div class="dv-olabel"><a class="dv-oid" href="#OSH-11">OSH-11</a>Set your deposit</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="OSH-11" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:60px 20px 0;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:17px;font-weight:700">Deposit</span>
+      <span style="width:38px;flex:none"></span>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;background:#17171A;border:1px solid #26262B;border-radius:18px;padding:14px 15px">
+      <span style="flex:1"><span style="display:block;font-size:13.5px;font-weight:700">Ask for a deposit</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px">Held from the customer's wallet at booking</span></span>
+      <span style="width:44px;height:26px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:flex-end;padding:0 3px;flex:none"><span style="width:20px;height:20px;border-radius:999px;background:#fff"></span></span>
+    </div>
+
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:22px;padding:18px 16px 16px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between">
+        <span><span style="display:block;font-size:9.5px;letter-spacing:.16em;font-weight:700;color:#6B6B72">YOUR SHOP ASKS FOR</span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:46px;line-height:1;letter-spacing:.01em;margin-top:5px;font-variant-numeric:tabular-nums">50<span style="font-size:24px">%</span></span></span>
+        <span style="text-align:right;padding-bottom:4px"><span style="display:block;font-size:18px;font-weight:800;color:#E8A100;font-variant-numeric:tabular-nums">30 DH</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:3px">on a 60 DH cut</span></span>
+      </div>
+
+      <div style="position:relative;height:8px;border-radius:4px;background:#212125;margin:8px 2px 0">
+        <span style="position:absolute;left:0;top:0;bottom:0;width:20%;border-radius:4px 0 0 4px;background:repeating-linear-gradient(135deg,#26262B 0 4px,#1A1A1D 4px 8px)"></span>
+        <span style="position:absolute;left:60%;right:0;top:0;bottom:0;border-radius:0 4px 4px 0;background:repeating-linear-gradient(135deg,#26262B 0 4px,#1A1A1D 4px 8px)"></span>
+        <span style="position:absolute;left:20%;width:30%;top:0;bottom:0;background:#E8442E"></span>
+        <span style="position:absolute;left:20%;top:-5px;bottom:-5px;width:2px;background:#3A3A40"></span>
+        <span style="position:absolute;left:60%;top:-5px;bottom:-5px;width:2px;background:#3A3A40"></span>
+        <span style="position:absolute;left:50%;top:-9px;width:26px;height:26px;border-radius:999px;background:#fff;margin-left:-13px;border:4px solid #17171A;box-shadow:0 3px 12px rgba(0,0,0,.5)"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin:0 2px">
+        <span style="display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:#6B6B72"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.2"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>20% Sterncut floor</span>
+        <span style="font-size:10.5px;font-weight:700;color:#6B6B72">60% ceiling</span>
+      </div>
+
+      <div style="display:flex;gap:7px">
+        <span style="flex:1;height:44px;border-radius:14px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:#9A9CA3;font-variant-numeric:tabular-nums">20%</span>
+        <span style="flex:1;height:44px;border-radius:14px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:#9A9CA3;font-variant-numeric:tabular-nums">30%</span>
+        <span style="flex:1;height:44px;border-radius:14px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:#9A9CA3;font-variant-numeric:tabular-nums">40%</span>
+        <span style="flex:1;height:44px;border-radius:14px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums">50%</span>
+        <span style="flex:1;height:44px;border-radius:14px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:#9A9CA3;font-variant-numeric:tabular-nums">60%</span>
+      </div>
+      <span style="font-size:11px;color:#6B6B72;line-height:1.45;text-wrap:pretty">Now 40%, set 14 July. A customer may always choose to pay more — up to the full price — never less.</span>
+    </div>
+
+    <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">WHAT A CUSTOMER WILL BE ASKED</span>
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:18px;padding:4px 15px">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #1E1E22">
+        <span style="flex:1;min-width:0;font-size:12.5px;font-weight:600">Classic Haircut <span style="color:#6B6B72;font-weight:400;font-variant-numeric:tabular-nums">60 DH</span></span>
+        <span style="font-size:12.5px;font-weight:700;color:#E8A100;flex:none;font-variant-numeric:tabular-nums">30 DH</span>
+        <span style="width:62px;text-align:right;flex:none;font-size:11.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">30 DH cash</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #1E1E22">
+        <span style="flex:1;min-width:0;font-size:12.5px;font-weight:600">Cut &amp; beard <span style="color:#6B6B72;font-weight:400;font-variant-numeric:tabular-nums">90 DH</span></span>
+        <span style="font-size:12.5px;font-weight:700;color:#E8A100;flex:none;font-variant-numeric:tabular-nums">45 DH</span>
+        <span style="width:62px;text-align:right;flex:none;font-size:11.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">45 DH cash</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 0">
+        <span style="flex:1;min-width:0;font-size:12.5px;font-weight:600">Kids Cut <span style="color:#6B6B72;font-weight:400;font-variant-numeric:tabular-nums">45 DH</span></span>
+        <span style="font-size:12.5px;font-weight:700;color:#E8A100;flex:none;font-variant-numeric:tabular-nums">23 DH</span>
+        <span style="width:62px;text-align:right;flex:none;font-size:11.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">22 DH cash</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:9px;background:rgba(232,161,0,.1);border:1px solid rgba(232,161,0,.28);border-radius:16px;padding:12px 14px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2" style="margin-top:2px;flex:none"><rect x="4" y="7" width="16" height="12" rx="3"></rect><path d="M8 7V5.5a4 4 0 0 1 8 0V7"></path></svg>
+      <span style="flex:1;font-size:11.5px;line-height:1.45;color:#E8A100;text-wrap:pretty">A deposit is <strong>held</strong>, not paid to you. It becomes the shop's when the cut is done, or if the customer doesn't turn up. Rounded to the dirham.</span>
+    </div>
+
+    <a href="#OSH-12" style="height:54px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;letter-spacing:.09em;text-decoration:none;margin-top:2px">SAVE · 50% DEPOSIT</a>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#OSH-12">SAVE · 50% DEPOSIT</a></div></div>
+
+<div class="dv-opt" id="OSH-12"><div class="dv-olabel"><a class="dv-oid" href="#OSH-12">OSH-12</a>Confirm · from today, forward only</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="OSH-12" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.6)"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#17171A;border-top:1px solid #26262B;border-radius:26px 26px 0 0;padding:12px 20px 34px;display:flex;flex-direction:column;gap:15px;box-shadow:0 -16px 44px rgba(0,0,0,.55)">
+    <span style="align-self:center;width:40px;height:4px;border-radius:2px;background:#3A3A40"></span>
+    <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:24px;line-height:1.2;letter-spacing:.01em;text-wrap:pretty">Raise the deposit to 50%?</span>
+
+    <div style="display:flex;align-items:center;gap:14px;background:#141416;border:1px solid #26262B;border-radius:18px;padding:16px">
+      <span style="text-align:center;flex:1"><span style="display:block;font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#6B6B72">UNTIL NOW</span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:28px;line-height:1.1;color:#9A9CA3;margin-top:5px;font-variant-numeric:tabular-nums">40%</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:3px;font-variant-numeric:tabular-nums">24 DH on 60 DH</span></span>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.2" style="flex:none"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+      <span style="text-align:center;flex:1"><span style="display:block;font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#E8442E">FROM TODAY</span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:28px;line-height:1.1;margin-top:5px;font-variant-numeric:tabular-nums">50%</span><span style="display:block;font-size:10.5px;color:#E8A100;margin-top:3px;font-variant-numeric:tabular-nums">30 DH on 60 DH</span></span>
+    </div>
+
+    <div style="background:#141416;border:1px solid #26262B;border-radius:18px;padding:4px 16px">
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #1E1E22"><span style="flex:1;font-size:12.5px;color:#9A9CA3">Applies to</span><span style="font-size:12.5px;font-weight:700;text-align:right">Bookings taken from now</span></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #1E1E22"><span style="flex:1;font-size:12.5px;color:#9A9CA3">Already booked</span><span style="font-size:12.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums">23 keep their 40%</span></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 0"><span style="flex:1;font-size:12.5px;color:#9A9CA3">Recorded as</span><span style="font-size:12.5px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums">Effective Thu 30 July</span></div>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:9px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2" style="margin-top:2px;flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+      <span style="flex:1;font-size:11.5px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Every customer who has already booked pays the deposit he agreed to. Nothing you change here reaches Monday's bookings.</span>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:9px;margin-top:2px">
+      <a href="#OSH-11" style="height:54px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;letter-spacing:.09em;text-decoration:none">SET 50% FROM TODAY</a>
+      <a href="#OSH-11" style="height:48px;border-radius:999px;background:#212125;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;letter-spacing:.09em;text-decoration:none">KEEP 40%</a>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#OSH-11">OSH-11</a></div></div>
+
+<div class="dv-opt" id="OSH-13"><div class="dv-olabel"><a class="dv-oid" href="#OSH-13">OSH-13</a>No deposit — a legitimate answer</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="OSH-13" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:60px 20px 0;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:17px;font-weight:700">Deposit</span>
+      <span style="width:38px;flex:none"></span>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;background:#17171A;border:1px solid #26262B;border-radius:18px;padding:14px 15px">
+      <span style="flex:1"><span style="display:block;font-size:13.5px;font-weight:700">Ask for a deposit</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px">Off — customers book with nothing held</span></span>
+      <span style="width:44px;height:26px;border-radius:999px;background:#3A3A40;display:flex;align-items:center;padding:0 3px;flex:none"><span style="width:20px;height:20px;border-radius:999px;background:#9A9CA3"></span></span>
+    </div>
+
+    <div style="background:#17171A;border:1px solid #26262B;border-radius:22px;padding:20px 18px;display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:9.5px;letter-spacing:.16em;font-weight:700;color:#6B6B72">YOUR SHOP ASKS FOR</span>
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:46px;line-height:1;letter-spacing:.01em;font-variant-numeric:tabular-nums">0<span style="font-size:24px">%</span></span>
+      <span style="font-size:12.5px;color:#9A9CA3;line-height:1.5;text-wrap:pretty;margin-top:2px">Bookings at Le Fade Tanger work exactly as they do today: the whole price in cash at the shop, nothing held in advance.</span>
+    </div>
+
+    <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">WHAT THAT MEANS</span>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="display:flex;align-items:flex-start;gap:11px;background:#17171A;border:1px solid #26262B;border-radius:16px;padding:13px 15px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2" style="margin-top:2px;flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+        <span style="flex:1;font-size:12px;line-height:1.45;color:#D8D8DC;text-wrap:pretty">A slot costs nothing to break. Someone who doesn't turn up loses nothing.</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:11px;background:#17171A;border:1px solid #26262B;border-radius:16px;padding:13px 15px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2" style="margin-top:2px;flex:none"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg>
+        <span style="flex:1;font-size:12px;line-height:1.45;color:#D8D8DC;text-wrap:pretty">Last month, three chairs lost <strong style="color:#F87171;font-variant-numeric:tabular-nums">11 slots</strong> to no-shows — <span style="font-variant-numeric:tabular-nums">760 DH</span> of chair time.</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:11px;background:#17171A;border:1px solid #26262B;border-radius:16px;padding:13px 15px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2" style="margin-top:2px;flex:none"><path d="M4 6h16M4 12h16M4 18h10"></path></svg>
+        <span style="flex:1;font-size:12px;line-height:1.45;color:#D8D8DC;text-wrap:pretty">Customers keep their wallets. Money already in one can't be spent here until you turn deposits on.</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;gap:9px;background:#141416;border:1px solid #26262B;border-radius:16px;padding:12px 14px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.2" style="margin-top:2px;flex:none"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+      <span style="flex:1;font-size:11.5px;line-height:1.45;color:#9A9CA3;text-wrap:pretty">Turn it back on and the lowest Sterncut allows is <span style="font-variant-numeric:tabular-nums">20%</span>.</span>
+    </div>
+
+    <a href="#OSH-11" style="height:54px;border-radius:999px;background:#212125;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;letter-spacing:.09em;text-decoration:none;margin-top:2px">SAVE · NO DEPOSIT</a>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#OSH-11">OSH-11</a></div></div>
+
+<p class="dv-next">Blocked next: <strong>G4</strong> — the platform floor and ceiling as a row on ops <code>SET-01</code>, which is what 20% and 60% above are reading.</p>
+</div>
+</section>
+
+<section class="dv-turn" id="T1">
+<div class="dv-thd"><a class="dv-tid" href="#T1">T1</a><span class="dv-tname">Sterncut — barber side, dark dashboard skin</span></div>
+<p class="dv-note">Every barber screen from the repo, rebuilt on the dark surfaces the code already declares (<code>theme.ts → dark</code>: canvas #0D0D0F, cards #17171A, raised #212125, sub #9A9CA3) with the Rentra display type and coral kept for money and live state only. Tabs are the barber set — Home · Calendar · Clients · Wallet · Profile with a centre Quick&nbsp;add. Currency MAD, Tangier data, same fixtures as the customer canvas so the two sides line up.</p>
+<p class="dv-src">from Barber App - Foundations · turn 1</p>
+<div class="dv-opts">
+<div class="dv-opt" id="OSH-01"><div class="dv-olabel"><a class="dv-oid" href="#OSH-01">OSH-01</a>Salon management</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:17px;font-weight:700">Le Fade Tanger</span>
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 20l1-4L17 4l3 3L8 19l-4 1z"></path></svg></span>
+    </div>
+    <div style="display:flex;gap:10px">
+      <div style="flex:1;background:#17171A;border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#9A9CA3">BOOKINGS</span><span style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums">18</span></div>
+      <div style="flex:1;background:#17171A;border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#9A9CA3">REVENUE</span><span style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums">1 140<span style="font-size:11px;font-weight:400;color:#9A9CA3"> DH</span></span></div>
+      <div style="flex:1;background:#17171A;border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#9A9CA3">RATING</span><span style="font-size:20px;font-weight:700">4.8<span style="font-size:11px;font-weight:400;color:#9A9CA3"> ★</span></span></div>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">THE TEAM · TODAY</span>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:18px;padding:13px 14px">
+        <span style="position:relative;width:42px;height:42px;border-radius:999px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#E8442E;flex:none">YE<span style="position:absolute;right:0;bottom:0;width:11px;height:11px;border-radius:999px;background:#4ADE80;border:2px solid #17171A"></span></span>
+        <span style="flex:1"><span style="display:block;font-size:14px;font-weight:700">Youssef El Amrani <span style="font-size:9px;letter-spacing:.08em;color:#E8442E;background:rgba(232,68,46,.14);border-radius:5px;padding:3px 6px;margin-left:3px">OWNER</span></span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px">In the shop · 7 today · 460 DH</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:18px;padding:13px 14px">
+        <span style="position:relative;width:42px;height:42px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#9A9CA3;flex:none">HB<span style="position:absolute;right:0;bottom:0;width:11px;height:11px;border-radius:999px;background:#4ADE80;border:2px solid #17171A"></span></span>
+        <span style="flex:1"><span style="display:block;font-size:14px;font-weight:700">Hamza Bennani</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px">In the shop · 6 today · 380 DH</span></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:18px;padding:13px 14px">
+        <span style="position:relative;width:42px;height:42px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#9A9CA3;flex:none">SA<span style="position:absolute;right:0;bottom:0;width:11px;height:11px;border-radius:999px;background:#3A3A40;border:2px solid #17171A"></span></span>
+        <span style="flex:1"><span style="display:block;font-size:14px;font-weight:700">Salim Alaoui</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px">Day off · back Friday</span></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg>
+      </div>
+      <span style="display:flex;align-items:center;gap:11px;border:1.5px dashed #3A3A40;border-radius:18px;padding:14px"><span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.2"><path d="M12 5v14M5 12h14"></path></svg></span><span style="flex:1;font-size:13px;font-weight:600;color:#9A9CA3">Invite a barber to the shop</span></span>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">SHOP</span>
+    <div style="background:#17171A;border-radius:20px;padding:6px 16px">
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #26262B"><span style="flex:1;font-size:13px;font-weight:600">Opening hours</span><span style="font-size:12px;color:#9A9CA3">09:30 – 19:00</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #26262B"><span style="flex:1;font-size:13px;font-weight:600">Address &amp; map pin</span><span style="font-size:12px;color:#9A9CA3">Kasbah</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #26262B"><span style="flex:1;font-size:13px;font-weight:600">Walk-in QR poster</span><span style="font-size:12px;color:#E8442E;font-weight:600">Print</span></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 0"><span style="flex:1;font-size:13px;font-weight:600">Reports &amp; payouts</span><span style="font-size:11px;color:#9A9CA3">Coming soon</span></div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:9px;background:#17171A;border-radius:16px;padding:13px 15px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2" style="margin-top:1px;flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+      <span style="font-size:12px;line-height:1.5;color:#9A9CA3">Money is paid at the shop today. In-app settlements and invoices land later.</span>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<p class="dv-next">Try next: "make the barber app a working prototype" · "add the salon-owner screens"</p>
+</div>
+</section>
+
+<section class="dv-turn" id="T2">
+<div class="dv-thd"><a class="dv-tid" href="#T2">T2</a><span class="dv-tname">Salon owner — the shop above the chair</span></div>
+<p class="dv-note">Youssef owns Le Fade Tanger as well as cutting in it, so the owner screens sit behind <a class="dv-oid" href="#OSH-01">OSH-01</a> rather than replacing the barber tabs — same dark skin, but the unit is the shop, not the chair. Three chairs, three barbers, one till. Commission is the only new money concept: the shop takes a cut of each barber's booked value, settled weekly in cash.</p>
+<p class="dv-src">from Barber App - Foundations · turn 2</p>
+<div class="dv-opts">
+<div class="dv-opt" id="OSH-02"><div class="dv-olabel"><a class="dv-oid" href="#OSH-02">OSH-02</a>Owner dashboard</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between">
+      <span><span style="display:block;font-size:10px;letter-spacing:.18em;font-weight:700;color:#9A9CA3">OWNER · THURSDAY, 30 JULY</span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:24px;line-height:1.1;letter-spacing:.03em;text-transform:uppercase;margin-top:5px">Le Fade Tanger</span></span>
+      <span style="height:32px;border-radius:999px;background:#212125;display:flex;align-items:center;gap:6px;padding:0 12px;flex:none"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg><span style="font-size:11px;font-weight:700">My chair</span></span>
+    </div>
+    <div>
+      <span style="display:block;font-size:10px;letter-spacing:.16em;font-weight:700;color:#9A9CA3">SHOP TAKE TODAY</span>
+      <span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:44px;line-height:1.05;margin-top:4px;font-variant-numeric:tabular-nums">1 140 DH</span>
+      <span style="display:block;font-size:12px;color:#9A9CA3;margin-top:6px">18 bookings across 3 chairs · 228 DH commission</span>
+    </div>
+    <div style="display:flex;gap:10px">
+      <div style="flex:1;background:#17171A;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#9A9CA3">OCCUPANCY</span><span style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums">78<span style="font-size:12px;font-weight:400;color:#9A9CA3">%</span></span></div>
+      <div style="flex:1;background:#17171A;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#9A9CA3">WAITING</span><span style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums">4</span></div>
+      <div style="flex:1;background:#17171A;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#9A9CA3">NO-SHOWS</span><span style="font-size:22px;font-weight:700;color:#F87171;font-variant-numeric:tabular-nums">1</span></div>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">THE CHAIRS · RIGHT NOW</span>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:18px;padding:13px 14px;outline:2px solid #4ADE80;outline-offset:-2px">
+        <span style="position:relative;width:42px;height:42px;border-radius:999px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#E8442E;flex:none">YE<span style="position:absolute;right:0;bottom:0;width:11px;height:11px;border-radius:999px;background:#4ADE80;border:2px solid #17171A"></span></span>
+        <span style="flex:1"><span style="display:block;font-size:14px;font-weight:700">Youssef <span style="font-size:9px;letter-spacing:.08em;color:#E8442E;background:rgba(232,68,46,.14);border-radius:5px;padding:3px 6px;margin-left:3px">YOU</span></span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px">Cutting Mehdi · free 11:30</span></span>
+        <span style="text-align:right;flex:none"><span style="display:block;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums">460 DH</span><span style="display:block;font-size:10px;color:#9A9CA3;margin-top:2px">7 today</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:18px;padding:13px 14px;outline:2px solid #4ADE80;outline-offset:-2px">
+        <span style="position:relative;width:42px;height:42px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#9A9CA3;flex:none">HB<span style="position:absolute;right:0;bottom:0;width:11px;height:11px;border-radius:999px;background:#4ADE80;border:2px solid #17171A"></span></span>
+        <span style="flex:1"><span style="display:block;font-size:14px;font-weight:700">Hamza</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px">Cutting a walk-in · free 12:10</span></span>
+        <span style="text-align:right;flex:none"><span style="display:block;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums">380 DH</span><span style="display:block;font-size:10px;color:#9A9CA3;margin-top:2px">6 today</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:18px;padding:13px 14px">
+        <span style="position:relative;width:42px;height:42px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#9A9CA3;flex:none">SA<span style="position:absolute;right:0;bottom:0;width:11px;height:11px;border-radius:999px;background:#3A3A40;border:2px solid #17171A"></span></span>
+        <span style="flex:1"><span style="display:block;font-size:14px;font-weight:700">Salim</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px">Day off · back Friday 10:00</span></span>
+        <span style="text-align:right;flex:none"><span style="display:block;font-size:14px;font-weight:700;color:#3A3A40;font-variant-numeric:tabular-nums">300 DH</span><span style="display:block;font-size:10px;color:#9A9CA3;margin-top:2px">5 today</span></span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:11px;background:rgba(232,68,46,.1);border:1px solid rgba(232,68,46,.28);border-radius:18px;padding:14px 15px">
+      <span style="width:34px;height:34px;border-radius:999px;background:rgba(232,68,46,.18);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg></span>
+      <span style="flex:1"><span style="display:block;font-size:13px;font-weight:700">Weekly settlement due</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">1 640 DH commission across 3 barbers</span></span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2.2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg>
+    </div>
+    <div style="display:flex;gap:10px">
+      <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;background:#17171A;border-radius:18px;padding:14px 0"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg><span style="font-size:11px;font-weight:600;color:#9A9CA3">All chairs</span></span>
+      <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;background:#17171A;border-radius:18px;padding:14px 0"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8"></path><path d="M21 3h-6M21 3v6"></path></svg><span style="font-size:11px;font-weight:600;color:#9A9CA3">Reports</span></span>
+      <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;background:#17171A;border-radius:18px;padding:14px 0"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8L12 2z"></path></svg><span style="font-size:11px;font-weight:600;color:#9A9CA3">Reviews</span></span>
+      <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;background:#17171A;border-radius:18px;padding:14px 0"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg><span style="font-size:11px;font-weight:600;color:#9A9CA3">Team</span></span>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<div class="dv-opt" id="OSH-03"><div class="dv-olabel"><a class="dv-oid" href="#OSH-03">OSH-03</a>All chairs — day view</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:17px;font-weight:700">All chairs</span>
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 5v14M5 12h14"></path></svg></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;background:#17171A;border-radius:14px;padding:11px 14px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M15 6l-6 6 6 6"></path></svg>
+      <span style="flex:1;text-align:center;font-size:13px;font-weight:700">Thu, 30 July</span>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg>
+    </div>
+    <div style="display:flex;gap:7px;padding-left:38px">
+      <span style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:#17171A;border-radius:11px;padding:8px 0"><span style="width:7px;height:7px;border-radius:999px;background:#E8442E"></span><span style="font-size:11px;font-weight:700">Youssef</span></span>
+      <span style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:#17171A;border-radius:11px;padding:8px 0"><span style="width:7px;height:7px;border-radius:999px;background:#5B8DEF"></span><span style="font-size:11px;font-weight:700">Hamza</span></span>
+      <span style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:#17171A;border-radius:11px;padding:8px 0;opacity:.5"><span style="width:7px;height:7px;border-radius:999px;background:#3A3A40"></span><span style="font-size:11px;font-weight:700">Salim</span></span>
+    </div>
+    <div style="display:flex;gap:7px">
+      <div style="width:38px;display:flex;flex-direction:column;gap:0;flex:none">
+        <span style="height:56px;font-size:10px;color:#9A9CA3;font-variant-numeric:tabular-nums">09:30</span>
+        <span style="height:56px;font-size:10px;color:#9A9CA3;font-variant-numeric:tabular-nums">10:30</span>
+        <span style="height:56px;font-size:10px;color:#9A9CA3;font-variant-numeric:tabular-nums">11:30</span>
+        <span style="height:56px;font-size:10px;color:#9A9CA3;font-variant-numeric:tabular-nums">12:30</span>
+        <span style="height:56px;font-size:10px;color:#9A9CA3;font-variant-numeric:tabular-nums">13:30</span>
+        <span style="height:56px;font-size:10px;color:#9A9CA3;font-variant-numeric:tabular-nums">14:30</span>
+        <span style="height:56px;font-size:10px;color:#9A9CA3;font-variant-numeric:tabular-nums">15:30</span>
+      </div>
+      <div style="flex:1;position:relative;height:392px;background:#141416;border-radius:12px;overflow:hidden">
+        <span style="position:absolute;left:4px;right:4px;top:2px;height:52px;border-radius:9px;background:rgba(232,68,46,.9);padding:7px 8px;box-sizing:border-box"><span style="display:block;font-size:10px;font-weight:700;color:#fff">Karim I.</span><span style="display:block;font-size:9px;color:rgba(255,255,255,.75);margin-top:2px">Kids · 40</span></span>
+        <span style="position:absolute;left:4px;right:4px;top:56px;height:44px;border-radius:9px;background:rgba(74,222,128,.9);padding:7px 8px;box-sizing:border-box"><span style="display:block;font-size:10px;font-weight:700;color:#0D0D0F">Mehdi K.</span><span style="display:block;font-size:9px;color:rgba(13,13,15,.7);margin-top:2px">In chair</span></span>
+        <span style="position:absolute;left:4px;right:4px;top:104px;height:28px;border-radius:9px;background:rgba(232,68,46,.9);padding:6px 8px;box-sizing:border-box"><span style="display:block;font-size:10px;font-weight:700;color:#fff">Amine B.</span></span>
+        <span style="position:absolute;left:4px;right:4px;top:168px;height:24px;border-radius:9px;background:rgba(232,161,0,.5);padding:5px 8px;box-sizing:border-box"><span style="display:block;font-size:9px;font-weight:700;color:#0D0D0F">Break</span></span>
+        <span style="position:absolute;left:4px;right:4px;top:196px;height:28px;border-radius:9px;background:rgba(232,68,46,.9);padding:6px 8px;box-sizing:border-box"><span style="display:block;font-size:10px;font-weight:700;color:#fff">Walk-in</span></span>
+        <span style="position:absolute;left:4px;right:4px;top:280px;height:36px;border-radius:9px;background:rgba(248,113,113,.28);border:1px dashed rgba(248,113,113,.7);padding:6px 8px;box-sizing:border-box"><span style="display:block;font-size:10px;font-weight:700;color:#F87171">No-show</span></span>
+      </div>
+      <div style="flex:1;position:relative;height:392px;background:#141416;border-radius:12px;overflow:hidden">
+        <span style="position:absolute;left:4px;right:4px;top:20px;height:44px;border-radius:9px;background:rgba(91,141,239,.9);padding:7px 8px;box-sizing:border-box"><span style="display:block;font-size:10px;font-weight:700;color:#fff">Rachid T.</span><span style="display:block;font-size:9px;color:rgba(255,255,255,.75);margin-top:2px">Shave · 50</span></span>
+        <span style="position:absolute;left:4px;right:4px;top:68px;height:52px;border-radius:9px;background:rgba(74,222,128,.9);padding:7px 8px;box-sizing:border-box"><span style="display:block;font-size:10px;font-weight:700;color:#0D0D0F">Walk-in</span><span style="display:block;font-size:9px;color:rgba(13,13,15,.7);margin-top:2px">In chair</span></span>
+        <span style="position:absolute;left:4px;right:4px;top:124px;height:36px;border-radius:9px;background:rgba(91,141,239,.9);padding:6px 8px;box-sizing:border-box"><span style="display:block;font-size:10px;font-weight:700;color:#fff">Yassine B.</span></span>
+        <span style="position:absolute;left:4px;right:4px;top:168px;height:24px;border-radius:9px;background:rgba(232,161,0,.5);padding:5px 8px;box-sizing:border-box"><span style="display:block;font-size:9px;font-weight:700;color:#0D0D0F">Break</span></span>
+        <span style="position:absolute;left:4px;right:4px;top:224px;height:52px;border-radius:9px;background:rgba(91,141,239,.9);padding:7px 8px;box-sizing:border-box"><span style="display:block;font-size:10px;font-weight:700;color:#fff">Anas B.</span><span style="display:block;font-size:9px;color:rgba(255,255,255,.75);margin-top:2px">Cut+beard</span></span>
+        <span style="position:absolute;left:4px;right:4px;top:312px;height:44px;border-radius:9px;background:rgba(91,141,239,.9);padding:7px 8px;box-sizing:border-box"><span style="display:block;font-size:10px;font-weight:700;color:#fff">Hicham</span></span>
+      </div>
+      <div style="flex:1;position:relative;height:392px;background:#141416;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center">
+        <span style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 6px,rgba(255,255,255,.035) 6px,rgba(255,255,255,.035) 12px)"></span>
+        <span style="position:relative;font-size:10px;letter-spacing:.1em;font-weight:700;color:#3A3A40;transform:rotate(-90deg);white-space:nowrap">DAY OFF</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:3px;background:#4ADE80"></span><span style="font-size:10px;color:#9A9CA3">In chair</span></span>
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:3px;background:rgba(232,161,0,.5)"></span><span style="font-size:10px;color:#9A9CA3">Break</span></span>
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:9px;height:9px;border-radius:3px;background:rgba(248,113,113,.5)"></span><span style="font-size:10px;color:#9A9CA3">No-show</span></span>
+      <span style="flex:1"></span>
+      <span style="font-size:11px;font-weight:700;color:#9A9CA3">78% full</span>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<div class="dv-opt" id="OSH-04"><div class="dv-olabel"><a class="dv-oid" href="#OSH-04">OSH-04</a>Shop listing — customer preview</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:17px;font-weight:700">Shop listing</span>
+      <span style="height:32px;border-radius:999px;background:#E8442E;display:flex;align-items:center;padding:0 13px;font-size:11px;font-weight:700;flex:none">SAVE</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:9px;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.28);border-radius:14px;padding:11px 14px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.4" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg>
+      <span style="flex:1;font-size:12px;font-weight:600;color:#4ADE80">Live — this is what customers see</span>
+    </div>
+    <div style="position:relative;height:130px;border-radius:18px;overflow:hidden;background:#17171A">
+      <image-slot id="shop-cover" shape="rect" placeholder="Shop cover photo"></image-slot>
+      <span style="position:absolute;bottom:8px;right:8px;height:30px;border-radius:999px;background:rgba(13,13,15,.8);display:flex;align-items:center;gap:6px;padding:0 12px;pointer-events:none"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 20l1-4L17 4l3 3L8 19l-4 1z"></path></svg><span style="font-size:11px;font-weight:700;color:#fff">Change</span></span>
+    </div>
+    <div style="display:flex;gap:9px">
+      <span style="width:72px;height:72px;border-radius:14px;overflow:hidden;background:#17171A;flex:none"><image-slot id="shop-g1" shape="rect" placeholder=" "></image-slot></span>
+      <span style="width:72px;height:72px;border-radius:14px;overflow:hidden;background:#17171A;flex:none"><image-slot id="shop-g2" shape="rect" placeholder=" "></image-slot></span>
+      <span style="width:72px;height:72px;border-radius:14px;overflow:hidden;background:#17171A;flex:none"><image-slot id="shop-g3" shape="rect" placeholder=" "></image-slot></span>
+      <span style="width:72px;height:72px;border-radius:14px;border:1.5px dashed #3A3A40;display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg></span>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:6px 16px">
+      <div style="display:flex;flex-direction:column;gap:3px;padding:13px 0;border-bottom:1px solid #26262B"><span style="font-size:10px;letter-spacing:.12em;font-weight:700;color:#9A9CA3">SHOP NAME</span><span style="font-size:14px;font-weight:700">Le Fade Tanger</span></div>
+      <div style="display:flex;flex-direction:column;gap:3px;padding:13px 0;border-bottom:1px solid #26262B"><span style="font-size:10px;letter-spacing:.12em;font-weight:700;color:#9A9CA3">TAGLINE</span><span style="font-size:14px;font-weight:600">Skin fades &amp; hot towel shaves, Kasbah side</span></div>
+      <div style="display:flex;flex-direction:column;gap:3px;padding:13px 0;border-bottom:1px solid #26262B"><span style="font-size:10px;letter-spacing:.12em;font-weight:700;color:#9A9CA3">ADDRESS</span><span style="font-size:14px;font-weight:600">14 Rue de la Kasbah, Tangier</span></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 0"><span style="flex:1"><span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#9A9CA3">MAP PIN</span><span style="display:block;font-size:14px;font-weight:600;margin-top:3px">35.7889, −5.8136</span></span><span style="height:32px;border-radius:999px;background:#212125;display:flex;align-items:center;padding:0 13px;font-size:12px;font-weight:700;flex:none">Move</span></div>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3">WHAT THE SHOP OFFERS</span>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span style="border-radius:999px;background:#212125;font-size:12px;font-weight:600;padding:9px 14px">Haircut</span>
+      <span style="border-radius:999px;background:#212125;font-size:12px;font-weight:600;padding:9px 14px">Beard</span>
+      <span style="border-radius:999px;background:#212125;font-size:12px;font-weight:600;padding:9px 14px">Shave</span>
+      <span style="border-radius:999px;background:#212125;font-size:12px;font-weight:600;padding:9px 14px">Kids</span>
+      <span style="border-radius:999px;border:1px dashed #3A3A40;font-size:12px;font-weight:600;color:#9A9CA3;padding:9px 14px">+ Add</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:11px;background:#17171A;border-radius:18px;padding:14px 16px">
+      <span style="flex:1"><span style="display:block;font-size:13px;font-weight:700">Accept walk-ins</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Shows the queue and QR on your page</span></span>
+      <span style="width:42px;height:24px;border-radius:999px;background:#4ADE80;display:flex;align-items:center;justify-content:flex-end;padding:0 3px;flex:none"><span style="width:18px;height:18px;border-radius:999px;background:#0D0D0F"></span></span>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<div class="dv-opt" id="OSH-05"><div class="dv-olabel"><a class="dv-oid" href="#OSH-05">OSH-05</a>Poster — print &amp; share</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:17px;font-weight:700">Walk-in poster</span>
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M22 2 11 13M22 2 15 22l-4-9-9-4z"></path></svg></span>
+    </div>
+    <span style="font-size:13px;color:#9A9CA3;line-height:1.5">Stick it by the mirror. Scanning puts them in your live queue with a ticket — no account needed.</span>
+    <div style="background:#F2F0EB;border-radius:16px;padding:22px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;color:#111">
+      <span style="font-family:'Playfair Display',serif;font-weight:800;font-size:19px;letter-spacing:.2em;text-transform:uppercase">Sterncut</span>
+      <span style="text-align:center"><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;letter-spacing:.03em;text-transform:uppercase;line-height:1.15">Skip the wait</span><span style="display:block;font-size:11px;color:#8A8A85;margin-top:5px">Scan to join the queue</span></span>
+      <span style="width:120px;height:120px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:8px;box-sizing:border-box">
+        <svg width="104" height="104" viewBox="0 0 29 29" shape-rendering="crispEdges"><path fill="#111" d="M0 0h7v7H0zM8 0h1v1H8zM10 0h2v1h-2zM13 0h1v2h-1zM15 0h2v1h-2zM19 0h1v1h-1zM22 0h7v7h-7zM2 2h3v3H2zM9 1h2v1H9zM17 1h1v3h-1zM20 1h2v2h-2zM24 2h3v3h-3zM8 2h1v2H8zM11 2h1v1h-1zM14 2h2v1h-2zM19 3h1v2h-1zM10 3h2v1h-2zM15 3h1v2h-1zM9 4h1v2H9zM12 4h2v1h-2zM17 5h2v1h-2zM8 5h1v1H8zM11 5h1v2h-1zM14 5h2v1h-2zM20 5h1v2h-1zM13 6h1v1h-1zM16 6h2v1h-2zM0 8h1v2H0zM2 8h2v1H2zM5 8h1v3H5zM7 8h2v1H7zM10 8h1v2h-1zM12 8h3v1h-3zM16 8h1v2h-1zM18 8h2v1h-2zM21 8h1v3h-1zM23 8h2v1h-2zM26 8h1v2h-1zM28 8h1v3h-1zM1 9h1v1H1zM3 9h1v2H3zM6 9h1v1H6zM8 9h1v2H8zM11 9h1v1h-1zM13 9h1v3h-1zM15 9h1v1h-1zM17 9h1v2h-1zM19 9h1v1h-1zM22 9h1v1h-1zM24 9h1v2h-1zM27 9h1v1h-1zM0 10h2v1H0zM4 10h1v2H4zM7 10h1v1H7zM9 10h1v1H9zM12 10h1v1h-1zM14 10h2v1h-2zM18 10h1v2h-1zM20 10h1v1h-1zM23 10h1v1h-1zM25 10h2v1h-2zM2 11h1v1H2zM6 11h2v1H6zM10 11h2v1h-2zM15 11h1v2h-1zM17 11h1v1h-1zM19 11h2v1h-2zM22 11h1v2h-1zM26 11h1v1h-1zM28 11h1v2h-1zM0 12h1v2H0zM3 12h2v1H3zM8 12h2v1H8zM11 12h1v2h-1zM14 12h1v1h-1zM16 12h1v2h-1zM18 12h1v1h-1zM21 12h1v1h-1zM24 12h2v1h-2zM27 12h1v1h-1zM2 13h1v1H2zM5 13h2v1H5zM9 13h1v2H9zM12 13h1v1h-1zM17 13h2v1h-2zM20 13h1v2h-1zM23 13h1v2h-1zM26 13h1v2h-1zM1 14h2v1H1zM4 14h1v2H4zM7 14h1v1H7zM10 14h1v1h-1zM13 14h2v1h-2zM16 14h1v1h-1zM18 14h1v2h-1zM21 14h2v1h-2zM25 14h1v1h-1zM27 14h2v1h-2zM0 15h1v2H0zM3 15h1v1H3zM6 15h2v1H6zM11 15h1v2h-1zM14 15h1v1h-1zM17 15h1v1h-1zM19 15h1v1h-1zM22 15h1v2h-1zM24 15h2v1h-2zM28 15h1v2h-1zM2 16h1v1H2zM5 16h1v2H5zM8 16h2v1H8zM12 16h2v1h-2zM15 16h1v2h-1zM18 16h1v1h-1zM20 16h2v1h-2zM23 16h1v1h-1zM26 16h1v2h-1zM1 17h2v1H1zM4 17h1v1H4zM7 17h1v2H7zM10 17h1v1h-1zM13 17h1v2h-1zM16 17h2v1h-2zM19 17h1v2h-1zM24 17h1v2h-1zM27 17h1v1h-1zM0 18h1v1H0zM3 18h1v2H3zM6 18h1v1H6zM9 18h2v1H9zM12 18h1v1h-1zM15 18h1v1h-1zM18 18h1v1h-1zM21 18h2v1h-2zM25 18h2v1h-2zM28 18h1v2h-1zM2 19h1v1H2zM5 19h1v2H5zM8 19h1v2H8zM11 19h2v1h-2zM14 19h2v1h-2zM17 19h1v2h-1zM20 19h1v1h-1zM23 19h1v2h-1zM26 19h1v1h-1zM0 20h2v1H0zM4 20h1v1H4zM7 20h1v1H7zM10 20h1v2h-1zM13 20h1v1h-1zM16 20h1v1h-1zM19 20h2v1h-2zM22 20h1v1h-1zM25 20h1v2h-1zM27 20h2v1h-2zM0 22h7v7H0zM8 21h2v1H8zM12 21h2v1h-2zM15 21h2v1h-2zM18 21h1v2h-1zM21 21h2v1h-2zM24 21h2v1h-2zM8 22h1v2H8zM11 22h1v1h-1zM14 22h1v2h-1zM17 22h1v1h-1zM20 22h1v2h-1zM23 22h1v1h-1zM26 22h1v2h-1zM28 22h1v3h-1zM2 24h3v3H2zM9 23h2v1H9zM12 23h2v1h-2zM16 23h2v1h-2zM21 23h2v1h-2zM24 23h1v2h-1zM27 23h1v1h-1zM8 25h1v1H8zM10 25h1v2h-1zM13 25h2v1h-2zM17 25h1v2h-1zM19 25h2v1h-2zM22 25h1v2h-1zM25 25h2v1h-2zM9 26h1v1H9zM12 26h1v1h-1zM15 26h2v1h-2zM21 26h1v1h-1zM24 26h1v2h-1zM27 26h2v1h-2zM8 27h2v1H8zM11 27h2v1h-2zM14 27h1v2h-1zM16 27h1v1h-1zM18 27h2v1h-2zM22 27h2v1h-2zM26 27h1v2h-1zM10 28h1v1h-1zM13 28h1v1h-1zM15 28h2v1h-2zM19 28h2v1h-2zM22 28h1v1h-1zM25 28h1v1h-1z"></path></svg>
+      </span>
+      <span style="text-align:center"><span style="display:block;font-size:13px;font-weight:700">Le Fade Tanger</span><span style="display:block;font-size:10px;color:#8A8A85;margin-top:3px">14 Rue de la Kasbah</span></span>
+    </div>
+    <div style="display:flex;gap:8px">
+      <span style="flex:1;height:40px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">A4</span>
+      <span style="flex:1;height:40px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#9A9CA3">A5</span>
+      <span style="flex:1;height:40px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#9A9CA3">Sticker</span>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:6px 16px">
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #26262B"><span style="flex:1;font-size:13px;font-weight:600">Language</span><span style="font-size:12px;color:#9A9CA3">عربي · Français</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #26262B"><span style="flex:1"><span style="display:block;font-size:13px;font-weight:600">Show live wait time</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Prints "usually 20–40 min"</span></span><span style="width:38px;height:22px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:flex-end;padding:0 3px;flex:none"><span style="width:16px;height:16px;border-radius:999px;background:#fff"></span></span></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 0"><span style="flex:1;font-size:13px;font-weight:600">Points at</span><span style="font-size:12px;color:#9A9CA3">Whole shop</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+    </div>
+    <div style="display:flex;gap:9px">
+      <span style="flex:1;height:50px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.05em"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"></path></svg>DOWNLOAD</span>
+      <span style="flex:1.2;height:50px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.05em"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M6 9V4h12v5M6 18H4v-6h16v6h-2M8 14h8v6H8z"></path></svg>PRINT</span>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<div class="dv-opt" id="OSH-06"><div class="dv-olabel"><a class="dv-oid" href="#OSH-06">OSH-06</a>The printed sheet · A4</div>
+<div style="width:420px;height:594px;background:#F2F0EB;color:#111;font-family:Inter,sans-serif;display:flex;flex-direction:column;align-items:center;padding:46px 42px;box-sizing:border-box;box-shadow:0 18px 50px rgba(0,0,0,.45)">
+  <span style="font-family:'Playfair Display',serif;font-weight:800;font-size:26px;letter-spacing:.24em;text-transform:uppercase">Sterncut</span>
+  <span style="width:34px;height:2px;background:#E8442E;margin-top:16px"></span>
+  <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:38px;line-height:1.05;letter-spacing:.02em;text-transform:uppercase;text-align:center;margin-top:26px">Skip<br>the wait</span>
+  <span style="font-size:14px;color:#5c5c58;margin-top:14px;text-align:center;line-height:1.5;max-width:250px;text-wrap:pretty">Scan with your phone camera to take a ticket and watch the queue from your seat.</span>
+  <span style="width:186px;height:186px;background:#fff;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-top:26px;padding:13px;box-sizing:border-box;box-shadow:0 6px 18px rgba(0,0,0,.07)">
+    <svg width="160" height="160" viewBox="0 0 29 29" shape-rendering="crispEdges"><path fill="#111" d="M0 0h7v7H0zM8 0h1v1H8zM10 0h2v1h-2zM13 0h1v2h-1zM15 0h2v1h-2zM19 0h1v1h-1zM22 0h7v7h-7zM2 2h3v3H2zM9 1h2v1H9zM17 1h1v3h-1zM20 1h2v2h-2zM24 2h3v3h-3zM8 2h1v2H8zM11 2h1v1h-1zM14 2h2v1h-2zM19 3h1v2h-1zM10 3h2v1h-2zM15 3h1v2h-1zM9 4h1v2H9zM12 4h2v1h-2zM17 5h2v1h-2zM8 5h1v1H8zM11 5h1v2h-1zM14 5h2v1h-2zM20 5h1v2h-1zM13 6h1v1h-1zM16 6h2v1h-2zM0 8h1v2H0zM2 8h2v1H2zM5 8h1v3H5zM7 8h2v1H7zM10 8h1v2h-1zM12 8h3v1h-3zM16 8h1v2h-1zM18 8h2v1h-2zM21 8h1v3h-1zM23 8h2v1h-2zM26 8h1v2h-1zM28 8h1v3h-1zM1 9h1v1H1zM3 9h1v2H3zM6 9h1v1H6zM8 9h1v2H8zM11 9h1v1h-1zM13 9h1v3h-1zM15 9h1v1h-1zM17 9h1v2h-1zM19 9h1v1h-1zM22 9h1v1h-1zM24 9h1v2h-1zM27 9h1v1h-1zM0 10h2v1H0zM4 10h1v2H4zM7 10h1v1H7zM9 10h1v1H9zM12 10h1v1h-1zM14 10h2v1h-2zM18 10h1v2h-1zM20 10h1v1h-1zM23 10h1v1h-1zM25 10h2v1h-2zM2 11h1v1H2zM6 11h2v1H6zM10 11h2v1h-2zM15 11h1v2h-1zM17 11h1v1h-1zM19 11h2v1h-2zM22 11h1v2h-1zM26 11h1v1h-1zM28 11h1v2h-1zM0 12h1v2H0zM3 12h2v1H3zM8 12h2v1H8zM11 12h1v2h-1zM14 12h1v1h-1zM16 12h1v2h-1zM18 12h1v1h-1zM21 12h1v1h-1zM24 12h2v1h-2zM27 12h1v1h-1zM2 13h1v1H2zM5 13h2v1H5zM9 13h1v2H9zM12 13h1v1h-1zM17 13h2v1h-2zM20 13h1v2h-1zM23 13h1v2h-1zM26 13h1v2h-1zM1 14h2v1H1zM4 14h1v2H4zM7 14h1v1H7zM10 14h1v1h-1zM13 14h2v1h-2zM16 14h1v1h-1zM18 14h1v2h-1zM21 14h2v1h-2zM25 14h1v1h-1zM27 14h2v1h-2zM0 15h1v2H0zM3 15h1v1H3zM6 15h2v1H6zM11 15h1v2h-1zM14 15h1v1h-1zM17 15h1v1h-1zM19 15h1v1h-1zM22 15h1v2h-1zM24 15h2v1h-2zM28 15h1v2h-1zM2 16h1v1H2zM5 16h1v2H5zM8 16h2v1H8zM12 16h2v1h-2zM15 16h1v2h-1zM18 16h1v1h-1zM20 16h2v1h-2zM23 16h1v1h-1zM26 16h1v2h-1zM1 17h2v1H1zM4 17h1v1H4zM7 17h1v2H7zM10 17h1v1h-1zM13 17h1v2h-1zM16 17h2v1h-2zM19 17h1v2h-1zM24 17h1v2h-1zM27 17h1v1h-1zM0 18h1v1H0zM3 18h1v2H3zM6 18h1v1H6zM9 18h2v1H9zM12 18h1v1h-1zM15 18h1v1h-1zM18 18h1v1h-1zM21 18h2v1h-2zM25 18h2v1h-2zM28 18h1v2h-1zM2 19h1v1H2zM5 19h1v2H5zM8 19h1v2H8zM11 19h2v1h-2zM14 19h2v1h-2zM17 19h1v2h-1zM20 19h1v1h-1zM23 19h1v2h-1zM26 19h1v1h-1zM0 20h2v1H0zM4 20h1v1H4zM7 20h1v1H7zM10 20h1v2h-1zM13 20h1v1h-1zM16 20h1v1h-1zM19 20h2v1h-2zM22 20h1v1h-1zM25 20h1v2h-1zM27 20h2v1h-2zM0 22h7v7H0zM8 21h2v1H8zM12 21h2v1h-2zM15 21h2v1h-2zM18 21h1v2h-1zM21 21h2v1h-2zM24 21h2v1h-2zM8 22h1v2H8zM11 22h1v1h-1zM14 22h1v2h-1zM17 22h1v1h-1zM20 22h1v2h-1zM23 22h1v1h-1zM26 22h1v2h-1zM28 22h1v3h-1zM2 24h3v3H2zM9 23h2v1H9zM12 23h2v1h-2zM16 23h2v1h-2zM21 23h2v1h-2zM24 23h1v2h-1zM27 23h1v1h-1zM8 25h1v1H8zM10 25h1v2h-1zM13 25h2v1h-2zM17 25h1v2h-1zM19 25h2v1h-2zM22 25h1v2h-1zM25 25h2v1h-2zM9 26h1v1H9zM12 26h1v1h-1zM15 26h2v1h-2zM21 26h1v1h-1zM24 26h1v2h-1zM27 26h2v1h-2zM8 27h2v1H8zM11 27h2v1h-2zM14 27h1v2h-1zM16 27h1v1h-1zM18 27h2v1h-2zM22 27h2v1h-2zM26 27h1v2h-1zM10 28h1v1h-1zM13 28h1v1h-1zM15 28h2v1h-2zM19 28h2v1h-2zM22 28h1v1h-1zM25 28h1v1h-1z"></path></svg>
+  </span>
+  <span style="display:flex;align-items:center;gap:8px;background:#101010;color:#fff;border-radius:999px;padding:10px 18px;margin-top:22px"><span style="width:7px;height:7px;border-radius:999px;background:#4ADE80"></span><span style="font-size:12px;font-weight:700;letter-spacing:.04em">Usually 20–40 min</span></span>
+  <span style="flex:1"></span>
+  <span style="width:100%;border-top:1px solid #DDD9CF;padding-top:18px;display:flex;align-items:flex-end;justify-content:space-between">
+    <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;letter-spacing:.03em;text-transform:uppercase">Le Fade Tanger</span><span style="display:block;font-size:11px;color:#8A8A85;margin-top:4px">14 Rue de la Kasbah · 09:30 – 19:00</span></span>
+    <span style="text-align:right"><span style="display:block;font-size:11px;font-weight:700;direction:rtl">امسح للانضمام</span><span style="display:block;font-size:11px;color:#8A8A85;margin-top:4px">Scannez pour patienter</span></span>
+  </span>
+</div></div>
+
+<div class="dv-opt" id="OSH-07"><div class="dv-olabel"><a class="dv-oid" href="#OSH-07">OSH-07</a>Wall display · 1280×800</div>
+<div style="width:1280px;height:800px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;display:flex;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.45)">
+  <div style="flex:1.35;box-sizing:border-box;padding:38px 44px;display:flex;flex-direction:column;gap:26px;border-right:1px solid #1E1E22">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between">
+      <span>
+        <span style="display:block;font-family:'Playfair Display',serif;font-weight:800;font-size:30px;letter-spacing:.24em;text-transform:uppercase">Sterncut</span>
+        <span style="display:block;font-size:16px;color:#9A9CA3;margin-top:9px">Le Fade Tanger · 14 Rue de la Kasbah</span>
+      </span>
+      <span style="text-align:right">
+        <span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:44px;line-height:1;font-variant-numeric:tabular-nums">11:18</span>
+        <span style="display:block;font-size:14px;color:#9A9CA3;margin-top:8px">Thursday, 30 July</span>
+      </span>
+    </div>
+    <div style="background:#17171A;border-radius:28px;padding:30px 38px;display:flex;align-items:center;gap:34px">
+      <span style="flex:none;width:132px;height:132px;border-radius:999px;background:rgba(74,222,128,.14);border:3px solid #4ADE80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px">
+        <span style="font-size:13px;letter-spacing:.16em;font-weight:700;color:#4ADE80">NOW</span>
+        <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:54px;line-height:1;color:#fff;font-variant-numeric:tabular-nums">04</span>
+      </span>
+      <span style="flex:1">
+        <span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:46px;line-height:1.05;letter-spacing:.02em;text-transform:uppercase">Mehdi K.</span>
+        <span style="display:block;font-size:20px;color:#9A9CA3;margin-top:11px">Classic Haircut · with Youssef</span>
+        <span style="display:flex;align-items:center;gap:10px;margin-top:13px"><span style="width:11px;height:11px;border-radius:999px;background:#4ADE80"></span><span style="font-size:16px;font-weight:700;color:#4ADE80">In the chair since 10:18</span></span>
+      </span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <span style="font-size:14px;letter-spacing:.2em;font-weight:700;color:#9A9CA3">UP NEXT</span>
+      <div style="display:flex;align-items:center;gap:24px;background:#17171A;border-radius:24px;padding:20px 30px;outline:3px solid #E8442E;outline-offset:-3px">
+        <span style="flex:none;width:72px;height:72px;border-radius:999px;background:rgba(232,68,46,.16);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:30px;color:#E8442E;font-variant-numeric:tabular-nums">05</span>
+        <span style="flex:1"><span style="display:block;font-size:30px;font-weight:700">Walk-in</span><span style="display:block;font-size:17px;color:#9A9CA3;margin-top:5px">Beard Trim · with Hamza</span></span>
+        <span style="flex:none;text-align:right"><span style="display:block;font-size:14px;letter-spacing:.1em;color:#9A9CA3;font-weight:700">READY IN</span><span style="display:block;font-size:28px;font-weight:800;color:#E8442E;margin-top:4px;font-variant-numeric:tabular-nums">~5 min</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:24px;background:#141416;border-radius:24px;padding:17px 30px">
+        <span style="flex:none;width:64px;height:64px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:26px;color:#9A9CA3;font-variant-numeric:tabular-nums">06</span>
+        <span style="flex:1"><span style="display:block;font-size:26px;font-weight:700">Anas B.</span><span style="display:block;font-size:16px;color:#9A9CA3;margin-top:4px">Haircut + Beard · with Hamza</span></span>
+        <span style="flex:none;font-size:22px;font-weight:700;color:#9A9CA3;font-variant-numeric:tabular-nums">~25 min</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:24px;background:#141416;border-radius:24px;padding:17px 30px">
+        <span style="flex:none;width:64px;height:64px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;font-size:26px;color:#9A9CA3;font-variant-numeric:tabular-nums">07</span>
+        <span style="flex:1"><span style="display:block;font-size:26px;font-weight:700">Amine B. <span style="font-size:13px;letter-spacing:.1em;font-weight:700;color:#E8442E;background:rgba(232,68,46,.14);border-radius:8px;padding:5px 10px;margin-left:8px;vertical-align:4px">BOOKED 11:00</span></span><span style="display:block;font-size:16px;color:#9A9CA3;margin-top:4px">Classic Haircut · with Youssef</span></span>
+        <span style="flex:none;font-size:22px;font-weight:700;color:#9A9CA3;font-variant-numeric:tabular-nums">~40 min</span>
+      </div>
+    </div>
+  </div>
+  <div style="flex:.65;box-sizing:border-box;padding:38px 40px;display:flex;flex-direction:column;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <span style="font-size:14px;letter-spacing:.2em;font-weight:700;color:#9A9CA3">THE CHAIRS</span>
+      <div style="display:flex;align-items:center;gap:15px;background:#17171A;border-radius:20px;padding:14px 18px">
+        <span style="position:relative;width:46px;height:46px;border-radius:999px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#E8442E;flex:none">YE<span style="position:absolute;right:0;bottom:0;width:13px;height:13px;border-radius:999px;background:#4ADE80;border:3px solid #17171A"></span></span>
+        <span style="flex:1"><span style="display:block;font-size:18px;font-weight:700">Youssef</span><span style="display:block;font-size:14px;color:#4ADE80;margin-top:2px">Cutting</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:15px;background:#17171A;border-radius:20px;padding:14px 18px">
+        <span style="position:relative;width:46px;height:46px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#9A9CA3;flex:none">HB<span style="position:absolute;right:0;bottom:0;width:13px;height:13px;border-radius:999px;background:#4ADE80;border:3px solid #17171A"></span></span>
+        <span style="flex:1"><span style="display:block;font-size:18px;font-weight:700">Hamza</span><span style="display:block;font-size:14px;color:#4ADE80;margin-top:2px">Cutting</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:15px;background:#141416;border-radius:20px;padding:14px 18px;opacity:.55">
+        <span style="position:relative;width:46px;height:46px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#9A9CA3;flex:none">SA<span style="position:absolute;right:0;bottom:0;width:13px;height:13px;border-radius:999px;background:#3A3A40;border:3px solid #141416"></span></span>
+        <span style="flex:1"><span style="display:block;font-size:18px;font-weight:700">Salim</span><span style="display:block;font-size:14px;color:#9A9CA3;margin-top:2px">Day off</span></span>
+      </div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:18px">
+      <div style="background:#F2F0EB;border-radius:26px;padding:22px;display:flex;flex-direction:column;align-items:center;gap:14px;color:#111">
+        <span style="text-align:center"><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:24px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Take a ticket</span><span style="display:block;font-size:14px;color:#8A8A85;margin-top:6px">Scan · no app account needed</span></span>
+        <span style="width:158px;height:158px;background:#fff;border-radius:16px;display:flex;align-items:center;justify-content:center;padding:11px;box-sizing:border-box">
+          <svg width="136" height="136" viewBox="0 0 29 29" shape-rendering="crispEdges"><path fill="#111" d="M0 0h7v7H0zM8 0h1v1H8zM10 0h2v1h-2zM13 0h1v2h-1zM15 0h2v1h-2zM19 0h1v1h-1zM22 0h7v7h-7zM2 2h3v3H2zM9 1h2v1H9zM17 1h1v3h-1zM20 1h2v2h-2zM24 2h3v3h-3zM8 2h1v2H8zM11 2h1v1h-1zM14 2h2v1h-2zM19 3h1v2h-1zM10 3h2v1h-2zM15 3h1v2h-1zM9 4h1v2H9zM12 4h2v1h-2zM17 5h2v1h-2zM8 5h1v1H8zM11 5h1v2h-1zM14 5h2v1h-2zM20 5h1v2h-1zM13 6h1v1h-1zM16 6h2v1h-2zM0 8h1v2H0zM2 8h2v1H2zM5 8h1v3H5zM7 8h2v1H7zM10 8h1v2h-1zM12 8h3v1h-3zM16 8h1v2h-1zM18 8h2v1h-2zM21 8h1v3h-1zM23 8h2v1h-2zM26 8h1v2h-1zM28 8h1v3h-1zM1 9h1v1H1zM3 9h1v2H3zM6 9h1v1H6zM8 9h1v2H8zM11 9h1v1h-1zM13 9h1v3h-1zM15 9h1v1h-1zM17 9h1v2h-1zM19 9h1v1h-1zM22 9h1v1h-1zM24 9h1v2h-1zM27 9h1v1h-1zM0 10h2v1H0zM4 10h1v2H4zM7 10h1v1H7zM9 10h1v1H9zM12 10h1v1h-1zM14 10h2v1h-2zM18 10h1v2h-1zM20 10h1v1h-1zM23 10h1v1h-1zM25 10h2v1h-2zM2 11h1v1H2zM6 11h2v1H6zM10 11h2v1h-2zM15 11h1v2h-1zM17 11h1v1h-1zM19 11h2v1h-2zM22 11h1v2h-1zM26 11h1v1h-1zM28 11h1v2h-1zM0 12h1v2H0zM3 12h2v1H3zM8 12h2v1H8zM11 12h1v2h-1zM14 12h1v1h-1zM16 12h1v2h-1zM18 12h1v1h-1zM21 12h1v1h-1zM24 12h2v1h-2zM27 12h1v1h-1zM2 13h1v1H2zM5 13h2v1H5zM9 13h1v2H9zM12 13h1v1h-1zM17 13h2v1h-2zM20 13h1v2h-1zM23 13h1v2h-1zM26 13h1v2h-1zM1 14h2v1H1zM4 14h1v2H4zM7 14h1v1H7zM10 14h1v1h-1zM13 14h2v1h-2zM16 14h1v1h-1zM18 14h1v2h-1zM21 14h2v1h-2zM25 14h1v1h-1zM27 14h2v1h-2zM0 15h1v2H0zM3 15h1v1H3zM6 15h2v1H6zM11 15h1v2h-1zM14 15h1v1h-1zM17 15h1v1h-1zM19 15h1v1h-1zM22 15h1v2h-1zM24 15h2v1h-2zM28 15h1v2h-1zM2 16h1v1H2zM5 16h1v2H5zM8 16h2v1H8zM12 16h2v1h-2zM15 16h1v2h-1zM18 16h1v1h-1zM20 16h2v1h-2zM23 16h1v1h-1zM26 16h1v2h-1zM1 17h2v1H1zM4 17h1v1H4zM7 17h1v2H7zM10 17h1v1h-1zM13 17h1v2h-1zM16 17h2v1h-2zM19 17h1v2h-1zM24 17h1v2h-1zM27 17h1v1h-1zM0 18h1v1H0zM3 18h1v2H3zM6 18h1v1H6zM9 18h2v1H9zM12 18h1v1h-1zM15 18h1v1h-1zM18 18h1v1h-1zM21 18h2v1h-2zM25 18h2v1h-2zM28 18h1v2h-1zM2 19h1v1H2zM5 19h1v2H5zM8 19h1v2H8zM11 19h2v1h-2zM14 19h2v1h-2zM17 19h1v2h-1zM20 19h1v1h-1zM23 19h1v2h-1zM26 19h1v1h-1zM0 20h2v1H0zM4 20h1v1H4zM7 20h1v1H7zM10 20h1v2h-1zM13 20h1v1h-1zM16 20h1v1h-1zM19 20h2v1h-2zM22 20h1v1h-1zM25 20h1v2h-1zM27 20h2v1h-2zM0 22h7v7H0zM8 21h2v1H8zM12 21h2v1h-2zM15 21h2v1h-2zM18 21h1v2h-1zM21 21h2v1h-2zM24 21h2v1h-2zM8 22h1v2H8zM11 22h1v1h-1zM14 22h1v2h-1zM17 22h1v1h-1zM20 22h1v2h-1zM23 22h1v1h-1zM26 22h1v2h-1zM28 22h1v3h-1zM2 24h3v3H2zM9 23h2v1H9zM12 23h2v1h-2zM16 23h2v1h-2zM21 23h2v1h-2zM24 23h1v2h-1zM27 23h1v1h-1zM8 25h1v1H8zM10 25h1v2h-1zM13 25h2v1h-2zM17 25h1v2h-1zM19 25h2v1h-2zM22 25h1v2h-1zM25 25h2v1h-2zM9 26h1v1H9zM12 26h1v1h-1zM15 26h2v1h-2zM21 26h1v1h-1zM24 26h1v2h-1zM27 26h2v1h-2zM8 27h2v1H8zM11 27h2v1h-2zM14 27h1v2h-1zM16 27h1v1h-1zM18 27h2v1h-2zM22 27h2v1h-2zM26 27h1v2h-1zM10 28h1v1h-1zM13 28h1v1h-1zM15 28h2v1h-2zM19 28h2v1h-2zM22 28h1v1h-1zM25 28h1v1h-1z"></path></svg>
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;background:#17171A;border-radius:20px;padding:17px 22px">
+        <span style="flex:1"><span style="display:block;font-size:13px;letter-spacing:.16em;font-weight:700;color:#9A9CA3">WAITING</span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:34px;line-height:1;margin-top:5px">4</span></span>
+        <span style="width:1px;align-self:stretch;background:#26262B"></span>
+        <span style="flex:1.2;text-align:right"><span style="display:block;font-size:13px;letter-spacing:.16em;font-weight:700;color:#9A9CA3">TYPICAL WAIT</span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:34px;line-height:1;margin-top:5px;color:#E8442E">40 min</span></span>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<p class="dv-next">Try next: "make the barber app a working prototype" · "add the shop's tablet queue display"</p>
+</div>
+</section>
+
+<section class="dv-turn" id="T3">
+<div class="dv-thd"><a class="dv-tid" href="#T3">T3</a><span class="dv-tname">When it breaks in the shop</span></div>
+<p class="dv-note">The barber's failures are not the customer's. He's mid-cut, one-handed, with someone in the chair and three waiting — so the rule from Customer <a class="dv-oid" href="./Customer - System States.dc.html#SYS-08">SYS-08</a> gets sharper here: <strong>an error must never stop the queue moving.</strong> Every screen keeps the chair working offline and syncs later; none of them asks him to stop and fix something while a client watches. Six states — connection, double-booking, a failed collection, an expiring licence, a suspended shop, and a stale app.</p>
+<p class="dv-src">from Barber App - Foundations · turn 10</p>
+<div class="dv-opts">
+<div class="dv-opt" id="OSH-08"><div class="dv-olabel"><a class="dv-oid" href="#OSH-08">OSH-08</a>Hidden from search</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding-top:4px">
+      <span style="width:62px;height:62px;border-radius:999px;background:rgba(248,113,113,.14);display:flex;align-items:center;justify-content:center"><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="1.9"><path d="M2 12s3.5-7 10-7c2 0 3.7.6 5.2 1.5M22 12s-3.5 7-10 7c-2 0-3.7-.6-5.2-1.5"></path><path d="M3 3l18 18"></path></svg></span>
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:23px;line-height:1.12;letter-spacing:.02em;text-transform:uppercase">Nobody new<br>can find you</div>
+        <div style="font-size:12.5px;color:#9A9CA3;margin-top:9px;line-height:1.5;max-width:280px;text-wrap:pretty">Your licence expired on Aug 18 and we had to hide the shop. Send us the new one and you're back in minutes.</div>
+      </div>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px">
+      <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">WHAT STILL WORKS</span>
+      <span style="display:flex;align-items:center;gap:10px"><span style="width:19px;height:19px;border-radius:999px;background:rgba(74,222,128,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span><span style="flex:1;min-width:0;font-size:12.5px;color:#D8D8DC">Your 7 bookings this fortnight stand</span></span>
+      <span style="display:flex;align-items:center;gap:10px"><span style="width:19px;height:19px;border-radius:999px;background:rgba(74,222,128,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span><span style="flex:1;min-width:0;font-size:12.5px;color:#D8D8DC">Walk-ins and the QR still work</span></span>
+      <span style="display:flex;align-items:center;gap:10px"><span style="width:19px;height:19px;border-radius:999px;background:rgba(74,222,128,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span><span style="flex:1;min-width:0;font-size:12.5px;color:#D8D8DC">Regulars who follow you can still book</span></span>
+      <span style="display:flex;align-items:center;gap:10px"><span style="width:19px;height:19px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="3"><path d="M6 6l12 12M18 6 6 18"></path></svg></span><span style="flex:1;min-width:0;font-size:12.5px;color:#9A9CA3">You're out of Explore and the map</span></span>
+    </div>
+    <div style="background:#111113;border:1px solid #1E1E22;border-radius:20px;padding:15px 16px;display:flex;align-items:center;gap:11px">
+      <span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><path d="M3 17l6-6 4 4 8-8"></path><path d="M21 3h-6M21 3v6"></path></svg></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">Costing you about 3 cuts a day</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Based on what search normally brings you</span></span>
+    </div>
+    <span style="height:54px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:700;letter-spacing:.05em"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><rect x="3" y="6" width="18" height="14" rx="3"></rect><circle cx="12" cy="13" r="3"></circle></svg>SEND THE NEW LICENCE</span>
+    <div style="display:flex;gap:9px">
+      <a href="./Barber - Messages.dc.html#BMS-02" style="flex:1;height:48px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.04em;color:#fff;text-decoration:none">MESSAGE NADIA</a>
+      <a href="./Barber - Support.dc.html#BSP-04" style="flex:1;height:48px;border-radius:999px;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.04em;color:#9A9CA3;text-decoration:none">I ALREADY SENT IT</a>
+    </div>
+    <span style="text-align:center;font-size:11px;color:#6B6B72;line-height:1.5;text-wrap:pretty">The shop un-hides itself the moment ops accepts it — no waiting on us.</span>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="./Barber - Support.dc.html#BSP-04">I ALREADY SENT IT</a>  <a class="dv-oid" href="./Barber - Messages.dc.html#BMS-02">MESSAGE NADIA</a></div></div>
+
+<p class="dv-next">Try next: "do the admin error states" · "wire packages into the customer prototype"</p>
+</div>
+</section>
+
+<section class="dv-turn" id="T4">
+<div class="dv-thd"><a class="dv-tid" href="#T4">T4</a><span class="dv-tname">Two switches that were only pretending</span></div>
+<p class="dv-note">Both of these are columns the code writes and the UI never reflects. <code>salons.accepting_bookings</code> is written by the header power button and read by nothing — so the owner thinks he closed the shop and requests keep landing on his barbers. <code>salons.float_cap_cents</code> is enforced in SQL with no screen, which means the stop lands while a customer's cash is already in the barber's hand. <strong>A switch has to say what it actually does, and a limit has to warn before it bites.</strong> <a class="dv-oid" href="#OSH-09">OSH-09</a>–<a class="dv-oid" href="./Barber - Today.dc.html#BTD-07">BTD-07</a> are the pause; <a class="dv-oid" href="./Barber - Float.dc.html#BCF-06">BCF-06</a>–<a class="dv-oid" href="./Barber - Float.dc.html#BCF-07">BCF-07</a> are the cap.</p>
+<p class="dv-src">from Barber App - Foundations · turn 11</p>
+<div class="dv-opts">
+<div class="dv-opt" id="OSH-09"><div class="dv-olabel"><a class="dv-oid" href="#OSH-09">OSH-09</a>Pause the shop · what it covers</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.62)"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#151517;border-radius:26px 26px 0 0;padding:12px 22px 34px;display:flex;flex-direction:column;gap:13px">
+    <span style="align-self:center;width:40px;height:4px;border-radius:2px;background:#333"></span>
+    <div style="display:flex;align-items:center">
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:17px;font-weight:700">Close Le Fade Tanger</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">This closes the whole shop, not just you</span></span>
+      <span style="width:32px;height:32px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+    </div>
+    <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">FOR HOW LONG</span>
+    <div style="display:flex;gap:8px">
+      <span style="flex:1;height:44px;border-radius:13px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700">Rest of today</span>
+      <span style="flex:1;height:44px;border-radius:13px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:#9A9CA3">Until I reopen</span>
+      <span style="flex:1;height:44px;border-radius:13px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:600;color:#9A9CA3">Pick dates</span>
+    </div>
+    <div style="background:#17171A;border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px">
+      <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">WHAT CLOSING DOES</span>
+      <span style="display:flex;align-items:flex-start;gap:10px"><span style="width:19px;height:19px;border-radius:999px;background:rgba(248,113,113,.18);display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="3"><path d="M6 6l12 12M18 6 6 18"></path></svg></span><span style="flex:1;min-width:0;font-size:12.5px;line-height:1.5;color:#D8D8DC">No new bookings for <strong style="color:#fff">any of the 3 barbers</strong></span></span>
+      <span style="display:flex;align-items:flex-start;gap:10px"><span style="width:19px;height:19px;border-radius:999px;background:rgba(248,113,113,.18);display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="3"><path d="M6 6l12 12M18 6 6 18"></path></svg></span><span style="flex:1;min-width:0;font-size:12.5px;line-height:1.5;color:#D8D8DC">The walk-in QR stops working</span></span>
+      <span style="display:flex;align-items:flex-start;gap:10px"><span style="width:19px;height:19px;border-radius:999px;background:rgba(74,222,128,.16);display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span><span style="flex:1;min-width:0;font-size:12.5px;line-height:1.5;color:#D8D8DC">Today's 7 bookings still stand</span></span>
+      <span style="display:flex;align-items:flex-start;gap:10px"><span style="width:19px;height:19px;border-radius:999px;background:rgba(74,222,128,.16);display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span><span style="flex:1;min-width:0;font-size:12.5px;line-height:1.5;color:#D8D8DC">You can still take cash top-ups</span></span>
+    </div>
+    <div style="background:rgba(232,161,0,.1);border:1px solid rgba(232,161,0,.3);border-radius:18px;padding:14px 16px;display:flex;align-items:center;gap:11px">
+      <span style="width:32px;height:32px;border-radius:999px;background:rgba(232,161,0,.2);display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#E8A100">Hamza is working today</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">He'll be told the shop is closed</span></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:11px;background:#17171A;border-radius:18px;padding:14px 16px">
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">Tell the 1 person on the waiting list</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Otherwise he waits for a slot that won't come</span></span>
+      <span style="width:42px;height:24px;border-radius:999px;background:#4ADE80;display:flex;align-items:center;justify-content:flex-end;padding:0 3px;flex:none"><span style="width:18px;height:18px;border-radius:999px;background:#0D0D0F"></span></span>
+    </div>
+    <a href="./Barber - Today.dc.html#BTD-07" style="height:54px;border-radius:999px;background:#F87171;color:#0D0D0F;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;letter-spacing:.05em;text-decoration:none">CLOSE FOR THE REST OF TODAY</a>
+    <span style="text-align:center;font-size:11px;color:#6B6B72;line-height:1.5;text-wrap:pretty">Only you can reopen it — your barbers can't.</span>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="./Barber - Today.dc.html#BTD-07">CLOSE FOR THE RES…</a></div></div>
+
+<p class="dv-next">Try next: "add the pass editor for option (b)" · "wire packages into the customer prototype"</p>
+</div>
+</section>
+
+<section class="dv-turn" id="T5">
+<div class="dv-thd"><a class="dv-tid" href="#T5">T5</a><span class="dv-tname">The cap he can see, and handing the shop over</span></div>
+<p class="dv-note">Two consequences of the admin decisions landing in the shop. <a class="dv-oid" href="./Barber - My Day.dc.html#BDY-08">BDY-08</a> puts the admin dashboard's cap inside Karim's own Schedule — it has to appear <em>where he plans his week</em>, not as a notice he dismisses, or he meets it as a mystery refusal at the eighth booking. <a class="dv-oid" href="./Owner - Barbers.dc.html#OBR-03">OBR-03</a> is the way out of the deadlock the admin suspension creates: a suspended owner can't run his shop, and Marina still needs someone who can accept barbers and settle the float. <strong>The handover is his to make, not ops' to impose</strong> — otherwise a suspension quietly becomes a confiscation.</p>
+<p class="dv-src">from Barber App - Foundations · turn 14</p>
+<div class="dv-opts">
+<div class="dv-opt" id="OSH-10"><div class="dv-olabel"><a class="dv-oid" href="#OSH-10">OSH-10</a>Standing in · first job</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between">
+      <span><span style="display:block;font-size:10px;letter-spacing:.18em;font-weight:700;color:#9A9CA3">SATURDAY, 15 AUGUST</span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:26px;line-height:1.1;letter-spacing:.03em;text-transform:uppercase;margin-top:5px">Salam, Zakaria</span></span>
+      <span style="position:relative;width:38px;height:38px;border-radius:999px;background:#17171A;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 8a6 6 0 0 1 12 0c0 7 2 7 2 9H4c0-2 2-2 2-9z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg><span style="position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:999px;background:#E8442E"></span></span>
+    </div>
+    <div style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.28);border-radius:20px;padding:15px 16px;display:flex;align-items:center;gap:12px">
+      <span style="width:34px;height:34px;border-radius:999px;background:rgba(74,222,128,.18);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:700;color:#4ADE80">You're running Marina</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Until Fri 22 Aug · Karim stays the owner</span></span>
+      <a href="./Owner - Barbers.dc.html#OBR-03" style="height:28px;border-radius:999px;background:#212125;display:flex;align-items:center;padding:0 11px;font-size:10.5px;font-weight:700;color:#fff;flex:none;text-decoration:none">HAND BACK</a>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">THE SHOP NEEDS · 2</span>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="background:#17171A;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:13px;outline:2px solid #E8442E;outline-offset:-2px">
+        <div style="display:flex;align-items:center;gap:11px">
+          <span style="width:34px;height:34px;border-radius:11px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="1.9"><rect x="3" y="6" width="18" height="14" rx="3"></rect><circle cx="12" cy="13" r="3"></circle></svg></span>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:700">Send the licence photo</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">AUD-118 · 10 days late · it's in the drawer</span></span>
+        </div>
+        <span style="font-size:11.5px;line-height:1.5;color:#D8D8DC;border-top:1px solid #26262B;padding-top:12px;text-wrap:pretty">Nobody new can find the shop until this lands. That's your bookings too.</span>
+        <a href="#OSH-05" style="height:46px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.05em;text-decoration:none">PHOTOGRAPH IT</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:18px;padding:13px 15px">
+        <span style="width:34px;height:34px;border-radius:11px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg></span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">Float · 260 DH</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Nothing worth a trip yet</span></span>
+        <span style="font-size:11px;color:#6B6B72;flex:none">Not urgent</span>
+      </div>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">YOUR OWN DAY</span>
+    <div style="display:flex;gap:10px">
+      <div style="flex:1;background:#17171A;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#9A9CA3">BOOKED</span><span style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums">9</span><span style="font-size:10px;color:#9A9CA3;margin-top:2px">4 were Karim's</span></div>
+      <div style="flex:1;background:#17171A;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#9A9CA3">TAKEN</span><span style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums">540<span style="font-size:11px;font-weight:400;color:#9A9CA3"> DH</span></span></div>
+      <div style="flex:1;background:#17171A;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#9A9CA3">NEXT</span><span style="font-size:15px;font-weight:700;margin-top:4px">16:00</span></div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:9px;background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:13px 15px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+      <span style="flex:1;min-width:0;font-size:12px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Running the shop doesn't change your own bookings or your pay.</span>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="./Owner - Barbers.dc.html#OBR-03">HAND BACK</a>  <a class="dv-oid" href="#OSH-05">PHOTOGRAPH IT</a></div></div>
+
+<p class="dv-next">Try next: "add the pass editor for option (b)" · "wire packages into the customer prototype"</p>
+</div>
+</section>
+
+
+</x-dc>
+</body>
+</html>

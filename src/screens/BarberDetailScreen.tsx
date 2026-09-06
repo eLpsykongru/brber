@@ -16,6 +16,9 @@ type Props = {
   salonName: string;
   onBack: () => void;
   onChromeHidden?: (hidden: boolean) => void;
+  // Booking from here used to leave him on this page, staring at the calendar
+  // he had just booked out of. There is nothing left to do on it.
+  onBooked?: () => void;
 };
 
 type Tab = 'services' | 'about' | 'gallery' | 'reviews';
@@ -82,7 +85,7 @@ function sameDay(a: Date, b: Date) {
   return a.toDateString() === b.toDateString();
 }
 
-export default function BarberDetailScreen({ barber, salonName, onBack, onChromeHidden }: Props) {
+export default function BarberDetailScreen({ barber, salonName, onBack, onChromeHidden, onBooked }: Props) {
   const [tab, setTab] = useState<Tab>('services');
   const [services, setServices] = useState<Service[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -202,11 +205,15 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
             setBusy(false);
             if (error) Alert.alert('Could not book', error.message);
             else {
-              Alert.alert('Request sent!', 'The barber will confirm your booking shortly. Pay at the shop.');
               setSlotMode(false);
               setSelected(null);
               setSelectedTime(null);
               loadCalendar();
+              // leave on OK, not before it: the alert is the only confirmation
+              // this path has, so it has to be read before the screen changes
+              Alert.alert('Request sent!',
+                'The barber will confirm your booking shortly. Pay at the shop.',
+                [{ text: 'OK', onPress: () => onBooked?.() }]);
             }
           },
         },

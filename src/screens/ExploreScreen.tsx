@@ -69,8 +69,9 @@ const RATING_OPTS = [{ label: 'Any', v: null }, { label: '4+', v: 4 }, { label: 
 const KM_OPTS = [{ label: 'Any', v: null }, { label: '< 1 Km', v: 1 }, { label: '< 3 Km', v: 3 }, { label: '< 5 Km', v: 5 }] as const;
 const PRICE_OPTS = [{ label: 'Any', v: null }, { label: '≤ 50 DH', v: 5000 }, { label: '≤ 100 DH', v: 10000 }, { label: '≤ 200 DH', v: 20000 }] as const;
 
-export default function ExploreScreen({ onChromeHidden, onBookings }: {
+export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
   onChromeHidden?: (hidden: boolean) => void; onBookings?: () => void;
+  onHome?: () => void;
 }) {
   const [salons, setSalons] = useState<SalonCard[]>([]);
   // EXPL-13 — typing moved to its own screen; the map keeps the filter sheet
@@ -169,7 +170,8 @@ export default function ExploreScreen({ onChromeHidden, onBookings }: {
   }
   if (salon) {
     return <SalonDetailScreen salon={salon} km={kmFor(salon)} onBack={() => open(null)}
-      onChromeHidden={onChromeHidden} />;
+      onChromeHidden={onChromeHidden}
+      onBooked={() => { open(null); onHome?.(); }} />;
   }
 
   const filtersOn = minRating != null || maxKm != null || maxPrice != null;

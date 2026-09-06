@@ -46,8 +46,10 @@ function timeAgo(iso: string) {
   return m < 12 ? `${m}mo ago` : `${Math.floor(m / 12)}y ago`;
 }
 
-export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }: {
+export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, onBooked }: {
   salon: SalonCard; km?: number | null; onBack: () => void; onChromeHidden?: (hidden: boolean) => void;
+  // where to go once a booking is finished - the salon page is not it
+  onBooked?: () => void;
 }) {
   const [tab, setTab] = useState<Tab>('about');
   const [photos, setPhotos] = useState<{ name: string; url: string }[]>([]);
@@ -84,8 +86,19 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
   // a barber page opened from the salon page is one level deeper again
   useAndroidBack(profileBarber ? () => setProfileBarber(null) : null);
 
+  // 39a — read the shop's own switch before offering a time. `salon_closure`
+  // and the booking trigger both go through `salon_open`, so the page can never
+  // offer what the insert will refuse.
+  //
+  // This has to stay ABOVE the barber-page return below. It used to sit with
+  // the other derived values further down, which meant opening a specialist
+  // skipped it and React counted one hook fewer — "rendered fewer hooks than
+  // expected", on exactly that tap.
+  const closure = useClosure(salon.id);
+  const shut = !!closure?.closed;
+
   if (profileBarber) {
-    return <BarberDetailScreen barber={profileBarber} salonName={salon.name}
+    return <BarberDetailScreen barber={profileBarber} salonName={salon.name} onBooked={onBooked}
       onBack={() => setProfileBarber(null)} onChromeHidden={onChromeHidden} />;
   }
 
@@ -121,12 +134,6 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
     if (url) Linking.openURL(url).catch(() => Alert.alert(name, 'Could not open.'));
     else Alert.alert(name, 'Coming soon — see BACKLOG.md');
   }
-
-  // 39a — read the shop's own switch before offering a time. `salon_closure`
-  // and the booking trigger both go through `salon_open`, so the page can never
-  // offer what the insert will refuse.
-  const closure = useClosure(salon.id);
-  const shut = !!closure?.closed;
 
   return (
     <View style={s.screen}>
@@ -346,14 +353,18 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden }:
         </Pressable>
       </View>
 
+      {/* onBooked is the "a booking happened" signal, NOT a close: closing here
+          killed the sheet the instant the row landed, so the 'Slot held / deposit
+          paid' confirmation never showed. The sheet closes on its own DONE. */}
       <BookingSheet visible={sheetOpen} salon={salon}
-        onClose={() => setSheetOpen(false)} onBooked={() => setSheetOpen(false)} />
+        onClose={() => setSheetOpen(false)} onBooked={() => {}}
+        onFinished={() => { setSheetOpen(false); onBooked?.(); }} />
 
       {/* 34b/34c/34d — the bundle's own three steps: it picks its own slot,
           because a 70-minute sitting can't use the ordinary time grid */}
       <BundleSheet visible={bundleOpen} bundle={sheetBundle} bundles={bundles} barbers={bundleBarbers}
         onClose={() => setBundleOpen(false)}
-        onBooked={() => setBundleOpen(false)}
+        onBooked={() => { setBundleOpen(false); onBooked?.(); }}
         onSplit={() => { setBundleOpen(false); setTab('services'); }} />
     </View>
   );

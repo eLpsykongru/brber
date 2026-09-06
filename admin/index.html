@@ -3080,6 +3080,7 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
     <div style="height:46px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:6px;padding:0 24px">
       <span style="height:28px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:700">Settlement runs</span>
       <span data-go="finance/corrections" style="cursor:pointer;height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:500;color:#9A9CA3">Corrections</span>
+      <span data-go="finance/calls" style="cursor:pointer;height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:500;color:#9A9CA3">Ops calls</span>
       <span id="fn-sub" style="margin-left:12px;font-size:11.5px;color:#6B6B72"></span>
     </div>
 
@@ -3087,6 +3088,7 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
       <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
         <div id="fn-stats" style="display:flex;gap:12px"></div>
         <div id="fn-net"></div>
+        <div id="fn-proof"></div>
         <div id="fn-table" style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;overflow:hidden"></div>
       </div>
       <div style="width:308px;flex:none;display:flex;flex-direction:column;gap:14px">
@@ -3206,6 +3208,69 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
 </div>
 </div>
 
+<!-- AGT-12 · ops-call receipts as a RATE. §8: below the thresholds nobody is
+     watched, and agents with zero are shown on purpose — a list containing only
+     people with a number on them reads as a list of suspects. -->
+<div class="scr" id="s14d">
+<div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px"></div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">OP</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Ops</span><span style="display:block;font-size:10px;color:#9A9CA3">Sterncut</span></span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span data-go="finance" style="cursor:pointer;font-size:12px;color:#6B6B72">Settlement runs</span>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg>
+      <span style="font-size:15px;font-weight:700">Ops calls</span>
+      <span id="oc-sub" style="font-size:12px;color:#6B6B72"></span>
+    </div>
+
+    <div style="flex:1;min-height:0;padding:22px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:auto">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div id="oc-queue"></div>
+        <div id="oc-table" style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;overflow:hidden"></div>
+      </div>
+      <div style="width:308px;flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:12.5px;font-weight:700">When this opens a review</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3"><strong style="color:#D8D8DC">Three ops-call collections from one agent in 7 rolling days</strong>, or <strong style="color:#D8D8DC">four <em>owner not reached</em> in 30</strong>. Below that nobody is watched. Both numbers are on this page because a threshold people cannot see is a threshold they cannot argue with.</span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:12.5px;font-weight:700">A routing fault before an agent fault</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3">A round that can&rsquo;t be closed at 19:30 is usually the round&rsquo;s fault. Moving his late shops to a morning window is the action that is right most often &mdash; it changes nothing about him.</span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:12.5px;font-weight:700">Every honest cause here is boring</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3">A dead phone, a shop with no signal, an owner who doesn&rsquo;t answer at 19:30. The moment this page reads as an accusation, agents stop using the call and the thing you&rsquo;d actually want to catch goes underground.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGT-08 · the duty call. §4: ops does not authorise the agent, ops reaches
+       the owner — so the steps are numbered and the order is not optional. -->
+  <div id="dc-dlg" hidden style="position:absolute;inset:0;left:216px;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:26px;box-sizing:border-box;z-index:20">
+    <div style="width:560px;max-height:100%;overflow:auto;background:#17171A;border:1px solid #26262B;border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.6);padding:22px;display:flex;flex-direction:column;gap:15px;box-sizing:border-box">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+        <span><span id="dc-title" style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:20px"></span><span id="dc-sub" style="display:block;font-size:11.5px;color:#9A9CA3;margin-top:4px"></span></span>
+        <span data-dc-close style="cursor:pointer;flex:none;margin-top:4px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+      </div>
+      <div id="dc-panel"></div>
+      <div id="dc-steps"></div>
+    </div>
+  </div>
+</div>
+</div>
+
 <script>
 // ---------------------------------------------------------------- routing --
 // Route → screen id. Barbers, Customers and Coupons are in the sidebar but have
@@ -3231,11 +3296,12 @@ const ROUTES = {
   // the settlement period — FIN-14/15. The sidebar had no Finance row at all,
   // so this is a route AND a rail entry.
   'finance': '14a', 'finance/statement': '14b', 'finance/corrections': '14c',
+  'finance/calls': '14d',
 };
 // ponytail: the one check this wiring leaves behind. The screens are the design's
 // own markup and the renderers find their slots by id — nothing errors when an id
 // drifts, the panel just silently stops updating. This says so on load instead.
-const SLOTS = ('fn-plan fn-open cx-sub cx-list '
+const SLOTS = ('oc-queue dc-title dc-sub dc-panel dc-steps oc-sub oc-table fn-proof fn-plan fn-open cx-sub cx-list '
   + 'sm-name sm-ref sm-hero sm-body sm-last sm-trust sm-age sm-shop '
   + 'fn-week fn-state fn-sub fn-cut fn-release fn-stats fn-net fn-table fn-excl '
   + 'a-kpis a-bars a-stats a-live a-needs a-top a-when a-q a-range a-results d-run '
@@ -6629,6 +6695,7 @@ const LOAD = {
   finance: loadFinance,
   'finance/statement': loadStatement,
   'finance/corrections': loadCorrections,
+  'finance/calls': loadOpsCalls,
 };
 
 // ------------------------------------------------ FIN-14/15 · the run (slice 2) --
@@ -6770,7 +6837,13 @@ function drawRun() {
                + ((l.receipts || []).length
                    ? ' \u00b7 ' + l.receipts.map((rc) => rc.ref + ' '
                        + (rc.verified_by === 'signature' ? 'signed'
-                          : rc.verified_by === 'ops_call' ? 'by ops call' : 'code')).join(' \u00b7 ')
+                          : rc.verified_by === 'ops_call' ? 'by ops call'
+                          : rc.verification === 'verified' ? 'code'
+                          // §8's four words, derived server-side so this row and
+                          // the closing pack cannot disagree about what it is
+                          : '<b style="color:' + (rc.incident || rc.verification === 'failed'
+                              ? '#F87171' : '#E8A100') + '">' + esc(rc.state)
+                            + (rc.incident ? ' ' + esc(rc.incident) : '') + '</b>')).join(' \u00b7 ')
                    : '')
                + (l.on_round && l.visit !== 'collected' && l.visit !== 'paid'
                    ? ' \u00b7 with ' + esc(l.on_round) : ''))) + '</span>'
@@ -6800,6 +6873,30 @@ function drawRun() {
           + esc(x.sentence) + '</span>').join('')
         + '</div>'
       : '');
+
+  // AGT-20. §8: "COLLECTED, UNCHECKED sits BESIDE proved by owner code and
+  // proved by ops call." Siblings, not a footnote — a week is money proved three
+  // ways, one of which is not proved yet, and putting the third somewhere else
+  // on the page is how somebody reconciles a week believing it is finished.
+  const pf = d.proof || {};
+  $('fn-proof').innerHTML =
+    '<div style="display:flex;gap:12px">'
+    + [['PROVED BY OWNER CODE', pf.code_cents, pf.code_n, '#4ADE80', ''],
+       ['PROVED BY OPS CALL', pf.call_cents, pf.call_n, '#E8A100', 'six digits, a duty officer'],
+       ['COLLECTED, UNCHECKED', pf.unchecked_cents, pf.unchecked_n, '#F87171',
+        (pf.incident_n ? pf.incident_n + ' incident' + (pf.incident_n === 1 ? '' : 's') + ' \u00b7 ' : '')
+        + (pf.failed_n ? pf.failed_n + ' did not match \u00b7 ' : '')
+        + (pf.queued_n ? pf.queued_n + ' still queued' : '')]]
+      .map(([label, cents, n, colour, foot]) =>
+        '<div style="flex:1;background:#17171A;border:1px solid '
+        + (label === 'COLLECTED, UNCHECKED' && cents ? 'rgba(248,113,113,.4)' : '#1E1E22')
+        + ';border-radius:14px;padding:14px 15px;display:flex;flex-direction:column;gap:4px">'
+        + '<span style="font-size:9px;letter-spacing:.13em;font-weight:700;color:#6B6B72">' + label + '</span>'
+        + '<span style="font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:'
+        + (cents ? colour : '#3A3A40') + '">' + DH(cents || 0) + '</span>'
+        + '<span style="font-size:10px;color:#6B6B72">' + (n || 0) + ' receipt'
+        + ((n || 0) === 1 ? '' : 's') + (foot ? ' \u00b7 ' + foot : '') + '</span></div>').join('')
+    + '</div>';
 
   // §3.2: the remainder stays on its own line, then carries — it never becomes a
   // separate debt to chase, because a second ledger is a second truth.
@@ -6860,13 +6957,23 @@ document.addEventListener('click', async (e) => {
     if ((run.imbalance || []).length) {
       return toast('A statement disagrees with its own lines. Nothing can be released.');
     }
+    const un = (run.proof || {}).unchecked_cents || 0;
     if (!confirm('Release ' + run.shops + ' statements for week ' + run.week.slice(-2) + '?\n\n'
       + DH(run.collect_cents) + ' to collect from ' + run.collect_shops + ' shops, '
       + DH(run.pay_cents) + ' to hand over to ' + run.pay_shops + '.\n\n'
+      + (un
+        // §8: the money moved and 312 shops should not wait on one dead phone,
+        // so this does not block. It just refuses to let the week close quietly.
+        ? DH(un) + ' of that has been collected but NOT CHECKED \u2014 '
+          + ((run.proof || {}).queued_n || 0) + ' still queued, '
+          + ((run.proof || {}).failed_n || 0) + ' where the code did not match.\n'
+          + 'Releasing makes every one of them an incident, and the owners are told.\n\n'
+        : '')
       + 'This cannot be partially undone. A correction after this is a new line on the next week.')) return;
     try {
       const r = await rpc('admin_release_run', { p_run: run.id });
-      toast('Week ' + r.week.slice(-2) + ' released \u00b7 ' + r.shops + ' statements');
+      toast('Week ' + r.week.slice(-2) + ' released \u00b7 ' + r.shops + ' statements'
+        + (r.unchecked ? ' \u00b7 ' + r.unchecked + ' unchecked, now incidents' : ''));
     } catch (err) { return fail(err); }
     return loadFinance().catch(fail);
   }
@@ -7169,6 +7276,257 @@ async function planRound() {
 
 document.addEventListener('click', (e) => {
   if (e.target.closest('#fn-plan')) planRound().catch(fail);
+});
+
+// ------------------------------------------------------ AGT-12 · ops calls --
+// §8: a RATE, not a count. Six calls means nothing without the forty-one rounds
+// they came out of, and the two thresholds are printed beside the table so a
+// threshold nobody can see is not a threshold nobody can argue with.
+let opsCalls = [];
+
+async function loadOpsCalls() {
+  opsCalls = await rpc('admin_ops_call_audit', { p_days: 90 }) || [];
+  drawOpsCalls();
+  // the queue is above the audit because somebody is standing in a shop right
+  // now, and the audit is a thing to read on a Monday
+  await loadDutyQueue();
+}
+
+function spark(xs) {
+  const max = Math.max(1, ...xs);
+  return '<span style="display:inline-flex;align-items:flex-end;gap:2px;height:18px">'
+    + xs.map((n) => '<span style="width:4px;border-radius:1px;background:'
+      + (n ? '#E8A100' : '#26262B') + ';height:' + Math.max(2, Math.round(n / max * 18)) + 'px"></span>').join('')
+    + '</span>';
+}
+
+function drawOpsCalls() {
+  const flagged = opsCalls.filter((a) => a.over_7d || a.over_30d).length;
+  $('oc-sub').textContent = flagged
+    ? flagged + ' over a threshold \u00b7 last 90 days'
+    : 'Nobody is over a threshold \u00b7 last 90 days';
+
+  const head = '<div style="display:flex;align-items:center;height:34px;padding:0 16px;background:#141416;border-bottom:1px solid #1E1E22;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#6B6B72">'
+    + '<span style="width:150px">AGENT</span><span style="width:120px">CALLS</span>'
+    + '<span style="width:70px;text-align:right">RATE</span><span style="width:80px;text-align:right">VS FLEET</span>'
+    + '<span style="width:76px">12 WEEKS</span><span style="flex:1;padding-left:14px">THE SHAPE OF IT</span></div>';
+
+  $('oc-table').innerHTML = head + (opsCalls.length ? opsCalls.map((a) => {
+    const over = a.over_7d || a.over_30d;
+    return '<div data-agent-row="' + a.agent + '" style="cursor:pointer;display:flex;align-items:center;min-height:46px;padding:0 16px;border-bottom:1px solid #1E1E22;font-variant-numeric:tabular-nums'
+      + (a.calls ? '' : ';opacity:.55') + '">'
+      + '<span style="width:150px;font-size:12px;font-weight:600">' + esc(a.name)
+      + (over ? '<span style="display:block;font-size:9.5px;font-weight:700;color:#E8A100">'
+          + (a.over_7d ? '3+ IN 7 DAYS' : '4+ NOT REACHED') + '</span>' : '') + '</span>'
+      + '<span style="width:120px;font-size:11.5px;color:#9A9CA3">'
+      + a.calls + ' of ' + a.collections + '</span>'
+      + '<span style="width:70px;text-align:right;font-size:12.5px;font-weight:700;color:'
+      + (over ? '#E8A100' : a.calls ? '#fff' : '#3A3A40') + '">' + a.pct + '%</span>'
+      + '<span style="width:80px;text-align:right;font-size:11.5px;color:#6B6B72">'
+      + (a.vs_fleet == null ? '\u2014' : a.vs_fleet + '\u00d7') + '</span>'
+      + '<span style="width:76px">' + spark(a.spark || []) + '</span>'
+      + '<span style="flex:1;padding-left:14px;font-size:10.5px;color:#6B6B72">'
+      + (a.calls
+          ? [a.shops + ' shop' + (a.shops === 1 ? '' : 's'),
+             a.late ? a.late + ' after 18:00' : null,
+             a.not_reached ? a.not_reached + ' owner not reached' : null,
+             a.disputes ? a.disputes + ' discrepancy' : null].filter(Boolean).join(' \u00b7 ')
+          // §8: rows for agents with zero are shown deliberately
+          : 'never needed it') + '</span></div>';
+  }).join('') : '<div style="padding:24px;font-size:12px;color:#6B6B72">No agents yet.</div>');
+}
+
+document.addEventListener('click', async (e) => {
+  const row = e.target.closest('[data-agent-row]');
+  if (!row) return;
+  const a = opsCalls.find((x) => x.agent === row.dataset.agentRow);
+  if (!a || !a.calls) return;
+  // §8's four actions, in the order they are usually right. The fourth is not
+  // offered: suspending needs a second approver and this product has no
+  // two-person approval, so a one-tap suspend labelled "needs a second
+  // approver" would be a lie in the copy.
+  const pick = prompt(a.name + ' \u2014 ' + a.calls + ' of ' + a.collections
+    + ' (' + a.pct + '%)\n\n'
+    + '1) Ring the ' + a.shops + ' owners yourself\n'
+    + '2) Move his late shops to a morning window  \u2190 usually the answer\n'
+    + '3) Send someone out with him for a day\n\n'
+    + 'Suspending needs a second approver, which this product does not have yet.\n\n'
+    + 'Type a number:', '2');
+  if (pick == null) return;
+  const action = { 1: 'ring_owners', 2: 'morning_window', 3: 'ride_along' }[pick.trim()];
+  if (!action) return toast('No action with that number.');
+  try {
+    const r = await rpc('admin_ops_call_action', { p_agent: a.agent, p_action: action });
+    toast(action === 'morning_window'
+      ? (r.moved ? r.moved + ' visit(s) moved to a morning window' : 'No late visits to move')
+      : 'Logged \u00b7 ' + a.name);
+  } catch (err) { return fail(err); }
+  return loadOpsCalls().catch(fail);
+});
+
+// ------------------------------------------------------- AGT-08 · the desk --
+// §4: "Ops does not authorise the agent. Ops reaches the owner." The duty
+// officer is not deciding whether to trust the man in the shop — they are the
+// channel the owner vouches through.
+//
+// The four steps are numbered and the order is enforced server-side, because
+// taking the agent's figure first puts it in the officer's head before they ask
+// the owner, and "is it 1 566?" is a different question from "how much did you
+// hand over?".
+let duty = null;      // the open call: { row, panel, call, stage, owner_reached }
+
+async function loadDutyQueue() {
+  const q = await rpc('admin_duty_queue', {}) || [];
+  $('oc-queue').innerHTML = !q.length ? '' :
+    '<div style="background:#17171A;border:1px solid rgba(232,68,46,.4);border-radius:14px;overflow:hidden">'
+    + '<div style="display:flex;align-items:center;height:38px;padding:0 16px;background:rgba(232,68,46,.09);border-bottom:1px solid #1E1E22">'
+    + '<span style="font-size:12px;font-weight:700;color:#E8442E">' + q.length
+    + ' agent' + (q.length === 1 ? ' is' : 's are') + ' standing in a shop waiting for you</span></div>'
+    + q.map((r) => '<div data-duty="' + r.visit + '" style="cursor:pointer;display:flex;align-items:center;min-height:48px;padding:0 16px;border-bottom:1px solid #1E1E22;font-variant-numeric:tabular-nums">'
+      + '<span style="width:180px;font-size:12px;font-weight:600">' + esc(r.salon)
+      + '<span style="display:block;font-size:10px;color:#6B6B72;font-weight:400">' + esc(r.agent) + '</span></span>'
+      + '<span style="width:100px;text-align:right;font-size:13px;font-weight:700">' + DH(r.cents) + '</span>'
+      + '<span style="flex:1;padding-left:16px;font-size:11px;color:#9A9CA3">' + esc(r.why) + '</span>'
+      + '<span style="font-size:11px;color:' + (r.waiting_min > 10 ? '#E8A100' : '#6B6B72') + '">'
+      + 'waiting ' + r.waiting_min + ' min</span></div>').join('')
+    + '</div>';
+  return q;
+}
+
+async function openDuty(visit) {
+  const panel = await rpc('admin_ops_call_open', { p_visit: visit });
+  duty = { panel, call: panel.call, stage: 1, owner_reached: null };
+  $('dc-dlg').hidden = false;
+  drawDuty();
+}
+
+function drawDuty() {
+  const p = duty.panel;
+  $('dc-title').textContent = 'Ring ' + p.owner;
+  $('dc-sub').textContent = p.ref + ' \u00b7 ' + p.salon + ' \u00b7 ' + DH(p.cents)
+    + ' \u00b7 week ' + p.week.slice(-2);
+
+  // §4's three figures beside the decision. Not to accuse him — to give the
+  // officer the context they would otherwise have to guess at.
+  const bag = p.bag || {}, q = p.queue || {}, ra = p.rates || {};
+  $('dc-panel').innerHTML =
+    '<div style="background:#111113;border:1px solid #26262B;border-radius:12px;padding:6px 14px">'
+    + [['Agent', esc(p.agent)],
+       ['Where his phone says he is', p.km_from_shop == null ? 'not known'
+         : p.km_from_shop + ' km from the shop'],
+       ['Carrying', DH(bag.in_bag_cents || 0) + ' of ' + DH(bag.cap_cents || 0)],
+       ['Unchecked in his queue', (q.n || 0) + (q.n ? ' \u00b7 ' + DH(q.cents) : '')],
+       ['Asked for the desk', (ra.calls || 0) + ' in 30 days \u00b7 team ' + (ra.team_calls ?? 0)]]
+      .map(([k, v]) => '<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #1E1E22">'
+        + '<span style="flex:1;font-size:11.5px;color:#9A9CA3">' + k + '</span>'
+        + '<span style="font-size:11.5px;font-weight:600;font-variant-numeric:tabular-nums">' + v + '</span></div>').join('')
+    + '</div>';
+
+  const step = (n, on, done, title, body, inner) =>
+    '<div style="display:flex;gap:12px;padding:13px 0' + (n < 4 ? ';border-bottom:1px solid #1E1E22' : '') + ';opacity:' + (on || done ? '1' : '.4') + '">'
+    + '<span style="width:22px;height:22px;flex:none;border-radius:999px;background:'
+    + (done ? '#4ADE80' : on ? '#E8442E' : '#212125') + ';color:' + (done ? '#0D0D0F' : '#fff')
+    + ';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">'
+    + (done ? '\u2713' : n) + '</span>'
+    + '<span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">' + title + '</span>'
+    + '<span style="display:block;font-size:11px;line-height:1.5;color:#9A9CA3;margin-top:3px">' + body + '</span>'
+    + (on && inner ? '<div style="margin-top:10px">' + inner + '</div>' : '') + '</span></div>';
+
+  const st = duty.stage;
+  let html = '';
+
+  html += step(1, st === 1, st > 1, 'Tell him to stay in the shop',
+    'And <strong style="color:#D8D8DC">not to say the amount yet</strong>. You are going to ask the owner first.',
+    '<span id="dc-s1" style="cursor:pointer;height:36px;border-radius:9px;background:#E8442E;color:#fff;display:inline-flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:700">HE IS STAYING PUT</span>');
+
+  html += step(2, st === 2, st > 2, 'Ring ' + esc(p.owner) + ' on the number we have',
+    'Never a number the agent reads out. ' + (p.owner_phone
+      ? '<a href="tel:' + esc(p.owner_phone) + '" style="color:#E8442E;text-decoration:none;font-weight:700">' + esc(p.owner_phone) + '</a>'
+      : '<span style="color:#F87171">We have no number on file for him.</span>'),
+    '<span id="dc-reached" style="cursor:pointer;height:36px;border-radius:9px;background:#212125;color:#fff;display:inline-flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:700;margin-right:8px">HE ANSWERED</span>'
+    + '<span id="dc-noreach" style="cursor:pointer;height:36px;border-radius:9px;background:#111113;border:1px solid #3A3A40;color:#9A9CA3;display:inline-flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:700">NO ANSWER</span>');
+
+  html += step(3, st === 3, st > 3,
+    duty.owner_reached === false ? 'No figure of his to take' : 'Ask HIM the amount, first',
+    duty.owner_reached === false
+      ? 'The agent is now the only voucher. This still issues, and it is visibly thinner on his statement \u2014 he gets three days to say otherwise.'
+      : 'How much did you hand over? Not <em>was it X?</em> \u2014 type what he says.',
+    duty.owner_reached === false ? '' :
+      '<input id="dc-owner" inputmode="numeric" placeholder="DH" style="width:120px;height:38px;border-radius:9px;background:#111113;border:1px solid #26262B;color:#fff;padding:0 12px;font-size:14px;font-variant-numeric:tabular-nums;outline:none">'
+      + '<span id="dc-s3" style="cursor:pointer;height:38px;border-radius:9px;background:#E8442E;color:#fff;display:inline-flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:700;margin-left:9px">THAT IS WHAT HE SAID</span>');
+
+  html += step(4, st === 4, st > 4, 'Now ask the agent',
+    'And type what he says. If the two do not match, nothing is issued.',
+    '<input id="dc-agent" inputmode="numeric" placeholder="DH" style="width:120px;height:38px;border-radius:9px;background:#111113;border:1px solid #26262B;color:#fff;padding:0 12px;font-size:14px;font-variant-numeric:tabular-nums;outline:none">'
+    + '<span id="dc-s4" style="cursor:pointer;height:38px;border-radius:9px;background:#E8442E;color:#fff;display:inline-flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:700;margin-left:9px">CHECK AND ISSUE</span>');
+
+  if (duty.issued) {
+    html += '<div style="margin-top:14px;background:rgba(74,222,128,.09);border:1px solid rgba(74,222,128,.4);border-radius:14px;padding:17px;text-align:center">'
+      + '<span style="display:block;font-size:9.5px;letter-spacing:.14em;font-weight:700;color:#4ADE80">READ THESE SIX DIGITS TO HIM</span>'
+      + '<span style="display:block;font-size:34px;font-weight:800;letter-spacing:.14em;font-variant-numeric:tabular-nums;margin:9px 0">'
+      + esc(duty.issued.auth_code) + '</span>'
+      + '<span style="display:block;font-size:11px;color:#9A9CA3;line-height:1.5">Aloud, on the call. Do not send them. '
+      + 'They are good for ten minutes and only for ' + DH(duty.issued.cents) + ' at this shop.'
+      + (duty.issued.owner_reached ? '' : ' The owner was not reached, so this receipt will say so.') + '</span></div>';
+  }
+  if (duty.discrepancy) {
+    html += '<div style="margin-top:14px;background:rgba(248,113,113,.09);border:1px solid rgba(248,113,113,.4);border-radius:14px;padding:17px">'
+      + '<span style="display:block;font-size:12.5px;font-weight:700;color:#F87171">Two different amounts \u2014 nothing issued</span>'
+      + '<span style="display:block;font-size:11.5px;color:#9A9CA3;line-height:1.5;margin-top:5px">The owner said '
+      + DH(duty.discrepancy.owner_cents) + ' and the agent said ' + DH(duty.discrepancy.agent_cents)
+      + '. No cash can be recorded on this visit until a person settles it. The agent should not leave with it.</span></div>';
+  }
+
+  $('dc-steps').innerHTML = html;
+}
+
+document.addEventListener('click', async (e) => {
+  const row = e.target.closest('[data-duty]');
+  if (row) return openDuty(row.dataset.duty).catch(fail);
+  if (e.target.closest('[data-dc-close]')) { $('dc-dlg').hidden = true; duty = null; return; }
+  if ($('dc-dlg').hidden || !duty) return;
+
+  if (e.target.closest('#dc-s1')) { duty.stage = 2; return drawDuty(); }
+
+  if (e.target.closest('#dc-reached') || e.target.closest('#dc-noreach')) {
+    duty.owner_reached = !!e.target.closest('#dc-reached');
+    duty.stage = 3;
+    if (!duty.owner_reached) {
+      // no figure of his to take, so step 3 is a statement rather than a field
+      try {
+        await rpc('admin_ops_call_owner_amount', {
+          p_call: duty.call, p_cents: null, p_reached: false,
+        });
+      } catch (err) { return fail(err); }
+      duty.stage = 4;
+    }
+    return drawDuty();
+  }
+
+  if (e.target.closest('#dc-s3')) {
+    const cents = Math.round(Number($('dc-owner').value) * 100);
+    if (!cents || cents <= 0) return toast('Type what he said.');
+    try {
+      await rpc('admin_ops_call_owner_amount', {
+        p_call: duty.call, p_cents: cents, p_reached: true,
+      });
+    } catch (err) { return fail(err); }
+    duty.stage = 4;
+    return drawDuty();
+  }
+
+  if (e.target.closest('#dc-s4')) {
+    const cents = Math.round(Number($('dc-agent').value) * 100);
+    if (!cents || cents <= 0) return toast('Type what he said.');
+    let r;
+    try {
+      r = await rpc('admin_ops_call_agent_amount', { p_call: duty.call, p_cents: cents });
+    } catch (err) { return fail(err); }
+    duty.stage = 5;
+    if (r.issued) duty.issued = r; else duty.discrepancy = r;
+    drawDuty();
+    return loadOpsCalls().catch(fail);
+  }
 });
 
 // turn 3 clicks

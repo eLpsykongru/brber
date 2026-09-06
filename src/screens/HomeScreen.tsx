@@ -94,13 +94,15 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
   } else {
     if (tab === 'home') content = <DiscoverScreen name={profile.full_name} customerId={profile.id}
       onChromeHidden={setChromeHidden} onExplore={() => setTab('explore')}
-      onBookings={() => { setChromeHidden(false); setTab('bookings'); }} />;
+      onBookings={() => { setChromeHidden(false); setTab('bookings'); }}
+      onHome={() => { setChromeHidden(false); setTab('home'); }} />;
     else if (tab === 'explore') content = <ExploreScreen onChromeHidden={setChromeHidden}
-      onBookings={() => setTab('bookings')} />;
+      onBookings={() => setTab('bookings')}
+      onHome={() => { setChromeHidden(false); setTab('home'); }} />;
     else if (tab === 'bookings') content = <MyBookingsScreen customerId={profile.id}
       onChromeHidden={setChromeHidden} onRebook={() => setTab('explore')} />;
     else if (tab === 'chats') content = <ChatsScreen customerId={profile.id} onChromeHidden={setChromeHidden} />;
-    else content = <ProfileScreen profile={profile} barber={null} phone={phone} onProfileChanged={onProfileChanged} onChromeHidden={setChromeHidden} />;
+    else content = <ProfileScreen profile={profile} barber={null} phone={phone} onProfileChanged={onProfileChanged} onChromeHidden={setChromeHidden} onExplore={() => setTab('explore')} />;
   }
 
   return (

@@ -71,6 +71,8 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
   const [open, setOpen] = useState<Item | null>(null);
   const [vs, setVs] = useState<VisitStatus | null>(null);
   const [code, setCode] = useState<{ code: string; amount_cents: number } | null>(null);
+  const [dispute, setDispute] = useState<any>(null);
+  const [tick, setTick] = useState(0);
 
   const load = useCallback(async (w: string | null) => {
     const { data, error } = await supabase.rpc('my_statement', { p_week: w });
@@ -84,6 +86,7 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
   // the mint so opening the statement does not rotate the code under his pen.
   useEffect(() => {
     let alive = true;
+    supabase.rpc('my_disputed_receipt').then(({ data }) => { if (alive) setDispute(data ?? null); });
     supabase.rpc('my_visit_status').then(({ data }) => {
       if (!alive) return;
       const st = data as VisitStatus;
@@ -95,7 +98,7 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
       }
     });
     return () => { alive = false; };
-  }, [week]);
+  }, [week, tick]);
 
   const s = p?.statement ?? null;
 
@@ -142,6 +145,8 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
       <ScrollView contentContainerStyle={s2.pad} showsVerticalScrollIndicator={false}>
 
         {held && <HeldCard h={held} />}
+
+        {dispute && <DisputeCard d={dispute} onAnswered={() => setTick((n) => n + 1)} />}
 
         {/* The four digits the agent needs. AGT-03: "His app shows it under this
             week's statement. It changes every visit, and it is what proves you
@@ -306,6 +311,12 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
           reference and the minute it happened, so you can check any one of them
           against your own day.
         </T>
+        {/* §6's footer, on every statement: it is what makes the phrase mean
+            something on the statements that do carry it. */}
+        <T size={11} c={D.muted} style={s2.fine}>
+          A line only says <T size={11} c={D.sub}>confirmed with your code</T> when
+          you typed those four digits and they matched.
+        </T>
 
         {/* the weeks behind this one */}
         {(p.weeks ?? []).length > 1 && (
@@ -353,6 +364,79 @@ function Row({ it, sign }: { it: Item; sign: string }) {
       <T w="b" size={12.5} c={sign === '+' ? D.green : D.text} style={s2.num}>
         {sign} {dh(it.cents)} DH
       </T>
+    </View>
+  );
+}
+
+
+// ---------------------------------------------------------------------------
+// AGT-19 — the direct question
+// ---------------------------------------------------------------------------
+// The agent's side of this (AGT-18) may not exist without it. §10: "a mismatch
+// that only exists on the agent's side is worse than nothing" — his statement
+// would then carry a number nobody had questioned.
+//
+// It is a question with his own money in it, it explains why his app was
+// probably showing the wrong code, and it says plainly that nothing has
+// changed. Both answers' consequences are on screen before he picks one.
+function DisputeCard({ d, onAnswered }: {
+  d: { receipt: string; ref: string; cents: number; agent: string; at: string;
+       week: string; answered: boolean | null };
+  onAnswered: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+
+  const answer = async (yes: boolean) => {
+    setBusy(true);
+    const { error } = await supabase.rpc('answer_disputed_receipt', {
+      p_receipt: d.receipt, p_yes: yes,
+    });
+    setBusy(false);
+    if (error) return Alert.alert('Could not send that', error.message);
+    onAnswered();
+  };
+
+  if (d.answered != null) {
+    return (
+      <View style={s2.answered}>
+        <Ico name="check-circle" size={15} color={D.green} />
+        <T size={11.5} c={D.sub} style={s2.grow}>
+          Thank you — you told us {d.answered ? 'yes' : 'no'} about the{' '}
+          {dh(d.cents)} DH on {d.ref}. Someone is looking at it.
+        </T>
+      </View>
+    );
+  }
+
+  return (
+    <View style={s2.dispute}>
+      <T w="b" size={10} c={D.amber} ls={1.5}>WE NEED TO ASK YOU SOMETHING</T>
+      <T w="b" size={16} style={s2.dq}>
+        Did you hand {d.agent} {dh(d.cents)} DH on {when(d.at)}?
+      </T>
+      <T size={11.5} c={D.sub} style={s2.dBody}>
+        The four digits he gave us are not the ones your app issued. That is
+        almost always because your app had been closed a while and was showing
+        an older number. <T w="sb" size={11.5} c={D.textDim}>Nothing on your
+        account has changed</T> — the {dh(d.cents)} DH still reads exactly as it
+        did on week {d.week.slice(-2)}.
+      </T>
+
+      <View style={s2.dChoices}>
+        <Pressable disabled={busy} onPress={() => answer(true)} style={s2.dYes}>
+          <T w="b" size={12.5} c="#0D0D0F">YES, I DID</T>
+          <T size={10.5} c="rgba(13,13,15,0.7)" style={s2.gap2}>
+            We close it and the line stands as it is.
+          </T>
+        </Pressable>
+        <Pressable disabled={busy} onPress={() => answer(false)} style={s2.dNo}>
+          <T w="b" size={12.5}>NO, I DIDN&rsquo;T</T>
+          <T size={10.5} c={D.sub} style={s2.gap2}>
+            A person rings you today. If we got it wrong the fix is a line on
+            next week&rsquo;s statement — we never quietly change one you have.
+          </T>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -519,6 +603,23 @@ const s2 = StyleSheet.create({
     borderWidth: 1, borderColor: 'rgba(232,161,0,0.3)',
   },
   heldTop: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  dispute: {
+    marginTop: 4, borderRadius: 18, padding: 18, gap: 9,
+    backgroundColor: 'rgba(232,161,0,0.09)',
+    borderWidth: 1, borderColor: 'rgba(232,161,0,0.36)',
+  },
+  dq: { lineHeight: 22 },
+  dBody: { lineHeight: 18 },
+  dChoices: { gap: 9, marginTop: 4 },
+  dYes: { borderRadius: 14, padding: 14, backgroundColor: D.green },
+  dNo: {
+    borderRadius: 14, padding: 14, backgroundColor: D.card,
+    borderWidth: 1, borderColor: D.border,
+  },
+  answered: {
+    flexDirection: 'row', alignItems: 'center', gap: 9, marginTop: 4,
+    borderRadius: 16, padding: 14, backgroundColor: D.card,
+  },
   codeCard: {
     marginTop: 4, borderRadius: 18, padding: 17, gap: 11,
     backgroundColor: 'rgba(232,68,46,0.08)',

@@ -393,7 +393,7 @@ function DetailBody({ d, request, photo, rating, queue, sheet, onQueue, onChat, 
       {d.barbers?.salon?.status && d.barbers.salon.status !== 'live'
         && d.status !== 'cancelled' && d.status !== 'completed' && (
         <UnderReviewStrip barberName={d.barbers?.profiles?.full_name ?? 'your barber'}
-          onMessage={onChat} />
+          onMessage={onChat} onCancel={onCancel} />
       )}
 
       <Payment d={d} compact={sheet} />

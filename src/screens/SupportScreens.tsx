@@ -67,7 +67,15 @@ export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
   const [busy, setBusy] = useState(false);
   const [filed, setFiled] = useState<CaseRow | null>(null);
 
+  // §9 - `bookingId` is the entire difference between the two doors into this
+  // screen. From the Help Center it is a PICKER over the last 20 completed
+  // visits; from a booking the card is FIXED, and the booking may not have
+  // happened yet - which the picker's own `.not('completed_at','is',null)`
+  // would exclude. So a fixed card is fetched by id and the list is not.
+  const fromBooking = !!bookingId;
+
   useEffect(() => {
+    if (fromBooking) return;   // no picker, so no list to build
     supabase.from('bookings')
       .select('id, starts_at, price_cents, deposit_cents, services(name),'
         + ' barbers(id, salon:salons!salon_id(name))')
@@ -78,9 +86,19 @@ export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
         setVisits(rows);
         if (!visitId && rows.length) setVisitId(rows[0].id);
       });
-  }, []);
+  }, [fromBooking]);
 
-  const visit = visits.find((v) => v.id === visitId) ?? null;
+  const [fixed, setFixed] = useState<Visit | null>(null);
+  useEffect(() => {
+    if (!bookingId) return;
+    supabase.from('bookings')
+      .select('id, starts_at, price_cents, deposit_cents, services(name),'
+        + ' barbers(id, salon:salons!salon_id(name))')
+      .eq('id', bookingId).single()
+      .then(({ data }) => setFixed((data as unknown as Visit) ?? null));
+  }, [bookingId]);
+
+  const visit = fixed ?? visits.find((v) => v.id === visitId) ?? null;
 
   async function addPhoto() {
     const res = await ImagePicker.launchImageLibraryAsync({ quality: 0.7 });
@@ -155,7 +173,9 @@ export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
           </View>
 
           <Pressable onPress={onBack} style={({ pressed }) => [s.wideDark, pressed && s.pressed]}>
-            <Text style={s.wideDarkText}>DONE</Text>
+            {/* BKG-44 differs from PRO-03 by exactly this: onBack goes to the
+                booking, so the button says so rather than 'DONE'. */}
+            <Text style={s.wideDarkText}>{fromBooking ? 'BACK TO MY BOOKING' : 'DONE'}</Text>
           </Pressable>
           <Text style={s.link} onPress={() => onOpenCase(filed)}>View case</Text>
         </View>
@@ -176,8 +196,9 @@ export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
         </View>
 
         {visit && (
-          <Pressable onPress={() => setPicking((v) => !v)}
-            style={({ pressed }) => [s.visitCard, pressed && s.pressed]}>
+          <Pressable onPress={fromBooking ? undefined : () => setPicking((v) => !v)}
+            disabled={fromBooking}
+            style={({ pressed }) => [s.visitCard, pressed && !fromBooking && s.pressed]}>
             <View style={s.visitThumb}>
               <Ionicons name="storefront-outline" size={20} color={colors.accent} />
             </View>
@@ -189,10 +210,10 @@ export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
                 {new Date(visit.starts_at).toTimeString().slice(0, 5)} · {dh(visit.price_cents)} DH
               </Text>
             </View>
-            <Text style={s.change}>Change</Text>
+            {!fromBooking && <Text style={s.change}>Change</Text>}
           </Pressable>
         )}
-        {picking && visits.map((v) => (
+        {!fromBooking && picking && visits.map((v) => (
           <Pressable key={v.id} onPress={() => { setVisitId(v.id); setPicking(false); }}
             style={({ pressed }) => [s.visitPick, v.id === visitId && s.visitPickOn, pressed && s.pressed]}>
             <Text style={s.visitPickText}>

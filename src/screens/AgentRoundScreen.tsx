@@ -5,6 +5,7 @@ import {
 import Svg, { Path } from 'react-native-svg';
 import { Btn, Ico, Screen, Sheet, T, TAB_INSET, TopBar } from '../components/dark';
 import { supabase } from '../lib/supabase';
+import { enqueue, useConnection } from '../lib/sync';
 import { dark as D } from '../theme';
 
 // AGT-01 … AGT-05 of "Ops Agent - Collection.dc.html".
@@ -42,10 +43,21 @@ type Visit = {
   age_days: number | null; waiting_days: number | null; limit_days: number;
 };
 type Round = { bag: Bag; visits: Visit[] };
+type Paused = {
+  receipt: string; ref: string; cents: number; code: string;
+  salon: string; at: string; owner: string;
+};
+type Queue = {
+  n: number; cents: number; max_n: number; max_cents: number;
+  oldest_h: number | null; failed: number; at_ceiling: boolean;
+};
 type Done = {
   receipt: string; salon: string; taken_cents?: number; handed_cents?: number;
   open_cents?: number; code?: string; bag: Bag; direction: 'collect' | 'pay_out';
   visit: Visit;
+  // §5: recorded, not wrong. The receipt is provisional until the digits
+  // he typed are compared against the ones the owner's app issued.
+  verification?: 'verified' | 'queued' | 'failed';
 };
 
 // ---------------------------------------------------------------------------
@@ -56,11 +68,20 @@ export default function AgentRoundScreen({ onBack }: { onBack?: () => void }) {
   const [open, setOpen] = useState<Visit | null>(null);
   const [done, setDone] = useState<Done | null>(null);
   const [dropping, setDropping] = useState(false);
+  const [q, setQ] = useState<Queue | null>(null);
+  const [paused, setPaused] = useState<Paused | null>(null);
+  const { online } = useConnection();
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.rpc('agent_visits');
     if (error) return Alert.alert('Could not load your round', error.message);
     setR(data as Round);
+    const { data: qd } = await supabase.rpc('agent_queue', {});
+    if (qd) setQ(qd as Queue);
+    // §6: a failed code pauses his round until he has said what he saw, because
+    // the owner's question cannot be sent until then.
+    const { data: pd } = await supabase.rpc('agent_paused', {});
+    setPaused((pd ?? null) as Paused | null);
   }, []);
   useEffect(() => { load(); }, [load]);
 
@@ -75,13 +96,6 @@ export default function AgentRoundScreen({ onBack }: { onBack?: () => void }) {
     load();
   };
 
-  if (done) return <ReceiptScreen d={done} onNext={() => setDone(null)} />;
-  if (open) {
-    return open.direction === 'collect'
-      ? <CollectScreen v={open} bag={r!.bag} onBack={() => setOpen(null)} onDone={finish} />
-      : <HandOverScreen v={open} bag={r!.bag} onBack={() => setOpen(null)} onDone={finish} />;
-  }
-
   const bag = r?.bag;
   const visits = r?.visits ?? [];
   const pct = bag && bag.cap_cents ? Math.min(100, Math.round(bag.in_bag_cents * 100 / bag.cap_cents)) : 0;
@@ -89,6 +103,10 @@ export default function AgentRoundScreen({ onBack }: { onBack?: () => void }) {
   // §2.4's warning, and it is about the ROUND rather than the next tap: the
   // collections still ahead of the next hand-over, taken together. A version
   // that only checked `bag + next visit` would stay quiet until he was over.
+  //
+  // This sits ABOVE the early returns below and must stay there: a hook after a
+  // conditional return runs on some renders and not others, which is exactly
+  // the "rendered fewer hooks than expected" crash.
   const overCap = useMemo(() => {
     if (!bag) return false;
     let running = bag.in_bag_cents;
@@ -99,6 +117,17 @@ export default function AgentRoundScreen({ onBack }: { onBack?: () => void }) {
     }
     return false;
   }, [bag, visits]);
+
+  // AGT-18. It is not a modal over the round: until he answers, the round is
+  // stopped, and a dismissible sheet would let him keep driving.
+  if (paused) return <MismatchScreen p={paused} onDone={load} />;
+  if (done) return <ReceiptScreen d={done} onNext={() => setDone(null)} />;
+  if (open) {
+    return open.direction === 'collect'
+      ? <CollectScreen v={open} bag={r!.bag} q={q} online={online}
+          onBack={() => setOpen(null)} onDone={finish} />
+      : <HandOverScreen v={open} bag={r!.bag} onBack={() => setOpen(null)} onDone={finish} />;
+  }
 
   const today = visits.filter((v) => !isLater(v));
   const later = visits.filter(isLater);
@@ -111,6 +140,27 @@ export default function AgentRoundScreen({ onBack }: { onBack?: () => void }) {
           {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
           {visits.length ? ` · ${visits.length} visit${visits.length === 1 ? '' : 's'} left` : ''}
         </T>
+
+        {q && (q.n > 0 || q.failed > 0) && (
+          <View style={s.queueStrip}>
+            <Ico name={q.failed ? 'alert-triangle' : 'clock'} size={14}
+              color={q.failed ? '#F87171' : D.amber} />
+            <View style={s.grow}>
+              <T w="sb" size={12} c={q.failed ? '#F87171' : D.amber}>
+                {q.failed
+                  ? `${q.failed} code didn’t match`
+                  : `${q.n} of ${q.max_n} · ${dh(q.cents)} DH waiting to be checked`}
+              </T>
+              <T size={10.5} c={D.sub} style={s.gap2}>
+                {q.failed
+                  ? 'Ops is ringing the owner. Your round is paused until that is sent.'
+                  : q.at_ceiling
+                    ? 'You cannot open another collection until these clear. Hand-overs still work.'
+                    : 'They go through on their own when you have signal.'}
+              </T>
+            </View>
+          </View>
+        )}
 
         {/* the bag. §2.4: it is his personal risk, not a nicety */}
         {bag && (
@@ -169,7 +219,19 @@ export default function AgentRoundScreen({ onBack }: { onBack?: () => void }) {
           </View>
         )}
 
-        {today.map((v) => <VisitCard key={v.id} v={v} onPress={() => setOpen(v)} />)}
+        {today.map((v) => (
+          <VisitCard key={v.id} v={v}
+            blocked={!!q?.at_ceiling && v.direction === 'collect'}
+            onPress={() => {
+              if (q?.at_ceiling && v.direction === 'collect') {
+                return Alert.alert('Too much unchecked cash',
+                  `You have ${q.n} collections worth ${dh(q.cents)} DH that we have not `
+                  + 'been able to check yet. Find signal and let them go through, or call ops. '
+                  + 'You can still hand over.');
+              }
+              setOpen(v);
+            }} />
+        ))}
         {later.map((v) => <VisitCard key={v.id} v={v} later onPress={() => setOpen(v)} />)}
       </ScrollView>
 
@@ -240,7 +302,9 @@ function DropSheet({ visible, bag, onClose, onDrop }: {
 const isLater = (v: Visit) =>
   !!v.window_from && new Date(v.window_from).toDateString() !== new Date().toDateString();
 
-function VisitCard({ v, later, onPress }: { v: Visit; later?: boolean; onPress: () => void }) {
+function VisitCard({ v, later, blocked, onPress }: {
+  v: Visit; later?: boolean; blocked?: boolean; onPress: () => void;
+}) {
   const collect = v.direction === 'collect';
   // §2.3 — the age is only real in one direction, and the other says so
   const late = collect && v.age_days != null && v.age_days >= v.limit_days - 5;
@@ -250,7 +314,7 @@ function VisitCard({ v, later, onPress }: { v: Visit; later?: boolean; onPress: 
 
   return (
     <Pressable onPress={onPress}
-      style={[s.card, { borderColor: border }, later && s.cardLater]}>
+      style={[s.card, { borderColor: border }, (later || blocked) && s.cardLater]}>
       <View style={s.cardTop}>
         <View style={s.grow}>
           <T w="sb" size={14} c={later ? D.sub : D.text}>{v.salon}</T>
@@ -309,11 +373,17 @@ function VisitCard({ v, later, onPress }: { v: Visit; later?: boolean; onPress: 
 // normal case: no red, no blocked button, no extra dialog. One amber panel and
 // a changed sentence. The full amount is the special case where that panel
 // happens not to appear.
-function CollectScreen({ v, bag, onBack, onDone }: {
-  v: Visit; bag: Bag; onBack: () => void; onDone: (d: Done) => void;
+function CollectScreen({ v, bag, q, online, onBack, onDone }: {
+  v: Visit; bag: Bag; q: Queue | null; online: boolean;
+  onBack: () => void; onDone: (d: Done) => void;
 }) {
   const [typed, setTyped] = useState('');
   const [confirm, setConfirm] = useState(false);
+  const [ladder, setLadder] = useState(false);
+  // §3's fourth brake: once he has counted the money with the owner, walking
+  // away is not an option the screen offers. Typing an amount is the moment
+  // that becomes true.
+  const counted = Number(typed || 0) > 0;
 
   const cents = Number(typed || 0) * 100;
   const short = Math.max(0, v.amount_cents - cents);
@@ -323,6 +393,11 @@ function CollectScreen({ v, bag, onBack, onDone }: {
     if (k === '<') return setTyped((t) => t.slice(0, -1));
     setTyped((t) => (t === '0' ? k : t + k).slice(0, 7));
   };
+
+  if (ladder) {
+    return <LadderScreen v={v} holding={counted}
+      onBack={() => setLadder(false)} onDone={onBack} />;
+  }
 
   return (
     <Screen bottom={TAB_INSET}>
@@ -397,6 +472,10 @@ function CollectScreen({ v, bag, onBack, onDone }: {
             </T>
           </View>
         )}
+
+        <T w="sb" size={12} c={D.sub} style={s.leaveLink} onPress={() => setLadder(true)}>
+          He can&rsquo;t give me the code
+        </T>
       </ScrollView>
 
       <View style={s.foot}>
@@ -408,7 +487,7 @@ function CollectScreen({ v, bag, onBack, onDone }: {
       </View>
 
       <ConfirmSheet visible={confirm} v={v} bag={bag} cents={cents} short={short}
-        onClose={() => setConfirm(false)} onDone={onDone} />
+        online={online} onClose={() => setConfirm(false)} onDone={onDone} />
     </Screen>
   );
 }
@@ -418,15 +497,47 @@ function CollectScreen({ v, bag, onBack, onDone }: {
 // ---------------------------------------------------------------------------
 // The friction lives HERE and nowhere else. No long-press, no second dialog, no
 // typed confirmation — the code is the friction, and it does real work.
-function ConfirmSheet({ visible, v, bag, cents, short, onClose, onDone }: {
+function ConfirmSheet({ visible, v, bag, cents, short, online, onClose, onDone }: {
   visible: boolean; v: Visit; bag: Bag; cents: number; short: number;
-  onClose: () => void; onDone: (d: Done) => void;
+  online: boolean; onClose: () => void; onDone: (d: Done) => void;
 }) {
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
 
   const record = async () => {
     setBusy(true);
+    const capturedAt = new Date().toISOString();
+
+    // §5, offline: the receipt exists on tap. He cannot be made to wait for a
+    // network he does not have, and the digits ride the queue with the money.
+    // The device names the receipt so a replay can never write it twice - the
+    // one part of offline immutability that is a real barrier.
+    if (!online) {
+      const clientRef = `c-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      await enqueue({
+        at: capturedAt,
+        label: `${v.salon} · ${dh(cents)} DH collected`,
+        icon: 'check',
+        cents,
+        call: {
+          rpc: 'agent_collect',
+          args: {
+            p_visit: v.id, p_cents: cents, p_code: code,
+            p_captured_at: capturedAt, p_client_ref: clientRef,
+          },
+        },
+      });
+      setBusy(false);
+      setCode('');
+      return onDone({
+        receipt: 'not yet issued', salon: v.salon, taken_cents: cents,
+        open_cents: Math.max(0, v.amount_cents - cents), code,
+        bag: { ...bag, in_bag_cents: bag.in_bag_cents + cents,
+               collected_cents: bag.collected_cents + cents },
+        direction: 'collect', visit: v, verification: 'queued',
+      });
+    }
+
     const { data, error } = await supabase.rpc('agent_collect', {
       p_visit: v.id, p_cents: cents, p_code: code,
     });
@@ -491,7 +602,21 @@ function ConfirmSheet({ visible, v, bag, cents, short, onClose, onDone }: {
         </T>
       </View>
 
-      <Btn title={busy ? 'RECORDING…' : `RECORD ${dh(cents)} DH COLLECTED`}
+      {/* §5: two separate promises on one screen. The first is not softened by
+          the second and they are never merged into one gentler sentence. */}
+      {!online && (
+        <View style={s.offlinePanel}>
+          <Ico name="wifi-off" size={15} color={D.amber} />
+          <T size={11.5} c={D.textDim} style={s.grow}>
+            And I can&rsquo;t check {code || 'his code'} until we have signal. The
+            money is recorded now; the proof waits.
+          </T>
+        </View>
+      )}
+
+      <Btn title={busy ? 'RECORDING…'
+          : online ? `RECORD ${dh(cents)} DH COLLECTED`
+          : `RECORD ${dh(cents)} DH · CHECK LATER`}
         bg={code.length === 4 && !busy ? D.accent : D.card2}
         fg={code.length === 4 && !busy ? '#fff' : D.faint}
         height={54} ls={0.7}
@@ -508,6 +633,7 @@ function ConfirmSheet({ visible, v, bag, cents, short, onClose, onDone }: {
 // ---------------------------------------------------------------------------
 function ReceiptScreen({ d, onNext }: { d: Done; onNext: () => void }) {
   const collect = d.direction === 'collect';
+  const queued = d.verification === 'queued';
   const amount = collect ? (d.taken_cents ?? 0) : (d.handed_cents ?? 0);
   const open = d.open_cents ?? 0;
 
@@ -515,18 +641,36 @@ function ReceiptScreen({ d, onNext }: { d: Done; onNext: () => void }) {
     <Screen bottom={TAB_INSET}>
       <ScrollView contentContainerStyle={s.pad} showsVerticalScrollIndicator={false}>
         <View style={s.tick}>
-          <Ico name="check" size={26} color={collect ? D.accent : D.green} />
+          <Ico name="check" size={26} color={queued ? D.amber : collect ? D.accent : D.green} />
         </View>
         <T style={s.rBig}>{dh(amount)} DH</T>
         <T size={12} c={D.sub} style={s.centre}>
           {collect ? 'Collected from' : 'Handed to'} {d.salon} · {hhmm()}
         </T>
 
+        {/* §5: RECORDED · HIS CODE NOT CHECKED YET. Amber and dashed, never red
+            — red is for failure and he has not failed. */}
+        {queued && (
+          <View style={s.provisional}>
+            <T w="eb" size={9.5} c={D.amber} ls={1.3}>RECORDED · HIS CODE NOT CHECKED YET</T>
+            <View style={s.provRow}>
+              <T size={11.5} c={D.sub} style={s.grow}>The money</T>
+              <T size={11.5} c={D.green}>in your bag, counted, done</T>
+            </View>
+            <View style={s.provRow}>
+              <T size={11.5} c={D.sub} style={s.grow}>His code {d.code}</T>
+              <T size={11.5} c={D.amber}>waiting to be checked</T>
+            </View>
+          </View>
+        )}
+
         <View style={s.facts}>
           {[
             ['Receipt', d.receipt],
             // the method is on the receipt because that is what makes it evidence
-            ['Confirmed by', collect ? `the owner's code · ${d.code}` : "the owner's signature"],
+            ['Confirmed by', !collect ? "the owner's signature"
+              : queued ? `his code ${d.code} — not checked yet`
+              : `the owner's code · ${d.code}`],
             ['Week', `${d.visit.week.slice(-2)}`],
           ].map(([k, val]) => (
             <View key={k} style={s.factRow}>
@@ -563,6 +707,220 @@ function ReceiptScreen({ d, onNext }: { d: Done; onNext: () => void }) {
       <View style={s.foot}>
         <Btn title="NEXT VISIT" height={54} ls={0.8} onPress={onNext} />
       </View>
+    </Screen>
+  );
+}
+
+
+// ---------------------------------------------------------------------------
+// AGT-18 — the code didn't match
+// ---------------------------------------------------------------------------
+// He is 30 km away with the cash already in his bag. §6: this must not read as
+// an accusation — the likeliest cause is a stale code on the owner's screen,
+// and `I mistyped it` is the commonest answer, so it is offered plainly and
+// first among equals rather than buried as a confession.
+//
+// He does not phone and does not drive back. Ops rings the owner.
+function MismatchScreen({ p, onDone }: { p: Paused; onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
+
+  const say = async (saw: 'owner_read' | 'barber_read' | 'mistyped') => {
+    setBusy(true);
+    const { error } = await supabase.rpc('agent_explain_mismatch', {
+      p_receipt: p.receipt, p_saw: saw,
+    });
+    setBusy(false);
+    if (error) return Alert.alert('Could not send that', error.message);
+    onDone();
+  };
+
+  return (
+    <Screen bottom={TAB_INSET}>
+      <TopBar title="One code didn't match" plain />
+      <ScrollView contentContainerStyle={s.pad} showsVerticalScrollIndicator={false}>
+        <View style={s.mmHero}>
+          <T w="b" size={10} c={D.amber} ls={1.5}>THE CODE DIDN&rsquo;T MATCH</T>
+          <T style={s.owesBig}>{dh(p.cents)} DH</T>
+          <T size={12} c={D.sub} style={s.mmBody}>
+            {p.salon} · you typed {p.code}. That is not the number {p.owner}&rsquo;s app
+            issued — usually because his app had been closed a while and was
+            showing an old one.
+          </T>
+        </View>
+
+        <View style={s.mmFacts}>
+          <View style={s.provRow}>
+            <T size={11.5} c={D.sub} style={s.grow}>The money</T>
+            <T size={11.5} c={D.green}>stays as recorded — nothing reversed</T>
+          </View>
+          <View style={s.provRow}>
+            <T size={11.5} c={D.sub} style={s.grow}>His statement</T>
+            <T size={11.5} c={D.textDim}>unchanged</T>
+          </View>
+          <View style={s.provRow}>
+            <T size={11.5} c={D.sub} style={s.grow}>Who calls him</T>
+            <T size={11.5} c={D.textDim}>we do, not you</T>
+          </View>
+        </View>
+
+        <T w="b" size={10} c={D.sub} ls={1.5} style={s.section}>WHAT DID YOU SEE?</T>
+        <T size={11.5} c={D.sub} style={s.mmAsk}>
+          This is the one thing only you know. Any of these is a normal answer.
+        </T>
+
+        {([
+          ['mistyped', 'I mistyped it', 'Four digits, one hand, in a hurry. It happens most weeks.'],
+          ['owner_read', `${p.owner} read it off his own phone`, 'Then his app was probably showing a stale number.'],
+          ['barber_read', 'A barber read it out, not the owner', 'The owner may not have been there at all.'],
+        ] as const).map(([k, title, why]) => (
+          <Pressable key={k} disabled={busy} onPress={() => say(k)} style={s.mmOpt}>
+            <View style={s.grow}>
+              <T w="sb" size={12.5}>{title}</T>
+              <T size={11} c={D.faint} style={s.gap2}>{why}</T>
+            </View>
+            <Ico name="chevron-right" size={15} color={D.muted} />
+          </Pressable>
+        ))}
+
+        <T size={11} c={D.muted} style={s.mmFoot}>
+          Your round starts again as soon as you answer. You do not need to go
+          back to the shop, and you do not need to ring anyone.
+        </T>
+      </ScrollView>
+    </Screen>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// AGT-06 / AGT-07 — no code, and leaving without closing
+// ---------------------------------------------------------------------------
+// §2: three rungs he works alone, in cost order, then the call. The third rung
+// REFUSES a code read down the phone — a code spoken over a phone proves the
+// owner agreed, not that the agent is in the shop, and accepting it once would
+// make every code in the system assert only the weaker of the two facts.
+//
+// §2's friction is a number about himself, not a delay. No timer: a timer just
+// teaches agents to wait it out.
+function LadderScreen({ v, holding, onBack, onDone }: {
+  v: Visit; holding: boolean; onBack: () => void; onDone: () => void;
+}) {
+  const [rates, setRates] = useState<{ calls: number; team_calls: number;
+    abandons: number; team_abandons: number } | null>(null);
+  const [leaving, setLeaving] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    supabase.rpc('agent_rates', {}).then(({ data }) => data && setRates(data));
+  }, []);
+
+  const call = async (reason: string) => {
+    setBusy(true);
+    const { error } = await supabase.rpc('agent_request_ops_call', {
+      p_visit: v.id, p_reason: reason,
+    });
+    setBusy(false);
+    if (error) return Alert.alert('Could not send that', error.message);
+    Alert.alert('The desk is ringing him',
+      'Stay in the shop and do not say the amount yet. They will ring the owner '
+      + 'on the number we have, ask him the amount first, then ask you.');
+    onDone();
+  };
+
+  const leave = async (reason: string) => {
+    setBusy(true);
+    const { error } = await supabase.rpc('agent_abandon_visit', {
+      p_visit: v.id, p_reason: reason,
+    });
+    setBusy(false);
+    if (error) return Alert.alert('Could not record that', error.message);
+    onDone();
+  };
+
+  return (
+    <Screen bottom={TAB_INSET}>
+      <TopBar title="He can't give me the code" onBack={onBack} />
+      <ScrollView contentContainerStyle={s.pad} showsVerticalScrollIndicator={false}>
+        <T size={12} c={D.sub} style={s.sub}>
+          {v.salon} · {dh(v.amount_cents)} DH. Three things to try before we ring anyone.
+        </T>
+
+        {[
+          ['1', 'He is on the wrong screen',
+           'The four digits are top right of This week’s statement — not in the receipts list.'],
+          ['2', 'Any other phone',
+           'shop.sterncut.ma, and he types his own number. Log him out afterwards.'],
+          ['3', 'Ring him if he isn’t here',
+           'A barber cannot stand in for him. And if he answers, do not take the digits down the phone — that proves he agreed, not that you are here. Tap below and the desk takes it from there.'],
+        ].map(([n, title, why]) => (
+          <View key={n} style={s.rung}>
+            <View style={s.rungNo}><T w="b" size={12} c={D.sub}>{n}</T></View>
+            <View style={s.grow}>
+              <T w="sb" size={13}>{title}</T>
+              <T size={11.5} c={D.sub} style={s.rungWhy}>{why}</T>
+            </View>
+          </View>
+        ))}
+
+        {/* §2: the number sits on the screen BEFORE he taps */}
+        {rates && (
+          <View style={s.rateStrip}>
+            <T size={11.5} c={D.sub} style={s.grow}>
+              You have asked for the desk{' '}
+              <T w="sb" size={11.5} c={D.textDim}>{rates.calls} times in 30 days</T>
+              {' '}· the team averages {rates.team_calls}.
+            </T>
+          </View>
+        )}
+
+        <T w="b" size={10} c={D.sub} ls={1.5} style={s.section}>ASK THE DESK TO RING HIM</T>
+        {([
+          ['owner_unreachable', 'He isn’t here and isn’t answering'],
+          ['app_no_code', 'His app isn’t showing a code'],
+          ['code_rejected_3x', 'The code keeps being rejected'],
+        ] as const).map(([k, label]) => (
+          <Pressable key={k} disabled={busy} onPress={() => call(k)} style={s.mmOpt}>
+            <T w="sb" size={12.5} style={s.grow}>{label}</T>
+            <Ico name="phone" size={15} color={D.accent} />
+          </Pressable>
+        ))}
+
+        {/* §3's fourth brake. Holding counted cash removes the option — this is
+            the one place the product refuses him an exit. */}
+        {holding ? (
+          <View style={s.noExit}>
+            <Ico name="lock" size={15} color={D.amber} />
+            <T size={11.5} c={D.textDim} style={s.grow}>
+              You have counted his money, so you cannot leave this open. The desk
+              is the only way out of a visit where cash has already moved.
+            </T>
+          </View>
+        ) : !leaving ? (
+          <T w="sb" size={12} c={D.sub} style={s.leaveLink} onPress={() => setLeaving(true)}>
+            Leave without closing
+          </T>
+        ) : (
+          <View style={s.leaveBox}>
+            <T w="b" size={12.5}>Leaving is recorded, not blank</T>
+            <T size={11.5} c={D.sub} style={s.leaveWhy}>
+              Your name, the time and where you are. {v.owner} sees a line saying
+              you came and could not close. The money does not go away — day{' '}
+              {v.age_days ?? '—'} of {v.limit_days} keeps counting and this shop
+              comes back tomorrow, at the top of your round.
+              {rates ? ` You have left ${rates.abandons} in 30 days; the team averages ${rates.team_abandons}.` : ''}
+            </T>
+            {([
+              ['shop_closed', 'The shop is closed'],
+              ['owner_absent', 'He isn’t here at all'],
+              ['other', 'Something else'],
+            ] as const).map(([k, label]) => (
+              <Pressable key={k} disabled={busy} onPress={() => leave(k)} style={s.leaveOpt}>
+                <T size={12.5} style={s.grow}>{label}</T>
+                <Ico name="chevron-right" size={14} color={D.muted} />
+              </Pressable>
+            ))}
+          </View>
+        )}
+      </ScrollView>
     </Screen>
   );
 }
@@ -808,6 +1166,59 @@ const s = StyleSheet.create({
     borderWidth: 1, borderStyle: 'dashed', borderColor: D.muted,
   },
 
+  section: { marginTop: 22, marginBottom: 9 },
+  rung: {
+    flexDirection: 'row', gap: 12, marginBottom: 10,
+    backgroundColor: D.card, borderRadius: 16, padding: 15,
+  },
+  rungNo: {
+    width: 24, height: 24, borderRadius: 999, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  rungWhy: { lineHeight: 17, marginTop: 3 },
+  rateStrip: {
+    flexDirection: 'row', marginTop: 4, borderRadius: 14, padding: 13,
+    backgroundColor: D.bg, borderWidth: 1, borderColor: D.border,
+  },
+  noExit: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 20,
+    backgroundColor: 'rgba(232,161,0,0.09)', borderRadius: 14, padding: 14,
+  },
+  leaveLink: { marginTop: 22, textAlign: 'center' },
+  leaveBox: { marginTop: 20, backgroundColor: D.card, borderRadius: 16, padding: 15, gap: 4 },
+  leaveWhy: { lineHeight: 18, marginBottom: 6 },
+  leaveOpt: {
+    flexDirection: 'row', alignItems: 'center', paddingVertical: 12,
+    borderTopWidth: 1, borderTopColor: D.hairline,
+  },
+  mmHero: {
+    marginTop: 4, borderRadius: 18, padding: 18, gap: 6,
+    borderWidth: 1, borderColor: 'rgba(232,161,0,0.4)', backgroundColor: D.card,
+  },
+  mmBody: { lineHeight: 18 },
+  mmFacts: { marginTop: 14, backgroundColor: D.card, borderRadius: 16, paddingHorizontal: 15, paddingVertical: 4 },
+  mmAsk: { marginBottom: 10, lineHeight: 17 },
+  mmOpt: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10,
+    backgroundColor: D.card, borderRadius: 16, padding: 15,
+  },
+  mmFoot: { marginTop: 6, lineHeight: 16, textAlign: 'center' },
+  offlinePanel: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 2,
+    backgroundColor: 'rgba(232,161,0,0.09)', borderRadius: 14, padding: 14,
+  },
+  provisional: {
+    marginTop: 20, borderRadius: 14, padding: 15, gap: 9,
+    borderWidth: 1, borderStyle: 'dashed', borderColor: D.amber,
+    backgroundColor: 'rgba(232,161,0,0.06)',
+  },
+  provRow: { flexDirection: 'row', alignItems: 'center' },
+  queueStrip: {
+    flexDirection: 'row', alignItems: 'center', gap: 9, marginBottom: 12,
+    borderRadius: 14, padding: 13,
+    backgroundColor: 'rgba(232,161,0,0.09)',
+    borderWidth: 1, borderColor: 'rgba(232,161,0,0.3)',
+  },
   give: {
     marginTop: 4, borderRadius: 18, padding: 17, gap: 9,
     borderWidth: 1, borderColor: 'rgba(74,222,128,0.4)', backgroundColor: D.card,

@@ -12,6 +12,7 @@ import { OfflineBanner, useOnline } from '../components/Offline';
 import { clearQueueActivity, syncQueueActivity } from '../lib/queueActivity';
 import CustomerNotificationsScreen from './CustomerNotificationsScreen';
 import MyBookingScreen from './MyBookingScreen';
+import ReportProblemScreen, { CaseRow, SupportCaseScreen } from './SupportScreens';
 import CheckInScreen, { WalkInTicketScreen, YoureNextScreen } from './QueueScreens';
 import QueueScreen, { DayQueueRow, minutesUntil, QUEUE_POLL_MS } from './QueueScreen';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
@@ -95,9 +96,10 @@ function useQueueActivity(
   useEffect(() => () => { clearQueueActivity(); }, []);
 }
 
-export default function DiscoverScreen({ name, customerId, onChromeHidden, onExplore, onBookings }: {
+export default function DiscoverScreen({ name, customerId, onChromeHidden, onExplore, onBookings, onHome }: {
   name?: string | null; customerId?: string;
   onChromeHidden?: (hidden: boolean) => void; onExplore?: () => void; onBookings?: () => void;
+  onHome?: () => void;
 }) {
   const [salons, setSalons] = useState<SalonCard[]>([]);
   const [salon, setSalon] = useState<SalonCard | null>(null);
@@ -110,7 +112,9 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
   const [booking, setBooking] = useState<MyBooking | null>(null);
   const [dayQueue, setDayQueue] = useState<DayQueueRow[]>([]);
   const [queueOpen, setQueueOpen] = useState(false);
-  const [detailOpen, setDetailOpen] = useState(false); // 9a, behind the queue's MY BOOKING
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [reportId, setReportId] = useState<string | null>(null);
+  const [openCase, setOpenCase] = useState<CaseRow | null>(null); // 9a, behind the queue's MY BOOKING
   const [inboxOpen, setInboxOpen] = useState(false);   // 14a, behind the bell
   const [unread, setUnread] = useState(0);
   const [checkIn, setCheckIn] = useState(false);       // 27a, the counter code
@@ -256,10 +260,23 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
       onOpenBooking={() => { setInboxOpen(false); setDetailOpen(true); }}
       onRate={() => { setInboxOpen(false); onChromeHidden?.(false); onBookings?.(); }} />;
   }
+  // §9 - the ⋯ sheet's 'Report a problem' called onReport?.() into nothing, so
+  // this door has never opened. It is also the ONLY route to 17a for a booking
+  // that has not happened yet: the Help Center's picker filters on completed
+  // visits, so tomorrow's 11:00 can be reported from here and nowhere else.
+  if (reportId && customerId) {
+    return <ReportProblemScreen bookingId={reportId}
+      onBack={() => setReportId(null)} onOpenCase={setOpenCase} />;
+  }
+  if (openCase && customerId) {
+    return <SupportCaseScreen caseRow={openCase} myId={customerId}
+      onBack={() => setOpenCase(null)} />;
+  }
   if (detailOpen && booking && customerId) {
     return <MyBookingScreen bookingId={booking.id} myId={customerId}
       onBack={() => { setDetailOpen(false); onChromeHidden?.(false); }}
-      onQueue={() => { setDetailOpen(false); setQueueOpen(true); }} />;
+      onQueue={() => { setDetailOpen(false); setQueueOpen(true); }}
+      onReport={(id) => setReportId(id)} />;
   }
   if (queueOpen && booking?.barbers?.id) {
     return <QueueScreen barberId={booking.barbers.id} myBookingId={booking.id}
@@ -278,7 +295,8 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
       onClose={() => { setSearchOpen(false); onChromeHidden?.(false); }} />;
   }
   if (salon) {
-    return <SalonDetailScreen salon={salon} onBack={() => open(null)} onChromeHidden={onChromeHidden} />;
+    return <SalonDetailScreen salon={salon} onBack={() => open(null)} onChromeHidden={onChromeHidden}
+      onBooked={() => { open(null); onHome?.(); }} />;
   }
 
   const header = (

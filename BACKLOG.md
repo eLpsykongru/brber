@@ -1995,3 +1995,273 @@ Two prompts written for Claude Design, for the §3 gaps that must not be
 invented: the **no-phone/no-code fallback** (`verified_by: 'ops_call'`, which
 exists in the enum and nothing writes) and **offline collection** (a queued
 collection is unverified until it syncs, and that state has to reach FIN-15).
+
+## Unverified collections — the model and the queue (0094, 0095)
+`design_handoff_unverified_collections/`. Money settled, proof not.
+
+### 0094 — the two fields, and both §9 rules as barriers
+- `verified_by` (which proof) and `verification` (whether it ran) are separate
+  columns. Collapsing them was the failure the whole spec exists to prevent.
+- **No function anywhere sets `verification = 'verified'`.** The only writer is
+  `verify_queued_receipt`, which compares the stored digits against the real
+  code; the trigger refuses the transition unless a session GUC set *inside*
+  that function is live. §8's "no one in ops can mark a queued receipt verified"
+  therefore survives someone writing a second function later.
+- **"Confirmed with your code" is generated in exactly one place** —
+  `my_visit_status` — and now reads `verification` first. Queued reads *waiting
+  to be checked*, failed reads *the code did not match*.
+- The guard is a **whitelist** (`verification`, `synced_at`, `incident_ref`) via
+  `to_jsonb(new) - ...`: a blacklist stops protecting each new column somebody
+  adds, and these are the columns a dispute is settled with.
+- **A code the owner's app never issued is a mismatch, not an error** — §6 says
+  the likeliest cause is a stale code, and a rotated-away code is exactly that.
+  Treating it as an error would leave the receipt queued for ever.
+- **Only a `code` receipt can be queued**, by CHECK: a signature is captured in
+  the room and an ops call is proved by the call itself.
+
+### 0095 — the queue
+- **Two calls, not one.** The receipt is written `queued` with its real
+  `code_captured_at`; the comparison is a separate call. Collapsing them would
+  write a receipt that had always been verified and lose the gap — which is the
+  only evidence a shop's money sat unchecked for three days.
+- **DECISION the spec leaves open: the ceiling is client-enforced, and the
+  server records a breach rather than refusing it.** The server cannot refuse a
+  collect it has not heard of, and by sync the cash is already in his bag — a
+  refusal would destroy the only record of real money. So it writes the receipt
+  and notifies ops that his app should have stopped him.
+- Offline capture rides the existing outbox (`src/lib/sync.ts`), which already
+  survives force-quit and retries. The device names the receipt (`client_ref`,
+  unique index) so a replay returns the first write instead of writing twice —
+  the one part of offline immutability that is a barrier, not discipline.
+- §5's two sentences on AGT-15 are kept **separate**: "there is no undo" is not
+  softened by "I can't check these digits yet"; both are on the screen.
+- The provisional receipt is amber and dashed, never red — he did nothing wrong.
+
+Left, in §10 order: the sync check UI (AGT-17), the mismatch pair
+(AGT-18/AGT-19, together or not at all), the clock and escalation **with both
+feeds** — queued receipts and visits that went quiet, because a queue that never
+syncs is invisible to the server — then AGT-20, the ladder, the duty call, audit.
+
+## The sync landing and the mismatch pair (0096)
+§10 steps 3 and 4, in one migration because step 4 says they ship together or
+not at all: a failed check that exists only on the agent's phone leaves a number
+on the owner's statement that nobody has questioned.
+- **AGT-17 is quiet.** `agent_sync_queue` runs the comparison over his queued
+  receipts and returns only what failed. A match changes nothing visible; from
+  then on the receipt reads like any other.
+- **AGT-18 takes the whole screen, not a sheet.** §6 pauses his round, and a
+  dismissible modal would let him keep driving. He is asked for the one thing
+  only he has, and **`I mistyped it` is offered first** — it is the commonest
+  answer and burying it as a confession is how agents learn to avoid the queue.
+  He does not phone and does not drive back; ops rings the owner.
+- **AGT-19 is a question with his own money in it**, above everything else on
+  his statement, with both answers' consequences on screen before he picks. It
+  explains why his app was probably showing an old number and says plainly that
+  nothing has changed.
+- **The pause is on HIS answer, not the owner's.** Waiting on somebody else's
+  phone would strand a whole round; answering unpauses him, and the outcome of
+  the question does not.
+- **Every answer is write-once**, enforced by the guard: neither party revises
+  what they said, because a dispute is settled on what they said at the time.
+- The guard's whitelist grew by four columns and each is write-once — a
+  whitelist that grows without that rule is a blacklist with extra steps.
+- §6's footer is now on every statement: *a line only says confirmed with your
+  code when you typed those four digits and they matched.* It is what makes the
+  phrase mean anything on the statements that do carry it.
+
+Left: §7's clock and escalation with **both feeds** (queued receipts, and visits
+that went quiet — a queue that never syncs is invisible to the server), the
+release-time trigger, then AGT-20, the ladder, the duty call, the audit.
+
+## The clock, and unchecked on the run (0097, 0098)
+### 0097 — §7, and the hole in it
+- **The escalation is one function called from two places** — the hourly sweep
+  and `admin_release_run` — because §7's "whichever first" only means anything
+  if both paths reach the same state.
+- **THE HOLE, and the second feed.** The clock runs from `code_captured_at`,
+  which the server only learns AT SYNC. A phone that never comes back is a queue
+  the server cannot see, so the 72-hour rung could never fire on the exact case
+  §7 was written for — "what happens when the app is never opened" was: nothing,
+  silently. So the sweep also watches **visits that went quiet**: planned, past
+  their window by three days, never closed, no receipt at all. It cannot know
+  whether cash moved and does not need to; the alternative was silence.
+- The 24-hour rung tells the duty desk **once** (`duty_notified_at`,
+  write-once). §7's own reasoning: a queue that pages someone every evening is a
+  queue people learn to ignore.
+- `blocked` is not `at_ceiling`: the ceiling is how much unchecked cash he
+  holds, blocked is how long he has held it.
+- pg_cron on the repo's conditional pattern, and the notice says the
+  release-time half still works without it because it is synchronous.
+
+### 0098 — AGT-20
+- **Three siblings, not a footnote.** `PROVED BY OWNER CODE`, `PROVED BY OPS
+  CALL` and `COLLECTED, UNCHECKED` sit side by side on the run, on a draft too —
+  saying `0 DH` is the point, so the column is not something that only appears
+  when there is bad news.
+- **`receipt_state` is derived server-side**, so the run, the release
+  confirmation and anything built later cannot disagree about what a row is.
+  Precedence: INCIDENT outranks everything, because it is the one a person is
+  already working on.
+- **Release still does not block** (§8: the money moved and 312 shops should not
+  wait on one dead phone) — the confirmation just spells out what releasing will
+  turn into incidents, and the audit note carries the count.
+- `receipt_state` is `stable`, not `immutable`: it reads `now()` for the 24-hour
+  rung, and a wrong volatility label comes back as a cached plan returning
+  yesterday's answer.
+
+**Tooling:** `sqlcheck.js` in the session scratchpad now runs dollar-quote
+pairing, per-segment paren balance and arithmetic assertions over a migration
+before it is handed over. Three apply-time failures in this session came from
+`node -e` inside a double-quoted shell string eating a `$`; anything touching
+`$$` goes through Edit or a script file now, never `node -e`.
+
+## The ladder and walking away (0099)
+§10 step 7. Two screens, one table (`visit_attempts`).
+- **The third rung refuses a code read down the phone**, and that is the rule
+  the whole mechanism rests on: a spoken code proves the owner agreed, not that
+  the agent is in the shop. Accept it once and every code in the system asserts
+  only the weaker of the two facts. When the owner answers, the flow routes into
+  the ops call, where the conversation is captured.
+- **The friction is a number about himself, not a delay.** His own ops-call rate
+  against the team's, on screen before he taps — §2's reasoning is that a timer
+  just teaches agents to wait it out. `agent_rates` serves both that screen and
+  the Head of Ops' sort, so the two cannot differ.
+- **Walking away is a recorded act**: name, time, geo, reason, and a line the
+  owner sees, never a blank. An agent who cannot leave will invent a close or
+  stand arguing with a barber.
+- **Except while holding counted cash.** The server's half of that brake is a
+  receipt existing on the visit; the app's half is having typed an amount. It is
+  the one place the product refuses him an exit.
+- **The second abandon takes the shop off him** — the visit is *unassigned*
+  rather than reassigned, because who goes instead is ops' call, not a rota's.
+- `visit_attempts` has **no `closed` column** despite §1 listing one: an attempt
+  is by definition a visit that did not close, and a boolean that can only hold
+  one value is a field somebody eventually sets to true.
+- **The sweep's feed 2 now excludes visits with a recent attempt.** A visit he
+  walked away from came back with a reason, so it is not silence; one nobody has
+  touched still is. That is the "no abandon record" clause 0097 could not write
+  because the row did not exist yet.
+
+Left: the duty call (AGT-08, the 6-digit authorisation and both grades) and the
+AGT-12 audit. §10 says cut 9 before 4 if the schedule slips — 4 shipped, so the
+tail is all optional-order now.
+
+## The duty call (0100)
+§10 step 8. §4's first line is the design: **ops does not authorise the agent,
+ops reaches the owner.** The duty officer is not deciding whether to trust the
+man in the shop — they are the channel the owner vouches through, and the
+witness to it.
+- **The order is the security property, so it is two functions.**
+  `admin_ops_call_agent_amount` REFUSES to run until the owner's figure is
+  recorded. Taking the agent's number first puts it in the duty officer's head
+  before they ring the owner, and *"is it 1 566?"* is a different question from
+  *"how much did you hand over?"*. Neither figure can be retyped.
+- **Six digits, ten minutes, read aloud.** Different length, different table,
+  different function, different rendering from an owner code — §4's reason is
+  that a four-digit authorisation would eventually be read as a code somebody's
+  app issued.
+- **The agent cannot read the digits.** RLS on `ops_calls` is admin-only: he is
+  told them aloud, which is the whole mechanism.
+- **The thinner grade still issues.** `owner_reached: false` means there is no
+  owner figure to match and the agent stands alone; it carries a 72-hour dispute
+  window and says so to the owner in his own notification. It issues because the
+  alternative is an agent leaving a shop with unrecorded cash.
+- A mismatch **issues nothing** and opens a discrepancy for a person.
+- **`record_collection` is shared, and `agent_collect` was re-emitted to use
+  it.** §3 says the two proofs are not one abstraction with a parameter and they
+  are not — two functions, two verifications. But the money is the same money,
+  and introducing a shared path while leaving the main caller writing its own
+  copy would have made the drift worse: two paths, one of them *looking* unified.
+- `km_from_shop` is haversine over `salons.lat/lng` and the geo on the ladder
+  attempt that opened the call — §4 wants the distance beside the decision.
+
+Left: the AGT-12 audit (ops-call receipts reviewed as a rate, with the two
+thresholds written on the page). That is §10 step 9, the one it says to cut
+first if the schedule slips.
+
+## The audit (0101) — §10 step 9, and the last of it
+AGT-12. §8's rules here are all about not turning a tool into a surveillance
+list, and each one is in the shape of the code:
+- **A rate, not a count.** `6 of 41 · 14.6% · 7× the fleet`. Six calls means
+  nothing without the forty-one rounds they came out of, and `vs_fleet` is his
+  share against everybody's, not his count against theirs.
+- **Both thresholds are printed on the page** — 3 in 7 rolling days, 4 *owner
+  not reached* in 30 — because a threshold people cannot see is one they cannot
+  argue with. The same numbers are evaluated in SQL, so the rule and the page
+  cannot drift.
+- **Agents with zero are rows, not absences.** A list containing only people
+  with a number on them reads as a list of suspects, and it is possible to work
+  a round without ever needing the call. Their shape column says "never needed
+  it".
+- **Sorted by threshold then rate, never by raw count** — a busy agent would sit
+  at the top for ever and the list would stop being read.
+- **Only three of §8's four actions are offered.** Suspending "needs a second
+  approver" and this product has no two-person approval anywhere; a one-tap
+  suspend with that phrase in the copy would be a lie. The screen says what is
+  missing instead. `morning_window` is the only one that changes the round
+  rather than the man, and it is the one flagged as usually right.
+
+**The unverified-collections spec is now built end to end** (0094–0101), except
+the ops-call and audit CONSOLE screens' duty-call flow: `admin_ops_call_open` /
+`_owner_amount` / `_agent_amount` exist and are correct, but the duty desk still
+drives them by RPC — AGT-08's screen itself is not drawn. That is the last gap,
+and it is the one that will change once a real duty officer uses it.
+
+## AGT-08 — the duty desk's own screen (0102)
+The last gap. `admin_ops_call_open` / `_owner_amount` / `_agent_amount` shipped
+in 0100 and were drivable only by RPC; this is the page that walks a duty
+officer through them, plus `admin_duty_queue` — who is standing in a shop right
+now waiting for someone to ring an owner.
+- **The queue sits ABOVE the audit** on `#/finance/calls`, because somebody is
+  waiting and the audit is a thing to read on a Monday. It shows how long he has
+  been standing there, in minutes.
+- **The four steps are numbered and each unlocks the next**, mirroring the
+  server's own refusal to take the agent's figure before the owner's. Step 1 is
+  a button that does nothing but make him say "he is staying put", which is the
+  point: §4's first instruction is to the agent, not to the system.
+- **The owner's number is a `tel:` link from the record**, and when there is no
+  number on file the step says so in red rather than leaving a blank the officer
+  fills from the agent.
+- **The six digits are shown once, large**, with "aloud, on the call — do not
+  send them", the ten-minute life and the amount they are good for.
+- **A discrepancy says the agent should not leave with the cash.** Nothing is
+  issued and the screen says what each of them claimed.
+- The panel beside it is §4's three: distance from the shop, bag against cap,
+  unchecked queue, and his call rate against the team's — context for the
+  officer, not evidence against him.
+
+**The unverified-collections spec (0094–0102) is now complete**: model, queue,
+sync, mismatch pair, clock with both feeds, release column, ladder, abandon,
+duty call, audit, and the desk's own screen.
+
+## The dry run (scripts/dryrun-settlement.mjs)
+Twenty-three migrations of money code were applied without a single week ever
+being pushed through them. This drives one, in the order the money moves, and
+prints what each RPC actually returned — so what gets checked is output rather
+than five surfaces.
+
+`npm run dryrun -- --confirm`, with `SB_URL`, `SB_ANON_KEY` and three logins
+(`DRY_ADMIN_*`, `DRY_AGENT_*`, `DRY_OWNER_*`). Three, because the whole design
+is about three people who do not take each other's word: only the owner can see
+the code, only the agent can collect, only ops can cut and release.
+
+- **It refuses to start without `--confirm`.** Settlements and receipts are
+  append-only by trigger, so nothing it writes can be deleted afterwards — by
+  anyone. That is a feature everywhere except on a database you meant to keep
+  clean.
+- **It asserts the one rule that matters**: if a receipt whose `verification` is
+  not `verified` ever reads as *confirmed with your code*, the script exits
+  non-zero and says so. That is the phrase §6 says would quietly destroy the
+  meaning of every code in the system.
+- **It checks that AGT-18 shipped with AGT-19**: after forcing a mismatch it
+  reads the owner's side, and calls it out by name if the question is not there.
+- It captures the offline receipt **26 hours ago**, so the queued row lands
+  already past §7's duty-desk rung rather than needing a wait.
+
+Three things it deliberately cannot do, and says so in its own output:
+- **the 24 h / 72 h escalation** — `unchecked_sweep()` is revoked from
+  `authenticated` on purpose; run it as the owner in the SQL editor.
+- **the day-14 carry** — needs a run whose `covers_to` is a fortnight old, and
+  0081's guard forbids moving a run's window once it exists. Seed or wait.
+- **the ops call** — drivable end to end, but it is two people on a phone, so it
+  is worth doing on the screen rather than in a script.

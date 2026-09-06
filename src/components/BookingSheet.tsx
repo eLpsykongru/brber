@@ -53,8 +53,11 @@ function serviceMenu(salon: SalonLike) {
   return [...byName.values()];
 }
 
-export default function BookingSheet({ visible, salon, onClose, onBooked }: {
+export default function BookingSheet({ visible, salon, onClose, onBooked, onFinished }: {
   visible: boolean; salon: SalonLike; onClose: () => void; onBooked: () => void;
+  // fired only when the sheet closes AFTER a booking - dragging it away or
+  // tapping X without booking must leave him exactly where he was
+  onFinished?: () => void;
 }) {
   const [step, setStep] = useState<Step>('service');
   // multi-select: the cut is n services in one sitting, not one. Names rather
@@ -169,7 +172,9 @@ export default function BookingSheet({ visible, salon, onClose, onBooked }: {
   }, [visible, (salon as any).id]);
 
   function close() {
-    Animated.timing(translateY, { toValue: SCREEN_H, duration: 180, useNativeDriver: true }).start(onClose);
+    const booked = !!done;
+    Animated.timing(translateY, { toValue: SCREEN_H, duration: 180, useNativeDriver: true })
+      .start(() => { onClose(); if (booked) onFinished?.(); });
   }
 
   // drag the handle down to dismiss

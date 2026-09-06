@@ -1,0 +1,577 @@
+<section class="dv-turn" id="T14">
+<div class="dv-thd"><a class="dv-tid" href="#T14">T14</a><span class="dv-tname">The ten My-Bookings states the app has and the canvas didn't</span></div>
+<p class="dv-note">Every screen here is a live branch in <code>MyBookingsScreen.tsx</code> / <code>MyBookingScreen.tsx</code> that had no drawing. Nothing invented: <a class="dv-oid" href="#BKG-32">BKG-32</a> and <a class="dv-oid" href="#BKG-33">BKG-33</a> are the two sides of <code>booking_free_until</code> (0078) — the deadline as a moment, "free until 13:30 today", never "up to 2 hours before" — and the cancel sheet after it lapses, which is the same sheet as <a class="dv-oid" href="#BKG-08">BKG-08</a> with the one number that changed. <a class="dv-oid" href="#BKG-34">BKG-34</a> is <code>CancelledScreen</code> with <code>refunded: true</code>, read off <code>deposit_holds</code> rather than recomputed, so the receipt says what the ledger did; <a class="dv-oid" href="#BKG-35">BKG-35</a> is the same component with <code>withdrawn: true</code> — no money card, no "changed your mind", because the barber never saw it. <a class="dv-oid" href="#BKG-36">BKG-36</a> is <code>MovedScreen</code> (13a), which fires on the next open via <code>moved_seen_&lt;id&gt;</code>, not on the tap that caused it — he accepts while the app is shut. <a class="dv-oid" href="#BKG-37">BKG-37</a> is <code>DeclinedCard</code>'s fallback: <code>alt_starts</code> empty, so the screen scans his real calendar a fortnight forward and the eyebrow changes from <em>KARIM SUGGESTS</em> to <em>NEXT FREE WITH KARIM</em> and ACCEPT to ASK — the honest difference between an offer and a guess. <a class="dv-oid" href="#BKG-38">BKG-38</a> is <code>status === 'no_show'</code>, the third chip on the Cancelled tab. <a class="dv-oid" href="#BKG-39">BKG-39</a> mounts <code>UnderReviewStrip</code> (38f) on the detail — a shop vanishing from search must never read as a booking vanishing. <a class="dv-oid" href="#BKG-40">BKG-40</a> is the full-screen <code>Receipt</code> behind the Completed tab's RECEIPT button, and <a class="dv-oid" href="#BKG-41">BKG-41</a> is <code>ListEmptyComponent</code> on the other two tabs, which reads "No completed bookings", not the upcoming copy at <a class="dv-oid" href="#BKG-02">BKG-02</a>.</p>
+<p class="dv-src">from MyBookingsScreen.tsx · MyBookingScreen.tsx · Failures.tsx (38f) · 0078 deposit holds</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="BKG-32"><div class="dv-olabel"><a class="dv-oid" href="#BKG-32">BKG-32</a>Free to cancel until 13:30 today</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div data-screen-label="BKG-32" style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:66px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:18px;letter-spacing:.04em;text-transform:uppercase">My booking</span>
+      <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="#111"><circle cx="12" cy="5" r="1.7"></circle><circle cx="12" cy="12" r="1.7"></circle><circle cx="12" cy="19" r="1.7"></circle></svg></span>
+    </div>
+    <div style="background:#fff;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:14px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <div style="display:flex;gap:8px">
+        <span style="font-size:10px;letter-spacing:.1em;font-weight:700;color:#111;background:#F2F0EB;border-radius:8px;padding:5px 10px">CONFIRMED</span>
+        <span style="font-size:10px;letter-spacing:.1em;font-weight:700;color:#E8442E;background:rgba(232,68,46,.1);border-radius:8px;padding:5px 10px">CLASSIC HAIRCUT</span>
+      </div>
+      <div style="display:flex;gap:14px">
+        <span style="width:74px;height:74px;border-radius:16px;overflow:hidden;flex:none"><image-slot id="bk32-photo" shape="rect" placeholder=" "></image-slot></span>
+        <span style="flex:1"><span style="display:block;font-size:16px;font-weight:700">Le Fade Tanger</span>
+          <span style="display:flex;align-items:center;gap:5px;margin-top:5px;font-size:12px;color:#8A8A85"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path></svg>14 Rue de la Kasbah, Tangier</span>
+          <span style="display:flex;align-items:center;gap:5px;margin-top:4px;font-size:12px;color:#8A8A85"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Today · 15:30 · 30 Mins</span>
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;border-top:1px solid #E5E2DB;padding-top:14px">
+        <span style="width:42px;height:42px;border-radius:999px;background:rgba(232,68,46,.12);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#E8442E">YE</span>
+        <span style="flex:1"><span style="display:block;font-size:13px;font-weight:700">Youssef El Amrani</span><span style="display:block;font-size:11px;color:#8A8A85;margin-top:2px">Fade specialist · 4.9 ★</span></span>
+        <span style="display:flex;gap:8px">
+          <span style="width:38px;height:38px;border-radius:999px;background:#F2F0EB;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg></span>
+          <span style="width:38px;height:38px;border-radius:999px;background:#F2F0EB;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.8"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg></span>
+        </span>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#8A8A85">PAYMENT</span>
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">Deposit paid (40%)</span><span style="font-weight:700;font-variant-numeric:tabular-nums">24 DH</span></span>
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">Due at the shop</span><span style="font-weight:700;font-variant-numeric:tabular-nums">36 DH</span></span>
+      <span style="height:1px;background:#E5E2DB"></span>
+      <span style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px;font-weight:700">Total</span><span style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums">60 DH</span></span>
+      <span style="display:flex;align-items:flex-start;gap:8px;background:rgba(74,222,128,.14);border-radius:14px;padding:11px 12px;margin-top:2px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.2" style="flex:none;margin-top:1px"><path d="M4 12.5l5 5L20 6.5"></path></svg>
+        <span style="flex:1;font-size:11.5px;line-height:1.5;color:#15803D;text-wrap:pretty"><strong>Free to cancel until 15:30 today</strong> — until then the 24 DH comes straight back to your wallet.</span>
+      </span>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:10px;background:#fff;border-radius:20px;padding:14px 16px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span style="width:28px;height:28px;border-radius:999px;background:#F2F0EB;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>
+      <span style="flex:1"><span style="display:block;font-size:13px;font-weight:700">2 hours left on that</span><span style="display:block;font-size:12px;line-height:1.5;color:#8A8A85;margin-top:4px;text-wrap:pretty">After 15:30 you can still cancel — the slot goes back to his queue either way. The 24 DH is what changes.</span></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;background:#fff;border-radius:20px;padding:14px 18px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span><span style="display:block;font-size:10px;letter-spacing:.1em;color:#B9B6AD;font-weight:600">BOOKING ID</span><span style="display:block;font-size:13px;font-weight:700;margin-top:3px;font-variant-numeric:tabular-nums">#B7C41D02</span></span>
+      <span style="text-align:right"><span style="display:block;font-size:10px;letter-spacing:.1em;color:#B9B6AD;font-weight:600">BOOKED</span><span style="display:block;font-size:13px;font-weight:700;margin-top:3px">Jul 29, 4:02 PM</span></span>
+    </div>
+  </div>
+  <div style="position:absolute;left:20px;right:20px;bottom:26px;display:flex;gap:10px">
+    <span style="flex:1;height:52px;border-radius:999px;background:#fff;border:1.5px solid #E5E2DB;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.06em;color:#5c5c58">CANCEL</span>
+    <a href="./Customer - Booking Flow.dc.html#BOOK-08" style="flex:1.4;height:52px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.06em;text-decoration:none">RESCHEDULE</a>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Once it lapses · <a class="dv-oid" href="#BKG-33">BKG-33</a></div></div>
+
+<div class="dv-opt" id="BKG-33"><div class="dv-olabel"><a class="dv-oid" href="#BKG-33">BKG-33</a>Cancelling after the free window closed</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div data-screen-label="BKG-33" style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.5)"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#F2F0EB;border-radius:28px 28px 0 0;padding:12px 22px 30px;display:flex;flex-direction:column;gap:13px;box-shadow:0 -12px 40px rgba(0,0,0,.3)">
+    <span style="align-self:center;width:40px;height:4px;border-radius:2px;background:#D8D4CA"></span>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:11px;text-align:center">
+      <span style="width:60px;height:60px;border-radius:999px;background:rgba(232,68,46,.12);display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2"><path d="M12 4l9 16H3z"></path><path d="M12 10v4M12 17h.01"></path></svg></span>
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:24px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Cancel booking?</div>
+        <div style="font-size:13px;color:#8A8A85;margin-top:8px;line-height:1.5;max-width:280px;text-wrap:pretty">Classic Haircut with Youssef, today · 15:30. The slot goes back to the queue.</div>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:22px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span style="display:flex;align-items:flex-start;gap:10px">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2" style="flex:none;margin-top:1px"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+        <span style="flex:1;font-size:12.5px;line-height:1.55;color:#5c5c58;text-wrap:pretty"><strong style="color:#111">Free cancellation ended at 13:30 today.</strong> Cancelling now leaves the 24 DH with the shop — he has been holding the chair for you since then.</span>
+      </span>
+      <span style="height:1px;background:#EFECE4"></span>
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">Paid up front</span><span style="font-weight:700;font-variant-numeric:tabular-nums">24 DH</span></span>
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">Refund to wallet</span><span style="font-weight:700;color:#E8442E;font-variant-numeric:tabular-nums">0 DH</span></span>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:10px;background:#F7F5F1;border-radius:16px;padding:13px 14px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2" style="flex:none;margin-top:2px"><path d="M4 12a8 8 0 1 0 8-8"></path><path d="M4 4v8h8"></path></svg>
+      <span style="flex:1;font-size:12px;line-height:1.5;color:#5c5c58;text-wrap:pretty"><strong style="color:#111">Moving it keeps the 24 DH.</strong> A reschedule carries the deposit over — if today just doesn't work, that's the cheaper door.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#8A8A85">REASON (OPTIONAL)</span>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <span style="font-size:12px;font-weight:600;color:#5c5c58;background:#fff;border-radius:999px;padding:9px 15px;box-shadow:0 4px 12px rgba(0,0,0,.05)">Something came up</span>
+        <span style="font-size:12px;font-weight:600;color:#5c5c58;background:#fff;border-radius:999px;padding:9px 15px;box-shadow:0 4px 12px rgba(0,0,0,.05)">Wrong time</span>
+        <span style="font-size:12px;font-weight:600;color:#5c5c58;background:#fff;border-radius:999px;padding:9px 15px;box-shadow:0 4px 12px rgba(0,0,0,.05)">Too far</span>
+        <span style="font-size:12px;font-weight:600;color:#5c5c58;background:#fff;border-radius:999px;padding:9px 15px;box-shadow:0 4px 12px rgba(0,0,0,.05)">Other</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <a href="#BKG-16" style="height:54px;border-radius:999px;background:#E8442E;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none"><span style="font-size:12.5px;font-weight:700;letter-spacing:.08em;color:#fff">CANCEL AND LOSE 24 DH</span></a>
+      <a href="./Customer - Booking Flow.dc.html#BOOK-08" style="height:50px;border-radius:999px;background:#101010;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.06em;color:#fff;text-decoration:none">KEEP IT — RESCHEDULE INSTEAD</a>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#BKG-16">CANCEL</a>  <a class="dv-oid" href="./Customer - Booking Flow.dc.html#BOOK-08">RESCHEDULE</a></div></div>
+
+<div class="dv-opt" id="BKG-34"><div class="dv-olabel"><a class="dv-oid" href="#BKG-34">BKG-34</a>Cancelled in time · the deposit came back</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div data-screen-label="BKG-34" style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:11px;letter-spacing:.18em;font-weight:700;color:#8A8A85">#B7C41D02</span>
+      <span style="width:40px"></span>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:13px;text-align:center;padding-top:2px">
+      <span style="width:64px;height:64px;border-radius:999px;background:#E9E6DE;display:flex;align-items:center;justify-content:center"><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="#5c5c58" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg></span>
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:24px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Cancelled</div>
+        <div style="font-size:13px;color:#8A8A85;margin-top:8px;line-height:1.5;max-width:272px;text-wrap:pretty">Youssef has been told. Your ticket Nº 07 is released and 11:00 is back in his queue.</div>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:22px;padding:16px 18px;display:flex;flex-direction:column;gap:11px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">Was</span><span style="font-weight:700">Thu, Jul 30 · 11:00</span></span>
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">Service</span><span style="font-weight:700">Classic Haircut · 60 DH</span></span>
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">You said</span><span style="font-weight:700">Wrong time</span></span>
+      <span style="height:1px;background:#EFECE4"></span>
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">Deposit paid</span><span style="font-weight:700;font-variant-numeric:tabular-nums">24 DH</span></span>
+      <span style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px;font-weight:700">Refunded to wallet</span><span style="font-size:18px;font-weight:800;color:#16A34A;font-variant-numeric:tabular-nums">24 DH</span></span>
+      <span style="display:flex;align-items:center;gap:8px;background:rgba(74,222,128,.14);border-radius:13px;padding:10px 12px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.4" style="flex:none"><path d="M4 12.5l5 5L20 6.5"></path></svg>
+        <span style="flex:1;font-size:11.5px;font-weight:600;color:#15803D">In your wallet already · you cancelled before 09:00</span>
+      </span>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:10px;background:#fff;border-radius:18px;padding:14px 16px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span style="width:28px;height:28px;border-radius:999px;background:#F2F0EB;display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2"><path d="M4 12a8 8 0 1 0 8-8"></path><path d="M4 4v8h8"></path></svg></span>
+      <span style="flex:1"><span style="display:block;font-size:13px;font-weight:700">Changed your mind?</span><span style="display:block;font-size:12px;line-height:1.5;color:#8A8A85;margin-top:4px;text-wrap:pretty">11:00 is free again for now. Your 24 DH is back in your wallet to spend on it.</span></span>
+    </div>
+    <div style="display:flex;gap:10px">
+      <a href="./Customer - Messages.dc.html#CHT-02" style="flex:1;height:52px;border-radius:999px;background:#fff;border:1.5px solid #E5E2DB;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.05em;color:#5c5c58;text-decoration:none">MESSAGE YOUSSEF</a>
+      <a href="#BKG-24" style="flex:1.2;height:52px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.05em;text-decoration:none">BOOK AGAIN</a>
+    </div>
+    <span style="text-align:center;font-size:11px;color:#B9B6AD;text-wrap:pretty">Read off the ledger, not the rule — the receipt says what actually happened to the money.</span>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">The pending version · <a class="dv-oid" href="#BKG-35">BKG-35</a></div></div>
+
+<div class="dv-opt" id="BKG-35"><div class="dv-olabel"><a class="dv-oid" href="#BKG-35">BKG-35</a>Withdrawn · he never saw it</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div data-screen-label="BKG-35" style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:11px;letter-spacing:.18em;font-weight:700;color:#8A8A85">#C1904E77</span>
+      <span style="width:40px"></span>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:13px;text-align:center;padding-top:2px">
+      <span style="width:64px;height:64px;border-radius:999px;background:#E9E6DE;display:flex;align-items:center;justify-content:center"><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="#5c5c58" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:24px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Withdrawn</div>
+        <div style="font-size:13px;color:#8A8A85;margin-top:8px;line-height:1.5;max-width:272px;text-wrap:pretty">Your request is gone. Karim never saw it, and nothing was charged.</div>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:22px;padding:16px 18px;display:flex;flex-direction:column;gap:11px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">You asked for</span><span style="font-weight:700">Sat, Aug 2 · 17:00</span></span>
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">Service</span><span style="font-weight:700">Beard Trim · 40 DH</span></span>
+      <span style="height:1px;background:#EFECE4"></span>
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">Wallet before</span><span style="font-weight:700;font-variant-numeric:tabular-nums">180 DH</span></span>
+      <span style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px;font-weight:700">Wallet after</span><span style="font-size:18px;font-weight:800;font-variant-numeric:tabular-nums">180 DH</span></span>
+      <span style="display:flex;align-items:center;gap:8px;background:#F7F5F1;border-radius:13px;padding:10px 12px">
+        <span style="width:19px;height:19px;border-radius:999px;background:rgba(74,222,128,.18);display:flex;align-items:center;justify-content:center;flex:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="3"><path d="M4 12.5l5 5L20 6.5"></path></svg></span>
+        <span style="flex:1;font-size:11.5px;color:#5c5c58">Nothing was ever held — a request is not a deposit</span>
+      </span>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:10px;background:#F7F5F1;border-radius:18px;padding:14px 16px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+      <span style="flex:1;font-size:12px;line-height:1.5;color:#5c5c58;text-wrap:pretty">Nothing to undo and nobody to tell. If you want that time after all, ask again — 17:00 is still open on his day.</span>
+    </div>
+    <div style="display:flex;gap:10px">
+      <a href="./Customer - Messages.dc.html#CHT-02" style="flex:1;height:52px;border-radius:999px;background:#fff;border:1.5px solid #E5E2DB;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.05em;color:#5c5c58;text-decoration:none">MESSAGE KARIM</a>
+      <a href="#BKG-24" style="flex:1.2;height:52px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.05em;text-decoration:none">BOOK AGAIN</a>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">The happy branch · <a class="dv-oid" href="#BKG-36">BKG-36</a></div></div>
+
+<div class="dv-opt" id="BKG-36"><div class="dv-olabel"><a class="dv-oid" href="#BKG-36">BKG-36</a>Moved · he accepted while the app was shut</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div data-screen-label="BKG-36" style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:88px 20px 0;display:flex;flex-direction:column;align-items:center;gap:15px">
+    <span style="width:72px;height:72px;border-radius:999px;background:rgba(74,222,128,.18);display:flex;align-items:center;justify-content:center"><svg width="31" height="31" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.4"><path d="M4 12.5l5 5L20 6.5"></path></svg></span>
+    <div style="text-align:center">
+      <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:28px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Moved</div>
+      <div style="font-size:13px;color:#8A8A85;margin-top:9px;line-height:1.5;max-width:290px;text-wrap:pretty">Youssef accepted your new time. Same service, same price — nothing else to pay up front.</div>
+    </div>
+    <div style="align-self:stretch;background:#101010;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="flex:1"><span style="display:block;font-size:10px;letter-spacing:.14em;font-weight:700;color:rgba(255,255,255,.5)">WAS</span><span style="display:block;font-size:14px;font-weight:700;color:rgba(255,255,255,.55);text-decoration:line-through;margin-top:4px">Thu, Jul 30 · 11:00</span></span>
+        <span style="width:30px;height:30px;border-radius:999px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+        <span style="flex:1;text-align:right"><span style="display:block;font-size:10px;letter-spacing:.14em;font-weight:700;color:#E8442E">NOW</span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;color:#fff;margin-top:4px">Sat, Aug 1 · 16:30</span></span>
+      </div>
+      <span style="height:1px;background:rgba(255,255,255,.12)"></span>
+      <div style="display:flex;align-items:flex-end;gap:12px">
+        <span style="flex:1"><span style="display:block;font-size:10px;letter-spacing:.14em;font-weight:700;color:rgba(255,255,255,.5)">NEW TICKET</span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:22px;color:#fff;margin-top:3px">Nº 04</span></span>
+        <span style="flex:1;text-align:right"><span style="display:block;font-size:10px;letter-spacing:.14em;font-weight:700;color:rgba(255,255,255,.5)">DEPOSIT CARRIED</span><span style="display:block;font-size:17px;font-weight:800;color:#fff;margin-top:3px;font-variant-numeric:tabular-nums">24 DH</span></span>
+      </div>
+    </div>
+    <div style="align-self:stretch;display:flex;align-items:center;gap:12px;background:#fff;border-radius:22px;padding:15px 17px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span style="width:46px;height:46px;border-radius:999px;background:rgba(232,68,46,.12);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#E8442E;flex:none">YE</span>
+      <span style="flex:1"><span style="display:block;font-size:13.5px;font-weight:700">Youssef El Amrani</span><span style="display:block;font-size:11.5px;color:#8A8A85;margin-top:2px;font-variant-numeric:tabular-nums">Classic Haircut · 36 DH at the shop</span></span>
+      <span style="font-size:9.5px;letter-spacing:.1em;font-weight:700;color:#15803D;background:rgba(74,222,128,.18);border-radius:7px;padding:5px 9px;flex:none">CONFIRMED</span>
+    </div>
+    <div style="align-self:stretch;display:flex;align-items:flex-start;gap:10px;background:#F7F5F1;border-radius:18px;padding:14px 16px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+      <span style="flex:1;font-size:12px;line-height:1.5;color:#5c5c58;text-wrap:pretty">He answered at <strong style="color:#111">21:40 last night</strong>, so you're seeing this now rather than then. Shown once — it won't greet you again.</span>
+    </div>
+    <a href="#BKG-07" style="align-self:stretch;height:54px;border-radius:999px;background:#101010;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;letter-spacing:.08em;color:#fff;text-decoration:none;margin-top:2px">VIEW MY BOOKING</a>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#BKG-07">VIEW MY BOOKING</a></div></div>
+
+<div class="dv-opt" id="BKG-37"><div class="dv-olabel"><a class="dv-oid" href="#BKG-37">BKG-37</a>Declined, and he offered nothing</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div data-screen-label="BKG-37" style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:66px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:18px;letter-spacing:.04em;text-transform:uppercase">My booking</span>
+      <span style="width:40px"></span>
+    </div>
+    <div style="background:#fff;border-radius:22px;padding:16px 17px;display:flex;flex-direction:column;gap:13px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <div style="display:flex;align-items:center;gap:11px">
+        <span style="width:34px;height:34px;border-radius:11px;background:rgba(232,68,46,.1);display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2.2"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+        <span style="flex:1"><span style="display:block;font-size:13.5px;font-weight:700">Reschedule declined</span><span style="display:block;font-size:11.5px;color:#8A8A85;margin-top:3px">Sat, Aug 1 · 16:30 · declined 2 h ago</span></span>
+      </div>
+      <span style="display:flex;align-items:flex-start;gap:10px;background:#F7F5F1;border-radius:14px;padding:12px 13px">
+        <span style="width:28px;height:28px;border-radius:999px;background:rgba(232,68,46,.12);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#E8442E;flex:none">YE</span>
+        <span style="flex:1;font-size:12px;line-height:1.5;color:#5c5c58;text-wrap:pretty">He said nothing — the request came back declined with no note and no alternatives.</span>
+      </span>
+      <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#8A8A85">NEXT FREE WITH YOUSSEF</span>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <span style="display:flex;align-items:center;gap:11px;background:#F7F5F1;border-radius:16px;padding:13px 14px">
+          <span style="flex:1"><span style="display:block;font-size:13px;font-weight:700">Sun, Aug 2 · 10:00</span><span style="display:block;font-size:11.5px;color:#8A8A85;margin-top:3px">Same service · 30 min</span></span>
+          <span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#fff;background:#101010;border-radius:999px;padding:9px 16px;flex:none">ASK</span>
+        </span>
+        <span style="display:flex;align-items:center;gap:11px;background:#F7F5F1;border-radius:16px;padding:13px 14px">
+          <span style="flex:1"><span style="display:block;font-size:13px;font-weight:700">Mon, Aug 3 · 14:30</span><span style="display:block;font-size:11.5px;color:#8A8A85;margin-top:3px">Same service · 30 min</span></span>
+          <span style="font-size:11px;font-weight:700;letter-spacing:.06em;color:#fff;background:#101010;border-radius:999px;padding:9px 16px;flex:none">ASK</span>
+        </span>
+      </div>
+      <span style="font-size:11px;line-height:1.5;color:#B9B6AD;text-wrap:pretty">These two are the soonest gaps on his real calendar, not times he has offered. ASK sends a fresh request — he still has to accept.</span>
+    </div>
+    <div style="background:#fff;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:13px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <div style="display:flex;gap:8px">
+        <span style="font-size:10px;letter-spacing:.1em;font-weight:700;color:#111;background:#F2F0EB;border-radius:8px;padding:5px 10px">STILL CONFIRMED</span>
+        <span style="font-size:10px;letter-spacing:.1em;font-weight:700;color:#E8442E;background:rgba(232,68,46,.1);border-radius:8px;padding:5px 10px">CLASSIC HAIRCUT</span>
+      </div>
+      <div style="display:flex;gap:14px">
+        <span style="width:68px;height:68px;border-radius:16px;overflow:hidden;flex:none"><image-slot id="bk37-photo" shape="rect" placeholder=" "></image-slot></span>
+        <span style="flex:1"><span style="display:block;font-size:15px;font-weight:700">Le Fade Tanger</span>
+          <span style="display:flex;align-items:center;gap:5px;margin-top:5px;font-size:12px;color:#8A8A85"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Thu, Jul 30 · 11:00 · 30 Mins</span>
+          <span style="display:block;margin-top:6px;font-size:11.5px;color:#5c5c58;text-wrap:pretty">Your original time is untouched — you have not lost it by asking.</span>
+        </span>
+      </div>
+    </div>
+  </div>
+  <div style="position:absolute;left:20px;right:20px;bottom:26px;display:flex;gap:10px">
+    <a href="./Customer - Booking Flow.dc.html#BOOK-08" style="flex:1;height:52px;border-radius:999px;background:#fff;border:1.5px solid #E5E2DB;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.05em;color:#5c5c58;text-decoration:none">PICK ANOTHER TIME</a>
+    <a href="#BKG-07" style="flex:1;height:52px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.05em;text-decoration:none">KEEP THU</a>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Compare · <a class="dv-oid" href="#BKG-12">BKG-12</a> where he did suggest</div></div>
+
+<div class="dv-opt" id="BKG-38"><div class="dv-olabel"><a class="dv-oid" href="#BKG-38">BKG-38</a>No-show · the third chip on Cancelled</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div data-screen-label="BKG-38" style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:66px 20px 0;display:flex;flex-direction:column;gap:14px">
+    <span style="text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:24px;letter-spacing:.03em;text-transform:uppercase">My bookings</span>
+    <div style="display:flex;border-bottom:1px solid #E5E2DB">
+      <span style="flex:1;text-align:center;padding:10px 0;font-size:13px;font-weight:600;color:#8A8A85">Upcoming</span>
+      <span style="flex:1;text-align:center;padding:10px 0;font-size:13px;font-weight:600;color:#8A8A85">Completed</span>
+      <span style="flex:1;text-align:center;padding:10px 0;font-size:13px;font-weight:700;position:relative">Cancelled<span style="position:absolute;left:25%;right:25%;bottom:-2px;height:3px;border-radius:2px;background:#E8442E"></span></span>
+    </div>
+    <div style="background:#fff;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:14px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <div style="display:flex;gap:8px">
+        <span style="font-size:10px;letter-spacing:.1em;font-weight:700;color:#8A6D2F;background:#F0E7D8;border-radius:8px;padding:5px 10px">NO-SHOW</span>
+      </div>
+      <div style="display:flex;gap:14px">
+        <span style="width:80px;height:80px;border-radius:16px;overflow:hidden;flex:none;opacity:.55"><image-slot id="bk38-photo" shape="rect" placeholder=" "></image-slot></span>
+        <span style="flex:1"><span style="display:block;font-size:16px;font-weight:700;color:#5C5C58">Le Fade Tanger</span>
+          <span style="display:block;margin-top:4px;font-size:12px;color:#8A8A85">Classic Haircut · with Youssef</span>
+          <span style="display:block;margin-top:4px;font-size:12px;color:#8A8A85;text-decoration:line-through;font-variant-numeric:tabular-nums">Jul 23, 2025 – 11:00 · 60 DH</span>
+        </span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:9px;background:#F7F5F1;border-radius:14px;padding:12px 14px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+        <span style="flex:1;font-size:12px;line-height:1.5;color:#5c5c58;text-wrap:pretty">Youssef marked this a no-show — the chair was held and nobody came. If that isn't right, tell us and we'll ask him.</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;background:#F7F5F1;border-radius:14px;padding:12px 14px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2" style="flex:none"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+        <span style="flex:1;font-size:12px;color:#5c5c58">Deposit kept by the shop</span>
+        <span style="font-size:13px;font-weight:700;color:#8A8A85;font-variant-numeric:tabular-nums">24 DH</span>
+      </div>
+      <div style="display:flex;gap:10px">
+        <a href="./Customer - Profile.dc.html#PRO-13" style="flex:1;height:44px;border-radius:999px;background:#fff;border:1.5px solid #E5E2DB;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.06em;color:#5c5c58;text-decoration:none">THIS IS WRONG</a>
+        <a href="#BKG-24" style="flex:1;height:44px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.06em;text-decoration:none">REBOOK</a>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <div style="display:flex;gap:8px">
+        <span style="font-size:10px;letter-spacing:.1em;font-weight:700;color:#B4351F;background:rgba(232,68,46,.1);border-radius:8px;padding:5px 10px">CANCELLED BY BARBER</span>
+      </div>
+      <div style="display:flex;gap:14px">
+        <span style="width:80px;height:80px;border-radius:16px;overflow:hidden;flex:none;opacity:.55"><image-slot id="bk38b-photo" shape="rect" placeholder=" "></image-slot></span>
+        <span style="flex:1"><span style="display:block;font-size:16px;font-weight:700;color:#5C5C58">Salon Riad</span>
+          <span style="display:block;margin-top:4px;font-size:12px;color:#8A8A85">Beard Trim · with Karim</span>
+          <span style="display:block;margin-top:4px;font-size:12px;color:#8A8A85;text-decoration:line-through;font-variant-numeric:tabular-nums">Jul 18, 2025 – 17:30 · 40 DH</span>
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;background:rgba(74,222,128,.14);border-radius:14px;padding:12px 14px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.4" style="flex:none"><path d="M4 12.5l5 5L20 6.5"></path></svg>
+        <span style="flex:1;font-size:12px;font-weight:600;color:#15803D">Deposit refunded to your wallet</span>
+        <span style="font-size:13px;font-weight:800;color:#16A34A;font-variant-numeric:tabular-nums">+16 DH</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="./Customer - Profile.dc.html#PRO-13">THIS IS WRONG</a>  <a class="dv-oid" href="#BKG-24">REBOOK</a></div></div>
+
+<div class="dv-opt" id="BKG-39"><div class="dv-olabel"><a class="dv-oid" href="#BKG-39">BKG-39</a>The shop is hidden · your booking stands</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div data-screen-label="BKG-39" style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:66px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:18px;letter-spacing:.04em;text-transform:uppercase">My booking</span>
+      <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="#111"><circle cx="12" cy="5" r="1.7"></circle><circle cx="12" cy="12" r="1.7"></circle><circle cx="12" cy="19" r="1.7"></circle></svg></span>
+    </div>
+    <div style="background:#fff;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:13px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <div style="display:flex;gap:8px">
+        <span style="font-size:10px;letter-spacing:.1em;font-weight:700;color:#111;background:#F2F0EB;border-radius:8px;padding:5px 10px">CONFIRMED</span>
+        <span style="font-size:10px;letter-spacing:.1em;font-weight:700;color:#E8442E;background:rgba(232,68,46,.1);border-radius:8px;padding:5px 10px">CLASSIC HAIRCUT</span>
+      </div>
+      <div style="display:flex;gap:14px">
+        <span style="width:74px;height:74px;border-radius:16px;overflow:hidden;flex:none"><image-slot id="bk39-photo" shape="rect" placeholder=" "></image-slot></span>
+        <span style="flex:1"><span style="display:block;font-size:16px;font-weight:700">Le Fade Tanger</span>
+          <span style="display:flex;align-items:center;gap:5px;margin-top:5px;font-size:12px;color:#8A8A85"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path></svg>14 Rue de la Kasbah, Tangier</span>
+          <span style="display:flex;align-items:center;gap:5px;margin-top:4px;font-size:12px;color:#8A8A85"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Sat, Aug 1 · 16:30 · 30 Mins</span>
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;border-top:1px solid #E5E2DB;padding-top:13px">
+        <span style="width:42px;height:42px;border-radius:999px;background:rgba(232,68,46,.12);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#E8442E">YE</span>
+        <span style="flex:1"><span style="display:block;font-size:13px;font-weight:700">Youssef El Amrani</span><span style="display:block;font-size:11px;color:#8A8A85;margin-top:2px">Fade specialist · 4.9 ★</span></span>
+      </div>
+    </div>
+    <div style="background:#fff;border:1px solid #E5E2DB;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:11px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span style="align-self:flex-start;font-size:9.5px;letter-spacing:.1em;font-weight:700;color:#8A6D2F;background:#F0E7D8;border-radius:6px;padding:4px 8px">SHOP UNDER REVIEW</span>
+      <span style="font-size:13.5px;font-weight:700">This shop is hidden while we check its papers</span>
+      <span style="font-size:12px;line-height:1.5;color:#8A8A85;text-wrap:pretty">Your booking still stands and Youssef is expecting you. You just won't find them in search for now.</span>
+      <span style="display:flex;align-items:center;gap:8px;border-top:1px solid #EFECE4;padding-top:11px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" style="flex:none"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"></path><path d="M9 12l2 2 4-4"></path></svg>
+        <span style="flex:1;font-size:11.5px;color:#5c5c58">If they can't open, you get a full refund.</span>
+      </span>
+      <div style="display:flex;gap:8px">
+        <span style="flex:1;height:42px;border-radius:999px;border:1px solid #DDD9CF;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:#5c5c58">CANCEL FREE</span>
+        <a href="./Customer - Messages.dc.html#CHT-02" style="flex:1;height:42px;border-radius:999px;background:#101010;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;letter-spacing:.04em;color:#fff;text-decoration:none">MESSAGE YOUSSEF</a>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:24px;padding:18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#8A8A85">PAYMENT</span>
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">Deposit paid (40%)</span><span style="font-weight:700;font-variant-numeric:tabular-nums">24 DH</span></span>
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">Due at the shop</span><span style="font-weight:700;font-variant-numeric:tabular-nums">36 DH</span></span>
+      <span style="height:1px;background:#E5E2DB"></span>
+      <span style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px;font-weight:700">Total</span><span style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums">60 DH</span></span>
+    </div>
+  </div>
+  <div style="position:absolute;left:20px;right:20px;bottom:26px;display:flex;gap:10px">
+    <span style="flex:1;height:52px;border-radius:999px;background:#fff;border:1.5px solid #E5E2DB;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.06em;color:#5c5c58">CANCEL</span>
+    <a href="./Customer - Booking Flow.dc.html#BOOK-08" style="flex:1.4;height:52px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.06em;text-decoration:none">RESCHEDULE</a>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Same strip, shop page · <a class="dv-oid" href="./Customer - System States.dc.html#SYS-13">SYS-13</a></div></div>
+
+<div class="dv-opt" id="BKG-40"><div class="dv-olabel"><a class="dv-oid" href="#BKG-40">BKG-40</a>Receipt · the completed visit</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div data-screen-label="BKG-40" style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:66px 20px 0;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:18px;letter-spacing:.04em;text-transform:uppercase">Receipt</span>
+      <span style="width:40px"></span>
+    </div>
+    <div style="background:#fff;border-radius:26px;padding:22px 20px;display:flex;flex-direction:column;gap:9px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span style="align-self:center;width:48px;height:48px;border-radius:999px;background:rgba(232,68,46,.12);display:flex;align-items:center;justify-content:center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2.2"><circle cx="12" cy="12" r="9"></circle><path d="M8 12.5l2.5 2.5L16 9.5"></path></svg></span>
+      <span style="text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:21px;letter-spacing:.03em;text-transform:uppercase;margin-bottom:6px">Booking completed</span>
+      <span style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#8A8A85">Booking ID</span><span style="font-weight:600;font-variant-numeric:tabular-nums">#B7C41D02</span></span>
+      <span style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#8A8A85">Salon</span><span style="font-weight:600">Le Fade Tanger</span></span>
+      <span style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#8A8A85">Barber</span><span style="font-weight:600">Youssef El Amrani</span></span>
+      <span style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#8A8A85">Service</span><span style="font-weight:600">Classic Haircut</span></span>
+      <span style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#8A8A85">Date</span><span style="font-weight:600">July 30, 2025</span></span>
+      <span style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#8A8A85">Time</span><span style="font-weight:600;font-variant-numeric:tabular-nums">11:00</span></span>
+      <span style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#8A8A85">Duration</span><span style="font-weight:600;font-variant-numeric:tabular-nums">30 min</span></span>
+      <span style="height:1px;background:#E5E2DB;margin:8px 0"></span>
+      <span style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px"><span style="color:#8A8A85">Deposit paid from wallet</span><span style="font-weight:600;font-variant-numeric:tabular-nums">24 DH</span></span>
+      <span style="display:flex;justify-content:space-between;align-items:baseline;padding:4px 0"><span style="font-size:14px;font-weight:700">Paid at the shop</span><span style="font-size:16px;font-weight:700;color:#E8442E;font-variant-numeric:tabular-nums">36 DH</span></span>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:10px;background:#F7F5F1;border-radius:18px;padding:14px 16px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+      <span style="flex:1;font-size:12px;line-height:1.5;color:#5c5c58;text-wrap:pretty">No code to scan — barbers have no scanner. This is your copy of what happened, nothing you have to show anyone.</span>
+    </div>
+    <div style="display:flex;gap:10px">
+      <a href="./Customer - Reviews.dc.html#REV-04" style="flex:1;height:52px;border-radius:999px;background:#fff;border:1.5px solid #E5E2DB;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.06em;color:#5c5c58;text-decoration:none">RATE VISIT</a>
+      <a href="#BKG-24" style="flex:1.2;height:52px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.06em;text-decoration:none">BOOK AGAIN</a>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="./Customer - Reviews.dc.html#REV-04">RATE VISIT</a>  <a class="dv-oid" href="#BKG-24">BOOK AGAIN</a></div></div>
+
+<div class="dv-opt" id="BKG-41"><div class="dv-olabel"><a class="dv-oid" href="#BKG-41">BKG-41</a>Empty · Completed, and the review nudge above it</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div data-screen-label="BKG-41" style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:66px 20px 0;display:flex;flex-direction:column;gap:14px">
+    <span style="text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:24px;letter-spacing:.03em;text-transform:uppercase">My bookings</span>
+    <div style="display:flex;border-bottom:1px solid #E5E2DB">
+      <span style="flex:1;text-align:center;padding:10px 0;font-size:13px;font-weight:600;color:#8A8A85">Upcoming</span>
+      <span style="flex:1;text-align:center;padding:10px 0;font-size:13px;font-weight:700;position:relative">Completed<span style="position:absolute;left:25%;right:25%;bottom:-2px;height:3px;border-radius:2px;background:#E8442E"></span></span>
+      <span style="flex:1;text-align:center;padding:10px 0;font-size:13px;font-weight:600;color:#8A8A85">Cancelled</span>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:74px 0 0">
+      <span style="width:96px;height:96px;border-radius:999px;border:1.5px dashed #C9C5BB;display:flex;align-items:center;justify-content:center"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#B9B6AD" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg></span>
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:19px;letter-spacing:.03em;text-transform:uppercase;text-align:center">No completed bookings</span>
+      <span style="text-align:center;font-size:13px;line-height:1.5;color:#8A8A85;max-width:250px;text-wrap:pretty">When you book a chair, it shows up here with its ticket and receipt.</span>
+    </div>
+    <div style="margin-top:auto;margin-bottom:26px;display:flex;flex-direction:column;gap:10px">
+      <span style="font-size:11px;line-height:1.5;color:#B9B6AD;text-align:center;text-wrap:pretty">Same shape on Cancelled, where it reads <strong style="color:#8A8A85">No cancelled bookings</strong> — and it is never the copy from <a class="dv-oid" href="#BKG-02" style="padding:1px 5px">BKG-02</a>, which is only right for Upcoming.</span>
+      <div style="display:flex;align-items:center;gap:10px;background:rgba(232,68,46,.08);border-radius:16px;padding:12px 14px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#E8442E" style="flex:none"><path d="M12 3l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20.9l1.1-6.5L2.6 9.8l6.5-.9z"></path></svg>
+        <span style="flex:1;font-size:12px;font-weight:600;color:#B4351F">2 visits waiting for your review</span>
+      </div>
+      <span style="font-size:11px;line-height:1.5;color:#B9B6AD;text-align:center;text-wrap:pretty">The nudge sits above the list when there are unrated visits — so it never appears on this screen. Shown here to place it.</span>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Upcoming's own empty · <a class="dv-oid" href="#BKG-02">BKG-02</a></div></div>
+
+<p class="dv-next">Try next: "the barber's side of a no-show dispute"</p>
+</div>
+</section>
+
+<section class="dv-turn" id="T15">
+<div class="dv-thd"><a class="dv-tid" href="#T15">T15</a><span class="dv-tname">⋯ → Report a problem, from the booking itself</span></div>
+<p class="dv-note">The header's <code>⋯</code> has been drawn since turn 9 and its second row went nowhere. In the code it is an <code>Alert</code> with three options — <em>Message the barber</em>, <em>Report a problem</em>, <em>Close</em> — and the middle one calls <code>onReport(d.id)</code> into the same <code>ReportProblemScreen</code> (17a) that Help Center opens. Same component, and the <code>bookingId</code> prop is the whole difference.<br><br><strong>Entered from here it is locked to this booking.</strong> Help Center's version at <a class="dv-oid" href="./Customer - Profile.dc.html#PRO-14">PRO-14</a> loads the last 20 completed visits and offers a picker, because it has no idea what you're complaining about. Arriving from the booking, <code>visitId</code> is already the answer: the visit card is fixed, there is no <em>Change</em>, and the reasons are the five in <code>REASONS</code> unchanged. Two consequences worth naming: this is the only door to 17a for a booking that <strong>hasn't happened yet</strong> (the picker filters on <code>completed_at is not null</code>), so <a class="dv-oid" href="#BKG-43">BKG-43</a> is drawn on tomorrow's booking; and picking <em>I was charged the wrong amount</em> passes <code>deposit_cents || price_cents</code> as the disputed figure, which is why the receipt in <a class="dv-oid" href="#BKG-44">BKG-44</a> can name a number without asking him for one.<br><br>The filed screen differs by one row from <a class="dv-oid" href="./Customer - Profile.dc.html#PRO-03">PRO-03</a>: <code>onBack</code> here returns to the booking, so the button reads BACK TO MY BOOKING rather than DONE, and <em>View case</em> still jumps the thread. Nothing about the booking changes by reporting it — the chair is still yours, and <a class="dv-oid" href="#BKG-43">BKG-43</a> says so on the screen, because a report that reads like a cancellation is a report nobody files.</p>
+<p class="dv-src">MyBookingScreen.tsx l.1030–1036 · SupportScreens.tsx (17a/17b) · 0038 file_support_case</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="BKG-42"><div class="dv-olabel"><a class="dv-oid" href="#BKG-42">BKG-42</a>The ⋯ menu · three rows, one of them new</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div data-screen-label="BKG-42" style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:66px 20px 0;display:flex;flex-direction:column;gap:13px;filter:blur(1.5px);opacity:.6">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:40px;height:40px;border-radius:999px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.06)"></span>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:18px;letter-spacing:.04em;text-transform:uppercase">My booking</span>
+      <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="#111"><circle cx="12" cy="5" r="1.7"></circle><circle cx="12" cy="12" r="1.7"></circle><circle cx="12" cy="19" r="1.7"></circle></svg></span>
+    </div>
+    <div style="background:#101010;border-radius:22px;height:78px"></div>
+    <div style="background:#fff;border-radius:24px;height:190px;box-shadow:0 4px 12px rgba(0,0,0,.05)"></div>
+    <div style="background:#fff;border-radius:24px;height:150px;box-shadow:0 4px 12px rgba(0,0,0,.05)"></div>
+  </div>
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.28)"></div>
+  <div style="position:absolute;left:10px;right:10px;bottom:12px;display:flex;flex-direction:column;gap:8px">
+    <div style="background:rgba(247,245,241,.94);border-radius:16px;overflow:hidden;backdrop-filter:blur(20px)">
+      <div style="padding:15px 16px 13px;text-align:center;border-bottom:1px solid rgba(0,0,0,.09)">
+        <span style="display:block;font-size:13px;font-weight:700">This booking</span>
+        <span style="display:block;font-size:11.5px;color:#8A8A85;margin-top:3px">Classic Haircut with Youssef · tomorrow 11:00</span>
+      </div>
+      <span style="display:flex;align-items:center;justify-content:center;gap:9px;height:56px;border-bottom:1px solid rgba(0,0,0,.09)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>
+        <span style="font-size:16px;color:#111">Message the barber</span>
+      </span>
+      <a href="#BKG-43" style="display:flex;align-items:center;justify-content:center;gap:9px;height:56px;text-decoration:none">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="1.9"><path d="M5 3v18M5 4h11l-1.5 4L16 12H5"></path></svg>
+        <span style="font-size:16px;font-weight:600;color:#E8442E">Report a problem</span>
+      </a>
+    </div>
+    <div style="background:rgba(247,245,241,.94);border-radius:16px;height:56px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(20px)">
+      <span style="font-size:16px;font-weight:700;color:#111">Close</span>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#BKG-43">REPORT A PROBLEM</a>  <a class="dv-oid" href="./Customer - Messages.dc.html#CHT-02">MESSAGE THE BARBER</a></div></div>
+
+<div class="dv-opt" id="BKG-43"><div class="dv-olabel"><a class="dv-oid" href="#BKG-43">BKG-43</a>17a, locked to this booking · no picker</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div data-screen-label="BKG-43" style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:66px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:18px;letter-spacing:.04em;text-transform:uppercase">Report a problem</span>
+      <span style="width:40px"></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;background:#fff;border-radius:20px;padding:14px 16px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span style="width:52px;height:52px;border-radius:14px;background:rgba(232,68,46,.12);display:flex;align-items:center;justify-content:center;flex:none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="1.9"><path d="M4 9h16v11H4z"></path><path d="M4 9l2-5h12l2 5"></path></svg></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:700">Le Fade Tanger</span><span style="display:block;font-size:11.5px;color:#8A8A85;margin-top:2px;font-variant-numeric:tabular-nums">Classic Haircut · tomorrow, 11:00 · 60 DH</span></span>
+      <span style="font-size:9.5px;letter-spacing:.1em;font-weight:700;color:#8A8A85;background:#F2F0EB;border-radius:6px;padding:5px 8px;flex:none">THIS ONE</span>
+    </div>
+    <span style="font-size:11px;line-height:1.5;color:#B9B6AD;margin-top:-4px;text-wrap:pretty">You came here from the booking, so we already know which one — nothing to pick.</span>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#8A8A85">WHAT WENT WRONG?</span>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <span style="display:flex;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:15px 16px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+        <span style="flex:1;font-size:14px;font-weight:600">The barber didn't show up</span>
+        <span style="width:22px;height:22px;border-radius:999px;border:1.5px solid #D8D4CA;flex:none"></span>
+      </span>
+      <span style="display:flex;align-items:center;gap:12px;background:#fff;border:2px solid #101010;border-radius:18px;padding:14px 15px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+        <span style="flex:1"><span style="display:block;font-size:14px;font-weight:700">I was charged the wrong amount</span><span style="display:block;font-size:11.5px;color:#8A8A85;margin-top:3px">Deposit or shop payment doesn't match</span></span>
+        <span style="width:22px;height:22px;border-radius:999px;background:#101010;display:flex;align-items:center;justify-content:center;flex:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4"><path d="M5 12l5 5L20 7"></path></svg></span>
+      </span>
+      <span style="display:flex;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:15px 16px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+        <span style="flex:1;font-size:14px;font-weight:600">Service wasn't what I booked</span>
+        <span style="width:22px;height:22px;border-radius:999px;border:1.5px solid #D8D4CA;flex:none"></span>
+      </span>
+      <span style="display:flex;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:15px 16px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+        <span style="flex:1;font-size:14px;font-weight:600">Hygiene or safety concern</span>
+        <span style="width:22px;height:22px;border-radius:999px;border:1.5px solid #D8D4CA;flex:none"></span>
+      </span>
+      <span style="display:flex;align-items:center;gap:12px;background:#fff;border-radius:18px;padding:15px 16px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+        <span style="flex:1;font-size:14px;font-weight:600">Something else</span>
+        <span style="width:22px;height:22px;border-radius:999px;border:1.5px solid #D8D4CA;flex:none"></span>
+      </span>
+    </div>
+    <span style="display:flex;align-items:flex-start;background:#fff;border-radius:20px;min-height:62px;padding:14px 16px;font-size:14px;line-height:1.5;color:#111;box-shadow:0 4px 12px rgba(0,0,0,.05)">The 24 DH deposit came off twice<span style="display:inline-block;width:2px;height:19px;background:#E8442E;margin-left:2px"></span></span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:58px;height:58px;border-radius:14px;border:1.5px dashed #C9C5BB;display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="1.8"><rect x="3" y="6" width="18" height="14" rx="3"></rect><circle cx="12" cy="13" r="3"></circle></svg></span>
+      <span style="flex:1;font-size:11px;line-height:1.45;color:#B9B6AD;text-wrap:pretty">Add a photo or receipt · support reviews reports within 24 h</span>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:9px;background:#F7F5F1;border-radius:16px;padding:12px 14px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2" style="flex:none;margin-top:2px"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18"></path></svg>
+      <span style="flex:1;font-size:12px;line-height:1.5;color:#5c5c58;text-wrap:pretty"><strong style="color:#111">Your booking is not affected.</strong> Tomorrow at 11:00 still stands and Youssef isn't told you've reported anything — cancel separately if that's what you want.</span>
+    </div>
+  </div>
+  <div style="position:absolute;left:20px;right:20px;bottom:26px">
+    <a href="#BKG-44" style="height:54px;border-radius:999px;background:#101010;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.1em;color:#fff;text-decoration:none">SUBMIT REPORT</a>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#BKG-44">SUBMIT REPORT</a>  ·  picker version <a class="dv-oid" href="./Customer - Profile.dc.html#PRO-14">PRO-14</a></div></div>
+
+<div class="dv-opt" id="BKG-44"><div class="dv-olabel"><a class="dv-oid" href="#BKG-44">BKG-44</a>17b · filed, and back to the booking</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div data-screen-label="BKG-44" style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:96px 26px 0;display:flex;flex-direction:column;align-items:center;gap:18px">
+    <span style="width:68px;height:68px;border-radius:999px;background:rgba(232,68,46,.12);display:flex;align-items:center;justify-content:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="1.9"><path d="M5 3v18M5 4h11l-1.5 4L16 12H5"></path></svg></span>
+    <div style="text-align:center">
+      <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:28px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Report filed</div>
+      <div style="font-size:13px;color:#8A8A85;margin-top:9px;line-height:1.55;max-width:290px;text-wrap:pretty">Support is looking into the wrong amount charged at Le Fade Tanger. You'll hear back within 24 hours.</div>
+    </div>
+    <div style="align-self:stretch;background:#fff;border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:11px;box-shadow:0 8px 22px rgba(0,0,0,.06)">
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">Case number</span><span style="font-weight:600;font-variant-numeric:tabular-nums">#R-4907</span></span>
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">Booking</span><span style="font-weight:600;font-variant-numeric:tabular-nums">#B7C41D02</span></span>
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">Issue</span><span style="font-weight:600">Wrong amount charged</span></span>
+      <span style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#8A8A85">Filed</span><span style="font-weight:600;font-variant-numeric:tabular-nums">Jul 29, 4:18 PM</span></span>
+      <span style="height:1px;background:#E5E2DB;margin:4px 0"></span>
+      <span style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13px;font-weight:700">Amount in dispute</span><span style="font-size:18px;font-weight:800;color:#E8442E;font-variant-numeric:tabular-nums">24 DH</span></span>
+      <span style="font-size:11px;line-height:1.45;color:#B9B6AD;text-wrap:pretty">Taken from the booking's deposit — you never had to type a figure.</span>
+    </div>
+    <div style="align-self:stretch;display:flex;align-items:center;gap:12px;background:#101010;border-radius:20px;padding:16px 18px">
+      <span style="width:38px;height:38px;border-radius:999px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg></span>
+      <span style="flex:1"><span style="display:block;font-size:13px;font-weight:700;color:#fff">Support chat opened</span><span style="display:block;font-size:11px;color:rgba(255,255,255,.55);margin-top:2px">Updates arrive in your Chat tab</span></span>
+    </div>
+    <a href="#BKG-07" style="align-self:stretch;height:54px;border-radius:999px;background:#101010;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.1em;color:#fff;text-decoration:none">BACK TO MY BOOKING</a>
+    <a href="./Customer - Profile.dc.html#PRO-13" style="font-size:13px;font-weight:600;color:#E8442E;text-decoration:none">View case</a>
+    <span style="text-align:center;font-size:11px;line-height:1.5;color:#B9B6AD;text-wrap:pretty">From Help Center this button reads DONE. Here it goes back where you were — the booking, which is still yours.</span>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#BKG-07">BACK TO MY BOOKING</a>  <a class="dv-oid" href="./Customer - Profile.dc.html#PRO-13">VIEW CASE</a></div></div>
+
+<p class="dv-next">Try next: "the barber's side of a no-show dispute" · "what support sees in the console when this case lands"</p>
+</div>
+</section>

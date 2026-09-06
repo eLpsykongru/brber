@@ -59,10 +59,14 @@ type ProfileView =
   // turn 9 — where admin actions land in the shop
   | 'tasks' | 'application' | 'float' | 'round' | 'statement' | 'agent';
 
-export default function ProfileScreen({ profile, barber, phone, onProfileChanged, onChromeHidden, onBack }: {
+export default function ProfileScreen({ profile, barber, phone, onProfileChanged, onChromeHidden, onBack, onExplore }: {
   profile: Profile; barber: Barber | null; phone: string | null;
   onProfileChanged: () => void; onChromeHidden?: (hidden: boolean) => void;
   onBack?: () => void;
+  // My Bookings is reachable from here as well as from the tab bar, and its
+  // rebook buttons need somewhere to go. Without this they rendered and did
+  // nothing, because `onRebook?.()` on a missing prop is silent.
+  onExplore?: () => void;
 }) {
   const [view, setView] = useState<ProfileView>('menu');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatar_url ?? null);
@@ -187,7 +191,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   }
   if (view === 'bookings') {
     return <MyBookingsScreen customerId={profile.id} onChromeHidden={onChromeHidden}
-      onBack={() => go('menu')} />;
+      onBack={() => go('menu')} onRebook={onExplore} />;
   }
   if (view === 'wallet') return <WalletScreen customerId={profile.id} onBack={() => go('menu')} />;
   if (view === 'coupons') return <CouponsScreen onBack={() => go('menu')} />;

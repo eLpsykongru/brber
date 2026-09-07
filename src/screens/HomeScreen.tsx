@@ -14,6 +14,7 @@ import ClientsScreen from './ClientsScreen';
 import DayScheduleScreen from './DayScheduleScreen';
 import DiscoverScreen from './DiscoverScreen';
 import ExploreScreen from './ExploreScreen';
+import BarberChatsScreen from './BarberChatsScreen';
 import MyBookingsScreen from './MyBookingsScreen';
 import ProfileScreen from './ProfileScreen';
 
@@ -30,6 +31,9 @@ const BARBER_TABS: TabItem[] = [
   { key: 'home', label: 'Home', icon: 'home', iconOutline: 'home-outline' },
   { key: 'calendar', label: 'Calendar', icon: 'calendar', iconOutline: 'calendar-outline' },
   { key: 'clients', label: 'Clients', icon: 'people', iconOutline: 'people-outline' },
+  // BMS-03 - client threads and ops cases had nowhere to live; he checks his
+  // phone once between cuts, so both share one tab
+  { key: 'chat', label: 'Chat', icon: 'chatbubble', iconOutline: 'chatbubble-outline' },
 ];
 // the salon agent till — only the owner (cash agent) gets a Wallet tab; co-barbers don't.
 // Salon management lives in Profile → Salon management, not a tab (keeps Clients in the bar).
@@ -90,6 +94,8 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
     }
     else if (tab === 'calendar') content = <CalendarScreen barberId={barber.id} onChromeHidden={setChromeHidden} />;
     else if (tab === 'clients') content = <ClientsScreen barberId={barber.id} onChromeHidden={setChromeHidden} />;
+    else if (tab === 'chat') content = <BarberChatsScreen barberId={barber.id}
+      onChromeHidden={setChromeHidden} onHelp={() => setTab('home')} />;
     else content = <AgentWalletScreen barberId={barber.id} />; // wallet tab exists for owners only
   } else {
     if (tab === 'home') content = <DiscoverScreen name={profile.full_name} customerId={profile.id}

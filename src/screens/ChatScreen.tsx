@@ -17,7 +17,17 @@ type Msg = {
 };
 
 type Props = {
-  bookingId: string; myId: string; title: string;
+  /** what a new message attaches to — always exactly one booking */
+  bookingId: string;
+  /**
+   * The other person's user id. Messages are keyed on a booking, but you have
+   * one conversation with your barber, not one per haircut — given this, the
+   * thread reads every booking the two of you have ever shared. Omitted, or
+   * equal to `myId` (a walk-in books under the barber's own id), and it reads
+   * `bookingId` alone, which is what a caller with one booking in hand wants.
+   */
+  threadWith?: string;
+  myId: string; title: string;
   subtitle?: string; avatarUrl?: string; onBack: () => void;
   dark?: boolean;   // 1m — the barber's thread sits on the dark canvas
 };
@@ -42,7 +52,7 @@ function initialsOf(name: string) {
   return name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 }
 
-export default function ChatScreen({ bookingId, myId, title, subtitle, avatarUrl, onBack, dark }: Props) {
+export default function ChatScreen({ bookingId, threadWith, myId, title, subtitle, avatarUrl, onBack, dark }: Props) {
   const [msgs, setMsgs] = useState<Msg[]>([]); // ascending (oldest → newest)
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
@@ -50,27 +60,58 @@ export default function ChatScreen({ bookingId, myId, title, subtitle, avatarUrl
   const urlsRef = useRef(imageUrls);
   urlsRef.current = imageUrls;
   const listRef = useRef<FlatList<Msg>>(null);
+  // Resolved here rather than by each caller: the barber's list holds only a
+  // date window of live bookings, so he could not work this out from memory.
+  // A string, not an array: a fresh array literal every render would tear the
+  // subscriptions down and rebuild them forever.
+  const [scope, setScope] = useState(bookingId);
 
   useEffect(() => {
+    if (!threadWith || threadWith === myId) { setScope(bookingId); return; }
+    let live = true;
+    supabase.from('bookings').select('id')
+      // RLS already limits this to bookings you are party to; naming both
+      // directions keeps it true read from either side of the chair
+      .or(`and(customer_id.eq.${myId},barber_id.eq.${threadWith}),`
+        + `and(customer_id.eq.${threadWith},barber_id.eq.${myId})`)
+      .order('starts_at', { ascending: false }).limit(100)
+      .then(({ data }) => {
+        if (!live) return;
+        // the booking we were opened on always counts, even if a hundred
+        // newer ones pushed it past the limit
+        const ids = [...new Set([bookingId, ...(data ?? []).map((b) => b.id)])];
+        setScope(ids.join(','));
+      });
+    return () => { live = false; };
+  }, [threadWith, myId, bookingId]);
+
+  useEffect(() => {
+    const ids = scope.split(',');
     supabase.from('messages')
       .select('id, sender_id, body, image_path, created_at')
-      .eq('booking_id', bookingId)
+      .in('booking_id', ids)
       .order('created_at', { ascending: true }).limit(200)
       .then(({ data, error }) => {
         if (error) Alert.alert('Could not load chat', error.message);
         else setMsgs(data);
       });
 
-    const ch = supabase.channel(`chat-${bookingId}`)
+    // postgres_changes filters cannot express `in`, so one subscription each.
+    // ponytail: only the newest few, or a regular of three years would open
+    // sixty sockets to hear about a message nobody sends on a haircut he had
+    // in 2024. Raise it if anyone ever replies on an old visit.
+    const chans = ids.slice(0, 6).map((id) => supabase.channel(`chat-${id}`)
       .on('postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages', filter: `booking_id=eq.${bookingId}` },
+        { event: 'INSERT', schema: 'public', table: 'messages', filter: `booking_id=eq.${id}` },
         (payload) => {
           const m = payload.new as Msg;
+          // always the newest, whichever booking it arrived on, so appending
+          // keeps the merged list in order
           setMsgs((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
         })
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
-  }, [bookingId]);
+      .subscribe());
+    return () => { chans.forEach((c) => supabase.removeChannel(c)); };
+  }, [scope]);
 
   // private bucket → images need short-lived signed URLs
   useEffect(() => {

@@ -17,7 +17,7 @@ import { dark as d, inter, radius, serif } from '../theme';
 
 export const OPS_PHONE = '+212522000000';   // TODO(backlog): a real ops line
 
-type CaseRow = {
+export type CaseRow = {
   id: string; case_no: string; reason: string; detail: string | null;
   amount_cents: number | null; refund_cents: number | null; status: string;
   created_at: string; resolved_at: string | null; booking_id: string | null;

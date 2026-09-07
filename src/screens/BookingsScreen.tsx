@@ -322,7 +322,13 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   );
 
   if (chat) {
-    return <ChatScreen dark bookingId={chat.id} myId={barberId}
+    // the customer reads one thread with this barber, so the barber reads the
+    // same one back - otherwise "like I said last time" arrives pointing at a
+    // message he cannot see. A walk-in books under the barber's own id, and
+    // ChatScreen leaves those on their single booking rather than pooling
+    // every walk-in he has ever had into one thread.
+    const row = bookings?.find((b) => b.id === chat.id);
+    return <ChatScreen dark bookingId={chat.id} threadWith={row?.customer_id} myId={barberId}
       title={chat.title} onBack={() => openChat(null)} />;
   }
   if (showProfile) {

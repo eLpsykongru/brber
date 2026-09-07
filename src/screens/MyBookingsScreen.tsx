@@ -6,6 +6,7 @@ import {
 import { Display, Field, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
 import { useAndroidBack } from '../lib/back';
+import ReportProblemScreen, { CaseRow, SupportCaseScreen } from './SupportScreens';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, sp } from '../theme';
 import { BookingDetailSheet } from './MyBookingScreen';
@@ -157,11 +158,13 @@ function BookingPhoto({ barberId, size, dim }: { barberId?: string; size: number
   );
 }
 
-function Chip({ text, tone }: { text: string; tone: 'ink' | 'muted' | 'accent' | 'red' }) {
+function Chip({ text, tone }: { text: string; tone: 'ink' | 'muted' | 'accent' | 'red' | 'review' }) {
   return (
-    <View style={[s.chip, tone === 'accent' && s.chipAccentBg, tone === 'red' && s.chipRedBg]}>
+    <View style={[s.chip, tone === 'accent' && s.chipAccentBg, tone === 'red' && s.chipRedBg,
+      tone === 'review' && s.chipReviewBg]}>
       <Text style={[s.chipText,
-        tone === 'muted' && s.chipMuted, tone === 'accent' && s.chipAccent, tone === 'red' && s.chipRed]}>
+        tone === 'muted' && s.chipMuted, tone === 'accent' && s.chipAccent, tone === 'red' && s.chipRed,
+        tone === 'review' && s.chipReview]}>
         {text}
       </Text>
     </View>
@@ -198,6 +201,10 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
   const [asks, setAsks] = useState<Ask[]>([]);
   const [queue, setQueue] = useState<DayQueueRow[] | null>(null);
   const [queueOpen, setQueueOpen] = useState<Row | null>(null);
+  // BKG-38 / BKG-42 - a no-show is the one cancelled state he didn't cause,
+  // so the card has to offer a way to answer it. Same 17a as Help Center.
+  const [reportId, setReportId] = useState<string | null>(null);
+  const [openCase, setOpenCase] = useState<CaseRow | null>(null);
   const [detail, setDetail] = useState<{ id: string; initial?: 'cancel' | 'reschedule' } | null>(
     openBookingId ? { id: openBookingId } : null);
 
@@ -258,7 +265,18 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
       onBookings={() => { setDetail({ id: queueOpen.id }); setQueueOpen(null); openOverlay(false); }} />;
   }
   if (receipt) {
-    return <Receipt booking={receipt} onBack={() => { setReceipt(null); openOverlay(false); }} />;
+    return <Receipt booking={receipt}
+      onBack={() => { setReceipt(null); openOverlay(false); }}
+      onRate={() => { setReceipt(null); openOverlay(false); setReview(receipt); }}
+      onRebook={onRebook} />;
+  }
+  if (reportId) {
+    return <ReportProblemScreen bookingId={reportId}
+      onBack={() => { setReportId(null); openOverlay(false); }} onOpenCase={setOpenCase} />;
+  }
+  if (openCase) {
+    return <SupportCaseScreen caseRow={openCase} myId={customerId}
+      onBack={() => setOpenCase(null)} />;
   }
 
   const filtered = rows.filter((r) => {
@@ -376,12 +394,14 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
               onReceipt={() => { setReceipt(item); openOverlay(true); }}
               onRate={() => setReview(item)} onRebook={onRebook} />;
           }
-          return <CancelledCard row={item} customerId={customerId} onRebook={onRebook} />;
+          return <CancelledCard row={item} customerId={customerId} onRebook={onRebook}
+            onReport={() => { setReportId(item.id); openOverlay(true); }} />;
         }}
       />
 
       <BookingDetailSheet bookingId={detail?.id ?? ''} myId={customerId} visible={!!detail}
-        initial={detail?.initial} onClose={() => { setDetail(null); load(); }} />
+        initial={detail?.initial} onClose={() => { setDetail(null); load(); }}
+        onReport={(id) => { setDetail(null); setReportId(id); openOverlay(true); }} />
 
       {/* 5a — the review, over the list */}
       <ReviewSheet booking={review} onClose={() => setReview(null)}
@@ -527,8 +547,8 @@ function CompletedCard({ row, rating, onReceipt, onRate, onRebook }: {
 }
 
 // ---- 6c ------------------------------------------------------------------
-function CancelledCard({ row, customerId, onRebook }: {
-  row: Row; customerId: string; onRebook?: () => void;
+function CancelledCard({ row, customerId, onRebook, onReport }: {
+  row: Row; customerId: string; onRebook?: () => void; onReport?: () => void;
 }) {
   const byBarber = !!row.cancelled_by && row.cancelled_by !== customerId;
   const noShow = row.status === 'no_show';
@@ -537,7 +557,7 @@ function CancelledCard({ row, customerId, onRebook }: {
     <View style={s.card}>
       <View style={s.chipRow}>
         <Chip text={noShow ? 'NO-SHOW' : byBarber ? 'CANCELLED BY BARBER' : 'YOU CANCELLED'}
-          tone={byBarber ? 'red' : 'muted'} />
+          tone={noShow ? 'review' : byBarber ? 'red' : 'muted'} />
       </View>
       <View style={s.bodyRow}>
         <BookingPhoto barberId={row.barbers?.id} size={80} dim />
@@ -550,7 +570,18 @@ function CancelledCard({ row, customerId, onRebook }: {
         </View>
       </View>
 
-      {!!row.cancel_reason && (
+      {noShow && (
+        <View style={s.reasonBox}>
+          <Ionicons name="alert-circle-outline" size={14} color={colors.textSecondary}
+            style={s.reasonIcon} />
+          <Text style={s.reasonText}>
+            {firstName(row.barbers?.profiles?.full_name)} marked this a no-show — the chair was held and
+            nobody came. If that isn't right, tell us and we'll ask him.
+          </Text>
+        </View>
+      )}
+
+      {!noShow && !!row.cancel_reason && (
         <View style={s.reasonBox}>
           <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary}
             style={s.reasonIcon} />
@@ -560,7 +591,13 @@ function CancelledCard({ row, customerId, onRebook }: {
         </View>
       )}
 
-      {dep > 0 && (byBarber ? (
+      {dep > 0 && (noShow ? (
+        <View style={s.keptBox}>
+          <Ionicons name="lock-closed-outline" size={14} color={colors.textSecondary} />
+          <Text style={s.keptText}>Deposit kept by the shop</Text>
+          <Text style={s.keptAmount}>{dh(dep)} DH</Text>
+        </View>
+      ) : byBarber ? (
         <View style={s.refundBox}>
           <Ionicons name="checkmark" size={14} color="#16A34A" />
           <Text style={s.refundText}>Deposit refunded to your wallet</Text>
@@ -575,6 +612,7 @@ function CancelledCard({ row, customerId, onRebook }: {
       ))}
 
       <View style={s.btnRow}>
+        {noShow && <Btn title="THIS IS WRONG" onPress={() => onReport?.()} />}
         {byBarber && <Btn title="FIND ANOTHER" onPress={() => onRebook?.()} />}
         <Btn title="REBOOK" dark onPress={() => onRebook?.()} />
       </View>
@@ -583,7 +621,9 @@ function CancelledCard({ row, customerId, onRebook }: {
 }
 
 // ---- receipt --------------------------------------------------------------
-function Receipt({ booking, onBack }: { booking: Row; onBack: () => void }) {
+function Receipt({ booking, onBack, onRate, onRebook }: {
+  booking: Row; onBack: () => void; onRate?: () => void; onRebook?: () => void;
+}) {
   const d = new Date(booking.starts_at);
   const dep = booking.deposit_cents;
   const lines: [string, string][] = [
@@ -616,9 +656,21 @@ function Receipt({ booking, onBack }: { booking: Row; onBack: () => void }) {
           </View>
         )}
         <View style={s.receiptRow}>
-          <Text style={s.receiptTotalKey}>{dep > 0 ? 'Due at the shop' : 'To pay at the shop'}</Text>
+          {/* the visit already happened - 'due' would read like a bill */}
+          <Text style={s.receiptTotalKey}>Paid at the shop</Text>
           <Text style={s.receiptTotalVal}>{dh(booking.price_cents - dep)} DH</Text>
         </View>
+      </View>
+
+      {/* ponytail: no QR - barbers have no scanner. Say so, or he hunts for it. */}
+      <Text style={s.receiptNote}>
+        No code to scan — barbers have no scanner. This is your copy of what happened, nothing you
+        have to show anyone.
+      </Text>
+
+      <View style={s.btnRow}>
+        <Btn title="RATE VISIT" onPress={() => onRate?.()} />
+        <Btn title="BOOK AGAIN" dark onPress={() => onRebook?.()} />
       </View>
     </ScrollView>
   );
@@ -806,10 +858,16 @@ const s = StyleSheet.create({
   chip: { backgroundColor: colors.surface, borderRadius: 8, paddingVertical: 5, paddingHorizontal: 10 },
   chipAccentBg: { backgroundColor: 'rgba(232,68,46,0.10)' },
   chipRedBg: { backgroundColor: 'rgba(232,68,46,0.10)' },
+  chipReviewBg: { backgroundColor: '#F0E7D8' },
+  receiptNote: {
+    fontSize: 11, lineHeight: 17, color: colors.textSecondary, textAlign: 'center',
+    paddingHorizontal: 12,
+  },
   chipText: { fontSize: 10, letterSpacing: 1, fontWeight: '700', color: colors.text },
   chipMuted: { color: colors.textSecondary },
   chipAccent: { color: colors.accent },
   chipRed: { color: DEEP_RED },
+  chipReview: { color: '#8A6D2F' },
 
   bodyRow: { flexDirection: 'row', gap: 14, alignItems: 'center' },
   photo: { backgroundColor: colors.surface },

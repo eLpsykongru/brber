@@ -127,9 +127,14 @@ export default function CustomerNotificationsScreen({ userId, onBack, onOpenBook
         <Ionicons name="arrow-back" size={16} color={colors.text} />
       </Pressable>
       <Display size={18} style={s.headerTitle}>Notifications</Display>
-      {unread > 0
-        ? <Text style={s.markAll} onPress={markAllRead}>Mark all read</Text>
-        : <View style={s.puckGhost} />}
+      <View style={s.headerEnd}>
+        {unread > 0 && <Text style={s.markAll} onPress={markAllRead}>Mark all read</Text>}
+        <Pressable onPress={() => setSettings(true)} hitSlop={8}
+          style={({ pressed }) => [s.puck, pressed && s.pressed]}
+          accessibilityLabel="Notification settings">
+          <Ionicons name="options-outline" size={16} color={colors.text} />
+        </Pressable>
+      </View>
     </View>
   );
 
@@ -223,6 +228,7 @@ function NotificationSettings({ userId, onBack }: { userId: string; onBack: () =
   const [prefs, setPrefs] = useState<Prefs>(DEFAULTS);
   const [granted, setGranted] = useState<boolean | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [probing, setProbing] = useState(false);
 
   useEffect(() => {
     supabase.from('notification_prefs').select('*').eq('user_id', userId).maybeSingle()
@@ -253,6 +259,18 @@ function NotificationSettings({ userId, onBack }: { userId: string; onBack: () =
       ))}
     </View>
   );
+
+  async function probe() {
+    setProbing(true);
+    const { data, error } = await supabase.rpc('push_probe', { p_title: 'Sterncut' });
+    setProbing(false);
+    if (error) return Alert.alert('Could not send', error.message);
+    const r = data as { sent: boolean; why?: string; tokens?: number };
+    if (!r?.sent) return Alert.alert('Nothing to send to', r?.why ?? 'No push token on this account.');
+    Alert.alert('Sent',
+      `Went out to ${r.tokens} device${r.tokens === 1 ? '' : 's'}. If nothing arrives in a few `
+      + 'seconds, the token is registered but the push was refused — ask ops to check push_delivery().');
+  }
 
   return (
     <View style={s.screen}>
@@ -287,6 +305,16 @@ function NotificationSettings({ userId, onBack }: { userId: string; onBack: () =
               </Pressable>
             )}
         </View>
+
+        {/* granted ≠ working: the token and the server are two more links, and
+            this is the only thing that tests all three at once */}
+        <Pressable onPress={probe} disabled={probing}
+          style={({ pressed }) => [s.testRow, (pressed || probing) && s.pressed]}
+          accessibilityRole="button">
+          <Ionicons name="paper-plane-outline" size={15} color={colors.textSecondary} />
+          <Text style={s.testText}>{probing ? 'Sending…' : 'Send me a test notification'}</Text>
+          <Ionicons name="chevron-forward" size={14} color={colors.textTertiary} />
+        </Pressable>
 
         <Text style={s.section}>QUEUE &amp; BOOKINGS</Text>
         <View style={s.card}>
@@ -409,6 +437,7 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', ...shadow,
   },
   puckGhost: { width: 40 },
+  headerEnd: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   headerTitle: { flex: 1, textAlign: 'center', letterSpacing: 0.72 },
   markAll: { width: 40, fontSize: 11, fontWeight: '600', color: colors.accent, lineHeight: 13 },
 
@@ -475,6 +504,11 @@ const s = StyleSheet.create({
   },
   permKnob: { width: 20, height: 20, borderRadius: 999, backgroundColor: '#fff' },
 
+  testRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.bg,
+    borderRadius: 16, paddingHorizontal: 16, height: 48,
+  },
+  testText: { flex: 1, fontSize: 13, fontWeight: '600', color: colors.text },
   section: {
     fontSize: 11, letterSpacing: 1.65, fontWeight: '700', color: colors.textSecondary, marginTop: 2,
   },

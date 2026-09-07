@@ -38,7 +38,10 @@ type Visit = {
   price_cents: number;
   deposit_cents: number;
   services: { name: string } | null;
-  barbers: { id: string; salon: { name: string } | null } | null;
+  barbers: {
+    id: string; salon: { name: string } | null;
+    profiles?: { full_name: string | null } | null;
+  } | null;
 };
 
 export type CaseRow = {
@@ -93,7 +96,7 @@ export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
     if (!bookingId) return;
     supabase.from('bookings')
       .select('id, starts_at, price_cents, deposit_cents, services(name),'
-        + ' barbers(id, salon:salons!salon_id(name))')
+        + ' barbers(id, profiles!barbers_id_fkey(full_name), salon:salons!salon_id(name))')
       .eq('id', bookingId).single()
       .then(({ data }) => setFixed((data as unknown as Visit) ?? null));
   }, [bookingId]);
@@ -210,8 +213,15 @@ export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
                 {new Date(visit.starts_at).toTimeString().slice(0, 5)} · {dh(visit.price_cents)} DH
               </Text>
             </View>
-            {!fromBooking && <Text style={s.change}>Change</Text>}
+            {fromBooking
+              ? <Text style={s.thisOne}>THIS ONE</Text>
+              : <Text style={s.change}>Change</Text>}
           </Pressable>
+        )}
+        {fromBooking && (
+          <Text style={s.fixedNote}>
+            You came here from the booking, so we already know which one — nothing to pick.
+          </Text>
         )}
         {!fromBooking && picking && visits.map((v) => (
           <Pressable key={v.id} onPress={() => { setVisitId(v.id); setPicking(false); }}
@@ -245,6 +255,21 @@ export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
 
         <TextInput style={s.detail} multiline value={detail} onChangeText={setDetail}
           placeholder="Tell us what happened" placeholderTextColor={colors.textTertiary} />
+
+        {fromBooking && !!visit && (
+          <View style={s.safeCard}>
+            <Ionicons name="shield-checkmark-outline" size={15} color={colors.textSecondary}
+              style={s.safeIcon} />
+            <View style={s.grow}>
+              <Text style={s.safeTitle}>Your booking is not affected.</Text>
+              <Text style={s.safeBody}>
+                {new Date(visit.starts_at).toTimeString().slice(0, 5)} still stands and{' '}
+                {(visit.barbers?.profiles?.full_name ?? 'the barber').split(' ')[0]} isn't told you've
+                reported anything — cancel separately if that's what you want.
+              </Text>
+            </View>
+          </View>
+        )}
 
         <View style={s.photoRow}>
           <Pressable onPress={addPhoto} accessibilityLabel="Add a photo"
@@ -571,6 +596,15 @@ const s = StyleSheet.create({
   visitName: { fontSize: 14, fontWeight: '700', color: colors.text },
   visitMeta: { fontSize: font.tiny, color: colors.textSecondary, marginTop: 2 },
   change: { fontSize: 12, fontWeight: '600', color: colors.accent },
+  thisOne: { fontSize: 10, letterSpacing: 1, fontWeight: '700', color: colors.textTertiary },
+  fixedNote: { fontSize: 11, lineHeight: 16, color: colors.textSecondary, marginTop: -4 },
+  safeCard: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: colors.surface,
+    borderRadius: 16, paddingHorizontal: 14, paddingVertical: 12,
+  },
+  safeIcon: { marginTop: 1 },
+  safeTitle: { fontSize: 12, fontWeight: '700', color: colors.text },
+  safeBody: { fontSize: 11, lineHeight: 17, color: colors.textSecondary, marginTop: 3 },
   visitPick: {
     backgroundColor: colors.bg, borderRadius: 14, paddingVertical: 11, paddingHorizontal: 14,
     borderWidth: 1, borderColor: colors.border,

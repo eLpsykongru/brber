@@ -217,14 +217,41 @@ function Payment({ d, compact }: { d: Detail; compact?: boolean }) {
               ? 'Nothing leaves your wallet until the barber accepts'
               : freeUntil
                 ? (stillFree
-                  ? `Free to cancel until ${freeAt(freeUntil)} — the deposit comes back to your wallet`
+                  ? `Free to cancel until ${freeAt(freeUntil)} — until then the ${dep.toFixed(0)} DH comes straight back to your wallet.`
                   : `Free cancellation ended at ${freeAt(freeUntil)}. Cancelling now leaves the deposit with the shop.`)
                 : 'Deposit refunded to your wallet if the shop cancels')
             : 'No deposit is taken — you pay the full price at the shop'}
         </Text>
       </View>
+
+      {/* BKG-32 - the deadline above is a moment, deliberately. This card is
+          the duration, and only exists to say the slot is not what expires. */}
+      {!compact && dep > 0 && stillFree && !!freeUntil && hoursLeft(freeUntil) != null && (
+        <View style={s.deadlineCard}>
+          <View style={s.deadlineIcon}>
+            <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
+          </View>
+          <View style={s.grow}>
+            <Text style={s.mindTitle}>{hoursLeft(freeUntil)} left on that</Text>
+            <Text style={s.mindBody}>
+              After {freeAt(freeUntil).replace(/ .*$/, '')} you can still cancel — the slot goes back to his
+              queue either way. The {dep.toFixed(0)} DH is what changes.
+            </Text>
+          </View>
+        </View>
+      )}
     </View>
   );
+}
+
+// how long until the free window shuts. Rounded down, and never shown as the
+// deadline itself - `freeAt` is the only thing allowed to say when it lands.
+function hoursLeft(t: Date) {
+  const min = Math.floor((t.getTime() - Date.now()) / 60_000);
+  if (min < 1) return null;
+  if (min < 60) return `${min} min`;
+  const h = Math.floor(min / 60);
+  return `${h} hour${h === 1 ? '' : 's'}`;
 }
 
 function Row({ label, value, valueMuted, accent }: {
@@ -490,6 +517,15 @@ function DeclinedCard({ d, request, onAcceptOffer }: {
               </View>
             ))}
           </View>
+          {/* BKG-37 - ASK and ACCEPT look alike; only this line says why they
+              aren't. A scanned slot dressed as an offer is a broken promise. */}
+          {!offered.length && (
+            <Text style={s.scanNote}>
+              {rows.length === 1 ? 'This is the soonest gap' : `These ${rows.length} are the soonest gaps`}
+              {' '}on his real calendar, not times he has offered. ASK sends a fresh request — he still
+              has to accept.
+            </Text>
+          )}
         </>
       )}
     </View>
@@ -540,8 +576,11 @@ function CancelSheet({ d, pending, visible, onClose, onReschedule, onDone }: {
   const [reason, setReason] = useState<string | null>(null);
   const [other, setOther] = useState('');
   const [walletCents, setWalletCents] = useState<number | null>(null);
+  const [freeUntil, setFreeUntil] = useState<Date | null>(null);
   const [busy, setBusy] = useState(false);
   const dep = d.deposit_cents / 100;
+  const stillFree = !!freeUntil && freeUntil.getTime() > Date.now();
+  const lapsed = !pending && dep > 0 && !!freeUntil && !stillFree;
   const first = (d.barbers?.profiles?.full_name ?? 'your barber').split(' ')[0];
   const isOther = reason === 'Other';
   // "Other" without words says nothing the chip didn't; send the words instead.
@@ -554,6 +593,12 @@ function CancelSheet({ d, pending, visible, onClose, onReschedule, onDone }: {
     supabase.from('wallet_transactions').select('amount_cents')
       .then(({ data }) => setWalletCents((data ?? []).reduce((a, r: any) => a + r.amount_cents, 0)));
   }, [visible, pending]);
+
+  useEffect(() => {
+    if (!visible || pending) return;
+    supabase.rpc('booking_free_until', { p_booking: d.id })
+      .then(({ data }) => setFreeUntil(data ? new Date(data as string) : null));
+  }, [visible, pending, d.id]);
 
   async function confirm() {
     setBusy(true);
@@ -593,8 +638,15 @@ function CancelSheet({ d, pending, visible, onClose, onReschedule, onDone }: {
                 ? <><Text style={s.lockStrong}>Nothing was charged</Text> — your wallet is untouched and no
                   deposit was held.</>
                 : dep > 0
-                  ? <><Text style={s.lockStrong}>Your {dep.toFixed(0)} DH deposit is not refunded</Text> when you
-                    cancel — it is only returned to your wallet if the barber cancels.</>
+                  ? (lapsed
+                    ? <><Text style={s.lockStrong}>Free cancellation ended at {freeAt(freeUntil!)}.</Text>{' '}
+                      Cancelling now leaves the {dep.toFixed(0)} DH with the shop — he has been holding the
+                      chair for you since then.</>
+                    : stillFree
+                      ? <><Text style={s.lockStrong}>Free until {freeAt(freeUntil!)}</Text> — cancel before then
+                        and the {dep.toFixed(0)} DH goes straight back to your wallet.</>
+                      : <><Text style={s.lockStrong}>Your {dep.toFixed(0)} DH deposit is not refunded</Text> when you
+                        cancel — it is only returned to your wallet if the barber cancels.</>)
                   : <><Text style={s.lockStrong}>Nothing was charged for this booking</Text> — you pay at the
                     shop, so cancelling costs you nothing.</>}
             </Text>
@@ -608,10 +660,26 @@ function CancelSheet({ d, pending, visible, onClose, onReschedule, onDone }: {
           ) : (
             <>
               <Row label="Paid up front" value={`${dep.toFixed(0)} DH`} />
-              <Row label="Refund to wallet" value="0 DH" accent />
+              <Row label="Refund to wallet" value={stillFree ? `${dep.toFixed(0)} DH` : '0 DH'}
+                accent={!stillFree} />
             </>
           )}
         </View>
+
+        {lapsed && (
+          <View style={s.deadlineCard}>
+            <View style={s.deadlineIcon}>
+              <Ionicons name="swap-horizontal-outline" size={14} color={colors.textSecondary} />
+            </View>
+            <View style={s.grow}>
+              <Text style={s.mindTitle}>Moving it keeps the {dep.toFixed(0)} DH.</Text>
+              <Text style={s.mindBody}>
+                A reschedule carries the deposit over — if {whenLine(d.starts_at).split(' · ')[0]} just
+                doesn't work, that's the cheaper door.
+              </Text>
+            </View>
+          </View>
+        )}
 
         <View style={s.reasonBlock}>
           <Eyebrow>REASON (OPTIONAL)</Eyebrow>
@@ -649,7 +717,8 @@ function CancelSheet({ d, pending, visible, onClose, onReschedule, onDone }: {
           <Pressable onPress={confirm} disabled={busy}
             style={({ pressed }) => [pending ? s.inkBtn : s.dangerBtn, (pressed || busy) && s.pressed]}>
             <Text style={pending ? s.inkText : s.dangerText}>
-              {pending ? 'WITHDRAW REQUEST' : 'CANCEL BOOKING'}
+              {pending ? 'WITHDRAW REQUEST'
+                : lapsed ? `CANCEL AND LOSE ${dep.toFixed(0)} DH` : 'CANCEL BOOKING'}
             </Text>
           </Pressable>
           <Pressable onPress={pending ? onClose : onReschedule}
@@ -681,6 +750,16 @@ function CancelledScreen({ d, ticketNo, reason, withdrawn, refunded, onMessage, 
   const dep = d.deposit_cents / 100;
   const at = new Date(d.starts_at).toTimeString().slice(0, 5);
 
+  // BKG-35 - a withdrawn request has no money story, so the proof is the
+  // wallet reading the same on both sides rather than a refund line of 0 DH.
+  const [walletCents, setWalletCents] = useState<number | null>(null);
+  useEffect(() => {
+    if (!withdrawn) return;
+    supabase.from('wallet_transactions').select('amount_cents')
+      .then(({ data }) => setWalletCents((data ?? []).reduce((a, r: any) => a + r.amount_cents, 0)));
+  }, [withdrawn]);
+  const wallet = `${((walletCents ?? 0) / 100).toFixed(0)} DH`;
+
   return (
     <View style={s.screen}>
       <View style={s.receiptHead}>
@@ -705,19 +784,45 @@ function CancelledScreen({ d, ticketNo, reason, withdrawn, refunded, onMessage, 
       </View>
 
       <View style={s.receiptCard}>
-        <Row label="Was" value={whenLine(d.starts_at)} />
+        <Row label={withdrawn ? 'You asked for' : 'Was'} value={whenLine(d.starts_at)} />
         <Row label="Service"
           value={`${d.services?.name ?? 'Service'} · ${(d.price_cents / 100).toFixed(0)} DH`} />
-        {!!reason && <Row label="You said" value={reason} />}
+        {!!reason && !withdrawn && <Row label="You said" value={reason} />}
         <View style={s.hr} />
-        <Row label="Deposit paid" value={`${dep.toFixed(0)} DH`} />
-        <View style={s.rowBase}>
-          <Text style={s.refundK}>Refunded to wallet</Text>
-          <Text style={[s.refundV, refunded && s.refundBack]}>
-            {refunded ? `${dep.toFixed(0)} DH` : '0 DH'}
+        {withdrawn ? (
+          <>
+            <Row label="Wallet before" value={wallet} />
+            <Row label="Wallet after" value={wallet} />
+            <Text style={s.receiptNote}>Nothing was ever held — a request is not a deposit</Text>
+          </>
+        ) : (
+          <>
+            <Row label="Deposit paid" value={`${dep.toFixed(0)} DH`} />
+            <View style={s.rowBase}>
+              <Text style={s.refundK}>Refunded to wallet</Text>
+              <Text style={[s.refundV, refunded && s.refundBack]}>
+                {refunded ? `${dep.toFixed(0)} DH` : '0 DH'}
+              </Text>
+            </View>
+            {dep > 0 && refunded && (
+              <Text style={s.receiptNote}>In your wallet already · you cancelled inside the free window</Text>
+            )}
+          </>
+        )}
+      </View>
+
+      {/* no released slot to talk about, so no "changed your mind" card - just
+          the one thing he might not realise: asking again costs nothing */}
+      {withdrawn && (
+        <View style={s.deadlineCard}>
+          <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary}
+            style={s.lockIcon} />
+          <Text style={s.mindBody}>
+            Nothing to undo and nobody to tell. If you want that time after all, ask again — {at} is
+            still open on his day.
           </Text>
         </View>
-      </View>
+      )}
 
       {!withdrawn && (
         <View style={s.mindCard}>
@@ -1072,9 +1177,10 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
 }
 
 // ---- 10c · the same body, as a sheet over My bookings ---------------------
-export function BookingDetailSheet({ bookingId, myId, visible, initial, onClose, onQueue }: {
+export function BookingDetailSheet({ bookingId, myId, visible, initial, onClose, onQueue, onReport }: {
   bookingId: string; myId: string; visible: boolean;
   initial?: 'cancel' | 'reschedule'; onClose: () => void; onQueue?: () => void;
+  onReport?: (bookingId: string) => void;
 }) {
   if (!visible) return null;
   return (
@@ -1083,7 +1189,17 @@ export function BookingDetailSheet({ bookingId, myId, visible, initial, onClose,
       <View style={s.sheetOver}>
         <View style={s.grabber} />
         <View style={s.sheetHead}>
-          <View style={s.headSlot} />
+          {/* BKG-42 - the same menu the full screen has. Without it, reporting
+              a problem is unreachable from the list, which is the main door. */}
+          {onReport ? (
+            <Pressable onPress={() => Alert.alert('This booking', undefined, [
+              { text: 'Report a problem', onPress: () => onReport(bookingId) },
+              { text: 'Close', style: 'cancel' },
+            ])} hitSlop={8} style={({ pressed }) => [s.headSlot, pressed && s.pressed]}
+              accessibilityLabel="More">
+              <Ionicons name="ellipsis-vertical" size={16} color={colors.text} />
+            </Pressable>
+          ) : <View style={s.headSlot} />}
           <Display size={18} style={s.headTitle}>My booking</Display>
           <Pressable onPress={onClose} hitSlop={8} style={[s.headSlot, s.headSlotEnd]}>
             <Ionicons name="close" size={16} color={colors.text} />
@@ -1417,6 +1533,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.bg, borderRadius: 22, paddingHorizontal: 18, paddingVertical: 16,
     gap: 11, ...shadow,
   },
+  receiptNote: { fontSize: 11, lineHeight: 16, color: colors.textSecondary, marginTop: -2 },
   refundK: { fontSize: font.small, fontWeight: '700', color: colors.text },
   refundV: { fontSize: 18, fontWeight: '800', color: colors.accent, fontVariant: ['tabular-nums'] },
   refundBack: { color: colors.success },
@@ -1428,6 +1545,16 @@ const s = StyleSheet.create({
     width: 28, height: 28, borderRadius: radius.pill, backgroundColor: colors.surface,
     alignItems: 'center', justifyContent: 'center', marginTop: 1,
   },
+  // BKG-32 - sunk inside the payment card, not a card of its own
+  deadlineCard: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: colors.surface,
+    borderRadius: 16, paddingHorizontal: 14, paddingVertical: 12,
+  },
+  deadlineIcon: {
+    width: 28, height: 28, borderRadius: radius.pill, backgroundColor: colors.bg,
+    alignItems: 'center', justifyContent: 'center', marginTop: 1,
+  },
+  scanNote: { fontSize: 11, lineHeight: 17, color: colors.textSecondary, marginTop: 2 },
   mindTitle: { fontSize: font.small, fontWeight: '700', color: colors.text },
   mindBody: { fontSize: 12, lineHeight: 18, color: colors.textSecondary, marginTop: 4 },
   receiptCtas: { flexDirection: 'row', gap: 10 },

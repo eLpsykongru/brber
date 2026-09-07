@@ -46,17 +46,20 @@ function timeAgo(iso: string) {
   return m < 12 ? `${m}mo ago` : `${Math.floor(m / 12)}y ago`;
 }
 
-export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, onBooked }: {
+export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, onBooked, initialBarberId }: {
   salon: SalonCard; km?: number | null; onBack: () => void; onChromeHidden?: (hidden: boolean) => void;
   // where to go once a booking is finished - the salon page is not it
   onBooked?: () => void;
+  // opened straight onto one barber (from Saved) instead of the shop's About tab
+  initialBarberId?: string;
 }) {
   const [tab, setTab] = useState<Tab>('about');
   const [photos, setPhotos] = useState<{ name: string; url: string }[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewQuery, setReviewQuery] = useState('');
   const [bioExpanded, setBioExpanded] = useState(false);
-  const [profileBarber, setProfileBarber] = useState<Specialist | null>(null);
+  const [profileBarber, setProfileBarber] = useState<Specialist | null>(
+    initialBarberId ? salon.barbers.find((b) => b.id === initialBarberId) ?? null : null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [bundles, setBundles] = useState<Bundle[]>([]);
   const [bundleOpen, setBundleOpen] = useState(false);

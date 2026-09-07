@@ -183,9 +183,12 @@ function Btn({ title, dark, accent, icon, onPress }: {
 
 // `onBack` is only passed when this is opened from Profile → My Bookings. As a
 // bottom tab there is nowhere to go back to, so the header stays as drawn.
-export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook, onBack }: {
+export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook, onBack, openBookingId }: {
   customerId: string; onChromeHidden?: (hidden: boolean) => void; onRebook?: () => void;
   onBack?: () => void;
+  // a notification names one booking. Landing on the list and making him find
+  // it again is the same dead end as not navigating at all.
+  openBookingId?: string;
 }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [rated, setRated] = useState<Map<string, number>>(new Map());
@@ -195,7 +198,8 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
   const [asks, setAsks] = useState<Ask[]>([]);
   const [queue, setQueue] = useState<DayQueueRow[] | null>(null);
   const [queueOpen, setQueueOpen] = useState<Row | null>(null);
-  const [detail, setDetail] = useState<{ id: string; initial?: 'cancel' | 'reschedule' } | null>(null);
+  const [detail, setDetail] = useState<{ id: string; initial?: 'cancel' | 'reschedule' } | null>(
+    openBookingId ? { id: openBookingId } : null);
 
   const load = useCallback(async () => {
     const [bk, rv] = await Promise.all([

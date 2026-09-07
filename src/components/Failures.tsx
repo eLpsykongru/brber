@@ -110,18 +110,22 @@ export function LowWalletBlock({ balanceCents, floorCents, onRequest, onTopUp }:
         </View>
         <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
       </Pressable>
-      {!!onTopUp && (
-        <Pressable onPress={onTopUp} style={s.wayCard}>
-          <View style={s.wayIconIdle}>
-            <Ionicons name="cash-outline" size={16} color={colors.textSecondary} />
-          </View>
-          <View style={s.grow}>
-            <Text style={s.wayTitle}>Top up with cash first</Text>
-            <Text style={s.waySub}>Any Sterncut shop can take it</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
-        </Pressable>
-      )}
+      {/* The heading above promises TWO ways, and this one was gated on a
+          handler no caller passes — so it has always shown one. Topping up is
+          not an in-app action: he walks into a shop and hands over cash, and a
+          barber's agent wallet credits him. So it renders as advice, and only
+          becomes a link where a caller actually has somewhere to send him. */}
+      <Pressable onPress={onTopUp} disabled={!onTopUp}
+        style={s.wayCard} accessibilityRole={onTopUp ? 'button' : 'text'}>
+        <View style={s.wayIconIdle}>
+          <Ionicons name="cash-outline" size={16} color={colors.textSecondary} />
+        </View>
+        <View style={s.grow}>
+          <Text style={s.wayTitle}>Top up with cash first</Text>
+          <Text style={s.waySub}>Any Sterncut shop can take it</Text>
+        </View>
+        {!!onTopUp && <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />}
+      </Pressable>
     </>
   );
 }

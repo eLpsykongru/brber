@@ -84,6 +84,8 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
   const [minRating, setMinRating] = useState<number | null>(null);
   const [maxKm, setMaxKm] = useState<number | null>(null);
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  // 38a - the answer to "location is off" is to let him name where he is
+  const [district, setDistrict] = useState<string | null>(null);
   const [reload, setReload] = useState(0);
   const { online } = useOnline();
   const mapRef = useRef<MapView>(null);
@@ -146,7 +148,8 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
     const matchD = maxKm == null || !userLoc || (km != null && km <= maxKm);
     const price = startingPrice(s);
     const matchP = maxPrice == null || (price != null && price <= maxPrice);
-    return matchR && matchD && matchP;
+    const matchN = district == null || s.district === district;
+    return matchR && matchD && matchP && matchN;
   });
   // nearby first; salons without a pin (or no user location) sink to the end
   // 38a's "ALL SALONS · A–Z". Without a location every distance is Infinity and
@@ -174,7 +177,9 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
       onBooked={() => { open(null); onHome?.(); }} />;
   }
 
-  const filtersOn = minRating != null || maxKm != null || maxPrice != null;
+  const filtersOn = minRating != null || maxKm != null || maxPrice != null || district != null;
+  // whatever the shops actually say they're in - no hardcoded list of Tangier
+  const districts = [...new Set(salons.map((x) => x.district).filter(Boolean))].sort() as string[];
 
   // 25b — Explore is the one tab with nothing useful cached: a map and a salon
   // list are both live queries, so there is nothing honest to show offline.
@@ -240,7 +245,8 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
           first" and nobody would know why. It falls back to A–Z and says so. */}
       {noLocation && (
         <View style={styles.noLocWrap}>
-          <NoLocationBar onAsk={() => locate(true)} />
+          <NoLocationBar onAsk={() => locate(true)}
+            onPickDistrict={districts.length ? () => setFilterOpen(true) : undefined} />
         </View>
       )}
 
@@ -317,10 +323,21 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
           <View style={styles.sheetHeader}>
             <Display size={22}>Filters</Display>
             <Pressable hitSlop={8}
-              onPress={() => { setMinRating(null); setMaxKm(null); setMaxPrice(null); }}>
+              onPress={() => { setMinRating(null); setMaxKm(null); setMaxPrice(null); setDistrict(null); }}>
               <Text style={styles.sheetReset}>Reset</Text>
             </Pressable>
           </View>
+          {districts.length > 0 && (
+            <>
+              <Text style={styles.sheetLabel}>District</Text>
+              <View style={styles.chipRow}>
+                <Chip label="Any" active={district === null} onPress={() => setDistrict(null)} />
+                {districts.map((d) => (
+                  <Chip key={d} label={d} active={district === d} onPress={() => setDistrict(d)} />
+                ))}
+              </View>
+            </>
+          )}
           <Text style={styles.sheetLabel}>Rating</Text>
           <View style={styles.chipRow}>
             {RATING_OPTS.map((o) => (

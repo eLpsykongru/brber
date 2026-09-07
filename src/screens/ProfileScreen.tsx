@@ -112,6 +112,12 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   // `appeal` from `takedown`; both would lose a step without this.
   const trail = useRef<ProfileView[]>([]);
 
+  // PreviewPage has two callers now - the owner previewing his own shop, and a
+  // tap on a saved barber/salon. `from` is where BACK goes, since they differ.
+  const [preview, setPreview] = useState<{ salonId?: string; barberId?: string; from: ProfileView } | null>(null);
+  // a notification names one booking; MyBookings opens straight onto it
+  const [openBookingId, setOpenBookingId] = useState<string | undefined>();
+
   function go(next: ProfileView) {
     setView((cur) => {
       if (next !== cur) {
@@ -180,7 +186,9 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
       onProfileChanged={onProfileChanged} go={go} />;
   }
   if (view === 'notifications') {
-    return <CustomerNotificationsScreen userId={profile.id} onBack={() => go('settings')} />;
+    return <CustomerNotificationsScreen userId={profile.id} onBack={() => go('settings')}
+      onOpenBooking={(id) => { setOpenBookingId(id); go('bookings'); }}
+      onRate={(id) => { setOpenBookingId(id); go('bookings'); }} />;
   }
   if (view === 'linked') {
     return <LinkedAccountsScreen onBack={() => go('settings')} onSetPassword={() => go('password')} />;
@@ -191,11 +199,16 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   }
   if (view === 'bookings') {
     return <MyBookingsScreen customerId={profile.id} onChromeHidden={onChromeHidden}
-      onBack={() => go('menu')} onRebook={onExplore} />;
+      openBookingId={openBookingId}
+      onBack={() => { setOpenBookingId(undefined); go('menu'); }} onRebook={onExplore} />;
   }
   if (view === 'wallet') return <WalletScreen customerId={profile.id} onBack={() => go('menu')} />;
   if (view === 'coupons') return <CouponsScreen onBack={() => go('menu')} />;
-  if (view === 'saved') return <SavedScreen onBack={() => go('menu')} />;
+  if (view === 'saved') {
+    return <SavedScreen onBack={() => go('menu')}
+      onOpenSalon={(id) => { setPreview({ salonId: id, from: 'saved' }); go('preview'); }}
+      onOpenBarber={(id) => { setPreview({ barberId: id, from: 'saved' }); go('preview'); }} />;
+  }
   if (view === 'standing') return <StandingScreen onBack={() => go('menu')} onDispute={() => go('support')} />;
   // 30a / 5a — Help Center is now the support console; the FAQ article list it
   // sits on is the old screen, one tap deeper.
@@ -233,8 +246,12 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   if (view === 'support') {
     return <ReportProblemScreen onBack={() => go('menu')} onOpenCase={setOpenCase} />;
   }
-  if (view === 'preview' && barber?.salon_id) {
-    return <PreviewPage salonId={barber.salon_id} onBack={() => go('menu')}
+  if (view === 'preview' && (preview || barber?.salon_id)) {
+    const t: { salonId?: string; barberId?: string; from: ProfileView } =
+      preview ?? { salonId: barber!.salon_id ?? undefined, from: 'menu' };
+    return <PreviewPage salonId={t.salonId} barberId={t.barberId}
+      onBack={() => { setPreview(null); go(t.from); }}
+      onBooked={() => { setPreview(null); go('bookings'); }}
       onChromeHidden={onChromeHidden} />;
   }
   if (view === 'salon' && barber) return <SalonScreen barberId={barber.id} onBack={() => go('menu')}
@@ -522,24 +539,38 @@ const d = StyleSheet.create({
 });
 
 // "how customers see me" — fetches the salon in SalonCard shape and reuses the customer screen
-function PreviewPage({ salonId, onBack, onChromeHidden }: {
-  salonId: string; onBack: () => void; onChromeHidden?: (hidden: boolean) => void;
+function PreviewPage({ salonId, barberId, onBack, onBooked, onChromeHidden }: {
+  salonId?: string; barberId?: string; onBack: () => void; onBooked?: () => void;
+  onChromeHidden?: (hidden: boolean) => void;
 }) {
   const [salon, setSalon] = useState<SalonCard | null>(null);
+  // a saved barber carries only his own id; his page lives inside his shop's
+  const [shopId, setShopId] = useState<string | null>(salonId ?? null);
 
   useEffect(() => {
+    if (shopId || !barberId) return;
+    supabase.from('barbers').select('salon_id').eq('id', barberId).single()
+      .then(({ data, error }) => {
+        if (error || !data?.salon_id) { Alert.alert('Could not open', error?.message ?? 'No shop'); onBack(); return; }
+        setShopId(data.salon_id);
+      });
+  }, [barberId, shopId]);
+
+  useEffect(() => {
+    if (!shopId) return;
     supabase.from('salons')
       .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, profiles!barbers_id_fkey(full_name, avatar_url, phone), reviews!reviews_barber_id_fkey(rating), services(id, name, price_cents, duration_min, is_active, category))')
-      .eq('id', salonId).single()
+      .eq('id', shopId).single()
       .then(({ data, error }) => {
         if (error) { Alert.alert('Could not load preview', error.message); onBack(); return; }
         const card = data as unknown as SalonCard;
         setSalon({ ...card, barbers: card.barbers.filter((b) => b.status === 'approved' && b.salon_status === 'approved') });
       });
-  }, [salonId]);
+  }, [shopId]);
 
   if (!salon) return <View style={s.center}><ActivityIndicator /></View>;
-  return <SalonDetailScreen salon={salon} onBack={onBack} onChromeHidden={onChromeHidden} />;
+  return <SalonDetailScreen salon={salon} onBack={onBack} onChromeHidden={onChromeHidden}
+    initialBarberId={barberId} onBooked={onBooked} />;
 }
 
 function EditProfile({ profile, barber, phone, onDone, onBack }: {

@@ -339,7 +339,15 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   }
   if (inboxOpen) {
     return <NotificationsScreen barberId={barberId}
-      onBack={() => { setInboxOpen(false); onChromeHidden?.(false); load(); }} />;
+      onBack={() => { setInboxOpen(false); onChromeHidden?.(false); load(); }}
+      // a notification names a booking; the sheet it opens depends on whether
+      // that booking is still a request. Unknown id (older than the loaded
+      // window) just closes the inbox rather than opening the wrong thing.
+      onOpenBooking={(id) => {
+        const b = bookings?.find((x) => x.id === id);
+        setInboxOpen(false); onChromeHidden?.(false);
+        if (b) (b.status === 'pending' ? setRequest : setPanel)(b);
+      }} />;
   }
   // 10e — opened by hand from the banner, or the moment ops hides the shop.
   // It is not a lock screen: he can always back out and keep cutting.

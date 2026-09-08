@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Empty, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
+import { Press } from '../components/motion';
 import { supabase } from '../lib/supabase';
 import { colors, inter, radius, sp } from '../theme';
 
@@ -54,7 +55,15 @@ export default function SavedScreen({ onBack, onOpenBarber, onOpenSalon }: {
     if (error) { Alert.alert('Could not save', error.message); load(); }
   }
 
-  if (!w) return <View style={s.screen}><ActivityIndicator style={s.spin} /></View>;
+  // the header comes too, or there is no way out while the list is loading
+  if (!w) {
+    return (
+      <View style={s.screen}>
+        <ScreenHeader title="Saved" onBack={onBack} />
+        <ActivityIndicator style={s.spin} />
+      </View>
+    );
+  }
   const nothing = w.barbers.length === 0 && w.salons.length === 0;
 
   return (
@@ -86,9 +95,8 @@ export default function SavedScreen({ onBack, onOpenBarber, onOpenSalon }: {
           <>
             <Text style={s.section}>BARBERS · {w.barbers.length}</Text>
             {w.barbers.map((b) => (
-              <Pressable key={b.id} onPress={() => onOpenBarber?.(b.id)}
-                accessibilityLabel={b.name}
-                style={({ pressed }) => [s.row, pressed && s.pressed]}>
+              <Press key={b.id} onPress={() => onOpenBarber?.(b.id)}
+                accessibilityLabel={b.name} style={s.row}>
                 <View style={s.avatar}><Text style={s.avatarText}>{initials(b.name)}</Text></View>
                 <View style={s.grow}>
                   <Text style={s.name}>{b.name}</Text>
@@ -98,12 +106,11 @@ export default function SavedScreen({ onBack, onOpenBarber, onOpenSalon }: {
                     <Text style={s.free}>Free {hhmm(b.free_today)} today</Text>
                   )}
                 </View>
-                <Pressable onPress={() => unsave('barber_id', b.id)} hitSlop={8}
-                  accessibilityLabel={`Remove ${b.name} from saved`}
-                  style={({ pressed }) => [s.heart, pressed && s.pressed]}>
+                <Press onPress={() => unsave('barber_id', b.id)} hitSlop={8} scale={0.86}
+                  accessibilityLabel={`Remove ${b.name} from saved`} style={s.heart}>
                   <Ionicons name="heart" size={16} color={colors.accent} />
-                </Pressable>
-              </Pressable>
+                </Press>
+              </Press>
             ))}
           </>
         )}
@@ -112,9 +119,8 @@ export default function SavedScreen({ onBack, onOpenBarber, onOpenSalon }: {
           <>
             <Text style={s.section}>SALONS · {w.salons.length}</Text>
             {w.salons.map((x) => (
-              <Pressable key={x.id} onPress={() => onOpenSalon?.(x.id)}
-                accessibilityLabel={x.name}
-                style={({ pressed }) => [s.row, pressed && s.pressed]}>
+              <Press key={x.id} onPress={() => onOpenSalon?.(x.id)}
+                accessibilityLabel={x.name} style={s.row}>
                 <View style={s.shopTile}>
                   <Ionicons name="cut-outline" size={19} color={colors.textTertiary} />
                 </View>
@@ -126,12 +132,11 @@ export default function SavedScreen({ onBack, onOpenBarber, onOpenSalon }: {
                   {/* 39a's state, carried here so a saved shop can't look bookable */}
                   {!x.open && <Text style={s.shut}>Closed right now</Text>}
                 </View>
-                <Pressable onPress={() => unsave('salon_id', x.id)} hitSlop={8}
-                  accessibilityLabel={`Remove ${x.name} from saved`}
-                  style={({ pressed }) => [s.heart, pressed && s.pressed]}>
+                <Press onPress={() => unsave('salon_id', x.id)} hitSlop={8} scale={0.86}
+                  accessibilityLabel={`Remove ${x.name} from saved`} style={s.heart}>
                   <Ionicons name="heart" size={16} color={colors.accent} />
-                </Pressable>
-              </Pressable>
+                </Press>
+              </Press>
             ))}
           </>
         )}
@@ -143,11 +148,12 @@ export default function SavedScreen({ onBack, onOpenBarber, onOpenSalon }: {
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.surface },
-  content: { padding: sp(5), gap: 10, paddingBottom: TAB_BAR_INSET },
+  // the header is pinned, so the status-bar inset belongs on the root — the
+  // same 66 every other pinned-header screen uses
+  screen: { flex: 1, paddingTop: 66, paddingHorizontal: 20, backgroundColor: colors.surface },
+  content: { gap: 10, paddingTop: 2, paddingBottom: TAB_BAR_INSET },
   spin: { marginTop: sp(20) },
   grow: { flex: 1 },
-  pressed: { opacity: 0.7 },
 
   alertCard: {
     flexDirection: 'row', alignItems: 'center', gap: 11,

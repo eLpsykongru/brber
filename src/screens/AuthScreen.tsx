@@ -5,6 +5,7 @@ import {
   TextInputProps, View,
 } from 'react-native';
 import { useAndroidBack } from '../lib/back';
+import { OAuthProvider, signInWithProvider } from '../lib/oauth';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, serifBlack, shadow, sp } from '../theme';
 import { ForgotPasswordScreen } from './AccountScreens';
@@ -12,7 +13,7 @@ import { ForgotPasswordScreen } from './AccountScreens';
 export type AuthView = 'welcome' | 'signin' | 'register';
 
 // Sterncut auth flow (design 2c → 2d → 2e): welcome with social sign-in,
-// email sign-in, register. Email/password is the real rail; social is stubbed.
+// email sign-in, register. Email/password and Google/Apple OAuth are both real.
 export default function AuthScreen({ initialView = 'welcome' }: { initialView?: AuthView }) {
   const [view, setView] = useState<AuthView>(initialView);
   // sign-in and register both back out to the welcome screen; from welcome
@@ -23,12 +24,26 @@ export default function AuthScreen({ initialView = 'welcome' }: { initialView?: 
   return <Register onBack={() => setView('welcome')} onSignIn={() => setView('signin')} />;
 }
 
-// TODO(backlog): real OAuth needs providers configured in Supabase + expo-auth-session deep link
-function social(provider: 'Google' | 'Apple') {
-  Alert.alert(`${provider} sign-in`, 'Coming soon — use email for now. See BACKLOG.md.');
+// Google / Apple, shared by the welcome screen and sign-in. The browser covers
+// the app while it runs, so the only state worth holding is "don't fire twice".
+function useSocial() {
+  const [busy, setBusy] = useState<OAuthProvider | null>(null);
+  async function go(provider: OAuthProvider) {
+    if (busy) return;
+    setBusy(provider);
+    try {
+      await signInWithProvider(provider); // App.tsx swaps the screen on SIGNED_IN
+    } catch (e) {
+      Alert.alert('Sign-in failed', e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(null);
+    }
+  }
+  return { busy, go };
 }
 
 function Welcome({ onEmail, onRegister }: { onEmail: () => void; onRegister: () => void }) {
+  const { busy, go } = useSocial();
   return (
     <View style={s.dark}>
       <View style={s.welcomeBottom}>
@@ -36,13 +51,15 @@ function Welcome({ onEmail, onRegister }: { onEmail: () => void; onRegister: () 
           <Text style={s.brandBig}>Sterncut</Text>
           <Text style={s.brandTag}>Book your barber in Tangier</Text>
         </View>
-        <Pressable onPress={() => social('Google')} style={({ pressed }) => [s.socialBtn, s.socialLight, pressed && s.pressed]}>
+        <Pressable onPress={() => go('google')} disabled={!!busy}
+          style={({ pressed }) => [s.socialBtn, s.socialLight, (pressed || busy) && s.pressed]}>
           <Ionicons name="logo-google" size={18} color={colors.text} />
-          <Text style={s.socialLightText}>Continue with Google</Text>
+          <Text style={s.socialLightText}>{busy === 'google' ? 'Opening…' : 'Continue with Google'}</Text>
         </Pressable>
-        <Pressable onPress={() => social('Apple')} style={({ pressed }) => [s.socialBtn, s.socialDark, pressed && s.pressed]}>
+        <Pressable onPress={() => go('apple')} disabled={!!busy}
+          style={({ pressed }) => [s.socialBtn, s.socialDark, (pressed || busy) && s.pressed]}>
           <Ionicons name="logo-apple" size={19} color={colors.onAccent} />
-          <Text style={s.socialDarkText}>Continue with Apple</Text>
+          <Text style={s.socialDarkText}>{busy === 'apple' ? 'Opening…' : 'Continue with Apple'}</Text>
         </Pressable>
         <View style={s.orRow}>
           <View style={s.orLineDark} />
@@ -112,6 +129,7 @@ function SignIn({ onBack, onRegister }: { onBack: () => void; onRegister: () => 
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [forgotOpen, setForgotOpen] = useState(false); // 23a
+  const social = useSocial();
 
   async function submit() {
     setBusy(true);
@@ -147,13 +165,15 @@ function SignIn({ onBack, onRegister }: { onBack: () => void; onRegister: () => 
           <View style={s.orLineLight} />
         </View>
         <View style={s.socialRow}>
-          <Pressable onPress={() => social('Google')} style={({ pressed }) => [s.socialSmall, s.socialSmallLight, pressed && s.pressed]}>
+          <Pressable onPress={() => social.go('google')} disabled={!!social.busy}
+            style={({ pressed }) => [s.socialSmall, s.socialSmallLight, (pressed || social.busy) && s.pressed]}>
             <Ionicons name="logo-google" size={17} color={colors.text} />
-            <Text style={s.socialSmallLightText}>Google</Text>
+            <Text style={s.socialSmallLightText}>{social.busy === 'google' ? '…' : 'Google'}</Text>
           </Pressable>
-          <Pressable onPress={() => social('Apple')} style={({ pressed }) => [s.socialSmall, s.socialSmallDark, pressed && s.pressed]}>
+          <Pressable onPress={() => social.go('apple')} disabled={!!social.busy}
+            style={({ pressed }) => [s.socialSmall, s.socialSmallDark, (pressed || social.busy) && s.pressed]}>
             <Ionicons name="logo-apple" size={18} color={colors.onAccent} />
-            <Text style={s.socialSmallDarkText}>Apple</Text>
+            <Text style={s.socialSmallDarkText}>{social.busy === 'apple' ? '…' : 'Apple'}</Text>
           </Pressable>
         </View>
         <Text style={s.footer}>

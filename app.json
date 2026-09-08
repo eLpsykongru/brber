@@ -2,6 +2,7 @@
   "expo": {
     "name": "Sterncut",
     "slug": "brber",
+    "scheme": "sterncut",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -34,7 +35,8 @@
           "color": "#E8442E"
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-web-browser"
     ],
     "extra": {
       "eas": {

@@ -214,10 +214,31 @@ Still open:
 ## Sterncut auth & onboarding  → `AuthScreen.tsx`, `IntroScreen.tsx`, `OtpScreen.tsx` (2026-07-22)
 Customer design doc (claude.ai/design "Customer App") implemented: app renamed
 **Sterncut** (app.json name; slug stays `brber`), first-run intro carousel, welcome
-with social sign-in, email sign-in, register. Email/password is the real rail.
-- **Google / Apple sign-in** — buttons alert "coming soon". Needs providers
-  configured in the Supabase dashboard + `expo-auth-session` deep link. Do NOT
-  fake it with a webview.
+with social sign-in, email sign-in, register. Email/password and OAuth are both real.
+- **Google / Apple sign-in** — REAL 2026-09-08 (`src/lib/oauth.ts`). Supabase
+  `signInWithOAuth` + `expo-web-browser` auth session, redirecting back into the
+  app via `Linking.createURL("/auth")` (`scheme: sterncut` in app.json); the
+  tokens come off the fragment into `setSession`. The same call signs up a
+  first-timer — the 0010 trigger gives them a profile. **Dashboard config is
+  required before it works:** enable Google and Apple under Auth → Providers, and
+  allowlist `sterncut://**` plus the Expo Go URL (`exp://<LAN-IP>:8081/**`) under
+  Auth → URL Configuration. Still open:
+  - **The Apple client secret expires every 6 months.** Supabase's "Secret Key"
+    is a JWT signed with the `.p8`, not the key itself; when it lapses Apple
+    sign-in fails silently. Trigger: 6 months after the provider goes live —
+    regenerate from the stored `.p8` (Team ID + Key ID + Services ID
+    `com.sterncut.app.web`) and paste it back in.
+  - **Provider users have no phone.** Google/Apple hand over a name and an email,
+    never a number, so the profile lands with `phone` null and the barber has
+    nothing to call. Trigger: the first booking made by an OAuth account — ask
+    for a phone after first sign-in, or block booking until there is one.
+  - **Apple is the web flow, not native.** Acceptable for App Store review, but
+    iOS gets a browser sheet instead of the Face ID sheet. Trigger: shipping to
+    the App Store — `expo-apple-authentication` + `signInWithIdToken`, dev build
+    only (never Expo Go).
+  - Implicit flow, not PKCE: pkce would turn the emailed password-reset link into
+    a code only the requesting device can exchange. Trigger: the in-app reset
+    deep link below — do both at once.
 - **Phone OTP** (`OtpScreen.tsx`) — full UI, NOT wired into register: Supabase
   phone OTP needs an SMS provider (Twilio) first. Register keeps email/password;
   the "we'll text a code" design copy was softened until this is real.

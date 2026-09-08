@@ -84,6 +84,28 @@ export function Pushed({ children, onBack, disabled, behind }: {
     }).start();
   }, [reduced, x]);
 
+  // Leaving does not always mean unmounting: a parent that holds several
+  // pushed screens (Profile's settings → account → back) swaps the child and
+  // keeps this layer. Without putting the screen back on stage the swapped-in
+  // child renders off to the right and the user sees a blank app.
+  //
+  // Coming back in from the left — where the layer underneath sits — is also
+  // the honest direction for a step back.
+  const reenter = useRef(() => {
+    if (reducedRef.current) { x.setValue(0); return; }
+    x.setValue(-W * 0.25);
+    Animated.spring(x, {
+      toValue: 0, useNativeDriver: true, damping: 22, stiffness: 210, mass: 0.9,
+    }).start();
+  }).current;
+
+  const leave = useRef((then: () => void) => {
+    if (reducedRef.current) { then(); x.setValue(0); return; }
+    Animated.timing(x, {
+      toValue: W, duration: 190, easing: Easing.out(Easing.quad), useNativeDriver: true,
+    }).start(() => { then(); reenter(); });
+  }).current;
+
   const pan = useRef(PanResponder.create({
     // moveX - dx is where the finger went down. Only an edge drag starts a
     // dismissal, or every horizontal scroll in the screen would fight it.
@@ -92,10 +114,7 @@ export function Pushed({ children, onBack, disabled, behind }: {
     onPanResponderMove: (_e, g) => x.setValue(Math.max(0, g.dx)),
     onPanResponderRelease: (_e, g) => {
       if (shouldDismiss(g.dx, g.vx, W)) {
-        Animated.timing(x, {
-          toValue: W, duration: reducedRef.current ? 0 : 190,
-          easing: Easing.out(Easing.quad), useNativeDriver: true,
-        }).start(() => backRef.current?.());
+        leave(() => backRef.current?.());
       } else {
         Animated.spring(x, {
           toValue: 0, useNativeDriver: true, damping: 24, stiffness: 240,
@@ -107,15 +126,6 @@ export function Pushed({ children, onBack, disabled, behind }: {
     },
   })).current;
 
-  // the same exit the gesture uses, so a tapped back button and a swipe do
-  // not look like two different app
-  function dismiss(then: () => void) {
-    if (reducedRef.current) { then(); return; }
-    Animated.timing(x, {
-      toValue: W, duration: 190, easing: Easing.out(Easing.quad), useNativeDriver: true,
-    }).start(() => then());
-  }
-
   const handlers = disabled ? {} : pan.panHandlers;
   const sliding = (
     <Animated.View
@@ -126,7 +136,7 @@ export function Pushed({ children, onBack, disabled, behind }: {
   );
 
   if (!behind) {
-    return <DismissCtx.Provider value={onBack ? dismiss : null}>{sliding}</DismissCtx.Provider>;
+    return <DismissCtx.Provider value={onBack ? leave : null}>{sliding}</DismissCtx.Provider>;
   }
 
   // a quarter of the width, which is roughly what iOS does: enough to read as
@@ -138,7 +148,7 @@ export function Pushed({ children, onBack, disabled, behind }: {
     inputRange: [0, W], outputRange: [0.22, 0], extrapolate: 'clamp',
   });
   return (
-    <DismissCtx.Provider value={onBack ? dismiss : null}>
+    <DismissCtx.Provider value={onBack ? leave : null}>
       <View style={s.layer}>
         <Animated.View style={[s.under, { transform: [{ translateX: trail }] }]}
           pointerEvents="none">

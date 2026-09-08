@@ -4,6 +4,7 @@ import {
   Modal, Pressable, ScrollView, StyleSheet, Text, TextProps, TextStyle, View, ViewStyle,
 } from 'react-native';
 import { dark as d, inter, serif } from '../theme';
+import { Press, useBack } from './motion';
 
 // The barber side's shared vocabulary, transcribed from "Barber App.dc.html" turn 1.
 // Every screen there repeats the same six shapes — screen frame, sheet, top bar,
@@ -122,10 +123,13 @@ export function TopBar({ title, onBack, backIcon = 'arrow-left', right, onRight,
   title: string; onBack?: () => void; backIcon?: IconName;
   right?: IconName; onRight?: () => void; plain?: boolean;
 }) {
+  // a tapped back leaves the same way a swipe does - see motion.tsx
+  const back = useBack(onBack);
   return (
     <View style={s.topBar}>
-      {onBack
-        ? <Pressable onPress={onBack} hitSlop={8} style={s.puck38}><Ico name={backIcon} /></Pressable>
+      {back
+        ? <Pressable onPress={back} hitSlop={8} accessibilityLabel="Go back"
+            style={s.puck38}><Ico name={backIcon} /></Pressable>
         : <View style={s.puck38Ghost} />}
       {plain
         ? <T w="b" size={17} style={s.topTitle}>{title}</T>
@@ -200,12 +204,11 @@ export function Btn({ title, onPress, bg = d.accent, fg = '#fff', height = 52, i
   icon?: IconName; style?: ViewStyle; ls?: number;
 }) {
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" style={({ pressed }) => [
-      s.btn, { height, backgroundColor: bg }, style, pressed && s.pressed,
-    ]}>
+    <Press onPress={onPress} accessibilityRole="button" disabled={!onPress}
+      style={[s.btn, { height, backgroundColor: bg }, style] as ViewStyle[]}>
       {icon ? <Ico name={icon} size={16} color={fg} /> : null}
       <T w={fg === d.bg ? 'eb' : 'b'} size={13} c={fg} ls={ls}>{title}</T>
-    </Pressable>
+    </Press>
   );
 }
 
@@ -214,11 +217,10 @@ export function GhostBtn({ title, onPress, color = d.sub, border = d.border, hei
   title: string; onPress?: () => void; color?: string; border?: string; height?: number; style?: ViewStyle;
 }) {
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" style={({ pressed }) => [
-      s.btn, { height, borderWidth: 1, borderColor: border }, style, pressed && s.pressed,
-    ]}>
+    <Press onPress={onPress} accessibilityRole="button" disabled={!onPress}
+      style={[s.btn, { height, borderWidth: 1, borderColor: border }, style] as ViewStyle[]}>
       <T w="b" size={12} c={color} ls={0.6}>{title}</T>
-    </Pressable>
+    </Press>
   );
 }
 

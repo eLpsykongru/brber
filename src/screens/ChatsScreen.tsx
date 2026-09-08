@@ -9,6 +9,7 @@ import { supabase } from '../lib/supabase';
 import { groupThreads, Thread as ThreadOf } from '../lib/threads';
 import ReportProblemScreen, { CaseListRow, CaseRow, SupportCaseScreen } from './SupportScreens';
 import { colors, font, radius, serif, shadow, sp } from '../theme';
+import { Pushed } from '../components/motion';
 import ChatScreen from './ChatScreen';
 
 const LIVE = ['pending', 'confirmed'];
@@ -138,29 +139,15 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
   };
   useAndroidBack(open ? () => openChat(null) : (caseOpen || reporting) ? closeHelp : null);
 
-  if (caseOpen) {
-    return <SupportCaseScreen caseRow={caseOpen} myId={customerId} onBack={closeHelp} />;
-  }
-  if (reporting) {
-    return <ReportProblemScreen onBack={closeHelp}
-      onOpenCase={(c) => { setReporting(false); setCaseOpen(c); }} />;
-  }
-
-  if (open) {
-    return <ChatScreen bookingId={writeTarget(open)} threadWith={open.head.barbers?.id} myId={customerId}
-      title={open.head.barbers?.profiles?.full_name ?? 'Chat'}
-      subtitle={open.head.barbers?.salon?.name ?? undefined}
-      avatarUrl={open.head.barbers?.profiles?.avatar_url ?? undefined}
-      onBack={() => openChat(null)} />;
-  }
-
   const q = query.trim().toLowerCase();
   const filtered = threads.filter((t) =>
     !q || t.head.barbers?.profiles?.full_name?.toLowerCase().includes(q));
   // TODO(backlog): real unread — nothing marked unread yet
   const shown = tab === 'unread' ? [] : filtered;
 
-  return (
+  // built before the pushed screens below, so each can hand it over as
+  // `behind` - the list then stays on stage and trails as you swipe back
+  const list = (
     <View style={st.screen}>
       {/* dark header band */}
       <View style={st.header}>
@@ -287,6 +274,36 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
       />
     </View>
   );
+
+  if (caseOpen) {
+    return (
+      <Pushed onBack={closeHelp} behind={list}>
+        <SupportCaseScreen caseRow={caseOpen} myId={customerId} onBack={closeHelp} />
+      </Pushed>
+    );
+  }
+  if (reporting) {
+    return (
+      <Pushed onBack={closeHelp} behind={list}>
+        <ReportProblemScreen onBack={closeHelp}
+          onOpenCase={(c) => { setReporting(false); setCaseOpen(c); }} />
+      </Pushed>
+    );
+  }
+
+  if (open) {
+    return (
+      <Pushed onBack={() => openChat(null)} behind={list}>
+        <ChatScreen bookingId={writeTarget(open)} threadWith={open.head.barbers?.id} myId={customerId}
+          title={open.head.barbers?.profiles?.full_name ?? 'Chat'}
+          subtitle={open.head.barbers?.salon?.name ?? undefined}
+          avatarUrl={open.head.barbers?.profiles?.avatar_url ?? undefined}
+          onBack={() => openChat(null)} />
+      </Pushed>
+    );
+  }
+
+  return list;
 }
 
 const st = StyleSheet.create({

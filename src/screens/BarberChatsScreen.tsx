@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 import { groupThreads, Thread as ThreadOf } from '../lib/threads';
 import { dark as d, radius, sp } from '../theme';
 import { BarberCaseScreen, CaseRow } from './BarberSupportScreens';
+import { Pushed } from '../components/motion';
 import ChatScreen from './ChatScreen';
 
 // BMS-03 / BMS-04 — the barber had threads (BMS-01, BMS-02) and nowhere they
@@ -123,20 +124,9 @@ export default function BarberChatsScreen({ barberId, onChromeHidden, onHelp }: 
 
   useAndroidBack(open ? () => openThread(null) : openCase ? () => showCase(null) : null);
 
-  if (open) {
-    const name = open.head.customer?.full_name ?? open.head.walk_in_name ?? 'Client';
-    return <ChatScreen dark bookingId={writeTarget(open)} threadWith={open.head.customer_id}
-      myId={barberId} title={name}
-      subtitle={`${isToday(open.head.starts_at) ? 'Today' : stamp(open.head.starts_at)} `
-        + `${hhmm(open.head.starts_at)} · ${open.head.services?.name ?? 'Service'}`}
-      onBack={() => { openThread(null); load(); }} />;
-  }
-  if (openCase) {
-    return <BarberCaseScreen caseRow={openCase} myId={barberId}
-      onBack={() => { showCase(null); load(); }} />;
-  }
-
-  return (
+  // built before the pushed screens below, so each can hand it over as
+  // `behind` - the inbox then stays on stage and trails as you swipe back
+  const inbox = (
     <View style={s.screen}>
       <View style={s.head}>
         <Serif size={20} ls={0.8}>MESSAGES</Serif>
@@ -187,6 +177,29 @@ export default function BarberChatsScreen({ barberId, onChromeHidden, onHelp }: 
       </ScrollView>
     </View>
   );
+
+  if (open) {
+    const name = open.head.customer?.full_name ?? open.head.walk_in_name ?? 'Client';
+    return (
+      <Pushed onBack={() => { openThread(null); load(); }} behind={inbox}>
+        <ChatScreen dark bookingId={writeTarget(open)} threadWith={open.head.customer_id}
+      myId={barberId} title={name}
+      subtitle={`${isToday(open.head.starts_at) ? 'Today' : stamp(open.head.starts_at)} `
+        + `${hhmm(open.head.starts_at)} · ${open.head.services?.name ?? 'Service'}`}
+          onBack={() => { openThread(null); load(); }} />
+      </Pushed>
+    );
+  }
+  if (openCase) {
+    return (
+      <Pushed onBack={() => { showCase(null); load(); }} behind={inbox}>
+        <BarberCaseScreen caseRow={openCase} myId={barberId}
+          onBack={() => { showCase(null); load(); }} />
+      </Pushed>
+    );
+  }
+
+  return inbox;
 }
 
 function Tab({ label, count, on, warn, onPress }: {

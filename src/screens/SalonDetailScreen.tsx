@@ -14,6 +14,7 @@ import { supabase } from '../lib/supabase';
 import { useAndroidBack } from '../lib/back';
 import { colors, font, radius, serif, shadow, shadowLg, sp } from '../theme';
 import type { Specialist } from '../types';
+import { Pushed } from '../components/motion';
 import BarberDetailScreen from './BarberDetailScreen';
 
 export type SalonCard = {
@@ -100,11 +101,6 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
   const closure = useClosure(salon.id);
   const shut = !!closure?.closed;
 
-  if (profileBarber) {
-    return <BarberDetailScreen barber={profileBarber} salonName={salon.name} onBooked={onBooked}
-      onBack={() => setProfileBarber(null)} onChromeHidden={onChromeHidden} />;
-  }
-
   // service categories → "Category · N types"
   const cats = new Map<string, Set<string>>();
   for (const b of salon.barbers) for (const sv of b.services) {
@@ -138,7 +134,9 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
     else Alert.alert(name, 'Coming soon — see BACKLOG.md');
   }
 
-  return (
+  // built before the specialist page below, so it can be handed over as
+  // `behind` - the shop stays on stage and trails as you swipe back
+  const shop = (
     <View style={s.screen}>
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         {/* hero */}
@@ -371,6 +369,16 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
         onSplit={() => { setBundleOpen(false); setTab('services'); }} />
     </View>
   );
+
+  if (profileBarber) {
+    return (
+      <Pushed onBack={() => setProfileBarber(null)} behind={shop}>
+        <BarberDetailScreen barber={profileBarber} salonName={salon.name} onBooked={onBooked}
+          onBack={() => setProfileBarber(null)} onChromeHidden={onChromeHidden} />
+      </Pushed>
+    );
+  }
+  return shop;
 }
 
 function Action({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void }) {

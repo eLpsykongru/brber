@@ -8,6 +8,7 @@ import { Card, Chip, Field, PillButton, ScreenHeader, TAB_BAR_INSET } from '../c
 import type { LatLng } from '../lib/geo';
 import { listPortfolio } from '../lib/portfolio';
 import { useAndroidBack } from '../lib/back';
+import { Pushed } from '../components/motion';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, radius, serif, shadow, sp } from '../theme';
 import type { Barber, Profile } from '../types';
@@ -172,119 +173,125 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     ]);
   }
 
-  // 19b is the customer's profile — preferred barber, usual service. Barbers
-  // keep the original editor: theirs carries bio, specialty and the shop.
-  if (view === 'edit') {
-    return barber
-      ? <EditProfile profile={profile} barber={barber} phone={phone}
-          onDone={() => { onProfileChanged(); go('menu'); }} onBack={() => go('menu')} />
-      : <EditProfileScreen profile={profile} onBack={() => go('menu')}
-          onDone={() => { onProfileChanged(); go('menu'); }} />;
+  // Every pushed view in one place, so the menu can stay mounted behind it
+  // and trail as you swipe back. Returns null when the menu itself is what
+  // should show.
+  function pushedView() {
+    // 19b is the customer's profile — preferred barber, usual service. Barbers
+    // keep the original editor: theirs carries bio, specialty and the shop.
+    if (view === 'edit') {
+      return barber
+        ? <EditProfile profile={profile} barber={barber} phone={phone}
+            onDone={() => { onProfileChanged(); go('menu'); }} onBack={() => go('menu')} />
+        : <EditProfileScreen profile={profile} onBack={() => go('menu')}
+            onDone={() => { onProfileChanged(); go('menu'); }} />;
+    }
+    if (view === 'settings') {
+      return <SettingsScreen profile={profile} onBack={() => go('menu')}
+        onProfileChanged={onProfileChanged} go={go} />;
+    }
+    if (view === 'notifications') {
+      return <CustomerNotificationsScreen userId={profile.id} onBack={() => go('settings')}
+        onOpenBooking={(id) => { setOpenBookingId(id); go('bookings'); }}
+        onRate={(id) => { setOpenBookingId(id); go('bookings'); }} />;
+    }
+    if (view === 'linked') {
+      return <LinkedAccountsScreen onBack={() => go('settings')} onSetPassword={() => go('password')} />;
+    }
+    if (view === 'password') {
+      return <SetPasswordScreen mode="set" email={profile.email} onBack={() => go('settings')}
+        onDone={() => { Alert.alert('Password saved', 'You can now sign in with your email.'); go('settings'); }} />;
+    }
+    if (view === 'bookings') {
+      return <MyBookingsScreen customerId={profile.id} onChromeHidden={onChromeHidden}
+        openBookingId={openBookingId}
+        onBack={() => { setOpenBookingId(undefined); go('menu'); }} onRebook={onExplore} />;
+    }
+    if (view === 'wallet') return <WalletScreen customerId={profile.id} onBack={() => go('menu')} />;
+    if (view === 'coupons') return <CouponsScreen onBack={() => go('menu')} />;
+    if (view === 'saved') {
+      return <SavedScreen onBack={() => go('menu')}
+        onOpenSalon={(id) => { setPreview({ salonId: id, from: 'saved' }); go('preview'); }}
+        onOpenBarber={(id) => { setPreview({ barberId: id, from: 'saved' }); go('preview'); }} />;
+    }
+    if (view === 'standing') return <StandingScreen onBack={() => go('menu')} onDispute={() => go('support')} />;
+    // 30a / 5a — Help Center is now the support console; the FAQ article list it
+    // sits on is the old screen, one tap deeper.
+    if (view === 'help') {
+      return barber
+        ? <BarberSupportScreen onBack={() => go('menu')} onOpenCase={setOpenCase} />
+        : <SupportHomeScreen onBack={() => go('menu')} onOpenCase={setOpenCase}
+            onNewCase={() => go('support')} />;
+    }
+    if (view === 'faq') {
+      return <HelpCenterScreen onBack={() => go('help')}
+        onContact={barber ? undefined : () => go('support')} />;
+    }
+    if (view === 'reply' && replyTo) {
+      return <PublicReplyScreen review={replyTo} onClose={() => go('menu')}
+        onPosted={() => { setReplyTo(null); Alert.alert('Posted', 'Your reply is on your page.'); go('menu'); }} />;
+    }
+    if (openCase) {
+      return barber
+        ? <BarberCaseScreen caseRow={openCase} myId={profile.id}
+            onBack={() => { setOpenCase(null); go('help'); }}
+            onReplyPublicly={() => openReplyFromCase(openCase.booking_id)} />
+        : <SupportCaseScreen caseRow={openCase} myId={profile.id}
+            onBack={() => { setOpenCase(null); go('help'); }} />;
+    }
+    // 31a/c/d — one screen, three states; 31b is the composer behind APPEAL THIS
+    if ((view === 'takedown' || view === 'appeal') && takedown) {
+      return view === 'appeal'
+        ? <AppealScreen item={takedown} onBack={() => go('takedown')}
+            onSent={() => { reloadTakedowns(); go('takedown'); }} />
+        : <ReviewTakedownScreen item={takedown} onBack={() => go('menu')}
+            onAppeal={() => go('appeal')} />;
+    }
+    if (view === 'invite') return <InviteScreen onBack={() => go('menu')} />;
+    if (view === 'support') {
+      return <ReportProblemScreen onBack={() => go('menu')} onOpenCase={setOpenCase} />;
+    }
+    if (view === 'preview' && (preview || barber?.salon_id)) {
+      const t: { salonId?: string; barberId?: string; from: ProfileView } =
+        preview ?? { salonId: barber!.salon_id ?? undefined, from: 'menu' };
+      return <PreviewPage salonId={t.salonId} barberId={t.barberId}
+        onBack={() => { setPreview(null); go(t.from); }}
+        onBooked={() => { setPreview(null); go('bookings'); }}
+        onChromeHidden={onChromeHidden} />;
+    }
+    if (view === 'salon' && barber) return <SalonScreen barberId={barber.id} onBack={() => go('menu')}
+      onManageServices={() => go('services')} onEditSalon={() => go('edit')} />;
+    if (view === 'schedule' && barber) return <AvailabilityScreen barberId={barber.id} onBack={() => go('menu')} />;
+    if (view === 'earnings' && barber) return <EarningsScreen barberId={barber.id} onBack={() => go('menu')} />;
+    if (view === 'services' && barber) return <ServicesScreen barberId={barber.id} onBack={() => go('menu')} />;
+    // turn 7 — bundles are made of services, so the editor lives next to them
+    if (view === 'bundles' && barber) return <BundleEditorScreen onBack={() => go('menu')} />;
+    // 8c — the pattern behind the reasons, only visible across bookings
+    if (view === 'cancellations' && barber) return <CancellationsScreen onBack={() => go('menu')} />;
+    // 8h/8i — where turn 36's asks land
+    if (view === 'waitlist' && barber) {
+      return <WaitingListScreen barberId={barber.id} onBack={() => go('menu')} />;
+    }
+    if (view === 'work' && barber) return <PortfolioScreen barberId={barber.id} onBack={() => go('menu')} />;
+    // 9a/9b — ops writes an obligation, this is where the shop reads it
+    if (view === 'tasks' && barber) {
+      return <ShopTasksScreen onBack={() => go('menu')} onChat={() => go('support')} />;
+    }
+    // 9c/9d — the applying shop's own status screen, behind admin 1f
+    if (view === 'application' && barber) {
+      return <ApplicationScreen onBack={() => go('menu')}
+        onGo={(w) => go(w === 'hours' ? 'schedule' : w === 'wallet' ? 'wallet' : 'preview')} />;
+    }
+    // 9e/9f — the float, hand to hand
+    if (view === 'float' && barber) return <SettleFloatScreen onBack={() => go('menu')} />;
+    if (view === 'round') return <CollectionRoundScreen onBack={() => go('menu')} />;
+    // AGT-01 - the settlement round. Not the float pickup above it: a shop rather
+    // than a person, a number that points either way, and a partial that is normal.
+    if (view === 'agent') return <AgentRoundScreen onBack={() => go('menu')} />;
+    // OSH-16/17 — the week that closed, and which way it points
+    if (view === 'statement' && barber) return <StatementScreen onBack={() => go('menu')} />;
+    return null;
   }
-  if (view === 'settings') {
-    return <SettingsScreen profile={profile} onBack={() => go('menu')}
-      onProfileChanged={onProfileChanged} go={go} />;
-  }
-  if (view === 'notifications') {
-    return <CustomerNotificationsScreen userId={profile.id} onBack={() => go('settings')}
-      onOpenBooking={(id) => { setOpenBookingId(id); go('bookings'); }}
-      onRate={(id) => { setOpenBookingId(id); go('bookings'); }} />;
-  }
-  if (view === 'linked') {
-    return <LinkedAccountsScreen onBack={() => go('settings')} onSetPassword={() => go('password')} />;
-  }
-  if (view === 'password') {
-    return <SetPasswordScreen mode="set" email={profile.email} onBack={() => go('settings')}
-      onDone={() => { Alert.alert('Password saved', 'You can now sign in with your email.'); go('settings'); }} />;
-  }
-  if (view === 'bookings') {
-    return <MyBookingsScreen customerId={profile.id} onChromeHidden={onChromeHidden}
-      openBookingId={openBookingId}
-      onBack={() => { setOpenBookingId(undefined); go('menu'); }} onRebook={onExplore} />;
-  }
-  if (view === 'wallet') return <WalletScreen customerId={profile.id} onBack={() => go('menu')} />;
-  if (view === 'coupons') return <CouponsScreen onBack={() => go('menu')} />;
-  if (view === 'saved') {
-    return <SavedScreen onBack={() => go('menu')}
-      onOpenSalon={(id) => { setPreview({ salonId: id, from: 'saved' }); go('preview'); }}
-      onOpenBarber={(id) => { setPreview({ barberId: id, from: 'saved' }); go('preview'); }} />;
-  }
-  if (view === 'standing') return <StandingScreen onBack={() => go('menu')} onDispute={() => go('support')} />;
-  // 30a / 5a — Help Center is now the support console; the FAQ article list it
-  // sits on is the old screen, one tap deeper.
-  if (view === 'help') {
-    return barber
-      ? <BarberSupportScreen onBack={() => go('menu')} onOpenCase={setOpenCase} />
-      : <SupportHomeScreen onBack={() => go('menu')} onOpenCase={setOpenCase}
-          onNewCase={() => go('support')} />;
-  }
-  if (view === 'faq') {
-    return <HelpCenterScreen onBack={() => go('help')}
-      onContact={barber ? undefined : () => go('support')} />;
-  }
-  if (view === 'reply' && replyTo) {
-    return <PublicReplyScreen review={replyTo} onClose={() => go('menu')}
-      onPosted={() => { setReplyTo(null); Alert.alert('Posted', 'Your reply is on your page.'); go('menu'); }} />;
-  }
-  if (openCase) {
-    return barber
-      ? <BarberCaseScreen caseRow={openCase} myId={profile.id}
-          onBack={() => { setOpenCase(null); go('help'); }}
-          onReplyPublicly={() => openReplyFromCase(openCase.booking_id)} />
-      : <SupportCaseScreen caseRow={openCase} myId={profile.id}
-          onBack={() => { setOpenCase(null); go('help'); }} />;
-  }
-  // 31a/c/d — one screen, three states; 31b is the composer behind APPEAL THIS
-  if ((view === 'takedown' || view === 'appeal') && takedown) {
-    return view === 'appeal'
-      ? <AppealScreen item={takedown} onBack={() => go('takedown')}
-          onSent={() => { reloadTakedowns(); go('takedown'); }} />
-      : <ReviewTakedownScreen item={takedown} onBack={() => go('menu')}
-          onAppeal={() => go('appeal')} />;
-  }
-  if (view === 'invite') return <InviteScreen onBack={() => go('menu')} />;
-  if (view === 'support') {
-    return <ReportProblemScreen onBack={() => go('menu')} onOpenCase={setOpenCase} />;
-  }
-  if (view === 'preview' && (preview || barber?.salon_id)) {
-    const t: { salonId?: string; barberId?: string; from: ProfileView } =
-      preview ?? { salonId: barber!.salon_id ?? undefined, from: 'menu' };
-    return <PreviewPage salonId={t.salonId} barberId={t.barberId}
-      onBack={() => { setPreview(null); go(t.from); }}
-      onBooked={() => { setPreview(null); go('bookings'); }}
-      onChromeHidden={onChromeHidden} />;
-  }
-  if (view === 'salon' && barber) return <SalonScreen barberId={barber.id} onBack={() => go('menu')}
-    onManageServices={() => go('services')} onEditSalon={() => go('edit')} />;
-  if (view === 'schedule' && barber) return <AvailabilityScreen barberId={barber.id} onBack={() => go('menu')} />;
-  if (view === 'earnings' && barber) return <EarningsScreen barberId={barber.id} onBack={() => go('menu')} />;
-  if (view === 'services' && barber) return <ServicesScreen barberId={barber.id} onBack={() => go('menu')} />;
-  // turn 7 — bundles are made of services, so the editor lives next to them
-  if (view === 'bundles' && barber) return <BundleEditorScreen onBack={() => go('menu')} />;
-  // 8c — the pattern behind the reasons, only visible across bookings
-  if (view === 'cancellations' && barber) return <CancellationsScreen onBack={() => go('menu')} />;
-  // 8h/8i — where turn 36's asks land
-  if (view === 'waitlist' && barber) {
-    return <WaitingListScreen barberId={barber.id} onBack={() => go('menu')} />;
-  }
-  if (view === 'work' && barber) return <PortfolioScreen barberId={barber.id} onBack={() => go('menu')} />;
-  // 9a/9b — ops writes an obligation, this is where the shop reads it
-  if (view === 'tasks' && barber) {
-    return <ShopTasksScreen onBack={() => go('menu')} onChat={() => go('support')} />;
-  }
-  // 9c/9d — the applying shop's own status screen, behind admin 1f
-  if (view === 'application' && barber) {
-    return <ApplicationScreen onBack={() => go('menu')}
-      onGo={(w) => go(w === 'hours' ? 'schedule' : w === 'wallet' ? 'wallet' : 'preview')} />;
-  }
-  // 9e/9f — the float, hand to hand
-  if (view === 'float' && barber) return <SettleFloatScreen onBack={() => go('menu')} />;
-  if (view === 'round') return <CollectionRoundScreen onBack={() => go('menu')} />;
-  // AGT-01 - the settlement round. Not the float pickup above it: a shop rather
-  // than a person, a number that points either way, and a partial that is normal.
-  if (view === 'agent') return <AgentRoundScreen onBack={() => go('menu')} />;
-  // OSH-16/17 — the week that closed, and which way it points
-  if (view === 'statement' && barber) return <StatementScreen onBack={() => go('menu')} />;
 
   // TODO(backlog): Payment Methods / My Coupons / My Wallet — no payment rail yet
   const items: MenuItem[] = [
@@ -339,13 +346,11 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     { icon: 'log-out-outline', label: 'Logout', onPress: signOut, danger: true },
   ];
 
-  if (barber) {
-    return <BarberProfile profile={profile} barber={barber} avatarUrl={avatarUrl}
+  const menu = barber ? (
+    <BarberProfile profile={profile} barber={barber} avatarUrl={avatarUrl}
       avatarBusy={avatarBusy} initials={initials} ownsSalon={ownsSalon}
-      onAvatar={changeAvatar} onSignOut={signOut} go={go} onBack={onBack} />;
-  }
-
-  return (
+      onAvatar={changeAvatar} onSignOut={signOut} go={go} onBack={onBack} />
+  ) : (
     <ScrollView style={s.screen} contentContainerStyle={s.content}>
       <ScreenHeader title="Profile" onBack={onBack} />
 
@@ -377,6 +382,15 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
         ))}
       </View>
     </ScrollView>
+  );
+
+  const pushed = pushedView();
+  if (!pushed) return menu;
+  // one Pushed for all of them: `go` keeps the trail, so back is uniform
+  return (
+    <Pushed onBack={() => go(trail.current.pop() ?? 'menu')} behind={menu}>
+      {pushed}
+    </Pushed>
   );
 }
 

@@ -6,6 +6,7 @@ import {
 import { Display, Field, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
 import { useAndroidBack } from '../lib/back';
+import { Pushed } from '../components/motion';
 import ReportProblemScreen, { CaseRow, SupportCaseScreen } from './SupportScreens';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, sp } from '../theme';
@@ -264,20 +265,6 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
       onBack={() => { setQueueOpen(null); openOverlay(false); }}
       onBookings={() => { setDetail({ id: queueOpen.id }); setQueueOpen(null); openOverlay(false); }} />;
   }
-  if (receipt) {
-    return <Receipt booking={receipt}
-      onBack={() => { setReceipt(null); openOverlay(false); }}
-      onRate={() => { setReceipt(null); openOverlay(false); setReview(receipt); }}
-      onRebook={onRebook} />;
-  }
-  if (reportId) {
-    return <ReportProblemScreen bookingId={reportId}
-      onBack={() => { setReportId(null); openOverlay(false); }} onOpenCase={setOpenCase} />;
-  }
-  if (openCase) {
-    return <SupportCaseScreen caseRow={openCase} myId={customerId}
-      onBack={() => setOpenCase(null)} />;
-  }
 
   const filtered = rows.filter((r) => {
     if (filter === 'upcoming') return isLive(r) && !isDone(r) && new Date(r.ends_at).getTime() >= now;
@@ -341,7 +328,9 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
     </View>
   ) : null;
 
-  return (
+  // built before the pushed screens below, so each can hand it over as
+  // `behind` - the list then stays on stage and trails as you swipe back
+  const list = (
     <View style={s.screen}>
       {onBack
         ? <ScreenHeader title="My bookings" onBack={onBack} />
@@ -408,6 +397,33 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
         onDone={() => { setReview(null); load(); }} />
     </View>
   );
+
+  if (receipt) {
+    const shut = () => { setReceipt(null); openOverlay(false); };
+    return (
+      <Pushed onBack={shut} behind={list}>
+        <Receipt booking={receipt} onBack={shut}
+          onRate={() => { shut(); setReview(receipt); }} onRebook={onRebook} />
+      </Pushed>
+    );
+  }
+  if (reportId) {
+    const shut = () => { setReportId(null); openOverlay(false); };
+    return (
+      <Pushed onBack={shut} behind={list}>
+        <ReportProblemScreen bookingId={reportId} onBack={shut} onOpenCase={setOpenCase} />
+      </Pushed>
+    );
+  }
+  if (openCase) {
+    return (
+      <Pushed onBack={() => setOpenCase(null)} behind={list}>
+        <SupportCaseScreen caseRow={openCase} myId={customerId}
+          onBack={() => setOpenCase(null)} />
+      </Pushed>
+    );
+  }
+  return list;
 }
 
 // ---- 6a ------------------------------------------------------------------

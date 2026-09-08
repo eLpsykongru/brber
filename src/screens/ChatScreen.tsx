@@ -5,6 +5,7 @@ import {
   Alert, FlatList, Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text,
   TextInput, View,
 } from 'react-native';
+import { useBack } from '../components/motion';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, inter, radius, shadow, sp } from '../theme';
 
@@ -60,6 +61,7 @@ export default function ChatScreen({ bookingId, threadWith, myId, title, subtitl
   const urlsRef = useRef(imageUrls);
   urlsRef.current = imageUrls;
   const listRef = useRef<FlatList<Msg>>(null);
+  const back = useBack(onBack);
   // Resolved here rather than by each caller: the barber's list holds only a
   // date window of live bookings, so he could not work this out from memory.
   // A string, not an array: a fresh array literal every render would tear the
@@ -155,7 +157,7 @@ export default function ChatScreen({ bookingId, threadWith, myId, title, subtitl
   return (
     <KeyboardAvoidingView style={k.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={k.header}>
-        <Pressable onPress={onBack} hitSlop={8} accessibilityLabel="Back" style={st.backBtn}>
+        <Pressable onPress={back} hitSlop={8} accessibilityLabel="Back" style={st.backBtn}>
           <Ionicons name="arrow-back" size={dark ? 17 : 20} color={colors.onAccent} />
         </Pressable>
         {avatarUrl

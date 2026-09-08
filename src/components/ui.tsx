@@ -4,6 +4,7 @@ import {
   ActivityIndicator, Pressable, StyleSheet, Text, TextInput, TextInputProps, TextStyle, View, ViewStyle,
 } from 'react-native';
 import { colors, font, radius, serif, shadow, sp } from '../theme';
+import { useBack } from './motion';
 
 // Shared primitives — every screen builds from these so the app reads as one system.
 
@@ -21,10 +22,11 @@ export function Display({ children, size = 24, style }: {
 export function ScreenHeader({ title, onBack, right }: {
   title: string; onBack?: () => void; right?: ReactNode;
 }) {
+  const back = useBack(onBack);
   return (
     <View style={s.header}>
-      {onBack ? (
-        <Pressable onPress={onBack} hitSlop={8} accessibilityLabel="Go back"
+      {back ? (
+        <Pressable onPress={back} hitSlop={8} accessibilityLabel="Go back"
           style={({ pressed }) => [s.backBtn, pressed && s.pressed]}>
           <Ionicons name="arrow-back" size={20} color={colors.text} />
         </Pressable>

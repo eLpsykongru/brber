@@ -12,6 +12,7 @@ import ClientSheet, { ClientRef } from '../components/ClientSheet';
 import RateClientSheet from '../components/RateClientSheet';
 import SettleBundleSheet from '../components/SettleBundleSheet';
 import SlotPicker from '../components/SlotPicker';
+import { Pushed } from '../components/motion';
 import { PillButton } from '../components/ui';
 import { Block, daySlots, Window } from '../lib/slots';
 import { useAndroidBack } from '../lib/back';
@@ -321,47 +322,6 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
                   : null,
   );
 
-  if (chat) {
-    // the customer reads one thread with this barber, so the barber reads the
-    // same one back - otherwise "like I said last time" arrives pointing at a
-    // message he cannot see. A walk-in books under the barber's own id, and
-    // ChatScreen leaves those on their single booking rather than pooling
-    // every walk-in he has ever had into one thread.
-    const row = bookings?.find((b) => b.id === chat.id);
-    return <ChatScreen dark bookingId={chat.id} threadWith={row?.customer_id} myId={barberId}
-      title={chat.title} onBack={() => openChat(null)} />;
-  }
-  if (showProfile) {
-    return <ProfileScreen profile={profile} barber={barber} phone={phone}
-      onProfileChanged={onProfileChanged} onChromeHidden={onChromeHidden}
-      onBack={() => openProfile(false)} />;
-  }
-  if (showEarnings) {
-    return <EarningsScreen barberId={barberId} onBack={() => openEarnings(false)} />;
-  }
-  if (showQueue) {
-    return <BarberQueueScreen barberId={barberId}
-      onBack={() => { setShowQueue(false); onChromeHidden?.(false); load(); }} />;
-  }
-  if (inboxOpen) {
-    return <NotificationsScreen barberId={barberId}
-      onBack={() => { setInboxOpen(false); onChromeHidden?.(false); load(); }}
-      // a notification names a booking; the sheet it opens depends on whether
-      // that booking is still a request. Unknown id (older than the loaded
-      // window) just closes the inbox rather than opening the wrong thing.
-      onOpenBooking={(id) => {
-        const b = bookings?.find((x) => x.id === id);
-        setInboxOpen(false); onChromeHidden?.(false);
-        if (b) (b.status === 'pending' ? setRequest : setPanel)(b);
-      }} />;
-  }
-  // 10e — opened by hand from the banner, or the moment ops hides the shop.
-  // It is not a lock screen: he can always back out and keep cutting.
-  if (hidden || standing?.hidden) {
-    return <HiddenScreen onBack={() => { setHidden(false); loadStanding(); }}
-      onSent={loadStanding} />;
-  }
-
   // ---- derive the dashboard ----
   const now = Date.now();
   const todayKey = new Date().toDateString();
@@ -448,7 +408,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     </View>
   );
 
-  return (
+  const dash = (
     <View style={s.root}>
       <Screen gap={14} bottom={TAB_INSET}>
         {/* 1a header — eyebrow date over the Playfair greeting, bell with its unread dot */}
@@ -828,6 +788,79 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
 
     </View>
   );
+
+  // Everything below is pushed over the dashboard, which stays mounted behind
+  // it so a swipe back reads as returning rather than a card vanishing.
+  //
+  // ponytail: the dashboard's derivation runs now even while a child is open.
+  // It is array work over rows already in memory, so it costs a render, not a
+  // fetch — memoise it if that ever shows up in a profile.
+  if (chat) {
+    // the customer reads one thread with this barber, so the barber reads the
+    // same one back - otherwise "like I said last time" arrives pointing at a
+    // message he cannot see. A walk-in books under the barber's own id, and
+    // ChatScreen leaves those on their single booking rather than pooling
+    // every walk-in he has ever had into one thread.
+    const row = bookings?.find((x) => x.id === chat.id);
+    return (
+      <Pushed onBack={() => openChat(null)} behind={dash}>
+        <ChatScreen dark bookingId={chat.id} threadWith={row?.customer_id} myId={barberId}
+          title={chat.title} onBack={() => openChat(null)} />
+      </Pushed>
+    );
+  }
+  if (showProfile) {
+    return (
+      <Pushed onBack={() => openProfile(false)} behind={dash}>
+        <ProfileScreen profile={profile} barber={barber} phone={phone}
+          onProfileChanged={onProfileChanged} onChromeHidden={onChromeHidden}
+          onBack={() => openProfile(false)} />
+      </Pushed>
+    );
+  }
+  if (showEarnings) {
+    return (
+      <Pushed onBack={() => openEarnings(false)} behind={dash}>
+        <EarningsScreen barberId={barberId} onBack={() => openEarnings(false)} />
+      </Pushed>
+    );
+  }
+  if (showQueue) {
+    const shut = () => { setShowQueue(false); onChromeHidden?.(false); load(); };
+    return (
+      <Pushed onBack={shut} behind={dash}>
+        <BarberQueueScreen barberId={barberId} onBack={shut} />
+      </Pushed>
+    );
+  }
+  if (inboxOpen) {
+    const shut = () => { setInboxOpen(false); onChromeHidden?.(false); };
+    return (
+      <Pushed onBack={() => { shut(); load(); }} behind={dash}>
+        <NotificationsScreen barberId={barberId}
+          onBack={() => { shut(); load(); }}
+          // a notification names a booking; the sheet it opens depends on whether
+          // that booking is still a request. Unknown id (older than the loaded
+          // window) just closes the inbox rather than opening the wrong thing.
+          onOpenBooking={(id) => {
+            const row = bookings?.find((x) => x.id === id);
+            shut();
+            if (row) (row.status === 'pending' ? setRequest : setPanel)(row);
+          }} />
+      </Pushed>
+    );
+  }
+  // 10e — opened by hand from the banner, or the moment ops hides the shop.
+  // It is not a lock screen: he can always back out and keep cutting.
+  if (hidden || standing?.hidden) {
+    const shut = () => { setHidden(false); loadStanding(); };
+    return (
+      <Pushed onBack={shut} behind={dash}>
+        <HiddenScreen onBack={shut} onSent={loadStanding} />
+      </Pushed>
+    );
+  }
+  return dash;
 }
 
 const s = StyleSheet.create({

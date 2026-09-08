@@ -40,7 +40,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "admin": "npx --yes serve admin -l 5173",
-    "check": "tsc src/lib/slots.ts src/lib/slots.check.ts src/lib/outbox.ts src/lib/outbox.check.ts src/lib/threads.ts src/lib/threads.check.ts --outDir .check --module commonjs --target es2020 --skipLibCheck && node .check/slots.check.js && node .check/outbox.check.js && node .check/threads.check.js",
+    "check": "tsc src/lib/slots.ts src/lib/slots.check.ts src/lib/outbox.ts src/lib/outbox.check.ts src/lib/threads.ts src/lib/threads.check.ts src/lib/swipe.ts src/lib/motion.check.ts --outDir .check --module commonjs --target es2020 --skipLibCheck && node .check/slots.check.js && node .check/outbox.check.js && node .check/threads.check.js && node .check/motion.check.js",
     "dryrun": "node scripts/dryrun-settlement.mjs",
     "hooks": "node .hookcheck.cjs",
     "props": "node .propcheck.cjs"

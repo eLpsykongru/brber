@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif, shadow, shadowLg } from '../theme';
+import { colors, font, radius, serif, shadow, shadowLg, TOP_INSET } from '../theme';
 
 // Turn 17 (17a report, 17b filed), 18b (the case thread) and 30a (support home).
 //
@@ -572,7 +572,7 @@ export function SupportHomeScreen({ onBack, onOpenCase, onNewCase }: {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
-  content: { paddingTop: 66, paddingHorizontal: 20, paddingBottom: 110, gap: 14 },
+  content: { paddingTop: TOP_INSET, paddingHorizontal: 20, paddingBottom: 110, gap: 14 },
   grow: { flex: 1 },
   center: { textAlign: 'center' },
   pressed: { opacity: 0.75 },
@@ -688,7 +688,7 @@ const s = StyleSheet.create({
   caseScreen: { flex: 1, backgroundColor: colors.surface },
   caseHead: {
     backgroundColor: colors.ink, borderBottomLeftRadius: 24, borderBottomRightRadius: 24,
-    paddingTop: 62, paddingBottom: 14, paddingHorizontal: 16,
+    paddingTop: TOP_INSET, paddingBottom: 14, paddingHorizontal: 16,
     flexDirection: 'row', alignItems: 'center', gap: 10,
   },
   caseBack: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
@@ -752,7 +752,7 @@ const s = StyleSheet.create({
   },
 
   // 30a
-  homeContent: { paddingTop: 62, paddingHorizontal: 20, paddingBottom: 40, gap: 13 },
+  homeContent: { paddingTop: TOP_INSET, paddingHorizontal: 20, paddingBottom: 40, gap: 13 },
   searchPill: {
     flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.bg,
     borderRadius: radius.pill, height: 48, paddingHorizontal: 18, ...shadow,

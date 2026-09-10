@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Display } from '../components/ui';
-import { colors, font, radius, shadow } from '../theme';
+import { colors, font, radius, shadow, TOP_INSET } from '../theme';
 
 // 16b — search, popular articles, topic list, contact row. 22b is the article
 // itself, opened over the top.
@@ -212,7 +212,7 @@ function ArticleRow({ a, onPress }: { a: Article; onPress: () => void }) {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
-  content: { paddingTop: 66, paddingHorizontal: 20, paddingBottom: 40, gap: 14 },
+  content: { paddingTop: TOP_INSET, paddingHorizontal: 20, paddingBottom: 40, gap: 14 },
   grow: { flex: 1 },
   pressed: { opacity: 0.75 },
 

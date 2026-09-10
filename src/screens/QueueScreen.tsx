@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ScreenHeader } from '../components/ui';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif, shadow, shadowLg, sp } from '../theme';
+import { colors, font, radius, serif, shadow, shadowLg, sp, TOP_INSET } from '../theme';
 
 // One row of barber_day_queue(): today's confirmed bookings, names pre-trimmed server-side.
 export type DayQueueRow = {
@@ -133,7 +133,7 @@ export default function QueueScreen({ barberId, myBookingId, barberLine, onBack,
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
-  content: { paddingTop: sp(14), paddingHorizontal: sp(5), paddingBottom: 130, gap: sp(4) },
+  content: { paddingTop: TOP_INSET, paddingHorizontal: sp(5), paddingBottom: 130, gap: sp(4) },
   grow: { flex: 1 },
   pressed: { opacity: 0.7 },
 

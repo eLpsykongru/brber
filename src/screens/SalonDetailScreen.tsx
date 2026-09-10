@@ -7,6 +7,7 @@ import BookingSheet from '../components/BookingSheet';
 import { Bundle, BundleSheet, BundlesTab } from '../components/Bundles';
 import { ClosedBadge, ClosedCard, useClosure } from '../components/SalonClosed';
 import { Empty, Field, Stars } from '../components/ui';
+import SaveHeart from '../components/SaveHeart';
 import { openDirections, walkMin } from '../lib/geo';
 import { useSaved } from '../lib/wishlist';
 import { listPortfolio } from '../lib/portfolio';
@@ -290,6 +291,9 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
                       <Text style={s.specialistName} numberOfLines={1}>{b.profiles?.full_name ?? 'Barber'}</Text>
                       <Text style={s.rowMeta} numberOfLines={1}>{b.specialty ?? 'Barber'}</Text>
                       {a != null && <Stars rating={a} />}
+                      {/* EXPL-29 — the shop already had a heart; the people in
+                          it did not, which is the wrong way round */}
+                      <SaveHeart kind="barber" id={b.id} style={s.cardHeart} />
                     </TouchableOpacity>
                   );
                 })}
@@ -467,6 +471,7 @@ const s = StyleSheet.create({
     width: '47%', borderRadius: radius.lg,
     padding: sp(4), alignItems: 'center', gap: 2, backgroundColor: colors.bg, ...shadow,
   },
+  cardHeart: { position: 'absolute', top: 8, right: 8 },
   specialistAvatar: { width: 64, height: 64, borderRadius: radius.pill, marginBottom: sp(1) },
   avatarFallback: { backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
   avatarText: { fontSize: font.body, fontWeight: '700', color: colors.accent },

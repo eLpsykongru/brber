@@ -5,10 +5,11 @@ import {
   Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { Display, Stars, TAB_BAR_INSET } from '../components/ui';
+import SaveHeart from '../components/SaveHeart';
 import { useAndroidBack } from '../lib/back';
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, shadow, sp } from '../theme';
+import { colors, font, radius, shadow, sp, TOP_INSET } from '../theme';
 import type { SalonCard } from './SalonDetailScreen';
 
 const RECENT_KEY = 'search:recent';
@@ -273,9 +274,7 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
                           ].filter(Boolean).join(' · ')}
                         </Text>
                       </View>
-                      <View style={s.chev}>
-                        <Ionicons name="chevron-forward" size={13} color={colors.text} />
-                      </View>
+                      <SaveHeart kind="salon" id={sal.id} variant="puck" />
                     </Pressable>
                   );
                 })}
@@ -298,9 +297,10 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
                         </Text>
                         {avg != null && <Text style={s.meta}>{avg.toFixed(1)} ★</Text>}
                       </View>
-                      <View style={s.chev}>
-                        <Ionicons name="chevron-forward" size={13} color={colors.text} />
-                      </View>
+                      {/* EXPL-29 — keep him without opening his page. Replaces
+                          the chevron, as the design draws it: the row is still
+                          the way in. */}
+                      <SaveHeart kind="barber" id={b.id} variant="puck" />
                     </Pressable>
                   );
                 })}
@@ -385,7 +385,7 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, paddingTop: sp(14), backgroundColor: colors.surface },
+  screen: { flex: 1, paddingTop: TOP_INSET, backgroundColor: colors.surface },
   grow: { flex: 1 },
   body: { paddingHorizontal: sp(5), paddingBottom: TAB_BAR_INSET, gap: sp(5) },
 

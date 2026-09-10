@@ -7,7 +7,7 @@ import { CapHitSheet, FloatCapMeter, askCollection, isCapError, useFloatStatus }
 import { TopUpAttempt, TopUpFailedSheet } from '../components/Trouble';
 import { OPS_PHONE } from './BarberSupportScreens';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, font, inter, radius, sp } from '../theme';
+import { colors, dark as D, font, inter, radius, sp, TOP_INSET } from '../theme';
 
 // REAL since 0022: float + activity read wallet_transactions; Top-up calls the
 // agent_cash_topup RPC (owner-only, phone lookup, no commission — decided 2026-07-19).
@@ -332,7 +332,7 @@ function TopupSheet({ onClose, onConfirm }: {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: D.bg },
-  content: { paddingTop: 62, paddingHorizontal: 20, gap: 14, paddingBottom: TAB_INSET },
+  content: { paddingTop: TOP_INSET, paddingHorizontal: 20, gap: 14, paddingBottom: TAB_INSET },
   pressed: { opacity: 0.7 },
   grow: { flex: 1 },
   rowCenter: { flexDirection: 'row', alignItems: 'center', gap: 10 },

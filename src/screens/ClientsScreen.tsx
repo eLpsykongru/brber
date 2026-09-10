@@ -4,7 +4,7 @@ import ClientSheet, { ClientRef } from '../components/ClientSheet';
 import { Avatar, Eyebrow, Ico, Serif, Stars, T, TAB_INSET } from '../components/dark';
 import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
-import { dark as D, inter } from '../theme';
+import { dark as D, inter, TOP_INSET } from '../theme';
 import ChatScreen from './ChatScreen';
 
 // Client book v1 (BACKLOG bet #3, partial): everyone who ever sat in the chair,
@@ -175,7 +175,7 @@ function Tile({ label, value, color }: { label: string; value: string; color?: s
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: D.bg },
-  head: { paddingTop: 62, paddingHorizontal: 20, gap: 13 },
+  head: { paddingTop: TOP_INSET, paddingHorizontal: 20, gap: 13 },
   title: { textAlign: 'center' },
   pressed: { opacity: 0.7 },
   grow: { flex: 1 },

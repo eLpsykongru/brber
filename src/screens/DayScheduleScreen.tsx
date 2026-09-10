@@ -14,7 +14,7 @@ import { takeLastFix } from '../lib/lastFix';
 import { Block, dayStatus, daySlots, sameDay, Window } from '../lib/slots';
 import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, font, inter, radius, sp } from '../theme';
+import { colors, dark as D, font, inter, radius, sp, TOP_INSET } from '../theme';
 import ChatScreen from './ChatScreen';
 import WaitingListScreen from './WaitingListScreen';
 import OutboxScreen from './OutboxScreen';
@@ -814,7 +814,7 @@ function PanelBtn({ icon, label, onPress, danger }: {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: D.bg },
-  content: { paddingTop: 62, paddingHorizontal: 20, gap: 13, paddingBottom: 40 },
+  content: { paddingTop: TOP_INSET, paddingHorizontal: 20, gap: 13, paddingBottom: 40 },
   pressed: { opacity: 0.7 },
   toast: {
     position: 'absolute', left: sp(5), right: sp(5), bottom: sp(9),

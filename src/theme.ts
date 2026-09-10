@@ -1,3 +1,5 @@
+import { initialWindowMetrics } from 'react-native-safe-area-context';
+
 // Design tokens — single source of truth for the visual system.
 // "Rentra" editorial skin (design.md): warm off-white canvas, white cards,
 // near-black hero surfaces, Playfair Display for display type, coral accents only.
@@ -84,6 +86,27 @@ export const radius = { sm: 10, md: 16, lg: 20, xl: 24, pill: 999 };
 
 // 4pt rhythm
 export const sp = (n: number) => n * 4;
+
+/**
+ * Top of a screen: the status bar, plus the gap the design wants under it.
+ *
+ * The app draws edge-to-edge (the default since Android 15), so nothing insets
+ * it for us, and the bar is not one height — 24dp on most Android, 44 or more
+ * on a notched iPhone. It used to be hardcoded as 66, 62 or 56 depending on
+ * which screen you landed on; all three were the same intent, guessed three
+ * times, and all three were wrong on a tall bar.
+ *
+ * `initialWindowMetrics` is read from the native module at startup, so this is
+ * a plain number and every screen keeps a static StyleSheet instead of growing
+ * a hook. It cannot follow a rotation — reach for `useSafeAreaInsets` on the
+ * screen that needs that, and only there.
+ *
+ * Until the development build carrying the native module is installed it reads
+ * null, not an error, and the fallback lands on 64 — within two pixels of the
+ * 66 most screens hardcoded. So this is safe to run before the rebuild; it
+ * just isn't telling the truth yet.
+ */
+export const TOP_INSET = (initialWindowMetrics?.insets.top ?? 24) + 40;
 
 export const font = {
   title: 24,

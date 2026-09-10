@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, shadow, shadowLg } from '../theme';
+import { colors, font, radius, shadow, shadowLg, TOP_INSET } from '../theme';
 
 // Customer turn 31 of "Customer App 3.dc.html" — what Anas gets after ops clicks
 // REMOVE & NOTIFY BOTH in the admin desk (0042), the one appeal he is allowed
@@ -417,7 +417,7 @@ function Changed({ children }: { children: React.ReactNode }) {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
-  content: { paddingTop: 62, paddingHorizontal: 20, paddingBottom: 40, gap: 13 },
+  content: { paddingTop: TOP_INSET, paddingHorizontal: 20, paddingBottom: 40, gap: 13 },
   grow: { flex: 1 },
   center: { textAlign: 'center' },
   pressed: { opacity: 0.75 },

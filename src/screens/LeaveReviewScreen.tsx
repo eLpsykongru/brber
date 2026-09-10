@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Field, PillButton, ScreenHeader } from '../components/ui';
-import { colors, font, radius, sp } from '../theme';
+import { colors, font, radius, sp, TOP_INSET } from '../theme';
 
 // Richer review form (UI shell). Real submit currently lives in My Bookings → Rate.
 // TODO(backlog): wire submit to reviews insert + a specialist picker + photo attach.
@@ -70,7 +70,7 @@ export default function LeaveReviewScreen({ salonName, address, specialists, onB
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, paddingTop: sp(14), paddingHorizontal: sp(5), backgroundColor: colors.bg },
+  screen: { flex: 1, paddingTop: TOP_INSET, paddingHorizontal: sp(5), backgroundColor: colors.bg },
   content: { paddingBottom: 100, gap: sp(3) },
   grow: { flex: 1 },
   salonRow: { flexDirection: 'row', alignItems: 'center', gap: sp(3), marginTop: sp(2) },

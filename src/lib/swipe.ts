@@ -13,3 +13,19 @@ export function shouldDismiss(dx: number, vx: number, width: number) {
   if (dx <= 0) return false;
   return dx > width * 0.32 || (vx > 0.45 && dx > 24);
 }
+
+/**
+ * EXPL-27 — whether a leftward drag on a row was a decision to remove it.
+ *
+ * Not `shouldDismiss` with the sign flipped: this one is stricter on both
+ * counts. A row sits inside a vertical list, so a stray horizontal component
+ * of a scroll is common, and the cost of being wrong is deleting something the
+ * customer chose to keep — recoverable through the undo toast, but still the
+ * wrong default. Distance is measured against the row's width, not the
+ * screen's, which happen to be near enough the same on a phone and would not
+ * be on a tablet.
+ */
+export function shouldRemove(dx: number, vx: number, width: number) {
+  if (dx >= 0) return false;
+  return -dx > width * 0.45 || (vx < -0.8 && -dx > 56);
+}

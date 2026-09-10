@@ -10,6 +10,9 @@ import AgentWalletScreen from './AgentWalletScreen';
 import BookingsScreen from './BookingsScreen';
 import CalendarScreen from './CalendarScreen';
 import ChatsScreen from './ChatsScreen';
+import SavedScreen from './SavedScreen';
+import PreviewPage from './PreviewPage';
+import { Pushed } from '../components/motion';
 import ClientsScreen from './ClientsScreen';
 import DayScheduleScreen from './DayScheduleScreen';
 import DiscoverScreen from './DiscoverScreen';
@@ -21,12 +24,17 @@ import ProfileScreen from './ProfileScreen';
 const CUSTOMER_TABS: TabItem[] = [
   { key: 'home', label: 'Home', icon: 'home', iconOutline: 'home-outline' },
   { key: 'explore', label: 'Explore', icon: 'compass', iconOutline: 'compass-outline' },
+  // EXPL-24 — third, between Explore and Bookings. A shortlist you chose, which
+  // is not what Profile's record of who cut you is for.
+  { key: 'saved', label: 'Saved', icon: 'heart', iconOutline: 'heart-outline' },
   { key: 'bookings', label: 'Bookings', icon: 'calendar', iconOutline: 'calendar-outline' },
   { key: 'chats', label: 'Chat', icon: 'chatbubble-ellipses', iconOutline: 'chatbubble-ellipses-outline' },
   { key: 'profile', label: 'Profile', icon: 'person', iconOutline: 'person-outline' },
 ];
 
-// services / portfolio / profile moved behind the dashboard avatar → Profile menu
+// services / portfolio and the rest live in the Profile menu; Profile itself is
+// a tab now — it used to hide behind the greeting on the dashboard, which is not
+// somewhere anyone looks for their own account.
 const BARBER_TABS: TabItem[] = [
   { key: 'home', label: 'Home', icon: 'home', iconOutline: 'home-outline' },
   { key: 'calendar', label: 'Calendar', icon: 'calendar', iconOutline: 'calendar-outline' },
@@ -35,6 +43,8 @@ const BARBER_TABS: TabItem[] = [
   // phone once between cuts, so both share one tab
   { key: 'chat', label: 'Chat', icon: 'chatbubble', iconOutline: 'chatbubble-outline' },
 ];
+// last, the way it is on the customer side
+const BARBER_PROFILE_TAB: TabItem = { key: 'profile', label: 'Profile', icon: 'person', iconOutline: 'person-outline' };
 // the salon agent till — only the owner (cash agent) gets a Wallet tab; co-barbers don't.
 // Salon management lives in Profile → Salon management, not a tab (keeps Clients in the bar).
 const WALLET_TAB: TabItem = { key: 'wallet', label: 'Wallet', icon: 'wallet', iconOutline: 'wallet-outline' };
@@ -48,15 +58,25 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
 }) {
   // salon owner = the cash agent (v1 decision) → only they get the Wallet tab
   const [ownsSalon, setOwnsSalon] = useState(false);
-  const tabs = barber ? (ownsSalon ? [...BARBER_TABS, WALLET_TAB] : BARBER_TABS) : CUSTOMER_TABS;
+  const tabs = barber
+    ? [...BARBER_TABS, ...(ownsSalon ? [WALLET_TAB] : []), BARBER_PROFILE_TAB]
+    : CUSTOMER_TABS;
   const [tab, setTab] = useState(tabs[0].key);
   const [chromeHidden, setChromeHidden] = useState(false);
+  // a saved row opens the shop (or the barber inside it) over the Saved tab
+  const [preview, setPreview] = useState<{ salonId?: string; barberId?: string } | null>(null);
 
   // the lowest handler in the app: from any other tab, back lands on the first
   // one; from the first tab it returns null and Android backgrounds the app,
   // which is what a tab root should do. Anything pushed over a tab registers
   // later and therefore answers before this does.
-  useAndroidBack(tab !== tabs[0].key ? () => { setChromeHidden(false); setTab(tabs[0].key); } : null);
+  useAndroidBack(
+    preview ? shutPreview
+      : tab !== tabs[0].key ? () => { setChromeHidden(false); setTab(tabs[0].key); }
+        : null,
+  );
+
+  function shutPreview() { setPreview(null); setChromeHidden(false); }
 
   useEffect(() => {
     if (!barber?.salon_id) return;
@@ -96,6 +116,8 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
     else if (tab === 'clients') content = <ClientsScreen barberId={barber.id} onChromeHidden={setChromeHidden} />;
     else if (tab === 'chat') content = <BarberChatsScreen barberId={barber.id}
       onChromeHidden={setChromeHidden} onHelp={() => setTab('home')} />;
+    else if (tab === 'profile') content = <ProfileScreen profile={profile} barber={barber} phone={phone}
+      onProfileChanged={onProfileChanged} onChromeHidden={setChromeHidden} />;
     else content = <AgentWalletScreen barberId={barber.id} />; // wallet tab exists for owners only
   } else {
     if (tab === 'home') content = <DiscoverScreen name={profile.full_name} customerId={profile.id}
@@ -105,6 +127,21 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
     else if (tab === 'explore') content = <ExploreScreen onChromeHidden={setChromeHidden}
       onBookings={() => setTab('bookings')}
       onHome={() => { setChromeHidden(false); setTab('home'); }} />;
+    else if (tab === 'saved') {
+      const saved = (
+        <SavedScreen
+          onOpenSalon={(id) => setPreview({ salonId: id })}
+          onOpenBarber={(id) => setPreview({ barberId: id })} />
+      );
+      content = preview
+        ? (
+          <Pushed onBack={shutPreview} behind={saved}>
+            <PreviewPage {...preview} onChromeHidden={setChromeHidden} onBack={shutPreview}
+              onBooked={() => { shutPreview(); setTab('bookings'); }} />
+          </Pushed>
+        )
+        : saved;
+    }
     else if (tab === 'bookings') content = <MyBookingsScreen customerId={profile.id}
       onChromeHidden={setChromeHidden} onRebook={() => setTab('explore')} />;
     else if (tab === 'chats') content = <ChatsScreen customerId={profile.id} onChromeHidden={setChromeHidden} />;

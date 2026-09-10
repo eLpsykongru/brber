@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, shadow } from '../theme';
+import { colors, font, radius, shadow, TOP_INSET } from '../theme';
 
 // 22a set a password · 23a/b/c forgot password · 24a session expired.
 //
@@ -334,7 +334,7 @@ export function SessionExpiredSheet({ visible, name, email, onSignIn, onNotYou }
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
-  authContent: { paddingTop: 66, paddingHorizontal: 24, paddingBottom: 40, gap: 15 },
+  authContent: { paddingTop: TOP_INSET, paddingHorizontal: 24, paddingBottom: 40, gap: 15 },
   grow: { flex: 1 },
   center: { textAlign: 'center' },
   pressed: { opacity: 0.75 },

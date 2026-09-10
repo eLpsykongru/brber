@@ -10,11 +10,10 @@ import { listPortfolio } from '../lib/portfolio';
 import { useAndroidBack } from '../lib/back';
 import { Pushed } from '../components/motion';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, font, radius, serif, shadow, sp } from '../theme';
+import { colors, dark as D, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
 import type { Barber, Profile } from '../types';
 import { ActivityIndicator } from 'react-native';
 import CouponsScreen from './CouponsScreen';
-import SavedScreen from './SavedScreen';
 import StandingScreen from './StandingScreen';
 import EarningsScreen from './EarningsScreen';
 import HelpCenterScreen from './HelpCenterScreen';
@@ -33,6 +32,7 @@ import PortfolioScreen from './PortfolioScreen';
 import AvailabilityScreen from './AvailabilityScreen';
 import SalonScreen from './SalonScreen';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
+import PreviewPage from './PreviewPage';
 import BundleEditorScreen from './BundleEditorScreen';
 import CancellationsScreen from './CancellationsScreen';
 import WaitingListScreen from './WaitingListScreen';
@@ -56,7 +56,7 @@ type ProfileView =
   | 'preview' | 'services' | 'bundles' | 'work' | 'schedule' | 'salon' | 'earnings'
   | 'cancellations' | 'waitlist'
   // turn 39 — two things the app already half-had
-  | 'saved' | 'standing'
+  | 'standing'
   // turn 9 — where admin actions land in the shop
   | 'tasks' | 'application' | 'float' | 'round' | 'statement' | 'agent';
 
@@ -218,11 +218,6 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     }
     if (view === 'wallet') return <WalletScreen customerId={profile.id} onBack={back} />;
     if (view === 'coupons') return <CouponsScreen onBack={back} />;
-    if (view === 'saved') {
-      return <SavedScreen onBack={back}
-        onOpenSalon={(id) => { setPreview({ salonId: id, from: 'saved' }); go('preview'); }}
-        onOpenBarber={(id) => { setPreview({ barberId: id, from: 'saved' }); go('preview'); }} />;
-    }
     if (view === 'standing') return <StandingScreen onBack={back} onDispute={() => go('support')} />;
     // 30a / 5a — Help Center is now the support console; the FAQ article list it
     // sits on is the old screen, one tap deeper.
@@ -334,7 +329,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     ...(barber ? [] : [
       { icon: 'card-outline', label: 'Payment Methods', onPress: () => soon('Payment Methods') },
       { icon: 'calendar-outline', label: 'My Bookings', onPress: () => go('bookings') },
-      { icon: 'heart-outline', label: 'Saved', onPress: () => go('saved') },
+      // Saved is a tab now (EXPL-24). One door, or the two rot apart.
       { icon: 'shield-checkmark-outline', label: 'Your standing', onPress: () => go('standing') },
       { icon: 'ticket-outline', label: 'My Coupons', onPress: () => go('coupons') },
       { icon: 'wallet-outline', label: 'My Wallet', onPress: () => go('wallet') },
@@ -562,39 +557,6 @@ const d = StyleSheet.create({
 });
 
 // "how customers see me" — fetches the salon in SalonCard shape and reuses the customer screen
-function PreviewPage({ salonId, barberId, onBack, onBooked, onChromeHidden }: {
-  salonId?: string; barberId?: string; onBack: () => void; onBooked?: () => void;
-  onChromeHidden?: (hidden: boolean) => void;
-}) {
-  const [salon, setSalon] = useState<SalonCard | null>(null);
-  // a saved barber carries only his own id; his page lives inside his shop's
-  const [shopId, setShopId] = useState<string | null>(salonId ?? null);
-
-  useEffect(() => {
-    if (shopId || !barberId) return;
-    supabase.from('barbers').select('salon_id').eq('id', barberId).single()
-      .then(({ data, error }) => {
-        if (error || !data?.salon_id) { Alert.alert('Could not open', error?.message ?? 'No shop'); onBack(); return; }
-        setShopId(data.salon_id);
-      });
-  }, [barberId, shopId]);
-
-  useEffect(() => {
-    if (!shopId) return;
-    supabase.from('salons')
-      .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, profiles!barbers_id_fkey(full_name, avatar_url, phone), reviews!reviews_barber_id_fkey(rating), services(id, name, price_cents, duration_min, is_active, category))')
-      .eq('id', shopId).single()
-      .then(({ data, error }) => {
-        if (error) { Alert.alert('Could not load preview', error.message); onBack(); return; }
-        const card = data as unknown as SalonCard;
-        setSalon({ ...card, barbers: card.barbers.filter((b) => b.status === 'approved' && b.salon_status === 'approved') });
-      });
-  }, [shopId]);
-
-  if (!salon) return <View style={s.center}><ActivityIndicator /></View>;
-  return <SalonDetailScreen salon={salon} onBack={onBack} onChromeHidden={onChromeHidden}
-    initialBarberId={barberId} onBooked={onBooked} />;
-}
 
 function EditProfile({ profile, barber, phone, onDone, onBack }: {
   profile: Profile; barber: Barber | null; phone: string | null;
@@ -692,7 +654,7 @@ function EditProfile({ profile, barber, phone, onDone, onBack }: {
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, paddingTop: sp(14), backgroundColor: colors.surface },
+  screen: { flex: 1, paddingTop: TOP_INSET, backgroundColor: colors.surface },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   content: { paddingHorizontal: sp(5), gap: sp(4), paddingBottom: TAB_BAR_INSET },
   pressed: { opacity: 0.7 },

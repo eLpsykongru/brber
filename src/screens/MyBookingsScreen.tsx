@@ -9,7 +9,7 @@ import { useAndroidBack } from '../lib/back';
 import { Pushed } from '../components/motion';
 import ReportProblemScreen, { CaseRow, SupportCaseScreen } from './SupportScreens';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif, shadow, sp } from '../theme';
+import { colors, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
 import { BookingDetailSheet } from './MyBookingScreen';
 import QueueScreen, { DayQueueRow, minutesUntil } from './QueueScreen';
 
@@ -819,7 +819,7 @@ function ReviewSheet({ booking, onClose, onDone }: {
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, paddingTop: 66, paddingHorizontal: 20, gap: 14, backgroundColor: colors.surface },
+  screen: { flex: 1, paddingTop: TOP_INSET, paddingHorizontal: 20, gap: 14, backgroundColor: colors.surface },
   grow: { flex: 1 },
   right: { alignItems: 'flex-end' },
   pressed: { opacity: 0.75 },

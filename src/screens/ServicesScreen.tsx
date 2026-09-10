@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Btn, Eyebrow, Ico, Screen, T, TAB_INSET, Toggle, TopBar } from '../components/dark';
 import { supabase } from '../lib/supabase';
-import { dark as D, inter } from '../theme';
+import { dark as D, inter, TOP_INSET } from '../theme';
 import type { Service } from '../types';
 
 // 1n — My services. Add at the top, the live list below; the toggle hides a
@@ -126,7 +126,7 @@ export default function ServicesScreen({ barberId, onBack }: { barberId: string;
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: D.bg },
-  head: { paddingTop: 62, paddingHorizontal: 20, gap: 13 },
+  head: { paddingTop: TOP_INSET, paddingHorizontal: 20, gap: 13 },
   grow: { flex: 1 },
   pressed: { opacity: 0.7 },
   center: { textAlign: 'center' },

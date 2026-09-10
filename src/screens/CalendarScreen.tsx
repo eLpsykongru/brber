@@ -11,7 +11,7 @@ import { daySlots } from '../lib/slots';
 import type { Window } from '../lib/slots';
 import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, font, inter, radius, sp } from '../theme';
+import { colors, dark as D, font, inter, radius, sp, TOP_INSET } from '../theme';
 import ChatScreen from './ChatScreen';
 
 // Calendar tab: day timeline / week summary of what's on the books.
@@ -813,7 +813,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: D.bg },
-  content: { paddingTop: 62, paddingHorizontal: 20, gap: 13, paddingBottom: TAB_BAR_INSET },
+  content: { paddingTop: TOP_INSET, paddingHorizontal: 20, gap: 13, paddingBottom: TAB_BAR_INSET },
   pressed: { opacity: 0.7 },
   grow: { flex: 1 },
   spinner: { marginVertical: sp(8) },

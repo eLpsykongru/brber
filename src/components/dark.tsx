@@ -3,7 +3,7 @@ import { ComponentProps, ReactNode } from 'react';
 import {
   Modal, Pressable, ScrollView, StyleSheet, Text, TextProps, TextStyle, View, ViewStyle,
 } from 'react-native';
-import { dark as d, inter, serif } from '../theme';
+import { dark as d, inter, serif, TOP_INSET } from '../theme';
 import { Press, useBack } from './motion';
 
 // The barber side's shared vocabulary, transcribed from "Barber App.dc.html" turn 1.
@@ -274,7 +274,7 @@ export const TAB_INSET = 104;
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: d.bg },
-  screenPad: { paddingTop: 62, paddingHorizontal: 20 },
+  screenPad: { paddingTop: TOP_INSET, paddingHorizontal: 20 },
 
   sheetWrap: { flex: 1, justifyContent: 'flex-end' },
   scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: d.scrim },

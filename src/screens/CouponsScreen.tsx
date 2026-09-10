@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif, shadow } from '../theme';
+import { colors, font, radius, serif, shadow, TOP_INSET } from '../theme';
 
 // 16a (active) and 17c (used & expired). A coupon is a code you show at the
 // shop — nothing here touches a booking's price. Redemption is recorded by
@@ -336,7 +336,7 @@ const s = StyleSheet.create({
   stackNote: { fontSize: 11.5, color: colors.textTertiary, lineHeight: 18 },
 
   screen: { flex: 1, backgroundColor: colors.surface },
-  content: { paddingTop: 66, paddingHorizontal: 20, paddingBottom: 40, gap: 14 },
+  content: { paddingTop: TOP_INSET, paddingHorizontal: 20, paddingBottom: 40, gap: 14 },
   grow: { flex: 1 },
   right: { alignItems: 'flex-end' },
   pressed: { opacity: 0.75 },

@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif, shadow } from '../theme';
+import { colors, font, radius, serif, shadow, TOP_INSET } from '../theme';
 
 // 21a linked accounts (and the biometric toggle that 24b acts on).
 
@@ -206,7 +206,7 @@ export function LockScreen({ ticketLine, onUnlocked, onPassword }: {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
-  content: { paddingTop: 66, paddingHorizontal: 20, paddingBottom: 40, gap: 13 },
+  content: { paddingTop: TOP_INSET, paddingHorizontal: 20, paddingBottom: 40, gap: 13 },
   grow: { flex: 1 },
   pressed: { opacity: 0.75 },
   link: { fontSize: font.small, fontWeight: '600', color: colors.accent },

@@ -6,7 +6,7 @@
 // wrong is felt on every screen: too eager and the app leaves while you are
 // scrolling, too strict and a normal flick does nothing.
 
-import { shouldDismiss } from './swipe';
+import { shouldDismiss, shouldRemove } from './swipe';
 
 const W = 400;
 let failures = 0;
@@ -34,6 +34,18 @@ ok('a fast twitch stays', !shouldDismiss(10, 3, W));
 // the threshold follows the screen, so a tablet does not need a longer drag
 ok('a wide screen scales its threshold', !shouldDismiss(200, 0, 1000));
 ok('and a narrow one does too', shouldDismiss(200, 0, 400));
+
+// ---- EXPL-27's row swipe: the other direction, and a stricter one ----
+const ROW = 340;
+ok('a row never leaves on a rightward drag', !shouldRemove(200, 2, ROW));
+ok('a still finger keeps the row', !shouldRemove(0, 0, ROW));
+// the threshold a screen dismissal would have accepted must NOT remove a row —
+// this is the whole reason the two predicates are separate
+ok('a third of the row is not enough', !shouldRemove(-ROW * 0.35, 0, ROW));
+ok('half of it is', shouldRemove(-ROW * 0.5, 0, ROW));
+ok('a firm flick removes', shouldRemove(-70, -1.2, ROW));
+ok('a fast twitch does not', !shouldRemove(-20, -3, ROW));
+ok('a lazy nudge does not', !shouldRemove(-60, -0.2, ROW));
 
 if (failures) { console.error(`\nmotion: ${failures} check(s) failed.`); process.exit(1); }
 console.log('motion: all checks passed.');

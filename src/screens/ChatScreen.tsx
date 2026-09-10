@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { useBack } from '../components/motion';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, font, inter, radius, shadow, sp } from '../theme';
+import { colors, dark as D, font, inter, radius, shadow, sp, TOP_INSET } from '../theme';
 
 type Msg = {
   id: string;
@@ -304,7 +304,7 @@ const d = StyleSheet.create({
   header: {
     flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: D.card,
     borderBottomWidth: 1, borderBottomColor: D.border,
-    paddingTop: 58, paddingBottom: 14, paddingHorizontal: 16,
+    paddingTop: TOP_INSET, paddingBottom: 14, paddingHorizontal: 16,
   },
   headerPuck: {
     width: 34, height: 34, borderRadius: 999, backgroundColor: D.card2,

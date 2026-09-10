@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 import {
   ActivityIndicator, Pressable, StyleSheet, Text, TextInput, TextInputProps, TextStyle, View, ViewStyle,
 } from 'react-native';
-import { colors, font, radius, serif, shadow, sp } from '../theme';
+import { colors, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
 import { useBack } from './motion';
 
 // Shared primitives — every screen builds from these so the app reads as one system.
@@ -32,7 +32,10 @@ export function ScreenHeader({ title, onBack, right }: {
         </Pressable>
       ) : <View style={s.backBtnGhost} />}
       <Display size={18} style={s.headerTitle}>{title}</Display>
-      <View style={s.backBtnGhost}>{right}</View>
+      {/* the slot grows: back + heart + share does not fit in a 40px box.
+          The title stays `flex: 1, textAlign: center`, so with two buttons on
+          the right it sits a little left of true centre — same as the mock. */}
+      {right ? <View style={s.headerRight}>{right}</View> : <View style={s.backBtnGhost} />}
     </View>
   );
 }
@@ -157,7 +160,7 @@ const s = StyleSheet.create({
   // SYS-01 — two greys, both measured off the design
   sk: { backgroundColor: colors.skeleton },
   skSoft: { backgroundColor: colors.skeletonSoft },
-  skWrap: { paddingHorizontal: sp(5), paddingTop: sp(14), gap: sp(4) },
+  skWrap: { paddingHorizontal: sp(5), paddingTop: TOP_INSET, gap: sp(4) },
   skHead: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
   skGap8: { gap: 8 },
   skCats: { flexDirection: 'row', gap: 18 },
@@ -170,6 +173,10 @@ const s = StyleSheet.create({
     backgroundColor: colors.bg, ...shadow,
   },
   backBtnGhost: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  headerRight: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end',
+    gap: sp(2), minWidth: 40, minHeight: 40,
+  },
   headerTitle: { flex: 1, textAlign: 'center' },
   card: {
     backgroundColor: colors.bg, borderRadius: radius.lg, padding: sp(4), gap: sp(1), ...shadow,

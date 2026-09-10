@@ -3,7 +3,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif } from '../theme';
+import { colors, font, radius, serif, TOP_INSET } from '../theme';
 
 // 18a — the referral screen. Dark, like the barber side, because it is the one
 // customer screen that is a pitch rather than a tool.
@@ -166,7 +166,7 @@ export default function InviteScreen({ onBack }: { onBack: () => void }) {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.ink },
-  content: { paddingTop: 66, paddingHorizontal: 24, paddingBottom: 40, gap: 16 },
+  content: { paddingTop: TOP_INSET, paddingHorizontal: 24, paddingBottom: 40, gap: 16 },
   grow: { flex: 1 },
   pressed: { opacity: 0.75 },
 

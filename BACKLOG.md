@@ -132,6 +132,27 @@ owner-only RPCs (`salon_team`, `salon_stats`, `salon_set_terms`,
   NOTE: nothing **enforces** it in the booking flow yet (like the per-barber
   `accepting_bookings`) — wire the check when the request path is next touched.
 **Still blocked / deferred (can't build now, not laziness):**
+- **Saved-gap alerts have no sender** (EXPL-28 §6) — `push_saved_gap` (0065) is
+  written by SavedScreen and read by `my_wishlist`, and *nothing sends a
+  notification that reads it*. The ask card was cut and the switch's "about one
+  a week" line with it, so the app no longer quantifies a promise nobody keeps.
+  Two ways out, both real: fold saved-barber customers into
+  `offer_candidates` (0049) — cheap, but the promise becomes "a barber can
+  offer you his gap", not "you'll be told about gaps" — or build an
+  automatic same-day cancellation fan-out. **Trigger:** either path ships →
+  restore the ask, and flip the column's default to `false` with it.
+- **Nothing ever un-suspends a salon** (EXPL-26 §3) — `salons.status` is set to
+  `'suspended'` in 0058 and 0061 and *never back to `'live'` by any function*,
+  so "TELL ME IF IT REOPENS" was cut: there is no event to hang it on.
+  `reopen_shop` (0064) is the owner's own `accepting_bookings` pause, a
+  different switch. Note also that `waitlist_requests.day` is `not null` and
+  `reopen_shop` filters `day >= today`, so a reopen-ask has no honest day to
+  carry. **Trigger:** an ops un-suspend path exists → the ask can ship on it.
+- **Saved never says "next free Fri 14:00"** (§4) — `barber_next_free_today`
+  scans today only, on purpose (0065 says why). `LATER THIS WEEK` therefore
+  shows static facts, not a forward-looking time, and no salon claims a slot
+  count. **Trigger:** someone wants the multi-day scan → price it before
+  redrawing the section.
 - **Packages** — Services tab shows a placeholder; needs the `packages` /
   `package_items` tables + the pending booking-mapping decision (Salon screen §).
 - **Invite by phone / share link** — the sheet is UI-only; real self-onboarding

@@ -62,9 +62,14 @@ const s = StyleSheet.create({
     shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 16, shadowOffset: { width: 0, height: 8 },
     elevation: 10,
   },
+  // sp(3), not sp(4): the customer bar went to six items with Saved, and at 16
+  // a side the row measured ~388 against a 360dp phone. 12 buys 40 back.
+  // ponytail: measured by arithmetic (50px per inactive item + gaps + the
+  // active pill's label), not on glass. If a seventh tab is ever proposed,
+  // that is the moment the bar needs a real design, not another 4px.
   item: {
     flexDirection: 'row', alignItems: 'center', gap: sp(1.5),
-    minHeight: 44, paddingHorizontal: sp(4), borderRadius: radius.pill,
+    minHeight: 44, paddingHorizontal: sp(3), borderRadius: radius.pill,
   },
   itemActive: { backgroundColor: colors.tabActive },
   label: { color: colors.onAccent, fontSize: font.small, fontWeight: '700' },
@@ -84,10 +89,18 @@ const s = StyleSheet.create({
     shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 28, shadowOffset: { width: 0, height: 10 },
     elevation: 12,
   },
-  dItem: { width: 42, height: 42, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
+  // 38 and 12, not the mock's 42 and 15: a salon owner's bar is now six items
+  // AND the 48px FAB — home, calendar, clients, chat, wallet, profile. At the
+  // mock's sizes that measured ~392 against a 360dp phone; this brings it to
+  // ~359. Everything from an iPhone SE up has room to spare.
+  //
+  // ponytail: arithmetic, not a device. If a seventh tab is ever proposed for
+  // the owner, the answer is to move Wallet into the Profile menu (Salon
+  // management already lives there), not to shave another 4px off these.
+  dItem: { width: 38, height: 38, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
   dItemActive: {
     flexDirection: 'row', alignItems: 'center', gap: 7,
-    height: 44, paddingHorizontal: 15, borderRadius: 999, backgroundColor: d.card2,
+    height: 44, paddingHorizontal: 12, borderRadius: 999, backgroundColor: d.card2,
   },
   dLabel: { color: '#fff', fontSize: 12, fontFamily: inter.b },
   dFab: {

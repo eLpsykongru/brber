@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Card, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
 import { supabase } from '../lib/supabase';
-import { colors, font, inter, radius, sp } from '../theme';
+import { colors, font, inter, radius, sp, TOP_INSET } from '../theme';
 
 // 39b of "Customer App 3.dc.html" — your standing.
 //
@@ -42,7 +42,15 @@ export default function StandingScreen({ onBack, onDispute }: {
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  if (!st) return <View style={s.screen}><ActivityIndicator style={s.spin} /></View>;
+  // the header comes too, or there is no way out while it loads
+  if (!st) {
+    return (
+      <View style={s.screen}>
+        <ScreenHeader title="Your standing" onBack={onBack} />
+        <ActivityIndicator style={s.spin} />
+      </View>
+    );
+  }
 
   const live = st.marks.filter((m) => !m.cleared);
 
@@ -163,8 +171,9 @@ export default function StandingScreen({ onBack, onDispute }: {
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.surface },
-  content: { padding: sp(5), gap: 14, paddingBottom: TAB_BAR_INSET },
+  // pinned header, so the status-bar inset sits on the root
+  screen: { flex: 1, paddingTop: TOP_INSET, paddingHorizontal: 20, backgroundColor: colors.surface },
+  content: { gap: 14, paddingTop: 2, paddingBottom: TAB_BAR_INSET },
   spin: { marginTop: sp(20) },
   grow: { flex: 1 },
   pressed: { opacity: 0.6 },

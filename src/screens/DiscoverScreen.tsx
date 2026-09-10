@@ -7,7 +7,7 @@ import { Display, HomeSkeleton, Stars, TAB_BAR_INSET } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
 import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif, shadow, sp } from '../theme';
+import { colors, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
 import { OfflineBanner, useOnline } from '../components/Offline';
 import { clearQueueActivity, syncQueueActivity } from '../lib/queueActivity';
 import CustomerNotificationsScreen from './CustomerNotificationsScreen';
@@ -458,7 +458,7 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
 }
 
 const styles = StyleSheet.create({
-  tabScreen: { flex: 1, paddingTop: sp(14), paddingHorizontal: sp(5), backgroundColor: colors.surface },
+  tabScreen: { flex: 1, paddingTop: TOP_INSET, paddingHorizontal: sp(5), backgroundColor: colors.surface },
   list: { gap: sp(3), paddingBottom: TAB_BAR_INSET },
 
   // home header

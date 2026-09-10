@@ -7,7 +7,7 @@ import {
   Avatar, Btn, Card, Eyebrow, GhostBtn, Ico, IconName, Screen, Sheet, SheetHead, T, TopBar,
 } from '../components/dark';
 import { supabase } from '../lib/supabase';
-import { dark as d, inter, radius, serif } from '../theme';
+import { dark as d, inter, radius, serif, TOP_INSET } from '../theme';
 
 // Barber turns 5 (support console) and 6 (losing the dispute) of "Barber App.dc.html".
 //
@@ -761,7 +761,7 @@ const s = StyleSheet.create({
   caseScreen: { flex: 1, backgroundColor: d.bg },
   caseHead: {
     backgroundColor: d.card, borderBottomWidth: 1, borderBottomColor: d.border,
-    paddingTop: 58, paddingBottom: 14, paddingHorizontal: 16,
+    paddingTop: TOP_INSET, paddingBottom: 14, paddingHorizontal: 16,
     flexDirection: 'row', alignItems: 'center', gap: 10,
   },
   caseBack: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },

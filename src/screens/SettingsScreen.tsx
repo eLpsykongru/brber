@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif, shadow } from '../theme';
+import { colors, font, radius, serif, shadow, TOP_INSET } from '../theme';
 import type { Profile } from '../types';
 
 // 19a Settings, 19b Edit profile, 20a Delete account, 20b Language.
@@ -465,8 +465,8 @@ export function EditProfileScreen({ profile, onBack, onDone }: {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
-  content: { paddingTop: 66, paddingHorizontal: 20, paddingBottom: 40, gap: 13 },
-  contentTall: { paddingTop: 66, paddingHorizontal: 20, paddingBottom: 110, gap: 14 },
+  content: { paddingTop: TOP_INSET, paddingHorizontal: 20, paddingBottom: 40, gap: 13 },
+  contentTall: { paddingTop: TOP_INSET, paddingHorizontal: 20, paddingBottom: 110, gap: 14 },
   grow: { flex: 1 },
   center: { alignItems: 'center', paddingTop: 4 },
   pressed: { opacity: 0.75 },

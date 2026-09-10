@@ -5,9 +5,10 @@ import {
 } from 'react-native';
 import { Empty, Field, PillButton, ScreenHeader, Stars } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
+import { useSaved } from '../lib/wishlist';
 import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif, shadow, sp } from '../theme';
+import { colors, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
 import type { Service, Specialist } from '../types';
 import ChatScreen from './ChatScreen';
 
@@ -104,6 +105,9 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
   const [reviewQuery, setReviewQuery] = useState('');
   const [chatBookingId, setChatBookingId] = useState<string | null>(null);
   const [meId, setMeId] = useState('');
+  // EXPL-28 — the half of the heart that never existed. Not SaveHeart: the
+  // hook runs fine here (no map), and the header wants its own puck.
+  const [saved, toggleSaved] = useSaved('barber', barber.id);
 
   const name = barber.profiles?.full_name ?? 'Barber';
   const avg = barber.reviews.length
@@ -332,10 +336,18 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
     <View style={s.screen}>
       <ScreenHeader title="Specialist" onBack={onBack}
         right={
-          <Pressable onPress={share} hitSlop={8} accessibilityLabel="Share this specialist"
-            style={({ pressed }) => pressed && s.pressed}>
-            <Ionicons name="share-social-outline" size={18} color={colors.text} />
-          </Pressable>
+          <>
+            <Pressable onPress={toggleSaved} hitSlop={8}
+              accessibilityLabel={saved ? `Remove ${name} from saved` : `Save ${name}`}
+              style={({ pressed }) => [s.headBtn, saved && s.headBtnOn, pressed && s.pressed]}>
+              <Ionicons name={saved ? 'heart' : 'heart-outline'} size={17}
+                color={saved ? colors.onAccent : colors.text} />
+            </Pressable>
+            <Pressable onPress={share} hitSlop={8} accessibilityLabel="Share this specialist"
+              style={({ pressed }) => [s.headBtn, pressed && s.pressed]}>
+              <Ionicons name="share-social-outline" size={16} color={colors.text} />
+            </Pressable>
+          </>
         } />
 
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
@@ -360,6 +372,14 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
             <Text style={s.subtitle} numberOfLines={1}>
               {barber.specialty ?? 'Barber'} | {salonName}
             </Text>
+            {/* EXPL-28 — saving is instant and silent, so the only confirmation
+                is this. No sheet: `useSaved` is optimistic on purpose. */}
+            {saved && (
+              <View style={s.savedChip}>
+                <Ionicons name="heart" size={11} color={colors.accent} />
+                <Text style={s.savedChipText}>IN YOUR SAVED</Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -532,7 +552,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, paddingTop: sp(14), paddingHorizontal: sp(5), backgroundColor: colors.surface },
+  screen: { flex: 1, paddingTop: TOP_INSET, paddingHorizontal: sp(5), backgroundColor: colors.surface },
   content: { paddingBottom: 120, gap: sp(3) },
   pressed: { opacity: 0.7 },
   grow: { flex: 1 },
@@ -551,6 +571,19 @@ const s = StyleSheet.create({
     textTransform: 'uppercase', color: colors.text, lineHeight: 27,
   },
   subtitle: { fontSize: font.small, color: colors.textSecondary },
+  headBtn: {
+    width: 40, height: 40, borderRadius: radius.pill, backgroundColor: colors.bg,
+    alignItems: 'center', justifyContent: 'center', ...shadow,
+  },
+  headBtnOn: { backgroundColor: colors.accent },
+  savedChip: {
+    alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 5,
+    marginTop: 5, paddingVertical: 4, paddingHorizontal: 10,
+    borderRadius: radius.pill, backgroundColor: colors.accentSoft,
+  },
+  savedChipText: {
+    fontSize: 10.5, fontWeight: '700', letterSpacing: 0.63, color: colors.accent,
+  },
 
   statsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: sp(3), marginTop: sp(1) },
   stat: {

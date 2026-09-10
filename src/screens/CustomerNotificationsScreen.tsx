@@ -6,7 +6,7 @@ import {
 import { Display } from '../components/ui';
 import { pushPermission } from '../lib/push';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, shadow } from '../theme';
+import { colors, font, radius, shadow, TOP_INSET } from '../theme';
 
 // Turns 14 and 15, customer side — 14a the inbox behind the Home bell, 14b its
 // settings, 15a the reminder-timing picker, 15b the empty inbox.
@@ -427,7 +427,7 @@ function ReminderSheet({ visible, value, onClose, onPick }: {
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, paddingTop: 66, paddingHorizontal: 20, gap: 14, backgroundColor: colors.surface },
+  screen: { flex: 1, paddingTop: TOP_INSET, paddingHorizontal: 20, gap: 14, backgroundColor: colors.surface },
   grow: { flex: 1 },
   pressed: { opacity: 0.75 },
 

@@ -32,7 +32,6 @@ import ChatScreen from './ChatScreen';
 import { HiddenScreen } from './OutboxScreen';
 import EarningsScreen from './EarningsScreen';
 import NotificationsScreen from './NotificationsScreen';
-import ProfileScreen from './ProfileScreen';
 
 type BookingRow = {
   id: string;
@@ -120,7 +119,6 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   const [unread, setUnread] = useState(0);
   const [chat, setChat] = useState<{ id: string; title: string } | null>(null);
   const [sheetClient, setSheetClient] = useState<ClientRef | null>(null);
-  const [showProfile, setShowProfile] = useState(false);
   const [menuBooking, setMenuBooking] = useState<BookingRow | null>(null);
   const [resched, setResched] = useState<BookingRow | null>(null);
   const [reschedAt, setReschedAt] = useState<Date | null>(null);
@@ -231,11 +229,6 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     onChromeHidden?.(v);
   }
 
-  function openProfile(v: boolean) {
-    setShowProfile(v);
-    onChromeHidden?.(v);
-  }
-
   // stage transitions: confirm uses accept_booking; the rest go through advance_booking
   async function advance(b: BookingRow, stage: 'check_in' | 'start' | 'complete') {
     // 34f — completing settles first: what was actually done decides the price,
@@ -312,8 +305,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   // Android and backgrounds the app.
   useAndroidBack(
     chat ? () => openChat(null)
-      : showProfile ? () => openProfile(false)
-        : showEarnings ? () => openEarnings(false)
+      : showEarnings ? () => openEarnings(false)
           : showQueue ? () => { setShowQueue(false); onChromeHidden?.(false); load(); }
             : inboxOpen ? () => { setInboxOpen(false); onChromeHidden?.(false); load(); }
                 // same condition as the render below, so back is never a
@@ -413,11 +405,13 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
       <Screen gap={14} bottom={TAB_INSET}>
         {/* 1a header — eyebrow date over the Playfair greeting, bell with its unread dot */}
         <View style={s.headRow}>
-          <Pressable onPress={() => openProfile(true)} accessibilityRole="button"
-            accessibilityLabel="Your profile" style={({ pressed }) => [s.grow, pressed && s.pressed]}>
+          {/* the greeting used to open Profile. Nobody looks for their own
+              account behind their own name, so Profile is a tab now and this
+              is just the greeting. */}
+          <View style={s.grow}>
             <Eyebrow ls={1.8}>{dateLabel}</Eyebrow>
             <Serif size={26} ls={0.03} style={s.greet}>Salam, {firstName}</Serif>
-          </Pressable>
+          </View>
           <Pressable onPress={() => { setInboxOpen(true); onChromeHidden?.(true); }}
             accessibilityRole="button"
             accessibilityLabel={`Notifications, ${unread} unread`}
@@ -806,15 +800,6 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
       <Pushed onBack={() => openChat(null)} behind={dash}>
         <ChatScreen dark bookingId={chat.id} threadWith={row?.customer_id} myId={barberId}
           title={chat.title} onBack={() => openChat(null)} />
-      </Pushed>
-    );
-  }
-  if (showProfile) {
-    return (
-      <Pushed onBack={() => openProfile(false)} behind={dash}>
-        <ProfileScreen profile={profile} barber={barber} phone={phone}
-          onProfileChanged={onProfileChanged} onChromeHidden={onChromeHidden}
-          onBack={() => openProfile(false)} />
       </Pushed>
     );
   }

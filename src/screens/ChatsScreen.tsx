@@ -8,7 +8,7 @@ import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { groupThreads, Thread as ThreadOf } from '../lib/threads';
 import ReportProblemScreen, { CaseListRow, CaseRow, SupportCaseScreen } from './SupportScreens';
-import { colors, font, radius, serif, shadow, sp } from '../theme';
+import { colors, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
 import { Pushed } from '../components/motion';
 import ChatScreen from './ChatScreen';
 
@@ -309,7 +309,7 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
 const st = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
   header: {
-    backgroundColor: colors.tabBg, paddingTop: sp(14), paddingBottom: sp(4), paddingHorizontal: sp(5),
+    backgroundColor: colors.tabBg, paddingTop: TOP_INSET, paddingBottom: sp(4), paddingHorizontal: sp(5),
     borderBottomLeftRadius: 28, borderBottomRightRadius: 28,
   },
   headerTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

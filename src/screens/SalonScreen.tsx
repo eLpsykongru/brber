@@ -9,7 +9,7 @@ import { ShopPauseSheet } from '../components/ShopPause';
 import { TAB_BAR_INSET } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { useAndroidBack } from '../lib/back';
-import { colors, dark as D, font, inter, radius, serif, sp } from '../theme';
+import { colors, dark as D, font, inter, radius, serif, sp, TOP_INSET } from '../theme';
 import { AllChairsScreen, OwnerBarberScreen, OwnerDashboard } from './OwnerScreens';
 import { ReviewsInboxScreen, ShopListingScreen, ShopReportScreen, WalkInPosterScreen, WallDisplayScreen } from './ShopScreens';
 import DepositScreen from './DepositScreen';
@@ -1238,7 +1238,7 @@ const s = StyleSheet.create({
 
   screen: { flex: 1, backgroundColor: D.bg },
   center: { flex: 1, backgroundColor: D.bg, alignItems: 'center', justifyContent: 'center' },
-  content: { padding: sp(5), paddingTop: sp(14), gap: sp(3), paddingBottom: TAB_BAR_INSET },
+  content: { padding: sp(5), paddingTop: TOP_INSET, gap: sp(3), paddingBottom: TAB_BAR_INSET },
   pressed: { opacity: 0.7 },
   grow: { flex: 1 },
   dim: { color: D.sub },

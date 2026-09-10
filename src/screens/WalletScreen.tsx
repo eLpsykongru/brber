@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif, shadow, sp } from '../theme';
+import { colors, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
 
 // Turn 7 of "Customer App 1.dc.html" — 7a My Wallet, 7b the add-money alert,
 // 7c the empty and loading states.
@@ -175,7 +175,7 @@ export default function WalletScreen({ customerId, onBack }: {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
-  content: { paddingTop: 66, paddingHorizontal: 20, paddingBottom: 40, gap: 14 },
+  content: { paddingTop: TOP_INSET, paddingHorizontal: 20, paddingBottom: 40, gap: 14 },
   grow: { flex: 1 },
   pressed: { opacity: 0.7 },
 

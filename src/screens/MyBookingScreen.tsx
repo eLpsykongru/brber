@@ -11,7 +11,7 @@ import { UnderReviewStrip } from '../components/Failures';
 import { daySlots } from '../lib/slots';
 import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif, shadow, shadowLg, sp } from '../theme';
+import { colors, font, radius, serif, shadow, shadowLg, sp, TOP_INSET } from '../theme';
 import ChatScreen from './ChatScreen';
 import { DayQueueRow, minutesUntil } from './QueueScreen';
 
@@ -1256,7 +1256,7 @@ function SheetBody({ bookingId, myId, initial, onClose, onQueue }: {
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.surface },
-  content: { paddingTop: 66, paddingHorizontal: 20, paddingBottom: 110, gap: 13 },
+  content: { paddingTop: TOP_INSET, paddingHorizontal: 20, paddingBottom: 110, gap: 13 },
   grow: { flex: 1 },
   right: { alignItems: 'flex-end' },
   pressed: { opacity: 0.7 },

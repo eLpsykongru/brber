@@ -11,8 +11,8 @@ import { DEFAULT_REGION, LatLng, haversineKm, openDirections, walkMin } from '..
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
 import { useAndroidBack } from '../lib/back';
-import { useSaved } from '../lib/wishlist';
-import { colors, font, radius, shadow, shadowLg, sp } from '../theme';
+import SaveHeart from '../components/SaveHeart';
+import { colors, font, radius, shadow, shadowLg, sp, TOP_INSET } from '../theme';
 import { NoLocationBar } from '../components/Failures';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
 import SearchScreen from './SearchScreen';
@@ -31,18 +31,6 @@ function startingPrice(s: SalonCard): number | null {
 function avgOf(reviews: { rating: number }[]): number | null {
   if (!reviews.length) return null;
   return reviews.reduce((a, r) => a + r.rating, 0) / reviews.length;
-}
-
-/** 39c — one card's heart. Its own component because the hook can't run in a map. */
-function SaveHeart({ salonId }: { salonId: string }) {
-  const [saved, toggle] = useSaved('salon', salonId);
-  return (
-    <Pressable hitSlop={8} style={styles.heart} onPress={toggle}
-      accessibilityLabel={saved ? 'Remove from saved' : 'Save to saved'}>
-      <Ionicons name={saved ? 'heart' : 'heart-outline'} size={18}
-        color={saved ? colors.accent : colors.text} />
-    </Pressable>
-  );
 }
 
 function SalonPhoto({ salon, style }: { salon: SalonCard; style: object }) {
@@ -276,7 +264,7 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
                     <Text style={styles.offText}>5% OFF</Text>
                   </View>
                   {/* 39c — real since 0065 */}
-                  <SaveHeart salonId={item.id} />
+                  <SaveHeart kind="salon" id={item.id} style={styles.heart} />
                 </View>
                 <SalonPhoto salon={item} style={styles.cardPhoto} />
                 <View style={styles.cardNameRow}>
@@ -371,7 +359,7 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
 
 const styles = StyleSheet.create({
   offlineTitle: { textAlign: 'center', letterSpacing: 0.72, marginTop: 20 },
-  screen: { flex: 1, paddingTop: sp(14), backgroundColor: colors.surface },
+  screen: { flex: 1, paddingTop: TOP_INSET, backgroundColor: colors.surface },
   grow: { flex: 1 },
   pressed: { opacity: 0.7 },
 

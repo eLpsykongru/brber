@@ -4,7 +4,7 @@ import { Alert, FlatList, Image, Pressable, StyleSheet, View } from 'react-nativ
 import { Btn, Ico, T, TAB_INSET, TopBar } from '../components/dark';
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
-import { dark as D } from '../theme';
+import { dark as D, TOP_INSET } from '../theme';
 
 // 1o — My work. Two-up grid, first photo is the cover customers see in search.
 export default function PortfolioScreen({ barberId, onBack }: { barberId: string; onBack?: () => void }) {
@@ -103,7 +103,7 @@ export default function PortfolioScreen({ barberId, onBack }: { barberId: string
 
 const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: D.bg },
-  head: { paddingTop: 62, paddingHorizontal: 20, gap: 13 },
+  head: { paddingTop: TOP_INSET, paddingHorizontal: 20, gap: 13 },
   hint: { lineHeight: 17 },
   pressed: { opacity: 0.7 },
 

@@ -5,7 +5,7 @@ import { Avatar, Eyebrow, Serif, T, TAB_INSET } from '../components/dark';
 import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { groupThreads, Thread as ThreadOf } from '../lib/threads';
-import { dark as d, radius, sp } from '../theme';
+import { dark as d, radius, sp, TOP_INSET } from '../theme';
 import { BarberCaseScreen, CaseRow } from './BarberSupportScreens';
 import { Pushed } from '../components/motion';
 import ChatScreen from './ChatScreen';
@@ -295,7 +295,7 @@ const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: d.bg },
   head: {
     backgroundColor: d.card, borderBottomWidth: 1, borderBottomColor: d.border,
-    paddingTop: sp(14), paddingHorizontal: sp(4),
+    paddingTop: TOP_INSET, paddingHorizontal: sp(4),
   },
   tabs: { flexDirection: 'row', gap: sp(5.5), marginTop: sp(4) },
   tab: {

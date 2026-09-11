@@ -49,6 +49,8 @@ export const dark = {
   textDim: '#D8D8DC',
   sub: '#9A9CA3',
   faint: '#6B6B72',         // §10 "Faint" — labels and disabled, a step below sub
+  recessed: '#111113',      // notes and fact lists that sit a step below the canvas (BNT-05, BRV-09)
+  seam: '#1E1E22',          // the hairline inside a recessed list
   scrim: 'rgba(0,0,0,0.6)',
   scrimDeep: 'rgba(0,0,0,0.62)',
 

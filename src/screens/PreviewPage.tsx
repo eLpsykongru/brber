@@ -15,9 +15,11 @@ import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
  * Lifted out of ProfileScreen when Saved became a tab: two doors now open the
  * same page, and a second copy of this fetch is a second thing to keep right.
  */
-export default function PreviewPage({ salonId, barberId, onBack, onBooked, onChromeHidden }: {
+export default function PreviewPage({ salonId, barberId, onBack, onBooked, onChromeHidden, preview }: {
   salonId?: string; barberId?: string; onBack: () => void; onBooked?: () => void;
   onChromeHidden?: (hidden: boolean) => void;
+  /** BPR-07 — a barber opening their own page: booking is dead, back ends the preview */
+  preview?: boolean;
 }) {
   const [salon, setSalon] = useState<SalonCard | null>(null);
   // a saved barber carries only his own id; his page lives inside his shop's
@@ -35,18 +37,20 @@ export default function PreviewPage({ salonId, barberId, onBack, onBooked, onChr
   useEffect(() => {
     if (!shopId) return;
     supabase.from('salons')
-      .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, profiles!barbers_id_fkey(full_name, avatar_url, phone), reviews!reviews_barber_id_fkey(rating), services(id, name, price_cents, duration_min, is_active, category))')
+      .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, languages, profiles!barbers_id_fkey(full_name, avatar_url, phone, previous_name, name_changed_at), reviews!reviews_barber_id_fkey(rating), services(id, name, price_cents, duration_min, is_active, category))')
       .eq('id', shopId).single()
       .then(({ data, error }) => {
         if (error) { Alert.alert('Could not load preview', error.message); onBack(); return; }
         const card = data as unknown as SalonCard;
-        setSalon({ ...card, barbers: card.barbers.filter((b) => b.status === 'approved' && b.salon_status === 'approved') });
+        // a barber previewing their own page sees it before it is approved, too
+        setSalon({ ...card, barbers: card.barbers.filter((b) => (preview && b.id === barberId)
+          || (b.status === 'approved' && b.salon_status === 'approved')) });
       });
   }, [shopId]);
 
   if (!salon) return <View style={s.center}><ActivityIndicator /></View>;
   return <SalonDetailScreen salon={salon} onBack={onBack} onChromeHidden={onChromeHidden}
-    initialBarberId={barberId} onBooked={onBooked} />;
+    initialBarberId={barberId} onBooked={onBooked} preview={preview} />;
 }
 
 const s = StyleSheet.create({

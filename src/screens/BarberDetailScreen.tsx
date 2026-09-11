@@ -7,6 +7,7 @@ import { Empty, Field, PillButton, ScreenHeader, Stars } from '../components/ui'
 import { listPortfolio } from '../lib/portfolio';
 import { useSaved } from '../lib/wishlist';
 import { useAndroidBack } from '../lib/back';
+import { formerlyName, LANGUAGES } from '../lib/profileRules';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
 import type { Service, Specialist } from '../types';
@@ -20,6 +21,8 @@ type Props = {
   // Booking from here used to leave him on this page, staring at the calendar
   // he had just booked out of. There is nothing left to do on it.
   onBooked?: () => void;
+  /** BPR-07 — the barber previewing their own page: nothing here books or writes */
+  preview?: boolean;
 };
 
 type Tab = 'services' | 'about' | 'gallery' | 'reviews';
@@ -86,7 +89,7 @@ function sameDay(a: Date, b: Date) {
   return a.toDateString() === b.toDateString();
 }
 
-export default function BarberDetailScreen({ barber, salonName, onBack, onChromeHidden, onBooked }: Props) {
+export default function BarberDetailScreen({ barber, salonName, onBack, onChromeHidden, onBooked, preview }: Props) {
   const [tab, setTab] = useState<Tab>('services');
   const [services, setServices] = useState<Service[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -110,6 +113,9 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
   const [saved, toggleSaved] = useSaved('barber', barber.id);
 
   const name = barber.profiles?.full_name ?? 'Barber';
+  // 0109 — for thirty days after a rename the page still says who this was
+  const formerly = formerlyName(barber.profiles?.previous_name ?? null,
+    barber.profiles?.name_changed_at ?? null, Date.now());
   const avg = barber.reviews.length
     ? barber.reviews.reduce((s, r) => s + r.rating, 0) / barber.reviews.length
     : null;
@@ -174,6 +180,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
   }
 
   async function openChat() {
+    if (preview) return;
     const { data: auth } = await supabase.auth.getUser();
     const { data } = await supabase.from('bookings').select('id')
       .eq('customer_id', auth.user!.id).eq('barber_id', barber.id)
@@ -187,11 +194,13 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
   }
 
   function call() {
+    if (preview) return;
     const phone = barber.profiles?.phone;
     if (phone) Linking.openURL(`tel:${phone}`);
   }
 
   async function book(slot: Date) {
+    if (preview) return;
     const svc = selected!;
     const when = `${slot.toDateString()} ${slot.toTimeString().slice(0, 5)}`;
     Alert.alert('Confirm booking',
@@ -334,7 +343,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
 
   return (
     <View style={s.screen}>
-      <ScreenHeader title="Specialist" onBack={onBack}
+      {preview ? <PreviewBar onDone={onBack} /> : <ScreenHeader title="Specialist" onBack={onBack}
         right={
           <>
             <Pressable onPress={toggleSaved} hitSlop={8}
@@ -348,7 +357,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
               <Ionicons name="share-social-outline" size={16} color={colors.text} />
             </Pressable>
           </>
-        } />
+        } />}
 
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         {/* profile block */}
@@ -372,6 +381,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
             <Text style={s.subtitle} numberOfLines={1}>
               {barber.specialty ?? 'Barber'} | {salonName}
             </Text>
+            {!!formerly && <Text style={s.formerly}>formerly {formerly}</Text>}
             {/* EXPL-28 — saving is instant and silent, so the only confirmation
                 is this. No sheet: `useSaved` is optimistic on purpose. */}
             {saved && (
@@ -449,6 +459,17 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
                 )}
               </Pressable>
             ) : <Text style={s.meta}>No bio yet.</Text>}
+
+            {!!barber.languages?.length && (
+              <>
+                <Text style={s.sectionTitle}>Languages in the chair</Text>
+                <View style={s.langRow}>
+                  {LANGUAGES.filter((l) => barber.languages!.includes(l.key)).map((l) => (
+                    <View key={l.key} style={s.langChip}><Text style={s.langText}>{l.label}</Text></View>
+                  ))}
+                </View>
+              </>
+            )}
 
             <Text style={s.sectionTitle}>Specialist contact</Text>
             <View style={s.contactRow}>
@@ -534,7 +555,12 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
 
       {/* pinned CTA */}
       <View style={s.cta}>
-        <PillButton title="Book Appointment"
+        {preview ? (
+          <View style={s.dead}>
+            <View style={s.deadBtn}><Text style={s.deadText}>BOOK {name.split(' ')[0].toUpperCase()}</Text></View>
+            <Text style={s.deadNote}>Dead in preview. You cannot book yourself, and nothing here writes to your day.</Text>
+          </View>
+        ) : <PillButton title="Book Appointment"
           onPress={() => {
             if (!selected) {
               setTab('services');
@@ -545,14 +571,48 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
             setSelectedTime(null);
             loadBooked(weekStartOf(today));
             setSlotMode(true);
-          }} />
+          }} />}
       </View>
+    </View>
+  );
+}
+
+// BPR-07 — the only thing preview adds. Everything under it is the real page a
+// customer opens, not a picture of one.
+function PreviewBar({ onDone }: { onDone: () => void }) {
+  return (
+    <View style={s.previewBar}>
+      <View style={s.grow}>
+        <Text style={s.previewEyebrow}>PREVIEW</Text>
+        <Text style={s.previewSub}>Exactly what a customer opens</Text>
+      </View>
+      <Pressable onPress={onDone} accessibilityRole="button"
+        style={({ pressed }) => [s.previewDone, pressed && s.pressed]}>
+        <Text style={s.previewDoneText}>Done</Text>
+      </Pressable>
     </View>
   );
 }
 
 const s = StyleSheet.create({
   screen: { flex: 1, paddingTop: TOP_INSET, paddingHorizontal: sp(5), backgroundColor: colors.surface },
+  previewBar: {
+    flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#0D0D0F',
+    marginHorizontal: -sp(5), marginTop: -TOP_INSET, paddingTop: TOP_INSET - 6,
+    paddingBottom: 12, paddingHorizontal: sp(5), marginBottom: sp(2),
+  },
+  previewEyebrow: { fontSize: 10, fontWeight: '700', letterSpacing: 1.5, color: colors.accent },
+  previewSub: { fontSize: 11.5, color: '#9A9CA3', marginTop: 2 },
+  previewDone: { backgroundColor: '#fff', borderRadius: radius.pill, paddingVertical: 8, paddingHorizontal: 15 },
+  previewDoneText: { fontSize: 12, fontWeight: '700', color: '#111' },
+  formerly: { fontSize: 11.5, color: colors.textTertiary, marginTop: 1 },
+  langRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
+  langChip: { borderWidth: 1, borderColor: '#DCD8CF', borderRadius: radius.pill, paddingVertical: 5, paddingHorizontal: 11 },
+  langText: { fontSize: 11.5, fontWeight: '600', color: '#5C5C58' },
+  dead: { gap: 8 },
+  deadBtn: { height: 50, borderRadius: 16, backgroundColor: '#C9C5BC', alignItems: 'center', justifyContent: 'center' },
+  deadText: { fontSize: 13, fontWeight: '800', letterSpacing: 0.5, color: '#F2F0EB' },
+  deadNote: { fontSize: 11, lineHeight: 16, color: colors.textSecondary, textAlign: 'center' },
   content: { paddingBottom: 120, gap: sp(3) },
   pressed: { opacity: 0.7 },
   grow: { flex: 1 },

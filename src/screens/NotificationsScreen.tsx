@@ -9,7 +9,11 @@ import { dark as D } from '../theme';
 // Turn 4 — 4b the inbox, 4c the settings behind its gear. What buzzes is decided
 // server-side by notif_should_push() (0032); this screen owns the toggles it reads.
 
-type Kind = 'booking_request' | 'reschedule' | 'cancellation' | 'checked_in' | 'wallet' | 'message' | 'review' | 'digest';
+// 'moderation' (0041) and 'shop_status' (0063) reach barbers too — a review taken
+// down or put back, a shop receipt. Without them here LOOK[kind] was undefined and
+// the whole inbox threw the first time one arrived.
+type Kind = 'booking_request' | 'reschedule' | 'cancellation' | 'checked_in' | 'wallet' | 'message' | 'review'
+  | 'digest' | 'moderation' | 'shop_status';
 
 type Notif = {
   id: string; kind: Kind; title: string; body: string | null;
@@ -38,6 +42,8 @@ const LOOK: Record<Kind, { icon: IconName; tint: string; bg: string }> = {
   message: { icon: 'message-circle', tint: D.sub, bg: D.card2 },
   review: { icon: 'star', tint: D.amber, bg: D.amberSoft },
   digest: { icon: 'trending-up', tint: D.sub, bg: D.card2 },
+  moderation: { icon: 'shield', tint: D.sub, bg: D.card2 },
+  shop_status: { icon: 'home', tint: D.amber, bg: D.amberSoft },
 };
 
 const GROUPS: Record<string, Kind[]> = {
@@ -58,22 +64,73 @@ function ago(iso: string) {
 
 const isToday = (iso: string) => new Date(iso).toDateString() === new Date().toDateString();
 
-export default function NotificationsScreen({ barberId, onBack, onOpenBooking }: {
+const ANSWERABLE: Kind[] = ['booking_request', 'reschedule'];
+
+// the live booking behind a request notification, as opposed to the frozen copy
+// of it that the notification row carries
+type Live = { status: string; starts_at: string; openAsk: boolean };
+
+const CLOSED: Record<string, string> = {
+  confirmed: 'Accepted', cancelled: 'Cancelled', completed: 'Done', no_show: 'No-show',
+};
+
+// 0015 leaves a request whose start time has passed sitting at 'pending' — no cron
+// kills it, the app is meant to render it dead (DayScheduleScreen says "request
+// expired"). null means still open; anything else replaces the Accept/Decline pair.
+function closedLabel(kind: Kind, b: Live | undefined, now: number): string | null {
+  if (!b) return 'No longer available';
+  if (kind === 'reschedule') {
+    if (b.status !== 'pending' && b.status !== 'confirmed') return CLOSED[b.status] ?? 'Closed';
+    return b.openAsk ? null : 'Answered';
+  }
+  if (b.status !== 'pending') return CLOSED[b.status] ?? 'Closed';
+  return new Date(b.starts_at).getTime() <= now ? 'Request expired' : null;
+}
+
+export default function NotificationsScreen({ barberId, onBack, onOpenBooking, onOpenAsk, onOpenReview }: {
   barberId: string; onBack: () => void; onOpenBooking?: (bookingId: string) => void;
+  /** G1 — a reschedule ask opens BDY-14, where its cost to the day is shown */
+  onOpenAsk?: (bookingId: string) => void;
+  /** G2 — a review opens BRV-09, the one review */
+  onOpenReview?: (bookingId: string) => void;
 }) {
   const [settings, setSettings] = useState(false);
   const [rows, setRows] = useState<Notif[] | null>(null);
   const [filter, setFilter] = useState<'all' | 'bookings' | 'money' | 'reviews'>('all');
+  const [live, setLive] = useState<Record<string, Live>>({});
+  const [now, setNow] = useState(() => Date.now()); // ticks so a request dies on screen at its start time
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.from('notifications')
       .select('id, kind, title, body, booking_id, amount_cents, read_at, created_at')
       .eq('user_id', barberId).order('created_at', { ascending: false }).limit(80);
     if (error) return Alert.alert('Could not load notifications', error.message);
-    setRows((data ?? []) as Notif[]);
+    const list = (data ?? []) as Notif[];
+    setRows(list);
+
+    // a notification is a snapshot of the moment it fired; the booking behind it has
+    // moved on since. Ask for the live row before offering to accept or decline it.
+    const ids = [...new Set(list
+      .filter((n) => n.booking_id && ANSWERABLE.includes(n.kind))
+      .map((n) => n.booking_id as string))];
+    if (!ids.length) return setLive({});
+    const [bookings, asks] = await Promise.all([
+      supabase.from('bookings').select('id, status, starts_at').in('id', ids),
+      supabase.from('reschedule_requests').select('booking_id')
+        .eq('status', 'pending').in('booking_id', ids),
+    ]);
+    const open = new Set((asks.data ?? []).map((r) => r.booking_id as string));
+    setLive(Object.fromEntries((bookings.data ?? []).map((b) => [b.id as string, {
+      status: b.status as string, starts_at: b.starts_at as string, openAsk: open.has(b.id),
+    }])));
   }, [barberId]);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   async function markAllRead() {
     setRows((cur) => cur?.map((n) => n.read_at ? n : { ...n, read_at: new Date().toISOString() }) ?? null);
@@ -106,6 +163,15 @@ export default function NotificationsScreen({ barberId, onBack, onOpenBooking }:
     load();
   }
 
+  // the routing audit's first rule: a tap lands on the one thing the row is about,
+  // never on a tab. Everything else that names a booking still opens the booking.
+  function open(n: Notif) {
+    if (!n.booking_id) return;
+    if (n.kind === 'reschedule' && onOpenAsk) return onOpenAsk(n.booking_id);
+    if (n.kind === 'review' && onOpenReview) return onOpenReview(n.booking_id);
+    onOpenBooking?.(n.booking_id);
+  }
+
   if (settings) {
     return <NotificationSettings barberId={barberId} onBack={() => setSettings(false)} />;
   }
@@ -117,13 +183,15 @@ export default function NotificationsScreen({ barberId, onBack, onOpenBooking }:
   const older = shown.filter((n) => !isToday(n.created_at));
 
   const row = (n: Notif, dim: boolean) => {
-    const look = LOOK[n.kind];
-    const actionable = (n.kind === 'booking_request' || n.kind === 'reschedule')
-      && !n.read_at && !!n.booking_id;
+    const look = LOOK[n.kind] ?? LOOK.digest;   // a kind added server-side must not take the inbox down
+    const answerable = ANSWERABLE.includes(n.kind) && !!n.booking_id;
+    const closed = answerable ? closedLabel(n.kind, live[n.booking_id!], now) : null;
+    const actionable = answerable && !closed && !n.read_at;
     return (
       <Pressable key={n.id}
-        onPress={() => { markRead(n); if (n.booking_id) onOpenBooking?.(n.booking_id); }}
-        accessibilityRole="button" accessibilityLabel={`${n.title}. ${n.body ?? ''}`}
+        onPress={() => { markRead(n); open(n); }}
+        accessibilityRole="button"
+        accessibilityLabel={`${n.title}. ${n.body ?? ''}${closed ? `. ${closed}` : ''}`}
         style={({ pressed }) => [
           dim ? s.rowDim : s.row, actionable && s.rowHot, pressed && s.pressed,
         ]}>
@@ -150,6 +218,12 @@ export default function NotificationsScreen({ barberId, onBack, onOpenBooking }:
               style={({ pressed }) => [s.accept, pressed && s.pressed]}>
               <T w="eb" size={12} c={D.bg}>Accept</T>
             </Pressable>
+          </View>
+        )}
+        {answerable && !!closed && (
+          <View style={s.closed}>
+            <Ico name="clock" size={13} color={D.sub} />
+            <T w="sb" size={12} c={D.sub}>{closed}</T>
           </View>
         )}
       </Pressable>
@@ -369,6 +443,10 @@ const s = StyleSheet.create({
   accept: {
     flex: 1.3, height: 38, borderRadius: 999, backgroundColor: D.green,
     alignItems: 'center', justifyContent: 'center',
+  },
+  closed: {
+    flexDirection: 'row', alignItems: 'center', gap: 7,
+    borderTopWidth: 1, borderTopColor: D.border, paddingTop: 11,
   },
 
   permCard: {

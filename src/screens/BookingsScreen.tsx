@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -32,6 +33,10 @@ import ChatScreen from './ChatScreen';
 import { HiddenScreen } from './OutboxScreen';
 import EarningsScreen from './EarningsScreen';
 import NotificationsScreen from './NotificationsScreen';
+import BarberReviewsScreen from './BarberReviewsScreen';
+import HeldBackScreen, { Held, loadHeld } from './HeldBackScreen';
+import RescheduleAskScreen from './RescheduleAskScreen';
+import { countWord } from '../lib/inboxRules';
 
 type BookingRow = {
   id: string;
@@ -65,6 +70,9 @@ const hhmm = (iso: string) => new Date(iso).toTimeString().slice(0, 5);
 const minLabel = (min: number) => new Date(0, 0, 0, 0, min).toTimeString().slice(0, 5);
 const isoDay = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+// BNT-05 is handed over once per cut; this remembers which cut it was
+const HELD_SEEN_KEY = 'held_seen_cut';
 
 const nameOf = (b: BookingRow, barberId: string) =>
   b.walk_in_name ?? (b.customer_id === barberId ? 'Walk-in' : b.customer?.full_name ?? 'Client');
@@ -112,6 +120,13 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [salonName, setSalonName] = useState<string | null>(null);
   const [inboxOpen, setInboxOpen] = useState(false);
+  // where the routing audit's gaps land: a reschedule ask (BDY-14), one review
+  // (BRV-09), and what silent-while-cutting held back (BNT-05)
+  const [askFor, setAskFor] = useState<string | null>(null);
+  const [reviewFor, setReviewFor] = useState<string | null>(null);
+  const [held, setHeld] = useState<Held | null>(null);
+  const [heldOpen, setHeldOpen] = useState(false);
+  const [heldSeen, setHeldSeen] = useState<string | null>(null);
   // turn 10 — standing is a fact about the shop, so it loads with the day
   const [standing, setStanding] = useState<Standing | null>(null);
   const [shop, setShop] = useState<ShopStatus | null>(null);   // 11b
@@ -159,11 +174,21 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     setBlocks(blk.data ?? []);
     const { count } = await supabase.from('notifications')
       .select('id', { count: 'exact', head: true })
-      .eq('barber_id', barberId).is('read_at', null);
+      // user_id: 0037 renamed the column, and barber_id made this count fail silently
+      .eq('user_id', barberId).is('read_at', null);
     setUnread(count ?? 0);
+    setHeld(await loadHeld(barberId));
   }, [barberId]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    AsyncStorage.getItem(HELD_SEEN_KEY).then(setHeldSeen).catch(() => {});
+  }, []);
+  // a reload can find nothing left to hand over (a new cut, a new day) while BNT-05
+  // is open; without this the dashboard came back with the tab bar still hidden
+  useEffect(() => {
+    if (heldOpen && !held) { setHeldOpen(false); onChromeHidden?.(false); }
+  }, [heldOpen, held]);
   // separate from load(): the day reloads constantly, standing changes weekly
   useEffect(() => {
     supabase.rpc('my_standing').then(({ data }) => { if (data) setStanding(data as Standing); });
@@ -223,6 +248,14 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     customerId: b.customer_id,
     walkInName: b.walk_in_name,
   });
+
+  function openHeld() {
+    if (!held) return;
+    setHeldSeen(held.cut.id);
+    AsyncStorage.setItem(HELD_SEEN_KEY, held.cut.id).catch(() => {});
+    setHeldOpen(true);
+    onChromeHidden?.(true);
+  }
 
   function openEarnings(v: boolean) {
     setShowEarnings(v);
@@ -308,6 +341,9 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
       : showEarnings ? () => openEarnings(false)
           : showQueue ? () => { setShowQueue(false); onChromeHidden?.(false); load(); }
             : inboxOpen ? () => { setInboxOpen(false); onChromeHidden?.(false); load(); }
+              : askFor ? () => { setAskFor(null); onChromeHidden?.(false); load(); }
+                : reviewFor ? () => { setReviewFor(null); onChromeHidden?.(false); }
+                  : heldOpen ? () => { setHeldOpen(false); onChromeHidden?.(false); }
                 // same condition as the render below, so back is never a
                 // no-op on a screen that is showing a back button
                 : (hidden || standing?.hidden) ? () => { setHidden(false); loadStanding(); }
@@ -431,6 +467,24 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
         {/* 11b — the shop is shut and he is still standing in it. Above the
             clocked-out banner because closing the shop outranks clocking out. */}
         {shop && <ShopClosedBanner st={shop} onReopened={loadShop} />}
+
+        {/* BNT-05 — the cut is done, and what the chair held back is handed over
+            here once per cut, rather than all of it buzzing at mark-done */}
+        {held && heldSeen !== held.cut.id && (
+          <View style={s.clockedCard}>
+            <View style={s.clockedIcon}><Ico name="scissors" size={16} color={D.amber} /></View>
+            <View style={s.grow}>
+              <T w="b" size={13} c={D.amber}>{countWord(held.items.length)} waited for you to finish</T>
+              <T size={11} c={D.sub} style={{ marginTop: 2 }}>
+                Held {hhmm(held.cut.started_at)}–{hhmm(held.cut.completed_at)} while you were cutting
+              </T>
+            </View>
+            <Pressable onPress={openHeld} accessibilityRole="button" accessibilityLabel="See what was held back"
+              style={({ pressed }) => [s.undoBtn, pressed && s.pressed]}>
+              <T w="eb" size={11} c={D.bg} ls={0.55}>SEE</T>
+            </Pressable>
+          </View>
+        )}
 
         {/* 1s — the clocked-out banner replaces nothing, it sits above the number */}
         {todayOff && (
@@ -824,6 +878,8 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
       <Pushed onBack={() => { shut(); load(); }} behind={dash}>
         <NotificationsScreen barberId={barberId}
           onBack={() => { shut(); load(); }}
+          onOpenAsk={(id) => { shut(); setAskFor(id); onChromeHidden?.(true); }}
+          onOpenReview={(id) => { shut(); setReviewFor(id); onChromeHidden?.(true); }}
           // a notification names a booking; the sheet it opens depends on whether
           // that booking is still a request. Unknown id (older than the loaded
           // window) just closes the inbox rather than opening the wrong thing.
@@ -832,6 +888,32 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
             shut();
             if (row) (row.status === 'pending' ? setRequest : setPanel)(row);
           }} />
+      </Pushed>
+    );
+  }
+  if (askFor) {
+    const shut = () => { setAskFor(null); onChromeHidden?.(false); load(); };
+    return (
+      <Pushed onBack={shut} behind={dash}>
+        <RescheduleAskScreen barberId={barberId} bookingId={askFor} onBack={shut} />
+      </Pushed>
+    );
+  }
+  if (reviewFor) {
+    const shut = () => { setReviewFor(null); onChromeHidden?.(false); };
+    return (
+      <Pushed onBack={shut} behind={dash}>
+        <BarberReviewsScreen barberId={barberId} openBookingId={reviewFor} onBack={shut} />
+      </Pushed>
+    );
+  }
+  if (heldOpen && held) {
+    const shut = () => { setHeldOpen(false); onChromeHidden?.(false); };
+    return (
+      <Pushed onBack={shut} behind={dash}>
+        <HeldBackScreen barberId={barberId} held={held} onBack={shut} onChanged={load}
+          onOpenAsk={(id) => { setHeldOpen(false); setAskFor(id); }}
+          onOpenReview={(id) => { setHeldOpen(false); setReviewFor(id); }} />
       </Pushed>
     );
   }

@@ -81,7 +81,7 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
 
   useEffect(() => {
     supabase.from('salons')
-      .select('id, name, address, district, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, profiles!barbers_id_fkey(full_name, avatar_url, phone), reviews!reviews_barber_id_fkey(rating), services(id, name, price_cents, duration_min, is_active, category))')
+      .select('id, name, address, district, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, languages, profiles!barbers_id_fkey(full_name, avatar_url, phone, previous_name, name_changed_at), reviews!reviews_barber_id_fkey(rating), services(id, name, price_cents, duration_min, is_active, category))')
       .order('name')
       .then(({ data, error }) => {
         if (error) return Alert.alert('Could not load salons', error.message);

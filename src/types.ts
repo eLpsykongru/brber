@@ -37,6 +37,8 @@ export type Barber = {
   salon_id: string | null;
   specialty: string | null;
   years_experience: number | null;
+  languages?: string[] | null;        // 0109 — BPR-06's languages in the chair
+  licence_expires_at?: string | null; // 0054
 };
 
 // shape the customer-facing specialist screens work with (embedded query result)
@@ -47,7 +49,12 @@ export type Specialist = {
   salon_status?: string; // salon membership; only 'approved' members show publicly
   specialty: string | null;
   years_experience: number | null;
-  profiles: { full_name: string | null; avatar_url: string | null; phone: string | null } | null;
+  languages?: string[] | null;   // 0109
+  profiles: {
+    full_name: string | null; avatar_url: string | null; phone: string | null;
+    // 0109 — the page reads "formerly …" for thirty days after a rename
+    previous_name?: string | null; name_changed_at?: string | null;
+  } | null;
   reviews: { rating: number }[];
   services: { id: string; name: string; price_cents: number; duration_min: number; is_active: boolean; category?: string }[];
 };

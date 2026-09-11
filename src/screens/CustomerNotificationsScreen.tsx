@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
 import {
-  Alert, Linking, Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View,
+  Alert, AppState, Linking, Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View,
 } from 'react-native';
 import { Display } from '../components/ui';
-import { pushPermission } from '../lib/push';
+import PushOff from '../components/PushOff';
+import { missedWhilePushOff } from '../lib/inboxRules';
+import { pushDeniedSince, pushPermission } from '../lib/push';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, shadow, TOP_INSET } from '../theme';
 
@@ -79,9 +81,11 @@ function bucket(iso: string): 'TODAY' | 'YESTERDAY' | 'EARLIER' {
   return 'EARLIER';
 }
 
-export default function CustomerNotificationsScreen({ userId, onBack, onOpenBooking, onRate }: {
+export default function CustomerNotificationsScreen({ userId, onBack, onOpenBooking, onRate, onOpenWallet }: {
   userId: string; onBack: () => void;
   onOpenBooking?: (bookingId: string) => void; onRate?: (bookingId: string) => void;
+  /** NTF-10 — a refund that could not reach the phone is still in the wallet */
+  onOpenWallet?: () => void;
 }) {
   const [rows, setRows] = useState<Notif[] | null>(null);
   const [settings, setSettings] = useState(false);
@@ -109,7 +113,8 @@ export default function CustomerNotificationsScreen({ userId, onBack, onOpenBook
   }
 
   if (settings) {
-    return <NotificationSettings userId={userId} onBack={() => setSettings(false)} />;
+    return <NotificationSettings userId={userId} onBack={() => setSettings(false)}
+      onOpenBooking={onOpenBooking} onOpenWallet={onOpenWallet} />;
   }
 
   const all = rows ?? [];
@@ -224,17 +229,46 @@ const MONEY_ROWS: { key: keyof Prefs; label: string; hint: string }[] = [
   { key: 'push_review_ask', label: 'Review reminders', hint: 'After a completed visit' },
 ];
 
-function NotificationSettings({ userId, onBack }: { userId: string; onBack: () => void }) {
+function NotificationSettings({ userId, onBack, onOpenBooking, onOpenWallet }: {
+  userId: string; onBack: () => void;
+  onOpenBooking?: (bookingId: string) => void; onOpenWallet?: () => void;
+}) {
   const [prefs, setPrefs] = useState<Prefs>(DEFAULTS);
   const [granted, setGranted] = useState<boolean | null>(null);
+  const [denied, setDenied] = useState(false);
+  const [missed, setMissed] = useState<Notif[] | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [probing, setProbing] = useState(false);
 
   useEffect(() => {
     supabase.from('notification_prefs').select('*').eq('user_id', userId).maybeSingle()
       .then(({ data }) => { if (data) setPrefs({ ...DEFAULTS, ...data }); });
-    pushPermission().then((p) => setGranted(p === 'granted'));
   }, [userId]);
+
+  // NTF-10 — the phone has the final say, and it can change under this screen:
+  // coming back from the phone's settings is an app-state change, so re-read then
+  const readPermission = useCallback(async () => {
+    const p = await pushPermission();
+    setGranted(p === 'granted');
+    setDenied(p === 'denied');
+    if (p !== 'denied') { setMissed(null); return; }
+    const since = new Date(Date.now() - 14 * 86_400_000).toISOString();
+    const [nt, at, deniedSince] = await Promise.all([
+      supabase.from('notifications')
+        .select('id, kind, title, body, booking_id, amount_cents, read_at, created_at')
+        .eq('user_id', userId).gte('created_at', since),
+      supabase.from('push_attempts').select('notification_id, note')
+        .eq('user_id', userId).gte('created_at', since),
+      pushDeniedSince(),
+    ]);
+    setMissed(missedWhilePushOff((nt.data ?? []) as Notif[], at.data ?? [], deniedSince));
+  }, [userId]);
+
+  useEffect(() => {
+    readPermission();
+    const sub = AppState.addEventListener('change', (st) => { if (st === 'active') readPermission(); });
+    return () => sub.remove();
+  }, [readPermission]);
 
   async function save(patch: Partial<Prefs>) {
     const next = { ...prefs, ...patch };
@@ -254,7 +288,7 @@ function NotificationSettings({ userId, onBack }: { userId: string; onBack: () =
             <Text style={s.prefHint}>{r.hint}</Text>
           </View>
           <Switch value={prefs[r.key] as boolean} onValueChange={(v) => save({ [r.key]: v } as Partial<Prefs>)}
-            trackColor={{ false: '#DDD9CF', true: colors.accent }} thumbColor="#fff" />
+            trackColor={{ false: '#DDD9CF', true: denied ? '#DDD9CF' : colors.accent }} disabled={denied} thumbColor="#fff" />
         </View>
       ))}
     </View>
@@ -284,6 +318,9 @@ function NotificationSettings({ userId, onBack }: { userId: string; onBack: () =
       </View>
 
       <ScrollView contentContainerStyle={s.list} showsVerticalScrollIndicator={false}>
+        {denied ? (
+          <PushOff missed={missed} onOpenBooking={onOpenBooking} onOpenWallet={onOpenWallet} />
+        ) : (<>
         {/* the OS has the final say; this card reports it rather than pretending */}
         <View style={s.permCard}>
           <View style={s.permIcon}>
@@ -315,7 +352,11 @@ function NotificationSettings({ userId, onBack }: { userId: string; onBack: () =
           <Text style={s.testText}>{probing ? 'Sending…' : 'Send me a test notification'}</Text>
           <Ionicons name="chevron-forward" size={14} color={colors.textTertiary} />
         </Pressable>
+        </>)}
 
+        {/* NTF-10 — with push off the switches stay, greyed and out of force */}
+        {denied && <Text style={s.section}>YOUR CHOICES, SAVED FOR LATER</Text>}
+        <View style={denied ? s.saved : s.savedOn} pointerEvents={denied ? 'none' : 'auto'}>
         <Text style={s.section}>QUEUE &amp; BOOKINGS</Text>
         <View style={s.card}>
           {QUEUE_ROWS.map((r) => (
@@ -326,7 +367,7 @@ function NotificationSettings({ userId, onBack }: { userId: string; onBack: () =
               </View>
               <Switch value={prefs[r.key] as boolean}
                 onValueChange={(v) => save({ [r.key]: v } as Partial<Prefs>)}
-                trackColor={{ false: '#DDD9CF', true: colors.accent }} thumbColor="#fff" />
+                trackColor={{ false: '#DDD9CF', true: denied ? '#DDD9CF' : colors.accent }} disabled={denied} thumbColor="#fff" />
             </View>
           ))}
           <Pressable onPress={() => setPickerOpen(true)} style={s.prefRow}
@@ -355,9 +396,15 @@ function NotificationSettings({ userId, onBack }: { userId: string; onBack: () =
               <Text style={s.prefHint}>Discounts from Tangier salons</Text>
             </View>
             <Switch value={prefs.push_offers} onValueChange={(v) => save({ push_offers: v })}
-              trackColor={{ false: '#DDD9CF', true: colors.accent }} thumbColor="#fff" />
+              trackColor={{ false: '#DDD9CF', true: denied ? '#DDD9CF' : colors.accent }} disabled={denied} thumbColor="#fff" />
           </View>
         </View>
+        </View>
+        {denied && (
+          <Text style={s.savedNote}>
+            These stay exactly as you set them. They start working again the moment you allow push.
+          </Text>
+        )}
       </ScrollView>
 
       <ReminderSheet visible={pickerOpen} value={prefs.reminder_min}
@@ -518,6 +565,9 @@ const s = StyleSheet.create({
   prefLabel: { fontSize: 14, fontWeight: '600', color: colors.text },
   prefHint: { fontSize: font.tiny, color: colors.textSecondary, marginTop: 2 },
   prefValue: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
+  saved: { gap: 14, opacity: 0.5 },
+  savedOn: { gap: 14 },
+  savedNote: { fontSize: 11, lineHeight: 16, color: colors.textSecondary, paddingHorizontal: 4, marginTop: -4 },
 
   // 15a
   scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)' },

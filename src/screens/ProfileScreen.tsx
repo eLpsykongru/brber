@@ -1,11 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import LocationPicker from '../components/LocationPicker';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Eyebrow, Ico, IconName, Screen, Serif, T, TAB_INSET, TopBar } from '../components/dark';
-import { Card, Chip, Field, PillButton, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
-import type { LatLng } from '../lib/geo';
+import { Chip, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
 import { useAndroidBack } from '../lib/back';
 import { Pushed } from '../components/motion';
@@ -33,6 +31,8 @@ import AvailabilityScreen from './AvailabilityScreen';
 import SalonScreen from './SalonScreen';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
 import PreviewPage from './PreviewPage';
+import BarberProfileEditScreen from './BarberProfileEditScreen';
+import BarberReviewsScreen from './BarberReviewsScreen';
 import BundleEditorScreen from './BundleEditorScreen';
 import CancellationsScreen from './CancellationsScreen';
 import WaitingListScreen from './WaitingListScreen';
@@ -54,7 +54,7 @@ type ProfileView =
   | 'menu' | 'edit' | 'bookings' | 'wallet' | 'coupons' | 'help' | 'faq' | 'invite' | 'support'
   | 'settings' | 'notifications' | 'password' | 'linked' | 'takedown' | 'appeal' | 'reply'
   | 'preview' | 'services' | 'bundles' | 'work' | 'schedule' | 'salon' | 'earnings'
-  | 'cancellations' | 'waitlist'
+  | 'cancellations' | 'waitlist' | 'reviews'
   // turn 39 — two things the app already half-had
   | 'standing'
   // turn 9 — where admin actions land in the shop
@@ -148,6 +148,13 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
         : onBack,
   );
 
+  // BPR-07 — the barber's own page the way a customer opens it, booking dead
+  function openOwnPage(from: ProfileView) {
+    if (!barber?.salon_id) return;
+    setPreview({ salonId: barber.salon_id, barberId: barber.id, from });
+    go('preview');
+  }
+
   function soon(feature: string) {
     Alert.alert(feature, 'Coming soon — see BACKLOG.md');
   }
@@ -190,8 +197,11 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     // keep the original editor: theirs carries bio, specialty and the shop.
     if (view === 'edit') {
       return barber
-        ? <EditProfile profile={profile} barber={barber} phone={phone}
-            onDone={() => { onProfileChanged(); go('menu'); }} onBack={back} />
+        ? <BarberProfileEditScreen profile={profile} barber={barber} avatarUrl={avatarUrl}
+            avatarBusy={avatarBusy} onAvatar={changeAvatar} onBack={back}
+            onSaved={() => { onProfileChanged(); back(); }}
+            onPreview={() => openOwnPage('edit')} onReviews={() => go('reviews')}
+            onCancellations={() => go('cancellations')} onHelp={() => go('help')} />
         : <EditProfileScreen profile={profile} onBack={back}
             onDone={() => { onProfileChanged(); go('menu'); }} />;
     }
@@ -202,6 +212,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     if (view === 'notifications') {
       return <CustomerNotificationsScreen userId={profile.id} onBack={back}
         onOpenBooking={(id) => { setOpenBookingId(id); go('bookings'); }}
+        onOpenWallet={() => go('wallet')}
         onRate={(id) => { setOpenBookingId(id); go('bookings'); }} />;
     }
     if (view === 'linked') {
@@ -259,6 +270,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
       const t: { salonId?: string; barberId?: string; from: ProfileView } =
         preview ?? { salonId: barber!.salon_id ?? undefined, from: 'menu' };
       return <PreviewPage salonId={t.salonId} barberId={t.barberId}
+        preview={!!barber && t.barberId === barber.id}
         onBack={() => { setPreview(null); back(); }}
         onBooked={() => { setPreview(null); go('bookings'); }}
         onChromeHidden={onChromeHidden} />;
@@ -272,6 +284,8 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     if (view === 'bundles' && barber) return <BundleEditorScreen onBack={back} />;
     // 8c — the pattern behind the reasons, only visible across bookings
     if (view === 'cancellations' && barber) return <CancellationsScreen onBack={back} />;
+    // G2 — BRV-08, the list of their own reviews a barber never had
+    if (view === 'reviews' && barber) return <BarberReviewsScreen barberId={barber.id} onBack={back} />;
     // 8h/8i — where turn 36's asks land
     if (view === 'waitlist' && barber) {
       return <WaitingListScreen barberId={barber.id} onBack={back} />;
@@ -353,7 +367,8 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   const menu = barber ? (
     <BarberProfile profile={profile} barber={barber} avatarUrl={avatarUrl}
       avatarBusy={avatarBusy} initials={initials} ownsSalon={ownsSalon}
-      onAvatar={changeAvatar} onSignOut={signOut} go={go} onBack={onBack} />
+      onAvatar={changeAvatar} onSignOut={signOut} go={go} onBack={onBack}
+      onPreview={() => openOwnPage('menu')} />
   ) : (
     <ScrollView style={s.screen} contentContainerStyle={s.content}>
       <ScreenHeader title="Profile" onBack={onBack} />
@@ -401,12 +416,12 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
 // 1q — the barber's profile. Same rows, dark canvas, with the numbers that
 // tell him whether his page is actually working.
 function BarberProfile({
-  profile, barber, avatarUrl, avatarBusy, initials, ownsSalon, onAvatar, onSignOut, go, onBack,
+  profile, barber, avatarUrl, avatarBusy, initials, ownsSalon, onAvatar, onSignOut, go, onBack, onPreview,
 }: {
   profile: Profile; barber: Barber; avatarUrl: string | null; avatarBusy: boolean;
   initials: string; ownsSalon: boolean;
   onAvatar: () => void; onSignOut: () => void; go: (v: ProfileView) => void;
-  onBack?: () => void;
+  onBack?: () => void; onPreview: () => void;
 }) {
   const [stats, setStats] = useState<{
     salon: string | null; rating: number | null; reviews: number;
@@ -441,6 +456,7 @@ function BarberProfile({
 
   const rows: { icon: IconName; label: string; value?: string; onPress: () => void }[] = [
     { icon: 'user', label: 'Your profile', onPress: () => go('edit') },
+    { icon: 'star', label: 'Your reviews', value: String(stats.reviews), onPress: () => go('reviews') },
     { icon: 'calendar', label: 'Schedule settings', onPress: () => go('schedule') },
     { icon: 'scissors', label: 'My services', value: String(stats.services), onPress: () => go('services') },
     { icon: 'image', label: 'My work', value: `${stats.photos} photo${stats.photos === 1 ? '' : 's'}`, onPress: () => go('work') },
@@ -473,13 +489,14 @@ function BarberProfile({
           <T size={12} c={D.sub} style={{ marginTop: 3 }}>
             {[barber.specialty ?? 'Barber', stats.salon].filter(Boolean).join(' · ')}
           </T>
-          <View style={d.ratingRow}>
+          <Pressable onPress={() => go('reviews')} hitSlop={6} accessibilityRole="button"
+            accessibilityLabel="Your reviews" style={({ pressed }) => [d.ratingRow, pressed && s.pressed]}>
             <T w="b" size={12}>{stats.rating != null ? `${stats.rating.toFixed(1)} ★` : 'No reviews yet'}</T>
             <T size={12} c={D.sub}>
               {stats.reviews} review{stats.reviews === 1 ? '' : 's'}
               {stats.clients != null ? ` · ${stats.clients} clients` : ''}
             </T>
-          </View>
+          </Pressable>
         </View>
       </View>
 
@@ -494,7 +511,7 @@ function BarberProfile({
           </T>
         </View>
         {barber.salon_id && (
-          <Pressable onPress={() => go('preview')} hitSlop={8} accessibilityRole="button"
+          <Pressable onPress={onPreview} hitSlop={8} accessibilityRole="button"
             style={({ pressed }) => pressed && s.pressed}>
             <T w="sb" size={12} c={D.accent}>Preview</T>
           </Pressable>
@@ -558,101 +575,6 @@ const d = StyleSheet.create({
 
 // "how customers see me" — fetches the salon in SalonCard shape and reuses the customer screen
 
-function EditProfile({ profile, barber, phone, onDone, onBack }: {
-  profile: Profile; barber: Barber | null; phone: string | null;
-  onDone: () => void; onBack: () => void;
-}) {
-  const [name, setName] = useState(profile.full_name ?? '');
-  const [phoneVal, setPhoneVal] = useState(phone ?? '');
-  const [specialty, setSpecialty] = useState(barber?.specialty ?? '');
-  const [yearsExp, setYearsExp] = useState(
-    barber?.years_experience != null ? String(barber.years_experience) : '',
-  );
-  const [busy, setBusy] = useState(false);
-  // owned salon (if any) → owner can set/move the map pin
-  const [salon, setSalon] = useState<{ id: string; name: string; lat: number | null; lng: number | null } | null>(null);
-  const [pickerOpen, setPickerOpen] = useState(false);
-
-  useEffect(() => {
-    if (!barber?.salon_id) return;
-    supabase.from('salons').select('id, name, lat, lng')
-      .eq('id', barber.salon_id).eq('owner_id', barber.id).maybeSingle()
-      .then(({ data }) => setSalon(data));
-  }, [barber?.salon_id]);
-
-  async function savePin(c: LatLng) {
-    setPickerOpen(false);
-    if (!salon) return;
-    const { error } = await supabase.from('salons')
-      .update({ lat: c.latitude, lng: c.longitude }).eq('id', salon.id);
-    if (error) Alert.alert('Could not save location', error.message);
-    else setSalon({ ...salon, lat: c.latitude, lng: c.longitude });
-  }
-
-  async function save() {
-    if (!name.trim()) return Alert.alert('Missing name', 'Your name cannot be empty.');
-    setBusy(true);
-    const { error } = await supabase.from('profiles')
-      .update({ full_name: name.trim(), phone: phoneVal.trim() || null })
-      .eq('id', profile.id);
-    let barberError = null;
-    if (!error && barber) {
-      const years = parseInt(yearsExp, 10);
-      const res = await supabase.from('barbers').update({
-        specialty: specialty.trim() || null,
-        years_experience: Number.isInteger(years) && years >= 0 ? years : null,
-      }).eq('id', barber.id);
-      barberError = res.error;
-    }
-    setBusy(false);
-    const err = error ?? barberError;
-    if (err) Alert.alert('Could not save', err.message);
-    else onDone();
-  }
-
-  return (
-    <ScrollView style={s.screen} contentContainerStyle={s.content}>
-      <ScreenHeader title="Your profile" onBack={onBack} />
-      <Card>
-        <Text style={s.label}>Full name</Text>
-        <Field value={name} onChangeText={setName} placeholder="Your name" />
-        <Text style={s.label}>Phone</Text>
-        <Field value={phoneVal} onChangeText={setPhoneVal} placeholder="Phone" keyboardType="phone-pad" />
-        {barber && (
-          <>
-            <Text style={s.label}>Specialty</Text>
-            <Field value={specialty} onChangeText={setSpecialty} placeholder="e.g. Barber, Fade specialist" />
-            <Text style={s.label}>Years of experience</Text>
-            <Field value={yearsExp} onChangeText={setYearsExp} placeholder="e.g. 8" keyboardType="number-pad" />
-          </>
-        )}
-        {salon && (
-          <>
-            <Text style={s.label}>Salon location ({salon.name})</Text>
-            <TouchableOpacity style={s.locationBtn} onPress={() => setPickerOpen(true)}
-              accessibilityLabel="Set salon location on map">
-              <Ionicons name={salon.lat != null ? 'checkmark-circle' : 'location-outline'} size={20}
-                color={salon.lat != null ? colors.success : colors.accent} />
-              <Text style={s.locationBtnText}>
-                {salon.lat != null ? 'On the map — tap to move the pin' : 'Set location on map'}
-              </Text>
-            </TouchableOpacity>
-          </>
-        )}
-        <View style={s.saveRow}>
-          <PillButton title="Save changes" onPress={save} loading={busy} />
-        </View>
-      </Card>
-      {salon && (
-        <LocationPicker visible={pickerOpen}
-          initial={salon.lat != null && salon.lng != null
-            ? { latitude: salon.lat, longitude: salon.lng } : null}
-          onPick={savePin} onClose={() => setPickerOpen(false)} />
-      )}
-    </ScrollView>
-  );
-}
-
 const s = StyleSheet.create({
   screen: { flex: 1, paddingTop: TOP_INSET, backgroundColor: colors.surface },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
@@ -688,13 +610,4 @@ const s = StyleSheet.create({
   rowIconDanger: { backgroundColor: colors.accentSoft },
   rowLabel: { flex: 1, fontSize: font.body, fontWeight: '600', color: colors.text },
   rowLabelDanger: { color: colors.accent },
-
-  label: { fontSize: font.small, fontWeight: '600', color: colors.textSecondary, marginTop: sp(2) },
-  saveRow: { marginTop: sp(3) },
-  locationBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: sp(2),
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.md,
-    paddingVertical: sp(3), backgroundColor: colors.surface,
-  },
-  locationBtnText: { fontSize: font.body, fontWeight: '600', color: colors.text },
 });

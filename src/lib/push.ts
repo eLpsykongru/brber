@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
@@ -28,6 +29,32 @@ Notifications.setNotificationHandler({
 });
 
 const inExpoGo = Constants.appOwnership === 'expo';
+
+// NTF-10 — the server cannot tell a phone that turned push off from one that got
+// the push: Expo accepts the token either way. The phone can. The first moment it
+// is seen denied is remembered, so "what you missed" starts there and claims
+// nothing from before it.
+const DENIED_KEY = 'push_denied_seen_at';
+
+async function notePermission(status: string) {
+  try {
+    if (status === 'granted') await AsyncStorage.removeItem(DENIED_KEY);
+    else if (status === 'denied' && !(await AsyncStorage.getItem(DENIED_KEY))) {
+      await AsyncStorage.setItem(DENIED_KEY, new Date().toISOString());
+    }
+  } catch {
+    // a convenience only: without it NTF-10 counts just what the server never tried
+  }
+}
+
+/** When this phone was first seen with push denied, or null if it never was. */
+export async function pushDeniedSince(): Promise<string | null> {
+  try {
+    return await AsyncStorage.getItem(DENIED_KEY);
+  } catch {
+    return null;
+  }
+}
 
 /** Accept / Decline straight from the banner, without opening the app. */
 async function registerCategory() {
@@ -71,6 +98,7 @@ export async function registerPush(userId: string): Promise<string | null> {
   const existing = await Notifications.getPermissionsAsync();
   let status = existing.status;
   if (status !== 'granted') status = (await Notifications.requestPermissionsAsync()).status;
+  await notePermission(status);
   if (status !== 'granted') return null;
 
   const projectId = Constants.expoConfig?.extra?.eas?.projectId
@@ -87,6 +115,7 @@ export async function registerPush(userId: string): Promise<string | null> {
 /** Whether the OS is letting anything through — drives 4c's "Push is on" card. */
 export async function pushPermission(): Promise<'granted' | 'denied' | 'undetermined'> {
   const { status } = await Notifications.getPermissionsAsync();
+  await notePermission(status);
   return status === 'granted' ? 'granted' : status === 'denied' ? 'denied' : 'undetermined';
 }
 

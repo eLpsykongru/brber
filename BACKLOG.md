@@ -2307,3 +2307,63 @@ Three things it deliberately cannot do, and says so in its own output:
   0081's guard forbids moving a run's window once it exists. Seed or wait.
 - **the ops call** — drivable end to end, but it is two people on a phone, so it
   is worth doing on the screen rather than in a script.
+
+## Notification routing + barber profile handoff (2026-09-11)
+The Claude Design handoff "Notification routing + barber profile (T4)". Several
+of its screens state rules the schema does not back, so this records what
+shipped and every line that was changed or left out, with why.
+
+Shipped:
+- **G1 · BDY-14/15** — `RescheduleAskScreen`. A reschedule notification opens
+  the ask with its cost to the day (fit against hours, breaks, buffers and
+  bookings; waitlist asks for both days; notice on the slot it empties) and,
+  after a yes, the day with that slot and OFFER IT TO THE WAITLIST. No migration.
+- **G2 · BRV-08/09** — `BarberReviewsScreen`: breakdown, filters, one review
+  with reply (`PublicReplyScreen`) and report (`review_flag`). From Profile and
+  from a review notification.
+- **G3 · BNT-05** — `HeldBackScreen` plus a dashboard card once per finished
+  cut. 0108 adds the one exception, `notification_prefs.cancel_breaks_silence`.
+- **G3 · NTF-10** — `PushOff` replaces the customer settings header when the
+  phone denies push; the switches stay, greyed and out of force.
+- **T4 · BPR-06/07/08** — `BarberProfileEditScreen` replaces the light editor
+  (the owner's map pin moved with it); preview opens the barber's own page with
+  booking dead; 0109 adds `barbers.languages` and a server-side name lock with a
+  thirty-day "formerly".
+- Fixed on the way: the barber inbox threw on `moderation`/`shop_status` rows,
+  and the dashboard bell filtered on `barber_id`, which 0037 renamed.
+
+Changed from the mock, deliberately:
+- Copy about customers is pronoun-free ("GIVE ANAS 16:00", not "GIVE HIM").
+- BDY-14 has no customer quote (0034 stores none); demand reads "asked for that
+  day" (asks are per day, 0050); "already paid" only when a deposit covers it.
+- BDY-15 drops "the two who wanted 16:00 have been told" and "no second move
+  today" — neither happens.
+- BRV-08 drops "the 4.9 is the last twelve months" (every rating in the app is
+  all-time) and tags (never stored). BRV-09's "yes or no, in writing" became what
+  happens: a removal is notified, a keep is not.
+- BNT-05: requests die at their start time (0015), not "in 2 h"; the switch's
+  "no sound" is dropped, because the push still carries sound.
+- NTF-10 counts pushes the server never tried, plus those sent after the phone
+  was first seen denied. Nothing earlier is claimed.
+- BPR-06 shows the phone without "verified" and no licence name; BPR-07 has no
+  "98% kept" or "30′" tiles, because it is the real customer page.
+
+Still open:
+- **Push-tap deep links.** The routing table's promise (a tap lands on the thing)
+  holds only inside the in-app inbox; `onBannerAction` ignores a plain tap.
+  **Trigger:** the first build that delivers push to barbers.
+- **Requests expire in 2 h** (the handoff's contract) instead of at start time.
+  **Trigger:** a product decision — it changes what customers wait on.
+- **Waitlist asks for a time**, which would let BDY-14 say "asked for 16:00" and
+  tell those people it went. **Trigger:** the ask sheet grows a time.
+- **A message on a reschedule ask.** **Trigger:** BOOK-08 gains a note field.
+- **Owner consent for a name containing a shop's name, and the licence-name
+  check (BPR-08).** **Trigger:** an owner-side design, or the first barber who
+  renames after a shop.
+- **Review tags; a twelve-month rating window.** **Trigger:** LeaveReviewScreen
+  collects tags / ops decides ratings age out (then apply it in one place).
+- **Held back is derived from the cut, not queued.** One push at mark-done would
+  need a trigger on `bookings.completed_at`. **Trigger:** barbers miss the card.
+
+Apply 0108 and 0109 before shipping this build: Explore, Discover and the barber
+editor select the new columns and fail without them.

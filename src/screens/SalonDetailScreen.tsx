@@ -48,12 +48,14 @@ function timeAgo(iso: string) {
   return m < 12 ? `${m}mo ago` : `${Math.floor(m / 12)}y ago`;
 }
 
-export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, onBooked, initialBarberId }: {
+export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, onBooked, initialBarberId, preview }: {
   salon: SalonCard; km?: number | null; onBack: () => void; onChromeHidden?: (hidden: boolean) => void;
   // where to go once a booking is finished - the salon page is not it
   onBooked?: () => void;
   // opened straight onto one barber (from Saved) instead of the shop's About tab
   initialBarberId?: string;
+  /** BPR-07 — a barber previewing their own page: back from it ends the preview */
+  preview?: boolean;
 }) {
   const [tab, setTab] = useState<Tab>('about');
   const [photos, setPhotos] = useState<{ name: string; url: string }[]>([]);
@@ -89,7 +91,7 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
   }, [salon.id]);
 
   // a barber page opened from the salon page is one level deeper again
-  useAndroidBack(profileBarber ? () => setProfileBarber(null) : null);
+  useAndroidBack(profileBarber ? () => (preview ? onBack() : setProfileBarber(null)) : null);
 
   // 39a — read the shop's own switch before offering a time. `salon_closure`
   // and the booking trigger both go through `salon_open`, so the page can never
@@ -376,9 +378,10 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
 
   if (profileBarber) {
     return (
-      <Pushed onBack={() => setProfileBarber(null)} behind={shop}>
+      <Pushed onBack={preview ? onBack : () => setProfileBarber(null)} behind={shop}>
         <BarberDetailScreen barber={profileBarber} salonName={salon.name} onBooked={onBooked}
-          onBack={() => setProfileBarber(null)} onChromeHidden={onChromeHidden} />
+          onBack={preview ? onBack : () => setProfileBarber(null)} onChromeHidden={onChromeHidden}
+          preview={preview} />
       </Pushed>
     );
   }

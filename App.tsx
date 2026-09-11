@@ -14,7 +14,7 @@ import { SUPPORT_PHONE } from './src/screens/SupportScreens';
 
 /** 38h — what my_account_state() (0056) answers. */
 type Account = { suspended: boolean; reason: string | null; since: string | null };
-import { onBannerAction, registerPush } from './src/lib/push';
+import { onBannerAction, openLaunchResponse, registerPush } from './src/lib/push';
 import { useAndroidBack } from './src/lib/back';
 import { supabase } from './src/lib/supabase';
 import { SessionExpiredSheet, SetPasswordScreen } from './src/screens/AccountScreens';
@@ -117,6 +117,8 @@ export default function App() {
     if (!userId) return;
     registerPush(userId).catch(() => {});
     const sub = onBannerAction(() => { if (session) loadUser(session); });
+    // a banner tap that launched the app from closed came before this listener existed
+    openLaunchResponse(() => { if (session) loadUser(session); });
     return () => sub.remove();
   }, [userId, session, loadUser]);
 

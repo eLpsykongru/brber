@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
+import type { NotificationResponse } from 'expo-notifications';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { supabase } from './supabase';
@@ -124,17 +125,60 @@ export async function pushPermission(): Promise<'granted' | 'denied' | 'undeterm
  * the lock screen and acting in the app cannot diverge.
  */
 export function onBannerAction(onHandled: () => void) {
-  return Notifications.addNotificationResponseReceivedListener(async (res) => {
-    const data = res.notification.request.content.data as { bookingId?: string } | undefined;
-    const id = data?.bookingId;
-    if (!id) return onHandled();
-    if (res.actionIdentifier === 'ACCEPT') {
-      await supabase.rpc('accept_booking', { p_booking: id });
-    } else if (res.actionIdentifier === 'DECLINE') {
-      await supabase.rpc('cancel_booking', { p_booking: id, p_reason: 'Declined from the notification' });
-    }
-    onHandled();
-  });
+  return Notifications.addNotificationResponseReceivedListener((res) => { handleResponse(res, onHandled); });
+}
+
+/** Where a tapped banner asks to go. The screen that owns that place subscribes. */
+export type BannerOpen = { kind: string; bookingId: string };
+
+const openers = new Set<(t: BannerOpen) => void>();
+// a tap that launched the app lands before any screen is listening; it waits here
+let waiting: BannerOpen | null = null;
+const handled = new Set<string>();
+
+/** Banner taps that name a destination (Notification Routing). Returns the unsubscribe. */
+export function onBannerOpen(fn: (t: BannerOpen) => void): () => void {
+  openers.add(fn);
+  if (waiting) { const t = waiting; waiting = null; fn(t); }
+  return () => { openers.delete(fn); };
+}
+
+// the ways a banner opens the app rather than resolving in place: a plain tap,
+// and 8a's REPLY / OFFER on a cancellation
+const OPENS = [Notifications.DEFAULT_ACTION_IDENTIFIER, 'REPLY', 'OFFER'];
+
+async function handleResponse(res: NotificationResponse, onHandled: () => void) {
+  const key = `${res.notification.request.identifier}:${res.actionIdentifier}`;
+  if (handled.has(key)) return;
+  handled.add(key);
+  // handled now, so a later cold start does not route to it all over again. The
+  // native method can be missing from an older installed build, where this throws —
+  // and a throw here would take banner Accept/Decline down with it.
+  try { Notifications.clearLastNotificationResponse(); } catch { /* nothing to clear on this build */ }
+
+  const data = res.notification.request.content.data as { bookingId?: string; kind?: string } | undefined;
+  const id = data?.bookingId;
+  if (!id) return onHandled();
+  if (res.actionIdentifier === 'ACCEPT') {
+    await supabase.rpc('accept_booking', { p_booking: id });
+  } else if (res.actionIdentifier === 'DECLINE') {
+    await supabase.rpc('cancel_booking', { p_booking: id, p_reason: 'Declined from the notification' });
+  } else if (data?.kind && OPENS.includes(res.actionIdentifier)) {
+    const t = { kind: data.kind, bookingId: id };
+    if (openers.size) openers.forEach((fn) => fn(t));
+    else waiting = t;
+  }
+  onHandled();
+}
+
+/**
+ * A tap that launched the app from closed happened before any listener existed,
+ * so the listener never hears it. Read it once here instead.
+ */
+export function openLaunchResponse(onHandled: () => void) {
+  let res: NotificationResponse | null = null;
+  try { res = Notifications.getLastNotificationResponse(); } catch { return; }   // older native build
+  if (res) handleResponse(res, onHandled);
 }
 
 export async function clearBadge() {

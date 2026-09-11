@@ -87,12 +87,15 @@ function closedLabel(kind: Kind, b: Live | undefined, now: number): string | nul
   return new Date(b.starts_at).getTime() <= now ? 'Request expired' : null;
 }
 
-export default function NotificationsScreen({ barberId, onBack, onOpenBooking, onOpenAsk, onOpenReview }: {
+export default function NotificationsScreen({ barberId, onBack, onOpenBooking, onOpenAsk, onOpenReview, onOpenGap }: {
   barberId: string; onBack: () => void; onOpenBooking?: (bookingId: string) => void;
   /** G1 — a reschedule ask opens BDY-14, where its cost to the day is shown */
   onOpenAsk?: (bookingId: string) => void;
   /** G2 — a review opens BRV-09, the one review */
   onOpenReview?: (bookingId: string) => void;
+  /** BDY-06 — a cancellation opens the gap it left on the day timeline. It used to go
+   *  through onOpenBooking, which only knows live bookings, so the tap did nothing. */
+  onOpenGap?: (bookingId: string) => void;
 }) {
   const [settings, setSettings] = useState(false);
   const [rows, setRows] = useState<Notif[] | null>(null);
@@ -169,6 +172,7 @@ export default function NotificationsScreen({ barberId, onBack, onOpenBooking, o
     if (!n.booking_id) return;
     if (n.kind === 'reschedule' && onOpenAsk) return onOpenAsk(n.booking_id);
     if (n.kind === 'review' && onOpenReview) return onOpenReview(n.booking_id);
+    if (n.kind === 'cancellation' && onOpenGap) return onOpenGap(n.booking_id);
     onOpenBooking?.(n.booking_id);
   }
 

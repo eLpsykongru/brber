@@ -86,19 +86,20 @@ function RelStars({ n }: { n: number }) {
   );
 }
 
-export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefillName, prefillServiceId, preferMin }: {
+export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefillName, prefillServiceId, preferMin, initialDay }: {
   barberId: string;
   onBack: () => void;
   autoAddNow?: boolean;    // open the add sheet at today's next free slot on arrival
   prefillName?: string;    // client name prefilled in the add sheet (quick add → existing client)
   prefillServiceId?: string; // client's usual service — listed first with a USUAL tag
   preferMin?: number;      // client's usual time — auto-open at the nearest free slot
+  initialDay?: string;     // BDY-06: a cancellation opens the day it left a hole in
 }) {
   const [windows, setWindows] = useState<Window[]>([]);
   const [daysOff, setDaysOff] = useState<string[]>([]);
   const [blocks, setBlocks] = useState<BlockRow[]>([]);
   const [bufferMin, setBufferMin] = useState(0);
-  const [selectedDay, setSelectedDay] = useState<Date>(new Date());
+  const [selectedDay, setSelectedDay] = useState<Date>(() => (initialDay ? new Date(initialDay) : new Date()));
   const [allBookings, setAllBookings] = useState<DayBooking[]>([]);
   const [history, setHistory] = useState<Hist>({});
   const [services, setServices] = useState<Service[]>([]);
@@ -157,6 +158,13 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
   const load = useCallback(async () => {
     const from = new Date(); from.setHours(0, 0, 0, 0);
     const to = new Date(from.getTime() + 14 * 86_400_000);
+    // a cancellation can sit outside the fortnight (earlier today, or weeks out);
+    // the day it opens on has to be loaded or its timeline reads as empty
+    if (initialDay) {
+      const d = new Date(initialDay); d.setHours(0, 0, 0, 0);
+      if (d.getTime() < from.getTime()) from.setTime(d.getTime());
+      if (d.getTime() + 86_400_000 > to.getTime()) to.setTime(d.getTime() + 86_400_000);
+    }
     const [bk, av, off, blk, sv, buf] = await Promise.all([
       supabase.from('bookings')
         .select('id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, services(name), customer:profiles!customer_id(full_name, avatar_url, phone)')
@@ -179,7 +187,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     setServices(sv.data ?? []);
     if (buf.data) setBufferMin(buf.data.buffer_before_min + buf.data.buffer_after_min);
     setLoaded(true);
-  }, [barberId]);
+  }, [barberId, initialDay]);
 
   useEffect(() => {
     load();

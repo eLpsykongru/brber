@@ -105,13 +105,15 @@ function MenuRow({ icon, label, onPress, danger }: {
   );
 }
 
-export default function BookingsScreen({ barber, profile, phone, onProfileChanged, onChromeHidden, goSchedule }: {
+export default function BookingsScreen({ barber, profile, phone, onProfileChanged, onChromeHidden, goSchedule, onOpenGap }: {
   barber: Barber;
   profile: Profile;
   phone: string | null;
   onProfileChanged: () => void;
   onChromeHidden?: (hidden: boolean) => void;
   goSchedule: () => void;
+  /** BDY-06 — a cancellation opens the day it left a hole in; HomeScreen owns the day */
+  onOpenGap: (bookingId: string) => void;
 }) {
   const barberId = barber.id;
   const [bookings, setBookings] = useState<BookingRow[] | null>(null); // null = first load in flight
@@ -880,6 +882,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
           onBack={() => { shut(); load(); }}
           onOpenAsk={(id) => { shut(); setAskFor(id); onChromeHidden?.(true); }}
           onOpenReview={(id) => { shut(); setReviewFor(id); onChromeHidden?.(true); }}
+          onOpenGap={(id) => { shut(); onOpenGap(id); }}
           // a notification names a booking; the sheet it opens depends on whether
           // that booking is still a request. Unknown id (older than the loaded
           // window) just closes the inbox rather than opening the wrong thing.

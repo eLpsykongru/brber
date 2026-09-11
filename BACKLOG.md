@@ -2349,8 +2349,11 @@ Changed from the mock, deliberately:
   "98% kept" or "30′" tiles, because it is the real customer page.
 
 Still open:
-- **Push-tap deep links.** The routing table's promise (a tap lands on the thing)
-  holds only inside the in-app inbox; `onBannerAction` ignores a plain tap.
+- **Push-tap deep links, beyond cancellations.** A cancellation — tapped in the
+  inbox, tapped on its banner, or its banner's Reply/Offer, including when the tap
+  launches the app from closed — now lands on BDY-06, the day timeline on that
+  booking's day. Every other kind still opens the app wherever it was.
+  `onBannerOpen` (push.ts) is the bus: a screen that owns a destination subscribes.
   **Trigger:** the first build that delivers push to barbers.
 - **Requests expire in 2 h** (the handoff's contract) instead of at start time.
   **Trigger:** a product decision — it changes what customers wait on.

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import QuickAddSheet, { QuickPick } from '../components/QuickAddSheet';
 import TabBar, { TabItem } from '../components/TabBar';
 import { useAndroidBack } from '../lib/back';
+import { onBannerOpen } from '../lib/push';
 import { supabase } from '../lib/supabase';
 import { colors } from '../theme';
 import type { Barber, Profile } from '../types';
@@ -49,7 +50,11 @@ const BARBER_PROFILE_TAB: TabItem = { key: 'profile', label: 'Profile', icon: 'p
 // Salon management lives in Profile → Salon management, not a tab (keeps Clients in the bar).
 const WALLET_TAB: TabItem = { key: 'wallet', label: 'Wallet', icon: 'wallet', iconOutline: 'wallet-outline' };
 
-type DayOpts = { autoAddNow?: boolean; prefillName?: string; prefillServiceId?: string; preferMin?: number };
+type DayOpts = {
+  autoAddNow?: boolean; prefillName?: string; prefillServiceId?: string; preferMin?: number;
+  /** open on this booking's day instead of today (BDY-06) */
+  day?: string;
+};
 
 // ponytail: state-based tabs, no navigation lib — Android hardware-back doesn't walk
 // back through inner screens yet; adopt React Navigation when that bites real users.
@@ -95,6 +100,25 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
     setChromeHidden(open);
   }
 
+  // BDY-06 — a cancellation lands on the hole it left: the day timeline, on that
+  // booking's day, where CancelledGap draws the reason and what to do with the slot.
+  // The same door from the inbox and from a tapped banner (Notification Routing).
+  async function openGap(bookingId: string) {
+    const { data, error } = await supabase.from('bookings').select('starts_at')
+      .eq('id', bookingId).maybeSingle();
+    if (error || !data) {
+      Alert.alert('Could not open that cancellation', error?.message ?? 'The booking is no longer there.');
+      return;
+    }
+    setTab('home');
+    openDay(true, { day: data.starts_at as string });
+  }
+
+  useEffect(() => {
+    if (!barber) return;
+    return onBannerOpen((t) => { if (t.kind === 'cancellation') openGap(t.bookingId); });
+  }, [barber?.id]);
+
   // 1c adds the walk-in itself; 'now' just means "show me the day it landed in"
   function onQuickPick({ mode, name, serviceId, preferMin }: QuickPick) {
     setQuickOpen(false);
@@ -103,14 +127,15 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
 
   let content;
   if (barber && dayOpen) {
-    content = <DayScheduleScreen barberId={barber.id} onBack={() => openDay(false)}
+    content = <DayScheduleScreen key={dayOpts.day ?? 'today'} barberId={barber.id} onBack={() => openDay(false)}
+      initialDay={dayOpts.day}
       autoAddNow={dayOpts.autoAddNow} prefillName={dayOpts.prefillName}
       prefillServiceId={dayOpts.prefillServiceId} preferMin={dayOpts.preferMin} />;
   } else if (barber) {
     if (tab === 'home') {
       content = <BookingsScreen barber={barber} profile={profile} phone={phone}
         onProfileChanged={onProfileChanged} onChromeHidden={setChromeHidden}
-        goSchedule={() => openDay(true)} />;
+        goSchedule={() => openDay(true)} onOpenGap={openGap} />;
     }
     else if (tab === 'calendar') content = <CalendarScreen barberId={barber.id} onChromeHidden={setChromeHidden} />;
     else if (tab === 'clients') content = <ClientsScreen barberId={barber.id} onChromeHidden={setChromeHidden} />;

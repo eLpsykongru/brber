@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert, Linking, Modal, Pressable, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { Display } from '../components/ui';
+import { isUuid, parseShopCode } from '../lib/shopCode';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow } from '../theme';
 
@@ -12,49 +13,75 @@ import { colors, font, radius, serif, shadow } from '../theme';
 //
 // The shop scans nothing: the customer's phone reads the code by the mirror.
 // That code is the one the barber side already prints — src/lib/qr.ts encodes
-// https://sterncut.ma/q/<salonId>[?b=<barberId>].
+// https://sterncut.ma/q/<shop code>[?b=<barber code>], and posters printed
+// before 0110 carry uuids in the same places.
 
 type Est = { barber_id: string; name: string; ahead: number; wait_min: number };
 type Service = { id: string; name: string; price_cents: number; barber_id: string };
 
 const dh = (c: number) => (c / 100).toFixed(0);
 
-/** Pull the salon (and optional barber) out of a scanned code or a typed one. */
-export function parseShopCode(raw: string): { salon: string; barber?: string } | null {
-  const text = raw.trim();
-  const uuid = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
-  const m = text.match(new RegExp(`/q/(${uuid.source})`, 'i')) ?? text.match(uuid);
-  if (!m) return null;
-  const b = text.match(new RegExp(`[?&]b=(${uuid.source})`, 'i'));
-  return { salon: m[1] ?? m[0], barber: b?.[1] };
-}
-
 // ---- 27a -----------------------------------------------------------------
-export default function CheckInScreen({ onClose, onJoined }: {
+export default function CheckInScreen({ onClose, onJoined, initialCode }: {
   onClose: () => void; onJoined: (bookingId: string) => void;
+  /** option (b): the shop's link that opened the app — no camera, straight to its sheet */
+  initialCode?: string | null;
 }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState<{ salon: string; barber?: string } | null>(null);
   const [manual, setManual] = useState(false);
   const [code, setCode] = useState('');
   const [torch, setTorch] = useState(false);
+  // the camera reports a code many times a second; one lookup at a time
+  const looking = useRef(false);
 
-  useEffect(() => { if (!permission?.granted) requestPermission(); }, [permission?.granted]);
+  useEffect(() => { if (!initialCode && !permission?.granted) requestPermission(); }, [permission?.granted]);
   // 38b — a blocked camera opens the typed path rather than parking him in front
   // of a dead viewfinder with the way through as a footnote
-  useEffect(() => { if (permission && !permission.granted) setManual(true); }, [permission?.granted]);
+  useEffect(() => {
+    if (!initialCode && permission && !permission.granted) setManual(true);
+  }, [permission?.granted]);
+  // a link that turns out not to be a shop closes the check-in it opened
+  useEffect(() => {
+    if (initialCode) take(initialCode).then((ok) => { if (!ok) onClose(); });
+  }, [initialCode]);
 
-  function take(raw: string) {
+  async function take(raw: string): Promise<boolean> {
+    if (looking.current) return false;
     const parsed = parseShopCode(raw);
-    if (!parsed) return Alert.alert('Not a Sterncut code', 'That code is not one of ours.');
+    if (!parsed) {
+      Alert.alert('Not a Sterncut code', 'That code is not one of ours.');
+      return false;
+    }
+    let ids: { salon: string; barber?: string } = { salon: parsed.shop, barber: parsed.barber };
+    // 0110 — six characters name the shop; the sheet below works in uuids
+    if (!isUuid(parsed.shop) || (parsed.barber && !isUuid(parsed.barber))) {
+      looking.current = true;
+      const { data, error } = await supabase.rpc('resolve_shop_code',
+        { p_shop: parsed.shop, p_barber: parsed.barber ?? null });
+      looking.current = false;
+      if (error) {
+        Alert.alert('Could not check that code', error.message);
+        return false;
+      }
+      const found = data as { salon: string | null; barber: string | null } | null;
+      if (!found?.salon) {
+        Alert.alert('Not a Sterncut code', 'That code is not one of ours.');
+        return false;
+      }
+      ids = { salon: found.salon, barber: found.barber ?? undefined };
+    }
     setManual(false);
-    setScanned(parsed);
+    setScanned(ids);
+    return true;
   }
 
   if (scanned) {
     return <ConfirmWalkIn salonId={scanned.salon} preferBarber={scanned.barber}
-      onClose={() => setScanned(null)} onJoined={onJoined} />;
+      onClose={initialCode ? onClose : () => setScanned(null)} onJoined={onJoined} />;
   }
+  // a link is being looked up: there is nothing to scan
+  if (initialCode) return <View style={s.scanScreen} />;
 
   return (
     <View style={s.scanScreen}>

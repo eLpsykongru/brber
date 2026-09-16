@@ -558,7 +558,10 @@ export function WalkInPosterScreen({ salon, onBack }: { salon: ShopMeta; onBack:
   const [size, setSize] = useState<Size>('A4');
   const [showWait, setShowWait] = useState(true);
   const [busy, setBusy] = useState(false);
-  const url = queueUrl(salon.id);
+  // 0110 — the six characters under the QR are the same shop for a camera that
+  // won't read it. Without a code loaded the uuid is printed, which still resolves.
+  const code = salon.short_code ?? null;
+  const url = queueUrl(code ?? salon.id);
   const svg = qrSvg(url, 104);
 
   const hours = `${String(Math.floor(salon.open_min / 60)).padStart(2, '0')}:${String(salon.open_min % 60).padStart(2, '0')}`
@@ -584,6 +587,8 @@ export function WalkInPosterScreen({ salon, onBack }: { salon: ShopMeta; onBack:
                 line-height:1.5; max-width:${250 * k}px; }
         .qr { background:#fff; border-radius:${14 * k}px; margin-top:${26 * k}px;
               padding:${13 * k}px; box-shadow:0 6px 18px rgba(0,0,0,.07); line-height:0; }
+        .code { font-family:ui-monospace,Menlo,Consolas,monospace; font-weight:700; font-size:${15 * k}pt;
+                letter-spacing:.24em; margin-top:${12 * k}px; }
         .wait { display:inline-flex; align-items:center; gap:8px; background:#101010; color:#fff;
                 border-radius:999px; padding:${10 * k}px ${18 * k}px; margin-top:${22 * k}px;
                 font-size:${12 * k}pt; font-weight:700; letter-spacing:.04em; }
@@ -601,6 +606,7 @@ export function WalkInPosterScreen({ salon, onBack }: { salon: ShopMeta; onBack:
         <h1>Skip<br>the wait</h1>
         <div class="lede">Scan with your phone camera to take a ticket and watch the queue from your seat.</div>
         <div class="qr">${qrSvg(url, Math.round(160 * k))}</div>
+        ${code ? `<div class="code">${escapeHtml(code)}</div>` : ''}
         ${showWait ? '<div class="wait"><span class="dot"></span>Usually 20–40 min</div>' : ''}
         <div class="spacer"></div>
         <div class="foot">
@@ -651,6 +657,7 @@ export function WalkInPosterScreen({ salon, onBack }: { salon: ShopMeta; onBack:
           <T size={11} style={s.posterSub}>Scan to join the queue</T>
         </View>
         <View style={s.qrBox}><SvgXml xml={svg} width={104} height={104} /></View>
+        {!!code && <T w="b" size={13} c="#111" ls={3} style={s.tnum}>{code}</T>}
         <View style={{ alignItems: 'center' }}>
           <T w="b" size={13} c="#111">{salon.name}</T>
           {!!salon.address && <T size={10} style={s.posterSub}>{salon.address}</T>}
@@ -855,8 +862,11 @@ export function WallDisplayScreen({ salon, team, onBack }: {
             <T size={f(14)} style={s.ticketSub}>Scan · no app account needed</T>
           </View>
           <View style={[s.ticketQr, { width: f(158), height: f(158), padding: f(11) }]}>
-            <SvgXml xml={qrSvg(queueUrl(salon.id), f(136))} width={f(136)} height={f(136)} />
+            <SvgXml xml={qrSvg(queueUrl(salon.short_code ?? salon.id), f(136))} width={f(136)} height={f(136)} />
           </View>
+          {!!salon.short_code && (
+            <T w="b" size={f(16)} c="#111" ls={f(16) * 0.24} style={s.tnum}>{salon.short_code}</T>
+          )}
         </View>
 
         <View style={[s.waitCard, { padding: f(17), paddingHorizontal: f(22), gap: f(16) }]}>

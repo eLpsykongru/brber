@@ -30,6 +30,7 @@ type SalonMeta = {
   lat: number | null; lng: number | null;
   default_commission: number; accepting_bookings: boolean; cash_agent_id: string | null;
   open_min: number; close_min: number;
+  short_code: string | null;   // 0110 — the poster and the wall display print it
 };
 
 // the turn-2 screens that sit behind this hub
@@ -90,7 +91,7 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
   const load = useCallback(async () => {
     const [{ data: s }, { data: t }, { data: st }, { data: sv }, { data: ch }] = await Promise.all([
       supabase.from('salons')
-        .select('id, name, address, bio, lat, lng, default_commission, accepting_bookings, cash_agent_id, open_min, close_min')
+        .select('id, name, address, bio, lat, lng, default_commission, accepting_bookings, cash_agent_id, open_min, close_min, short_code')
         .eq('owner_id', barberId).maybeSingle(),
       supabase.rpc('salon_team'),
       supabase.rpc('salon_stats'),

@@ -16,6 +16,7 @@ import PreviewPage from './PreviewPage';
 import { Pushed } from '../components/motion';
 import ClientsScreen from './ClientsScreen';
 import DayScheduleScreen from './DayScheduleScreen';
+import type { QueueLink } from '../lib/queueLink';
 import DiscoverScreen from './DiscoverScreen';
 import ExploreScreen from './ExploreScreen';
 import BarberChatsScreen from './BarberChatsScreen';
@@ -58,8 +59,10 @@ type DayOpts = {
 
 // ponytail: state-based tabs, no navigation lib — Android hardware-back doesn't walk
 // back through inner screens yet; adopt React Navigation when that bites real users.
-export default function HomeScreen({ profile, barber, phone, onProfileChanged }: {
+export default function HomeScreen({ profile, barber, phone, onProfileChanged, queueLink, onQueueLinkUsed }: {
   profile: Profile; barber: Barber | null; phone: string | null; onProfileChanged: () => void;
+  /** option (b): a shop's queue link opened the app — Home's check-in takes it */
+  queueLink?: QueueLink | null; onQueueLinkUsed?: () => void;
 }) {
   // salon owner = the cash agent (v1 decision) → only they get the Wallet tab
   const [ownsSalon, setOwnsSalon] = useState(false);
@@ -125,6 +128,14 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
     openDay(true, { autoAddNow: mode === 'schedule', prefillName: name, prefillServiceId: serviceId, preferMin });
   }
 
+  // option (b) — a shop's queue link lands on Home's check-in from whichever tab
+  // is open. Discover opens it and hides the tab bar; nothing here touches that.
+  useEffect(() => {
+    if (!queueLink || barber) return;
+    setPreview(null);
+    setTab('home');
+  }, [queueLink?.at]);
+
   let content;
   if (barber && dayOpen) {
     content = <DayScheduleScreen key={dayOpts.day ?? 'today'} barberId={barber.id} onBack={() => openDay(false)}
@@ -148,7 +159,8 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged }:
     if (tab === 'home') content = <DiscoverScreen name={profile.full_name} customerId={profile.id}
       onChromeHidden={setChromeHidden} onExplore={() => setTab('explore')}
       onBookings={() => { setChromeHidden(false); setTab('bookings'); }}
-      onHome={() => { setChromeHidden(false); setTab('home'); }} />;
+      onHome={() => { setChromeHidden(false); setTab('home'); }}
+      queueLink={queueLink} onQueueLinkUsed={onQueueLinkUsed} />;
     else if (tab === 'explore') content = <ExploreScreen onChromeHidden={setChromeHidden}
       onBookings={() => setTab('bookings')}
       onHome={() => { setChromeHidden(false); setTab('home'); }} />;

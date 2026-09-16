@@ -7,6 +7,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Session } from '@supabase/supabase-js';
 import { StatusBar } from 'expo-status-bar';
+import * as WebBrowser from 'expo-web-browser';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, AppState, Linking, StyleSheet, View } from 'react-native';
 import { Suspended } from './src/components/Failures';
@@ -16,6 +17,7 @@ import { SUPPORT_PHONE } from './src/screens/SupportScreens';
 type Account = { suspended: boolean; reason: string | null; since: string | null };
 import { onBannerAction, openLaunchResponse, registerPush } from './src/lib/push';
 import { useAndroidBack } from './src/lib/back';
+import { dropQueueLink, heldQueueLink, holdQueueLink, QueueLink } from './src/lib/queueLink';
 import { supabase } from './src/lib/supabase';
 import { SessionExpiredSheet, SetPasswordScreen } from './src/screens/AccountScreens';
 import AuthScreen, { AuthView } from './src/screens/AuthScreen';
@@ -25,6 +27,7 @@ import SlotOfferSheet from './src/components/SlotOfferSheet';
 import HomeScreen from './src/screens/HomeScreen';
 import IntroScreen from './src/screens/IntroScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import QueueLinkScreen from './src/screens/QueueLinkScreen';
 import { colors } from './src/theme';
 import type { Barber, Profile } from './src/types';
 
@@ -58,6 +61,34 @@ export default function App() {
     });
     return () => sub.remove();
   }, []);
+
+  // Option (b) — a shop's queue link opened the app. It is held, through a sign-in
+  // or a sign-up if need be, until Home opens the check-in on it (QL-16).
+  const [queueLink, setQueueLink] = useState<QueueLink | null>(null);
+  const [linkAuth, setLinkAuth] = useState(false);
+  useEffect(() => {
+    const take = (url: string | null) => holdQueueLink(url).then((l) => { if (l) setQueueLink(l); });
+    heldQueueLink().then((l) => { if (l) setQueueLink((cur) => cur ?? l); });
+    Linking.getInitialURL().then(take);
+    const sub = Linking.addEventListener('url', ({ url }) => { take(url); });
+    return () => sub.remove();
+  }, []);
+  const spendQueueLink = useCallback(() => {
+    dropQueueLink();
+    setQueueLink(null);
+    setLinkAuth(false);
+  }, []);
+  // An in-app browser tab loads the page itself rather than handing the link back
+  // to the app, so "carry on in the browser" cannot bounce straight back here.
+  const openInBrowser = useCallback((link: QueueLink) => {
+    spendQueueLink();
+    WebBrowser.openBrowserAsync(link.url).catch(() => {});
+  }, [spendQueueLink]);
+  // a barber's app has no check-in: his own link shows him the page
+  const isBarber = !!user?.barber;
+  useEffect(() => {
+    if (queueLink && isBarber) openInBrowser(queueLink);
+  }, [queueLink, isBarber, openInBrowser]);
 
   const loadUser = useCallback(async (s: Session) => {
     const { data: row } = await supabase
@@ -128,8 +159,11 @@ export default function App() {
   }
 
   // every other root view is terminal (auth, onboarding, suspended, lock):
-  // back there should leave the app, which is what returning null does.
-  useAndroidBack(recovering ? () => setRecovering(false) : null);
+  // back there should leave the app, which is what returning null does. The
+  // sign-in opened from QL-16 backs out to it.
+  useAndroidBack(recovering ? () => setRecovering(false)
+    : linkAuth && !session ? () => setLinkAuth(false)
+      : null);
 
   let content;
   if (locked && user) {
@@ -141,9 +175,15 @@ export default function App() {
   } else if (booting || !fontsLoaded || (session && !user)) {
     content = <ActivityIndicator color={colors.text} />;
   } else if (!session || !user) {
-    content = intro.show
-      ? <IntroScreen onDone={finishIntro} />
-      : <AuthScreen initialView={intro.next} />;
+    content = queueLink && !linkAuth
+      // QL-16 — signed out, with a shop's link in hand
+      ? <QueueLinkScreen link={queueLink} onSignIn={() => setLinkAuth(true)}
+          onBrowser={() => openInBrowser(queueLink)} onDismiss={spendQueueLink} />
+      : linkAuth
+        ? <AuthScreen initialView="welcome" />
+        : intro.show
+          ? <IntroScreen onDone={finishIntro} />
+          : <AuthScreen initialView={intro.next} />;
   } else if (invite) {
     // 12a/b/c — ahead of onboarding on purpose: his shop already exists, so the
     // generic "create or join a salon" flow would ask him to invent a second one.
@@ -158,7 +198,8 @@ export default function App() {
       onAppeal={() => Linking.openURL(`tel:${SUPPORT_PHONE}`)} />;
   } else {
     content = <HomeScreen profile={user.profile} barber={user.barber}
-      phone={user.profile.phone} onProfileChanged={() => loadUser(session!)} />;
+      phone={user.profile.phone} onProfileChanged={() => loadUser(session!)}
+      queueLink={user.barber ? null : queueLink} onQueueLinkUsed={spendQueueLink} />;
   }
 
   return (

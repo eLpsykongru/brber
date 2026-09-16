@@ -42,6 +42,7 @@ const clientOf = (b: LiveBooking) =>
 export type ShopMeta = {
   id: string; name: string; address: string | null;
   open_min: number; close_min: number; default_commission: number;
+  short_code?: string | null;   // 0110 — printed under the walk-in QR
 };
 
 // ---- 2a · owner dashboard --------------------------------------------------

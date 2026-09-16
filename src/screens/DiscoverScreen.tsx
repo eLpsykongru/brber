@@ -14,6 +14,7 @@ import CustomerNotificationsScreen from './CustomerNotificationsScreen';
 import MyBookingScreen from './MyBookingScreen';
 import ReportProblemScreen, { CaseRow, SupportCaseScreen } from './SupportScreens';
 import CheckInScreen, { WalkInTicketScreen, YoureNextScreen } from './QueueScreens';
+import type { QueueLink } from '../lib/queueLink';
 import QueueScreen, { DayQueueRow, minutesUntil, QUEUE_POLL_MS } from './QueueScreen';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
 import SearchScreen from './SearchScreen';
@@ -96,10 +97,14 @@ function useQueueActivity(
   useEffect(() => () => { clearQueueActivity(); }, []);
 }
 
-export default function DiscoverScreen({ name, customerId, onChromeHidden, onExplore, onBookings, onHome }: {
+export default function DiscoverScreen({
+  name, customerId, onChromeHidden, onExplore, onBookings, onHome, queueLink, onQueueLinkUsed,
+}: {
   name?: string | null; customerId?: string;
   onChromeHidden?: (hidden: boolean) => void; onExplore?: () => void; onBookings?: () => void;
   onHome?: () => void;
+  /** option (b): a shop's queue link opened the app — straight to that shop's check-in */
+  queueLink?: QueueLink | null; onQueueLinkUsed?: () => void;
 }) {
   const [salons, setSalons] = useState<SalonCard[]>([]);
   const [salon, setSalon] = useState<SalonCard | null>(null);
@@ -118,6 +123,17 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
   const [inboxOpen, setInboxOpen] = useState(false);   // 14a, behind the bell
   const [unread, setUnread] = useState(0);
   const [checkIn, setCheckIn] = useState(false);       // 27a, the counter code
+  // option (b) — the link that opened the app, handed to 27a in place of a scan
+  const [checkInCode, setCheckInCode] = useState<string | null>(null);
+  // first, so a link arriving in the same pass is not wiped by it
+  useEffect(() => { if (!checkIn) setCheckInCode(null); }, [checkIn]);
+  useEffect(() => {
+    if (!queueLink || !customerId) return;
+    setCheckInCode(queueLink.url);
+    setCheckIn(true);
+    onChromeHidden?.(true);
+    onQueueLinkUsed?.();
+  }, [queueLink?.at, customerId]);
   const [walkIn, setWalkIn] = useState<string | null>(null); // 27c, the fresh ticket
   const [ackedTakeover, setAckedTakeover] = useState<string | null>(null); // 28
   const { online, since } = useOnline();                                   // 25
@@ -238,7 +254,8 @@ export default function DiscoverScreen({ name, customerId, onChromeHidden, onExp
   }
 
   if (checkIn && customerId) {
-    return <CheckInScreen onClose={() => { setCheckIn(false); onChromeHidden?.(false); }}
+    return <CheckInScreen initialCode={checkInCode}
+      onClose={() => { setCheckIn(false); onChromeHidden?.(false); }}
       onJoined={(id) => { setCheckIn(false); setWalkIn(id); }} />;
   }
   if (walkIn && booking) {

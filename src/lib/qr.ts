@@ -4,13 +4,17 @@ import QRCode from 'qrcode';
 // `toString` API would force every caller to hold state — so the SVG path is
 // built here from the raw module matrix, one rect per dark module.
 //
-// ponytail: nothing serves this URL yet. It is the BACKLOG "shareable booking
-// link" surface; when that lands, this constant is the only thing to change.
-const QUEUE_BASE = 'https://sterncut.ma/q';
+// `web/` serves this (BACKLOG "Queue link"). sterncut.ma is not pointed at it
+// yet: EXPO_PUBLIC_QUEUE_BASE sends a test build's links wherever the page is
+// deployed. A printed poster outlives a temporary address, so only ever print
+// posters against the real one.
+const QUEUE_BASE = process.env.EXPO_PUBLIC_QUEUE_BASE || 'https://sterncut.ma/q';
 
-/** Scanning this drops the walk-in into the shop's live queue (or one chair's). */
-export function queueUrl(salonId: string, barberId?: string | null) {
-  return barberId ? `${QUEUE_BASE}/${salonId}?b=${barberId}` : `${QUEUE_BASE}/${salonId}`;
+/** Scanning this drops the walk-in into the shop's live queue (or one chair's).
+ *  `shop` is the salon's six-character code (0110); a uuid still resolves, and is
+ *  what every poster printed before 0110 carries. */
+export function queueUrl(shop: string, barber?: string | null) {
+  return barber ? `${QUEUE_BASE}/${shop}?b=${barber}` : `${QUEUE_BASE}/${shop}`;
 }
 
 /** SVG path data for the QR, in a `0 0 size size` viewBox (1 unit = 1 module). */

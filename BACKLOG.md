@@ -153,6 +153,12 @@ owner-only RPCs (`salon_team`, `salon_stats`, `salon_set_terms`,
   shows static facts, not a forward-looking time, and no salon claims a slot
   count. **Trigger:** someone wants the multi-day scan → price it before
   redrawing the section.
+- **Who customers call for the shop** — decided with the owner 2026-09-15, to be
+  built later: in Salon management the owner picks whose phone a customer reaches
+  when they call the shop — the owner's own, or one of the shop's barbers. Nothing
+  stores it today (`salons` has no phone), which is why the queue page's QL-09 has
+  no CALL THE SHOP button (see "Queue link"). **Trigger:** the first screen that
+  needs a "call the shop" button — QL-09 is already waiting on it.
 - **Packages** — Services tab shows a placeholder; needs the `packages` /
   `package_items` tables + the pending booking-mapping decision (Salon screen §).
 - **Invite by phone / share link** — the sheet is UI-only; real self-onboarding
@@ -2370,3 +2376,280 @@ Still open:
 
 Apply 0108 and 0109 before shipping this build: Explore, Discover and the barber
 editor select the new columns and fail without them.
+
+## Queue link — step 1: a scanned poster shows a real wait (0110, 2026-09-15)
+Handoff `design_handoff_queue_link` (pasted into the session, not committed): the
+public page `QL-01…10` and the barber's share sheet `BTD-11…13`, in five steps.
+Decided with the owner before code: short codes, not slugs; leaving the line will
+need a fresh SMS code; build ahead of both the SMS account and the domain.
+- **There was no web target.** `web/` is the smallest thing that serves `/q/:code`:
+  one server-rendered handler, no framework and nothing to install — HTML
+  templates, inline CSS, ~3 KB of script. Server-rendered because QL-01's preview
+  card must be in the HTML (WhatsApp's crawler runs no JavaScript) and a phone on
+  3G should not wait on a bundle. The handler is plain Request → Response, so any
+  fetch host runs it; `web/functions/q/[[path]].js` is the Cloudflare Pages
+  adapter. Supabase Edge Functions only serve HTML behind a custom domain.
+- **No domain yet.** `EXPO_PUBLIC_QUEUE_BASE` points a test build's links at a
+  temporary address. **Never print posters against one** — paper outlives it.
+- **Short codes (0110).** `salons.short_code` (6) and `barbers.short_code` (4), no
+  I/O/0/1, unique, defaulted on insert and backfilled. Links are
+  `/q/LF7K2M[?b=Y4SF]`; a uuid still resolves, because every poster since 0031
+  carries one. The printed poster and the wall display now show the code under
+  the QR — `Failures.tsx` (38b) had been telling customers to type a code that was
+  never printed. The app's scanner reads codes too (`lib/shopCode.ts`,
+  `resolve_shop_code`).
+- **`public_queue` is the page's only read**, callable by anon: first name and
+  initial, counts, minutes, ticket numbers, the menu, open or not. Nothing about a
+  customer. A shop hidden from search still answers — 0058 hides it "bookings
+  untouched" and 10e says walk-ins and the QR still work.
+- **`walk_in_start` is the one answer to "when would a walk-in start"**; step 2's
+  join will call it, so the quote and the place cannot drift. It follows
+  `fill_booking` for a real customer: hand-opened time beats everything, otherwise
+  the sitting fits inside one window of his hours, breaks are stepped over, and
+  cleaning time follows the last booking. **Limit kept from 0040:** the back of the
+  line is the end of the last booking today, so a 17:00 appointment puts a 10:00
+  walk-in after 17:30. That is the queue-mode decision as written; revisit when a
+  shop hits it.
+- **QL-08 opens a chair's QL-03, not QL-04:** a ticket needs a service and QL-08
+  has no picker.
+- Preview without a database: `npm run queue-web -- --fixture`. `npm run check`
+  now runs `shopCode.check.ts` and `web/render.check.mjs` (the §7 QL-03 sentence
+  word for word, no undefined/NaN, escaping, closed-shop honesty, the page and the
+  server agreeing on "Anyone").
+Not built, because nothing true can be said yet:
+- **QL-09's "booking a time for later today", next-free-slot card and BOOK
+  button** — closing stops appointments too, and a browser with no account cannot
+  book. **CALL THE SHOP** — waits on the owner choosing whose phone that is
+  ("Who customers call for the shop", under Salon management). **"Tell me when walk-ins
+  reopen"** — a third SMS type, which the README rules out.
+- **QL-08's "The barber's own link (?b=) skips this step"** — a note to the reader
+  of the design, not a sentence for a customer.
+- **The unknown-code and database-down pages** are not drawn; they say the
+  smallest true thing.
+- **French and Arabic.** Every string is in `web/src/copy.js`; the translations
+  are not written, and are not the builder's to invent. RTL waits for its design.
+Still open:
+- **0110 is NOT APPLIED.** Salon management selects `short_code` and fails without
+  it — apply it before running this build.
+- ~~**The in-app walk-in path lands requests, not tickets**~~ — fixed in 0112 (step 3).
+- ~~**Every RPC granted to `authenticated` is callable by anon**~~ — closed in 0117
+  (the owner's call, 2026-09-16). Its first cut revoked PUBLIC only and **refused
+  itself on apply**: 190 functions were still open, because on Supabase **anon does
+  not reach a function through PUBLIC — it holds its own grant**, from the project's
+  default privileges (`alter default privileges … grant all on functions to postgres,
+  anon, authenticated, service_role`). 0117 now revokes PUBLIC *and* anon, once per
+  grantor in the ACL, and keeps three sets open on purpose: (1)
+  `public_queue`/`nearby_open_shop` (the page with no account, and the app's only
+  session-less call); (2) every function named inside an RLS policy — a policy
+  expression runs as the querying role, so revoking `is_admin()` from anon would turn
+  an anon read of any table using it into "permission denied for function"; (3) every
+  function belonging to an **extension installed in `public`** — 188 of them, nearly
+  all btree_gist's, which is in `public` because 0015's `no_double_booking` needs it.
+  Those are owned and granted by `supabase_admin`, so `postgres` cannot revoke them,
+  and they are index-support and distance helpers with nothing about a person in
+  them. `service_role` gets an explicit grant of what it already reached. A function with **no** grant line still carries the default PUBLIC
+  grant; 0117 counts those in a notice rather than guessing. **Trigger:** any of
+  those ever returning a customer's details.
+- Triggers this slice lands on: adoption bet #1 (a web surface now exists) and the
+  SMS rail (steps 2 and 4 cannot run end to end without an account).
+
+## Queue link — step 2: taking a ticket with no account (0111, 2026-09-15)
+QL-04 (first name, phone), QL-05 (four digits), QL-06 (the web ticket) and QL-10
+(one line at a time), on the same `web/` handler. Plain forms: every step works
+with no script, and `guest-client.js` only draws the four boxes, the countdowns
+and the live line.
+- **The held place is a real booking row** — decided with the owner: a walk-in
+  the barber adds by hand during the five minutes goes after it. It is the walk-in
+  shape the schema already has (`customer_id = barber_id`, `walk_in_name`), so
+  `no_double_booking` and every barber screen respect it with no new reader. A
+  hold nobody confirms is **deleted**, not cancelled: nothing was booked, and a
+  cancellation would count against the day in 8c and admin 8b. No notification
+  fires either way — 0037 and 0049 both skip walk-in rows.
+- **`fill_booking` skips a walk-in's pause switch, breaks and buffers** (it assumes
+  the barber is typing), so `guest_hold` checks the switch and `walk_in_start`
+  (0110) carries the rest. The closed-shop trigger still bites.
+- **Leaving needs a fresh code** — decided with the owner. The ticket's address is
+  enough to read it; changing it takes the phone.
+- **A number that already holds a ticket gets a code too**, and QL-10 only appears
+  after it: typing somebody else's number must not say where they are getting a
+  haircut. One gap left — QL-05 shows the held-place card only when a hold was
+  made, so its absence says the number holds a ticket somewhere today.
+- **QL-10's "leave it and join" needs no second code**: the number was proven
+  minutes before (`guest_switch`, a ten-minute window). An app booking on the same
+  number counts as a ticket but is never cancelled from a web page.
+- **Limits** (`guest_limit` — guesses, untuned): a phone gets three codes in
+  fifteen minutes and eight a day; an address ten an hour, to at most four
+  numbers; a code gets five tries. They count `sms_outbox`, so a deleted hold
+  still counts against the phone that asked for it.
+- **The guest functions are the server's alone** (`service_role`): only the server
+  knows the caller's IP. The page's host needs `SUPABASE_SERVICE_ROLE_KEY` —
+  never under an `EXPO_PUBLIC_` name, which would build it into the app.
+- **Tokens and codes come from `gen_random_uuid()`**, not `random()`: they are
+  credentials, where 0110's shop code is printed on a wall. Codes are stored hashed.
+- Preview the whole flow with no database: `npm run queue-web -- --fixture` prints
+  each code in the terminal. `web/fixtures/rpc.js` answers in 0111's shapes and is
+  not a second copy of the rules. `render.check.mjs` walks the flow end to end.
+Not built, because nothing true can be said yet:
+- **Sending.** No SMS account, so every text waits in `sms_outbox` as `queued`. To
+  test on the real database, read the code there in the SQL editor.
+  **Trigger:** the SMS account — then a sender over pg_net (0104's push shape),
+  and blank the body of a code once it is sent.
+- **The code text is one send** — decided with the owner: Messages Out's curly
+  apostrophe (n’avez) is outside the GSM alphabet and made every code two sends; it
+  is a straight one now. `lib/shareText.check.ts` holds the count.
+- **Which language a text goes in** — French for now; Messages Out lists it as
+  undecided.
+- **QL-04's "Open the app instead"** — not built: under option (b) (step 3) someone
+  with the app never reaches QL-04, and a web page cannot tell the app is there.
+- **QL-06's "Add to my home screen"** — needs a web manifest, and an iPhone can only
+  be told how. Not asked for.
+- **The pages no design draws** — too many codes, left, started, done, gone — say
+  the smallest true thing.
+Still open:
+- **0111 is NOT APPLIED.** It needs 0110 first.
+- **Without pg_cron an unconfirmed hold stays in the barber's day** until the next
+  guest request anywhere clears it, not at five minutes exactly.
+- **Nº moves when somebody ahead leaves**: the number is the position in the day
+  (0029's rule), so a cancellation renumbers everyone behind it, same as the app.
+
+## Queue link — step 3: a shop's link opens the app (0112, 2026-09-15)
+Option (b), decided with the owner: with Sterncut installed, a shop's link opens the
+app; without it, the page. README §5 wanted QL-02 as a web page offering the app,
+but a page cannot tell the app is there. The choice stays in the app: QL-16 always
+offers "carry on in the browser".
+- **Only the landings open the app** — `/q/<code>` and a pre-0110 poster's
+  `/q/<uuid>` (`app.config.js`; `appLinks` in `web/src/handler.js` serves the matching
+  `assetlinks.json` and `apple-app-site-association`). The code, join and ticket
+  pages stay in the browser: a guest's ticket has no account to open.
+- **The link survives signing in** (ADDENDUM A4 blocker 6). `lib/queueLink.ts` holds
+  it for the day; signed out, QL-16 (`QueueLinkScreen`) quotes the chair and offers
+  sign-in or the browser; after sign-in Home opens the check-in on that shop with no
+  camera. A barber's own link opens the page.
+- **"Carry on in the browser" is an in-app browser tab**, which loads the page itself
+  rather than handing the link straight back to the app.
+- **The app's walk-in check-in gave a request, not a ticket** — fixed in 0112:
+  `join_queue` starts at `walk_in_start` (the page's own answer) and marks its insert,
+  so a trigger after `fill_booking` keeps it confirmed with no deposit.
+Not built:
+- **QL-16's phone field and "Send me a code"** — the app signs in with email, Google
+  or Apple; there is no phone sign-in to fill in.
+- **QL-16's "Youssef is holding this for you"** — nothing is held before a ticket is
+  taken (README §5), so the card quotes the number instead.
+Still open:
+- **0112 is NOT APPLIED** (needs 0110). The app links need a new build, and the page's
+  host needs `ANDROID_CERT_SHA256` and `IOS_APP_ID` (`eas credentials`). Until then
+  the links open the browser, which works.
+- **Trigger:** the domain — set `EXPO_PUBLIC_QUEUE_BASE`, rebuild, serve both files.
+
+## Queue link — step 4: the you're-next text (0113, 2026-09-15)
+- A guest whose ticket becomes next gets QL-07's text, once, queued in `sms_outbox`.
+  "Next" is asked again whenever the line moves — a cut starts or ends, somebody
+  leaves, a hold is swept, a ticket is confirmed — so a guest who became next because
+  somebody left is told too. Joining an empty chair sends nothing: he is standing in
+  front of it.
+- **One send, not three**: plain "-" and "Ticket 07" instead of QL-07's em dash and
+  "Nº" — the owner's call on the code text, applied the same way.
+Not built:
+- ~~**The "shop closes the line" text**~~ — written in 0116 (the owner's call,
+  2026-09-16). No design has its words, and closing cancels nothing, so it says that.
+- **French and Arabic for it** — QL-07's English is the only copy there is.
+- **QL-07's link to the ticket** — waits for the domain; a text outlives a temporary host.
+- 0037's app push skips walk-in rows when it picks "next", so an app customer behind a
+  walk-in is told early. Left as it is.
+Still open: **0113 is NOT APPLIED** (needs 0111).
+
+## Queue link — step 5: the barber sends the link (0114, 2026-09-15)
+BTD-11 (`ShareLinkSheet`), BTD-12 and BTD-13 (`GuestSheet`) on `BarberQueueScreen`.
+- **The grid puck sends the line link** instead of an Alert: his chair or the shop,
+  by WhatsApp (free, `wa.me`), the phone's own SMS app (metered) or copy. The counter
+  is what a carrier counts (`lib/shareText.ts`).
+- **BTD-12 shows what the app knows**: sent, how, when — and whether a ticket came of
+  it, matched on the number (a guest's or an app customer's). **Delivered and opened
+  are not shown**: the app hands the text to WhatsApp or the SMS app and learns
+  nothing after that.
+- **BTD-13**: a guest's row reads NO ACCOUNT and opens his first name, service, cash,
+  the phone he gave with Call, and the two absences — no chat, nothing to rate. An
+  unconfirmed hold says "not confirmed yet". The queue screen polls every 20 s.
+Not built:
+- **The prefilled recipient** ("asked about today at 08:50") — nothing records who
+  asked; the barber types a name and number.
+- **WhatsApp not installed** — not designed; `wa.me` opens WhatsApp's own page.
+- **"If he installs the app with this number, today's cut joins his history"** —
+  nothing joins a guest to an account yet (README §9).
+Still open: **0114 is NOT APPLIED** (needs 0111).
+
+## Queue link — the addendum's guest states (0115, 2026-09-15)
+`ADDENDUM-guest-states` (pasted into the session): QL-11 … QL-17.
+- **QL-11/12**: three wrong codes per number in fifteen minutes, across every code it
+  was sent (A4 blocker 5). The third lets the held place go and blocks the number for
+  fifteen minutes. A new code no longer resets the count.
+- **QL-17 before QL-09**: a shop past every chair's hours says "Shut for tonight", its
+  week of hours (the barbers' own — the shop keeps one open–close pair for every day),
+  the first chair tomorrow, and the nearest open shop within 5 km. A shut shop never
+  says it paused.
+- **QL-16** — see step 3.
+- **QL-14**: a guest the barber marks a no-show sees the ticket struck with its times
+  and can rejoin once, with no code.
+- **QL-15**: a paused chair's ticket stands, and "frozen for" counts from the pause
+  (`barbers.paused_at`, stamped by a trigger). The page's 20 s poll redraws it — the
+  app's own mechanism (README §6), so no realtime channel.
+Not built, because nothing true can be said yet:
+- ~~**QL-13 (called) and its eight-minute chair hold**~~ — built in 0116, below.
+- **The new texts** (restart after a pause, you're up, missed) — A7, not designed; so
+  QL-15 does not say "we text you the moment it restarts".
+- **BOOK A TIME / BOOK 09:00 / BOOK 16:15** — a browser cannot book.
+- **QL-17's "Last walk-in taken 45 minutes before close"** — no such rule exists.
+- **QL-15's "Boards come back inside 20 minutes most days"** — nothing measures it.
+- **CALL THE SHOP** — "Who customers call for the shop".
+- QL-11 with one try left is not drawn; it reads QL-11's sentence with "One more try".
+Still open: **0115 is NOT APPLIED** (needs 0110, 0111, 0113). RTL still waits for its design.
+
+## Queue link — QL-13, the chair hold, and the last two answers (0116, 0117, 2026-09-16)
+The owner took the recommendation on all four open questions: the hold releases
+itself, the closed-line text says the ticket stands, the you're-next text goes in
+English, and anon loses the signed-in RPCs.
+- **The chair hold is real and it ends** (ADDENDUM A3's eight minutes), because
+  QL-13's own copy promises it: "After that Youssef takes Nº 08 and you'd rejoin at
+  the back." So `guest_sweep` (0111) now ends two holds instead of one — the
+  unconfirmed place, and a called chair nobody sat in. A lapsed one becomes
+  `no_show`, which is QL-14, the same state the barber's own DROP writes; QL-14
+  rejoins with no new code, so an automatic release costs one tap, not the morning.
+  pg_cron runs the sweep every minute and every guest read sweeps first, so nothing
+  depends on a page being open.
+- **Called is 0018's check-in.** CALL NEXT already stamped `checked_in_at`, so
+  nothing on the barber's side changed to make QL-13 appear — the page reads the
+  timestamp the app writes. The ticket's 20 s poll turns the page red, which is
+  README §6's own mechanism; A5 allowed it instead of a realtime channel.
+- **"I'm walking in" tells the barber and stops no clock** — only he can hold a
+  chair longer. **"Give me 5 minutes" adds five, once.** Both land on his row
+  ("called 11:04 · holds till 11:12 · on the way"), because he is the one who can
+  act on them.
+- **QL-14 may now quote the eight minutes** — but only to a guest who was called. A
+  guest taken off the line was never given them, and is not told he was.
+- **The closed-line text** is QL-04's second promise: when a shop closes the line,
+  every live guest ticket is texted once — "{shop} has stopped taking new walk-ins.
+  Ticket 07 still stands - come to the chair when your turn comes." Closing cancels
+  nothing (0064's own panel says so), so that is all it says. English, ASCII, one
+  send, like the other two.
+Not built, because nothing true can be said yet:
+- **QL-13's walking directions** ("3 min walk · second door past the pharmacy") —
+  nothing knows where he is standing, or what the door looks like.
+- **A text when he is called.** QL-13's "we also texted you" is printed only when
+  0113's you're-next text really went out. A guest who joins an empty chair and is
+  called straight away gets the red page and no text: the "you're up" text is one of
+  A7's four undesigned ones.
+- **The hold keeps running while the barber pauses.** The sweep does not know the
+  difference. **Trigger:** a barber losing a called guest to his own break.
+- **French and Arabic** for QL-13 and for both texts.
+Still open:
+- **0116 is NOT APPLIED** (needs 0111, 0113 and 0115).
+- **0117 refused itself three times on 2026-09-16**, and each refusal was worth
+  having — see the step-1 note. (1) Revoking PUBLIC alone left anon's own grant.
+  (2) Revoking `public, anon` still reported 188 open, with no error on any
+  statement. (3) Made to print the ACL, it named the cause: those 188 are
+  `supabase_admin`'s extension functions (`cash_dist(…)` is btree_gist's), which
+  `postgres` cannot revoke and should not. The fourth cut skips every extension,
+  revokes once per grantor through `GRANTED BY`, and still fails loudly with the
+  ACL, the owner and the role it ran as if anything of ours is left open. Safe to
+  re-run; silent on a database without Supabase's roles.
+- **The you're-next text stays English** — the owner's call, 2026-09-16.

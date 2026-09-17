@@ -1,24 +1,28 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator, Alert, Image, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native';
 import {
-  Avatar, Eyebrow, Ico, Screen, Serif, Sheet, SheetHead, Stat, T, TAB_INSET,
+  Eyebrow, Ico, Screen, Serif, T, TAB_INSET,
 } from '../components/dark';
-import BookingPanelSheet, { BookingRequestSheet, PanelBooking } from '../components/BookingPanels';
+import BookingPanelSheet, { BookingRequestSheet, PanelBooking, RowSheet } from '../components/BookingPanels';
 import CancelBookingSheet from '../components/CancelBookingSheet';
 import ClientSheet, { ClientRef } from '../components/ClientSheet';
+import { FrontSheet } from '../components/LineSheets';
 import RateClientSheet from '../components/RateClientSheet';
 import SettleBundleSheet from '../components/SettleBundleSheet';
 import SlotPicker from '../components/SlotPicker';
 import { Pushed } from '../components/motion';
 import { PillButton } from '../components/ui';
+import {
+  chairList, collectCents, dayMoney, isLinePlace, nextToCall, rungOf, smsSends, undoableDone, verbOf, waitingOf,
+} from '../lib/line';
+import { checkIn } from '../lib/lineCalls';
 import { Block, daySlots, Window } from '../lib/slots';
 import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, inter, radius, sp } from '../theme';
+import { colors, dark as D, inter, sp } from '../theme';
 import type { Barber, Profile } from '../types';
 
 /** 10d/10e read the same fact at two distances from the deadline (0054). */
@@ -36,37 +40,50 @@ import NotificationsScreen from './NotificationsScreen';
 import BarberReviewsScreen from './BarberReviewsScreen';
 import HeldBackScreen, { Held, loadHeld } from './HeldBackScreen';
 import RescheduleAskScreen from './RescheduleAskScreen';
+import OfferDayScreen, { OfferFor } from './OfferDayScreen';
 import { countWord } from '../lib/inboxRules';
+
+// ADDENDUM-app-first, turn B11: Home is THE CHAIR (BTD-20). NEXT UP and the live queue
+// were the same list shown twice with two sets of verbs; now bookings and walk-ins are
+// one list in the order each man reaches the chair, each row carries one button read
+// off where it sits (line.ts), and done — the one rung that moves money — can be taken
+// back until the next man sits down (BTD-22, 0121). No clock: the rows decide.
 
 type BookingRow = {
   id: string;
   starts_at: string;
   ends_at: string;
+  created_at: string;          // BTD-21 — when the booking, or the place, was made
   status: string;
   price_cents: number;
   deposit_cents: number;   // BTD-03 — what is already held, so "collect" is the rest
   walk_in_name: string | null;
+  walk_in_phone: string | null;   // BTD-02 (0118)
   customer_id: string;
   checked_in_at: string | null;
   started_at: string | null;
   completed_at: string | null;
+  dropped_at: string | null;   // BTD-15 (0119)
+  joined_line: boolean;        // held his own place in the app (0119)
   notes: string | null;   // 39d
-  services: { name: string } | null;
+  services: { name: string; duration_min: number | null } | null;
   customer: { full_name: string | null; avatar_url: string | null; phone: string | null } | null;
 };
 
-// where a live appointment sits in its lifecycle → which single button the card shows
-type Stage = 'confirm' | 'check_in' | 'start' | 'in_chair';
-function stageOf(b: BookingRow): Stage | null {
-  if (b.status === 'pending') return 'confirm';
-  if (b.status !== 'confirmed' || b.completed_at) return null;
-  if (b.started_at) return 'in_chair';
-  if (b.checked_in_at) return 'start';
-  return 'check_in';
-}
+/** 0114/0118 — a place taken on the web page, behind a walk-in row */
+type Guest = {
+  booking_id: string; first_name: string; phone: string; source: 'code' | 'link';
+  joined_at: string; confirmed: boolean;
+};
+
+// the line moves while he works; the queue board polls the same way
+const POLL_MS = 20_000;
 
 const dh = (cents: number) => `${Math.round(cents / 100)} DH`;
 const hhmm = (iso: string) => new Date(iso).toTimeString().slice(0, 5);
+const pad = (n: number) => String(n).padStart(2, '0');
+const minsSince = (iso: string) => Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
+const minsTo = (iso: string) => Math.max(0, Math.round((new Date(iso).getTime() - Date.now()) / 60_000));
 const minLabel = (min: number) => new Date(0, 0, 0, 0, min).toTimeString().slice(0, 5);
 const isoDay = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -79,29 +96,21 @@ const nameOf = (b: BookingRow, barberId: string) =>
 const initialsOf = (name: string) =>
   name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
-function ClientAvatar({ b, barberId, size = 46, warm }: {
-  b: BookingRow; barberId: string; size?: number; warm?: boolean;
-}) {
-  const url = b.customer_id === barberId ? null : b.customer?.avatar_url;
-  if (url) return <Image source={{ uri: url }} style={{ width: size, height: size, borderRadius: 999 }} />;
-  if (b.customer_id === barberId && !b.walk_in_name) {
-    return <Avatar size={size} icon="user" />;
-  }
-  return <Avatar size={size} warm={warm} initials={initialsOf(nameOf(b, barberId))} />;
-}
+type Tone = 'green' | 'coral' | 'amber' | 'plain';
+const TONE_BG: Record<Tone, string> = { green: D.greenSoft, coral: D.accentSoft, amber: D.amberSoft12, plain: D.card2 };
+const TONE_FG: Record<Tone, string> = { green: D.green, coral: D.accent, amber: D.amber, plain: D.sub };
 
-function MenuRow({ icon, label, onPress, danger }: {
-  icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void; danger?: boolean;
+/** A client's photo or initials; a walk-in, who has neither, wears his Nº */
+function Badge({ b, barberId, no, tone, size = 40 }: {
+  b: BookingRow; barberId: string; no: number; tone: Tone; size?: number;
 }) {
+  const walkIn = b.customer_id === barberId;
+  const url = walkIn ? null : b.customer?.avatar_url;
+  if (url) return <Image source={{ uri: url }} style={{ width: size, height: size, borderRadius: 999 }} />;
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label}
-      style={({ pressed }) => [s.menuRow, pressed && s.pressed]}>
-      <View style={s.menuRowIcon}>
-        <Ionicons name={icon} size={19} color={danger ? D.red : D.text} />
-      </View>
-      <T w="b" size={14} c={danger ? D.red : D.text} style={s.grow}>{label}</T>
-      <Ionicons name="chevron-forward" size={18} color={D.muted} />
-    </Pressable>
+    <View style={[s.badge, { width: size, height: size, backgroundColor: TONE_BG[tone] }]}>
+      <T w="b" size={12} c={TONE_FG[tone]}>{walkIn ? (no ? pad(no) : '—') : initialsOf(nameOf(b, barberId))}</T>
+    </View>
   );
 }
 
@@ -136,16 +145,22 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   const [unread, setUnread] = useState(0);
   const [chat, setChat] = useState<{ id: string; title: string } | null>(null);
   const [sheetClient, setSheetClient] = useState<ClientRef | null>(null);
-  const [menuBooking, setMenuBooking] = useState<BookingRow | null>(null);
   const [resched, setResched] = useState<BookingRow | null>(null);
   const [reschedAt, setReschedAt] = useState<Date | null>(null);
   const [completedB, setCompletedB] = useState<BookingRow | null>(null);
   const [settleB, setSettleB] = useState<BookingRow | null>(null);
+  // BTD-21's Service tile opens the same checklist, and it always shows the list
+  const [settleAsk, setSettleAsk] = useState(false);
   const [cancelling, setCancelling] = useState<BookingRow | null>(null);
   const [showEarnings, setShowEarnings] = useState(false);
   const [showQueue, setShowQueue] = useState(false);
-  const [panel, setPanel] = useState<BookingRow | null>(null);      // 1d
+  const [panel, setPanel] = useState<BookingRow | null>(null);      // BTD-21
   const [request, setRequest] = useState<BookingRow | null>(null);  // 3d
+  // BTD-20 — the line's switch rides on the money card; a web name carries whether he tapped
+  const [lineOpen, setLineOpen] = useState(true);
+  const [guests, setGuests] = useState<Record<string, Guest>>({});
+  const [frontAsk, setFrontAsk] = useState<string | null>(null);   // BTD-17
+  const [offerFor, setOfferFor] = useState<OfferFor | null>(null); // BTD-16
 
   useEffect(() => {
     if (!barber.salon_id) return;
@@ -153,18 +168,30 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
       .then(({ data }) => setSalonName(data?.name ?? null));
   }, [barber.salon_id]);
 
-  // one window: last 7 days (earnings bars) through +14 days (requests)
+  // the line: today through +14 days (requests), whether it is open, who never tapped
+  const loadLine = useCallback(async (quiet = false) => {
+    const from = new Date(); from.setHours(0, 0, 0, 0);
+    const to = new Date(from); to.setDate(to.getDate() + 14);
+    const [book, me, guestRows] = await Promise.all([
+      supabase.from('bookings')
+        .select('id, starts_at, ends_at, created_at, status, price_cents, deposit_cents, walk_in_name, walk_in_phone, customer_id, checked_in_at, started_at, completed_at, dropped_at, joined_line, notes, services(name, duration_min), customer:profiles!customer_id(full_name, avatar_url, phone)')
+        .eq('barber_id', barberId)
+        .gte('starts_at', from.toISOString()).lt('starts_at', to.toISOString())
+        .in('status', ['pending', 'confirmed'])
+        .order('starts_at'),
+      supabase.from('barbers').select('accepting_bookings').eq('id', barberId).single(),
+      supabase.rpc('barber_guests_today'),
+    ]);
+    if (book.error) { if (!quiet) Alert.alert('Could not load bookings', book.error.message); }
+    else setBookings(book.data as unknown as BookingRow[]);
+    if (me.data) setLineOpen(me.data.accepting_bookings);
+    const byBooking: Record<string, Guest> = {};
+    for (const g of (guestRows.data ?? []) as Guest[]) byBooking[g.booking_id] = g;
+    setGuests(byBooking);
+  }, [barberId]);
+
   const load = useCallback(async () => {
-    const from = new Date(); from.setHours(0, 0, 0, 0); from.setDate(from.getDate() - 6);
-    const to = new Date(); to.setHours(0, 0, 0, 0); to.setDate(to.getDate() + 14);
-    const { data, error } = await supabase.from('bookings')
-      .select('id, starts_at, ends_at, status, price_cents, deposit_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, notes, services(name), customer:profiles!customer_id(full_name, avatar_url, phone)')
-      .eq('barber_id', barberId)
-      .gte('starts_at', from.toISOString()).lt('starts_at', to.toISOString())
-      .in('status', ['pending', 'confirmed'])
-      .order('starts_at');
-    if (error) Alert.alert('Could not load bookings', error.message);
-    else setBookings(data as unknown as BookingRow[]);
+    await loadLine();
     const [av, off, blk] = await Promise.all([
       supabase.from('availability').select('weekday, start_min, end_min').eq('barber_id', barberId),
       supabase.from('days_off').select('id, day').eq('barber_id', barberId)
@@ -180,9 +207,13 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
       .eq('user_id', barberId).is('read_at', null);
     setUnread(count ?? 0);
     setHeld(await loadHeld(barberId));
-  }, [barberId]);
+  }, [barberId, loadLine]);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    const poll = setInterval(() => loadLine(true), POLL_MS);
+    return () => clearInterval(poll);
+  }, [loadLine]);
   useEffect(() => {
     AsyncStorage.getItem(HELD_SEEN_KEY).then(setHeldSeen).catch(() => {});
   }, []);
@@ -238,7 +269,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     priceCents: b.price_cents,
     depositCents: b.deposit_cents ?? 0,
     checkedInAt: b.checked_in_at, startedAt: b.started_at,
-    phone: b.customer_id === barberId ? null : b.customer?.phone ?? null,
+    phone: b.customer_id === barberId ? phoneOf(b) : b.customer?.phone ?? null,
     isWalkIn: b.customer_id === barberId,
     notes: b.notes,
   });
@@ -264,22 +295,78 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     onChromeHidden?.(v);
   }
 
-  // stage transitions: confirm uses accept_booking; the rest go through advance_booking
-  async function advance(b: BookingRow, stage: 'check_in' | 'start' | 'complete') {
-    // 34f — completing settles first: what was actually done decides the price,
-    // and a half-taken bundle loses its saving. The sheet runs advance_booking
-    // itself, and closes straight through when there is only one service.
-    if (stage === 'complete') return setSettleB(b);
-    const { error } = await supabase.rpc('advance_booking', { p_booking: b.id, p_stage: stage });
-    if (error) Alert.alert('Could not update', error.message);
+  // ---- B11 · one verb per rung ------------------------------------------------------
+  const unconfirmed = (b: BookingRow) => !!guests[b.id] && !guests[b.id].confirmed;
+  /** a web guest's number, or the one the barber typed (BTD-02) */
+  const phoneOf = (b: BookingRow) => guests[b.id]?.phone ?? b.walk_in_phone ?? null;
+
+  /** CALL HIM and HE'S HERE are one check-in. A web name that never tapped is asked about first (BTD-17). */
+  async function callIn(b: BookingRow, anyway = false) {
+    if (!anyway && unconfirmed(b)) return setFrontAsk(b.id);
+    // only a man called up from somewhere else is told; a walk-in is standing there
+    const error = await checkIn(b.id, isLinePlace(b, barberId) && b.customer_id !== barberId);
+    if (error) Alert.alert('Could not call', error);
+    loadLine();
+  }
+
+  async function seat(b: BookingRow) {
+    const { error } = await supabase.rpc('advance_booking', { p_booking: b.id, p_stage: 'start' });
+    if (error) Alert.alert('Could not seat him', error.message);
+    loadLine();
+  }
+
+  function primary(b: BookingRow) {
+    switch (verbOf(b, barberId)) {
+      case 'CALL HIM': case "HE'S HERE": return callIn(b);
+      case 'SEAT HIM': return seat(b);
+      // 34f — done settles first: what was actually done decides the price, and a
+      // half-taken bundle loses its saving. The sheet runs advance_booking itself, and
+      // closes straight through when there is only one service.
+      case 'DONE': return setSettleB(b);
+    }
+  }
+
+  // BTD-15 "Take him off", BTD-17 "Drop him" — the no-show 0119's queue_take_off writes
+  async function dropNow(b: BookingRow) {
+    const { error } = await supabase.rpc('queue_take_off', { p_booking: b.id });
+    if (error) Alert.alert('Could not take him off', error.message);
+    loadLine();
+  }
+
+  function takeOff(b: BookingRow) {
+    const walkIn = b.customer_id === barberId;
+    Alert.alert(`Take ${nameOf(b, barberId)} off the line?`,
+      walkIn ? "He leaves today's line. Nothing is recorded against a walk-in." : 'Marks him a no-show and frees the slot.', [
+        { text: 'Keep', style: 'cancel' },
+        { text: walkIn ? 'Take off' : 'No-show', style: 'destructive', onPress: () => dropNow(b) },
+      ]);
+  }
+
+  // BTD-22 — status and money go back together (0121)
+  async function undoDone(b: BookingRow) {
+    const { error } = await supabase.rpc('revert_completion', { p_booking: b.id });
+    if (error) Alert.alert('Could not put him back', error.message);
     load();
   }
 
-  async function menuAction(b: BookingRow, rpc: 'cancel_booking' | 'mark_no_show') {
-    setMenuBooking(null);
-    const { error } = await supabase.rpc(rpc, { p_booking: b.id });
-    if (error) Alert.alert('Could not update', error.message);
-    load();
+  /** An account moves his own booking; a walk-in is offered a time by text, which needs his number and a way to send it (BTD-16). */
+  function anotherDayOff(b: BookingRow): string | null {
+    if (b.customer_id !== barberId) return null;
+    if (!phoneOf(b)) return "Needs his number — you'll only have his name";
+    if (!smsSends()) return 'Waits until Sterncut can send texts';
+    return null;
+  }
+
+  function anotherDay(b: BookingRow) {
+    setPanel(null);
+    if (b.customer_id !== barberId) { setResched(b); setReschedAt(null); return; }
+    setOfferFor({
+      bookingId: b.id, no: noOf(b), name: nameOf(b, barberId), service: b.services?.name ?? 'Service',
+      durationMin: b.services?.duration_min
+        ?? Math.round((new Date(b.ends_at).getTime() - new Date(b.starts_at).getTime()) / 60_000),
+      startsAt: b.starts_at, waitingSince: guests[b.id]?.joined_at ?? b.created_at,
+    });
+    onChromeHidden?.(true);
   }
 
   async function confirmReschedule() {
@@ -339,7 +426,8 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   // dashboard itself is a tab root, so at the bottom it falls through to
   // Android and backgrounds the app.
   useAndroidBack(
-    chat ? () => openChat(null)
+    offerFor ? () => { setOfferFor(null); onChromeHidden?.(false); }
+    : chat ? () => openChat(null)
       : showEarnings ? () => openEarnings(false)
           : showQueue ? () => { setShowQueue(false); onChromeHidden?.(false); load(); }
             : inboxOpen ? () => { setInboxOpen(false); onChromeHidden?.(false); load(); }
@@ -357,46 +445,33 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   const todayKey = new Date().toDateString();
   const rows = bookings ?? [];
   const confirmed = rows.filter((b) => b.status === 'confirmed');
-  const todayConfirmed = confirmed.filter((b) => new Date(b.starts_at).toDateString() === todayKey);
-  const earnedToday = todayConfirmed.reduce((a, b) => a + b.price_cents, 0);
+  // today's book: every confirmed row, and a request whose time is still ahead
+  const todayRows = rows.filter((b) => new Date(b.starts_at).toDateString() === todayKey
+    && (b.status === 'confirmed' || (b.status === 'pending' && new Date(b.starts_at).getTime() > now)));
+  const book = todayRows.filter((b) => b.status === 'confirmed');   // loaded by start: Nº is the place in it
+  // by id: a sheet opened before the last poll holds the row as it was then
+  const noOf = (b: BookingRow) => book.findIndex((x) => x.id === b.id) + 1;
 
-  // 7-day earnings bars (booked value per day; today last, accent-emphasized)
-  const week = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() - (6 - i));
-    const key = d.toDateString();
-    return confirmed.filter((b) => new Date(b.starts_at).toDateString() === key)
-      .reduce((a, b) => a + b.price_cents, 0);
-  });
-  const weekMax = Math.max(...week, 1);
-  const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 6);
-
-  // theoretical slots today, minus breaks — 'full' here only means blocked, since booked=[]
-  const capacity = daySlots(new Date(), 30, windows, [], [], blocks)
-    .filter((sl) => sl.status !== 'full').length;
-  const freeSlots = Math.max(0, capacity - todayConfirmed.length);
-  const walkIns = todayConfirmed.filter((b) => b.customer_id === barberId);
-  const walkInsDH = walkIns.reduce((a, b) => a + b.price_cents, 0);
-
-  const requests = rows.filter((b) => b.status === 'pending' && new Date(b.starts_at).getTime() > now);
-  // today's live cards: pending requests inline + confirmed until completed
-  // (an in-chair client running past his slot stays visible until Complete)
-  const remaining = rows
-    .filter((b) => {
-      if (new Date(b.starts_at).toDateString() !== todayKey) return false;
-      if (b.status === 'pending') return new Date(b.starts_at).getTime() > now;
-      if (b.status !== 'confirmed' || b.completed_at) return false;
-      return new Date(b.ends_at).getTime() > now || !!b.checked_in_at;
-    })
-    .sort((a, b) => a.starts_at.localeCompare(b.starts_at));
-  const nextUp = remaining.find((b) => b.status === 'confirmed') ?? null;
-  const pending = remaining.filter((b) => b.status === 'pending');
+  // BTD-20 — one list per chair, and A10's two counting rules: waiting leaves out the man
+  // in the chair and an unanswered request; the money is TAKEN, which climbs only at done.
+  const list = chairList(todayRows);
+  const waiting = waitingOf(todayRows);
+  const { takenCents, bookedCents } = dayMoney(todayRows);
+  const notConfirmed = waiting.filter(unconfirmed).length;
+  const nextCall = nextToCall(book.filter((b) => !b.completed_at));
+  const chairTaken = list.some((b) => rungOf(b) === 'in_chair');
+  // BTD-22 — the chair's latest done, until somebody sits down after it (0121 asks the same)
+  const doneRow = undoableDone(book);
+  const done = doneRow ? { row: doneRow } : null;
+  const whole = (cents: number) => String(Math.round(cents / 100));
+  const frontRow = frontAsk ? rows.find((b) => b.id === frontAsk) ?? null : null;
+  const panelRow = panel ? rows.find((b) => b.id === panel.id) ?? panel : null;
 
   const today = new Date();
   const dateLabel = today
     .toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
     .toUpperCase();
   const firstName = (profile.full_name ?? 'Barber').split(' ')[0];
-  const hours = windows.find((w) => w.weekday === today.getDay());
   const nextShift = windows.length
     ? (() => {
       for (let i = 1; i <= 7; i++) {
@@ -426,17 +501,106 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     return null;
   }
 
-  const bars = (
-    <View style={s.chart} accessible
-      accessibilityLabel={`Booked value, last 7 days, today ${dh(earnedToday)}`}>
-      {week.map((v, i) => (
-        <View key={i} style={[s.bar, {
-          height: Math.max(3, Math.round((v / weekMax) * 52)),
-          backgroundColor: i === 6 ? (todayOff ? D.muted : D.accent) : D.barMuted,
-        }]} />
-      ))}
-    </View>
-  );
+  const sheetOf = (b: BookingRow): RowSheet => {
+    const frees = nextToCall(book.filter((x) => !x.completed_at), b.id);
+    return { row: b, no: noOf(b), frees: frees ? noOf(frees) : null, unconfirmed: unconfirmed(b), anotherDayOff: anotherDayOff(b) };
+  };
+
+  /** What a row says under the name: what is happening to it now, or where the place came from */
+  function subOf(b: BookingRow): string {
+    const service = b.services?.name ?? 'Service';
+    const g = guests[b.id];
+    switch (rungOf(b)) {
+      case 'request': return `${hhmm(b.starts_at)} booking · asked to come in`;
+      case 'in_chair': return `${service} · ${minsSince(b.started_at!)} min in`;
+      case 'called':
+        if (g && !g.confirmed) return `Called ${hhmm(b.checked_in_at!)} anyway · hasn't tapped`;
+        if (isLinePlace(b, barberId)) return `${service} · called ${hhmm(b.checked_in_at!)}`;
+        return (b.deposit_cents ?? 0) > 0
+          ? `${hhmm(b.starts_at)} booking · ${dh(b.deposit_cents)} paid · ${whole(collectCents(b))} in cash`
+          : `${hhmm(b.starts_at)} booking · ${dh(collectCents(b))} in cash`;
+      default:
+        if (g && !g.confirmed) return `Texted ${minsSince(g.joined_at)} min ago · hasn't tapped`;
+        if (b.dropped_at) return `${service} · didn't come · at the end`;
+        if (g) return `${service} · ${g.source === 'link' ? 'took your link' : 'put his name in from the web'}`;
+        if (b.customer_id === barberId) return `${service} · you wrote him down`;
+        if (b.joined_line) return `${service} · held his own place in the app`;
+        return `${hhmm(b.starts_at)} booking · ${service}`;
+    }
+  }
+
+  // BTD-20 — one row of THE CHAIR. In the chair and called-up rows are cards with their
+  // button full width; the rest are one line, and only the man CALL NEXT would call
+  // carries his button. A request keeps its ✕/✓: it is a different decision, not a rung.
+  function chairRow(b: BookingRow) {
+    const rung = rungOf(b);
+    const name = nameOf(b, barberId);
+    const line = isLinePlace(b, barberId);
+    const grey = unconfirmed(b);
+    const open = () => (rung === 'request' ? setRequest(b) : setPanel(b));
+
+    if (rung === 'in_chair' || rung === 'called') {
+      const cutting = rung === 'in_chair';
+      const label = cutting ? `DONE · COLLECT ${dh(collectCents(b))}` : 'SEAT HIM';
+      return (
+        <View key={b.id} style={[s.bigRow, { borderColor: cutting ? D.green : D.accent }]}>
+          <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={`${name}, open`}
+            style={({ pressed }) => [s.bigTop, pressed && s.pressed]}>
+            <Badge b={b} barberId={barberId} no={noOf(b)} tone={cutting ? 'green' : 'coral'} />
+            <View style={s.grow}>
+              <T w="b" size={14}>{name}</T>
+              <T size={11} c={D.sub} style={{ marginTop: 2 }}>{subOf(b)}</T>
+            </View>
+            <View style={[s.chip, { backgroundColor: cutting ? D.green : D.accentSoft }]}>
+              <T w="b" size={10} c={cutting ? D.bg : D.accent} ls={0.8}>
+                {cutting ? 'IN CHAIR' : line ? 'CALLED' : 'HERE'}
+              </T>
+            </View>
+          </Pressable>
+          <Pressable onPress={() => primary(b)} accessibilityRole="button" accessibilityLabel={label}
+            style={({ pressed }) => [s.bigBtn, { backgroundColor: cutting ? D.green : D.accent }, pressed && s.pressed]}>
+            {cutting && <Ico name="check" size={15} color={D.bg} />}
+            <T w="eb" size={12.5} c={cutting ? D.bg : '#fff'} ls={0.62}>{label}</T>
+          </Pressable>
+        </View>
+      );
+    }
+
+    const isNext = nextCall?.id === b.id && !grey;
+    return (
+      <Pressable key={b.id} onPress={open} accessibilityRole="button" accessibilityLabel={`${name}, ${subOf(b)}`}
+        style={({ pressed }) => [s.row, grey && s.unconfirmedRow, !!b.dropped_at && s.droppedRow, pressed && s.pressed]}>
+        <Badge b={b} barberId={barberId} no={noOf(b)} tone={grey ? 'amber' : 'plain'} size={38} />
+        <View style={s.grow}>
+          <T w="b" size={13.5} c={grey || b.dropped_at ? D.sub : D.text}>{name}</T>
+          <T size={11} c={grey ? D.amber : D.sub} style={{ marginTop: 2 }}>{subOf(b)}</T>
+        </View>
+        {rung === 'request' ? (
+          <View style={s.pucks}>
+            <Pressable onPress={() => decline(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel={`Decline ${name}`}
+              style={({ pressed }) => [s.puck34, pressed && s.pressed]}>
+              <Ico name="x" size={14} color={D.red} />
+            </Pressable>
+            <Pressable onPress={() => accept(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel={`Accept ${name}`}
+              style={({ pressed }) => [s.puck34, { backgroundColor: D.green }, pressed && s.pressed]}>
+              <Ico name="check" size={14} color={D.bg} />
+            </Pressable>
+          </View>
+        ) : grey ? (
+          <View style={[s.chip, { backgroundColor: D.amberSoft12 }]}>
+            <T w="b" size={10} c={D.amber} ls={0.6}>UNCONFIRMED</T>
+          </View>
+        ) : isNext ? (
+          <Pressable onPress={() => primary(b)} hitSlop={4} accessibilityRole="button"
+            style={({ pressed }) => [s.callPill, pressed && s.pressed]}>
+            <T w="b" size={11.5}>{verbOf(b, barberId) === 'CALL HIM' ? 'Call him' : "He's here"}</T>
+          </Pressable>
+        ) : b.dropped_at ? null : (
+          <T size={11} c={D.sub} style={s.tnum}>{line ? `~${minsTo(b.starts_at)} min` : hhmm(b.starts_at)}</T>
+        )}
+      </Pressable>
+    );
+  }
 
   const dash = (
     <View style={s.root}>
@@ -503,166 +667,102 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
           </View>
         )}
 
-        {/* booked today + the 7-day sparkline */}
-        <Pressable onPress={() => openEarnings(true)} accessibilityRole="button"
-          accessibilityLabel="Earnings details" style={({ pressed }) => pressed && s.pressed}>
-          {/* 11b relabels the same number rather than drawing a second one —
-              the reassurance is that this money did not go anywhere. */}
-          <Eyebrow ls={1.6}>{shop?.open === false ? 'STILL BOOKED TODAY' : 'BOOKED TODAY'}</Eyebrow>
-          <Serif size={44} ls={0} style={[s.bigMoney, todayOff && { color: D.muted }]}>
-            {dh(earnedToday)}
-          </Serif>
-          {bars}
-          <View style={s.chartAxis}>
-            <T size={11} c={D.sub}>{weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</T>
-            <T size={11} c={D.sub}>Today</T>
-          </View>
-          {shop?.open === false && (
-            <T size={12} c={D.sub} style={s.closedNote}>
-              Nothing was cancelled — closing only stops new ones
-            </T>
-          )}
-        </Pressable>
-
-        {/* 11b — what closing switched off, and the two things it didn't */}
-        {shop && <ShopClosedTiles st={shop} />}
-
-        {/* three-up tiles */}
-        <View style={s.tileRow}>
-          <Stat label="TODAY" value={String(todayConfirmed.length)}
-            valueColor={todayOff ? D.muted : undefined} />
-          <Stat label="WALK-INS" value={String(walkIns.length)}
-            sub={todayOff ? undefined : dh(walkInsDH)} valueColor={todayOff ? D.muted : undefined} />
-          {todayOff
-            ? <View style={s.tile}>
-                <Eyebrow ls={0.8}>NEXT SHIFT</Eyebrow>
-                <T w="b" size={16} style={{ marginTop: 4 }}>{nextShift}</T>
-              </View>
-            : <Stat label="FREE SLOTS" value={String(freeSlots)} />}
+        {/* BTD-20 — TAKEN, not booked: it climbs only when a man is done, and booked sits
+            beside it. The line's switch rides on the right and opens it (BTD-14); the rest
+            of the card opens Earnings. */}
+        <View style={s.moneyCard}>
+          <Pressable onPress={() => openEarnings(true)} accessibilityRole="button"
+            accessibilityLabel={`Taken today ${dh(takenCents)} of ${dh(bookedCents)} booked, earnings details`}
+            style={({ pressed }) => [s.moneyTap, pressed && s.pressed]}>
+            <View>
+              <T w="b" size={9.5} c={D.sub} ls={1.15}>TAKEN TODAY</T>
+              <Serif size={25} ls={0} style={[s.money, todayOff && { color: D.muted }]}>{dh(takenCents)}</Serif>
+            </View>
+            <View style={s.moneyRule} />
+            <View style={s.grow}>
+              <T size={11.5} c={D.sub} style={{ lineHeight: 16.5 }}>
+                {done
+                  ? `Up ${dh(done.row.price_cents)} from ${nameOf(done.row, barberId).split(' ')[0]} · ${waiting.length} waiting`
+                  : `${waiting.length} waiting · ${whole(takenCents)} of ${dh(bookedCents)} booked`}
+              </T>
+              {notConfirmed > 0 && (
+                <T size={11} c={D.amber} style={{ marginTop: 2 }}>
+                  {notConfirmed === 1 ? '1 name not confirmed' : `${notConfirmed} names not confirmed`}
+                </T>
+              )}
+            </View>
+          </Pressable>
+          <Pressable onPress={() => { setShowQueue(true); onChromeHidden?.(true); }} hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={`The line is ${lineOpen ? 'open' : 'paused'}, open the live queue`}
+            style={({ pressed }) => [s.linePill, !lineOpen && { backgroundColor: D.card2 }, pressed && s.pressed]}>
+            <View style={[s.linePillDot, !lineOpen && { backgroundColor: D.sub }]} />
+            <T w="eb" size={9} c={lineOpen ? D.green : D.sub} ls={0.9}>{lineOpen ? 'OPEN' : 'PAUSED'}</T>
+          </Pressable>
         </View>
 
-        {/* open / clock-out strip */}
-        {!todayOff && (
-          <View style={s.openRow}>
-            <Pressable onPress={() => { setShowQueue(true); onChromeHidden?.(true); }}
-              accessibilityRole="button" accessibilityLabel="Live queue"
-              style={({ pressed }) => [s.openTap, pressed && s.pressed]}>
-              <View style={s.openDotWrap}><View style={s.openDot} /></View>
-              <View style={s.grow}>
-                <T w="b" size={13}>Open · taking walk-ins</T>
-                <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-                  {hours ? `Working ${minLabel(hours.start_min)} – ${minLabel(hours.end_min)} today` : 'No hours set for today'}
-                </T>
-              </View>
-            </Pressable>
-            <Pressable onPress={toggleClockOut} accessibilityRole="button" accessibilityLabel="Clock out"
-              style={({ pressed }) => [s.clockOutBtn, pressed && s.pressed]}>
-              <T w="b" size={11} ls={0.55}>CLOCK OUT</T>
-            </Pressable>
-          </View>
+        {/* 11b — the money did not go anywhere, and what closing switched off */}
+        {shop?.open === false && (
+          <T size={12} c={D.sub} style={s.closedNote}>Nothing was cancelled — closing only stops new ones</T>
         )}
+        {shop && <ShopClosedTiles st={shop} />}
 
-        {/* next up */}
-        {!todayOff && (
+        {(list.length > 0 || done) && (
           <View style={s.sectionRow}>
-            <Eyebrow ls={1.65}>NEXT UP</Eyebrow>
-            <Pressable onPress={goSchedule} hitSlop={6} accessibilityRole="button" accessibilityLabel="My day"
-              style={({ pressed }) => pressed && s.pressed}>
-              <T w="sb" size={12} c={D.accent}>My day</T>
-            </Pressable>
+            <Eyebrow ls={1.65}>{done && !chairTaken ? 'THE CHAIR IS EMPTY' : 'THE CHAIR'}</Eyebrow>
+            <T size={11} c={D.faint}>
+              {done && !chairTaken ? `${waiting.length} waiting` : 'bookings and walk-ins, in order'}
+            </T>
           </View>
         )}
 
-        {bookings === null && <ActivityIndicator color={D.accent} accessibilityLabel="Loading appointments" />}
+        {bookings === null && <ActivityIndicator color={D.accent} accessibilityLabel="Loading the chair" />}
 
-        {nextUp && !todayOff && (() => {
-          const st = stageOf(nextUp)!;
-          const mins = Math.round((new Date(nextUp.starts_at).getTime() - now) / 60_000);
-          const when = st === 'in_chair' ? 'IN CHAIR'
-            : mins <= 0 ? 'NOW' : mins < 60 ? `IN ${mins} MIN` : `IN ${Math.round(mins / 60)} H`;
-          const cta = st === 'check_in' ? 'CHECK IN'
-            : st === 'start' ? 'START'
-              // same rule as BTD-03: a held deposit is already out of the wallet
-              : `MARK DONE · COLLECT ${dh(Math.max(0, nextUp.price_cents - (nextUp.deposit_cents ?? 0)))}`;
-          const dur = Math.round(
-            (new Date(nextUp.ends_at).getTime() - new Date(nextUp.starts_at).getTime()) / 60_000);
-          return (
-            <View style={s.nextCard}>
-              <Pressable onPress={() => setPanel(nextUp)} accessibilityRole="button"
-                accessibilityLabel={`${nameOf(nextUp, barberId)}, open booking`} style={s.nextTop}>
-                <ClientAvatar b={nextUp} barberId={barberId} size={46} warm />
-                <View style={s.grow}>
-                  <T w="b" size={15}>{nameOf(nextUp, barberId)}</T>
-                  <T size={12} c={D.sub} style={{ marginTop: 2 }}>
-                    {nextUp.services?.name ?? 'Service'} · {dur} min · {dh(nextUp.price_cents)}
-                  </T>
-                </View>
-                <View style={s.nextRight}>
-                  <T w="eb" size={15} c={D.accent} style={s.tnum}>{hhmm(nextUp.starts_at)}</T>
-                  <T size={10} c={D.sub} ls={0.8} style={{ marginTop: 2 }}>{when}</T>
-                </View>
-              </Pressable>
-              {/* ponytail: deposits were removed in 0005_no_deposits — the strip carries
-                  what the shop actually collects until the wallet deposit rail lands. */}
-              <View style={s.moneyStrip}>
-                <Ico name="check" size={13} color={D.green} />
-                <T size={11} c={D.sub} style={s.grow}>
-                  {nextUp.checked_in_at ? `Checked in ${hhmm(nextUp.checked_in_at)} · ` : ''}
-                  {dh(nextUp.price_cents)} in cash
+        {/* BTD-22 — done is the only rung that moves money, so it is the only one with a way back */}
+        {done && (
+          <View style={s.doneCard}>
+            <View style={s.bigTop}>
+              <View style={s.doneTick}><Ico name="check" size={20} color={D.bg} /></View>
+              <View style={s.grow}>
+                <T w="b" size={14.5}>{nameOf(done.row, barberId)} is done</T>
+                <T size={11.5} c={D.sub} style={{ marginTop: 2 }}>
+                  {dh(collectCents(done.row))} in cash · chair free since {hhmm(done.row.completed_at!)}
                 </T>
-              </View>
-              <View style={s.nextBtns}>
-                <Pressable onPress={() => advance(nextUp, st === 'check_in' ? 'check_in' : st === 'start' ? 'start' : 'complete')}
-                  accessibilityRole="button" accessibilityLabel={cta}
-                  style={({ pressed }) => [s.cta, st === 'in_chair' && { backgroundColor: D.green }, pressed && s.pressed]}>
-                  <T w="b" size={12} c={st === 'in_chair' ? D.bg : '#fff'} ls={0.72}>{cta}</T>
-                </Pressable>
-                {nextUp.customer_id !== barberId && (
-                  <Pressable onPress={() => openChat({ id: nextUp.id, title: nameOf(nextUp, barberId) })}
-                    accessibilityRole="button" accessibilityLabel="Message client"
-                    style={({ pressed }) => [s.puck42, pressed && s.pressed]}>
-                    <Ico name="message-circle" size={17} />
-                  </Pressable>
-                )}
-                <Pressable onPress={() => setMenuBooking(nextUp)} accessibilityRole="button"
-                  accessibilityLabel="More actions"
-                  style={({ pressed }) => [s.puck42, pressed && s.pressed]}>
-                  <Ico name="more-vertical" size={16} />
-                </Pressable>
               </View>
             </View>
-          );
-        })()}
-
-        {/* pending requests, inline and dashed */}
-        {!todayOff && pending.map((b) => (
-          <View key={b.id} style={s.pendingCard}>
-            <Pressable onPress={() => setRequest(b)} accessibilityRole="button"
-              accessibilityLabel={`${nameOf(b, barberId)}, open request`} style={s.pendingTap}>
-              <ClientAvatar b={b} barberId={barberId} size={40} />
-              <View style={s.grow}>
-                <View style={s.pendingNameRow}>
-                  <T w="b" size={14}>{nameOf(b, barberId)}</T>
-                  <View style={s.pendingChip}><T w="b" size={10} c={D.accent} ls={1}>PENDING</T></View>
-                </View>
-                <T size={12} c={D.sub} style={{ marginTop: 3 }}>
-                  {b.services?.name ?? 'Service'} · {hhmm(b.starts_at)} · {dh(b.price_cents)}
-                </T>
-              </View>
-            </Pressable>
-            <Pressable onPress={() => decline(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel="Decline"
-              style={({ pressed }) => [s.puck36, pressed && s.pressed]}>
-              <Ico name="x" size={15} color={D.red} />
-            </Pressable>
-            <Pressable onPress={() => accept(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel="Accept"
-              style={({ pressed }) => [s.puck36, { backgroundColor: D.green }, pressed && s.pressed]}>
-              <Ico name="check" size={15} color={D.bg} />
-            </Pressable>
+            <View style={s.undoStrip}>
+              <Ico name="rotate-ccw" size={14} color={D.sub} />
+              <T size={11.5} c={D.sub} style={[s.grow, { lineHeight: 16.5 }]}>
+                Wrong man? Put him back any time until the next man sits down — the cash goes back too.
+              </T>
+              <Pressable onPress={() => undoDone(done.row)} accessibilityRole="button"
+                accessibilityLabel={`Undo, put ${nameOf(done.row, barberId)} back in the chair`}
+                style={({ pressed }) => [s.undoPill, pressed && s.pressed]}>
+                <T w="b" size={11.5}>Undo</T>
+              </Pressable>
+            </View>
           </View>
-        ))}
+        )}
+
+        {list.length > 0 && <View style={s.list}>{list.map(chairRow)}</View>}
+
+        {(list.length > 0 || done) && (
+          <T size={11} c={D.faint} style={s.footnote}>
+            {done
+              ? "Done is the only rung that moves money, so it is the only one with a way back. Once someone else is in the chair the cash is counted, and a wrong one is the owner's to fix — he's holding it."
+              : "Bookings keep their clock time; walk-ins fill the space between. Waiting leaves out the man in the chair and any request you haven't answered."}
+          </T>
+        )}
+
+        {!todayOff && bookings !== null && (
+          <Pressable onPress={toggleClockOut} accessibilityRole="button" accessibilityLabel="Clock out"
+            style={({ pressed }) => [s.clockOutWide, pressed && s.pressed]}>
+            <T w="b" size={11.5} c={D.textDim} ls={0.55}>CLOCK OUT</T>
+          </Pressable>
+        )}
 
         {/* 1s — nothing left today */}
-        {bookings !== null && !nextUp && pending.length === 0 && (
+        {bookings !== null && list.length === 0 && (
           <View style={s.emptyWrap}>
             <View style={s.emptyCircle}><Ico name="scissors" size={32} color={D.muted} /></View>
             <View style={{ alignItems: 'center' }}>
@@ -686,15 +786,22 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
         onClose={() => setSheetClient(null)}
         onChat={(id, title) => openChat({ id, title })} />
 
-      {/* 34f — tick off what was actually done, then complete. Hands off to 3a. */}
+      {/* 34f — tick off what was actually done, then complete. Hands off to BTD-22's card, and to 3a
+          for a client with an account. A walk-in has nobody to rate: the card is his goodbye. */}
       <SettleBundleSheet
         booking={settleB && {
           id: settleB.id,
           starts_at: settleB.starts_at,
           client: nameOf(settleB, barberId),
         }}
-        onClose={() => setSettleB(null)}
-        onDone={() => { setCompletedB(settleB); setSettleB(null); load(); }} />
+        ask={settleAsk}
+        onClose={() => { setSettleB(null); setSettleAsk(false); }}
+        onDone={() => {
+          const b = settleB;
+          setSettleB(null); setSettleAsk(false);
+          if (b && b.customer_id !== barberId) setCompletedB(b);
+          load();
+        }} />
 
       {/* 3a–3c — rate the client, raised straight after MARK DONE */}
       <RateClientSheet
@@ -716,12 +823,14 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
               (new Date(completedB.checked_in_at).getTime() - new Date(completedB.starts_at).getTime()) / 60_000))
             : null,
         }}
-        bookedTodayCents={earnedToday}
+        // the list may not have reloaded yet: count the cut just done once, never twice
+        takenTodayCents={takenCents + (completedB && !book.some((b) => b.id === completedB.id && b.completed_at)
+          ? completedB.price_cents : 0)}
         next={(() => {
-          const n = remaining.find((b) => b.id !== completedB?.id && b.status === 'confirmed');
+          const n = waiting.find((b) => b.id !== completedB?.id);
           if (!n) return null;
           return {
-            ticket: String(remaining.indexOf(n) + 1).padStart(2, '0'),
+            ticket: pad(noOf(n)),
             label: nameOf(n, barberId),
             service: n.services?.name ?? 'Service',
             waitingMin: Math.max(0, Math.round((now - new Date(n.starts_at).getTime()) / 60_000)),
@@ -733,16 +842,29 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
         onDone={() => { setCompletedB(null); load(); }}
       />
 
-      {/* 1d — the booking in the chair */}
+      {/* BTD-21 — one row, opened: where it sits on the four rungs, and its one next verb */}
       <BookingPanelSheet
         visible={!!panel}
-        booking={panel && panelOf(panel)}
+        booking={panelRow && panelOf(panelRow)}
+        sheet={panelRow && sheetOf(panelRow)}
+        barberId={barberId}
         onClose={() => setPanel(null)}
-        onDone={() => { const b = panel; setPanel(null); if (b) advance(b, 'complete'); }}
+        onPrimary={() => {
+          const b = panelRow;
+          setPanel(null);
+          // a sheet opening as another closes can be swallowed with it
+          if (b) setTimeout(() => primary(b), unconfirmed(b) ? 350 : 0);
+        }}
         onChat={() => { const b = panel; setPanel(null); if (b) openChat({ id: b.id, title: nameOf(b, barberId) }); }}
         onHistory={() => { const b = panel; setPanel(null); if (b) setSheetClient(clientRefOf(b)); }}
-        onReschedule={() => { const b = panel; setPanel(null); setResched(b); setReschedAt(null); }}
-        onNoShow={() => { const b = panel; setPanel(null); if (b) menuAction(b, 'mark_no_show'); }}
+        onService={() => {
+          const b = panelRow;
+          setPanel(null);
+          if (b) setTimeout(() => { setSettleAsk(true); setSettleB(b); }, 350);
+        }}
+        onAnotherDay={() => { const b = panel; if (b) anotherDay(b); }}
+        // the take-off asks first, and an Alert over a closing sheet can vanish with it
+        onTakeOff={() => { const b = panel; setPanel(null); if (b) setTimeout(() => takeOff(b), 350); }}
       />
 
       {/* 3d — a request, with the shop's flag on it */}
@@ -776,47 +898,16 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
         }}
       />
 
-      {/* … actions menu */}
-      <Modal visible={!!menuBooking} transparent animationType="slide" onRequestClose={() => setMenuBooking(null)}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.sheetBackdrop} onPress={() => setMenuBooking(null)} />
-        {menuBooking && (() => {
-          const b = menuBooking;
-          const canNoShow = b.status === 'confirmed' && new Date(b.starts_at).getTime() <= now && !b.completed_at;
-          const canCancel = !b.started_at && new Date(b.starts_at).getTime() > now;
-          return (
-            <View style={s.menuSheet} onAccessibilityEscape={() => setMenuBooking(null)}>
-              <View style={s.handle} />
-              <View style={s.menuHead}>
-                <View style={s.grow}>
-                  <T w="b" size={17}>{nameOf(b, barberId)}</T>
-                  <T size={12} c={D.sub}>{hhmm(b.starts_at)} · {b.services?.name ?? 'Service'}</T>
-                </View>
-                <Pressable onPress={() => setMenuBooking(null)} hitSlop={8} accessibilityRole="button" accessibilityLabel="Close"
-                  style={({ pressed }) => [s.menuClose, pressed && s.pressed]}>
-                  <Ico name="x" size={16} />
-                </Pressable>
-              </View>
-              {!b.started_at && (
-                <MenuRow icon="calendar-outline" label="Reschedule"
-                  onPress={() => { setMenuBooking(null); setResched(b); setReschedAt(null); }} />
-              )}
-              {b.customer_id !== barberId && (
-                <MenuRow icon="chatbox-outline" label="Message client"
-                  onPress={() => { setMenuBooking(null); openChat({ id: b.id, title: nameOf(b, barberId) }); }} />
-              )}
-              {canNoShow && (
-                <MenuRow icon="person-remove-outline" label="Mark as no-show"
-                  onPress={() => menuAction(b, 'mark_no_show')} />
-              )}
-              {canCancel && (
-                <MenuRow danger icon="trash-outline"
-                  label={b.status === 'pending' ? 'Decline request' : 'Cancel booking'}
-                  onPress={() => { setMenuBooking(null); setCancelling(b); }} />
-              )}
-            </View>
-          );
-        })()}
-      </Modal>
+      {/* BTD-17 — CALL HIM on a web name that never tapped: asked once, here */}
+      <FrontSheet visible={!!frontRow}
+        row={frontRow && {
+          no: noOf(frontRow), name: nameOf(frontRow, barberId),
+          service: frontRow.services?.name ?? 'Service', phone: phoneOf(frontRow),
+        }}
+        textedAt={frontRow ? guests[frontRow.id]?.joined_at ?? null : null}
+        onClose={() => setFrontAsk(null)}
+        onCall={() => { const r = frontRow; setFrontAsk(null); if (r) callIn(r, true); }}
+        onDrop={() => { const r = frontRow; setFrontAsk(null); if (r) dropNow(r); }} />
 
       {/* reschedule */}
       <Modal visible={!!resched} transparent animationType="slide" onRequestClose={() => setResched(null)}>
@@ -845,6 +936,14 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   // ponytail: the dashboard's derivation runs now even while a child is open.
   // It is array work over rows already in memory, so it costs a render, not a
   // fetch — memoise it if that ever shows up in a profile.
+  if (offerFor) {
+    const shut = () => { setOfferFor(null); onChromeHidden?.(false); };
+    return (
+      <Pushed onBack={shut} behind={dash}>
+        <OfferDayScreen barberId={barberId} row={offerFor} onBack={shut} onSent={() => { shut(); load(); }} />
+      </Pushed>
+    );
+  }
   if (chat) {
     // the customer reads one thread with this barber, so the barber reads the
     // same one back - otherwise "like I said last time" arrives pointing at a
@@ -964,63 +1063,76 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
 
-  bigMoney: { marginTop: 4, fontVariant: ['tabular-nums'] },
-  chart: { flexDirection: 'row', alignItems: 'flex-end', gap: 3, height: 52, marginTop: 12 },
-  bar: { flex: 1, borderRadius: 3 },
-  chartAxis: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 6 },
-
-  tileRow: { flexDirection: 'row', gap: 10 },
-  tile: { flex: 1, backgroundColor: D.card, borderRadius: 20, padding: 14, gap: 3 },
-
-  openRow: {
+  // BTD-20 — TAKEN TODAY, with the line's switch on the right
+  moneyCard: {
     flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: D.card,
-    borderRadius: 20, padding: 14, paddingHorizontal: 16,
+    borderRadius: 18, paddingVertical: 13, paddingLeft: 15, paddingRight: 12,
   },
-  openTap: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  openDotWrap: {
-    width: 34, height: 34, borderRadius: 999, backgroundColor: D.greenSoft,
-    alignItems: 'center', justifyContent: 'center',
+  moneyTap: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  money: { marginTop: 1, lineHeight: 28, fontVariant: ['tabular-nums'] },
+  moneyRule: { width: 1, alignSelf: 'stretch', backgroundColor: D.border },
+  linePill: {
+    flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: D.greenSoft,
+    borderRadius: 999, paddingVertical: 6, paddingHorizontal: 10,
   },
-  openDot: { width: 9, height: 9, borderRadius: 999, backgroundColor: D.green },
-  clockOutBtn: {
-    height: 34, borderRadius: 999, borderWidth: 1, borderColor: D.border,
-    paddingHorizontal: 14, alignItems: 'center', justifyContent: 'center',
-  },
+  linePillDot: { width: 6, height: 6, borderRadius: 999, backgroundColor: D.green },
 
   sectionRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
+  list: { gap: 8 },
+  badge: { borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
+  chip: { borderRadius: 8, paddingVertical: 5, paddingHorizontal: 9 },
 
-  nextCard: {
-    backgroundColor: D.card, borderRadius: 22, padding: 16, gap: 13,
-    borderWidth: 2, borderColor: D.accent,
+  // in the chair, or called up: the card whose button is the next thing he does
+  bigRow: {
+    backgroundColor: D.card, borderRadius: 20, paddingVertical: 14, paddingHorizontal: 15, gap: 11,
+    borderWidth: 2,
   },
-  nextTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  nextRight: { alignItems: 'flex-end' },
-  moneyStrip: {
-    flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: D.card2,
-    borderRadius: 12, padding: 10, paddingHorizontal: 12,
-  },
-  nextBtns: { flexDirection: 'row', gap: 9 },
-  cta: {
-    flex: 1, height: 42, borderRadius: 999, backgroundColor: D.accent,
+  bigTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  bigBtn: {
+    height: 44, borderRadius: 999, flexDirection: 'row', gap: 7,
     alignItems: 'center', justifyContent: 'center',
   },
-  puck42: {
-    width: 42, height: 42, borderRadius: 999, backgroundColor: D.card2,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  puck36: {
-    width: 36, height: 36, borderRadius: 999, backgroundColor: D.card2,
-    alignItems: 'center', justifyContent: 'center',
-  },
-
-  pendingCard: {
+  row: {
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: D.card,
-    borderRadius: 22, padding: 15, paddingHorizontal: 16,
-    borderWidth: 1, borderStyle: 'dashed', borderColor: D.muted,
+    borderRadius: 18, paddingVertical: 12, paddingHorizontal: 14,
   },
-  pendingTap: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 },
-  pendingNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  pendingChip: { backgroundColor: D.accentSoft, borderRadius: 6, paddingVertical: 3, paddingHorizontal: 7 },
+  // BTD-14's unconfirmed row, the same everywhere it appears: recessed, dashed amber
+  unconfirmedRow: {
+    backgroundColor: D.recessed, borderWidth: 1, borderStyle: 'dashed', borderColor: 'rgba(232,161,0,0.45)',
+  },
+  droppedRow: { backgroundColor: D.recessed },
+  callPill: {
+    height: 34, borderRadius: 999, borderWidth: 1, borderColor: D.border, paddingHorizontal: 13,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  pucks: { flexDirection: 'row', gap: 7 },
+  puck34: {
+    width: 34, height: 34, borderRadius: 999, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  footnote: { lineHeight: 16.5 },
+  clockOutWide: {
+    height: 46, borderRadius: 999, borderWidth: 1, borderColor: D.border,
+    alignItems: 'center', justifyContent: 'center',
+  },
+
+  // BTD-22
+  doneCard: {
+    backgroundColor: D.card, borderRadius: 20, padding: 16, gap: 13,
+    borderWidth: 2, borderColor: D.green,
+  },
+  doneTick: {
+    width: 42, height: 42, borderRadius: 999, backgroundColor: D.green,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  undoStrip: {
+    flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: D.card2,
+    borderRadius: 14, paddingVertical: 11, paddingHorizontal: 13,
+  },
+  undoPill: {
+    height: 32, borderRadius: 999, backgroundColor: D.bg, borderWidth: 1, borderColor: D.muted,
+    paddingHorizontal: 13, alignItems: 'center', justifyContent: 'center',
+  },
 
   emptyWrap: { alignItems: 'center', gap: 15, paddingTop: 44 },
   emptyCircle: {
@@ -1033,23 +1145,10 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
 
-  reqRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-
   sheetBackdrop: { flex: 1, backgroundColor: D.scrim },
   menuSheet: {
     backgroundColor: D.sheet, borderTopLeftRadius: 26, borderTopRightRadius: 26,
     padding: sp(5), paddingBottom: sp(10), gap: sp(3),
-  },
-  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: D.hairline, marginBottom: sp(2) },
-  menuHead: { flexDirection: 'row', alignItems: 'center', gap: sp(3), marginBottom: sp(1) },
-  menuClose: {
-    width: 36, height: 36, borderRadius: 999, backgroundColor: D.card2,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  menuRow: { flexDirection: 'row', alignItems: 'center', gap: sp(3.5), paddingVertical: sp(3) },
-  menuRowIcon: {
-    width: 44, height: 44, borderRadius: radius.md, backgroundColor: D.card2,
-    alignItems: 'center', justifyContent: 'center',
   },
   sheetLight: { backgroundColor: colors.bg },
   sheetTitleLight: { fontFamily: inter.b, fontSize: 18, color: colors.text },

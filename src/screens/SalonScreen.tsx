@@ -10,6 +10,7 @@ import { TAB_BAR_INSET } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { useAndroidBack } from '../lib/back';
 import { colors, dark as D, font, inter, radius, serif, sp, TOP_INSET } from '../theme';
+import LinesScreen from './LinesScreen';
 import { AllChairsScreen, OwnerBarberScreen, OwnerDashboard } from './OwnerScreens';
 import { ReviewsInboxScreen, ShopListingScreen, ShopReportScreen, WalkInPosterScreen, WallDisplayScreen } from './ShopScreens';
 import DepositScreen from './DepositScreen';
@@ -36,7 +37,8 @@ type SalonMeta = {
 // the turn-2 screens that sit behind this hub
 type OwnerView =
   | 'hub' | 'dashboard' | 'allChairs' | 'report' | 'reviews' | 'listing' | 'poster' | 'wall'
-  | 'deposit';   // OSH-11/12/13
+  | 'deposit'    // OSH-11/12/13
+  | 'lines';     // OSH-19
 
 const hhmm = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 type Member = {
@@ -170,7 +172,7 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
 
   if (view === 'dashboard') {
     return <OwnerDashboard salon={salon} team={team} onBack={() => setView('hub')}
-      onAllChairs={() => setView('allChairs')} onReports={() => setView('report')}
+      onAllChairs={() => setView('allChairs')} onLines={() => setView('lines')} onReports={() => setView('report')}
       onReviews={() => setView('reviews')} onTeam={() => setView('hub')}
       onBarber={(m) => { setView('hub'); setSelected(m); }} />;
   }
@@ -178,6 +180,7 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
     return <AllChairsScreen salon={salon} team={team} onBack={() => setView('hub')}
       onAdd={() => Alert.alert('Add a booking', 'Use the + on your own day, or the chair’s own schedule.')} />;
   }
+  if (view === 'lines') return <LinesScreen onBack={() => setView('hub')} />;
   if (view === 'report') return <ShopReportScreen onBack={() => setView('hub')} />;
   if (view === 'reviews') {
     return <ReviewsInboxScreen salon={salon} team={team} onBack={() => setView('hub')} />;
@@ -210,6 +213,7 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
     { icon: 'grid', label: 'Walk-in QR poster', value: 'Print', accent: true, onPress: () => setView('poster') },
     { icon: 'monitor', label: 'Wall display', onPress: () => setView('wall') },
     { icon: 'calendar', label: 'All chairs', onPress: () => setView('allChairs') },
+    { icon: 'list', label: 'The lines, live', onPress: () => setView('lines') },
     { icon: 'star', label: 'Reviews', onPress: () => setView('reviews') },
     { icon: 'trending-up', label: 'Reports & payouts', onPress: () => setView('report') },
     { icon: 'percent', label: 'Default commission', value: `${100 - salon.default_commission}%`, onPress: () => setDefCommOpen(true) },

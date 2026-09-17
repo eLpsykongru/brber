@@ -2,9 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { Eyebrow, GhostBtn, Ico, IconName, Note, Screen, Serif, T, Toggle, TopBar } from '../components/dark';
 import GuestSheet from '../components/GuestSheet';
+import { CalledSheet, FrontSheet } from '../components/LineSheets';
 import ShareLinkSheet, { LinkSend } from '../components/ShareLinkSheet';
+import { useAndroidBack } from '../lib/back';
+import { calledNotHere, callOrder, heldUntil, lapsedCall, nextToCall, smsSends } from '../lib/line';
+import { checkIn } from '../lib/lineCalls';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
+import OfferDayScreen, { OfferFor } from './OfferDayScreen';
 
 // 1l — Live queue, barber control. Per 0029 the queue is not a separate rail: it is
 // today's confirmed book, run through the lifecycle the barber already has.
@@ -15,18 +20,26 @@ import { dark as D } from '../theme';
 // and opened are not shown — the app hands the text to WhatsApp or the SMS app and
 // learns nothing after that (0114).
 //
-// ADDENDUM-app-first: a name put on from the web page is UNCONFIRMED until he taps
-// the link in his text (0118). That row is greyed, CALL NEXT goes past it, and so
-// does the you're-next text — the visible price of having no code.
+// ADDENDUM-app-first, turn B10 (BTD-14): a place in the line has no date and
+// nothing to accept, so there is no inbox here. A name put on from the web is
+// UNCONFIRMED until he taps his text — greyed, never "next" for the text (0118),
+// and put to the barber once, when he reaches the front (BTD-17). A called man who
+// never sat down is a question too (BTD-15), asked when his eight minutes are up:
+// no timer removes anybody from this line behind the barber's back.
+
 type Row = {
   id: string;
   starts_at: string;
+  created_at: string;
   price_cents: number;
   walk_in_name: string | null;
+  walk_in_phone: string | null;   // BTD-02 (0118)
   customer_id: string;
   checked_in_at: string | null;
   started_at: string | null;
   completed_at: string | null;
+  dropped_at: string | null;      // BTD-15 (0119)
+  joined_line: boolean;           // held his own place in the app (0119)
   services: { name: string; duration_min: number | null } | null;
   customer: { full_name: string | null } | null;
 };
@@ -35,13 +48,18 @@ type Row = {
 type GuestRow = {
   booking_id: string; first_name: string; phone: string; source: 'code' | 'link';
   joined_at: string; confirmed: boolean;
-  // 0116 — the chair hold QL-13 counts down, and what he said about it
   called_at: string | null; called_until: string | null;
   coming_at: string | null; extended_at: string | null;
 };
 
 // the numbers move while he works; the customer's own queue polls the same way
 const POLL_MS = 20_000;
+// BTD-15 opens by itself once a hold runs out; this is how soon after it notices
+const TICK_MS = 15_000;
+
+// BTD-15 opens by itself once per call. Closing it is not an answer, but it is not
+// asked again for the same call either — CALL NEXT still brings it back.
+const askedCalls = new Set<string>();
 
 const CHANNEL: Record<LinkSend['channel'], { label: string; icon: IconName }> = {
   whatsapp: { label: 'WhatsApp', icon: 'message-circle' },
@@ -49,29 +67,40 @@ const CHANNEL: Record<LinkSend['channel'], { label: string; icon: IconName }> = 
   copy: { label: 'Copied', icon: 'copy' },
 };
 
-const hhmm = (iso: string) => new Date(iso).toTimeString().slice(0, 5);
-const minsFrom = (iso: string) => Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
+const hhmm = (iso: string | number) => new Date(iso).toTimeString().slice(0, 5);
+const minsFrom = (iso: string, now = Date.now()) => Math.max(0, Math.round((now - new Date(iso).getTime()) / 60_000));
 const minsTo = (iso: string) => Math.max(0, Math.round((new Date(iso).getTime() - Date.now()) / 60_000));
 const pad = (n: number) => String(n).padStart(2, '0');
 
 // short label, same shape the customer queue gets server-side: "Mehdi K."
-function shortName(r: Row, barberId: string) {
+function shortName(r: Row, barberId: string, guest?: GuestRow) {
+  if (guest) return guest.first_name;
   if (r.walk_in_name) return r.walk_in_name;
   if (r.customer_id === barberId) return 'Walk-in';
   const parts = (r.customer?.full_name ?? 'Client').split(' ');
   return parts[1] ? `${parts[0]} ${parts[1][0]}.` : parts[0];
 }
 
-// What the row says under the name. A called guest is the one person here who
-// cannot be told anything after the fact, so his chair's hold (0116) and whatever
-// he tapped on it are on the row itself — he is also the only one the barber can
-// give more time to.
-function rowSub(r: Row, guest?: GuestRow) {
-  if (guest && !guest.confirmed) return "hasn't tapped his text · call past him";
-  if (!r.checked_in_at) return `${hhmm(r.starts_at)} booking`;
-  if (!guest?.called_at || !guest.called_until) return `waiting ${minsFrom(r.checked_in_at)} min`;
-  const asked = guest.coming_at ? ' · on the way' : guest.extended_at ? ' · asked for 5 min' : '';
-  return `called ${hhmm(guest.called_at)} · holds till ${hhmm(guest.called_until)}${asked}`;
+// What the row says under the name — BTD-14's wording: where the place came from,
+// or what is happening to it now.
+function rowSub(r: Row, barberId: string, now: number, guest?: GuestRow) {
+  const service = r.services?.name ?? 'Service';
+  if (guest && !guest.confirmed) {
+    return r.checked_in_at
+      ? `Called ${hhmm(r.checked_in_at)} anyway · hasn't tapped`
+      : `Texted ${minsFrom(guest.joined_at, now)} min ago · hasn't tapped`;
+  }
+  if (r.checked_in_at) {
+    const until = heldUntil(r.checked_in_at);
+    return until > now
+      ? `${service} · called ${hhmm(r.checked_in_at)} · holds till ${hhmm(until)}`
+      : `${service} · called ${hhmm(r.checked_in_at)} · he isn't here`;
+  }
+  if (r.dropped_at) return `${service} · didn't come · at the end since ${hhmm(r.dropped_at)}`;
+  if (guest) return `${service} · ${guest.source === 'link' ? 'took your link' : 'put his name in from the web'}`;
+  if (r.customer_id === barberId) return `${service} · you wrote him down`;
+  if (r.joined_line) return 'Held his own place in the app';
+  return `${hhmm(r.starts_at)} booking · ${service}`;
 }
 
 export default function BarberQueueScreen({ barberId, onBack }: {
@@ -83,14 +112,18 @@ export default function BarberQueueScreen({ barberId, onBack }: {
   const [guests, setGuests] = useState<Record<string, GuestRow>>({});
   const [sent, setSent] = useState<LinkSend | null>(null);
   const [share, setShare] = useState(false);
-  const [guestOpen, setGuestOpen] = useState<string | null>(null);
+  const [sheetFor, setSheetFor] = useState<string | null>(null);   // BTD-13
+  const [calledAsk, setCalledAsk] = useState<string | null>(null); // BTD-15
+  const [frontAsk, setFrontAsk] = useState<string | null>(null);   // BTD-17
+  const [offerFor, setOfferFor] = useState<OfferFor | null>(null); // BTD-16
+  const [now, setNow] = useState(() => Date.now());
 
   const load = useCallback(async (quiet = false) => {
     const from = new Date(); from.setHours(0, 0, 0, 0);
     const to = new Date(from); to.setDate(to.getDate() + 1);
     const [book, barber, misses, guestRows, link] = await Promise.all([
       supabase.from('bookings')
-        .select('id, starts_at, price_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, services(name, duration_min), customer:profiles!customer_id(full_name)')
+        .select('id, starts_at, created_at, price_cents, walk_in_name, walk_in_phone, customer_id, checked_in_at, started_at, completed_at, dropped_at, joined_line, services(name, duration_min), customer:profiles!customer_id(full_name)')
         .eq('barber_id', barberId).eq('status', 'confirmed')
         .gte('starts_at', from.toISOString()).lt('starts_at', to.toISOString())
         .order('starts_at'),
@@ -112,13 +145,40 @@ export default function BarberQueueScreen({ barberId, onBack }: {
     for (const g of (guestRows.data ?? []) as GuestRow[]) byBooking[g.booking_id] = g;
     setGuests(byBooking);
     setSent((link.data as LinkSend | null) ?? null);
+    setNow(Date.now());
   }, [barberId]);
 
   useEffect(() => {
     load();
-    const t = setInterval(() => load(true), POLL_MS);
-    return () => clearInterval(t);
+    const poll = setInterval(() => load(true), POLL_MS);
+    const tick = setInterval(() => setNow(Date.now()), TICK_MS);
+    return () => { clearInterval(poll); clearInterval(tick); };
   }, [load]);
+
+  useAndroidBack(offerFor ? () => setOfferFor(null) : null);
+
+  const all = rows ?? [];
+  const active = all.filter((r) => !r.completed_at);
+  const inChair = active.find((r) => r.started_at);
+  const order = callOrder(active);
+  const noOf = (r: Row) => all.indexOf(r) + 1;
+  const unconfirmed = (r: Row) => !!guests[r.id] && !guests[r.id].confirmed;
+  const notConfirmed = order.filter(unconfirmed);
+  const lastTicket = pad(all.length);
+  const nextNo = pad(all.length + 1);
+  const takenNo = sent?.taken ? all.findIndex((r) => r.id === sent.taken!.booking_id) + 1 : 0;
+  const nothingOpen = !share && !sheetFor && !calledAsk && !frontAsk && !offerFor;
+
+  // BTD-15 by itself: once his eight minutes are up, and once per call
+  useEffect(() => {
+    if (!rows || !nothingOpen) return;
+    const lapsed = lapsedCall(callOrder(rows.filter((r) => !r.completed_at)), now);
+    if (!lapsed) return;
+    const key = `${lapsed.id}:${lapsed.checked_in_at}`;
+    if (askedCalls.has(key)) return;
+    askedCalls.add(key);
+    setCalledAsk(lapsed.id);
+  }, [rows, now, nothingOpen]);
 
   async function setOpenState(next: boolean) {
     setOpen(next); // optimistic — the toggle is the whole point of the screen
@@ -127,44 +187,80 @@ export default function BarberQueueScreen({ barberId, onBack }: {
     if (error) { setOpen(!next); Alert.alert('Could not update the queue', error.message); }
   }
 
-  async function callNext(r: Row) {
-    const { error } = await supabase.rpc('advance_booking', { p_booking: r.id, p_stage: 'check_in' });
-    if (error) return Alert.alert('Could not call', error.message);
-    if (r.customer_id !== barberId) {
-      // ponytail: chat is the only push we have (BACKLOG: reminders increment)
-      await supabase.from('messages').insert({ booking_id: r.id, body: "You're next — head over." });
-    }
+  async function callRow(r: Row) {
+    const error = await checkIn(r.id, r.customer_id !== barberId);
+    if (error) return Alert.alert('Could not call', error);
     load();
   }
 
-  function drop(r: Row) {
-    Alert.alert(`Drop ${shortName(r, barberId)}?`, 'Marks them a no-show and frees the slot.', [
-      { text: 'Keep', style: 'cancel' },
-      {
-        text: 'Drop', style: 'destructive',
-        onPress: async () => {
-          const { error } = await supabase.rpc('mark_no_show', { p_booking: r.id });
-          if (error) Alert.alert('Could not update', error.message);
-          load();
-        },
-      },
-    ]);
+  // CALL NEXT: a man already called is decided on first (BTD-15); an unconfirmed
+  // name at the front is asked about once (BTD-17); anybody else is simply called.
+  function callNext() {
+    const called = calledNotHere(active);
+    if (called) return setCalledAsk(called.id);
+    const next = nextToCall(active);
+    if (!next) return;
+    if (unconfirmed(next)) return setFrontAsk(next.id);
+    callRow(next);
   }
 
-  const all = rows ?? [];
-  const active = all.filter((r) => !r.completed_at);
-  const inChair = active.find((r) => r.started_at);
-  const waiting = active.filter((r) => !r.started_at);
-  // an unconfirmed web name keeps its place and is simply never next
-  const unconfirmed = (r: Row) => !!guests[r.id] && !guests[r.id].confirmed;
-  const callable = waiting.filter((r) => !unconfirmed(r));
-  const lastTicket = pad(all.length);
-  const nextNo = pad(all.length + 1);
-  const takenNo = sent?.taken ? all.findIndex((r) => r.id === sent.taken!.booking_id) + 1 : 0;
+  async function callPast(r: Row) {
+    setCalledAsk(null);
+    const next = nextToCall(active, r.id);
+    const { error } = await supabase.rpc('queue_drop_to_end', { p_booking: r.id });
+    if (error) return Alert.alert('Could not move him to the end', error.message);
+    if (next && unconfirmed(next)) {
+      await load();
+      // a sheet opening as another closes can be swallowed with it
+      setTimeout(() => setFrontAsk(next.id), 350);
+      return;
+    }
+    if (next) return callRow(next);
+    load();
+  }
 
-  const openRow = guestOpen ? active.find((r) => r.id === guestOpen) ?? null : null;
-  const openGuest = openRow ? guests[openRow.id] ?? null : null;
-  const before = openRow ? active[active.indexOf(openRow) - 1] ?? null : null;
+  async function sitDown(r: Row) {
+    setCalledAsk(null);
+    const { error } = await supabase.rpc('advance_booking', { p_booking: r.id, p_stage: 'start' });
+    if (error) Alert.alert('Could not start', error.message);
+    load();
+  }
+
+  async function takeOff(r: Row) {
+    setCalledAsk(null); setFrontAsk(null);
+    const { error } = await supabase.rpc('queue_take_off', { p_booking: r.id });
+    if (error) Alert.alert('Could not take him off', error.message);
+    load();
+  }
+
+  function confirmTakeOff(r: Row) {
+    const walkIn = r.customer_id === barberId;
+    Alert.alert(`Take ${shortName(r, barberId, guests[r.id])} off the line?`,
+      walkIn ? 'He leaves today\'s line. Nothing is recorded against a walk-in.' : 'Marks him a no-show and frees the slot.', [
+        { text: 'Keep', style: 'cancel' },
+        { text: 'Take off', style: 'destructive', onPress: () => takeOff(r) },
+      ]);
+  }
+
+  if (offerFor) {
+    return (
+      <OfferDayScreen barberId={barberId} row={offerFor} onBack={() => setOfferFor(null)}
+        onSent={() => { setOfferFor(null); load(); }} />
+    );
+  }
+
+  const sheetRow = sheetFor ? active.find((r) => r.id === sheetFor) ?? null : null;
+  const sheetGuest = sheetRow ? guests[sheetRow.id] : undefined;
+  const before = sheetRow ? order[order.indexOf(sheetRow) - 1] ?? inChair ?? null : null;
+  const sheetPhone = sheetGuest?.phone ?? sheetRow?.walk_in_phone ?? null;
+
+  const calledRow = calledAsk ? active.find((r) => r.id === calledAsk) ?? null : null;
+  const calledNext = calledRow ? nextToCall(active, calledRow.id) : null;
+  const frontRow = frontAsk ? active.find((r) => r.id === frontAsk) ?? null : null;
+  const asked = (r: Row | null) => r && {
+    no: noOf(r), name: shortName(r, barberId, guests[r.id]), service: r.services?.name ?? 'Service',
+    phone: guests[r.id]?.phone ?? r.walk_in_phone,
+  };
 
   return (
     <Screen gap={13}>
@@ -193,7 +289,7 @@ export default function BarberQueueScreen({ barberId, onBack }: {
               ) : (
                 <>
                   <T w="b" size={12} c={D.amber}>No ticket yet</T>
-                  <T size={10} c={D.sub}>{minsFrom(sent.sent_at)} min ago</T>
+                  <T size={10} c={D.sub}>{minsFrom(sent.sent_at, now)} min ago</T>
                 </>
               )}
             </View>
@@ -218,7 +314,10 @@ export default function BarberQueueScreen({ barberId, onBack }: {
         <View style={s.numbers}>
           <View>
             <Eyebrow ls={1.4}>WAITING</Eyebrow>
-            <Serif size={38} ls={0} style={{ marginTop: 4 }}>{String(waiting.length)}</Serif>
+            <Serif size={38} ls={0} style={{ marginTop: 4 }}>{String(order.length)}</Serif>
+            {notConfirmed.length > 0 && (
+              <T size={10.5} c={D.faint} style={{ marginTop: 3 }}>{notConfirmed.length} not confirmed</T>
+            )}
           </View>
           <View style={{ alignItems: 'flex-end' }}>
             <Eyebrow ls={1.4}>LAST TICKET</Eyebrow>
@@ -230,9 +329,8 @@ export default function BarberQueueScreen({ barberId, onBack }: {
             style={({ pressed }) => [s.pauseBtn, pressed && s.pressed]}>
             <T w="b" size={12} c={D.sub} ls={0.6}>{open ? 'PAUSE QUEUE' : 'REOPEN QUEUE'}</T>
           </Pressable>
-          <Pressable disabled={!callable.length} accessibilityRole="button"
-            onPress={() => callable[0] && callNext(callable[0])}
-            style={({ pressed }) => [s.callBtn, !callable.length && s.off, pressed && s.pressed]}>
+          <Pressable disabled={!order.length} accessibilityRole="button" onPress={callNext}
+            style={({ pressed }) => [s.callBtn, !order.length && s.off, pressed && s.pressed]}>
             <T w="b" size={12} c="#fff" ls={0.6}>CALL NEXT</T>
           </Pressable>
         </View>
@@ -242,14 +340,14 @@ export default function BarberQueueScreen({ barberId, onBack }: {
       {rows !== null && active.length === 0 && !sent && (
         <T size={13} c={D.sub}>Nobody in the line right now.</T>
       )}
-      <View style={{ gap: 9 }}>
+      <View style={{ gap: 8 }}>
         {inChair && (
           <View style={[s.row, { borderWidth: 2, borderColor: D.green }]}>
             <View style={[s.ticket, { backgroundColor: D.greenSoft }]}>
-              <T w="b" size={12} c={D.green}>{pad(all.indexOf(inChair) + 1)}</T>
+              <T w="b" size={12} c={D.green}>{pad(noOf(inChair))}</T>
             </View>
             <View style={s.grow}>
-              <T w="b" size={14}>{shortName(inChair, barberId)}</T>
+              <T w="b" size={14}>{shortName(inChair, barberId, guests[inChair.id])}</T>
               <T size={11} c={D.sub} style={{ marginTop: 2 }}>
                 {inChair.services?.name ?? 'Service'} · started {hhmm(inChair.started_at!)}
               </T>
@@ -257,42 +355,46 @@ export default function BarberQueueScreen({ barberId, onBack }: {
             <View style={s.chairChip}><T w="b" size={10} c={D.bg} ls={0.8}>IN CHAIR</T></View>
           </View>
         )}
-        {waiting.map((r) => {
-          const misses = r.customer_id === barberId ? 0 : noShows[r.customer_id] ?? 0;
-          const first = r === callable[0];
+        {order.map((r, i) => {
           const guest = guests[r.id];
           const grey = unconfirmed(r);
+          const walkIn = r.customer_id === barberId;
+          const misses = walkIn ? 0 : noShows[r.customer_id] ?? 0;
+          const front = i === 0 && !r.checked_in_at && !grey;
+          const name = shortName(r, barberId, guest);
           return (
-            <Pressable key={r.id} disabled={!guest} onPress={() => setGuestOpen(r.id)}
-              accessibilityRole={guest ? 'button' : undefined}
-              style={({ pressed }) => [s.row, grey && s.grey, pressed && s.pressed]}>
-              <View style={[s.ticket, r.checked_in_at && { backgroundColor: D.accentSoft }]}>
-                <T w="b" size={12} c={r.checked_in_at ? D.accent : D.sub}>{pad(all.indexOf(r) + 1)}</T>
+            <Pressable key={r.id} disabled={!walkIn} onPress={() => setSheetFor(r.id)}
+              accessibilityRole={walkIn ? 'button' : undefined}
+              style={({ pressed }) => [s.row, grey && s.unconfirmedRow, r.dropped_at && s.droppedRow, pressed && s.pressed]}>
+              <View style={[s.ticket,
+                grey ? { backgroundColor: D.amberSoft12 } : r.checked_in_at ? { backgroundColor: D.accentSoft } : null]}>
+                <T w="b" size={12} c={grey ? D.amber : r.checked_in_at ? D.accent : D.sub}>{pad(noOf(r))}</T>
               </View>
               <View style={s.grow}>
-                <T w="b" size={14}>
-                  {shortName(r, barberId)}
-                  {guest ? <T w="b" size={10} c={D.faint} ls={0.8}>  · NO ACCOUNT</T> : null}
-                </T>
-                <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-                  {r.services?.name ?? 'Service'} · {rowSub(r, guest)}
+                <T w="b" size={14} c={grey || r.dropped_at ? D.sub : D.text}>{name}</T>
+                <T size={11} c={grey ? D.amber : D.sub} style={{ marginTop: 2 }}>
+                  {rowSub(r, barberId, now, guest)}
                   {misses ? <T size={11} c={D.red}> · {misses} past no-show{misses > 1 ? 's' : ''}</T> : null}
                 </T>
               </View>
-              {first ? (
+              {grey ? (
+                <View style={s.amberChip}><T w="b" size={10} c={D.amber} ls={0.6}>UNCONFIRMED</T></View>
+              ) : front ? (
                 <View style={s.rowBtns}>
-                  <Pressable onPress={() => drop(r)} hitSlop={4} accessibilityRole="button"
-                    accessibilityLabel={`Drop ${shortName(r, barberId)}`}
+                  <Pressable onPress={() => confirmTakeOff(r)} hitSlop={4} accessibilityRole="button"
+                    accessibilityLabel={`Take ${name} off the line`}
                     style={({ pressed }) => [s.rowPuck, pressed && s.pressed]}>
                     <Ico name="x" size={14} color={D.red} />
                   </Pressable>
-                  <Pressable onPress={() => callNext(r)} hitSlop={4} accessibilityRole="button"
-                    accessibilityLabel={`Call ${shortName(r, barberId)}`}
+                  <Pressable onPress={callNext} hitSlop={4} accessibilityRole="button"
+                    accessibilityLabel={`Call ${name}`}
                     style={({ pressed }) => [s.rowPuck, pressed && s.pressed]}>
                     <Ico name="arrow-up" size={14} />
                   </Pressable>
                 </View>
-              ) : (
+              ) : r.checked_in_at ? (
+                <View style={s.calledChip}><T w="b" size={10} c={D.accent} ls={0.6}>CALLED</T></View>
+              ) : r.dropped_at ? null : (
                 <T size={11} c={D.sub}>~{minsTo(r.starts_at)} min</T>
               )}
             </Pressable>
@@ -313,25 +415,56 @@ export default function BarberQueueScreen({ barberId, onBack }: {
 
       {sent && <GhostBtn title="SEND TO SOMEONE ELSE" height={48} onPress={() => setShare(true)} />}
 
+      {notConfirmed.length > 0 && (
+        <View style={s.amberNote}>
+          <Ico name="info" size={14} color={D.amber} />
+          <T size={11.5} c={D.sub} style={[s.grow, { lineHeight: 17 }]}>
+            Nº {pad(noOf(notConfirmed[0]))}{notConfirmed.length > 1 ? ` and ${notConfirmed.length - 1} more` : ''} put
+            {notConfirmed.length > 1 ? ' their names' : ' his name'} in from the web and never tapped the text. Call
+            past freely — we'll ask you once when {notConfirmed.length > 1 ? 'each reaches' : 'he reaches'} the front.
+          </T>
+        </View>
+      )}
       <Note>
-        Call next pings an app client in chat. A guest from the web page is held eight minutes once
-        called. A greyed name never tapped his text — you may call past it. Pausing stops anyone new
-        taking a place.
+        Call next pings an app client in chat. A called chair is held eight minutes, then you decide what
+        happens. Pausing stops anyone new taking a place.
       </Note>
 
       <ShareLinkSheet visible={share} barberId={barberId} onClose={() => setShare(false)}
         onSent={(link) => { setSent(link); load(true); }} />
-      <GuestSheet visible={!!openGuest} onClose={() => setGuestOpen(null)}
-        guest={openRow && openGuest ? {
-          firstName: openGuest.first_name, phone: openGuest.phone, source: openGuest.source,
-          joinedAt: openGuest.joined_at, confirmed: openGuest.confirmed,
-          no: all.indexOf(openRow) + 1, service: openRow.services?.name ?? 'Service',
-          durationMin: openRow.services?.duration_min ?? null, priceCents: openRow.price_cents,
-          startsAt: openRow.starts_at, after: before ? shortName(before, barberId) : null,
+      <GuestSheet visible={!!sheetRow} onClose={() => setSheetFor(null)}
+        guest={sheetRow ? {
+          firstName: shortName(sheetRow, barberId, sheetGuest), phone: sheetPhone,
+          source: sheetGuest ? sheetGuest.source : 'hand',
+          joinedAt: sheetGuest?.joined_at ?? sheetRow.created_at, confirmed: sheetGuest ? sheetGuest.confirmed : true,
+          no: noOf(sheetRow), service: sheetRow.services?.name ?? 'Service',
+          durationMin: sheetRow.services?.duration_min ?? null, priceCents: sheetRow.price_cents,
+          startsAt: sheetRow.starts_at, after: before ? shortName(before, barberId, guests[before.id]) : null,
         } : null}
-        onCallUp={() => { const r = openRow; setGuestOpen(null); if (r) callNext(r); }}
-        // the drop asks first, and an Alert over a closing sheet can vanish with it
-        onTakeOff={() => { const r = openRow; setGuestOpen(null); if (r) setTimeout(() => drop(r), 350); }} />
+        onCallUp={() => { const r = sheetRow; setSheetFor(null); if (r) callRow(r); }}
+        // the take-off asks first, and an Alert over a closing sheet can vanish with it
+        onTakeOff={() => { const r = sheetRow; setSheetFor(null); if (r) setTimeout(() => confirmTakeOff(r), 350); }}
+        anotherDay={!sheetPhone ? "Needs his number — you'll only have his name"
+          : !smsSends() ? 'Waits until Sterncut can send texts'
+            : () => {
+              const r = sheetRow!;
+              setSheetFor(null);
+              setOfferFor({
+                bookingId: r.id, no: noOf(r), name: shortName(r, barberId, sheetGuest),
+                service: r.services?.name ?? 'Service', durationMin: r.services?.duration_min ?? 30,
+                startsAt: r.starts_at, waitingSince: sheetGuest?.joined_at ?? r.created_at,
+              });
+            }} />
+      <CalledSheet visible={!!calledRow} row={asked(calledRow)} calledAt={calledRow?.checked_in_at ?? null}
+        nextNo={calledNext ? noOf(calledNext) : null}
+        onClose={() => setCalledAsk(null)}
+        onNext={() => calledRow && callPast(calledRow)}
+        onHere={() => calledRow && sitDown(calledRow)}
+        onTakeOff={() => calledRow && takeOff(calledRow)} />
+      <FrontSheet visible={!!frontRow} row={asked(frontRow)} textedAt={frontRow ? guests[frontRow.id]?.joined_at ?? null : null}
+        onClose={() => setFrontAsk(null)}
+        onCall={() => { const r = frontRow; setFrontAsk(null); if (r) callRow(r); }}
+        onDrop={() => frontRow && takeOff(frontRow)} />
     </Screen>
   );
 }
@@ -340,7 +473,6 @@ const s = StyleSheet.create({
   grow: { flex: 1 },
   pressed: { opacity: 0.7 },
   off: { opacity: 0.4 },
-  grey: { opacity: 0.5 },
   tnum: { fontVariant: ['tabular-nums'] },
 
   // BTD-12
@@ -357,7 +489,7 @@ const s = StyleSheet.create({
   openRow: { backgroundColor: 'transparent', borderWidth: 1, borderStyle: 'dashed', borderColor: D.muted },
   openTicket: { backgroundColor: D.sheet, borderWidth: 1, borderStyle: 'dashed', borderColor: D.muted },
 
-  control: { backgroundColor: D.card, borderRadius: 22, padding: 18, gap: 14 },
+  control: { backgroundColor: D.card, borderRadius: 22, padding: 17, gap: 13 },
   controlTop: { flexDirection: 'row', alignItems: 'center' },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 7, flex: 1 },
   statusDot: { width: 8, height: 8, borderRadius: 999 },
@@ -374,16 +506,27 @@ const s = StyleSheet.create({
 
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: D.card,
-    borderRadius: 18, padding: 13, paddingHorizontal: 14,
+    borderRadius: 18, paddingVertical: 12, paddingHorizontal: 14,
   },
+  // BTD-14's unconfirmed row: recessed, dashed amber, never hidden
+  unconfirmedRow: {
+    backgroundColor: D.recessed, borderWidth: 1, borderStyle: 'dashed', borderColor: 'rgba(232,161,0,0.45)',
+  },
+  droppedRow: { backgroundColor: D.recessed },
   ticket: {
     width: 38, height: 38, borderRadius: 999, backgroundColor: D.card2,
     alignItems: 'center', justifyContent: 'center',
   },
   chairChip: { backgroundColor: D.green, borderRadius: 8, paddingVertical: 5, paddingHorizontal: 9 },
+  amberChip: { backgroundColor: D.amberSoft12, borderRadius: 8, paddingVertical: 5, paddingHorizontal: 8 },
+  calledChip: { backgroundColor: D.accentSoft, borderRadius: 8, paddingVertical: 5, paddingHorizontal: 8 },
   rowBtns: { flexDirection: 'row', gap: 7 },
   rowPuck: {
     width: 34, height: 34, borderRadius: 999, backgroundColor: D.card2,
     alignItems: 'center', justifyContent: 'center',
+  },
+  amberNote: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 9, backgroundColor: D.card,
+    borderRadius: 16, paddingVertical: 12, paddingHorizontal: 15,
   },
 });

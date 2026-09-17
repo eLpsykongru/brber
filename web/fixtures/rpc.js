@@ -8,6 +8,7 @@ import { readFileSync } from 'node:fs';
 export function fixtureRpc({ print = (line) => console.log(line) } = {}) {
   const shops = JSON.parse(readFileSync(new URL('./queue.json', import.meta.url), 'utf8'));
   const tickets = new Map();   // ticket token → ticket
+  const offers = new Map();    // BTD-16: confirm token → offer
   const outbox = [];
 
   const token = () => crypto.randomUUID().replace(/-/g, '').slice(0, 12);
@@ -35,6 +36,25 @@ export function fixtureRpc({ print = (line) => console.log(line) } = {}) {
       stage: tk.stage === 'waiting' && !tk.confirmed ? 'held' : tk.stage,
       hold_text: tk.confirmed ? null
         : outbox.filter((o) => o.ticket === tk.token && o.kind === 'hold').pop()?.body.replace(/\/c\/[0-9a-f]+/, '/c/…') ?? null,
+    };
+  }
+
+  // 0119's offer_confirm: the tap writes the booking, unless the time went first
+  function offerConfirm(tokenValue) {
+    const o = offers.get(tokenValue);
+    if (!o) return { state: 'unknown' };
+    const said = { kind: 'offer', shop: o.shop, barber: o.barber, starts_at: o.starts_at };
+    if (!o.booked) {
+      if (new Date(o.starts_at) < new Date()) return { state: 'expired', ...said };
+      if (o.taken) return { state: 'taken', ...said };
+      o.booked = true;
+    }
+    const again = o.tapped === true;
+    o.tapped = true;
+    const shop = shopOf(o.shop);
+    return {
+      state: 'booked', again, ...said, shop_name: shop.name, address: shop.address,
+      service: o.service, price_cents: 9000, first_name: o.first_name,
     };
   }
 
@@ -99,10 +119,10 @@ export function fixtureRpc({ print = (line) => console.log(line) } = {}) {
 
       guest_confirm({ p_token }) {
         const tk = [...tickets.values()].find((t) => t.confirm === p_token);
-        if (!tk) return { state: 'unknown' };
+        if (!tk) return offerConfirm(p_token);
         if (tk.confirmed) return { state: 'confirmed', ticket: tk.token, shop: tk.shop, again: true };
-        if (tk.day !== today()) return { state: 'expired', shop: tk.shop };
-        if (tk.stage !== 'waiting') return { state: 'gone', shop: tk.shop };
+        if (tk.day !== today()) return { state: 'expired', ticket: tk.token, shop: tk.shop };
+        if (tk.stage !== 'waiting') return { state: 'gone', ticket: tk.token, shop: tk.shop };
         tk.confirmed = true;
         return { state: 'confirmed', ticket: tk.token, shop: tk.shop, again: false };
       },
@@ -126,6 +146,11 @@ export function fixtureRpc({ print = (line) => console.log(line) } = {}) {
     calls.fixture_set = ({ ticket, ...change }) => Object.assign(tickets.get(ticket), change);
     calls.fixture_confirm_token = ({ ticket }) => tickets.get(ticket)?.confirm ?? null;
     calls.fixture_outbox = () => outbox;
+    calls.fixture_offer = (o) => {
+      const t = token();
+      offers.set(t, { barber: 'Youssef', service: 'Haircut + Beard', first_name: 'Anas', ...o });
+      return t;
+    };
 
     const fn = calls[name];
     if (!fn) throw new Error(`fixture has no ${name}`);

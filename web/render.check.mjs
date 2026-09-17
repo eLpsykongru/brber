@@ -239,8 +239,12 @@ const late = await post('/q/LF7K2M/name', { ...fields, phone: '0698765432' }, { 
 const lateToken = await tooLate('fixture_confirm_token', { ticket: late.location.split('/').pop() });
 await tooLate('fixture_set', { ticket: late.location.split('/').pop(), day: 'yesterday' });
 const ranOut = await get(`/c/${lateToken}`, { rpc: tooLate });
-ok('a link that ran out shows the line, not an error page', ranOut.status === 200
-  && has(ranOut, 'That link has run out') && has(ranOut, 'THE LINE'), ranOut.status);
+ok('QL-27 · a link that ran out is not an error page', ranOut.status === 200
+  && has(ranOut, 'THIS LINK HAS RUN OUT') && has(ranOut, 'That link<br>has run out'), ranOut.status);
+ok('QL-27 · …it shows the wait now and what to do', has(ranOut, 'WAIT NOW') && has(ranOut, 'IF YOU STILL WANT A CUT')
+  && has(ranOut, 'SEE THE LINE NOW') && has(ranOut, 'href="/q/LF7K2M"'));
+ok('QL-27 · nothing is held against him', has(ranOut, 'Nothing is held against you. There is no account here to mark, and no fee'));
+clean('QL-27 ran out', ranOut);
 ok('an unknown link says so', (await get('/c/0123456789ab', as)).status === 404);
 
 const left = await post(`/q/LF7K2M/t/${ticket2}/leave`, {}, as);
@@ -252,6 +256,55 @@ const started = await post('/q/LF7K2M/name', { ...fields, phone: '0611111111' },
 const startedTicket = started.location.split('/').pop();
 await live('fixture_set', { ticket: startedTicket, confirmed: true, stage: 'in_chair' });
 ok('a ticket in the chair says the cut started', has(await get(started.location, as), 'Your cut has already started'));
+
+// ---- QL-27 · the barber chose Drop him before the tap ---------------------------------------
+const dropped = await post('/q/LF7K2M/name', { ...fields, phone: '0633333333' }, as);
+const droppedTicket = dropped.location.split('/').pop();
+const droppedToken = await live('fixture_confirm_token', { ticket: droppedTicket });
+await live('fixture_set', { ticket: droppedTicket, stage: 'missed' });
+const cameAndWent = await get(`/c/${droppedToken}`, as);
+ok('QL-27 · a place the barber dropped is not an error page', cameAndWent.status === 200, cameAndWent.status);
+ok('QL-27 · says why, naming his barber and his number', /Nº \d{2} IS GONE/.test(cameAndWent.body)
+  && has(cameAndWent, 'Your turn came<br>and went')
+  && /Youssef reached Nº \d{2} and we never got a tap from this phone/.test(cameAndWent.body));
+ok('QL-27 · the two real options, walking in first', has(cameAndWent, '<i>1</i><span><strong>Walk in and say your name.</strong> Youssef will put you back on')
+  && has(cameAndWent, '<strong>Put your name on again</strong>'));
+ok('QL-27 · starting again is a text link, and keeps his chair',
+  has(cameAndWent, '<a class="textlink" href="/q/LF7K2M/name?b=Y4SF&amp;src=code">Put my name on again</a>'));
+ok('QL-27 · confirms nothing and offers no form', !has(cameAndWent, '<form') && !has(cameAndWent, 'CONFIRMED'));
+clean('QL-27', cameAndWent);
+const cameNoSms = await send(new Request(`http://queue.test/c/${droppedToken}`, { headers: { 'user-agent': PHONE_UA } }), as, {});
+ok('QL-27 · without texts there is no "put my name on again"', cameNoSms.status === 200
+  && !has(cameNoSms, '/name') && has(cameNoSms, 'Walk in and say your name'));
+
+// ---- a man at the end of the line (BTD-15) ----------------------------------------------------
+const kasbah = await get('/q/KC4B7D');
+ok('a man dropped to the end is listed last, called, with no minutes',
+  has(kasbah, 'Nº 04</b><span class="grow">Next</span><small>~12 min</small></div><div class="lrow"><b class="serif lno">Nº 02</b><span class="grow">Called · at the end</span></div>'));
+ok('…and still counts as in the line', has(kasbah, '3 in the line right now.'));
+clean('QL-18 with a dropped man', kasbah);
+
+// ---- BTD-16 · the tap on another day ---------------------------------------------------------
+const tomorrow = new Date(Date.now() + 86_400_000);
+tomorrow.setUTCHours(9, 0, 0, 0);   // 10:00 in Tangier
+const offerToken = await live('fixture_offer', { shop: 'LF7K2M', starts_at: tomorrow.toISOString() });
+const booked = await get(`/c/${offerToken}`, as);
+ok('an offer tapped is booked', booked.status === 200 && has(booked, 'BOOKED') && has(booked, 'ANAS · WITH YOUSSEF')
+  && has(booked, '>10:00<') && has(booked, '>Tomorrow<'), booked.status);
+ok('…says what and where, and that it is paid at the chair', has(booked, 'Haircut + Beard at Le Fade Tanger, 14 Rue de la Kasbah')
+  && has(booked, '<strong>Pay Youssef in cash at the chair.</strong> No deposit, and nothing more to tap.'));
+clean('offer booked', booked);
+ok('…a preview fetcher books nothing', has(await get(`/c/${await live('fixture_offer', { shop: 'LF7K2M', starts_at: tomorrow.toISOString() })}`, as, { 'user-agent': 'facebookexternalhit/1.1' }), 'Open this link on your phone'));
+const takenToken = await live('fixture_offer', { shop: 'LF7K2M', starts_at: tomorrow.toISOString(), taken: true });
+const taken = await get(`/c/${takenToken}`, as);
+ok('an offer somebody else booked first says so, not an error', taken.status === 200 && has(taken, 'That time<br>has gone')
+  && has(taken, 'Somebody took tomorrow at 10:00 with Youssef before you tapped. Nothing was booked, and nothing was charged.'));
+ok('…and offers the app and the line', has(taken, 'href="/q/LF7K2M/app"') && has(taken, 'href="/q/LF7K2M"'));
+clean('offer taken', taken);
+const pastToken = await live('fixture_offer', { shop: 'LF7K2M', starts_at: new Date(Date.now() - 86_400_000).toISOString() });
+const past = await get(`/c/${pastToken}`, as);
+ok('an offer whose time passed says so', past.status === 200 && has(past, 'That offer<br>has run out') && has(past, 'has already passed'));
+clean('offer ran out', past);
 
 // ---- limits --------------------------------------------------------------------------------
 const flood = fixtureRpc({ print: quiet });

@@ -57,7 +57,7 @@ const ICON = {
  */
 export function signature(data) {
   const s = JSON.stringify([data.found, data.open, data.shut, (data.chairs ?? []).map((c) => [
-    c.code, c.state, c.next_no, waitOf(c), (c.line ?? []).map((l) => [l.no, l.in_chair, l.wait_min]),
+    c.code, c.state, c.next_no, waitOf(c), (c.line ?? []).map((l) => [l.no, l.in_chair, !!l.dropped, l.wait_min]),
   ])]);
   let h = 5381;
   for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
@@ -112,21 +112,20 @@ const canonical = (url, data) => `${url.origin}/q/${data.code}${data.chosen ? `?
 /**
  * Which screen this shop is, right now. `src` is how the visitor came — 'link'
  * from a barber's own text (?b=), 'code' off the poster — and rides along to
- * QL-23 as BTD-13's "BY LINK". `notice` is a sentence from /c/ about a link that
- * ran out.
+ * QL-23 as BTD-13's "BY LINK".
  */
-export function renderQueue(data, { url, src = 'code', notice = null, remote = false, t = en }) {
+export function renderQueue(data, { url, src = 'code', remote = false, t = en }) {
   // closed beats paused (the guest-states addendum's A2, still true)
   if (data.shut) return closedPage(t, data, url);
   const open = data.chairs.filter(taking);
   if (!data.open || open.length === 0) return pausedPage(t, data, url);
-  return linePage(t, data, open, url, src, notice, remote);
+  return linePage(t, data, open, url, src, remote);
 }
 
 // ---- QL-18 · poster scanned · the line, read-only ------------------------------------
 // Numbers carry no names (A3.1). Nothing here holds a place, and the page says so.
 // `remote` is whether QL-23's link is offered: only once its text can really be sent.
-function linePage(t, data, open, url, src, notice, remote) {
+function linePage(t, data, open, url, src, remote) {
   const chosen = data.chairs.find((c) => c.code === data.chosen) ?? null;
   const soonest = [...open].sort((a, b) => waitOf(a) - waitOf(b))[0];
   const head = chosen && taking(chosen) ? chosen : soonest;
@@ -136,20 +135,23 @@ function linePage(t, data, open, url, src, notice, remote) {
   const meta = [data.address, data.close_min != null ? fill(t.openUntil, { until: minuteClock(data.close_min) }) : null]
     .filter(Boolean).join(' · ');
 
-  // one list across the chairs, soonest first; each chair's first waiting ticket is "Next"
+  // one list across the chairs, soonest first; each chair's first waiting ticket is
+  // "Next". A man the barber dropped to the end (BTD-15) is last, with no minutes.
   const rows = [];
   for (const c of data.chairs) {
     let nextGiven = false;
     for (const l of c.line ?? []) {
-      const state = l.in_chair ? t.inChair : nextGiven ? t.waitingRow : t.next;
-      if (!l.in_chair) nextGiven = true;
+      const state = l.in_chair ? t.inChair : l.dropped ? t.calledEnd : nextGiven ? t.waitingRow : t.next;
+      if (!l.in_chair && !l.dropped) nextGiven = true;
       rows.push({ ...l, state, who: firstName(c.name) });
     }
   }
-  rows.sort((a, b) => (a.in_chair ? -1 : a.wait_min) - (b.in_chair ? -1 : b.wait_min) || a.no - b.no);
+  const rank = (r) => (r.in_chair ? -1 : r.dropped ? Number.MAX_SAFE_INTEGER : r.wait_min);
+  rows.sort((a, b) => rank(a) - rank(b) || a.no - b.no);
   const line = rows.map((r) => `<div class="lrow"><b class="serif lno">${text(t.ticketNo, { no: pad(r.no) })}</b>`
     + `<span class="grow">${many ? text(t.withWho, { state: r.state, who: r.who }) : esc(r.state)}</span>`
-    + (r.in_chair ? `<small class="hot">${text(t.nowWord)}</small>` : `<small>${text(t.mins, { n: r.wait_min })}</small>`)
+    + (r.in_chair ? `<small class="hot">${text(t.nowWord)}</small>`
+      : r.dropped ? '' : `<small>${text(t.mins, { n: r.wait_min })}</small>`)
     + '</div>').join('');
 
   const soonestWait = waitOf(soonest);
@@ -167,7 +169,6 @@ function linePage(t, data, open, url, src, notice, remote) {
   const ordered = chosen ? [...chairs.filter((c) => c.code === chosen.code), ...chairs.filter((c) => c.code !== chosen.code)] : chairs;
 
   const body = `${brand(t, 'live')}
-${notice ? `<p class="notice">${ICON.clockAmber}<span>${esc(notice)}</span></p>` : ''}
 <div><h1 class="serif">${esc(data.name)}</h1>${meta ? `<p class="meta">${esc(meta)}</p>` : ''}</div>
 <section class="wait"><div class="now"><span class="eyebrow">${text(t.waitNow)}</span><span class="big">${text(t.mins, { n: waitOf(head) })}</span></div><span class="vr"></span><p>${text(count === 0 ? t.inLine0 : t.inLine, { n: count })}</p></section>
 ${line ? `<p class="label">${text(t.theLine)}</p>\n<div class="list">${line}</div>` : ''}
@@ -284,4 +285,4 @@ export const renderNoStore = (shop, t = en) => plainPage(t, t.noStoreTitle, t.no
   dock: `<footer class="dock flat"><a class="cta" href="${esc(`/q/${shop}`)}">${text(t.seeLine)}</a></footer>`,
 });
 
-export { ICON, brand, clock, esc, firstName, markup, pad, plainPage, shell, svg, taking, text, waitOf };
+export { ICON, brand, clock, esc, firstName, markup, minuteClock, names, pad, plainPage, shell, svg, taking, text, TZ, waitOf };

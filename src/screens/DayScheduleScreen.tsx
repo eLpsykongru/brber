@@ -86,6 +86,9 @@ function RelStars({ n }: { n: number }) {
   );
 }
 
+/** BTD-16 — a time offered to a walk-in by text (0119). It holds nothing: until he taps, it shows here as provisional and stays bookable. */
+type Offer = { id: string; starts_at: string; ends_at: string; first_name: string | null; services: { name: string } | null };
+
 export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefillName, prefillServiceId, preferMin, initialDay }: {
   barberId: string;
   onBack: () => void;
@@ -101,6 +104,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
   const [bufferMin, setBufferMin] = useState(0);
   const [selectedDay, setSelectedDay] = useState<Date>(() => (initialDay ? new Date(initialDay) : new Date()));
   const [allBookings, setAllBookings] = useState<DayBooking[]>([]);
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [history, setHistory] = useState<Hist>({});
   const [services, setServices] = useState<Service[]>([]);
   const [highlightId, setHighlightId] = useState<string | null>(null);
@@ -165,7 +169,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
       if (d.getTime() < from.getTime()) from.setTime(d.getTime());
       if (d.getTime() + 86_400_000 > to.getTime()) to.setTime(d.getTime() + 86_400_000);
     }
-    const [bk, av, off, blk, sv, buf] = await Promise.all([
+    const [bk, av, off, blk, sv, buf, lo] = await Promise.all([
       supabase.from('bookings')
         .select('id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, services(name), customer:profiles!customer_id(full_name, avatar_url, phone)')
         .eq('barber_id', barberId)
@@ -178,6 +182,10 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
       supabase.from('services').select('id, name, price_cents, duration_min')
         .eq('barber_id', barberId).eq('is_active', true).order('name'),
       supabase.from('barbers').select('buffer_before_min, buffer_after_min').eq('id', barberId).single(),
+      supabase.from('line_offers').select('id, starts_at, ends_at, first_name, services(name)')
+        .eq('barber_id', barberId).is('confirmed_at', null)
+        .gte('confirm_until', new Date().toISOString())
+        .gte('starts_at', from.toISOString()).lt('starts_at', to.toISOString()),
     ]);
     if (bk.error) Alert.alert('Could not load bookings', bk.error.message);
     else setAllBookings(bk.data as unknown as DayBooking[]);
@@ -185,6 +193,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     setDaysOff((off.data ?? []).map((d) => d.day));
     setBlocks((blk.data ?? []) as BlockRow[]);
     setServices(sv.data ?? []);
+    setOffers((lo.data ?? []) as unknown as Offer[]);
     if (buf.data) setBufferMin(buf.data.buffer_before_min + buf.data.buffer_after_min);
     setLoaded(true);
   }, [barberId, initialDay]);
@@ -401,11 +410,14 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     .map((sl) => sl.time);
   const midnight = new Date(selectedDay.getFullYear(), selectedDay.getMonth(), selectedDay.getDate());
   const timeline = [
-    ...dayAll.map((b) => ({ at: new Date(b.starts_at), booking: b as DayBooking | null, block: null as BlockRow | null })),
-    ...freeTicks.map((t) => ({ at: t, booking: null as DayBooking | null, block: null as BlockRow | null })),
+    ...dayAll.map((b) => ({ at: new Date(b.starts_at), booking: b as DayBooking | null, block: null as BlockRow | null, offer: null as Offer | null })),
+    ...freeTicks.map((t) => ({ at: t, booking: null as DayBooking | null, block: null as BlockRow | null, offer: null as Offer | null })),
     ...dayBlocks.map((b) => ({
       at: new Date(midnight.getTime() + b.start_min * 60_000),
-      booking: null as DayBooking | null, block: b,
+      booking: null as DayBooking | null, block: b, offer: null as Offer | null,
+    })),
+    ...offers.filter((o) => sameDay(new Date(o.starts_at), selectedDay)).map((o) => ({
+      at: new Date(o.starts_at), booking: null as DayBooking | null, block: null as BlockRow | null, offer: o as Offer | null,
     })),
   ].sort((a, b) => a.at.getTime() - b.at.getTime());
   const isDayOff = daysOff.includes(isoOf(selectedDay));
@@ -612,6 +624,27 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
                       {lateLabel && <Text style={s.lateTag}> · {lateLabel}</Text>}
                     </Text>
                   </Pressable>
+                </View>
+              );
+            }
+            if (item.offer) {
+              const o = item.offer;
+              return (
+                <View key={`offer-${o.id}`} style={s.trow}>
+                  <T w="b" size={11} c={D.amber} style={s.ttime}>{hhmm(o.starts_at)}</T>
+                  <View style={[s.trail, { backgroundColor: D.amber }]} />
+                  <View style={s.slotOffer}
+                    accessibilityLabel={`${o.first_name ?? 'Walk-in'}, provisional, has not tapped the text`}>
+                    <Ico name="send" size={14} color={D.amber} />
+                    <View style={s.grow}>
+                      <T w="b" size={13} c={D.textDim}>
+                        {o.first_name ?? 'Walk-in'}<T w="b" size={10} c={D.amber} ls={0.8}> · PROVISIONAL</T>
+                      </T>
+                      <T size={11} c={D.sub} style={{ marginTop: 2 }}>
+                        {o.services?.name ?? 'Service'} · texted, hasn't tapped · anyone can still book it
+                      </T>
+                    </View>
+                  </View>
                 </View>
               );
             }
@@ -897,6 +930,12 @@ const s = StyleSheet.create({
     paddingVertical: 12, paddingHorizontal: 14,
   },
   slotFreeText: { fontSize: font.small, fontWeight: '600', color: D.sub, fontVariant: ['tabular-nums'] },
+  // BTD-16's offer: dashed amber, like every "we texted him and he hasn't answered"
+  slotOffer: {
+    flex: 1, flexDirection: 'row', alignItems: 'center', gap: 9,
+    borderWidth: 1, borderColor: 'rgba(232,161,0,0.45)', borderStyle: 'dashed', borderRadius: 16,
+    paddingVertical: 12, paddingHorizontal: 14, backgroundColor: D.recessed,
+  },
   slotBlock: {
     flex: 1, flexDirection: 'row', alignItems: 'center', gap: 9,
     borderRadius: 16, paddingVertical: 12, paddingHorizontal: 14,

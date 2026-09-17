@@ -13,7 +13,9 @@ import { dark, font, radius, serif } from '../theme';
 // `settle_booking_services` — this sheet only shows it and then completes.
 //
 // It loads its own rows, so the caller doesn't need to know whether a booking is
-// a bundle. One service → nothing to ask, it settles and completes silently.
+// a bundle. One service → nothing to ask, it settles and completes silently — unless
+// the barber asked to see it (BTD-21's Service tile, `ask`): a changed service is
+// priced here, at the till, never by an edit mid-cut.
 
 type Item = {
   service_id: string; price_cents: number; duration_min: number; sort: number;
@@ -23,9 +25,11 @@ type Item = {
 const dh = (cents: number) => (cents / 100).toFixed(0);
 const hhmm = (d: Date) => d.toTimeString().slice(0, 5);
 
-export default function SettleBundleSheet({ booking, onDone, onClose }: {
+export default function SettleBundleSheet({ booking, ask = false, onDone, onClose }: {
   /** the booking being completed, or null when the sheet is closed */
   booking: { id: string; starts_at: string; client: string } | null;
+  /** show the list even for a single service — the barber opened it to change what he did */
+  ask?: boolean;
   onDone: () => void;
   onClose: () => void;
 }) {
@@ -60,12 +64,16 @@ export default function SettleBundleSheet({ booking, onDone, onClose }: {
       const sorted = [...rows].sort((a, b) => a.sort - b.sort);
       setDone(sorted.map((i) => i.service_id));   // everything done is the default
       // nothing to ask about a single service — settle it and get out of the way
-      if (sorted.length < 2) { finish(sorted.map((i) => i.service_id)); setItems([]); return; }
+      if (!ask && sorted.length < 2) { finish(sorted.map((i) => i.service_id)); setItems([]); return; }
+      // asked, with nothing on the booking to tick: never complete behind his back
+      if (!sorted.length) { setItems([]); onClose(); return; }
       setItems(sorted);
     })();
-  }, [booking, finish]);
+    // keyed on the booking, not the object: the caller rebuilds it on every render, and
+    // each rebuild reloaded the rows, reset the ticks and could finish twice
+  }, [booking?.id, ask]);
 
-  if (!booking || !items || items.length < 2) return null;
+  if (!booking || !items || items.length < (ask ? 1 : 2)) return null;
 
   const doneItems = items.filter((i) => done.includes(i.service_id));
   const skipped = items.filter((i) => !done.includes(i.service_id));

@@ -702,8 +702,10 @@ function escapeHtml(x: string) {
 }
 
 // ---- 2j · wall display -----------------------------------------------------
+// Read through shop_bookings (0120): straight from the table, the wall only ever
+// showed the owner's own chair.
 type QueueRow = {
-  id: string; barber_id: string; starts_at: string; ends_at: string;
+  id: string; barber_id: string; starts_at: string; ends_at: string; status: string;
   walk_in_name: string | null; customer_id: string;
   checked_in_at: string | null; started_at: string | null; completed_at: string | null;
   services: { name: string } | null;
@@ -722,12 +724,9 @@ export function WallDisplayScreen({ salon, team, onBack }: {
     if (!ids.length) return;
     const from = new Date(); from.setHours(0, 0, 0, 0);
     const to = new Date(from); to.setDate(to.getDate() + 1);
-    const { data } = await supabase.from('bookings')
-      .select('id, barber_id, starts_at, ends_at, walk_in_name, customer_id, checked_in_at, started_at, completed_at, services(name), customer:profiles!customer_id(full_name)')
-      .in('barber_id', ids).eq('status', 'confirmed')
-      .gte('starts_at', from.toISOString()).lt('starts_at', to.toISOString())
-      .order('starts_at');
-    setRows((data as unknown as QueueRow[]) ?? []);
+    const { data } = await supabase.rpc('shop_bookings', { p_from: from.toISOString(), p_to: to.toISOString() });
+    // already in start order
+    setRows(((data ?? []) as QueueRow[]).filter((r) => r.status === 'confirmed' && ids.includes(r.barber_id)));
   }, [ids.join(',')]);
 
   useEffect(() => {
@@ -742,7 +741,9 @@ export function WallDisplayScreen({ salon, team, onBack }: {
 
   const active = rows.filter((r) => !r.completed_at);
   const inChair = active.find((r) => r.started_at);
-  const upNext = active.filter((r) => !r.started_at).slice(0, 3);
+  // A10 — WAITING is everyone not yet in the chair; the wall only has room to name three
+  const waiting = active.filter((r) => !r.started_at);
+  const upNext = waiting.slice(0, 3);
   const label = (r: QueueRow) => r.walk_in_name
     ?? (r.customer?.full_name
       ? `${first(r.customer.full_name)} ${(r.customer.full_name.split(' ')[1] ?? '')[0] ?? ''}.`.trim()
@@ -874,7 +875,7 @@ export function WallDisplayScreen({ salon, team, onBack }: {
         <View style={[s.waitCard, { padding: f(17), paddingHorizontal: f(22), gap: f(16) }]}>
           <View style={s.grow}>
             <T w="b" size={f(13)} c={D.sub} ls={f(13) * 0.16}>WAITING</T>
-            <Serif size={f(34)} ls={0} style={{ marginTop: f(5) }}>{String(upNext.length)}</Serif>
+            <Serif size={f(34)} ls={0} style={{ marginTop: f(5) }}>{String(waiting.length)}</Serif>
           </View>
           <View style={s.waitDivider} />
           <View style={[s.grow, { alignItems: 'flex-end' }]}>

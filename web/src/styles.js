@@ -52,9 +52,8 @@ h1{font-size:25px;line-height:1.1}
 .chair small{font-size:10px;color:#8A8A85;font-variant-numeric:tabular-nums}
 .chair small.soon{color:#16A34A;font-weight:600}
 .note{display:flex;align-items:flex-start;gap:9px;background:#fff;border-radius:16px;padding:11px 15px;box-shadow:0 4px 12px rgba(0,0,0,.04);font-size:12px;line-height:1.5;color:#5C5C58;text-wrap:pretty}
-.note svg,.amber svg,.notice svg{flex:none;margin-top:1px}
+.note svg,.amber svg{flex:none;margin-top:1px}
 .note strong{color:#111}
-.notice{display:flex;align-items:flex-start;gap:9px;background:rgba(180,83,9,.08);border-radius:16px;padding:12px 15px;font-size:12px;line-height:1.5;color:#5C5C58;text-wrap:pretty}
 .dock{position:sticky;bottom:0;padding:12px 20px calc(30px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:9px;background:#EBE8E1;box-shadow:0 -10px 24px rgba(235,232,225,.9)}
 .dock.flat{box-shadow:none}
 .cta{min-height:54px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.08em;text-align:center;padding:0 16px}
@@ -78,6 +77,7 @@ button.cta{width:100%}
 .badge{align-self:flex-start;display:flex;align-items:center;gap:7px;border-radius:999px;padding:6px 12px;font-size:9.5px;font-weight:800;letter-spacing:.12em}
 .badge.amber{background:rgba(180,83,9,.1);color:#B45309}
 .badge.green{background:rgba(22,163,74,.18);color:#4ADE80}
+.badge.grey{background:rgba(0,0,0,.06);color:#8A8A85}
 .kicker{display:block;font-size:10px;font-weight:700;letter-spacing:.12em;color:#8A8A85}
 .ink .kicker{color:rgba(255,255,255,.5)}
 .t52{display:block;font-size:52px;line-height:1.02;letter-spacing:0;margin-top:6px;font-variant-numeric:tabular-nums}
@@ -106,4 +106,8 @@ button.cta{width:100%}
 .fact i{width:19px;height:19px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex:none;background:rgba(74,222,128,.2)}
 .fact.no{color:#8A8A85}
 .fact.no i{background:rgba(0,0,0,.07)}
+.step{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;line-height:1.5;color:#111;text-wrap:pretty}
+.step+.step{border-top:1px solid #EFECE4;padding-top:11px}
+.step i{width:22px;height:22px;border-radius:999px;background:rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;flex:none;font-style:normal;font-size:11px;font-weight:800;color:#5C5C58}
+.fine.left{text-align:left}
 `;

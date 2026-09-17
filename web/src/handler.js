@@ -11,13 +11,13 @@
 //   GET  /q/:shop/name           QL-23, not at the shop       POST → a name on the line, a text
 //   GET  /q/:shop/t/:ticket      QL-24 unconfirmed, QL-25 confirmed
 //   POST /q/:shop/t/:ticket/leave  QL-25's "Give up my place"
-//   GET  /c/:token               the tap in the text → QL-25
+//   GET  /c/:token               the tap in the text → QL-25, QL-27 when the place is gone,
+//                                or the booking a barber offered for another day (BTD-16)
 //   GET  /.well-known/…          the app-link files
 //
 // Every step re-reads the database: a quote is never trusted across a step.
 
-import { en } from './copy.js';
-import { renderConfirmed, renderEnded, renderName, renderUnconfirmed } from './guest.js';
+import { renderConfirmed, renderEnded, renderGone, renderName, renderOffer, renderUnconfirmed } from './guest.js';
 import {
   clock, renderDown, renderLinkPreview, renderMissing, renderNoStore, renderQueue, renderUnknownLink,
   signature, taking, waitOf,
@@ -225,22 +225,26 @@ async function giveUp({ call, shop, token }) {
 }
 
 // ---- /c/:token · the tap in the text -------------------------------------------------
-async function confirm({ request, url, env, call, token }) {
+async function confirm({ request, env, call, token }) {
   // a HEAD, or a preview fetcher, never confirms: only a person opening the link does
   if (request.method === 'HEAD' || PREVIEWER.test(request.headers.get('user-agent') ?? '')) {
     return page(renderLinkPreview(), 200);
   }
   const r = await call('guest_confirm', { p_token: token });
+  // BTD-16: the tap writes the booking, or says why it could not
+  if (r.kind === 'offer') return page(renderOffer(r), 200);
   if (r.state === 'confirmed') {
     const tk = await call('guest_ticket', { p_token: r.ticket });
     if (tk?.found) return ticketResponse(tk, r.ticket);
   }
   if ((r.state === 'expired' || r.state === 'gone') && r.shop) {
-    // not an error page: the line as it is now, and why the link did nothing
-    const data = await call('public_queue', { p_shop: r.shop, p_barber: null });
+    // QL-27, never an error page: what happened, the line as it is now, what to do
+    const [data, tk] = await Promise.all([
+      call('public_queue', { p_shop: r.shop, p_barber: null }),
+      r.ticket ? call('guest_ticket', { p_token: r.ticket }) : null,
+    ]);
     if (data?.found) {
-      const notice = r.state === 'expired' ? en.linkRanOut : en.linkGone;
-      return page(renderQueue(data, { url: new URL(`/q/${data.code}`, url), notice, remote: remoteOn(env) }), 200);
+      return page(renderGone(data, tk?.found ? tk : null, { expired: r.state === 'expired', remote: remoteOn(env) }), 200);
     }
   }
   return page(renderUnknownLink(), 404);

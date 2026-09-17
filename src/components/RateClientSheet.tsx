@@ -26,14 +26,15 @@ const dh = (cents: number) => `${Math.round(cents / 100)} DH`;
 const ordinal = (n: number) => `${n}${['th', 'st', 'nd', 'rd'][(n % 100 - 20) % 10] ?? ['th', 'st', 'nd', 'rd'][n % 100] ?? 'th'}`;
 
 export default function RateClientSheet({
-  visible, onClose, onDone, barberId, booking, bookedTodayCents, next, onAskInChat, onAskBySms,
+  visible, onClose, onDone, barberId, booking, takenTodayCents, next, onAskInChat, onAskBySms,
 }: {
   visible: boolean;
   onClose: () => void;
   onDone: () => void;
   barberId: string;
   booking: RateTarget | null;
-  bookedTodayCents: number;
+  /** B11 — what done cuts have brought in, this one included; never the booked total */
+  takenTodayCents: number;
   next?: NextInChair | null;
   onAskInChat?: () => void;
   onAskBySms?: () => void;
@@ -113,8 +114,8 @@ export default function RateClientSheet({
           )}
           <View style={s.rule} />
           <View style={s.sumRowBase}>
-            <T w="b" size={13}>Booked today</T>
-            <T w="eb" size={20} c={D.accent} style={s.tnum}>{dh(bookedTodayCents)}</T>
+            <T w="b" size={13}>Taken today</T>
+            <T w="eb" size={20} c={D.accent} style={s.tnum}>{dh(takenTodayCents)}</T>
           </View>
         </View>
         {next && (

@@ -19,14 +19,44 @@
         "cuts": 218,
         "state": "taking",
         "services": [
-          { "id": "5b1e7a52-3c4d-4e8f-9a01-2b3c4d5e6f70", "name": "Haircut", "price_cents": 6000, "duration_min": 30, "wait_min": 40 },
-          { "id": "6c2f8b63-4d5e-4f90-8b12-3c4d5e6f7081", "name": "Beard", "price_cents": 4000, "duration_min": 20, "wait_min": 40 },
-          { "id": "7d309c74-5e6f-4a01-9c23-4d5e6f708192", "name": "Both", "price_cents": 9000, "duration_min": 45, "wait_min": 40 }
+          {
+            "id": "5b1e7a52-3c4d-4e8f-9a01-2b3c4d5e6f70",
+            "name": "Haircut",
+            "price_cents": 6000,
+            "duration_min": 30,
+            "wait_min": 40
+          },
+          {
+            "id": "6c2f8b63-4d5e-4f90-8b12-3c4d5e6f7081",
+            "name": "Beard",
+            "price_cents": 4000,
+            "duration_min": 20,
+            "wait_min": 40
+          },
+          {
+            "id": "7d309c74-5e6f-4a01-9c23-4d5e6f708192",
+            "name": "Both",
+            "price_cents": 9000,
+            "duration_min": 45,
+            "wait_min": 40
+          }
         ],
         "line": [
-          { "no": 4, "in_chair": true, "wait_min": null },
-          { "no": 5, "in_chair": false, "wait_min": 10 },
-          { "no": 6, "in_chair": false, "wait_min": 25 }
+          {
+            "no": 4,
+            "in_chair": true,
+            "wait_min": null
+          },
+          {
+            "no": 5,
+            "in_chair": false,
+            "wait_min": 10
+          },
+          {
+            "no": 6,
+            "in_chair": false,
+            "wait_min": 25
+          }
         ]
       },
       {
@@ -39,8 +69,20 @@
         "cuts": 96,
         "state": "taking",
         "services": [
-          { "id": "8e41ad85-6f70-4b12-8d34-5e6f708192a3", "name": "Haircut", "price_cents": 6000, "duration_min": 30, "wait_min": 5 },
-          { "id": "9f52be96-7081-4c23-9e45-6f708192a3b4", "name": "Beard", "price_cents": 4000, "duration_min": 20, "wait_min": 5 }
+          {
+            "id": "8e41ad85-6f70-4b12-8d34-5e6f708192a3",
+            "name": "Haircut",
+            "price_cents": 6000,
+            "duration_min": 30,
+            "wait_min": 5
+          },
+          {
+            "id": "9f52be96-7081-4c23-9e45-6f708192a3b4",
+            "name": "Beard",
+            "price_cents": 4000,
+            "duration_min": 20,
+            "wait_min": 5
+          }
         ],
         "line": []
       },
@@ -54,15 +96,45 @@
         "cuts": 140,
         "state": "full",
         "services": [
-          { "id": "a063cfa7-8192-4d34-8f56-708192a3b4c5", "name": "Haircut", "price_cents": 6000, "duration_min": 30, "wait_min": null }
+          {
+            "id": "a063cfa7-8192-4d34-8f56-708192a3b4c5",
+            "name": "Haircut",
+            "price_cents": 6000,
+            "duration_min": 30,
+            "wait_min": null
+          }
         ],
         "line": [
-          { "no": 5, "in_chair": true, "wait_min": null },
-          { "no": 6, "in_chair": false, "wait_min": 15 },
-          { "no": 7, "in_chair": false, "wait_min": 40 },
-          { "no": 8, "in_chair": false, "wait_min": 65 },
-          { "no": 9, "in_chair": false, "wait_min": 90 },
-          { "no": 10, "in_chair": false, "wait_min": 115 }
+          {
+            "no": 5,
+            "in_chair": true,
+            "wait_min": null
+          },
+          {
+            "no": 6,
+            "in_chair": false,
+            "wait_min": 15
+          },
+          {
+            "no": 7,
+            "in_chair": false,
+            "wait_min": 40
+          },
+          {
+            "no": 8,
+            "in_chair": false,
+            "wait_min": 65
+          },
+          {
+            "no": 9,
+            "in_chair": false,
+            "wait_min": 90
+          },
+          {
+            "no": 10,
+            "in_chair": false,
+            "wait_min": 115
+          }
         ]
       },
       {
@@ -99,12 +171,30 @@
         "cuts": 218,
         "state": "closed",
         "services": [
-          { "id": "b174d0b8-92a3-4e45-9067-8192a3b4c5d6", "name": "Haircut", "price_cents": 6000, "duration_min": 30, "wait_min": 40 }
+          {
+            "id": "b174d0b8-92a3-4e45-9067-8192a3b4c5d6",
+            "name": "Haircut",
+            "price_cents": 6000,
+            "duration_min": 30,
+            "wait_min": 40
+          }
         ],
         "line": [
-          { "no": 4, "in_chair": true, "wait_min": null },
-          { "no": 5, "in_chair": false, "wait_min": 12 },
-          { "no": 6, "in_chair": false, "wait_min": 30 }
+          {
+            "no": 4,
+            "in_chair": true,
+            "wait_min": null
+          },
+          {
+            "no": 5,
+            "in_chair": false,
+            "wait_min": 12
+          },
+          {
+            "no": 6,
+            "in_chair": false,
+            "wait_min": 30
+          }
         ]
       },
       {
@@ -117,7 +207,13 @@
         "cuts": 96,
         "state": "closed",
         "services": [
-          { "id": "c285e1c9-a3b4-4f56-8178-92a3b4c5d6e7", "name": "Haircut", "price_cents": 6000, "duration_min": 30, "wait_min": 5 }
+          {
+            "id": "c285e1c9-a3b4-4f56-8178-92a3b4c5d6e7",
+            "name": "Haircut",
+            "price_cents": 6000,
+            "duration_min": 30,
+            "wait_min": 5
+          }
         ],
         "line": []
       }
@@ -133,13 +229,41 @@
     "shut": true,
     "closed_at": null,
     "week": [
-      { "dow": 0, "open_min": null, "close_min": null },
-      { "dow": 1, "open_min": 540, "close_min": 1260 },
-      { "dow": 2, "open_min": 540, "close_min": 1260 },
-      { "dow": 3, "open_min": 540, "close_min": 1260 },
-      { "dow": 4, "open_min": 540, "close_min": 1260 },
-      { "dow": 5, "open_min": 540, "close_min": 1260 },
-      { "dow": 6, "open_min": 540, "close_min": 1320 }
+      {
+        "dow": 0,
+        "open_min": null,
+        "close_min": null
+      },
+      {
+        "dow": 1,
+        "open_min": 540,
+        "close_min": 1260
+      },
+      {
+        "dow": 2,
+        "open_min": 540,
+        "close_min": 1260
+      },
+      {
+        "dow": 3,
+        "open_min": 540,
+        "close_min": 1260
+      },
+      {
+        "dow": 4,
+        "open_min": 540,
+        "close_min": 1260
+      },
+      {
+        "dow": 5,
+        "open_min": 540,
+        "close_min": 1260
+      },
+      {
+        "dow": 6,
+        "open_min": 540,
+        "close_min": 1320
+      }
     ],
     "opens": {
       "days": 1,
@@ -162,7 +286,13 @@
         "cuts": 218,
         "state": "full",
         "services": [
-          { "id": "d396f2da-b4c5-4a67-9289-a3b4c5d6e7f8", "name": "Haircut", "price_cents": 6000, "duration_min": 30, "wait_min": null }
+          {
+            "id": "d396f2da-b4c5-4a67-9289-a3b4c5d6e7f8",
+            "name": "Haircut",
+            "price_cents": 6000,
+            "duration_min": 30,
+            "wait_min": null
+          }
         ],
         "line": []
       }
@@ -188,11 +318,31 @@
         "cuts": 310,
         "state": "taking",
         "services": [
-          { "id": "e4a703eb-c5d6-4b78-8390-b4c5d6e7f809", "name": "Haircut", "price_cents": 5000, "duration_min": 30, "wait_min": 25 }
+          {
+            "id": "e4a703eb-c5d6-4b78-8390-b4c5d6e7f809",
+            "name": "Haircut",
+            "price_cents": 5000,
+            "duration_min": 30,
+            "wait_min": 25
+          }
         ],
         "line": [
-          { "no": 3, "in_chair": true, "wait_min": null },
-          { "no": 4, "in_chair": false, "wait_min": 12 }
+          {
+            "no": 3,
+            "in_chair": true,
+            "wait_min": null
+          },
+          {
+            "no": 4,
+            "in_chair": false,
+            "wait_min": 12
+          },
+          {
+            "no": 2,
+            "in_chair": false,
+            "dropped": true,
+            "wait_min": null
+          }
         ]
       }
     ]

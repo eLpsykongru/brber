@@ -2743,3 +2743,110 @@ Still open:
   page can live beside the confirm route — build it knowing that.
 - Triggers this lands on: **adoption bet #1** (`?b=` links now open the app, the
   page stays read-only) and the **SMS rail** (QL-23 and BTD-02's text wait on it).
+
+## Queue link — the barber's side of the line, and the owner's (0119, 2026-09-17)
+ADDENDUM-app-first turns B10 (BTD-14…19) and T9 (OSH-19), plus QL-27. Needs 0118.
+- **No invisible timers.** 0116's sweep turned a called web guest into a no-show after
+  eight minutes. 0119 takes that out: the eight minutes stay, and when they run out
+  the barber is asked (BTD-15). This reverses 0118's note that "the sweep stays".
+- **BTD-14** (`BarberQueueScreen`): WAITING shows "1 not confirmed"; rows say where the
+  place came from ("you wrote him down", "Held his own place in the app" — new
+  `bookings.joined_line`, set by join_queue; older rows read as bookings); an
+  unconfirmed row is dashed amber with "Texted 9 min ago · hasn't tapped"; a called
+  row says until when the chair is held. Every no-account row opens BTD-13.
+- **BTD-15** (`LineSheets.CalledSheet`): opens by itself once a called man's eight
+  minutes are up, once per call, and whenever CALL NEXT is pressed while he is still
+  called. CALL THE NEXT MAN drops him to the end (`bookings.dropped_at`, keeps his Nº,
+  called last, passed over by the you're-next text, not "ahead" of anyone) and calls
+  the next. He's here starts the cut. Take him off is `queue_take_off`.
+- **BTD-17** (`LineSheets.FrontSheet`): CALL NEXT with an unconfirmed name at the front
+  asks: call him anyway, ring him, drop him. Closing the sheet is not an answer, so
+  the next CALL NEXT asks again. Drop him → he reads QL-27 when he taps.
+- **BTD-16 / BTD-19** (`OfferDayScreen`, `line_offers`, `queue_offer_day`): from BTD-13,
+  "Give him another day". Two times that fit, or a two-week picker of gaps that fit
+  his service (breaks, cleaning time and the past taken out; short gaps dimmed). The
+  time is checked by writing the booking and rolling it back. Today's row leaves the
+  line with nobody as the canceller. One text; the tap (`/c/<token>`) writes the real
+  booking — or says somebody took the time first. Until then it shows PROVISIONAL on
+  My day and stays bookable.
+- **BTD-18** (`BookingsScreen`): the status card is the door to the line — waiting,
+  who is in the chair, who is next, "One name not confirmed". CLOCK OUT sits below.
+- **OSH-19** (`LinesScreen`, `shop_lines_today`): every chair, worst wait first, the
+  shop's unconfirmed count, paused chairs last. Owner's own chair opens his board;
+  another barber's opens read-only. PAUSE THE WHOLE SHOP is OSH-09's sheet.
+- **QL-27** (`web/src/guest.js`): a tap on a dropped, gone or run-out place is its own
+  page — why, the wait now, walk in or put your name on again, nothing held against
+  him. Replaces the notice on QL-18. A dropped man shows on QL-18 as "Called · at the end".
+Not built, because nothing true can be said yet:
+- **BTD-16 is greyed until texts send** — it takes a man out of today's line and only
+  his text would tell him. The app switch is `EXPO_PUBLIC_SMS_SENDS=1`, the same rule
+  as QL-23's `SMS_SENDS`. **Trigger:** the SMS rail.
+- **BTD-16's French text** — English and one send, like the other queue texts (owner,
+  2026-09-16). Its link is fixed to https://sterncut.ma, not the test host.
+- **BTD-16's "your day is empty until 11:30" / "After the quiet hour"** — says "First
+  time that fits · 90 min clear" instead. **BTD-19's month grid** is two weeks from
+  tomorrow; "Between Rachid and Omar" names nobody.
+- **BTD-14's "24 DH paid"** on a booking row — the board has no deposit read.
+- **OSH-19's "Hamza could take three of them"** — nothing works that out; it says who is
+  quickest. **"Work that barber's line"** — read-only: calling is his, and the design
+  also says the owner cannot reorder it. **Trigger:** an owner asking to run the line
+  of a barber who stepped out.
+- **Minutes do not re-flow** when a man drops to the end or a cut ends early — each
+  row's wait is still its own start time, as before.
+- **Arabic, French, RTL** for every new string.
+Still open:
+- **0119 is NOT APPLIED.** Apply 0118 and 0119 together, then deploy `web/`; the app
+  needs a build. No database here, so neither migration has run anywhere yet.
+- ~~**The owner dashboard (OSH-02) under-counts**~~ — fixed in **0120** (2026-09-17), which
+  does not need 0118/0119. The owner screens read bookings straight from the table,
+  and bookings' only read policy (0001) shows a barber his own — so the dashboard,
+  all chairs (OSH-03), the wall display (OSH-07) and the barber detail's week bars
+  counted the owner's chair alone. They now read `shop_bookings`, owner-only. A rent
+  barber's rows carry no price (0025's rule), so his chair shows "—" for money.
+  A read, not a new policy: a policy would also widen every "mine" screen for an
+  owner who cuts hair too.
+
+## Queue link — one list per chair, and undo on done (0121, 2026-09-17)
+ADDENDUM-app-first turn B11 (BTD-20, BTD-21, BTD-22). Lands on the **queue mode** bet:
+the barber now runs the line from Home, not from a second screen.
+- **BTD-20** (`BookingsScreen`): Home is THE CHAIR — bookings and walk-ins in one list, in
+  the order each man reaches the chair (line.ts `chairList`), a request (✕/✓) at its own
+  time, one button per row read off where it sits (`verbOf`). TAKEN TODAY replaces BOOKED
+  TODAY, with "N waiting · X of Y booked" beside it. The OPEN/PAUSED pill opens the live
+  queue (BTD-14); the rest of the card opens Earnings. Home polls every 20 s like the board.
+  Gone from Home: the 7-day bars (Earnings has them), the three tiles, THE LINE card, the
+  NEXT UP card and the "…" menu. **Cancelling a booking is on My day only now.**
+- **Verbs:** a place in the line (walk-in, web guest, held in the app) gets CALL HIM and
+  reads CALLED; a booked time gets HE'S HERE and reads HERE. Both are the same check-in
+  (`lineCalls.checkIn`), then SEAT HIM, then DONE. The rung is read off 0018's timestamps,
+  not stored — no new enum.
+- **BTD-21** (`BookingPanels`, replaces BTD-03): the four rungs with the next one marked,
+  "He asked for", Chat/Call/Service/History, the one verb, then Another day and No-show (Take
+  him off for a walk-in). **Service** shows on an in-chair row only and opens 34f's tick-off
+  checklist (`SettleBundleSheet`, `ask`: the list shows even for one service) with the
+  booking's services ticked. A changed service is priced at the till, when he is marked done
+  — there is no write that edits services without touching the status. Another day moves an account's booking; for a walk-in it is BTD-16,
+  greyed with the reason when there is no number or texts don't send.
+- **BTD-22** + **0121**: after DONE, a green card with Undo. No clock: undo is open on the
+  chair's **latest done while nobody has sat down after it** (line.ts `undoableDone`, and
+  the same test in `revert_completion`, which dropped 0021's two minutes). Seating the next
+  man closes it. The undo gives the deposit back to "held", deletes the "How was the cut?" inbox row and any rating
+  written since — 0021's undo left all three. It refuses once the cut is on a settlement
+  run. The rate sheet (3a) still opens after done, for account clients only, and says
+  "Taken today".
+- **Waiting counts, everywhere (A10):** the owner dashboard counted only checked-in men and
+  the wall display stopped at 3. Both now count everyone not yet in the chair.
+Not built, or said differently:
+- **A wrong done after the next man sits down is not fixable in the barber app — on
+  purpose.** The cash is counted and the owner is holding it, and the footer says so. No
+  disabled button, no "coming soon", no promise of a correction in Earnings (Earnings has
+  none). **Trigger:** the corrections slice.
+- **Undo does not take back a referral reward** the cut paid (0038). It pays once per
+  invitee, so re-marking done never pays twice; only wrong if he never comes back.
+- **BTD-22's "same as before he sat"** — dropped; Home says "Up 60 DH from Mehdi · 3 waiting".
+- **BTD-14 still asks BTD-15 by itself** when a called man's eight minutes run out; Home
+  does not (a called booking there reads HERE). **Trigger:** barbers confused by the two.
+- **Arabic, French, RTL** for every new string.
+Still open:
+- **0121 is NOT APPLIED.** It stands alone, but Home already needs 0118 and 0119 (dropped
+  men, `joined_line`, `queue_take_off`). Apply 0118 → 0121 in order; the app needs a build.

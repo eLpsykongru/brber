@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Alert, Linking, Pressable, StyleSheet, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, View } from 'react-native';
+import {
+  canTakeOff, ChairRow, collectCents, ladderOf, verbOf, Verb,
+} from '../lib/line';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
 import {
   Avatar, Btn, Eyebrow, GhostBtn, Ico, IconName, Note, Sheet, SheetHead, Stars, T,
 } from './dark';
 
-// 1d (the booking in the chair) and 3d (a request from a flagged client).
+// BTD-21 (one row of the chair, on its rungs) and 3d (a request from a flagged client).
 // Both read client_reliability, which is barber-private (0030).
 
 export type PanelBooking = {
@@ -20,10 +23,6 @@ export type PanelBooking = {
   phone: string | null; isWalkIn: boolean;
   notes?: string | null;   // 39d — what the customer wrote when booking
 };
-
-/** What is still owed in the chair. A deposit is already out of his customer's
- *  wallet (0035/0075), so collecting the full price would take it twice. */
-const collect = (b: PanelBooking) => Math.max(0, b.priceCents - (b.depositCents ?? 0));
 
 type Reliability = {
   visits: number; no_shows: number; avg_rating: number | null;
@@ -63,74 +62,161 @@ function Tile({ icon, label, onPress }: { icon: IconName; label: string; onPress
   );
 }
 
-// ---- 1d · booking panel, in the chair -------------------------------------
+// ---- BTD-21 · one row, opened — the four rungs ----------------------------
+// Replaces 1d/BTD-03, which printed "in chair 11:02" as a fact nothing ever set. The
+// rung between here and done is a button now, and the button is read off where the row
+// sits (line.ts verbOf), never off who the customer is. A walk-in opens the same sheet
+// with CALL HIM on top and no deposit line.
+
+export type RowSheet = {
+  row: ChairRow & { created_at: string };
+  /** Nº in today's book; 0 for a booking on another day */
+  no: number;
+  /** who SEAT HIM frees to be called */
+  frees: number | null;
+  /** a web name that never tapped his text: CALL HIM asks first (BTD-17) */
+  unconfirmed: boolean;
+  /** why "Another day" cannot be offered; null when it can */
+  anotherDayOff: string | null;
+};
+
+const VERB_SUB = (v: Verb, sheet: RowSheet, isWalkIn: boolean): string => {
+  switch (v) {
+    case 'CALL HIM':
+      return sheet.unconfirmed ? "He never tapped his text · you'll be asked first"
+        : isWalkIn ? 'Shout the name · the chair holds eight minutes'
+          : "Tells him in chat he's next · the chair holds eight minutes";
+    case "HE'S HERE": return 'He walked in · seat him when the chair is free';
+    case 'SEAT HIM':
+      return sheet.frees ? `Starts the clock · frees Nº ${String(sheet.frees).padStart(2, '0')} to be called` : 'Starts the clock';
+    case 'DONE': return 'Can be put back until the next man sits down';
+  }
+};
+
+function whenOf(iso: string) {
+  const d = new Date(iso);
+  return d.toDateString() === new Date().toDateString()
+    ? hhmm(iso) : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
 export default function BookingPanelSheet({
-  visible, booking, onClose, onDone, onChat, onHistory, onReschedule, onNoShow,
+  visible, booking, sheet, barberId, onClose, onPrimary, onChat, onService, onHistory, onAnotherDay, onTakeOff,
 }: {
-  visible: boolean; booking: PanelBooking | null; onClose: () => void;
-  onDone: () => void; onChat?: () => void; onHistory?: () => void;
-  onReschedule?: () => void; onNoShow?: () => void;
+  visible: boolean; booking: PanelBooking | null; sheet: RowSheet | null; barberId: string;
+  onClose: () => void;
+  /** CALL HIM, HE'S HERE, SEAT HIM or DONE — whichever the row's rung carries */
+  onPrimary: () => void;
+  onChat?: () => void; onHistory?: () => void; onAnotherDay?: () => void; onTakeOff?: () => void;
+  /** the tick-off-what-you-did checklist (34f): a changed service is priced at the till, so it only opens in the chair */
+  onService?: () => void;
 }) {
   const rel = useReliability(booking?.customerId, booking?.isWalkIn, visible);
-  if (!booking) return null;
+  if (!booking || !sheet) return null;
   const b = booking;
-  const stars = rel && rel.avg_rating != null ? Math.round(Number(rel.avg_rating)) : null;
+  const r = sheet.row;
+  const verb = verbOf(r, barberId);
+  const steps = ladderOf(r, barberId);
+  const cash = dh(collectCents(r));
+  const takeOff = canTakeOff(r, barberId, Date.now());
+  const ahead = verb === 'CALL HIM' || verb === "HE'S HERE" || verb === 'SEAT HIM';
 
   return (
-    <Sheet visible={visible} onClose={onClose}>
+    <Sheet visible={visible} onClose={onClose} gap={14} deep>
       <View style={s.head}>
-        {b.isWalkIn ? <Avatar size={56} icon="user" /> : <Avatar size={56} warm initials={b.initials} />}
+        {b.isWalkIn
+          ? <View style={s.ticketBig}><T w="b" size={14} c={D.sub}>{sheet.no ? String(sheet.no).padStart(2, '0') : '—'}</T></View>
+          : <Avatar size={50} warm initials={b.initials} />}
         <View style={s.grow}>
-          <T w="b" size={17}>{b.name}</T>
-          <T size={12} c={D.sub} style={{ marginTop: 3 }}>
-            {b.isWalkIn ? 'Walk-in · no account'
-              : rel ? `${rel.visits} visit${rel.visits === 1 ? '' : 's'} · ${rel.no_shows ? `${rel.no_shows} no-show${rel.no_shows > 1 ? 's' : ''}` : 'no no-shows'}`
-                : ' '}
+          <T w="b" size={16}>{b.name}</T>
+          <T size={11.5} c={D.sub} style={{ marginTop: 3 }}>
+            {b.service} · {b.durationMin} min · {b.isWalkIn ? 'no account'
+              : rel ? `${rel.visits} visit${rel.visits === 1 ? '' : 's'}` : ' '}
           </T>
-          {stars != null && <View style={{ marginTop: 3 }}><Stars n={stars} size={11} /></View>}
         </View>
         <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel="Close"
           style={({ pressed }) => [s.close, pressed && s.pressed]}>
-          <Ico name="x" size={16} />
+          <Ico name="x" size={15} />
         </Pressable>
       </View>
 
-      <View style={s.detail}>
-        <Row label="Service" value={`${b.service} · ${b.durationMin} min`} />
-        <Row label="Slot" value={`${b.whenLabel} · ${b.timeLabel}`} />
-        {/* 39d — he reads this in the chair, which is why it sits with the service */}
-        {b.notes ? <Row label="They said" value={b.notes} /> : null}
-        {b.checkedInAt && (
-          <Row label="Checked in" color={D.green}
-            value={`${hhmm(b.checkedInAt)}${b.startedAt ? ` · in chair ${hhmm(b.startedAt)}` : ''}`} />
-        )}
-        <View style={s.rule} />
-        {(b.depositCents ?? 0) > 0 && (
-          <Row label="Deposit paid" value={dh(b.depositCents!)} />
-        )}
-        <View style={s.detailRowBase}>
-          <T w="b" size={13}>Collect in cash</T>
-          <T w="eb" size={20} c={D.accent} style={s.tnum}>{dh(collect(b))}</T>
-        </View>
+      <View style={s.ladder} accessibilityLabel={`Where he is: ${steps.find((x) => x.state === 'next')?.label ?? 'done'}`}>
+        {steps.map((step, i) => (
+          <View key={step.label} style={[s.rungRow, i > 0 && s.rungSeam, step.state === 'later' && s.dim]}>
+            {step.state === 'past' ? (
+              <View style={s.rungPast}><Ico name="check" size={12} color={D.bg} /></View>
+            ) : step.state === 'next' ? (
+              <View style={s.rungNext}><View style={s.rungNextDot} /></View>
+            ) : (
+              <View style={s.rungLater} />
+            )}
+            <T w={step.state === 'next' ? 'eb' : 'sb'} size={step.state === 'next' ? 13.5 : 13}
+              c={step.state === 'next' ? D.text : D.sub} style={s.grow}>{step.label}</T>
+            {step.state === 'next'
+              ? <T w="b" size={11} c={D.accent} ls={0.66}>NEXT STEP</T>
+              : step.at && step.state === 'past'
+                ? <T size={11.5} c={D.faint} style={s.tnum}>{whenOf(step.at)}</T>
+                : null}
+          </View>
+        ))}
       </View>
+
+      {/* 39d — he reads this in the chair, which is why it sits over the buttons */}
+      {b.notes ? (
+        <View style={s.asked}>
+          <View style={s.askedHead}>
+            <Ico name="message-square" size={13} color={D.amber} />
+            <T w="b" size={9.5} c={D.amber} ls={1.3}>HE ASKED FOR</T>
+          </View>
+          <T size={13} style={{ lineHeight: 19.5 }}>“{b.notes}”</T>
+        </View>
+      ) : null}
 
       <View style={s.tiles}>
-        <Tile icon="message-circle" label="Chat" onPress={b.isWalkIn ? undefined : onChat} />
-        <Tile icon="phone" label="Call"
-          onPress={b.phone ? () => Linking.openURL(`tel:${b.phone}`) : undefined} />
+        {!b.isWalkIn && <Tile icon="message-circle" label="Chat" onPress={onChat} />}
+        {b.phone && <Tile icon="phone" label="Call" onPress={() => Linking.openURL(`tel:${b.phone}`)} />}
+        {verb === 'DONE' && onService && <Tile icon="scissors" label="Service" onPress={onService} />}
         <Tile icon="clock" label="History" onPress={onHistory} />
-        {/* ponytail: coupons need the promotions table — BACKLOG "Flash discounts" */}
-        <Tile icon="tag" label="Coupon"
-          onPress={() => Alert.alert('Coupons', 'Coming soon — see BACKLOG.md')} />
       </View>
+      {b.isWalkIn && (
+        <T size={11} c={D.faint} style={s.fact}>
+          No chat with a guest — there's no account to message.{b.phone ? ' Use the phone.' : ''}
+        </T>
+      )}
 
-      <Btn title={`MARK DONE · COLLECT ${dh(collect(b))}`} height={54} icon="check"
-        bg={D.green} fg={D.bg} onPress={onDone} />
-      <View style={s.footRow}>
-        <GhostBtn title="RESCHEDULE" height={48} style={s.grow} onPress={onReschedule} />
-        <GhostBtn title="NO-SHOW" height={48} style={s.grow} color={D.red} border={D.redLine}
-          onPress={onNoShow} />
-      </View>
+      {verb && (
+        <Pressable onPress={onPrimary} accessibilityRole="button"
+          accessibilityLabel={verb === 'DONE' ? `Done, collect ${cash}` : verb}
+          style={({ pressed }) => [s.primary, verb === 'DONE' && { backgroundColor: D.green }, pressed && s.pressed]}>
+          <View style={s.primaryTitle}>
+            {verb === 'DONE' && <Ico name="check" size={15} color={D.bg} />}
+            <T w="eb" size={13} c={verb === 'DONE' ? D.bg : '#fff'} ls={0.65}>
+              {verb === 'DONE' ? `DONE · COLLECT ${cash}` : verb}
+            </T>
+          </View>
+          <T size={10.5} c={verb === 'DONE' ? 'rgba(13,13,15,0.7)' : 'rgba(255,255,255,0.75)'}>
+            {VERB_SUB(verb, sheet, b.isWalkIn)}
+          </T>
+        </Pressable>
+      )}
+
+      {ahead && (
+        <View style={s.footRow}>
+          <Pressable onPress={sheet.anotherDayOff ? undefined : onAnotherDay} disabled={!!sheet.anotherDayOff}
+            accessibilityRole="button" accessibilityLabel="Another day"
+            style={({ pressed }) => [s.second, !!sheet.anotherDayOff && s.off, pressed && s.pressed]}>
+            <T w="b" size={12} c={D.textDim}>Another day</T>
+          </Pressable>
+          {takeOff && (
+            <Pressable onPress={onTakeOff} accessibilityRole="button"
+              style={({ pressed }) => [s.second, { borderColor: D.redLine }, pressed && s.pressed]}>
+              <T w="b" size={12} c={D.red}>{b.isWalkIn ? 'Take him off' : 'No-show'}</T>
+            </Pressable>
+          )}
+        </View>
+      )}
+      {ahead && sheet.anotherDayOff && (
+        <T size={11} c={D.faint} style={s.fact}>Another day · {sheet.anotherDayOff}</T>
+      )}
     </Sheet>
   );
 }
@@ -229,6 +315,41 @@ const s = StyleSheet.create({
     width: 32, height: 32, borderRadius: 999, backgroundColor: D.card2,
     alignItems: 'center', justifyContent: 'center',
   },
+  dim: { opacity: 0.45 },
+  fact: { textAlign: 'center', lineHeight: 16.5, paddingHorizontal: 6 },
+
+  // BTD-21
+  ticketBig: {
+    width: 50, height: 50, borderRadius: 999, backgroundColor: D.card2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  ladder: { backgroundColor: D.card, borderRadius: 18, paddingVertical: 4, paddingHorizontal: 16 },
+  rungRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 11 },
+  rungSeam: { borderTopWidth: 1, borderTopColor: D.seam },
+  rungPast: {
+    width: 22, height: 22, borderRadius: 999, backgroundColor: D.green,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  rungNext: {
+    width: 22, height: 22, borderRadius: 999, borderWidth: 2, borderColor: D.accent,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  rungNextDot: { width: 7, height: 7, borderRadius: 999, backgroundColor: D.accent },
+  rungLater: { width: 22, height: 22, borderRadius: 999, borderWidth: 2, borderColor: D.muted },
+  asked: {
+    backgroundColor: D.card, borderRadius: 18, paddingVertical: 14, paddingHorizontal: 16, gap: 9,
+    borderWidth: 2, borderColor: D.amber,
+  },
+  askedHead: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  primary: {
+    height: 54, borderRadius: 16, backgroundColor: D.accent,
+    alignItems: 'center', justifyContent: 'center', gap: 1,
+  },
+  primaryTitle: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  second: {
+    flex: 1, height: 44, borderRadius: 14, backgroundColor: D.card, borderWidth: 1, borderColor: D.border,
+    alignItems: 'center', justifyContent: 'center',
+  },
 
   detail: { backgroundColor: D.card, borderRadius: 18, padding: 16, gap: 10 },
   detailRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -237,8 +358,8 @@ const s = StyleSheet.create({
 
   tiles: { flexDirection: 'row', gap: 9 },
   tile: {
-    flex: 1, alignItems: 'center', gap: 7, backgroundColor: D.card,
-    borderRadius: 16, paddingVertical: 13,
+    flex: 1, alignItems: 'center', gap: 6, backgroundColor: D.card,
+    borderRadius: 14, paddingVertical: 11,
   },
   footRow: { flexDirection: 'row', gap: 10 },
 

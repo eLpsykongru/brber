@@ -19,9 +19,12 @@ export type Member = {
   todayBookings: number; todayRevenue: number | null; inService: boolean; isCashAgent: boolean;
 };
 
+// Read through shop_bookings (0120): bookings' own policy shows a barber only his
+// own rows, so reading the team's straight from the table counted the owner's chair
+// alone. price_cents is null on a rent barber's rows — his takings are his (0025).
 type LiveBooking = {
   id: string; barber_id: string; starts_at: string; ends_at: string; status: string;
-  price_cents: number; walk_in_name: string | null; customer_id: string;
+  price_cents: number | null; walk_in_name: string | null; customer_id: string;
   checked_in_at: string | null; started_at: string | null; completed_at: string | null;
   services: { name: string } | null;
   customer: { full_name: string | null } | null;
@@ -46,9 +49,10 @@ export type ShopMeta = {
 };
 
 // ---- 2a · owner dashboard --------------------------------------------------
-export function OwnerDashboard({ salon, team, onBack, onAllChairs, onReports, onReviews, onTeam, onBarber }: {
+export function OwnerDashboard({ salon, team, onBack, onAllChairs, onLines, onReports, onReviews, onTeam, onBarber }: {
   salon: ShopMeta; team: Member[]; onBack: () => void;
-  onAllChairs: () => void; onReports: () => void; onReviews: () => void; onTeam: () => void;
+  /** OSH-19 — every chair's line, worst wait first */
+  onAllChairs: () => void; onLines: () => void; onReports: () => void; onReviews: () => void; onTeam: () => void;
   onBarber: (m: Member) => void;
 }) {
   const [rows, setRows] = useState<LiveBooking[] | null>(null);
@@ -60,11 +64,8 @@ export function OwnerDashboard({ salon, team, onBack, onAllChairs, onReports, on
     if (!ids.length) return;
     const from = new Date(); from.setHours(0, 0, 0, 0);
     const to = new Date(from); to.setDate(to.getDate() + 1);
-    supabase.from('bookings')
-      .select('id, barber_id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, services(name), customer:profiles!customer_id(full_name)')
-      .in('barber_id', ids)
-      .gte('starts_at', from.toISOString()).lt('starts_at', to.toISOString())
-      .then(({ data }) => setRows((data as unknown as LiveBooking[]) ?? []));
+    supabase.rpc('shop_bookings', { p_from: from.toISOString(), p_to: to.toISOString() })
+      .then(({ data }) => setRows(((data ?? []) as LiveBooking[]).filter((b) => ids.includes(b.barber_id))));
 
     // settlement banner: commission accrued since each barber was last squared up
     (async () => {
@@ -89,11 +90,12 @@ export function OwnerDashboard({ salon, team, onBack, onAllChairs, onReports, on
   const live = rows ?? [];
   const confirmed = live.filter((b) => b.status === 'confirmed');
   const bookings = confirmed.length;
-  const revenue = confirmed.reduce((a, b) => a + b.price_cents, 0);
+  const revenue = confirmed.reduce((a, b) => a + (b.price_cents ?? 0), 0);
   const noShows = live.filter((b) => b.status === 'no_show').length;
-  const waiting = confirmed.filter((b) => b.checked_in_at && !b.started_at && !b.completed_at).length;
+  // A10 — the barber board's count: everyone not yet in the chair, not only the checked-in
+  const waiting = confirmed.filter((b) => !b.started_at && !b.completed_at).length;
   const shopCut = team.filter((m) => m.pay === 'commission').reduce((a, m) => {
-    const rev = confirmed.filter((b) => b.barber_id === m.id).reduce((x, b) => x + b.price_cents, 0);
+    const rev = confirmed.filter((b) => b.barber_id === m.id).reduce((x, b) => x + (b.price_cents ?? 0), 0);
     return a + Math.round(rev * (100 - m.split) / 100);
   }, 0);
 
@@ -143,7 +145,9 @@ export function OwnerDashboard({ salon, team, onBack, onAllChairs, onReports, on
           const inChair = mine.find((b) => b.started_at && !b.completed_at);
           const off = !mine.length && !m.inService;
           const freeAt = inChair ? hhmm(inChair.ends_at) : null;
-          const rev = mine.reduce((a, b) => a + b.price_cents, 0);
+          const rev = mine.reduce((a, b) => a + (b.price_cents ?? 0), 0);
+          // 0025: a rent barber's takings are not the owner's to see
+          const moneyHidden = m.pay === 'rent' && m.role !== 'owner';
           return (
             <Pressable key={m.id} onPress={() => onBarber(m)} accessibilityRole="button"
               accessibilityLabel={`${m.name}, ${inChair ? 'cutting' : off ? 'off' : 'free'}`}
@@ -164,7 +168,7 @@ export function OwnerDashboard({ salon, team, onBack, onAllChairs, onReports, on
                 </T>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
-                <T w="b" size={14} c={off ? D.muted : D.text} style={s.tnum}>{dh(rev)}</T>
+                <T w="b" size={14} c={off || moneyHidden ? D.muted : D.text} style={s.tnum}>{moneyHidden ? '—' : dh(rev)}</T>
                 <T size={10} c={D.sub} style={{ marginTop: 2 }}>{mine.length} today</T>
               </View>
             </Pressable>
@@ -188,6 +192,7 @@ export function OwnerDashboard({ salon, team, onBack, onAllChairs, onReports, on
 
       <View style={s.quickRow}>
         <Quick icon="calendar" label="All chairs" onPress={onAllChairs} />
+        <Quick icon="list" label="Lines" onPress={onLines} />
         <Quick icon="trending-up" label="Reports" onPress={onReports} />
         <Quick icon="star" label="Reviews" onPress={onReviews} />
         <Quick icon="users" label="Team" onPress={onTeam} />
@@ -227,15 +232,12 @@ export function AllChairsScreen({ salon, team, onBack, onAdd }: {
     setRows(null);
     const to = new Date(day); to.setDate(to.getDate() + 1);
     const [bk, blk, off] = await Promise.all([
-      supabase.from('bookings')
-        .select('id, barber_id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, services(name), customer:profiles!customer_id(full_name)')
-        .in('barber_id', ids)
-        .gte('starts_at', day.toISOString()).lt('starts_at', to.toISOString()),
+      supabase.rpc('shop_bookings', { p_from: day.toISOString(), p_to: to.toISOString() }),
       supabase.from('time_blocks').select('id, barber_id, label, day, start_min, end_min')
         .eq('kind', 'block').in('barber_id', ids),
       supabase.from('days_off').select('barber_id, day').in('barber_id', ids).eq('day', isoDay(day)),
     ]);
-    setRows((bk.data as unknown as LiveBooking[]) ?? []);
+    setRows(((bk.data ?? []) as LiveBooking[]).filter((b) => ids.includes(b.barber_id)));
     setBlocks((blk.data ?? []) as BlockRow[]);
     setDaysOff((off.data ?? []) as { barber_id: string; day: string }[]);
   }, [ids.join(','), day.getTime()]);
@@ -393,14 +395,13 @@ export function OwnerBarberScreen({ member, salon, onBack, onChat, onSchedule, o
           });
         }
       });
-    supabase.from('bookings').select('starts_at, price_cents')
-      .eq('barber_id', member.id).eq('status', 'confirmed')
-      .gte('starts_at', from.toISOString()).lt('starts_at', to.toISOString())
+    supabase.rpc('shop_bookings', { p_from: from.toISOString(), p_to: to.toISOString(), p_barber: member.id })
       .then(({ data }) => {
+        const confirmed = ((data ?? []) as LiveBooking[]).filter((b) => b.status === 'confirmed');
         const buckets = Array.from({ length: 7 }, (_, i) => {
           const d = new Date(); d.setDate(d.getDate() - (6 - i));
-          return (data ?? []).filter((b: any) => new Date(b.starts_at).toDateString() === d.toDateString())
-            .reduce((a: number, b: any) => a + b.price_cents, 0);
+          return confirmed.filter((b) => new Date(b.starts_at).toDateString() === d.toDateString())
+            .reduce((a, b) => a + (b.price_cents ?? 0), 0);
         });
         setDays(buckets);
       });

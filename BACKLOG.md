@@ -1378,8 +1378,9 @@ there is no step 3 until an SMS provider exists. **Trigger: an SMS account.**
   Referral credits (0038) count as money entering — they are platform-funded with
   no cash behind them. Scheduled 02:30 on the conditional pg_cron shape (0037/0051).
 Still open:
-- **0075 is NOT APPLIED.** Its assertions are the test — the drift check runs
-  against real rows at apply time and fails the migration if the backfill is wrong.
+- ~~**0075 is NOT APPLIED**~~ — applied by 2026-09-16. Its assertions were the test:
+  the drift check ran against real rows and would have refused the migration if the
+  backfill were wrong.
 - **The free-cancellation window does not exist** (§6.4). `resolve_deposit_hold`
   encodes today's shipped behaviour: customer cancels → forfeit, whatever the
   timing. Step 4 splits that branch; it is the only edit needed there.
@@ -1439,8 +1440,8 @@ on **Salon management → Deposit**. G3 is no longer blocked; **G4 still is**.
 - Amber everywhere on the shop's side, per the turn note: a deposit is **held**,
   not earned. Green would say the money is already his.
 Still open:
-- **0076 is NOT APPLIED.** Its assertions pin OSH-11's drawn arithmetic
-  (50% of 60 = 30; a 45 DH kids cut rounds UP to 23 held, 22 cash).
+- ~~**0076 is NOT APPLIED**~~ — applied by 2026-09-16. Its assertions pin OSH-11's
+  drawn arithmetic (50% of 60 = 30; a 45 DH kids cut rounds UP to 23 held, 22 cash).
 - **G4 — the ops screen** for the floor and ceiling. Until it exists nobody can
   change 20/60 from a UI.
 - **A shop at 0% cannot take a voluntary partial deposit.** `fill_booking` still
@@ -1473,8 +1474,9 @@ the two integers with no screen and no history; this is the desk for them.
 - The histogram's 0% column is hatched grey, not coral: it is a choice, not the
   bottom of a scale.
 Still open:
-- **0077 is NOT APPLIED.** Its assertions pin SET-11's card arithmetic (12 DH at
-  20%, 36 at 60%, 54 on cut and beard) and SET-12/13's drawn cohorts.
+- ~~**0077 is NOT APPLIED**~~ — applied by 2026-09-16. Its assertions pin SET-11's
+  card arithmetic (12 DH at 20%, 36 at 60%, 54 on cut and beard) and SET-12/13's
+  drawn cohorts.
 - **"Tell the owners" is an in-app notification, not the SMS the design draws** —
   the SMS rail is the same one blocking slice 1's OTP and RTL. The audience query
   is the part that matters and it is already right; swap the insert for a send.
@@ -2374,8 +2376,8 @@ Still open:
 - **Held back is derived from the cut, not queued.** One push at mark-done would
   need a trigger on `bookings.completed_at`. **Trigger:** barbers miss the card.
 
-Apply 0108 and 0109 before shipping this build: Explore, Discover and the barber
-editor select the new columns and fail without them.
+~~Apply 0108 and 0109 before shipping this build~~ — applied by 2026-09-16, along
+with every migration through 0117.
 
 ## Queue link — step 1: a scanned poster shows a real wait (0110, 2026-09-15)
 Handoff `design_handoff_queue_link` (pasted into the session, not committed): the
@@ -2429,8 +2431,7 @@ Not built, because nothing true can be said yet:
 - **French and Arabic.** Every string is in `web/src/copy.js`; the translations
   are not written, and are not the builder's to invent. RTL waits for its design.
 Still open:
-- **0110 is NOT APPLIED.** Salon management selects `short_code` and fails without
-  it — apply it before running this build.
+- ~~**0110 is NOT APPLIED**~~ — applied 2026-09-16, with 0111 … 0117.
 - ~~**The in-app walk-in path lands requests, not tickets**~~ — fixed in 0112 (step 3).
 - ~~**Every RPC granted to `authenticated` is callable by anon**~~ — closed in 0117
   (the owner's call, 2026-09-16). Its first cut revoked PUBLIC only and **refused
@@ -2454,6 +2455,8 @@ Still open:
   SMS rail (steps 2 and 4 cannot run end to end without an account).
 
 ## Queue link — step 2: taking a ticket with no account (0111, 2026-09-15)
+> **Superseded by ADDENDUM-app-first (0118, 2026-09-17)** — the code, the web ticket and
+> leaving by code are gone. See "Queue link — app-first" at the end of this file.
 QL-04 (first name, phone), QL-05 (four digits), QL-06 (the web ticket) and QL-10
 (one line at a time), on the same `web/` handler. Plain forms: every step works
 with no script, and `guest-client.js` only draws the four boxes, the countdowns
@@ -2506,9 +2509,10 @@ Not built, because nothing true can be said yet:
 - **The pages no design draws** — too many codes, left, started, done, gone — say
   the smallest true thing.
 Still open:
-- **0111 is NOT APPLIED.** It needs 0110 first.
-- **Without pg_cron an unconfirmed hold stays in the barber's day** until the next
-  guest request anywhere clears it, not at five minutes exactly.
+- ~~**0111 is NOT APPLIED**~~ — applied 2026-09-16.
+- ~~**Without pg_cron an unconfirmed hold stays in the barber's day**~~ — pg_cron is
+  enabled (2026-09-16), so `guest_sweep` runs every minute: an unconfirmed place goes
+  at five minutes and a called chair at eight, whether or not any page is open.
 - **Nº moves when somebody ahead leaves**: the number is the position in the day
   (0029's rule), so a cancellation renumbers everyone behind it, same as the app.
 
@@ -2536,7 +2540,7 @@ Not built:
 - **QL-16's "Youssef is holding this for you"** — nothing is held before a ticket is
   taken (README §5), so the card quotes the number instead.
 Still open:
-- **0112 is NOT APPLIED** (needs 0110). The app links need a new build, and the page's
+- ~~**0112 is NOT APPLIED**~~ — applied 2026-09-16. The app links still need a new build, and the page's
   host needs `ANDROID_CERT_SHA256` and `IOS_APP_ID` (`eas credentials`). Until then
   the links open the browser, which works.
 - **Trigger:** the domain — set `EXPO_PUBLIC_QUEUE_BASE`, rebuild, serve both files.
@@ -2556,7 +2560,8 @@ Not built:
 - **QL-07's link to the ticket** — waits for the domain; a text outlives a temporary host.
 - 0037's app push skips walk-in rows when it picks "next", so an app customer behind a
   walk-in is told early. Left as it is.
-Still open: **0113 is NOT APPLIED** (needs 0111).
+Still open: ~~**0113 is NOT APPLIED**~~ — applied 2026-09-16. Nothing sends until there
+is an SMS account: the texts sit in `sms_outbox` as `queued`.
 
 ## Queue link — step 5: the barber sends the link (0114, 2026-09-15)
 BTD-11 (`ShareLinkSheet`), BTD-12 and BTD-13 (`GuestSheet`) on `BarberQueueScreen`.
@@ -2576,9 +2581,11 @@ Not built:
 - **WhatsApp not installed** — not designed; `wa.me` opens WhatsApp's own page.
 - **"If he installs the app with this number, today's cut joins his history"** —
   nothing joins a guest to an account yet (README §9).
-Still open: **0114 is NOT APPLIED** (needs 0111).
+Still open: ~~**0114 is NOT APPLIED**~~ — applied 2026-09-16.
 
 ## Queue link — the addendum's guest states (0115, 2026-09-15)
+> **Superseded by ADDENDUM-app-first (0118)** — QL-11…QL-17 are deleted from the web.
+> QL-17's shut page became QL-26. See the last section.
 `ADDENDUM-guest-states` (pasted into the session): QL-11 … QL-17.
 - **QL-11/12**: three wrong codes per number in fifteen minutes, across every code it
   was sent (A4 blocker 5). The third lets the held place go and blocks the number for
@@ -2602,9 +2609,11 @@ Not built, because nothing true can be said yet:
 - **QL-15's "Boards come back inside 20 minutes most days"** — nothing measures it.
 - **CALL THE SHOP** — "Who customers call for the shop".
 - QL-11 with one try left is not drawn; it reads QL-11's sentence with "One more try".
-Still open: **0115 is NOT APPLIED** (needs 0110, 0111, 0113). RTL still waits for its design.
+Still open: ~~**0115 is NOT APPLIED**~~ — applied 2026-09-16. RTL still waits for its design.
 
 ## Queue link — QL-13, the chair hold, and the last two answers (0116, 0117, 2026-09-16)
+> **Partly superseded by ADDENDUM-app-first (0118)** — QL-13's page, its two taps and the
+> closed-line text are gone. The eight-minute hold and 0117 stand. See the last section.
 The owner took the recommendation on all four open questions: the hold releases
 itself, the closed-line text says the ticket stands, the you're-next text goes in
 English, and anon loses the signed-in RPCs.
@@ -2642,8 +2651,8 @@ Not built, because nothing true can be said yet:
   difference. **Trigger:** a barber losing a called guest to his own break.
 - **French and Arabic** for QL-13 and for both texts.
 Still open:
-- **0116 is NOT APPLIED** (needs 0111, 0113 and 0115).
-- **0117 refused itself three times on 2026-09-16**, and each refusal was worth
+- ~~**0116 is NOT APPLIED**~~ — applied 2026-09-16, and 0117 with it.
+- **0117 refused itself three times on 2026-09-16 before going through**, and each refusal was worth
   having — see the step-1 note. (1) Revoking PUBLIC alone left anon's own grant.
   (2) Revoking `public, anon` still reported 188 open, with no error on any
   statement. (3) Made to print the ACL, it named the cause: those 188 are
@@ -2653,3 +2662,84 @@ Still open:
   ACL, the owner and the role it ran as if anything of ours is left open. Safe to
   re-run; silent on a database without Supabase's roles.
 - **The you're-next text stays English** — the owner's call, 2026-09-16.
+
+## Queue link — app-first: the web stops taking places (0118, 2026-09-17)
+`ADDENDUM-app-first` (turn Q3, pasted into the session): anonymous eyes on the web,
+named places in the app or from the barber's board. The owner said "implement them";
+no reconnaissance round. This slice deletes more than it adds (−2 100 / +1 560 lines).
+- **Deleted, not deferred:** the four-digit code and everything around it (code
+  texts, attempt counter, 15-minute block, leaving by code, QL-10's switch, QL-14's
+  rejoin, QL-13's page and taps), the closed-line text, and the old QL-03/QL-08
+  picker. 0118 drops their functions. `guest_codes` and `guest_misses` keep their
+  rows — nothing reads them; drop them when nobody needs the history.
+- **QL-18** (`web/src/render.js`): the line, nameless. `public_queue` now returns
+  each chair's `line` (Nº, in the chair, minutes) and nothing about anyone. With
+  several chairs the rows say whose ("Next · Youssef") because Nº is per chair
+  (0029), not per shop as drawn. Polls a ~7-character signature every 20 s and
+  reloads only when something visible changed. ~12 KB uncompressed.
+- **QL-26** replaces QL-17: closed time, who opens next ("Youssef, Hamza and Sami"
+  — `opens.barbers`, new in 0118) and three days of hours. **BOOK A TIME INSTEAD goes
+  to the app** (a browser cannot book). The nearby-shop card is gone;
+  `nearby_open_shop` is no longer called but is still anon-callable — revoke it
+  with anything else that touches 0117's list.
+- **QL-19 / QL-21** (`QueueLinkOpen` in `QueueLinkScreen.tsx`): a link opens the
+  shop in the app — "Anyone free" off the poster, his chair chosen and folded away
+  off a barber's `?b=`. HOLD MY PLACE is `join_queue`. Replaces the old check-in
+  sheet for links; the camera and the typed code still use it.
+- **QL-20 → QL-21, Android:** `/q/<code>/app` sends Google Play the shop in the
+  install referrer; the first open reads it once (`takeInstallLink`, expo-application)
+  and opens the shop. The app also claims `/q/<code>/app`, so a phone that has the app
+  opens it instead of the store.
+- **QL-22**: signed out, the link is kept through sign-in (as before, QL-16).
+- **QL-23 → QL-24 → /c/<token> → QL-25**: first name + phone, no code. The name is
+  on the line at once, **unconfirmed** (`verified_at` null, never swept) until the
+  link in the text is tapped. The page quotes the text with the link blanked — its
+  own address must never confirm. Link-preview fetchers and HEAD requests confirm
+  nothing. One line at a time (a confirmed web ticket, an app booking, or a
+  barber-typed number today). Same number again replaces its own unconfirmed name.
+  Limits are 0111's guesses, counted on confirm texts.
+- **Barber's board**: an unconfirmed row is greyed, CALL NEXT skips it, and so does
+  the you're-next text (0113's pick now skips it too).
+- **BTD-02**: optional number on quick add → `bookings.walk_in_phone` (tidied to
+  +212…, walk-ins only). Buys exactly one text, the you're-next one.
+- **Poster, printed sheet, wall display, share text**: "See the wait". "No app
+  account needed" / "no app needed" are gone everywhere; BTD-11's text follows
+  Messages Out's qlink (wait first, link second), in English, one send.
+Not built, because nothing true can be said yet:
+- **QL-20's banner on the store page** — nobody can put a banner on Google Play or
+  the App Store. The store opens plain.
+- **QL-21's "STILL YOURS Nº 07" and "we kept your place"**, QL-22's "waiting for you,
+  sign in and it's yours", QL-24/QL-22's "the place is held through sign-in" —
+  nothing is held before HOLD MY PLACE. The screens say the number you would get.
+- **QL-22's phone field** — the app signs in with email, Google or Apple.
+- **QL-21's "the wait moved 2 min while you installed"** and "we'll ask for your
+  number" — no quote travels in the referrer, and join_queue asks for nothing.
+- **QL-25's "keep your place across shops"** — no such feature. Rest of the line kept.
+- **QL-23's service** — not drawn; the chair's first service that still fits is
+  written (QL-18's own default). The barber sees it on the row.
+- **French and Arabic** for every page string and both new texts; RTL (A8).
+Still open:
+- **0118 is NOT APPLIED.** Apply it together with deploying `web/`: it drops the
+  functions the old page calls. The app changes need a new build (expo-application,
+  the extra intent filter).
+- **QL-23 is switched off until texts send.** With no SMS account a web name could
+  never be confirmed while the page says "we just texted you", so the page offers
+  no remote form unless the host sets `SMS_SENDS=1`. **Trigger:** the SMS rail.
+- **QL-09 vs QL-26 — the owner's decision** (A2 says ask). Both are built as they
+  stand: QL-26 when the shop is shut for the day, QL-09 when it is open but nobody
+  takes walk-ins. Recommendation: keep both; they are different causes.
+- **iOS has no deferred link.** An iPhone that installs from the page opens the app
+  with no shop — the addendum's acceptable fallback is "opens on the shop with
+  nothing picked", which iOS does not meet. The only honest mechanism is a paste
+  step (the page copies the link; first open offers iOS's paste button) — not
+  designed. `IOS_APP_STORE_ID` must be set on the host; until then an iPhone gets
+  "not in this phone's app store yet".
+- **Giving up a confirmed web place needs only the ticket address** — the code that
+  guarded it is gone. A shared screenshot of the URL is enough to remove him.
+- **An unconfirmed name nobody taps stays in the barber's day** as a greyed row
+  until he drops it; nothing ends it at close.
+- **`/c/` is shared with 0072's owner invites** (`sterncut.ma/c/<6 chars>`), which
+  nothing serves yet. The shapes differ (6 upper-case vs 12 hex), so the invite
+  page can live beside the confirm route — build it knowing that.
+- Triggers this lands on: **adoption bet #1** (`?b=` links now open the app, the
+  page stays read-only) and the **SMS rail** (QL-23 and BTD-02's text wait on it).

@@ -7,6 +7,10 @@ import { Btn, Eyebrow, Ico, Segmented, Sheet, SheetHead, T } from './dark';
 
 // 1c — Quick add (tab-bar +). A walk-in is added straight from here; "Appointment"
 // and "Pick…" hand off to the day timeline, which owns arbitrary slot placement.
+//
+// BTD-02 under ADDENDUM-app-first: this is the real in-shop path the poster points
+// at, so it must stay faster than the App Store. The number is optional and empty
+// by default; typed, it buys exactly one text, when he's next (0118).
 export type QuickPick = {
   mode: 'now' | 'schedule';
   name?: string;
@@ -32,12 +36,13 @@ export default function QuickAddSheet({ visible, barberId, onClose, onPick }: {
   const [mode, setMode] = useState<'walkin' | 'appt'>('walkin');
   const [at, setAt] = useState<Date | null>(null);
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [pickedId, setPickedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     if (!visible) return;
-    setMode('walkin'); setName(''); setPickedId(null); setAt(null); setServices(null);
+    setMode('walkin'); setName(''); setPhone(''); setPickedId(null); setAt(null); setServices(null);
     (async () => {
       const [svc, av, blk, book, hist] = await Promise.all([
         supabase.from('services').select('id, name, price_cents, duration_min')
@@ -78,6 +83,8 @@ export default function QuickAddSheet({ visible, barberId, onClose, onPick }: {
     const { error } = await supabase.from('bookings').insert({
       customer_id: barberId, barber_id: barberId, service_id: picked.id,
       starts_at: at.toISOString(), walk_in_name: name.trim() || null,
+      // 0118 tidies it to +212… and refuses anything that is not a mobile
+      walk_in_phone: phone.trim() || null,
     });
     setBusy(false);
     if (error) {
@@ -132,6 +139,20 @@ export default function QuickAddSheet({ visible, barberId, onClose, onPick }: {
             placeholder="Optional — shows as Walk-in" placeholderTextColor={D.sub}
             accessibilityLabel="Client name" />
         </View>
+      </View>
+
+      <View style={{ gap: 8 }}>
+        <Eyebrow ls={1.4}>HIS NUMBER · OPTIONAL</Eyebrow>
+        <View style={s.nameField}>
+          <Ico name="phone" size={16} color={D.sub} />
+          <TextInput value={phone} onChangeText={setPhone} style={s.nameInput}
+            placeholder="Leave empty — you'll call his name" placeholderTextColor={D.faint}
+            keyboardType="phone-pad" autoComplete="tel" textContentType="telephoneNumber"
+            accessibilityLabel="His number, optional" />
+        </View>
+        <T size={11} c={D.faint} style={{ lineHeight: 16 }}>
+          If you type it he gets one text when he's next — nothing else, and no app needed.
+        </T>
       </View>
 
       <View style={{ gap: 9 }}>

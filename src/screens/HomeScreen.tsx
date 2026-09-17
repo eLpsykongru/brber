@@ -128,7 +128,7 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged, q
     openDay(true, { autoAddNow: mode === 'schedule', prefillName: name, prefillServiceId: serviceId, preferMin });
   }
 
-  // option (b) — a shop's queue link lands on Home's check-in from whichever tab
+  // a shop's queue link lands on Home's QL-19 from whichever tab
   // is open. Discover opens it and hides the tab bar; nothing here touches that.
   useEffect(() => {
     if (!queueLink || barber) return;

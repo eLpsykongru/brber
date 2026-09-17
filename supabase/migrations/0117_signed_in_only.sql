@@ -1,7 +1,7 @@
 -- 0117_signed_in_only: every RPC granted to `authenticated` was callable by anon
 -- as well. Decided with the owner (2026-09-16): close it.
 --
--- Two failed applies are written into this file, because each one was a fact
+-- Three failed applies are written into this file, because each one was a fact
 -- nobody could read off the migrations:
 --
 --   1. 2026-09-16, "190 signed-in functions are still open to anon". The first

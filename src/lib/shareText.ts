@@ -9,14 +9,20 @@ export type ShareChair = { name: string; waiting: number; waitMin: number };
 
 const first = (name: string) => name.split(' ')[0];
 
-/** The line link as it goes out. The wait is in the words, not only the preview card (QL-01). */
+/**
+ * The line link as it goes out — Messages Out's qlink, in the English the sheet
+ * speaks. The wait first and the link second: he decides on the number. It never
+ * says "no app needed" (A2: false under Q3) and never asks for a name or a code;
+ * the link opens the app when it is installed and the read-only line when not.
+ */
 export function shareMessage({ shop, url, chair, soonest }: {
   shop: string; url: string; chair?: ShareChair | null; soonest?: ShareChair | null;
 }): string {
-  const tail = `Take a place in today's line here - no app needed: ${url}`;
-  if (chair) return `${first(chair.name)} at ${shop}. ${chair.waiting} waiting, about ${chair.waitMin} min. ${tail}`;
-  if (soonest) return `${shop}. ${first(soonest.name)} is free in about ${soonest.waitMin} min. ${tail}`;
-  return `${shop}. ${tail}`;
+  if (chair) {
+    return `Sterncut: ${shop}, ${chair.waiting} ahead, about ${chair.waitMin} min. Take your place with ${first(chair.name)}: ${url}`;
+  }
+  if (soonest) return `Sterncut: ${shop}, ${first(soonest.name)} is free in about ${soonest.waitMin} min. Take your place: ${url}`;
+  return `Sterncut: ${shop}. See the wait: ${url}`;
 }
 
 const GSM = '@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !"#¤%&\'()*+,-./0123456789:;<=>?¡'

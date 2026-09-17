@@ -26,9 +26,10 @@ export default function GuestSheet({ visible, guest, onClose, onCallUp, onTakeOf
 }) {
   if (!guest) return null;
   const g = guest;
+  // ADDENDUM-app-first: a web name is unconfirmed until he taps the link in his text
   const joined = g.confirmed
     ? `Joined ${g.source === 'link' ? 'from your link ' : ''}at ${hhmm(g.joinedAt)} · no account`
-    : `Holding a place since ${hhmm(g.joinedAt)} · not confirmed yet`;
+    : `Put on from the web at ${hhmm(g.joinedAt)} · hasn't tapped his text`;
 
   return (
     <Sheet visible={visible} onClose={onClose} gap={13}>
@@ -59,7 +60,11 @@ export default function GuestSheet({ visible, guest, onClose, onCallUp, onTakeOf
           sub="Reliability starts when he makes an account" dim rule />
       </View>
 
-      <Note>He is a named walk-in in your day, the same as anyone off the street.</Note>
+      <Note>
+        {g.confirmed
+          ? 'He is a named walk-in in your day, the same as anyone off the street.'
+          : 'Until he taps the link in his text his number is greyed, and you may call past it.'}
+      </Note>
 
       <Btn title="CALL HIM UP NEXT" height={54} onPress={onCallUp} />
       <Pressable onPress={onTakeOff} hitSlop={8} accessibilityRole="button" style={s.takeOff}>

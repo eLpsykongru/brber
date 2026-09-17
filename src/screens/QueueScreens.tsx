@@ -22,10 +22,10 @@ type Service = { id: string; name: string; price_cents: number; barber_id: strin
 const dh = (c: number) => (c / 100).toFixed(0);
 
 // ---- 27a -----------------------------------------------------------------
-export default function CheckInScreen({ onClose, onJoined, initialCode }: {
+// A shop's link that opens the app lands on QL-19 (QueueLinkScreen), not here:
+// this is the camera and the typed code, in the shop.
+export default function CheckInScreen({ onClose, onJoined }: {
   onClose: () => void; onJoined: (bookingId: string) => void;
-  /** option (b): the shop's link that opened the app — no camera, straight to its sheet */
-  initialCode?: string | null;
 }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState<{ salon: string; barber?: string } | null>(null);
@@ -35,16 +35,12 @@ export default function CheckInScreen({ onClose, onJoined, initialCode }: {
   // the camera reports a code many times a second; one lookup at a time
   const looking = useRef(false);
 
-  useEffect(() => { if (!initialCode && !permission?.granted) requestPermission(); }, [permission?.granted]);
+  useEffect(() => { if (!permission?.granted) requestPermission(); }, [permission?.granted]);
   // 38b — a blocked camera opens the typed path rather than parking him in front
   // of a dead viewfinder with the way through as a footnote
   useEffect(() => {
-    if (!initialCode && permission && !permission.granted) setManual(true);
+    if (permission && !permission.granted) setManual(true);
   }, [permission?.granted]);
-  // a link that turns out not to be a shop closes the check-in it opened
-  useEffect(() => {
-    if (initialCode) take(initialCode).then((ok) => { if (!ok) onClose(); });
-  }, [initialCode]);
 
   async function take(raw: string): Promise<boolean> {
     if (looking.current) return false;
@@ -78,10 +74,8 @@ export default function CheckInScreen({ onClose, onJoined, initialCode }: {
 
   if (scanned) {
     return <ConfirmWalkIn salonId={scanned.salon} preferBarber={scanned.barber}
-      onClose={initialCode ? onClose : () => setScanned(null)} onJoined={onJoined} />;
+      onClose={() => setScanned(null)} onJoined={onJoined} />;
   }
-  // a link is being looked up: there is nothing to scan
-  if (initialCode) return <View style={s.scanScreen} />;
 
   return (
     <View style={s.scanScreen}>

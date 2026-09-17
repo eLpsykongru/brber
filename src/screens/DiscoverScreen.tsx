@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
 import { useCallback, useEffect, useState } from 'react';
 import {
   Alert, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View,
@@ -15,6 +16,7 @@ import MyBookingScreen from './MyBookingScreen';
 import ReportProblemScreen, { CaseRow, SupportCaseScreen } from './SupportScreens';
 import CheckInScreen, { WalkInTicketScreen, YoureNextScreen } from './QueueScreens';
 import type { QueueLink } from '../lib/queueLink';
+import { QueueLinkOpen } from './QueueLinkScreen';
 import QueueScreen, { DayQueueRow, minutesUntil, QUEUE_POLL_MS } from './QueueScreen';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
 import SearchScreen from './SearchScreen';
@@ -123,14 +125,11 @@ export default function DiscoverScreen({
   const [inboxOpen, setInboxOpen] = useState(false);   // 14a, behind the bell
   const [unread, setUnread] = useState(0);
   const [checkIn, setCheckIn] = useState(false);       // 27a, the counter code
-  // option (b) — the link that opened the app, handed to 27a in place of a scan
-  const [checkInCode, setCheckInCode] = useState<string | null>(null);
-  // first, so a link arriving in the same pass is not wiped by it
-  useEffect(() => { if (!checkIn) setCheckInCode(null); }, [checkIn]);
+  // QL-19 / QL-21 — the shop's link that opened the app, straight onto its chairs
+  const [linkOpen, setLinkOpen] = useState<QueueLink | null>(null);
   useEffect(() => {
     if (!queueLink || !customerId) return;
-    setCheckInCode(queueLink.url);
-    setCheckIn(true);
+    setLinkOpen(queueLink);
     onChromeHidden?.(true);
     onQueueLinkUsed?.();
   }, [queueLink?.at, customerId]);
@@ -232,13 +231,14 @@ export default function DiscoverScreen({
   // you-are-next takeover) is deliberately absent: it is an alarm you
   // acknowledge, not a screen you back out of.
   useAndroidBack(
-    checkIn ? () => { setCheckIn(false); onChromeHidden?.(false); }
-      : inboxOpen ? () => { setInboxOpen(false); onChromeHidden?.(false); loadUnread(); }
-        : detailOpen ? () => { setDetailOpen(false); onChromeHidden?.(false); }
-          : queueOpen ? () => { setQueueOpen(false); onChromeHidden?.(false); }
-            : searchOpen ? () => { setSearchOpen(false); onChromeHidden?.(false); }
-              : salon ? () => open(null)
-                : null,
+    linkOpen ? () => { setLinkOpen(null); onChromeHidden?.(false); }
+      : checkIn ? () => { setCheckIn(false); onChromeHidden?.(false); }
+        : inboxOpen ? () => { setInboxOpen(false); onChromeHidden?.(false); loadUnread(); }
+          : detailOpen ? () => { setDetailOpen(false); onChromeHidden?.(false); }
+            : queueOpen ? () => { setQueueOpen(false); onChromeHidden?.(false); }
+              : searchOpen ? () => { setSearchOpen(false); onChromeHidden?.(false); }
+                : salon ? () => open(null)
+                  : null,
   );
 
   if (phase && booking && ackedTakeover !== `${booking.id}:${phase}`) {
@@ -253,8 +253,15 @@ export default function DiscoverScreen({
       onMessage={() => { setAckedTakeover(`${booking.id}:${phase}`); setDetailOpen(true); }} />;
   }
 
+  if (linkOpen && customerId) {
+    const link = linkOpen;
+    return <QueueLinkOpen link={link}
+      onJoined={(id) => { setLinkOpen(null); setWalkIn(id); }}
+      onBrowser={() => { WebBrowser.openBrowserAsync(link.url).catch(() => {}); }}
+      onDismiss={() => { setLinkOpen(null); onChromeHidden?.(false); }} />;
+  }
   if (checkIn && customerId) {
-    return <CheckInScreen initialCode={checkInCode}
+    return <CheckInScreen
       onClose={() => { setCheckIn(false); onChromeHidden?.(false); }}
       onJoined={(id) => { setCheckIn(false); setWalkIn(id); }} />;
   }

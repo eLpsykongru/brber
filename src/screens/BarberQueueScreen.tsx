@@ -14,6 +14,10 @@ import { dark as D } from '../theme';
 // it (BTD-12); a ticket taken on the web page opens as a guest (BTD-13). Delivered
 // and opened are not shown — the app hands the text to WhatsApp or the SMS app and
 // learns nothing after that (0114).
+//
+// ADDENDUM-app-first: a name put on from the web page is UNCONFIRMED until he taps
+// the link in his text (0118). That row is greyed, CALL NEXT goes past it, and so
+// does the you're-next text — the visible price of having no code.
 type Row = {
   id: string;
   starts_at: string;
@@ -63,7 +67,7 @@ function shortName(r: Row, barberId: string) {
 // he tapped on it are on the row itself — he is also the only one the barber can
 // give more time to.
 function rowSub(r: Row, guest?: GuestRow) {
-  if (guest && !guest.confirmed) return 'not confirmed yet';
+  if (guest && !guest.confirmed) return "hasn't tapped his text · call past him";
   if (!r.checked_in_at) return `${hhmm(r.starts_at)} booking`;
   if (!guest?.called_at || !guest.called_until) return `waiting ${minsFrom(r.checked_in_at)} min`;
   const asked = guest.coming_at ? ' · on the way' : guest.extended_at ? ' · asked for 5 min' : '';
@@ -151,6 +155,9 @@ export default function BarberQueueScreen({ barberId, onBack }: {
   const active = all.filter((r) => !r.completed_at);
   const inChair = active.find((r) => r.started_at);
   const waiting = active.filter((r) => !r.started_at);
+  // an unconfirmed web name keeps its place and is simply never next
+  const unconfirmed = (r: Row) => !!guests[r.id] && !guests[r.id].confirmed;
+  const callable = waiting.filter((r) => !unconfirmed(r));
   const lastTicket = pad(all.length);
   const nextNo = pad(all.length + 1);
   const takenNo = sent?.taken ? all.findIndex((r) => r.id === sent.taken!.booking_id) + 1 : 0;
@@ -223,9 +230,9 @@ export default function BarberQueueScreen({ barberId, onBack }: {
             style={({ pressed }) => [s.pauseBtn, pressed && s.pressed]}>
             <T w="b" size={12} c={D.sub} ls={0.6}>{open ? 'PAUSE QUEUE' : 'REOPEN QUEUE'}</T>
           </Pressable>
-          <Pressable disabled={!waiting.length} accessibilityRole="button"
-            onPress={() => waiting[0] && callNext(waiting[0])}
-            style={({ pressed }) => [s.callBtn, !waiting.length && s.off, pressed && s.pressed]}>
+          <Pressable disabled={!callable.length} accessibilityRole="button"
+            onPress={() => callable[0] && callNext(callable[0])}
+            style={({ pressed }) => [s.callBtn, !callable.length && s.off, pressed && s.pressed]}>
             <T w="b" size={12} c="#fff" ls={0.6}>CALL NEXT</T>
           </Pressable>
         </View>
@@ -250,14 +257,15 @@ export default function BarberQueueScreen({ barberId, onBack }: {
             <View style={s.chairChip}><T w="b" size={10} c={D.bg} ls={0.8}>IN CHAIR</T></View>
           </View>
         )}
-        {waiting.map((r, i) => {
+        {waiting.map((r) => {
           const misses = r.customer_id === barberId ? 0 : noShows[r.customer_id] ?? 0;
-          const first = i === 0;
+          const first = r === callable[0];
           const guest = guests[r.id];
+          const grey = unconfirmed(r);
           return (
             <Pressable key={r.id} disabled={!guest} onPress={() => setGuestOpen(r.id)}
               accessibilityRole={guest ? 'button' : undefined}
-              style={({ pressed }) => [s.row, pressed && s.pressed]}>
+              style={({ pressed }) => [s.row, grey && s.grey, pressed && s.pressed]}>
               <View style={[s.ticket, r.checked_in_at && { backgroundColor: D.accentSoft }]}>
                 <T w="b" size={12} c={r.checked_in_at ? D.accent : D.sub}>{pad(all.indexOf(r) + 1)}</T>
               </View>
@@ -306,8 +314,9 @@ export default function BarberQueueScreen({ barberId, onBack }: {
       {sent && <GhostBtn title="SEND TO SOMEONE ELSE" height={48} onPress={() => setShare(true)} />}
 
       <Note>
-        Call next pings the client in chat. A guest with no app sees it on his own page, and his
-        chair is held eight minutes — five more if he asks. Pausing hides the shop's QR from new walk-ins.
+        Call next pings an app client in chat. A guest from the web page is held eight minutes once
+        called. A greyed name never tapped his text — you may call past it. Pausing stops anyone new
+        taking a place.
       </Note>
 
       <ShareLinkSheet visible={share} barberId={barberId} onClose={() => setShare(false)}
@@ -331,6 +340,7 @@ const s = StyleSheet.create({
   grow: { flex: 1 },
   pressed: { opacity: 0.7 },
   off: { opacity: 0.4 },
+  grey: { opacity: 0.5 },
   tnum: { fontVariant: ['tabular-nums'] },
 
   // BTD-12

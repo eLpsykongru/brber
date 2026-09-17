@@ -17,7 +17,7 @@ import { SUPPORT_PHONE } from './src/screens/SupportScreens';
 type Account = { suspended: boolean; reason: string | null; since: string | null };
 import { onBannerAction, openLaunchResponse, registerPush } from './src/lib/push';
 import { useAndroidBack } from './src/lib/back';
-import { dropQueueLink, heldQueueLink, holdQueueLink, QueueLink } from './src/lib/queueLink';
+import { dropQueueLink, heldQueueLink, holdQueueLink, QueueLink, takeInstallLink } from './src/lib/queueLink';
 import { supabase } from './src/lib/supabase';
 import { SessionExpiredSheet, SetPasswordScreen } from './src/screens/AccountScreens';
 import AuthScreen, { AuthView } from './src/screens/AuthScreen';
@@ -62,13 +62,15 @@ export default function App() {
     return () => sub.remove();
   }, []);
 
-  // Option (b) — a shop's queue link opened the app. It is held, through a sign-in
-  // or a sign-up if need be, until Home opens the check-in on it (QL-16).
+  // A shop's queue link opened the app. It is held, through a sign-in or a sign-up
+  // if need be (QL-22), until Home opens the shop on it (QL-19). On Android a link
+  // can also arrive through the store, on the first open after an install (QL-21).
   const [queueLink, setQueueLink] = useState<QueueLink | null>(null);
   const [linkAuth, setLinkAuth] = useState(false);
   useEffect(() => {
     const take = (url: string | null) => holdQueueLink(url).then((l) => { if (l) setQueueLink(l); });
     heldQueueLink().then((l) => { if (l) setQueueLink((cur) => cur ?? l); });
+    takeInstallLink().then((l) => { if (l) setQueueLink((cur) => cur ?? l); });
     Linking.getInitialURL().then(take);
     const sub = Linking.addEventListener('url', ({ url }) => { take(url); });
     return () => sub.remove();
@@ -160,7 +162,7 @@ export default function App() {
 
   // every other root view is terminal (auth, onboarding, suspended, lock):
   // back there should leave the app, which is what returning null does. The
-  // sign-in opened from QL-16 backs out to it.
+  // sign-in opened from QL-22 backs out to it.
   useAndroidBack(recovering ? () => setRecovering(false)
     : linkAuth && !session ? () => setLinkAuth(false)
       : null);
@@ -176,7 +178,7 @@ export default function App() {
     content = <ActivityIndicator color={colors.text} />;
   } else if (!session || !user) {
     content = queueLink && !linkAuth
-      // QL-16 — signed out, with a shop's link in hand
+      // QL-22 — signed out, with a shop's link in hand
       ? <QueueLinkScreen link={queueLink} onSignIn={() => setLinkAuth(true)}
           onBrowser={() => openInBrowser(queueLink)} onDismiss={spendQueueLink} />
       : linkAuth

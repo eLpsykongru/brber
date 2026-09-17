@@ -34,11 +34,28 @@ export function parseShopCode(raw: string): ShopCode | null {
 }
 
 /**
- * A shop's landing link as the phone hands it to the app (option b): /q/<code>
- * or a pre-0110 poster's /q/<uuid>, on whatever https host serves the page. The
- * code, join and ticket pages under it are not landings — they stay in the browser.
+ * A shop's landing link as the phone hands it to the app: /q/<code>, a pre-0110
+ * poster's /q/<uuid>, or QL-18's store hand-off /q/<code>/app — on whatever https
+ * host serves the page. The form and ticket pages under it are not landings: they
+ * stay in the browser.
  */
 export function queueLanding(url: string): ShopCode | null {
-  const landing = /^https:\/\/[^/?#\s]+\/q\/[^/?#\s]+\/?(?:[?#]\S*)?$/i;
+  const landing = /^https:\/\/[^/?#\s]+\/q\/[^/?#\s]+(?:\/app)?\/?(?:[?#]\S*)?$/i;
   return landing.test(url.trim()) ? parseShopCode(url) : null;
+}
+
+/**
+ * QL-20 → QL-21 on Android: the shop the store was opened for, out of the Play
+ * install referrer web/src/handler.js writes (`sterncut_shop=LF7K2M&sterncut_barber=Y4SF`).
+ * Null for any other install — organic, an ad, a referrer somebody else wrote.
+ */
+export function referrerLanding(referrer: string | null | undefined): ShopCode | null {
+  let text = String(referrer ?? '');
+  try { text = decodeURIComponent(text); } catch { /* already plain */ }
+  const shop = text.match(/(?:^|&)sterncut_shop=([A-HJ-NP-Z2-9]{6})(?:&|$)/i);
+  if (!shop) return null;
+  const barber = text.match(/(?:^|&)sterncut_barber=([A-HJ-NP-Z2-9]{4})(?:&|$)/i);
+  return barber
+    ? { shop: shop[1].toUpperCase(), barber: barber[1].toUpperCase() }
+    : { shop: shop[1].toUpperCase() };
 }

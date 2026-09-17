@@ -603,8 +603,8 @@ export function WalkInPosterScreen({ salon, onBack }: { salon: ShopMeta; onBack:
       <div class="sheet">
         <div class="brand">Sterncut</div>
         <div class="rule"></div>
-        <h1>Skip<br>the wait</h1>
-        <div class="lede">Scan with your phone camera to take a ticket and watch the queue from your seat.</div>
+        <h1>See<br>the wait</h1>
+        <div class="lede">Scan to see today's line from where you're standing. Hold a place in the app — or just ask us to put your name on it.</div>
         <div class="qr">${qrSvg(url, Math.round(160 * k))}</div>
         ${code ? `<div class="code">${escapeHtml(code)}</div>` : ''}
         ${showWait ? '<div class="wait"><span class="dot"></span>Usually 20–40 min</div>' : ''}
@@ -615,8 +615,8 @@ export function WalkInPosterScreen({ salon, onBack }: { salon: ShopMeta; onBack:
             <div class="addr">${escapeHtml(salon.address ?? '')} · ${hours}</div>
           </div>
           <div style="text-align:right">
-            <div class="rtl">امسح للانضمام</div>
-            <div class="addr">Scannez pour patienter</div>
+            <div class="rtl">امسح لرؤية الانتظار</div>
+            <div class="addr">Scannez pour voir l'attente</div>
           </div>
         </div>
       </div></body></html>`;
@@ -644,17 +644,19 @@ export function WalkInPosterScreen({ salon, onBack }: { salon: ShopMeta; onBack:
   return (
     <Screen gap={13}>
       <TopBar title="Walk-in poster" onBack={onBack} plain right="send"
-        onRight={() => Share.share({ message: `Join the queue at ${salon.name}: ${url}` })} />
+        onRight={() => Share.share({ message: `See the wait at ${salon.name}: ${url}` })} />
 
+      {/* OSH-05 under ADDENDUM-app-first: the page is read-only, so the poster
+          promises what it does — see the wait — and never a join. */}
       <T size={13} c={D.sub} style={s.lede}>
-        Stick it by the mirror. Scanning puts them in your live queue with a ticket — no account needed.
+        Stick it by the mirror. Scanning shows today's line, read-only — they hold a place in the app, or you add them by name.
       </T>
 
       <View style={s.poster}>
         <T style={s.posterBrand}>STERNCUT</T>
         <View style={{ alignItems: 'center' }}>
-          <T style={s.posterTitle}>SKIP THE WAIT</T>
-          <T size={11} style={s.posterSub}>Scan to join the queue</T>
+          <T style={s.posterTitle}>SEE THE WAIT</T>
+          <T size={11} style={s.posterSub}>Scan · get the app to hold a place</T>
         </View>
         <View style={s.qrBox}><SvgXml xml={svg} width={104} height={104} /></View>
         {!!code && <T w="b" size={13} c="#111" ls={3} style={s.tnum}>{code}</T>}
@@ -858,8 +860,8 @@ export function WallDisplayScreen({ salon, team, onBack }: {
 
         <View style={[s.ticketCard, { padding: f(22), gap: f(14) }]}>
           <View style={{ alignItems: 'center' }}>
-            <T style={[s.ticketTitle, { fontSize: f(24) }]}>TAKE A TICKET</T>
-            <T size={f(14)} style={s.ticketSub}>Scan · no app account needed</T>
+            <T style={[s.ticketTitle, { fontSize: f(24) }]}>SEE THE WAIT</T>
+            <T size={f(14)} style={s.ticketSub}>Scan · hold a place in the app</T>
           </View>
           <View style={[s.ticketQr, { width: f(158), height: f(158), padding: f(11) }]}>
             <SvgXml xml={qrSvg(queueUrl(salon.short_code ?? salon.id), f(136))} width={f(136)} height={f(136)} />

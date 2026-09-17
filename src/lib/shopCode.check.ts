@@ -5,7 +5,7 @@
 // A code that parses wrong sends a walk-in to the wrong shop, or tells him a
 // real poster "is not one of ours" — and nothing else in the app would notice.
 
-import { isUuid, parseShopCode, queueLanding } from './shopCode';
+import { isUuid, parseShopCode, queueLanding, referrerLanding } from './shopCode';
 
 let failures = 0;
 function eq(label: string, actual: unknown, expected: unknown) {
@@ -26,7 +26,7 @@ eq('typed with a space', parseShopCode('LF7 K2M'), { shop: 'LF7K2M' });
 eq('typed with a dash', parseShopCode(' lf7-k2m '), { shop: 'LF7K2M' });
 eq('a link ending a sentence', parseShopCode('Take a place here: sterncut.ma/q/LF7K2M.'), { shop: 'LF7K2M' });
 eq('the whole WhatsApp message',
-  parseShopCode("Youssef at Le Fade Tanger. 3 waiting, about 40 min. Take a place in today's line here — no app needed: sterncut.ma/q/LF7K2M?b=Y4SF"),
+  parseShopCode('Sterncut: Le Fade Tanger, 3 ahead, about 40 min. Take your place with Youssef: sterncut.ma/q/LF7K2M?b=Y4SF'),
   { shop: 'LF7K2M', barber: 'Y4SF' });
 eq('served from another host', parseShopCode('https://sterncut-q.pages.dev/q/LF7K2M'), { shop: 'LF7K2M' });
 eq('a poster printed before 0110', parseShopCode(`https://sterncut.ma/q/${SALON}`), { shop: SALON });
@@ -45,9 +45,22 @@ eq('a barber link opens the app', queueLanding('https://sterncut.ma/q/LF7K2M?b=Y
 eq('the poster opens the app', queueLanding('https://sterncut-q.pages.dev/q/LF7K2M'), { shop: 'LF7K2M' });
 eq('an old poster opens the app', queueLanding(`https://sterncut.ma/q/${SALON}`), { shop: SALON });
 eq('a web ticket is not a landing', queueLanding('https://sterncut.ma/q/LF7K2M/t/0123456789ab'), null);
-eq('the join step is not a landing', queueLanding(`https://sterncut.ma/q/LF7K2M/join?b=Y4SF&s=${SALON}`), null);
+eq("QL-23's form is not a landing", queueLanding('https://sterncut.ma/q/LF7K2M/name?b=Y4SF'), null);
+eq('the tap in the text is not a landing', queueLanding('https://sterncut.ma/c/0123456789ab'), null);
+eq('the store hand-off opens the app when it is there',
+  queueLanding('https://sterncut.ma/q/LF7K2M/app?b=Y4SF'), { shop: 'LF7K2M', barber: 'Y4SF' });
 eq('the sign-in return is not a landing', queueLanding('sterncut://auth#access_token=x'), null);
 eq('a code typed by hand is not a link', queueLanding('LF7K2M'), null);
+
+// QL-20 → QL-21: the Play install referrer the page writes
+eq('the referrer carries the shop and the chair',
+  referrerLanding('sterncut_shop=LF7K2M&sterncut_barber=Y4SF'), { shop: 'LF7K2M', barber: 'Y4SF' });
+eq('…still url-encoded',
+  referrerLanding('sterncut_shop%3DLF7K2M%26sterncut_barber%3DY4SF'), { shop: 'LF7K2M', barber: 'Y4SF' });
+eq('…the shop alone, off the poster', referrerLanding('sterncut_shop=lf7k2m'), { shop: 'LF7K2M' });
+eq("an organic install is nobody's link", referrerLanding('utm_source=google-play&utm_medium=organic'), null);
+eq('a bad code is ignored', referrerLanding('sterncut_shop=LF0K2M'), null);
+eq('no referrer at all', referrerLanding(null), null);
 
 if (failures) throw new Error(`shopCode: ${failures} check${failures === 1 ? '' : 's'} failed`);
 console.log('shopCode: all checks pass');

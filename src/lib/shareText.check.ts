@@ -20,23 +20,24 @@ const URL = 'https://sterncut.ma/q/LF7K2M?b=Y4SF';
 const youssef = { name: 'Youssef E.', waiting: 3, waitMin: 40 };
 
 const chair = shareMessage({ shop: 'Le Fade Tanger', url: URL, chair: youssef });
-eq('BTD-11, his chair', chair,
-  "Youssef at Le Fade Tanger. 3 waiting, about 40 min. Take a place in today's line here - no app needed: https://sterncut.ma/q/LF7K2M?b=Y4SF");
-eq('…is one send', smsLength(chair), { chars: 138, limit: 160, sends: 1 });
-eq('the design\'s em dash would make it three',
-  smsLength(chair.replace(' - ', ' — ')).sends, 3);
+eq('BTD-11, his chair — the wait first, the link second (qlink)', chair,
+  'Sterncut: Le Fade Tanger, 3 ahead, about 40 min. Take your place with Youssef: https://sterncut.ma/q/LF7K2M?b=Y4SF');
+eq('…is one send', smsLength(chair), { chars: 114, limit: 160, sends: 1 });
+eq('the design\'s "~" would cost an extra place', smsLength(chair.replace('about ', '~')).chars, 110);
 eq('the whole shop names whoever is soonest',
   shareMessage({ shop: 'Le Fade Tanger', url: 'https://sterncut.ma/q/LF7K2M', soonest: { name: 'Hamza B.', waiting: 0, waitMin: 5 } }),
-  "Le Fade Tanger. Hamza is free in about 5 min. Take a place in today's line here - no app needed: https://sterncut.ma/q/LF7K2M");
+  'Sterncut: Le Fade Tanger, Hamza is free in about 5 min. Take your place: https://sterncut.ma/q/LF7K2M');
 eq('a shop with nobody taking still gets the link',
   shareMessage({ shop: 'Le Fade Tanger', url: 'https://sterncut.ma/q/LF7K2M' }),
-  "Le Fade Tanger. Take a place in today's line here - no app needed: https://sterncut.ma/q/LF7K2M");
+  'Sterncut: Le Fade Tanger. See the wait: https://sterncut.ma/q/LF7K2M');
+eq('A2 · "no app needed" is false now and is never sent', /no app/i.test(chair), false);
 
-// 0111's code text and 0113's next text, as queued
-eq('the code text is one send',
-  smsLength("Sterncut : votre code est 4417. Valable 5 min. Si vous n'avez rien demandé, ignorez ce message.").sends, 1);
-const curly = smsLength('Sterncut : votre code est 4417. Valable 5 min. Si vous n’avez rien demandé, ignorez ce message.');
-eq('…and with the curly apostrophe it was two', [curly.limit, curly.sends], [70, 2]);
+// 0118's confirm text and 0113's next text, as queued
+eq('the confirm text is one send',
+  smsLength('Sterncut: Ticket 07 at Le Fade Tanger with Youssef, about 40 min. Confirm with one tap: https://sterncut.ma/c/0123456789ab'),
+  { chars: 122, limit: 160, sends: 1 });
+eq('…and Messages Out\'s "Nº" would make it two',
+  smsLength('Sterncut: Nº 07 at Le Fade Tanger with Youssef, about 40 min. Confirm with one tap: https://sterncut.ma/c/0123456789ab').sends, 2);
 eq('the you\'re-next text is one send',
   smsLength("You're next at Le Fade Tanger. Youssef is finishing up - come to the chair now. 14 Rue de la Kasbah. Ticket 07.").sends, 1);
 eq('a brace takes two places', smsLength('{}'), { chars: 4, limit: 160, sends: 1 });

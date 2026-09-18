@@ -3,6 +3,7 @@ import { Alert, StyleSheet, View } from 'react-native';
 import { Eyebrow, Screen, Segmented, Serif, Stat, T, TAB_INSET, TopBar } from '../components/dark';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
+import { loc, tr, trn } from '../lib/i18n';
 
 // 1i — Earnings. Booked value, not cash in hand: the money is still paid at the shop.
 type Period = 'day' | 'week' | 'month';
@@ -18,14 +19,14 @@ type Row = {
 const dh0 = (cents: number) => `${Math.round(cents / 100)} DH`;
 const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
 const hhmm = (iso: string) => new Date(iso).toTimeString().slice(0, 5);
-const shortDate = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+const shortDate = (d: Date) => d.toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' });
 const grouped = (cents: number) =>
   (cents / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 
 const PERIODS: { key: Period; label: string; days: number }[] = [
-  { key: 'day', label: 'Day', days: 1 },
-  { key: 'week', label: 'Week', days: 7 },
-  { key: 'month', label: 'Month', days: 30 },
+  { key: 'day', label: tr('Day'), days: 1 },
+  { key: 'week', label: tr('Week'), days: 7 },
+  { key: 'month', label: tr('Month'), days: 30 },
 ];
 
 export default function EarningsScreen({ barberId, onBack }: { barberId: string; onBack: () => void }) {
@@ -40,7 +41,7 @@ export default function EarningsScreen({ barberId, onBack }: { barberId: string;
       .eq('barber_id', barberId).eq('status', 'confirmed')
       .gte('starts_at', from.toISOString()).lt('starts_at', to.toISOString())
       .order('starts_at');
-    if (error) Alert.alert('Could not load earnings', error.message);
+    if (error) Alert.alert(tr('Could not load earnings'), error.message);
     else setRows(data as unknown as Row[]);
   }, [barberId]);
 
@@ -67,22 +68,22 @@ export default function EarningsScreen({ barberId, onBack }: { barberId: string;
   // by-service breakdown
   const svc = new Map<string, { count: number; sum: number }>();
   for (const r of inPeriod) {
-    const name = r.services?.name ?? 'Service';
+    const name = r.services?.name ?? tr('Service');
     const e = svc.get(name) ?? { count: 0, sum: 0 };
     e.count++; e.sum += r.price_cents; svc.set(name, e);
   }
   const byService = [...svc.entries()].sort((a, b) => b[1].sum - a[1].sum);
 
   const rangeLabel = period === 'day'
-    ? `TODAY, ${shortDate(new Date())}`
+    ? tr('TODAY, {date}', { date: shortDate(new Date()) })
     : `${shortDate(start)} – ${shortDate(new Date())}`;
   const dayRows = [...inPeriod].sort((a, b) => a.starts_at.localeCompare(b.starts_at));
   const nameOf = (r: Row) =>
-    r.walk_in_name ?? (r.customer_id === barberId ? 'Walk-in' : r.customer?.full_name ?? 'Client');
+    r.walk_in_name ?? (r.customer_id === barberId ? tr('Walk-in') : r.customer?.full_name ?? tr('Client'));
 
   return (
     <Screen gap={14} bottom={TAB_INSET}>
-      <TopBar title="Earnings" onBack={onBack} backIcon="chevron-left" plain />
+      <TopBar title={tr('Earnings')} onBack={onBack} backIcon="chevron-left" plain />
 
       <Segmented track={D.card} height={38} active={period}
         items={PERIODS.map((p) => ({ key: p.key, label: p.label }))}
@@ -90,16 +91,15 @@ export default function EarningsScreen({ barberId, onBack }: { barberId: string;
 
       <View>
         <Eyebrow ls={1.6}>{rangeLabel.toUpperCase()}</Eyebrow>
-        <Serif size={42} ls={0} style={s.hero}>{grouped(total)} DH</Serif>
+        <Serif size={42} ls={0} style={s.hero}>{tr('{total} DH', { total: grouped(total) })}</Serif>
         <T size={12} c={D.sub} style={{ marginTop: 6 }}>
-          booked value · {clients} client{clients === 1 ? '' : 's'}
-          {period !== 'day' ? ` · ${dh0(avgPerDay)}/day avg` : ''}
+          {trn(clients, 'booked value · {n} client{x2}', 'booked value · {n} clients{x2}', { x2: period !== 'day' ? tr(' · {avgPerDay}/day avg', { avgPerDay: dh0(avgPerDay) }) : '' })}
         </T>
       </View>
 
       {period !== 'day' && (
         <View style={s.chartCard}>
-          <View style={s.chart} accessible accessibilityLabel={`${meta.label} earnings by day`}>
+          <View style={s.chart} accessible accessibilityLabel={tr('{label} earnings by day', { label: meta.label })}>
             {buckets.map((v, i) => (
               <View key={i} style={[s.bar, {
                 height: Math.max(3, Math.round((v / barMax) * 90)),
@@ -109,31 +109,31 @@ export default function EarningsScreen({ barberId, onBack }: { barberId: string;
           </View>
           <View style={s.axis}>
             <T size={10} c={D.sub}>{shortDate(start)}</T>
-            <T size={10} c={D.sub}>Today</T>
+            <T size={10} c={D.sub}>{tr('Today')}</T>
           </View>
         </View>
       )}
 
       <View style={s.tileRow}>
-        <Stat radius={18} label="CLIENTS" value={String(clients)} />
-        <Stat radius={18} label="WALK-INS" value={String(walkIns)} />
-        <Stat radius={18} label={period === 'day' ? 'AVG/CLIENT' : 'AVG/DAY'} unit="DH"
+        <Stat radius={18} label={tr('CLIENTS')} value={String(clients)} />
+        <Stat radius={18} label={tr('WALK-INS')} value={String(walkIns)} />
+        <Stat radius={18} label={period === 'day' ? tr('AVG/CLIENT') : tr('AVG/DAY')} unit={tr('DH')}
           value={String(period === 'day'
             ? (clients ? Math.round(total / clients / 100) : 0)
             : Math.round(avgPerDay / 100))} />
       </View>
 
-      <T w="b" size={15} style={{ marginTop: 2 }}>{period === 'day' ? "Today's bookings" : 'By service'}</T>
+      <T w="b" size={15} style={{ marginTop: 2 }}>{period === 'day' ? tr('Today\'s bookings') : tr('By service')}</T>
       <View style={{ gap: 9 }}>
         {period === 'day' ? (
           <>
-            {dayRows.length === 0 && <T size={12} c={D.sub}>Nothing booked today.</T>}
+            {dayRows.length === 0 && <T size={12} c={D.sub}>{tr('Nothing booked today.')}</T>}
             {dayRows.map((r, i) => (
               <View key={i} style={s.listRow}>
                 <T w="b" size={12} c={D.accent} style={[s.tnum, { width: 42 }]}>{hhmm(r.starts_at)}</T>
                 <View style={s.grow}>
                   <T w="b" size={14}>{nameOf(r)}</T>
-                  <T size={11} c={D.sub} style={{ marginTop: 2 }}>{r.services?.name ?? 'Service'}</T>
+                  <T size={11} c={D.sub} style={{ marginTop: 2 }}>{r.services?.name ?? tr('Service')}</T>
                 </View>
                 <T w="b" size={14} style={s.tnum}>{dh0(r.price_cents)}</T>
               </View>
@@ -141,13 +141,13 @@ export default function EarningsScreen({ barberId, onBack }: { barberId: string;
           </>
         ) : (
           <>
-            {byService.length === 0 && <T size={12} c={D.sub}>No earnings in this period.</T>}
+            {byService.length === 0 && <T size={12} c={D.sub}>{tr('No earnings in this period.')}</T>}
             {byService.map(([name, e]) => (
               <View key={name} style={s.listRow}>
                 <View style={s.grow}>
                   <T w="b" size={14}>{name}</T>
                   <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-                    {e.count} booking{e.count === 1 ? '' : 's'}
+                    {trn(e.count, '{n} booking', '{n} bookings')}
                   </T>
                 </View>
                 <T w="b" size={14} style={s.tnum}>{dh0(e.sum)}</T>

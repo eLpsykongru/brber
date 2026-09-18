@@ -2,9 +2,12 @@
 // BDY-14 (a reschedule ask and what it does to the day), BNT-05 (what "silent
 // while cutting" held back) and NTF-10 (what never reached a phone with push off).
 //
-// Pure, so `inboxRules.check.ts` runs them under node. Each one decides what a
+// Pure, so `inboxRules.check.ts` runs them under node (in English: tr() is a
+// pass-through until a language is set). Each one decides what a
 // screen tells someone about their own day or their own money, which is exactly
 // the kind of branch that starts lying quietly.
+
+import { tr, trn, lang } from './i18n';
 
 const MIN = 60_000;
 const HOUR = 60 * MIN;
@@ -14,25 +17,28 @@ const HOUR = 60 * MIN;
 /** "80 minutes", "1 h 45", "3 h", "2 days" — the units the design reads out. */
 export function spanLabel(ms: number): string {
   const min = Math.max(0, Math.round(ms / MIN));
-  if (min < 90) return `${min} minute${min === 1 ? '' : 's'}`;
+  if (min < 90) return trn(min, '{n} minute', '{n} minutes');
   const h = Math.floor(min / 60);
   const m = min % 60;
-  if (h < 24) return m ? `${h} h ${String(m).padStart(2, '0')}` : `${h} h`;
+  if (h < 24) return m ? tr('{h} h {m}', { h, m: String(m).padStart(2, '0') }) : tr('{h} h', { h });
   const d = Math.round(h / 24);
-  return `${d} day${d === 1 ? '' : 's'}`;
+  return trn(d, '{n} day', '{n} days');
 }
 
 export function agoLabel(ms: number): string {
-  return ms < MIN ? 'just now' : `${spanLabel(ms)} ago`;
+  return ms < MIN ? tr('just now') : tr('{span} ago', { span: spanLabel(ms) });
 }
 
 const WORDS = ['No', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
-/** A count said in a sentence: "Three" up to ten, digits after. */
+/** A count said in a sentence: "Three" up to ten, digits after. French and Arabic write the digits. */
 export function countWord(n: number): string {
+  if (lang() !== 'en') return n === 0 ? tr('No') : String(n);
   return WORDS[n] ?? String(n);
 }
 
 export function ordinal(n: number): string {
+  if (lang() === 'fr') return n === 1 ? '1re' : `${n}e`;
+  if (lang() === 'ar') return String(n);
   const teen = n % 100 >= 11 && n % 100 <= 13;
   const suffix = teen ? 'th' : n % 10 === 1 ? 'st' : n % 10 === 2 ? 'nd' : n % 10 === 3 ? 'rd' : 'th';
   return `${n}${suffix}`;

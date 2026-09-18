@@ -4,6 +4,7 @@ import { daySlots, type Block, type Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
 import { dark as D, inter } from '../theme';
 import { Btn, Eyebrow, Ico, Segmented, Sheet, SheetHead, T } from './dark';
+import { tr } from '../lib/i18n';
 
 // 1c — Quick add (tab-bar +). A walk-in is added straight from here; "Appointment"
 // and "Pick…" hand off to the day timeline, which owns arbitrary slot placement.
@@ -89,19 +90,19 @@ export default function QuickAddSheet({ visible, barberId, onClose, onPick }: {
     setBusy(false);
     if (error) {
       const msg = error.message.includes('no_double_booking')
-        ? 'That time overlaps another booking.' : error.message;
-      return Alert.alert('Could not add', msg);
+        ? tr('That time overlaps another booking.') : error.message;
+      return Alert.alert(tr('Could not add'), msg);
     }
     onPick({ mode: 'now' }); // parent closes the sheet and reloads the day
   }
 
   return (
     <Sheet visible={visible} onClose={onClose}>
-      <SheetHead title="Quick add" onClose={onClose} left />
+      <SheetHead title={tr('Quick add')} onClose={onClose} left />
 
       <Segmented
-        items={[{ key: 'walkin', label: 'Walk-in', icon: 'user' },
-          { key: 'appt', label: 'Appointment', icon: 'calendar' }]}
+        items={[{ key: 'walkin', label: tr('Walk-in'), icon: 'user' },
+          { key: 'appt', label: tr('Appointment'), icon: 'calendar' }]}
         active={mode}
         onChange={(k) => {
           if (k === 'appt') return onPick({ mode: 'schedule' });
@@ -109,7 +110,7 @@ export default function QuickAddSheet({ visible, barberId, onClose, onPick }: {
         }} />
 
       <View style={{ gap: 8 }}>
-        <Eyebrow ls={1.4}>STARTS AT</Eyebrow>
+        <Eyebrow ls={1.4}>{tr('STARTS AT')}</Eyebrow>
         <View style={s.chipRow}>
           {slots.slice(0, 2).map((t, i) => {
             const on = at?.getTime() === t.getTime();
@@ -118,48 +119,48 @@ export default function QuickAddSheet({ visible, barberId, onClose, onPick }: {
                 accessibilityState={{ selected: on }}
                 style={({ pressed }) => [s.slotChip, on && s.slotChipOn, pressed && s.pressed]}>
                 <T w={on ? 'b' : 'sb'} size={13} c={on ? '#fff' : D.sub}>
-                  {i === 0 ? `Now · ${hhmm(t)}` : hhmm(t)}
+                  {i === 0 ? tr('Now · {t}', { t: hhmm(t) }) : hhmm(t)}
                 </T>
               </Pressable>
             );
           })}
           <Pressable onPress={() => onPick({ mode: 'schedule', name: name.trim() || undefined })}
-            accessibilityRole="button" accessibilityLabel="Pick a time on the timeline"
+            accessibilityRole="button" accessibilityLabel={tr('Pick a time on the timeline')}
             style={({ pressed }) => [s.slotChip, pressed && s.pressed]}>
-            <T w="sb" size={13} c={D.sub}>Pick…</T>
+            <T w="sb" size={13} c={D.sub}>{tr('Pick…')}</T>
           </Pressable>
         </View>
       </View>
 
       <View style={{ gap: 8 }}>
-        <Eyebrow ls={1.4}>CLIENT NAME</Eyebrow>
+        <Eyebrow ls={1.4}>{tr('CLIENT NAME')}</Eyebrow>
         <View style={s.nameField}>
           <Ico name="user" size={16} color={D.sub} />
           <TextInput value={name} onChangeText={setName} style={s.nameInput}
-            placeholder="Optional — shows as Walk-in" placeholderTextColor={D.sub}
-            accessibilityLabel="Client name" />
+            placeholder={tr('Optional — shows as Walk-in')} placeholderTextColor={D.sub}
+            accessibilityLabel={tr('Client name')} />
         </View>
       </View>
 
       <View style={{ gap: 8 }}>
-        <Eyebrow ls={1.4}>HIS NUMBER · OPTIONAL</Eyebrow>
+        <Eyebrow ls={1.4}>{tr('HIS NUMBER · OPTIONAL')}</Eyebrow>
         <View style={s.nameField}>
           <Ico name="phone" size={16} color={D.sub} />
           <TextInput value={phone} onChangeText={setPhone} style={s.nameInput}
-            placeholder="Leave empty — you'll call his name" placeholderTextColor={D.faint}
+            placeholder={tr('Leave empty — you\'ll call his name')} placeholderTextColor={D.faint}
             keyboardType="phone-pad" autoComplete="tel" textContentType="telephoneNumber"
-            accessibilityLabel="His number, optional" />
+            accessibilityLabel={tr('His number, optional')} />
         </View>
         <T size={11} c={D.faint} style={{ lineHeight: 16 }}>
-          If you type it he gets one text when he's next — nothing else, and no app needed.
+          {tr('If you type it he gets one text when he\'s next — nothing else, and no app needed.')}
         </T>
       </View>
 
       <View style={{ gap: 9 }}>
-        <Eyebrow ls={1.4}>SERVICE · TAP TO PICK</Eyebrow>
-        {services === null && <ActivityIndicator color={D.accent} accessibilityLabel="Loading services" />}
+        <Eyebrow ls={1.4}>{tr('SERVICE · TAP TO PICK')}</Eyebrow>
+        {services === null && <ActivityIndicator color={D.accent} accessibilityLabel={tr('Loading services')} />}
         {services?.length === 0 && (
-          <T size={12} c={D.sub}>No active services — add one in My services first.</T>
+          <T size={12} c={D.sub}>{tr('No active services — add one in My services first.')}</T>
         )}
         {services?.map((svc) => {
           const on = svc.id === pickedId;
@@ -170,7 +171,7 @@ export default function QuickAddSheet({ visible, barberId, onClose, onPick }: {
               <View style={s.grow}>
                 <T w="b" size={14}>{svc.name}</T>
                 <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-                  {svc.duration_min} min{svc.id === usualId ? ' · usual for this client' : ''}
+                  {tr('{duration_min} min{x}', { duration_min: svc.duration_min, x: svc.id === usualId ? tr(' · usual for this client') : '' })}
                 </T>
               </View>
               <T w="eb" size={15} style={s.tnum}>{dh(svc.price_cents)}</T>
@@ -179,7 +180,7 @@ export default function QuickAddSheet({ visible, barberId, onClose, onPick }: {
         })}
       </View>
 
-      <Btn title={picked && at ? `ADD TO THE CHAIR · ${dh(picked.price_cents)}` : 'NO FREE SLOT TODAY'}
+      <Btn title={picked && at ? tr('ADD TO THE CHAIR · {price_cents}', { price_cents: dh(picked.price_cents) }) : tr('NO FREE SLOT TODAY')}
         height={52} onPress={add}
         style={!picked || !at || busy ? { opacity: 0.5 } : undefined} />
     </Sheet>

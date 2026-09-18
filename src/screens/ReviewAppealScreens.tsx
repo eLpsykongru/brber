@@ -6,6 +6,7 @@ import {
 import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, shadow, shadowLg, TOP_INSET } from '../theme';
+import { loc, tr } from '../lib/i18n';
 
 // Customer turn 31 of "Customer App 3.dc.html" — what Anas gets after ops clicks
 // REMOVE & NOTIFY BOTH in the admin desk (0042), the one appeal he is allowed
@@ -31,23 +32,23 @@ export type RemovedReview = {
 };
 
 const REASON_TEXT: Record<string, string> = {
-  no_visit: 'We could not find a visit behind this review.',
-  abusive: 'The language broke our review rules.',
-  personal_details: 'It named someone or carried contact details.',
-  off_service: "The complaint was about something outside the barber's control.",
-  spam: 'It read as advertising rather than a review.',
-  duplicate: 'The same visit was already reviewed.',
+  no_visit: tr('We could not find a visit behind this review.'),
+  abusive: tr('The language broke our review rules.'),
+  personal_details: tr('It named someone or carried contact details.'),
+  off_service: tr('The complaint was about something outside the barber\'s control.'),
+  spam: tr('It read as advertising rather than a review.'),
+  duplicate: tr('The same visit was already reviewed.'),
 };
 
 const APPEAL_REASONS = [
-  { key: 'log_wrong', label: 'I was on time — the log is wrong' },
-  { key: 'not_only', label: "My review wasn't only about that" },
-  { key: 'other', label: 'Something else is missing' },
+  { key: 'log_wrong', label: tr('I was on time — the log is wrong') },
+  { key: 'not_only', label: tr('My review wasn\'t only about that') },
+  { key: 'other', label: tr('Something else is missing') },
 ];
 
 const hhmm = (iso: string) => new Date(iso).toTimeString().slice(0, 5);
 const day = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  new Date(iso).toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' });
 
 export function useRemovedReviews() {
   const [rows, setRows] = useState<RemovedReview[] | null>(null);
@@ -71,7 +72,7 @@ function Head({ label, onBack }: { label: string; onBack: () => void }) {
   return (
     <View style={s.header}>
       <Pressable onPress={onBack} hitSlop={8}
-        style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel="Go back">
+        style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel={tr('Go back')}>
         <Ionicons name="arrow-back" size={16} color={colors.text} />
       </Pressable>
       <Text style={s.headEyebrow}>{label}</Text>
@@ -99,13 +100,12 @@ function Notice({ item, onBack, onAppeal }: {
   return (
     <View style={s.screen}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        <Head label="YOUR REVIEW" onBack={onBack} />
+        <Head label={tr('YOUR REVIEW')} onBack={onBack} />
 
         <View>
-          <Display size={27} style={s.title}>Your review{'\n'}was taken down</Display>
+          <Display size={27} style={s.title}>{tr('Your review\nwas taken down')}</Display>
           <Text style={s.sub}>
-            Reviewed by our team{item.moderated_at ? ` on ${day(item.moderated_at)}` : ''} ·
-            you can appeal once.
+            {tr('Reviewed by our team{x} · you can appeal once.', { x: item.moderated_at ? tr(' on {moderated_at}', { moderated_at: day(item.moderated_at) }) : '' })}
           </Text>
         </View>
 
@@ -113,25 +113,25 @@ function Notice({ item, onBack, onAppeal }: {
           <View style={s.rowMid}>
             <Stars n={item.rating} />
             <Text style={s.cardMeta}>{item.barber} · {day(item.created_at)}</Text>
-            <View style={s.tag}><Text style={s.tagText}>HIDDEN</Text></View>
+            <View style={s.tag}><Text style={s.tagText}>{tr('HIDDEN')}</Text></View>
           </View>
           <Text style={s.struck}>
-            {item.comment ? `"${item.comment}"` : 'A rating with no words.'}
+            {item.comment ? `"${item.comment}"` : tr('A rating with no words.')}
           </Text>
         </View>
 
         <View style={s.inkCard}>
-          <Text style={s.inkEyebrow}>WHY</Text>
+          <Text style={s.inkEyebrow}>{tr('WHY')}</Text>
           <Text style={s.inkBody}>
-            {item.note ?? REASON_TEXT[item.removal_reason ?? ''] ?? 'It broke our review policy.'}
+            {item.note ?? REASON_TEXT[item.removal_reason ?? ''] ?? tr('It broke our review policy.')}
           </Text>
           {!!v && (
             <View style={s.logRow}>
-              <LogTile label="YOUR SLOT" value={hhmm(v.starts_at)} />
+              <LogTile label={tr('YOUR SLOT')} value={hhmm(v.starts_at)} />
               {!!v.checked_in_at && (
-                <LogTile label="YOU SCANNED IN" value={hhmm(v.checked_in_at)} warm />
+                <LogTile label={tr('YOU SCANNED IN')} value={hhmm(v.checked_in_at)} warm />
               )}
-              {!!v.started_at && <LogTile label="IN THE CHAIR" value={hhmm(v.started_at)} />}
+              {!!v.started_at && <LogTile label={tr('IN THE CHAIR')} value={hhmm(v.started_at)} />}
             </View>
           )}
         </View>
@@ -141,25 +141,24 @@ function Notice({ item, onBack, onAppeal }: {
             <Ionicons name="checkmark" size={14} color="#16A34A" />
           </View>
           <View style={s.grow}>
-            <Text style={s.calmTitle}>Nothing else changed</Text>
+            <Text style={s.calmTitle}>{tr('Nothing else changed')}</Text>
             <Text style={s.calmBody}>
-              Your account is fine and you can still book {item.barber.split(' ')[0]} or anyone else.
+              {tr('Your account is fine and you can still book {barber} or anyone else.', { barber: item.barber.split(' ')[0] })}
             </Text>
           </View>
         </View>
 
         <View style={s.actions}>
-          <Pressable onPress={() => Alert.alert('Review rules',
-            'Reviews are about the service you received. We take one down only for a policy '
-            + 'reason, and we tell you which one.')}
+          <Pressable onPress={() => Alert.alert(tr('Review rules'),
+            tr('Reviews are about the service you received. We take one down only for a policy reason, and we tell you which one.'))}
             style={({ pressed }) => [s.ghost, pressed && s.pressed]}>
-            <Text style={s.ghostText}>READ THE RULES</Text>
+            <Text style={s.ghostText}>{tr('READ THE RULES')}</Text>
           </Pressable>
           <Pressable onPress={onAppeal} style={({ pressed }) => [s.dark, pressed && s.pressed]}>
-            <Text style={s.darkText}>APPEAL THIS</Text>
+            <Text style={s.darkText}>{tr('APPEAL THIS')}</Text>
           </Pressable>
         </View>
-        <Text style={s.foot}>One appeal per review · read by a different reviewer</Text>
+        <Text style={s.foot}>{tr('One appeal per review · read by a different reviewer')}</Text>
       </ScrollView>
     </View>
   );
@@ -183,13 +182,13 @@ export function AppealScreen({ item, onBack, onSent }: {
   const [busy, setBusy] = useState(false);
 
   async function send() {
-    if (!reason) return Alert.alert('Pick one', 'Tell us what we are missing.');
+    if (!reason) return Alert.alert(tr('Pick one'), tr('Tell us what we are missing.'));
     setBusy(true);
     const { error } = await supabase.rpc('appeal_review', {
       p_review: item.id, p_reason: reason, p_note: note.trim() || null,
     });
     setBusy(false);
-    if (error) return Alert.alert('Could not send the appeal', error.message);
+    if (error) return Alert.alert(tr('Could not send the appeal'), error.message);
     onSent();
   }
 
@@ -198,14 +197,14 @@ export function AppealScreen({ item, onBack, onSent }: {
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.header}>
           <Pressable onPress={onBack} hitSlop={8}
-            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel="Go back">
+            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel={tr('Go back')}>
             <Ionicons name="arrow-back" size={16} color={colors.text} />
           </Pressable>
-          <Display size={18} style={s.headerTitle}>Appeal</Display>
+          <Display size={18} style={s.headerTitle}>{tr('Appeal')}</Display>
           <View style={s.puckGhost} />
         </View>
 
-        <Text style={s.eyebrow}>WHAT ARE WE MISSING?</Text>
+        <Text style={s.eyebrow}>{tr('WHAT ARE WE MISSING?')}</Text>
         <View style={s.optionList}>
           {APPEAL_REASONS.map((r) => {
             const on = reason === r.key;
@@ -222,17 +221,16 @@ export function AppealScreen({ item, onBack, onSent }: {
           })}
         </View>
 
-        <Text style={s.eyebrow}>IN YOUR WORDS</Text>
+        <Text style={s.eyebrow}>{tr('IN YOUR WORDS')}</Text>
         <TextInput style={s.detail} multiline value={note} onChangeText={setNote}
-          placeholder="What happened, in your words" placeholderTextColor={colors.textTertiary} />
+          placeholder={tr('What happened, in your words')} placeholderTextColor={colors.textTertiary} />
         <Text style={s.hint}>
-          {item.visit ? 'Booking and check-in log attached' : 'Your review is attached'} ·
-          answered within 3 days
+          {tr('{x} · answered within 3 days', { x: item.visit ? tr('Booking and check-in log attached') : tr('Your review is attached') })}
         </Text>
 
         <Pressable onPress={send} disabled={busy}
           style={({ pressed }) => [s.dark, s.wide, (pressed || busy) && s.pressed]}>
-          <Text style={s.darkText}>SEND MY APPEAL</Text>
+          <Text style={s.darkText}>{tr('SEND MY APPEAL')}</Text>
         </Pressable>
       </ScrollView>
     </View>
@@ -246,42 +244,40 @@ function Waiting({ item, onBack }: { item: RemovedReview; onBack: () => void }) 
   return (
     <View style={s.screen}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        <Head label={`APPEAL · ${item.ref}`} onBack={onBack} />
+        <Head label={tr('APPEAL · {ref}', { ref: item.ref })} onBack={onBack} />
 
         <View style={s.hero}>
           <View style={s.heroIcon}>
             <Ionicons name="time-outline" size={28} color={colors.text} />
           </View>
           <View>
-            <Display size={24} style={s.center}>Appeal sent</Display>
+            <Display size={24} style={s.center}>{tr('Appeal sent')}</Display>
             <Text style={[s.sub, s.center, { maxWidth: 270 }]}>
-              A different reviewer will read it. We&apos;ll tell you either way by{' '}
-              {due.toLocaleDateString('en-US', { weekday: 'long' })}.
+              {tr('A different reviewer will read it. We\'ll tell you either way by {toLocaleDateString}.', { toLocaleDateString: due.toLocaleDateString(loc('en-US'), { weekday: 'long' }) })}
             </Text>
           </View>
         </View>
 
         <View style={s.card}>
-          <Step done title="Review taken down"
+          <Step done title={tr('Review taken down')}
             meta={`${item.moderated_at ? day(item.moderated_at) : '—'} · ${
-              (item.removal_reason ?? 'policy').replace(/_/g, ' ')}`} />
-          <Step now title="You appealed"
-            meta={`${day(a.created_at)} · with your note and the booking`} />
-          <Step title="Second reviewer decides" last
-            meta={`By ${due.toLocaleDateString('en-US',
-              { weekday: 'short', month: 'short', day: 'numeric' })}`} />
+              tr((item.removal_reason ?? 'policy').replace(/_/g, ' '))}`} />
+          <Step now title={tr('You appealed')}
+            meta={tr('{day} · with your note and the booking', { day: day(a.created_at) })} />
+          <Step title={tr('Second reviewer decides')} last
+            meta={tr('By {date}', { date: due.toLocaleDateString(loc('en-US'),
+              { weekday: 'short', month: 'short', day: 'numeric' }) })} />
         </View>
 
         {!!a.note && (
           <View style={s.card}>
-            <Text style={s.eyebrowSmall}>WHAT YOU TOLD US</Text>
-            <Text style={s.quote}>&quot;{a.note}&quot;</Text>
+            <Text style={s.eyebrowSmall}>{tr('WHAT YOU TOLD US')}</Text>
+            <Text style={s.quote}>{tr('"{note}"', { note: a.note })}</Text>
             {!!item.visit && (
               <View style={s.attachRow}>
                 <Ionicons name="calendar-outline" size={13} color={colors.textTertiary} />
                 <Text style={s.attachText}>
-                  {item.visit.service ?? 'Service'} · {day(item.visit.starts_at)},{' '}
-                  {hhmm(item.visit.starts_at)} · {Math.round(item.visit.price_cents / 100)} DH attached
+                  {tr('{service} · {starts_at}, {starts_at2} · {round} DH attached', { service: item.visit.service ?? tr('Service'), starts_at: day(item.visit.starts_at), starts_at2: hhmm(item.visit.starts_at), round: Math.round(item.visit.price_cents / 100) })}
                 </Text>
               </View>
             )}
@@ -293,8 +289,8 @@ function Waiting({ item, onBack }: { item: RemovedReview; onBack: () => void }) 
             <Ionicons name="lock-closed-outline" size={14} color={colors.textSecondary} />
           </View>
           <View style={s.grow}>
-            <Text style={s.calmTitle}>{item.barber.split(' ')[0]} can&apos;t see your appeal</Text>
-            <Text style={s.calmBody}>He&apos;s only told the outcome. He won&apos;t know you appealed.</Text>
+            <Text style={s.calmTitle}>{tr('{barber} can\'t see your appeal', { barber: item.barber.split(' ')[0] })}</Text>
+            <Text style={s.calmBody}>{tr('He\'s only told the outcome. He won\'t know you appealed.')}</Text>
           </View>
         </View>
       </ScrollView>
@@ -318,7 +314,7 @@ function Step({ title, meta, done, now, last }: {
       <View style={[s.grow, !last && { paddingBottom: 16 }]}>
         <View style={s.rowMid}>
           <Text style={[s.stepTitle, !done && !now && s.stepTitleTodo]}>{title}</Text>
-          {now && <View style={s.nowTag}><Text style={s.nowTagText}>NOW</Text></View>}
+          {now && <View style={s.nowTag}><Text style={s.nowTagText}>{tr('NOW')}</Text></View>}
         </View>
         <Text style={[s.stepMeta, !done && !now && s.stepMetaTodo]}>{meta}</Text>
       </View>
@@ -334,16 +330,16 @@ function Upheld({ item, onBack, onViewReview }: {
   return (
     <View style={s.screen}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        <Head label={`APPEAL · ${item.ref}`} onBack={onBack} />
+        <Head label={tr('APPEAL · {ref}', { ref: item.ref })} onBack={onBack} />
 
         <View style={s.hero}>
           <View style={[s.heroIcon, { backgroundColor: 'rgba(74,222,128,0.18)' }]}>
             <Ionicons name="checkmark" size={29} color="#16A34A" />
           </View>
           <View>
-            <Display size={25} style={s.center}>You were right</Display>
+            <Display size={25} style={s.center}>{tr('You were right')}</Display>
             <Text style={[s.sub, s.center, { maxWidth: 280 }]}>
-              Your review is back on {item.barber.split(' ')[0]}&apos;s page. Sorry for taking it down.
+              {tr('Your review is back on {barber}\'s page. Sorry for taking it down.', { barber: item.barber.split(' ')[0] })}
             </Text>
           </View>
         </View>
@@ -354,26 +350,26 @@ function Upheld({ item, onBack, onViewReview }: {
             <Text style={s.cardMeta}>{item.barber} · {day(item.created_at)}</Text>
             <View style={s.tagGreen}>
               <View style={s.dotGreen} />
-              <Text style={s.tagGreenText}>PUBLIC AGAIN</Text>
+              <Text style={s.tagGreenText}>{tr('PUBLIC AGAIN')}</Text>
             </View>
           </View>
           <Text style={s.body}>
-            {item.comment ? `"${item.comment}"` : 'A rating with no words.'}
+            {item.comment ? `"${item.comment}"` : tr('A rating with no words.')}
           </Text>
         </View>
 
         <View style={s.inkCard}>
-          <Text style={s.inkEyebrow}>WHAT THE SECOND REVIEWER FOUND</Text>
+          <Text style={s.inkEyebrow}>{tr('WHAT THE SECOND REVIEWER FOUND')}</Text>
           <Text style={s.inkBody}>{a.decision_note}</Text>
           <View style={s.inkFoot}>
             <View style={s.inkAvatar}>
               <Text style={s.inkAvatarText}>
-                {(a.decided_by ?? 'Ops').slice(0, 2).toUpperCase()}
+                {(a.decided_by ?? tr('Ops')).slice(0, 2).toUpperCase()}
               </Text>
             </View>
             <Text style={s.inkFootText}>
-              {a.decided_by ?? 'Ops'} · {a.decided_at
-                ? new Date(a.decided_at).toLocaleDateString('en-US',
+              {a.decided_by ?? tr('Ops')} · {a.decided_at
+                ? new Date(a.decided_at).toLocaleDateString(loc('en-US'),
                   { weekday: 'short', month: 'short', day: 'numeric' })
                 : ''}
             </Text>
@@ -381,22 +377,22 @@ function Upheld({ item, onBack, onViewReview }: {
         </View>
 
         <View style={s.card}>
-          <Text style={s.eyebrowSmall}>WHAT CHANGED</Text>
-          <Changed>Your review is public on his page again</Changed>
+          <Text style={s.eyebrowSmall}>{tr('WHAT CHANGED')}</Text>
+          <Changed>{tr('Your review is public on his page again')}</Changed>
           {item.late_cleared && (
-            <Changed>Your late-arrival flag is cleared — deposits back to 40%</Changed>
+            <Changed>{tr('Your late-arrival flag is cleared — deposits back to 40%')}</Changed>
           )}
-          <Changed>The takedown reason has been withdrawn from your record</Changed>
-          <Changed>Nothing was held against your account — appeals are free</Changed>
+          <Changed>{tr('The takedown reason has been withdrawn from your record')}</Changed>
+          <Changed>{tr('Nothing was held against your account — appeals are free')}</Changed>
         </View>
 
         <View style={s.actions}>
           <Pressable onPress={onViewReview} disabled={!onViewReview}
             style={({ pressed }) => [s.ghost, pressed && s.pressed]}>
-            <Text style={s.ghostText}>VIEW MY REVIEW</Text>
+            <Text style={s.ghostText}>{tr('VIEW MY REVIEW')}</Text>
           </Pressable>
           <Pressable onPress={onBack} style={({ pressed }) => [s.dark, pressed && s.pressed]}>
-            <Text style={s.darkText}>DONE</Text>
+            <Text style={s.darkText}>{tr('DONE')}</Text>
           </Pressable>
         </View>
       </ScrollView>

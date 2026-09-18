@@ -5,6 +5,7 @@ import { Display, PillButton } from '../components/ui';
 import type { QueueLink } from '../lib/queueLink';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, TOP_INSET } from '../theme';
+import { tr } from '../lib/i18n';
 
 // A shop's queue link opened the app — ADDENDUM-app-first (turn Q3). The web page
 // is for anonymous eyes; places are held here.
@@ -92,8 +93,8 @@ function Brand({ onDismiss, children }: { onDismiss: () => void; children?: Reac
   return (
     <View style={s.top}>
       <View style={s.logo}><Ionicons name="cut-outline" size={14} color="#fff" /></View>
-      {children ?? <Text style={s.wordmark}>STERNCUT</Text>}
-      <Pressable onPress={onDismiss} hitSlop={10} accessibilityRole="button" accessibilityLabel="Close">
+      {children ?? <Text style={s.wordmark}>{tr('STERNCUT')}</Text>}
+      <Pressable onPress={onDismiss} hitSlop={10} accessibilityRole="button" accessibilityLabel={tr('Close')}>
         <Ionicons name="close" size={20} color={colors.text} />
       </Pressable>
     </View>
@@ -129,18 +130,18 @@ export function QueueLinkOpen({ link, onJoined, onBrowser, onDismiss }: {
       // join_queue works in uuids; the page's read speaks codes (0110)
       const { data: ids, error: e1 } = await supabase.rpc('resolve_shop_code', { p_shop: q.code, p_barber: r.chair.code });
       const barber = (ids as { barber: string | null } | null)?.barber;
-      if (e1 || !barber) throw new Error(e1?.message ?? 'That chair is no longer in this shop.');
+      if (e1 || !barber) throw new Error(e1?.message ?? tr('That chair is no longer in this shop.'));
       const { data, error } = await supabase.rpc('join_queue', { p_barber: barber, p_service: r.service.id });
       if (error) throw new Error(error.message);
       onJoined(data as string);
     } catch (e: any) {
-      Alert.alert('Could not hold a place', e.message ?? String(e));
+      Alert.alert(tr('Could not hold a place'), e.message ?? String(e));
     } finally {
       setBusy(false);
     }
   }
 
-  const header = link.fresh ? 'Welcome — from the link you tapped' : 'Opened straight in the app';
+  const header = link.fresh ? tr('Welcome — from the link you tapped') : tr('Opened straight in the app');
   if (q === undefined) {
     return (
       <View style={s.screen}>
@@ -160,26 +161,26 @@ export function QueueLinkOpen({ link, onJoined, onBrowser, onDismiss }: {
     <View style={s.screen}>
       <Brand onDismiss={onDismiss}>
         <Text style={s.headerNote}>{header}</Text>
-        {!!q && r && <View style={s.live}><View style={s.liveDot} /><Text style={s.liveText}>LIVE</Text></View>}
+        {!!q && r && <View style={s.live}><View style={s.liveDot} /><Text style={s.liveText}>{tr('LIVE')}</Text></View>}
       </Brand>
 
       <ScrollView contentContainerStyle={s.body} showsVerticalScrollIndicator={false}>
         <View>
-          <Display size={26}>{q?.name ?? 'This shop'}</Display>
+          <Display size={26}>{q?.name ?? tr('This shop')}</Display>
           {!!q && (
             <Text style={s.meta}>
-              {[`${count} in the line`, q.close_min != null ? `open until ${hhmm(q.close_min)}` : null]
+              {[tr('{count} in the line', { count }), q.close_min != null ? tr('open until {at}', { at: hhmm(q.close_min) }) : null]
                 .filter(Boolean).join(' · ')}
             </Text>
           )}
         </View>
 
-        {!q && <Text style={s.lede}>That link is not a shop we know.</Text>}
+        {!q && <Text style={s.lede}>{tr('That link is not a shop we know.')}</Text>}
 
         {!!q && !r && (
           <View style={s.inkCard}>
             <Text style={s.inkText}>
-              {q.shut ? 'No line right now — the shop is closed for today.' : 'No walk-ins right now — nobody here is taking a new place.'}
+              {q.shut ? tr('No line right now — the shop is closed for today.') : tr('No walk-ins right now — nobody here is taking a new place.')}
             </Text>
           </View>
         )}
@@ -188,18 +189,18 @@ export function QueueLinkOpen({ link, onJoined, onBrowser, onDismiss }: {
           <>
             <View style={s.inkCard}>
               <View style={s.inkNow}>
-                <Text style={s.inkLabel}>{pick.chair === '*' ? 'FIRST FREE' : 'WAIT NOW'}</Text>
-                <Text style={s.inkBig}>~{r.service.wait_min} min</Text>
+                <Text style={s.inkLabel}>{pick.chair === '*' ? tr('FIRST FREE') : tr('WAIT NOW')}</Text>
+                <Text style={s.inkBig}>{tr('~{wait_min} min', { wait_min: r.service.wait_min })}</Text>
               </View>
               <View style={s.vr} />
               <Text style={s.inkText}>
                 {pick.chair === '*'
-                  ? `${first(r.chair.name)} is free soonest · you'd be Nº ${pad(r.chair.next_no)}`
-                  : `${r.chair.waiting} ahead with ${first(r.chair.name)} · you'd be Nº ${pad(r.chair.next_no)}`}
+                  ? tr('{name} is free soonest · you\'d be Nº {next_no}', { name: first(r.chair.name), next_no: pad(r.chair.next_no) })
+                  : tr('{waiting} ahead with {name} · you\'d be Nº {next_no}', { waiting: r.chair.waiting, name: first(r.chair.name), next_no: pad(r.chair.next_no) })}
               </Text>
             </View>
 
-            <Text style={s.eyebrow}>WHO'S CUTTING</Text>
+            <Text style={s.eyebrow}>{tr('WHO\'S CUTTING')}</Text>
             {fromLink && folded ? (
               // a barber's text: his chair is chosen and the picker folds away
               <Pressable onPress={() => setFolded(false)} accessibilityRole="button"
@@ -207,7 +208,7 @@ export function QueueLinkOpen({ link, onJoined, onBrowser, onDismiss }: {
                 <View style={[s.av, s.avOn]}><Text style={[s.avText, s.avTextOn]}>{his!.initials}</Text></View>
                 <View style={s.grow}>
                   <Text style={s.pickedName}>{first(his!.name)}</Text>
-                  <Text style={s.pickedSub}>Picked from the link · tap to change</Text>
+                  <Text style={s.pickedSub}>{tr('Picked from the link · tap to change')}</Text>
                 </View>
               </Pressable>
             ) : (
@@ -219,10 +220,10 @@ export function QueueLinkOpen({ link, onJoined, onBrowser, onDismiss }: {
                     <Ionicons name="people-outline" size={17} color={pick.chair === '*' ? '#fff' : colors.textSecondary} />
                   </View>
                   <View style={s.grow}>
-                    <Text style={[s.anyTitle, pick.chair === '*' && s.onInk]}>Anyone free</Text>
-                    <Text style={[s.anySub, pick.chair === '*' && s.onInkDim]}>Fastest · whoever opens up first</Text>
+                    <Text style={[s.anyTitle, pick.chair === '*' && s.onInk]}>{tr('Anyone free')}</Text>
+                    <Text style={[s.anySub, pick.chair === '*' && s.onInkDim]}>{tr('Fastest · whoever opens up first')}</Text>
                   </View>
-                  <Text style={[s.anyWait, pick.chair === '*' && s.onInk]}>~{soonest} min</Text>
+                  <Text style={[s.anyWait, pick.chair === '*' && s.onInk]}>{tr('~{soonest} min', { soonest })}</Text>
                 </Pressable>
                 <View style={s.chairs}>
                   {open.map((c) => {
@@ -235,7 +236,7 @@ export function QueueLinkOpen({ link, onJoined, onBrowser, onDismiss }: {
                         <View style={[s.av, on && s.avOn]}><Text style={[s.avText, on && s.avTextOn]}>{c.initials}</Text></View>
                         <Text style={s.chairName}>{first(c.name)}</Text>
                         <Text style={[s.chairWait, can && waitOf(c) === soonest && s.soon]}>
-                          {can ? `~${waitOf(c)} min` : 'Not taking'}
+                          {can ? tr('~{c} min', { c: waitOf(c) }) : tr('Not taking')}
                         </Text>
                       </Pressable>
                     );
@@ -244,14 +245,14 @@ export function QueueLinkOpen({ link, onJoined, onBrowser, onDismiss }: {
               </View>
             )}
 
-            <Text style={s.eyebrow}>SERVICE</Text>
+            <Text style={s.eyebrow}>{tr('SERVICE')}</Text>
             <View style={s.chips}>
               {menu(q, pick).map((v) => {
                 const on = v.name === r.service.name;
                 return (
                   <Pressable key={v.name} onPress={() => setPick({ ...pick, service: v.name })} accessibilityRole="button"
                     accessibilityState={{ selected: on }} style={[s.chip, on && s.chipOn]}>
-                    <Text style={[s.chipText, on && s.onInk]}>{v.name} · {Math.round(v.price_cents / 100)} DH</Text>
+                    <Text style={[s.chipText, on && s.onInk]}>{tr('{name} · {round} DH', { name: v.name, round: Math.round(v.price_cents / 100) })}</Text>
                   </Pressable>
                 );
               })}
@@ -265,11 +266,11 @@ export function QueueLinkOpen({ link, onJoined, onBrowser, onDismiss }: {
           <Pressable onPress={hold} disabled={busy} accessibilityRole="button"
             style={({ pressed }) => [s.hot, pressed && s.hotPressed, busy && s.dim]}>
             {busy ? <ActivityIndicator color="#fff" />
-              : <Text style={s.hotText}>HOLD MY PLACE · ~{r.service.wait_min} MIN</Text>}
+              : <Text style={s.hotText}>{tr('HOLD MY PLACE · ~{wait_min} MIN', { wait_min: r.service.wait_min })}</Text>}
           </Pressable>
         )}
         {!!q && (
-          <Text style={s.textLink} onPress={onBrowser} accessibilityRole="link">Just looking at the line</Text>
+          <Text style={s.textLink} onPress={onBrowser} accessibilityRole="link">{tr('Just looking at the line')}</Text>
         )}
       </View>
     </View>
@@ -295,35 +296,35 @@ export default function QueueLinkScreen({ link, onSignIn, onBrowser, onDismiss }
           <View style={s.inkCard}>
             {chair && (
               <View>
-                <Text style={s.inkLabel}>YOU'D BE</Text>
+                <Text style={s.inkLabel}>{tr('YOU\'D BE')}</Text>
                 <Text style={s.inkNo}>Nº {pad(chair.next_no)}</Text>
               </View>
             )}
             {chair && <View style={s.vr} />}
             <Text style={s.inkText}>
               {chair
-                ? `${q.name} with ${first(chair.name)} · ~${waitOf(chair)} min — sign in to hold a place`
-                : `${q.name} · no walk-ins right now`}
+                ? tr('{name} with {name2} · ~{chair} min — sign in to hold a place', { name: q.name, name2: first(chair.name), chair: waitOf(chair) })
+                : tr('{name} · no walk-ins right now', { name: q.name })}
             </Text>
           </View>
         )}
 
         <View>
-          <Display size={26}>Hold a place</Display>
-          <Text style={s.lede}>Sign in and this shop opens with its chairs and its waits.</Text>
+          <Display size={26}>{tr('Hold a place')}</Display>
+          <Text style={s.lede}>{tr('Sign in and this shop opens with its chairs and its waits.')}</Text>
         </View>
 
         <View style={s.note}>
           <Ionicons name="lock-closed-outline" size={14} color={colors.textSecondary} style={{ marginTop: 2 }} />
           <Text style={s.noteText}>
-            The link is kept through sign-in — close the app now and it still opens on this shop today.
+            {tr('The link is kept through sign-in — close the app now and it still opens on this shop today.')}
           </Text>
         </View>
       </View>
 
       <View style={s.foot}>
-        <PillButton title="SIGN IN" onPress={onSignIn} />
-        <Text style={s.textLink} onPress={onBrowser} accessibilityRole="link">See the line without signing in</Text>
+        <PillButton title={tr('SIGN IN')} onPress={onSignIn} />
+        <Text style={s.textLink} onPress={onBrowser} accessibilityRole="link">{tr('See the line without signing in')}</Text>
       </View>
     </View>
   );

@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { PillButton } from './ui';
 import { colors, inter, radius, sp } from '../theme';
+import { tr } from '../lib/i18n';
 
 // 39d of "Customer App 3.dc.html" — "anything he should know?"
 //
@@ -16,7 +17,7 @@ import { colors, inter, radius, sp } from '../theme';
 // the street to compose a sentence; a chip is one tap and covers the four things
 // people actually say. The box is there for the fifth thing.
 
-const QUICK = ['Same as last time', 'Shorter than usual', 'Beard too', 'Bringing my son'];
+const QUICK = [tr('Same as last time'), tr('Shorter than usual'), tr('Beard too'), tr('Bringing my son')];
 const MAX = 280;   // matches the column's own check constraint
 
 export default function BookingNoteSheet({ visible, onClose, onSend, who, when, service, skipLabel }: {
@@ -47,13 +48,13 @@ export default function BookingNoteSheet({ visible, onClose, onSend, who, when, 
     <Modal visible={visible} transparent animationType="slide" onRequestClose={close}>
       <KeyboardAvoidingView style={s.wrap}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <Pressable style={s.scrim} onPress={close} accessibilityLabel="Close" />
+        <Pressable style={s.scrim} onPress={close} accessibilityLabel={tr('Close')} />
         <View style={s.sheet}>
           <View style={s.grabber} />
           <View style={s.head}>
             <View style={s.headSide} />
-            <Text style={s.title}>Anything he should know?</Text>
-            <Pressable onPress={close} hitSlop={8} accessibilityLabel="Close"
+            <Text style={s.title}>{tr('Anything he should know?')}</Text>
+            <Pressable onPress={close} hitSlop={8} accessibilityLabel={tr('Close')}
               style={({ pressed }) => [s.headSide, s.headRight, pressed && s.pressed]}>
               <Ionicons name="close" size={16} color={colors.text} />
             </Pressable>
@@ -73,7 +74,7 @@ export default function BookingNoteSheet({ visible, onClose, onSend, who, when, 
               </View>
             </View>
 
-            <Text style={s.label}>QUICK ONES</Text>
+            <Text style={s.label}>{tr('QUICK ONES')}</Text>
             <View style={s.chips}>
               {QUICK.map((q) => (
                 <Pressable key={q} onPress={() => choose(q)}
@@ -84,13 +85,13 @@ export default function BookingNoteSheet({ visible, onClose, onSend, who, when, 
               ))}
             </View>
 
-            <Text style={s.label}>OR WRITE IT</Text>
+            <Text style={s.label}>{tr('OR WRITE IT')}</Text>
             <TextInput value={text} onChangeText={(t) => setText(t.slice(0, MAX))}
-              multiline placeholder="Same as last time but leave the top a bit longer"
+              multiline placeholder={tr('Same as last time but leave the top a bit longer')}
               placeholderTextColor={colors.textTertiary}
-              accessibilityLabel="Note for your barber" style={s.input} />
+              accessibilityLabel={tr('Note for your barber')} style={s.input} />
             {text.length > MAX - 60 && (
-              <Text style={s.counter}>{MAX - text.length} left</Text>
+              <Text style={s.counter}>{tr('{x} left', { x: MAX - text.length })}</Text>
             )}
 
             <View style={s.hint}>
@@ -98,18 +99,18 @@ export default function BookingNoteSheet({ visible, onClose, onSend, who, when, 
                 <Ionicons name="information-circle-outline" size={13} color={colors.textSecondary} />
               </View>
               <Text style={s.hintText}>
-                He reads this when you're in the chair. For anything urgent, message him instead.
+                {tr('He reads this when you\'re in the chair. For anything urgent, message him instead.')}
               </Text>
             </View>
           </ScrollView>
 
           <View style={s.actions}>
             <View style={s.grow}>
-              <PillButton title={skipLabel ?? 'SKIP'} variant="secondary"
+              <PillButton title={skipLabel ?? tr('SKIP')} variant="secondary"
                 onPress={() => { onSend(null); close(); }} />
             </View>
             <View style={s.sendCol}>
-              <PillButton title="SEND WITH BOOKING"
+              <PillButton title={tr('SEND WITH BOOKING')}
                 onPress={() => { onSend(note || null); close(); }} />
             </View>
           </View>

@@ -13,9 +13,10 @@ import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, inter, radius, sp, TOP_INSET } from '../theme';
 import ChatScreen from './ChatScreen';
+import { en, loc, tr, trn, weekdayDate } from '../lib/i18n';
 
 // Calendar tab: day timeline / week summary of what's on the books.
-// Hours & breaks are EDITED in Profile â†’ Schedule settings; here they're only shown.
+// Hours & breaks are EDITED in Profile → Schedule settings; here they're only shown.
 type CalBooking = {
   id: string;
   starts_at: string;
@@ -41,12 +42,13 @@ const DAY_MS = 86_400_000;
 const HOUR_H = 112; // timeline px per hour
 const STEP = 15;    // drag reschedule snaps to 15-min increments
 const AMBER = '#E8B84B';
-const CANCEL_REASONS = ['Client requested', 'Client no-show', "I'm unavailable", 'Double booked', 'Emergency'];
-const MOVE_REASONS = ['Client requested', 'Running late', 'Schedule conflict', 'Better slot', 'Emergency'];
+// kept in English: the reasons are written into the client's chat, and shown translated
+const CANCEL_REASONS = [en('Client requested'), en('Client no-show'), en("I'm unavailable"), en('Double booked'), en('Emergency')];
+const MOVE_REASONS = [en('Client requested'), en('Running late'), en('Schedule conflict'), en('Better slot'), en('Emergency')];
 const toggleReason = (xs: string[], r: string) => (xs.includes(r) ? xs.filter((x) => x !== r) : [...xs, r]);
 
 // the mock's grid is a rolling 3-week window, Monday-based: last week (dimmed
-// once past), this week, next week â€” not a calendar month.
+// once past), this week, next week — not a calendar month.
 const GRID_DAYS = 21;
 // 20px screen padding either side, six 5px gaps between seven cells
 const CELL = Math.floor((Dimensions.get('window').width - 40 - 30) / 7);
@@ -63,20 +65,20 @@ const isoOf = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const sameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString();
 const ampm = (iso: string) =>
-  new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  new Date(iso).toLocaleTimeString(loc('en-US'), { hour: 'numeric', minute: '2-digit' });
 const hourLabel = (h: number) => `${((h + 11) % 12) + 1} ${h < 12 ? 'AM' : 'PM'}`;
 const minToHHMM = (m: number) =>
   `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 const minLabel = (m: number) => {
   const d = new Date(); d.setHours(Math.floor(m / 60), m % 60, 0, 0);
-  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  return d.toLocaleTimeString(loc('en-US'), { hour: 'numeric', minute: '2-digit' });
 };
 const dh = (cents: number) => `${(cents / 100).toFixed(0)} DH`;
 const minutesOf = (iso: string) => { const d = new Date(iso); return d.getHours() * 60 + d.getMinutes(); };
 const durMin = (b: { starts_at: string; ends_at: string }) =>
   Math.round((new Date(b.ends_at).getTime() - new Date(b.starts_at).getTime()) / 60_000);
 const nameOf = (b: CalBooking, barberId: string) =>
-  b.walk_in_name ?? (b.customer_id === barberId ? 'Walk-in' : b.customer?.full_name ?? 'Client');
+  b.walk_in_name ?? (b.customer_id === barberId ? tr('Walk-in') : b.customer?.full_name ?? tr('Client'));
 
 function Avatar({ url, name, size = 44 }: { url?: string | null; name: string; size?: number }) {
   if (url) return <Image source={{ uri: url }} style={{ width: size, height: size, borderRadius: 999 }} />;
@@ -124,12 +126,12 @@ function ReasonChips({ options, selected, onToggle, light }: {
         const on = selected.includes(r);
         return (
           <Pressable key={r} onPress={() => onToggle(r)} accessibilityRole="button"
-            accessibilityState={{ selected: on }} accessibilityLabel={r}
+            accessibilityState={{ selected: on }} accessibilityLabel={tr(r)}
             style={({ pressed }) => [s.reasonChip, light ? s.reasonChipLight : s.reasonChipDark,
               on && s.reasonChipOn, pressed && s.pressed]}>
             {on && <Ionicons name="checkmark" size={12} color={colors.onAccent} />}
             <Text style={[s.reasonChipText, light ? s.reasonTextLight : s.reasonTextDark,
-              on && s.reasonChipTextOn]}>{r}</Text>
+              on && s.reasonChipTextOn]}>{tr(r)}</Text>
           </Pressable>
         );
       })}
@@ -157,7 +159,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
   // the agenda's one-of-four filter chips
   const [filter, setFilter] = useState<'all' | 'appts' | 'walkins' | 'off'>('all');
   const [daysOff, setDaysOff] = useState<{ day: string; label: string | null }[]>([]);
-  // tap-to-create (empty slot â†’ new booking sheet)
+  // tap-to-create (empty slot → new booking sheet)
   const [services, setServices] = useState<Service[]>([]);
   const [newAt, setNewAt] = useState<Date | null>(null);
   const [newName, setNewName] = useState('');
@@ -187,7 +189,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
       supabase.from('services').select('id, name, price_cents, duration_min')
         .eq('barber_id', barberId).eq('is_active', true).order('name'),
     ]);
-    if (bk.error) Alert.alert('Could not load calendar', bk.error.message);
+    if (bk.error) Alert.alert(tr('Could not load calendar'), bk.error.message);
     setBookings((bk.data as unknown as CalBooking[]) ?? []);
     setBlocks((blk.data ?? []) as BlockRow[]);
     setWindows(av.data ?? []);
@@ -204,7 +206,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
     return () => clearTimeout(t);
   }, [toast]);
 
-  // known clients for the Appointment search â€” loaded once, on first sheet open
+  // known clients for the Appointment search — loaded once, on first sheet open
   useEffect(() => {
     if (!newAt || clients !== null) return;
     supabase.from('bookings')
@@ -253,7 +255,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
 
   async function confirmBooking(b: CalBooking) {
     const { error } = await supabase.rpc('accept_booking', { p_booking: b.id });
-    if (error) Alert.alert('Could not confirm', error.message);
+    if (error) Alert.alert(tr('Could not confirm'), error.message);
     setSheet(null); load();
   }
 
@@ -262,11 +264,11 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
     setBusy(true);
     if (!b.started_at) {
       const r = await supabase.rpc('advance_booking', { p_booking: b.id, p_stage: 'start' });
-      if (r.error) { setBusy(false); return Alert.alert('Could not complete', r.error.message); }
+      if (r.error) { setBusy(false); return Alert.alert(tr('Could not complete'), r.error.message); }
     }
     const { error } = await supabase.rpc('advance_booking', { p_booking: b.id, p_stage: 'complete' });
     setBusy(false);
-    if (error) return Alert.alert('Could not complete', error.message);
+    if (error) return Alert.alert(tr('Could not complete'), error.message);
     // capture only what this call set, so undo restores the exact prior state
     setToast({ booking: b, clearStart: !b.started_at, clearCheckin: !b.checked_in_at });
     setSheet(null); load();
@@ -279,7 +281,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
     const { error } = await supabase.rpc('revert_completion', {
       p_booking: booking.id, p_clear_start: clearStart, p_clear_checkin: clearCheckin,
     });
-    if (error) Alert.alert('Could not undo', error.message);
+    if (error) Alert.alert(tr('Could not undo'), error.message);
     load();
   }
 
@@ -293,7 +295,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
       p_booking: cancelling.id, p_reason: cancelReasons.length ? cancelReasons.join(', ') : null,
     });
     setBusy(false);
-    if (error) return Alert.alert('Could not cancel', error.message);
+    if (error) return Alert.alert(tr('Could not cancel'), error.message);
     setCancelling(null); load();
   }
 
@@ -303,7 +305,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
       p_booking: resched.id, p_new_start: reschedAt.toISOString(),
       p_reason: moveReasons.length ? moveReasons.join(', ') : null,
     });
-    if (error) Alert.alert('Could not reschedule', error.message);
+    if (error) Alert.alert(tr('Could not reschedule'), error.message);
     setResched(null); setReschedAt(null);
     load();
   }
@@ -319,23 +321,23 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
     setAddBusy(false);
     if (error) {
       const msg = error.message.includes('no_double_booking')
-        ? 'That time overlaps another booking.' : error.message;
-      return Alert.alert('Could not add', msg);
+        ? tr('That time overlaps another booking.') : error.message;
+      return Alert.alert(tr('Could not add'), msg);
     }
     setNewAt(null); setNewName('');
     load();
   }
 
   function removeBlock(b: BlockRow) {
-    Alert.alert('Remove this break?',
-      b.day === null ? 'It repeats every day â€” removing deletes it everywhere.' : (b.label ?? 'Break'),
+    Alert.alert(tr('Remove this break?'),
+      b.day === null ? tr('It repeats every day — removing deletes it everywhere.') : (b.label ?? tr('Break')),
       [
-        { text: 'Keep', style: 'cancel' },
+        { text: tr('Keep'), style: 'cancel' },
         {
-          text: 'Remove', style: 'destructive',
+          text: tr('Remove'), style: 'destructive',
           onPress: async () => {
             const { error } = await supabase.from('time_blocks').delete().eq('id', b.id);
-            if (error) Alert.alert('Could not remove', error.message);
+            if (error) Alert.alert(tr('Could not remove'), error.message);
             setBlockSheet(null); load();
           },
         },
@@ -366,16 +368,16 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
     : filter === 'off' ? [] : dayAll;
   const showBlocks = filter === 'all' || filter === 'off';
   const revenue = dayAll.reduce((a, b) => a + b.price_cents, 0);
-  const monthLabel = `${selected.toLocaleDateString('en-US', { month: 'long' })} ${selected.getFullYear()}`;
-  const agendaLabel = selected.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' }).toUpperCase();
+  const monthLabel = `${selected.toLocaleDateString(loc('en-US'), { month: 'long' })} ${selected.getFullYear()}`;
+  const agendaLabel = selected.toLocaleDateString(loc('en-US'), { weekday: 'short', day: 'numeric' }).toUpperCase();
 
   const midnight = new Date(); midnight.setHours(0, 0, 0, 0);
 
-  // long-press an empty day â†’ open the new-booking sheet on its first free slot
+  // long-press an empty day → open the new-booking sheet on its first free slot
   function addOnDay(d: Date) {
     const free = daySlots(d, 30, windows, ofDay(d), daysOff.map((x) => x.day), blocks)
       .find((sl) => sl.status === 'free');
-    if (!free) return Alert.alert('Nothing free', 'No open slot left on that day.');
+    if (!free) return Alert.alert(tr('Nothing free'), tr('No open slot left on that day.'));
     setNewName(''); setNewKind('walkin'); setNewAt(free.time);
   }
 
@@ -395,21 +397,21 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
         <View style={s.headRow}>
           <Serif size={20} ls={0.04}>{monthLabel}</Serif>
           <View style={s.grow} />
-          <Pressable onPress={goToday} accessibilityRole="button" accessibilityLabel="Jump to today"
+          <Pressable onPress={goToday} accessibilityRole="button" accessibilityLabel={tr('Jump to today')}
             style={({ pressed }) => [s.todayPill, pressed && s.pressed]}>
-            <T w="b" size={12}>Today</T>
+            <T w="b" size={12}>{tr('Today')}</T>
           </Pressable>
           <Pressable onPress={() => shiftGrid(-1)} hitSlop={6} accessibilityRole="button"
-            accessibilityLabel="Previous week" style={({ pressed }) => [s.navPuck, pressed && s.pressed]}>
+            accessibilityLabel={tr('Previous week')} style={({ pressed }) => [s.navPuck, pressed && s.pressed]}>
             <Ico name="chevron-left" size={14} />
           </Pressable>
           <Pressable onPress={() => shiftGrid(1)} hitSlop={6} accessibilityRole="button"
-            accessibilityLabel="Next week" style={({ pressed }) => [s.navPuck, pressed && s.pressed]}>
+            accessibilityLabel={tr('Next week')} style={({ pressed }) => [s.navPuck, pressed && s.pressed]}>
             <Ico name="chevron-right" size={14} />
           </Pressable>
         </View>
 
-        {/* three-week grid â€” a dot when the day has work, a tag when it's off */}
+        {/* three-week grid — a dot when the day has work, a tag when it's off */}
         <View style={s.grid}>
           {['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'].map((w) => (
             <T key={w} w="b" size={9} c={D.sub} ls={0.72} style={s.gridHead}>{w}</T>
@@ -419,11 +421,11 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
             const past = d < midnight;
             const list = ofDay(d);
             const off = offOf(d);
-            const tag = off ? (off.label ?? '').toLowerCase().includes('vac') ? 'VAC' : 'OFF' : null;
+            const tag = off ? (off.label ?? '').toLowerCase().includes('vac') ? tr('VAC') : tr('OFF') : null;
             return (
               <Pressable key={isoOf(d)} onPress={() => setSelected(d)} onLongPress={() => addOnDay(d)}
                 accessibilityRole="button" accessibilityState={{ selected: sel }}
-                accessibilityLabel={`${d.toDateString()}${off ? ', time off' : list.length ? `, ${list.length} bookings` : ', free'}`}
+                accessibilityLabel={off ? tr('{day}, time off', { day: weekdayDate(d) }) : list.length ? trn(list.length, '{day}, {n} booking', '{day}, {n} bookings', { day: weekdayDate(d) }) : tr('{day}, free', { day: weekdayDate(d) })}
                 style={({ pressed }) => [
                   s.cell, past && !sel && s.cellPast,
                   tag && !sel && s.cellOff, sel && s.cellSel, pressed && s.pressed,
@@ -441,7 +443,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
 
         {/* agenda filter */}
         <View style={s.chipRow}>
-          {([['all', 'All'], ['appts', 'Appointments'], ['walkins', 'Walk-ins'], ['off', 'Time off']] as const)
+          {([['all', tr('All')], ['appts', tr('Appointments')], ['walkins', tr('Walk-ins')], ['off', tr('Time off')]] as const)
             .map(([k, label]) => (
               <Pressable key={k} onPress={() => setFilter(k)} accessibilityRole="button"
                 accessibilityState={{ selected: filter === k }}
@@ -452,13 +454,13 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
         </View>
 
         {bookings === null && (
-          <ActivityIndicator style={s.spinner} color={colors.accent} accessibilityLabel="Loading calendar" />
+          <ActivityIndicator style={s.spinner} color={colors.accent} accessibilityLabel={tr('Loading calendar')} />
         )}
 
         {bookings !== null && (
           <View style={s.agendaHead}>
             <T w="b" size={11} c={D.sub} ls={1.65}>
-              {agendaLabel} Â· {dayAll.length} BOOKING{dayAll.length === 1 ? '' : 'S'}
+              {trn(dayAll.length, '{agendaLabel} · {n} BOOKING', '{agendaLabel} · {n} BOOKINGS', { agendaLabel })}
             </T>
             <T w="b" size={12} c={D.accent}>{dh(revenue)}</T>
           </View>
@@ -471,21 +473,21 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
               <View style={s.offBanner}>
                 <Ionicons name="pause-circle-outline" size={18} color={AMBER} />
                 <View style={s.grow}>
-                  <Text style={s.offBannerLabel}>TIME OFF</Text>
-                  <Text style={s.offBannerText}>{offToday.label ?? 'Day off'}</Text>
+                  <Text style={s.offBannerLabel}>{tr('TIME OFF')}</Text>
+                  <Text style={s.offBannerText}>{offToday.label ?? tr('Day off')}</Text>
                 </View>
               </View>
             )}
 
             {showBlocks && dayBlocks.map((b) => (
               <Pressable key={b.id} onPress={() => setBlockSheet(b)} accessibilityRole="button"
-                accessibilityLabel={`${b.label ?? 'Break'}, ${minLabel(b.start_min)} to ${minLabel(b.end_min)}`}
+                accessibilityLabel={tr('{label}, {start_min} to {end_min}', { label: b.label ?? tr('Break'), start_min: minLabel(b.start_min), end_min: minLabel(b.end_min) })}
                 style={({ pressed }) => [s.agendaRow, pressed && s.pressed]}>
                 <T w="b" size={12} c={AMBER} style={s.agendaTime}>{minToHHMM(b.start_min)}</T>
                 <View style={s.grow}>
-                  <T w="b" size={13} c={AMBER}>{b.label ?? 'Break'}</T>
+                  <T w="b" size={13} c={AMBER}>{b.label ?? tr('Break')}</T>
                   <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-                    {b.end_min - b.start_min} min{b.day === null ? ' Â· every day' : ''}
+                    {tr('{x} min{x2}', { x: b.end_min - b.start_min, x2: b.day === null ? tr(' · every day') : '' })}
                   </T>
                 </View>
                 <Ionicons name="cafe-outline" size={14} color={AMBER} />
@@ -494,7 +496,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
 
             {dayRows.map((b) => (
               <Pressable key={b.id} onPress={() => setSheet(b)} accessibilityRole="button"
-                accessibilityLabel={`${nameOf(b, barberId)}, ${b.services?.name ?? 'Service'}, ${ampm(b.starts_at)}`}
+                accessibilityLabel={`${nameOf(b, barberId)}, ${b.services?.name ?? tr('Service')}, ${ampm(b.starts_at)}`}
                 style={({ pressed }) => [s.agendaRow, pressed && s.pressed]}>
                 <T w="b" size={12} c={D.accent} style={s.agendaTime}>
                   {new Date(b.starts_at).toTimeString().slice(0, 5)}
@@ -502,8 +504,8 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
                 <View style={s.grow}>
                   <T w="b" size={13}>{nameOf(b, barberId)}</T>
                   <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-                    {b.services?.name ?? 'Service'} Â· {dh(b.price_cents)}
-                    {b.status === 'pending' ? ' Â· PENDING' : b.completed_at ? ' Â· done' : ''}
+                    {b.services?.name ?? tr('Service')} · {dh(b.price_cents)}
+                    {b.status === 'pending' ? tr(' · PENDING') : b.completed_at ? tr(' · done') : ''}
                   </T>
                 </View>
                 <Ico name="chevron-right" size={14} color={D.muted} />
@@ -512,11 +514,11 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
 
             {dayRows.length === 0 && !(showBlocks && dayBlocks.length) && !offToday && (
               <Pressable onPress={() => addOnDay(selected)} accessibilityRole="button"
-                accessibilityLabel="Add a booking on this day"
+                accessibilityLabel={tr('Add a booking on this day')}
                 style={({ pressed }) => [s.agendaEmpty, pressed && s.pressed]}>
                 <Ico name="plus" size={14} color={D.sub} />
                 <T size={12} c={D.sub}>
-                  {filter === 'all' ? 'Nothing booked â€” tap to add' : 'Nothing matches this filter'}
+                  {filter === 'all' ? tr('Nothing booked — tap to add') : tr('Nothing matches this filter')}
                 </T>
               </Pressable>
             )}
@@ -526,18 +528,18 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
 
       {/* tap-to-create: new booking at the tapped slot */}
       <Modal visible={!!newAt} transparent animationType="slide" onRequestClose={() => setNewAt(null)}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.backdrop}
+        <Pressable accessibilityRole="button" accessibilityLabel={tr('Close')} style={s.backdrop}
           onPress={() => setNewAt(null)} />
         {newAt && (
           <View style={s.sheet} onAccessibilityEscape={() => setNewAt(null)}>
             <View style={s.handle} />
             <View style={s.sheetHead}>
               <View style={s.grow}>
-                <Text style={s.sheetName}>New booking</Text>
-                <Text style={s.sheetSub}>{newAt.toDateString().slice(0, 10)} Â· {ampm(newAt.toISOString())}</Text>
+                <Text style={s.sheetName}>{tr('New booking')}</Text>
+                <Text style={s.sheetSub}>{weekdayDate(newAt)} · {ampm(newAt.toISOString())}</Text>
               </View>
               <Pressable onPress={() => setNewAt(null)} hitSlop={8} accessibilityRole="button"
-                accessibilityLabel="Close" style={({ pressed }) => [s.closeBtn, pressed && s.pressed]}>
+                accessibilityLabel={tr('Close')} style={({ pressed }) => [s.closeBtn, pressed && s.pressed]}>
                 <Ionicons name="close" size={18} color={D.text} />
               </Pressable>
             </View>
@@ -545,19 +547,19 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
             <View style={s.kindSeg}>
               {(['walkin', 'appt'] as const).map((k) => (
                 <Pressable key={k} onPress={() => setNewKind(k)} accessibilityRole="button"
-                  accessibilityLabel={k === 'walkin' ? 'Walk-in' : 'Scheduled appointment'}
+                  accessibilityLabel={k === 'walkin' ? tr('Walk-in') : tr('Scheduled appointment')}
                   accessibilityState={{ selected: newKind === k }}
                   style={({ pressed }) => [s.kindBtn, newKind === k && s.kindBtnOn, pressed && s.pressed]}>
                   <Ionicons name={k === 'walkin' ? 'walk-outline' : 'calendar-outline'} size={15}
                     color={newKind === k ? colors.onAccent : D.sub} />
                   <Text style={[s.kindTxt, newKind === k && s.kindTxtOn]}>
-                    {k === 'walkin' ? 'Walk-in' : 'Appointment'}
+                    {k === 'walkin' ? tr('Walk-in') : tr('Appointment')}
                   </Text>
                 </Pressable>
               ))}
             </View>
 
-            <Field placeholder={newKind === 'walkin' ? 'Name (optional)' : 'Search client name'}
+            <Field placeholder={newKind === 'walkin' ? tr('Name (optional)') : tr('Search client name')}
               placeholderTextColor={D.sub} style={s.darkField}
               value={newName} onChangeText={setNewName} />
 
@@ -565,7 +567,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
               <View style={s.searchList}>
                 {clientMatches.map((c) => (
                   <Pressable key={c.name} onPress={() => setNewName(c.name)} accessibilityRole="button"
-                    accessibilityLabel={`Use ${c.name}`}
+                    accessibilityLabel={tr('Use {name}', { name: c.name })}
                     style={({ pressed }) => [s.searchRow, pressed && s.pressed]}>
                     {c.avatar
                       ? <Image source={{ uri: c.avatar }} style={s.searchAvatar} />
@@ -578,7 +580,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
                     {c.app && (
                       <View style={s.appTag}>
                         <Ionicons name="person" size={9} color={colors.accent} />
-                        <Text style={s.appTagText}>App</Text>
+                        <Text style={s.appTagText}>{tr('App')}</Text>
                       </View>
                     )}
                   </Pressable>
@@ -586,18 +588,18 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
               </View>
             )}
 
-            <Text style={s.sheetLabel}>SERVICE</Text>
+            <Text style={s.sheetLabel}>{tr('SERVICE')}</Text>
             {services.length === 0 && (
-              <Text style={s.sheetSub}>Add a service first in Profile â†’ My Services.</Text>
+              <Text style={s.sheetSub}>{tr('Add a service first in Profile → My Services.')}</Text>
             )}
             {services.map((sv) => (
               <Pressable key={sv.id} disabled={addBusy} onPress={() => addBooking(sv)}
                 accessibilityRole="button"
-                accessibilityLabel={`${sv.name}, ${sv.duration_min} min, ${dh(sv.price_cents)}`}
+                accessibilityLabel={tr('{name}, {duration_min} min, {price_cents}', { name: sv.name, duration_min: sv.duration_min, price_cents: dh(sv.price_cents) })}
                 style={({ pressed }) => [s.svcRow, pressed && s.pressed]}>
                 <View style={s.grow}>
                   <Text style={s.svcName}>{sv.name}</Text>
-                  <Text style={s.svcMeta}>{sv.duration_min} min</Text>
+                  <Text style={s.svcMeta}>{tr('{duration_min} min', { duration_min: sv.duration_min })}</Text>
                 </View>
                 <Text style={s.svcPrice}>{dh(sv.price_cents)}</Text>
               </Pressable>
@@ -609,7 +611,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
 
       {/* appointment sheet */}
       <Modal visible={!!sheet} transparent animationType="slide" onRequestClose={() => setSheet(null)}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.backdrop}
+        <Pressable accessibilityRole="button" accessibilityLabel={tr('Close')} style={s.backdrop}
           onPress={() => setSheet(null)} />
         {sheet && (() => {
           const b = sheet;
@@ -626,67 +628,67 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
                   <View style={s.tagIcon}>
                     <Ionicons name="cut-outline" size={12} color={colors.accent} />
                   </View>
-                  <Text style={s.tagText}>{pending ? 'REQUEST' : 'APPOINTMENT'}</Text>
+                  <Text style={s.tagText}>{pending ? tr('REQUEST') : tr('APPOINTMENT')}</Text>
                 </View>
                 <Pressable onPress={() => setSheet(null)} hitSlop={8} accessibilityRole="button"
-                  accessibilityLabel="Close" style={({ pressed }) => [s.closeBtn, pressed && s.pressed]}>
+                  accessibilityLabel={tr('Close')} style={({ pressed }) => [s.closeBtn, pressed && s.pressed]}>
                   <Ionicons name="close" size={18} color={D.text} />
                 </Pressable>
               </View>
               <Pressable onPress={() => { setSheet(null); setSheetClient(clientRefOf(b)); }}
                 accessibilityRole="button"
-                accessibilityLabel={`View ${nameOf(b, barberId)}'s profile and history`}
+                accessibilityLabel={tr('View {b}\'s profile and history', { b: nameOf(b, barberId) })}
                 style={({ pressed }) => [s.clientPreview, pressed && s.pressed]}>
                 <Avatar url={isWalkIn ? null : b.customer?.avatar_url} name={nameOf(b, barberId)} size={48} />
                 <View style={s.grow}>
                   <Text style={s.sheetName}>{nameOf(b, barberId)}</Text>
                   <Text style={s.sheetSub}>
-                    {isWalkIn ? 'Walk-in (no account)' : `${b.services?.name ?? 'Service'} Â· view history`}
+                    {isWalkIn ? tr('Walk-in (no account)') : tr('{name} · view history', { name: b.services?.name ?? tr('Service') })}
                   </Text>
                 </View>
                 <Ionicons name="chevron-forward" size={18} color={D.sub} />
               </Pressable>
 
               <View style={s.infoCard}>
-                <InfoRow icon="time-outline" label="TIME"
-                  value={`${ampm(b.starts_at)} â€“ ${ampm(b.ends_at)}`} right={`${durMin(b)} min`} />
-                <InfoRow icon="card-outline" label="SERVICE PRICE" value={dh(b.price_cents)} />
-                {phone ? <InfoRow icon="call-outline" label="CLIENT PHONE" value={phone} /> : null}
+                <InfoRow icon="time-outline" label={tr('TIME')}
+                  value={`${ampm(b.starts_at)} – ${ampm(b.ends_at)}`} right={`${durMin(b)} min`} />
+                <InfoRow icon="card-outline" label={tr('SERVICE PRICE')} value={dh(b.price_cents)} />
+                {phone ? <InfoRow icon="call-outline" label={tr('CLIENT PHONE')} value={phone} /> : null}
               </View>
               {/* TODO(backlog): NOTES card needs a bookings.notes column (client book bet) */}
 
               {done ? (
                 <View style={s.doneRow}>
                   <Ionicons name="checkmark-circle" size={16} color={colors.success} />
-                  <Text style={s.doneText}>Completed {ampm(b.completed_at!)}</Text>
+                  <Text style={s.doneText}>{tr('Completed {ampm}', { ampm: ampm(b.completed_at!) })}</Text>
                 </View>
               ) : (
                 <Pressable disabled={busy} accessibilityRole="button"
-                  accessibilityLabel={pending ? 'Confirm booking' : 'Mark as complete'}
+                  accessibilityLabel={pending ? tr('Confirm booking') : tr('Mark as complete')}
                   onPress={() => (pending ? confirmBooking(b) : markComplete(b))}
                   style={({ pressed }) => [s.primaryBtn, (pressed || busy) && s.pressed]}>
                   <Ionicons name="checkmark-circle-outline" size={16} color={colors.onAccent} />
-                  <Text style={s.primaryText}>{pending ? 'Confirm booking' : 'Mark as complete'}</Text>
+                  <Text style={s.primaryText}>{pending ? tr('Confirm booking') : tr('Mark as complete')}</Text>
                 </Pressable>
               )}
 
               <View style={s.btnRow}>
                 {!done && (
-                  <SheetBtn icon="calendar-outline" label="Reschedule"
+                  <SheetBtn icon="calendar-outline" label={tr('Reschedule')}
                     onPress={() => { setSheet(null); setResched(b); setReschedAt(null); setMoveReasons([]); }} />
                 )}
                 {!isWalkIn && (
-                  <SheetBtn icon="chatbox-outline" label="Message" onPress={() => openChat(b)} />
+                  <SheetBtn icon="chatbox-outline" label={tr('Message')} onPress={() => openChat(b)} />
                 )}
               </View>
               {(phone || canCancel) ? (
                 <View style={s.btnRow}>
                   {phone && (
-                    <SheetBtn icon="call-outline" label="Call"
+                    <SheetBtn icon="call-outline" label={tr('Call')}
                       onPress={() => Linking.openURL(`tel:${phone}`)} />
                   )}
                   {canCancel && (
-                    <SheetBtn danger icon="trash-outline" label="Cancel" onPress={() => cancelBooking(b)} />
+                    <SheetBtn danger icon="trash-outline" label={tr('Cancel')} onPress={() => cancelBooking(b)} />
                   )}
                 </View>
               ) : null}
@@ -695,14 +697,14 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
         })()}
       </Modal>
 
-      {/* client profile preview â†’ full history */}
+      {/* client profile preview → full history */}
       <ClientSheet client={sheetClient} barberId={barberId}
         onClose={() => setSheetClient(null)}
         onChat={(id, title) => { setSheetClient(null); setChat({ id, title }); onChromeHidden?.(true); }} />
 
       {/* break sheet */}
       <Modal visible={!!blockSheet} transparent animationType="slide" onRequestClose={() => setBlockSheet(null)}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.backdrop}
+        <Pressable accessibilityRole="button" accessibilityLabel={tr('Close')} style={s.backdrop}
           onPress={() => setBlockSheet(null)} />
         {blockSheet && (() => {
           const b = blockSheet;
@@ -715,27 +717,27 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
                     <View style={[s.tagIcon, s.tagIconAmber]}>
                       <Ionicons name="cafe-outline" size={12} color={AMBER} />
                     </View>
-                    <Text style={[s.tagText, { color: AMBER }]}>BREAK</Text>
+                    <Text style={[s.tagText, { color: AMBER }]}>{tr('BREAK')}</Text>
                   </View>
-                  <Text style={s.sheetName}>{b.label ?? 'Break'}</Text>
-                  {b.day === null && <Text style={s.sheetSub}>Repeats every day</Text>}
+                  <Text style={s.sheetName}>{b.label ?? tr('Break')}</Text>
+                  {b.day === null && <Text style={s.sheetSub}>{tr('Repeats every day')}</Text>}
                 </View>
                 <Pressable onPress={() => setBlockSheet(null)} hitSlop={8} accessibilityRole="button"
-                  accessibilityLabel="Close" style={({ pressed }) => [s.closeBtn, pressed && s.pressed]}>
+                  accessibilityLabel={tr('Close')} style={({ pressed }) => [s.closeBtn, pressed && s.pressed]}>
                   <Ionicons name="close" size={18} color={D.text} />
                 </Pressable>
               </View>
 
               <View style={s.infoCard}>
-                <InfoRow icon="time-outline" label="TIME"
-                  value={`${minLabel(b.start_min)} â€“ ${minLabel(b.end_min)}`}
+                <InfoRow icon="time-outline" label={tr('TIME')}
+                  value={`${minLabel(b.start_min)} – ${minLabel(b.end_min)}`}
                   right={`${b.end_min - b.start_min} min`} />
               </View>
 
               <View style={s.btnRow}>
-                <SheetBtn icon="calendar-outline" label="Reschedule"
-                  onPress={() => Alert.alert('Edit this break', 'Break times are edited in Profile â†’ Schedule settings.')} />
-                <SheetBtn danger icon="trash-outline" label="Remove" onPress={() => removeBlock(b)} />
+                <SheetBtn icon="calendar-outline" label={tr('Reschedule')}
+                  onPress={() => Alert.alert(tr('Edit this break'), tr('Break times are edited in Profile → Schedule settings.'))} />
+                <SheetBtn danger icon="trash-outline" label={tr('Remove')} onPress={() => removeBlock(b)} />
               </View>
             </View>
           );
@@ -744,20 +746,20 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
 
       {/* reschedule */}
       <Modal visible={!!resched} transparent animationType="slide" onRequestClose={() => setResched(null)}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.backdrop}
+        <Pressable accessibilityRole="button" accessibilityLabel={tr('Close')} style={s.backdrop}
           onPress={() => setResched(null)} />
         {resched && (
           <View style={[s.sheet, s.sheetLight]} onAccessibilityEscape={() => setResched(null)}>
             <Text style={s.sheetTitleLight}>
-              Move {nameOf(resched, barberId)} Â· {durMin(resched)} min
+              {tr('Move {resched} · {resched2} min', { resched: nameOf(resched, barberId), resched2: durMin(resched) })}
             </Text>
             {/* ponytail: SlotPicker is light-themed; lives on a light sheet until a dark variant matters */}
             <SlotPicker barberId={barberId} durationMin={durMin(resched)}
               selected={reschedAt} onSelect={setReschedAt} />
-            <Text style={s.reasonLabelLight}>Reason (optional) â€” tap any</Text>
+            <Text style={s.reasonLabelLight}>{tr('Reason (optional) — tap any')}</Text>
             <ReasonChips light options={MOVE_REASONS} selected={moveReasons}
               onToggle={(r) => setMoveReasons((xs) => toggleReason(xs, r))} />
-            <PillButton title={reschedAt ? `Move to ${reschedAt.toTimeString().slice(0, 5)}` : 'Pick a new time'}
+            <PillButton title={reschedAt ? tr('Move to {reschedAt}', { reschedAt: reschedAt.toTimeString().slice(0, 5) }) : tr('Pick a new time')}
               disabled={!reschedAt} onPress={confirmReschedule} />
           </View>
         )}
@@ -765,30 +767,30 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
 
       {/* cancel confirmation with reason */}
       <Modal visible={!!cancelling} transparent animationType="slide" onRequestClose={() => setCancelling(null)}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Keep booking" style={s.backdrop}
+        <Pressable accessibilityRole="button" accessibilityLabel={tr('Keep booking')} style={s.backdrop}
           onPress={() => setCancelling(null)} />
         {cancelling && (
           <View style={s.sheet} onAccessibilityEscape={() => setCancelling(null)}>
             <View style={s.handle} />
             <View style={s.sheetHead}>
               <View style={s.grow}>
-                <Text style={s.sheetName}>Cancel this booking?</Text>
-                <Text style={s.sheetSub}>{nameOf(cancelling, barberId)} Â· {ampm(cancelling.starts_at)}</Text>
+                <Text style={s.sheetName}>{tr('Cancel this booking?')}</Text>
+                <Text style={s.sheetSub}>{nameOf(cancelling, barberId)} · {ampm(cancelling.starts_at)}</Text>
               </View>
             </View>
-            <Text style={s.reasonLabel}>REASON (OPTIONAL) â€” TAP ANY</Text>
+            <Text style={s.reasonLabel}>{tr('REASON (OPTIONAL) — TAP ANY')}</Text>
             <ReasonChips options={CANCEL_REASONS} selected={cancelReasons}
               onToggle={(r) => setCancelReasons((xs) => toggleReason(xs, r))} />
             <View style={s.btnRow}>
               <Pressable onPress={() => setCancelling(null)} accessibilityRole="button"
-                accessibilityLabel="Keep booking" style={({ pressed }) => [s.sheetBtn, pressed && s.pressed]}>
-                <Text style={s.sheetBtnText}>Keep</Text>
+                accessibilityLabel={tr('Keep booking')} style={({ pressed }) => [s.sheetBtn, pressed && s.pressed]}>
+                <Text style={s.sheetBtnText}>{tr('Keep')}</Text>
               </Pressable>
               <Pressable onPress={doCancel} disabled={busy} accessibilityRole="button"
-                accessibilityLabel="Cancel booking"
+                accessibilityLabel={tr('Cancel booking')}
                 style={({ pressed }) => [s.sheetBtn, s.sheetBtnDanger, (pressed || busy) && s.pressed]}>
                 <Ionicons name="trash-outline" size={16} color={colors.danger} />
-                <Text style={[s.sheetBtnText, { color: colors.danger }]}>Cancel booking</Text>
+                <Text style={[s.sheetBtnText, { color: colors.danger }]}>{tr('Cancel booking')}</Text>
               </Pressable>
             </View>
           </View>
@@ -799,10 +801,10 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
       {toast && (
         <View style={s.toast}>
           <Ionicons name="checkmark-circle" size={18} color={colors.success} />
-          <Text style={s.toastText} numberOfLines={1}>{nameOf(toast.booking, barberId)} â€” completed</Text>
-          <Pressable onPress={undoComplete} accessibilityRole="button" accessibilityLabel="Undo completion"
+          <Text style={s.toastText} numberOfLines={1}>{tr('{booking} — completed', { booking: nameOf(toast.booking, barberId) })}</Text>
+          <Pressable onPress={undoComplete} accessibilityRole="button" accessibilityLabel={tr('Undo completion')}
             hitSlop={8} style={({ pressed }) => pressed && s.pressed}>
-            <Text style={s.toastUndo}>UNDO</Text>
+            <Text style={s.toastUndo}>{tr('UNDO')}</Text>
           </Pressable>
         </View>
       )}

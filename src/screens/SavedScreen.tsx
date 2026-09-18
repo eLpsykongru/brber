@@ -9,6 +9,7 @@ import { Filter, SavedBarber, SavedRow, SavedSalon, splitSaved } from '../lib/sa
 import { shouldRemove } from '../lib/swipe';
 import { supabase } from '../lib/supabase';
 import { colors, inter, radius, sp, TOP_INSET } from '../theme';
+import { tr } from '../lib/i18n';
 
 // EXPL-24 … EXPL-27 — Saved, promoted from a page nobody could find twice to a
 // tab that sorts on one question: can you sit in the chair today.
@@ -53,7 +54,7 @@ export default function SavedScreen({ onBack, onOpenBarber, onOpenSalon }: {
 
   const load = useCallback(() => {
     supabase.rpc('my_wishlist').then(({ data, error }) => {
-      if (error) { Alert.alert('Could not load', error.message); return; }
+      if (error) { Alert.alert(tr('Could not load'), error.message); return; }
       setW(data as Wishlist);
     });
   }, []);
@@ -68,7 +69,7 @@ export default function SavedScreen({ onBack, onOpenBarber, onOpenSalon }: {
     if (undoTimer.current) clearTimeout(undoTimer.current);
     undoTimer.current = setTimeout(() => setUndo(null), 6000);
     const { error } = await supabase.from('wishlists').delete().eq(col(row), row.id);
-    if (error) { Alert.alert('Could not remove', error.message); setUndo(null); load(); }
+    if (error) { Alert.alert(tr('Could not remove'), error.message); setUndo(null); load(); }
   }
 
   // No soft-delete column: `wishlists` orders by name and nothing user-visible
@@ -82,7 +83,7 @@ export default function SavedScreen({ onBack, onOpenBarber, onOpenSalon }: {
     if (!u.user) return;
     const { error } = await supabase.from('wishlists')
       .insert({ customer_id: u.user.id, [col(row)]: row.id });
-    if (error) Alert.alert('Could not put it back', error.message);
+    if (error) Alert.alert(tr('Could not put it back'), error.message);
     load();
   }
 
@@ -92,7 +93,7 @@ export default function SavedScreen({ onBack, onOpenBarber, onOpenSalon }: {
     if (!u.user) return;
     const { error } = await supabase.from('notification_prefs')
       .upsert({ user_id: u.user.id, push_saved_gap: on }, { onConflict: 'user_id' });
-    if (error) { Alert.alert('Could not save', error.message); load(); }
+    if (error) { Alert.alert(tr('Could not save'), error.message); load(); }
   }
 
   // the header comes too, or there is no way out while the list is loading
@@ -123,8 +124,8 @@ export default function SavedScreen({ onBack, onOpenBarber, onOpenSalon }: {
 
         {!nothing && (
           <View style={s.chipRow}>
-            {([['all', `All ${counts.all}`], ['barber', `Barbers ${counts.barbers}`],
-              ['salon', `Salons ${counts.salons}`]] as [Filter, string][]).map(([k, label]) => (
+            {([['all', tr('All {n}', { n: counts.all })], ['barber', tr('Barbers {n}', { n: counts.barbers })],
+              ['salon', tr('Salons {n}', { n: counts.salons })]] as [Filter, string][]).map(([k, label]) => (
               <Press key={k} onPress={() => setFilter(k)}
                 accessibilityRole="tab" accessibilityState={{ selected: filter === k }}
                 style={filter === k ? s.chipOn : s.chip}>
@@ -140,30 +141,30 @@ export default function SavedScreen({ onBack, onOpenBarber, onOpenSalon }: {
               <Ionicons name="time-outline" size={16} color="#FFFFFF" />
             </View>
             <View style={s.grow}>
-              <Text style={s.alertTitle}>Tell me when a saved barber has a gap</Text>
+              <Text style={s.alertTitle}>{tr('Tell me when a saved barber has a gap')}</Text>
               {/* the frequency line is gone until something sends this: see the
                   header note. The switch stays, so the preference survives. */}
-              <Text style={s.alertSub}>Same-day cancellations only</Text>
+              <Text style={s.alertSub}>{tr('Same-day cancellations only')}</Text>
             </View>
             <Switch value={w.gap_alerts} onValueChange={setAlerts}
-              accessibilityLabel="Notify me about gaps at saved barbers"
+              accessibilityLabel={tr('Notify me about gaps at saved barbers')}
               trackColor={{ true: colors.accent, false: '#3A3A40' }} thumbColor="#FFFFFF" />
           </View>
         )}
 
         {nothing && (
-          <Empty icon="heart-outline" title="Nothing saved yet"
-            text="Tap the heart on a barber or a shop and they'll wait for you here." />
+          <Empty icon="heart-outline" title={tr('Nothing saved yet')}
+            text={tr('Tap the heart on a barber or a shop and they\'ll wait for you here.')} />
         )}
 
-        {free.length > 0 && <Text style={s.section}>FREE TODAY</Text>}
+        {free.length > 0 && <Text style={s.section}>{tr('FREE TODAY')}</Text>}
         {free.map((r) => (
           <SwipeRow key={r.id} onRemove={() => unsave(r)}>
             <SavedCard row={r} onOpen={() => open(r)} onRemove={() => unsave(r)} />
           </SwipeRow>
         ))}
 
-        {later.length > 0 && <Text style={s.section}>LATER THIS WEEK</Text>}
+        {later.length > 0 && <Text style={s.section}>{tr('LATER THIS WEEK')}</Text>}
         {later.map((r) => (
           <SwipeRow key={r.id} onRemove={() => unsave(r)}>
             <SavedCard row={r} onOpen={() => open(r)} onRemove={() => unsave(r)} />
@@ -174,26 +175,26 @@ export default function SavedScreen({ onBack, onOpenBarber, onOpenSalon }: {
             that hides them */}
         {blocked.length > 0 && (
           <Press onPress={() => setCantBook(true)} style={s.blockedStrip}
-            accessibilityLabel={`${blocked.length} saved names can't be booked right now`}>
+            accessibilityLabel={tr('{count} saved names can\'t be booked right now', { count: blocked.length })}>
             <View style={s.blockedIcon}>
               <Ionicons name="information-circle-outline" size={16} color={colors.textSecondary} />
             </View>
             <Text style={s.blockedText}>
-              {blocked.length} saved {blocked.length === 1 ? 'name' : 'names'} can't be booked right now
+              {tr('{count} saved {x} can\'t be booked right now', { count: blocked.length, x: blocked.length === 1 ? tr('name') : tr('names') })}
             </Text>
             <Ionicons name="chevron-forward" size={14} color={colors.textSecondary} />
           </Press>
         )}
 
-        {!nothing && <Text style={s.foot}>Nobody is told you saved them.</Text>}
-        {!nothing && <Text style={s.foot}>Taking someone off doesn't cancel anything you booked with them.</Text>}
+        {!nothing && <Text style={s.foot}>{tr('Nobody is told you saved them.')}</Text>}
+        {!nothing && <Text style={s.foot}>{tr('Taking someone off doesn\'t cancel anything you booked with them.')}</Text>}
       </ScrollView>
 
       {undo && (
         <View style={s.toast}>
-          <Text style={s.toastText} numberOfLines={1}>{undo.name} taken off Saved</Text>
-          <Press onPress={undoRemove} hitSlop={8} accessibilityLabel={`Put ${undo.name} back`}>
-            <Text style={s.toastUndo}>UNDO</Text>
+          <Text style={s.toastText} numberOfLines={1}>{tr('{name} taken off Saved', { name: undo.name })}</Text>
+          <Press onPress={undoRemove} hitSlop={8} accessibilityLabel={tr('Put {name} back', { name: undo.name })}>
+            <Text style={s.toastUndo}>{tr('UNDO')}</Text>
           </Press>
         </View>
       )}
@@ -217,11 +218,11 @@ export default function SavedScreen({ onBack, onOpenBarber, onOpenSalon }: {
 function Head({ onBack, kept, free }: { onBack?: () => void; kept: number; free: number }) {
   // at a tab root there is no back button, so the eyebrow count carries the
   // header on its own rather than sitting under a centred title
-  if (onBack) return <ScreenHeader title="Saved" onBack={onBack} />;
+  if (onBack) return <ScreenHeader title={tr('Saved')} onBack={onBack} />;
   return (
     <View style={s.head}>
-      <Display size={26}>Saved</Display>
-      <Text style={s.headSub}>{kept} kept · {free} free today</Text>
+      <Display size={26}>{tr('Saved')}</Display>
+      <Text style={s.headSub}>{tr('{kept} kept · {free} free today', { kept, free })}</Text>
     </View>
   );
 }
@@ -245,19 +246,19 @@ function SavedCard({ row, onOpen, onRemove }: {
         <Text style={s.meta}>
           {row.kind === 'barber'
             ? `${row.salon}${row.rating ? ` · ${row.rating} ★` : ''}`
-            : `${row.district}${row.from_cents != null ? ` · from ${Math.round(row.from_cents / 100)} DH` : ''}`}
+            : `${row.district}${row.from_cents != null ? ` · ${tr('from {price} DH', { price: Math.round(row.from_cents / 100) })}` : ''}`}
         </Text>
         {/* today's first free time, or nothing — see the header note */}
-        {free && <Text style={s.free}>Free {hhmm(row.free_today!)} today</Text>}
-        {row.kind === 'salon' && !row.open && <Text style={s.shut}>Closed right now</Text>}
+        {free && <Text style={s.free}>{tr('Free {hhmm} today', { hhmm: hhmm(row.free_today!) })}</Text>}
+        {row.kind === 'salon' && !row.open && <Text style={s.shut}>{tr('Closed right now')}</Text>}
       </View>
       {free && (
-        <Press onPress={onOpen} style={s.bookBtn} accessibilityLabel={`Book ${row.name}`}>
-          <Text style={s.bookText}>BOOK</Text>
+        <Press onPress={onOpen} style={s.bookBtn} accessibilityLabel={tr('Book {name}', { name: row.name })}>
+          <Text style={s.bookText}>{tr('BOOK')}</Text>
         </Press>
       )}
       <Press onPress={onRemove} hitSlop={8} scale={0.86}
-        accessibilityLabel={`Remove ${row.name} from saved`} style={s.heart}>
+        accessibilityLabel={tr('Remove {name} from saved', { name: row.name })} style={s.heart}>
         <Ionicons name="heart" size={16} color={colors.accent} />
       </Press>
     </Press>
@@ -296,7 +297,7 @@ function SwipeRow({ children, onRemove }: { children: React.ReactNode; onRemove:
     <View style={s.swipeWrap} onLayout={(e) => { width.current = e.nativeEvent.layout.width; }}>
       <View style={s.swipeBack} pointerEvents="none">
         <Ionicons name="trash-outline" size={17} color={colors.onAccent} />
-        <Text style={s.swipeBackText}>REMOVE</Text>
+        <Text style={s.swipeBackText}>{tr('REMOVE')}</Text>
       </View>
       <Animated.View style={{ transform: [{ translateX: x }] }} {...pan.panHandlers}>
         {children}
@@ -311,9 +312,9 @@ function CantBookScreen({ rows, total, onBack, onRemove }: {
 }) {
   return (
     <View style={s.screen}>
-      <ScreenHeader title="Can't book" onBack={onBack} />
+      <ScreenHeader title={tr('Can\'t book')} onBack={onBack} />
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        <Text style={s.headSub}>{rows.length} of your {total} saved</Text>
+        <Text style={s.headSub}>{tr('{count} of your {total} saved', { count: rows.length, total })}</Text>
         {rows.map((r) => (
           <View key={r.id} style={s.blockedCard}>
             <View style={s.blockedHead}>
@@ -326,12 +327,12 @@ function CantBookScreen({ rows, total, onBack, onRemove }: {
                 )}
               <View style={s.grow}>
                 <Text style={s.name}>{r.name}</Text>
-                <Text style={s.meta}>{r.reason}</Text>
+                <Text style={s.meta}>{tr(r.reason ?? '')}</Text>
               </View>
               {r.kind === 'salon' && (
                 <View style={s.offPill}>
                   <View style={s.offDot} />
-                  <Text style={s.offText}>OFF</Text>
+                  <Text style={s.offText}>{tr('OFF')}</Text>
                 </View>
               )}
             </View>
@@ -340,20 +341,20 @@ function CantBookScreen({ rows, total, onBack, onRemove }: {
             {r.has_booking && (
               <Text style={s.blockedBody}>
                 {r.kind === 'salon'
-                  ? "Sterncut is working with this shop. You can't book it until that's done — your booking still stands."
-                  : 'You already have a booking with him. That still stands.'}
+                  ? tr('Sterncut is working with this shop. You can\'t book it until that\'s done — your booking still stands.')
+                  : tr('You already have a booking with him. That still stands.')}
               </Text>
             )}
             <Press onPress={() => onRemove(r)} style={s.removeBtn}
-              accessibilityLabel={`Remove ${r.name} from saved`}>
-              <Text style={s.removeText}>REMOVE</Text>
+              accessibilityLabel={tr('Remove {name} from saved', { name: r.name })}>
+              <Text style={s.removeText}>{tr('REMOVE')}</Text>
             </Press>
           </View>
         ))}
         <View style={s.note}>
           <Ionicons name="information-circle-outline" size={15} color={colors.textSecondary} />
           <Text style={s.noteText}>
-            We never unsave anyone for you. They stay on this list, greyed, until you take them off.
+            {tr('We never unsave anyone for you. They stay on this list, greyed, until you take them off.')}
           </Text>
         </View>
       </ScrollView>

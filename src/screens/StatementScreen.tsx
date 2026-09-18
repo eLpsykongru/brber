@@ -3,6 +3,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Ico, Screen, T, TAB_INSET, TopBar } from '../components/dark';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
+import { loc, tr, trRich, weekdayName } from '../lib/i18n';
 
 // OSH-16 / OSH-17 of "Owner - Shop.dc.html" — the week, and which way it points.
 //
@@ -22,8 +23,8 @@ import { dark as D } from '../theme';
 
 const dh = (c: number) => Math.round(Math.abs(c) / 100).toLocaleString('en-US').replace(/,/g, ' ');
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const DAYS = [0, 1, 2, 3, 4, 5, 6].map((i) => weekdayName(i, 'short'));
+const MONTHS = Array.from({ length: 12 }, (_, m) => new Date(2023, m, 1).toLocaleDateString(loc('en-GB'), { month: 'short' }));
 // §7: times read `Fri 4 Sep 21:04`, and a coverage window reads
 // `Fri 28 Aug 21:00 → Fri 4 Sep 21:00`.
 const when = (iso: string | null) => {
@@ -76,7 +77,7 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
 
   const load = useCallback(async (w: string | null) => {
     const { data, error } = await supabase.rpc('my_statement', { p_week: w });
-    if (error) return Alert.alert('Could not load your statement', error.message);
+    if (error) return Alert.alert(tr('Could not load your statement'), error.message);
     setP(data as Payload);
   }, []);
   useEffect(() => { load(week); }, [load, week]);
@@ -110,7 +111,7 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
   if (!p) {
     return (
       <Screen bottom={TAB_INSET}>
-        <TopBar title="Your week" onBack={onBack} />
+        <TopBar title={tr('Your week')} onBack={onBack} />
       </Screen>
     );
   }
@@ -118,13 +119,12 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
   if (!s) {
     return (
       <Screen bottom={TAB_INSET}>
-        <TopBar title="Your week" onBack={onBack} />
+        <TopBar title={tr('Your week')} onBack={onBack} />
         {held && <HeldCard h={held} />}
         <View style={s2.empty}>
           <Ico name="file-text" size={26} color={D.sub} />
           <T size={12.5} c={D.sub} style={s2.centre}>
-            No week has been closed yet. Statements are cut on Friday evening and
-            cover the seven days before.
+            {tr('No week has been closed yet. Statements are cut on Friday evening and cover the seven days before.')}
           </T>
         </View>
       </Screen>
@@ -141,7 +141,7 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
 
   return (
     <Screen bottom={TAB_INSET}>
-      <TopBar title={`Week ${s.week.slice(-2)}`} onBack={onBack} />
+      <TopBar title={tr('Week {week}', { week: s.week.slice(-2) })} onBack={onBack} />
       <ScrollView contentContainerStyle={s2.pad} showsVerticalScrollIndicator={false}>
 
         {held && <HeldCard h={held} />}
@@ -153,7 +153,7 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
             were in the shop." Nothing else on either surface can prove that. */}
         {code && vs?.pending && (
           <View style={s2.codeCard}>
-            <T w="b" size={10} c={D.accent} ls={1.5}>READ THESE OUT TO THE AGENT</T>
+            <T w="b" size={10} c={D.accent} ls={1.5}>{tr('READ THESE OUT TO THE AGENT')}</T>
             <View style={s2.codeRow}>
               {code.code.split('').map((n, i) => (
                 <View key={i} style={s2.codeBox}>
@@ -162,9 +162,7 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
               ))}
             </View>
             <T size={11.5} c={D.sub} style={s2.codeWhy}>
-              {vs.pending.agent} is coming for {dh(vs.pending.amount_cents)} DH.
-              Count it with him first, then give him these four digits — they are
-              how we know he was really here. They change after every visit.
+              {tr('{agent} is coming for {amount_cents} DH. Count it with him first, then give him these four digits — they are how we know he was really here. They change after every visit.', { agent: vs.pending.agent, amount_cents: dh(vs.pending.amount_cents) })}
             </T>
           </View>
         )}
@@ -180,17 +178,15 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
                 color={vs.last_receipt.direction === 'pay_out' ? D.green : D.textDim} />
               <T w="b" size={12.5} style={s2.grow}>
                 {vs.last_receipt.direction === 'pay_out'
-                  ? `Received ${dh(vs.last_receipt.amount_cents)} DH`
-                  : `You handed over ${dh(vs.last_receipt.amount_cents)} DH`}
+                  ? tr('Received {amount_cents} DH', { amount_cents: dh(vs.last_receipt.amount_cents) })
+                  : tr('You handed over {amount_cents} DH', { amount_cents: dh(vs.last_receipt.amount_cents) })}
               </T>
               <T size={10.5} c={D.muted}>{vs.last_receipt.ref}</T>
             </View>
             <T size={11.5} c={D.sub} style={s2.receiptBody}>
-              {vs.last_receipt.agent} · {when(vs.last_receipt.at)} · week{' '}
-              {vs.last_receipt.week.slice(-2)} ·{' '}
-              {vs.last_receipt.verified_by === 'signature'
-                ? 'you signed for it'
-                : 'confirmed with your code'}
+              {tr('{agent} · {at} · week {week} · {x}', { agent: vs.last_receipt.agent, at: when(vs.last_receipt.at), week: vs.last_receipt.week.slice(-2), x: vs.last_receipt.verified_by === 'signature'
+                ? tr('you signed for it')
+                : tr('confirmed with your code') })}
             </T>
           </View>
         )}
@@ -199,72 +195,68 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
         <View style={[s2.hero, { borderColor: nil ? D.border : accent }]}>
           <View style={s2.heroTop}>
             <T w="b" size={10} c={accent} ls={1.5}>
-              {nil ? `WEEK ${s.week.slice(-2)} · NOTHING MOVED`
-                : pay ? `WEEK ${s.week.slice(-2)} · WE OWE YOU`
-                  : `WEEK ${s.week.slice(-2)} · YOU ARE HOLDING OURS`}
+              {nil ? tr('WEEK {week} · NOTHING MOVED', { week: s.week.slice(-2) })
+                : pay ? tr('WEEK {week} · WE OWE YOU', { week: s.week.slice(-2) })
+                  : tr('WEEK {week} · YOU ARE HOLDING OURS', { week: s.week.slice(-2) })}
             </T>
             <View style={s2.grow} />
             <View style={[s2.chip, { backgroundColor: accent + '22' }]}>
               <T w="b" size={9.5} c={accent} ls={1}>
-                {s.settled_at ? (pay ? 'PAID' : 'COLLECTED') : nil ? 'CLOSED' : 'DUE FRIDAY'}
+                {s.settled_at ? (pay ? tr('PAID') : tr('COLLECTED')) : nil ? tr('CLOSED') : tr('DUE FRIDAY')}
               </T>
             </View>
           </View>
-          <T style={[s2.huge, { color: D.text }]}>{dh(s.total_cents)} DH</T>
+          <T style={[s2.huge, { color: D.text }]}>{tr('{total_cents} DH', { total_cents: dh(s.total_cents) })}</T>
 
           {s.settled_at ? (
             <T size={12} c={D.sub} style={s2.heroSub}>
-              {s.agent ?? 'An agent'} {pay ? 'brought it' : 'counted it with you'} {when(s.settled_at)}
-              {pay ? ', you counted it and signed' : ''}
-              {s.receipt_ref ? ` · receipt ${s.receipt_ref}` : ''}
+              {s.agent ?? tr('An agent')} {pay ? tr('brought it') : tr('counted it with you')} {when(s.settled_at)}
+              {pay ? tr(', you counted it and signed') : ''}
+              {s.receipt_ref ? tr(' · receipt {receipt_ref}', { receipt_ref: s.receipt_ref }) : ''}
             </T>
           ) : nil ? (
             <T size={12} c={D.sub} style={s2.heroSub}>
-              No cash moved either way this week. You still get the statement —
-              a nil week is a fact, not a gap.
+              {tr('No cash moved either way this week. You still get the statement — a nil week is a fact, not a gap.')}
             </T>
           ) : (
             <T size={12} c={D.sub} style={s2.heroSub}>
-              Have it ready in the till. An agent comes Friday between 17:00 and
-              20:00, counts it with you and leaves a receipt.
+              {tr('Have it ready in the till. An agent comes Friday between 17:00 and 20:00, counts it with you and leaves a receipt.')}
             </T>
           )}
           <T size={11} c={D.muted} style={s2.window}>
-            Covers {day(s.covers_from)} 21:00 → {day(s.covers_to)} 21:00
+            {tr('Covers {covers_from} 21:00 → {covers_to} 21:00', { covers_from: day(s.covers_from), covers_to: day(s.covers_to) })}
           </T>
         </View>
 
         {/* §2.7's sentence the paid screen does not need */}
         {!pay && !nil && (
           <View style={s2.notBill}>
-            <T w="b" size={12.5} c={D.text}>This is not a bill</T>
+            <T w="b" size={12.5} c={D.text}>{tr('This is not a bill')}</T>
             <T size={11.5} c={D.sub} style={s2.notBillBody}>
-              The {dh(s.hold_cents)} DH your barbers took over the counter is
-              customers&rsquo; wallet money — ours, sitting in your till. Sterncut
-              charges you nothing and takes no fee from either side.
+              {tr('The {hold_cents} DH your barbers took over the counter is customers’ wallet money — ours, sitting in your till. Sterncut charges you nothing and takes no fee from either side.', { hold_cents: dh(s.hold_cents) })}
             </T>
           </View>
         )}
 
-        <T w="b" size={10} c={D.sub} ls={1.5} style={s2.section}>HOW IT ADDS UP</T>
+        <T w="b" size={10} c={D.sub} ls={1.5} style={s2.section}>{tr('HOW IT ADDS UP')}</T>
 
         <View style={s2.card}>
           {/* the earning line first and largest when we owe him; our float first
               when he owes us. Either way every row carries a reference and a time. */}
           {pay ? (
             <>
-              <Group label="Deposits you earned" total={s.earned_cents} colour={D.green} />
+              <Group label={tr('Deposits you earned')} total={s.earned_cents} colour={D.green} />
               {s.earned_lines.map((x) => (
                 <Row key={x.ref + x.at} it={x} sign={x.kind === 'refund' ? '−' : '+'} />
               ))}
-              <Group label="Our cash your barbers took" total={-s.hold_cents} />
+              <Group label={tr('Our cash your barbers took')} total={-s.hold_cents} />
               {s.float_lines.map((x) => <Row key={x.ref} it={x} sign="−" />)}
             </>
           ) : (
             <>
-              <Group label="Our cash in your till" total={s.hold_cents} />
+              <Group label={tr('Our cash in your till')} total={s.hold_cents} />
               {s.float_lines.map((x) => <Row key={x.ref} it={x} sign="+" />)}
-              <Group label="Deposits you earned" total={-s.earned_cents} colour={D.green} />
+              <Group label={tr('Deposits you earned')} total={-s.earned_cents} colour={D.green} />
               {s.earned_lines.map((x) => (
                 <Row key={x.ref + x.at} it={x} sign={x.kind === 'refund' ? '+' : '−'} />
               ))}
@@ -277,19 +269,19 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
             <>
               <View style={s2.rule} />
               <View style={s2.line}>
-                <T w="sb" size={12.5} style={s2.grow}>This week</T>
-                <T w="b" size={13} style={s2.num}>{dh(s.subtotal_cents)} DH</T>
+                <T w="sb" size={12.5} style={s2.grow}>{tr('This week')}</T>
+                <T w="b" size={13} style={s2.num}>{tr('{subtotal_cents} DH', { subtotal_cents: dh(s.subtotal_cents) })}</T>
               </View>
               {s.carried_lines.map((x) => (
                 <Pressable key={x.ref} onPress={() => setOpen(x)} style={[s2.line, s2.carried]}>
                   <View style={s2.grow}>
-                    <T size={12} c={D.amber}>From week {x.source_week?.slice(-2)} · a refund</T>
+                    <T size={12} c={D.amber}>{tr('From week {source_week} · a refund', { source_week: x.source_week?.slice(-2) })}</T>
                     <T size={10.5} c={D.muted} style={s2.gap2}>
-                      {x.ref} · refunded {when(x.at)}
+                      {tr('{ref} · refunded {at}', { ref: x.ref, at: when(x.at) })}
                     </T>
                   </View>
                   <T w="b" size={12.5} c={D.amber} style={s2.num}>
-                    {x.cents >= 0 ? '+' : '−'} {dh(x.cents)} DH
+                    {tr('{x} {cents} DH', { x: x.cents >= 0 ? '+' : '−', cents: dh(x.cents) })}
                   </T>
                   <Ico name="chevron-right" size={14} color={D.muted} />
                 </Pressable>
@@ -300,39 +292,38 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
           <View style={s2.rule} />
           <View style={s2.line}>
             <T w="b" size={13} style={s2.grow}>
-              {nil ? 'Nothing to move' : pay ? 'We hand you' : 'You put on the counter'}
+              {nil ? tr('Nothing to move') : pay ? tr('We hand you') : tr('You put on the counter')}
             </T>
-            <T w="eb" size={19} c={accent} style={s2.num}>{dh(s.total_cents)} DH</T>
+            <T w="eb" size={19} c={accent} style={s2.num}>{tr('{total_cents} DH', { total_cents: dh(s.total_cents) })}</T>
           </View>
         </View>
 
         <T size={11} c={D.muted} style={s2.fine}>
-          Sterncut takes no fee from either side. Every line above carries its
-          reference and the minute it happened, so you can check any one of them
-          against your own day.
+          {tr('Sterncut takes no fee from either side. Every line above carries its reference and the minute it happened, so you can check any one of them against your own day.')}
         </T>
         {/* §6's footer, on every statement: it is what makes the phrase mean
             something on the statements that do carry it. */}
         <T size={11} c={D.muted} style={s2.fine}>
-          A line only says <T size={11} c={D.sub}>confirmed with your code</T> when
-          you typed those four digits and they matched.
+          {trRich('A line only says <b>confirmed with your code</b> when you typed those four digits and they matched.', {
+            b: (text, key) => <T key={key} size={11} c={D.sub}>{text}</T>,
+          })}
         </T>
 
         {/* the weeks behind this one */}
         {(p.weeks ?? []).length > 1 && (
           <>
-            <T w="b" size={10} c={D.sub} ls={1.5} style={s2.section}>EARLIER WEEKS</T>
+            <T w="b" size={10} c={D.sub} ls={1.5} style={s2.section}>{tr('EARLIER WEEKS')}</T>
             <View style={s2.card}>
               {(p.weeks ?? []).slice(0, 8).map((w) => (
                 <Pressable key={w.covers_to} onPress={() => setWeek(w.covers_to)}
                   style={[s2.line, w.week === s.week && s2.lineOn]}>
                   <T size={12.5} c={w.week === s.week ? D.text : D.sub} style={s2.grow}>
-                    Week {w.week.slice(-2)}
+                    {tr('Week {week}', { week: w.week.slice(-2) })}
                   </T>
                   <T size={11} c={D.muted} style={s2.dirn}>
-                    {w.direction === 'pay_out' ? 'paid to you' : w.direction === 'nil' ? 'nil' : 'you paid'}
+                    {w.direction === 'pay_out' ? tr('paid to you') : w.direction === 'nil' ? tr('nil') : tr('you paid')}
                   </T>
-                  <T w="b" size={12.5} style={s2.num}>{dh(w.total_cents)} DH</T>
+                  <T w="b" size={12.5} style={s2.num}>{tr('{total_cents} DH', { total_cents: dh(w.total_cents) })}</T>
                 </Pressable>
               ))}
             </View>
@@ -348,7 +339,7 @@ function Group({ label, total, colour }: { label: string; total: number; colour?
     <View style={s2.group}>
       <T w="b" size={10} c={D.sub} ls={1.3} style={s2.grow}>{label.toUpperCase()}</T>
       <T w="b" size={12.5} c={colour ?? D.text} style={s2.num}>
-        {total < 0 ? '− ' : ''}{dh(total)} DH
+        {tr('{x}{total} DH', { x: total < 0 ? '− ' : '', total: dh(total) })}
       </T>
     </View>
   );
@@ -362,7 +353,7 @@ function Row({ it, sign }: { it: Item; sign: string }) {
         <T size={10.5} c={D.muted} style={s2.gap2}>{it.ref} · {when(it.at)}</T>
       </View>
       <T w="b" size={12.5} c={sign === '+' ? D.green : D.text} style={s2.num}>
-        {sign} {dh(it.cents)} DH
+        {tr('{sign} {cents} DH', { sign, cents: dh(it.cents) })}
       </T>
     </View>
   );
@@ -392,7 +383,7 @@ function DisputeCard({ d, onAnswered }: {
       p_receipt: d.receipt, p_yes: yes,
     });
     setBusy(false);
-    if (error) return Alert.alert('Could not send that', error.message);
+    if (error) return Alert.alert(tr('Could not send that'), error.message);
     onAnswered();
   };
 
@@ -401,8 +392,7 @@ function DisputeCard({ d, onAnswered }: {
       <View style={s2.answered}>
         <Ico name="check-circle" size={15} color={D.green} />
         <T size={11.5} c={D.sub} style={s2.grow}>
-          Thank you — you told us {d.answered ? 'yes' : 'no'} about the{' '}
-          {dh(d.cents)} DH on {d.ref}. Someone is looking at it.
+          {tr('Thank you — you told us {x} about the {cents} DH on {ref}. Someone is looking at it.', { x: d.answered ? tr('yes') : tr('no'), cents: dh(d.cents), ref: d.ref })}
         </T>
       </View>
     );
@@ -410,30 +400,27 @@ function DisputeCard({ d, onAnswered }: {
 
   return (
     <View style={s2.dispute}>
-      <T w="b" size={10} c={D.amber} ls={1.5}>WE NEED TO ASK YOU SOMETHING</T>
+      <T w="b" size={10} c={D.amber} ls={1.5}>{tr('WE NEED TO ASK YOU SOMETHING')}</T>
       <T w="b" size={16} style={s2.dq}>
-        Did you hand {d.agent} {dh(d.cents)} DH on {when(d.at)}?
+        {tr('Did you hand {agent} {cents} DH on {at}?', { agent: d.agent, cents: dh(d.cents), at: when(d.at) })}
       </T>
       <T size={11.5} c={D.sub} style={s2.dBody}>
-        The four digits he gave us are not the ones your app issued. That is
-        almost always because your app had been closed a while and was showing
-        an older number. <T w="sb" size={11.5} c={D.textDim}>Nothing on your
-        account has changed</T> — the {dh(d.cents)} DH still reads exactly as it
-        did on week {d.week.slice(-2)}.
+        {trRich('The four digits he gave us are not the ones your app issued. That is almost always because your app had been closed a while and was showing an older number. <b>Nothing on your account has changed</b> — the {cents} DH still reads exactly as it did on week {week}.', {
+          b: (text, key) => <T key={key} w="sb" size={11.5} c={D.textDim}>{text}</T>,
+        }, { cents: dh(d.cents), week: d.week.slice(-2) })}
       </T>
 
       <View style={s2.dChoices}>
         <Pressable disabled={busy} onPress={() => answer(true)} style={s2.dYes}>
-          <T w="b" size={12.5} c="#0D0D0F">YES, I DID</T>
+          <T w="b" size={12.5} c="#0D0D0F">{tr('YES, I DID')}</T>
           <T size={10.5} c="rgba(13,13,15,0.7)" style={s2.gap2}>
-            We close it and the line stands as it is.
+            {tr('We close it and the line stands as it is.')}
           </T>
         </Pressable>
         <Pressable disabled={busy} onPress={() => answer(false)} style={s2.dNo}>
-          <T w="b" size={12.5}>NO, I DIDN&rsquo;T</T>
+          <T w="b" size={12.5}>{tr('NO, I DIDN’T')}</T>
           <T size={10.5} c={D.sub} style={s2.gap2}>
-            A person rings you today. If we got it wrong the fix is a line on
-            next week&rsquo;s statement — we never quietly change one you have.
+            {tr('A person rings you today. If we got it wrong the fix is a line on next week’s statement — we never quietly change one you have.')}
           </T>
         </Pressable>
       </View>
@@ -467,37 +454,35 @@ function CarriedScreen({ it, lw, onBack }: {
       p_detail: `Carried line on my statement: ${it.ref}, ${dh(it.cents)} DH, `
         + `from week ${it.source_week?.slice(-2)}. I don't think this is right.`,
     });
-    if (error) return Alert.alert('Could not send that', error.message);
+    if (error) return Alert.alert(tr('Could not send that'), error.message);
     setSent(true);
-    Alert.alert('We have it',
-      'Someone will look at this line and come back to you. If we got it wrong '
-      + 'the fix is another line on another week — we never reopen a week you have already been paid for.');
+    Alert.alert(tr('We have it'),
+      tr('Someone will look at this line and come back to you. If we got it wrong the fix is another line on another week — we never reopen a week you have already been paid for.'));
   };
 
   return (
     <Screen bottom={TAB_INSET}>
-      <TopBar title="This line" onBack={onBack} />
+      <TopBar title={tr('This line')} onBack={onBack} />
       <ScrollView contentContainerStyle={s2.pad} showsVerticalScrollIndicator={false}>
         <View style={[s2.hero, { borderColor: D.amber }]}>
           <T w="b" size={10} c={D.amber} ls={1.5}>
-            CARRIED FROM WEEK {it.source_week?.slice(-2)}
+            {tr('CARRIED FROM WEEK {source_week}', { source_week: it.source_week?.slice(-2) })}
           </T>
           <T style={[s2.huge, { color: D.text }]}>
-            {it.cents >= 0 ? '+' : '−'} {dh(it.cents)} DH
+            {tr('{x} {cents} DH', { x: it.cents >= 0 ? '+' : '−', cents: dh(it.cents) })}
           </T>
           <T size={12} c={D.sub} style={s2.heroSub}>
-            A customer was refunded for a cut you had already been paid for, so
-            it comes back on this week rather than changing the last one.
+            {tr('A customer was refunded for a cut you had already been paid for, so it comes back on this week rather than changing the last one.')}
           </T>
         </View>
 
-        <T w="b" size={10} c={D.sub} ls={1.5} style={s2.section}>THE FACTS</T>
+        <T w="b" size={10} c={D.sub} ls={1.5} style={s2.section}>{tr('THE FACTS')}</T>
         <View style={s2.card}>
           {[
-            ['Booking', it.ref],
-            ['Refunded', when(it.at)],
-            ['From', `Week ${it.source_week?.slice(-2)}`],
-            ['Amount', `${dh(it.cents)} DH`],
+            [tr('Booking'), it.ref],
+            [tr('Refunded'), when(it.at)],
+            [tr('From'), tr('Week {week}', { week: it.source_week?.slice(-2) })],
+            [tr('Amount'), `${dh(it.cents)} DH`],
           ].map(([k, v]) => (
             <View key={k} style={s2.line}>
               <T size={12} c={D.sub} style={s2.grow}>{k}</T>
@@ -507,35 +492,32 @@ function CarriedScreen({ it, lw, onBack }: {
         </View>
 
         <T w="b" size={10} c={D.sub} ls={1.5} style={s2.section}>
-          WHY IT IS ON THIS WEEK
+          {tr('WHY IT IS ON THIS WEEK')}
         </T>
         <View style={s2.card}>
           <T size={12} c={D.sub} style={s2.why}>
-            Week {it.source_week?.slice(-2)} is closed. The
-            {lw ? ` ${dh(lw.total_cents)} DH ` : ' amount '}
-            you counted was right when you counted it, and we do not change a
-            week you have already been settled for — you would be holding a
-            receipt that no longer matches anything.
+            {lw
+              ? tr('Week {week} is closed. The {amount} DH you counted was right when you counted it, and we do not change a week you have already been settled for — you would be holding a receipt that no longer matches anything.', { week: it.source_week?.slice(-2), amount: dh(lw.total_cents) })
+              : tr('Week {week} is closed. The amount you counted was right when you counted it, and we do not change a week you have already been settled for — you would be holding a receipt that no longer matches anything.', { week: it.source_week?.slice(-2) })}
           </T>
           {lw && (
             <View style={s2.closed}>
               <Ico name="lock" size={13} color={D.green} />
               <T size={11.5} c={D.sub} style={s2.grow}>
-                Week {lw.week.slice(-2)} · {dh(lw.total_cents)} DH
+                {tr('Week {week} · {total_cents} DH', { week: lw.week.slice(-2), total_cents: dh(lw.total_cents) })}
               </T>
-              <T w="b" size={10} c={D.green} ls={0.8}>UNCHANGED</T>
+              <T w="b" size={10} c={D.green} ls={0.8}>{tr('UNCHANGED')}</T>
             </View>
           )}
         </View>
 
         <Pressable onPress={sent ? undefined : flag} style={[s2.flag, sent && s2.flagSent]}>
           <T w="b" size={12} c={sent ? D.sub : D.text}>
-            {sent ? 'WE HAVE IT' : "THIS ISN'T RIGHT"}
+            {sent ? tr('WE HAVE IT') : tr('THIS ISN\'T RIGHT')}
           </T>
         </Pressable>
         <T size={11} c={D.muted} style={s2.centre}>
-          This opens a support case. There is no way to dispute a line and freeze
-          it — if we got it wrong, the fix is another line on another week.
+          {tr('This opens a support case. There is no way to dispute a line and freeze it — if we got it wrong, the fix is another line on another week.')}
         </T>
       </ScrollView>
     </Screen>
@@ -548,13 +530,10 @@ function HeldCard({ h }: { h: Held }) {
     <View style={s2.held}>
       <View style={s2.heldTop}>
         <Ico name="lock" size={15} color={D.amber} />
-        <T w="b" size={12.5} c={D.amber}>Your {dh(h.amount_cents ?? 0)} DH is held, not kept</T>
+        <T w="b" size={12.5} c={D.amber}>{tr('Your {dh} DH is held, not kept', { dh: dh(h.amount_cents ?? 0) })}</T>
       </View>
       <T size={11.5} c={D.sub} style={s2.heldBody}>
-        Your shop is suspended, so this week&rsquo;s visit did not happen. The money
-        is still yours and it is waiting
-        {h.unlocks_on ? ` — it releases when the suspension lifts, reviewed ${day(h.unlocks_on)}` : ''}.
-        {h.told_by ? ` ${h.told_by} is your contact until then.` : ''}
+        {tr('Your shop is suspended, so this week’s visit did not happen. The money is still yours and it is waiting{x}.{x2}', { x: h.unlocks_on ? tr(' — it releases when the suspension lifts, reviewed {unlocks_on}', { unlocks_on: day(h.unlocks_on) }) : '', x2: h.told_by ? tr(' {told_by} is your contact until then.', { told_by: h.told_by }) : '' })}
       </T>
     </View>
   );

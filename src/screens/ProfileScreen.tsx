@@ -2,7 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Eyebrow, Ico, IconName, Screen, Serif, T, TAB_INSET, TopBar } from '../components/dark';
+import { Eyebrow, Ico, IconName, RadioRow, Screen, Serif, Sheet, SheetHead, T, TAB_INSET, TopBar } from '../components/dark';
+import { chooseLanguage, LANGUAGE_ROWS } from '../lib/language';
 import { Chip, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
 import { useAndroidBack } from '../lib/back';
@@ -43,9 +44,11 @@ import StatementScreen from './StatementScreen';
 import AgentRoundScreen from './AgentRoundScreen';
 import ServicesScreen from './ServicesScreen';
 import WalletScreen from './WalletScreen';
+import { tr, trn, lang } from '../lib/i18n';
+import type { Lang } from '../lib/i18n';
 
 const STATUS_LABEL: Record<string, string> = {
-  pending: 'Under review', approved: 'Live', rejected: 'Not approved',
+  pending: tr('Under review'), approved: tr('Live'), rejected: tr('Not approved'),
 };
 
 type MenuItem = { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void; danger?: boolean };
@@ -84,17 +87,17 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   // 6b's REPLY TO THE REVIEW IN PUBLIC — the case knows the booking, the booking
   // knows the review
   async function openReplyFromCase(bookingId: string | null) {
-    if (!bookingId) return Alert.alert('No review here', 'This case is not about a review.');
+    if (!bookingId) return Alert.alert(tr('No review here'), tr('This case is not about a review.'));
     const { data } = await supabase.from('reviews')
       .select('id, rating, comment, created_at, customer:profiles!customer_id(full_name)')
       .eq('booking_id', bookingId).maybeSingle();
-    if (!data) return Alert.alert('No review here', 'This case is not about a review.');
+    if (!data) return Alert.alert(tr('No review here'), tr('This case is not about a review.'));
     const r = data as unknown as {
       id: string; rating: number; comment: string | null; created_at: string;
       customer: { full_name: string | null } | null;
     };
     setOpenCase(null);
-    setReplyTo({ ...r, customer: r.customer?.full_name ?? 'A client' });
+    setReplyTo({ ...r, customer: r.customer?.full_name ?? tr('A client') });
     go('reply');
   }
 
@@ -156,7 +159,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   }
 
   function soon(feature: string) {
-    Alert.alert(feature, 'Coming soon — see BACKLOG.md');
+    Alert.alert(feature, tr('Coming soon — see BACKLOG.md'));
   }
 
   async function changeAvatar() {
@@ -176,16 +179,16 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
       setAvatarUrl(url);
       onProfileChanged();
     } catch (e: any) {
-      Alert.alert('Could not update photo', e.message ?? String(e));
+      Alert.alert(tr('Could not update photo'), e.message ?? String(e));
     } finally {
       setAvatarBusy(false);
     }
   }
 
   function signOut() {
-    Alert.alert('Logout', 'Are you sure you want to log out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Yes, Logout', style: 'destructive', onPress: () => supabase.auth.signOut() },
+    Alert.alert(tr('Logout'), tr('Are you sure you want to log out?'), [
+      { text: tr('Cancel'), style: 'cancel' },
+      { text: tr('Yes, Logout'), style: 'destructive', onPress: () => supabase.auth.signOut() },
     ]);
   }
 
@@ -220,7 +223,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     }
     if (view === 'password') {
       return <SetPasswordScreen mode="set" email={profile.email} onBack={back}
-        onDone={() => { Alert.alert('Password saved', 'You can now sign in with your email.'); go('settings'); }} />;
+        onDone={() => { Alert.alert(tr('Password saved'), tr('You can now sign in with your email.')); go('settings'); }} />;
     }
     if (view === 'bookings') {
       return <MyBookingsScreen customerId={profile.id} onChromeHidden={onChromeHidden}
@@ -244,7 +247,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     }
     if (view === 'reply' && replyTo) {
       return <PublicReplyScreen review={replyTo} onClose={() => go('menu')}
-        onPosted={() => { setReplyTo(null); Alert.alert('Posted', 'Your reply is on your page.'); go('menu'); }} />;
+        onPosted={() => { setReplyTo(null); Alert.alert(tr('Posted'), tr('Your reply is on your page.')); go('menu'); }} />;
     }
     if (openCase) {
       return barber
@@ -313,55 +316,55 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
 
   // TODO(backlog): Payment Methods / My Coupons / My Wallet — no payment rail yet
   const items: MenuItem[] = [
-    { icon: 'person-outline', label: 'Your profile', onPress: () => go('edit') },
+    { icon: 'person-outline', label: tr('Your profile'), onPress: () => go('edit') },
     ...(barber ? [
-      { icon: 'calendar-outline', label: 'Schedule settings', onPress: () => go('schedule') },
-      { icon: 'cut-outline', label: 'My Services', onPress: () => go('services') },
-      { icon: 'cube-outline', label: 'My Bundles', onPress: () => go('bundles') },
-      { icon: 'hourglass-outline', label: 'Waiting list', onPress: () => go('waitlist') },
-      { icon: 'close-circle-outline', label: 'Cancellations', onPress: () => go('cancellations') },
-      { icon: 'images-outline', label: 'My Work', onPress: () => go('work') },
+      { icon: 'calendar-outline', label: tr('Schedule settings'), onPress: () => go('schedule') },
+      { icon: 'cut-outline', label: tr('My Services'), onPress: () => go('services') },
+      { icon: 'cube-outline', label: tr('My Bundles'), onPress: () => go('bundles') },
+      { icon: 'hourglass-outline', label: tr('Waiting list'), onPress: () => go('waitlist') },
+      { icon: 'close-circle-outline', label: tr('Cancellations'), onPress: () => go('cancellations') },
+      { icon: 'images-outline', label: tr('My Work'), onPress: () => go('work') },
       // turn 9 — ops was writing into a void; these are the three places it lands
-      { icon: 'checkbox-outline', label: 'To do', onPress: () => go('tasks') },
-      { icon: 'storefront-outline', label: 'Your shop', onPress: () => go('application') },
-      { icon: 'cash-outline', label: 'Settle up', onPress: () => go('float') },
-      { icon: 'receipt-outline', label: 'Weekly statement', onPress: () => go('statement') },
+      { icon: 'checkbox-outline', label: tr('To do'), onPress: () => go('tasks') },
+      { icon: 'storefront-outline', label: tr('Your shop'), onPress: () => go('application') },
+      { icon: 'cash-outline', label: tr('Settle up'), onPress: () => go('float') },
+      { icon: 'receipt-outline', label: tr('Weekly statement'), onPress: () => go('statement') },
     ] as MenuItem[] : []),
     // 9f is the collector's phone, not the shop's
     ...(profile.role === 'admin' || profile.role === 'agent' ? [
-      { icon: 'car-outline', label: 'Your round', onPress: () => go('agent') },
+      { icon: 'car-outline', label: tr('Your round'), onPress: () => go('agent') },
     ] as MenuItem[] : []),
     ...(profile.role === 'admin' ? [
-      { icon: 'cash-outline', label: 'Float pickup (BCF-04)', onPress: () => go('round') },
+      { icon: 'cash-outline', label: tr('Float pickup (BCF-04)'), onPress: () => go('round') },
     ] as MenuItem[] : []),
     ...(barber?.salon_id ? [
-      { icon: 'eye-outline', label: 'Preview my page', onPress: () => go('preview') },
+      { icon: 'eye-outline', label: tr('Preview my page'), onPress: () => go('preview') },
     ] as MenuItem[] : []),
     ...(ownsSalon ? [
-      { icon: 'storefront-outline', label: 'Salon management', onPress: () => go('salon') },
+      { icon: 'storefront-outline', label: tr('Salon management'), onPress: () => go('salon') },
     ] as MenuItem[] : []),
     ...(barber ? [] : [
-      { icon: 'card-outline', label: 'Payment Methods', onPress: () => soon('Payment Methods') },
-      { icon: 'calendar-outline', label: 'My Bookings', onPress: () => go('bookings') },
+      { icon: 'card-outline', label: tr('Payment Methods'), onPress: () => soon(tr('Payment Methods')) },
+      { icon: 'calendar-outline', label: tr('My Bookings'), onPress: () => go('bookings') },
       // Saved is a tab now (EXPL-24). One door, or the two rot apart.
-      { icon: 'shield-checkmark-outline', label: 'Your standing', onPress: () => go('standing') },
-      { icon: 'ticket-outline', label: 'My Coupons', onPress: () => go('coupons') },
-      { icon: 'wallet-outline', label: 'My Wallet', onPress: () => go('wallet') },
-      { icon: 'gift-outline', label: 'Invite friends', onPress: () => go('invite') },
+      { icon: 'shield-checkmark-outline', label: tr('Your standing'), onPress: () => go('standing') },
+      { icon: 'ticket-outline', label: tr('My Coupons'), onPress: () => go('coupons') },
+      { icon: 'wallet-outline', label: tr('My Wallet'), onPress: () => go('wallet') },
+      { icon: 'gift-outline', label: tr('Invite friends'), onPress: () => go('invite') },
     ] as MenuItem[]),
-    { icon: 'settings-outline', label: 'Settings',
-      onPress: () => barber ? soon('Settings') : go('settings') },
-    { icon: 'help-circle-outline', label: 'Help & support', onPress: () => go('help') },
+    { icon: 'settings-outline', label: tr('Settings'),
+      onPress: () => barber ? soon(tr('Settings')) : go('settings') },
+    { icon: 'help-circle-outline', label: tr('Help & support'), onPress: () => go('help') },
     ...(barber ? [] : [
-      { icon: 'flag-outline', label: 'Report a problem', onPress: () => go('support') },
+      { icon: 'flag-outline', label: tr('Report a problem'), onPress: () => go('support') },
     ] as MenuItem[]),
     // 31a — only there when there is something to read
     ...(!barber && takedown ? [{
       icon: 'star-half-outline' as const,
-      label: takedown.appeal?.upheld ? 'Your review is back' : 'A review was taken down',
+      label: takedown.appeal?.upheld ? tr('Your review is back') : tr('A review was taken down'),
       onPress: () => go('takedown'),
     }] as MenuItem[] : []),
-    { icon: 'log-out-outline', label: 'Logout', onPress: signOut, danger: true },
+    { icon: 'log-out-outline', label: tr('Logout'), onPress: signOut, danger: true },
   ];
 
   const menu = barber ? (
@@ -371,10 +374,10 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
       onPreview={() => openOwnPage('menu')} />
   ) : (
     <ScrollView style={s.screen} contentContainerStyle={s.content}>
-      <ScreenHeader title="Profile" onBack={onBack} />
+      <ScreenHeader title={tr('Profile')} onBack={onBack} />
 
       <View style={s.avatarWrap}>
-        <Pressable onPress={changeAvatar} disabled={avatarBusy} accessibilityLabel="Change profile photo"
+        <Pressable onPress={changeAvatar} disabled={avatarBusy} accessibilityLabel={tr('Change profile photo')}
           style={({ pressed }) => pressed && s.pressed}>
           {avatarUrl
             ? <Image source={{ uri: avatarUrl }} style={s.avatar} />
@@ -383,7 +386,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
             <Ionicons name={avatarBusy ? 'hourglass-outline' : 'pencil'} size={14} color={colors.onAccent} />
           </View>
         </Pressable>
-        <Text style={s.name}>{profile.full_name ?? 'Your name'}</Text>
+        <Text style={s.name}>{profile.full_name ?? tr('Your name')}</Text>
         {!!phone && <Text style={s.phone}>{phone}</Text>}
       </View>
 
@@ -453,16 +456,27 @@ function BarberProfile({
   }, [barber.id, barber.salon_id]);
 
   const live = barber.status === 'approved';
+  const [langOpen, setLangOpen] = useState(false);
+
+  // the barber's 20b: his Settings row is still a placeholder, so the language
+  // sits in the menu itself. Same rule as the customer's — the phone's pick wins.
+  async function pickLanguage(next: Lang) {
+    setLangOpen(false);
+    if (next === lang()) return;
+    await supabase.from('profiles').update({ language: next }).eq('id', profile.id);
+    await chooseLanguage(next);
+  }
 
   const rows: { icon: IconName; label: string; value?: string; onPress: () => void }[] = [
-    { icon: 'user', label: 'Your profile', onPress: () => go('edit') },
-    { icon: 'star', label: 'Your reviews', value: String(stats.reviews), onPress: () => go('reviews') },
-    { icon: 'calendar', label: 'Schedule settings', onPress: () => go('schedule') },
-    { icon: 'scissors', label: 'My services', value: String(stats.services), onPress: () => go('services') },
-    { icon: 'image', label: 'My work', value: `${stats.photos} photo${stats.photos === 1 ? '' : 's'}`, onPress: () => go('work') },
-    ...(ownsSalon ? [{ icon: 'edit-2' as IconName, label: 'Salon management', onPress: () => go('salon') }] : []),
-    { icon: 'trending-up', label: 'Earnings', onPress: () => go('earnings') },
-    { icon: 'help-circle', label: 'Help Center', onPress: () => go('help') },
+    { icon: 'user', label: tr('Your profile'), onPress: () => go('edit') },
+    { icon: 'star', label: tr('Your reviews'), value: String(stats.reviews), onPress: () => go('reviews') },
+    { icon: 'calendar', label: tr('Schedule settings'), onPress: () => go('schedule') },
+    { icon: 'scissors', label: tr('My services'), value: String(stats.services), onPress: () => go('services') },
+    { icon: 'image', label: tr('My work'), value: trn(stats.photos, '{n} photo', '{n} photos'), onPress: () => go('work') },
+    ...(ownsSalon ? [{ icon: 'edit-2' as IconName, label: tr('Salon management'), onPress: () => go('salon') }] : []),
+    { icon: 'trending-up', label: tr('Earnings'), onPress: () => go('earnings') },
+    { icon: 'help-circle', label: tr('Help Center'), onPress: () => go('help') },
+    { icon: 'globe', label: tr('Language'), value: LANGUAGE_ROWS.find((l) => l.key === lang())?.native, onPress: () => setLangOpen(true) },
   ];
 
   return (
@@ -470,11 +484,11 @@ function BarberProfile({
       {/* The dashboard hides the tab bar when it opens this, so a bare centred
           title left the barber with no way out at all. TopBar draws the same
           title and adds the back puck when there is somewhere to go back to. */}
-      <TopBar title="Profile" onBack={onBack} />
+      <TopBar title={tr('Profile')} onBack={onBack} />
 
       <View style={d.headRow}>
         <Pressable onPress={onAvatar} disabled={avatarBusy} accessibilityRole="button"
-          accessibilityLabel="Change profile photo" style={({ pressed }) => [d.avatarWrap, pressed && s.pressed]}>
+          accessibilityLabel={tr('Change profile photo')} style={({ pressed }) => [d.avatarWrap, pressed && s.pressed]}>
           {avatarUrl
             ? <Image source={{ uri: avatarUrl }} style={d.avatar} />
             : <View style={d.avatar}>
@@ -485,16 +499,15 @@ function BarberProfile({
           </View>
         </Pressable>
         <View style={s.grow}>
-          <T w="b" size={17}>{profile.full_name ?? 'Your name'}</T>
+          <T w="b" size={17}>{profile.full_name ?? tr('Your name')}</T>
           <T size={12} c={D.sub} style={{ marginTop: 3 }}>
-            {[barber.specialty ?? 'Barber', stats.salon].filter(Boolean).join(' · ')}
+            {[barber.specialty ?? tr('Barber'), stats.salon].filter(Boolean).join(' · ')}
           </T>
           <Pressable onPress={() => go('reviews')} hitSlop={6} accessibilityRole="button"
-            accessibilityLabel="Your reviews" style={({ pressed }) => [d.ratingRow, pressed && s.pressed]}>
-            <T w="b" size={12}>{stats.rating != null ? `${stats.rating.toFixed(1)} ★` : 'No reviews yet'}</T>
+            accessibilityLabel={tr('Your reviews')} style={({ pressed }) => [d.ratingRow, pressed && s.pressed]}>
+            <T w="b" size={12}>{stats.rating != null ? `${stats.rating.toFixed(1)} ★` : tr('No reviews yet')}</T>
             <T size={12} c={D.sub}>
-              {stats.reviews} review{stats.reviews === 1 ? '' : 's'}
-              {stats.clients != null ? ` · ${stats.clients} clients` : ''}
+              {trn(stats.reviews, '{n} review{x2}', '{n} reviews{x2}', { x2: stats.clients != null ? tr(' · {clients} clients', { clients: stats.clients }) : '' })}
             </T>
           </Pressable>
         </View>
@@ -505,15 +518,15 @@ function BarberProfile({
           <Ico name={live ? 'check-circle' : 'clock'} size={16} color={live ? D.green : D.amber} />
         </View>
         <View style={s.grow}>
-          <T w="b" size={13}>{live ? 'Page is live' : STATUS_LABEL[barber.status] ?? barber.status}</T>
+          <T w="b" size={13}>{live ? tr('Page is live') : STATUS_LABEL[barber.status] ?? barber.status}</T>
           <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-            {live ? 'Customers can find and book you' : 'We’ll email you when it’s approved'}
+            {live ? tr('Customers can find and book you') : tr('We’ll email you when it’s approved')}
           </T>
         </View>
         {barber.salon_id && (
           <Pressable onPress={onPreview} hitSlop={8} accessibilityRole="button"
             style={({ pressed }) => pressed && s.pressed}>
-            <T w="sb" size={12} c={D.accent}>Preview</T>
+            <T w="sb" size={12} c={D.accent}>{tr('Preview')}</T>
           </Pressable>
         )}
       </View>
@@ -528,14 +541,24 @@ function BarberProfile({
             <Ico name="chevron-right" size={14} color={D.muted} />
           </Pressable>
         ))}
-        <Pressable onPress={onSignOut} accessibilityRole="button" accessibilityLabel="Logout"
+        <Pressable onPress={onSignOut} accessibilityRole="button" accessibilityLabel={tr('Logout')}
           style={({ pressed }) => [d.row, d.rowLine, pressed && s.pressed]}>
           <View style={[d.rowIcon, { backgroundColor: D.accentSoft }]}>
             <Ico name="log-out" size={15} color={D.accent} />
           </View>
-          <T w="sb" size={14} c={D.accent} style={s.grow}>Logout</T>
+          <T w="sb" size={14} c={D.accent} style={s.grow}>{tr('Logout')}</T>
         </Pressable>
       </View>
+
+      <Sheet visible={langOpen} onClose={() => setLangOpen(false)}>
+        <SheetHead title={tr('Language')} onClose={() => setLangOpen(false)} />
+        <View style={{ gap: 8 }}>
+          {LANGUAGE_ROWS.map((l) => (
+            <RadioRow key={l.key} label={l.native} on={lang() === l.key} onPress={() => pickLanguage(l.key)} />
+          ))}
+        </View>
+        <T size={11} c={D.sub}>{tr('Arabic turns the app right-to-left. Prices stay in DH. The app restarts to switch.')}</T>
+      </Sheet>
     </Screen>
   );
 }

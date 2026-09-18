@@ -1,6 +1,7 @@
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { dark as D } from '../theme';
 import { Ico, Serif, Sheet, T } from './dark';
+import { tr } from '../lib/i18n';
 
 // The only two questions a queue asks the barber (ADDENDUM-app-first, turn B10).
 // Nothing is decided for him on a clock he cannot see: each sheet is a decision,
@@ -37,8 +38,8 @@ export function CalledSheet({ visible, row, calledAt, nextNo, onClose, onNext, o
           <Ico name="clock" size={23} color={D.red} />
         </View>
         <View style={s.grow}>
-          <Serif size={21} ls={0} style={s.title}>Nº {pad(row.no)} didn't come</Serif>
-          <T size={12} c={D.sub}>Called {hhmm(calledAt)} · held the chair {held} min</T>
+          <Serif size={21} ls={0} style={s.title}>{tr('Nº {no} didn\'t come', { no: pad(row.no) })}</Serif>
+          <T size={12} c={D.sub}>{tr('Called {calledAt} · held the chair {held} min', { calledAt: hhmm(calledAt), held })}</T>
         </View>
       </View>
 
@@ -47,7 +48,7 @@ export function CalledSheet({ visible, row, calledAt, nextNo, onClose, onNext, o
         <View style={s.grow}>
           <T w="b" size={14}>{row.name}</T>
           <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-            {row.service} · {row.phone ? spaced(row.phone) : 'no number to text'}
+            {row.service} · {row.phone ? spaced(row.phone) : tr('no number to text')}
           </T>
         </View>
       </View>
@@ -55,26 +56,25 @@ export function CalledSheet({ visible, row, calledAt, nextNo, onClose, onNext, o
       <View style={{ gap: 8 }}>
         <Pressable onPress={onNext} accessibilityRole="button"
           style={({ pressed }) => [s.primary, pressed && s.pressed]}>
-          <T w="b" size={13} c="#fff" ls={0.65}>CALL THE NEXT MAN</T>
+          <T w="b" size={13} c="#fff" ls={0.65}>{tr('CALL THE NEXT MAN')}</T>
           <T size={10.5} c="rgba(255,255,255,0.75)">
-            Nº {pad(row.no)} drops to the end · {nextNo ? `Nº ${pad(nextNo)} is up` : 'nobody else is waiting'}
+            {tr('Nº {no} drops to the end · {x}', { no: pad(row.no), x: nextNo ? tr('Nº {nextNo} is up', { nextNo: pad(nextNo) }) : tr('nobody else is waiting') })}
           </T>
         </Pressable>
         <View style={s.pair}>
           <Pressable onPress={onHere} accessibilityRole="button"
             style={({ pressed }) => [s.secondary, pressed && s.pressed]}>
-            <T w="b" size={12.5} c={D.textDim}>He's here</T>
+            <T w="b" size={12.5} c={D.textDim}>{tr('He\'s here')}</T>
           </Pressable>
           <Pressable onPress={onTakeOff} accessibilityRole="button"
             style={({ pressed }) => [s.secondary, pressed && s.pressed]}>
-            <T w="b" size={12.5} c={D.red}>Take him off</T>
+            <T w="b" size={12.5} c={D.red}>{tr('Take him off')}</T>
           </Pressable>
         </View>
       </View>
 
       <T size={11} c={D.faint} style={s.foot}>
-        Dropping him to the end keeps him in the shop's line but stops him counting toward anyone's
-        wait. Nothing is recorded against him — a walk-in with no account has no no-show history to hold.
+        {tr('Dropping him to the end keeps him in the shop\'s line but stops him counting toward anyone\'s wait. Nothing is recorded against him — a walk-in with no account has no no-show history to hold.')}
       </T>
     </Sheet>
   );
@@ -93,24 +93,23 @@ export function FrontSheet({ visible, row, textedAt, onClose, onCall, onDrop }: 
           <Ico name="message-square" size={23} color={D.amber} />
         </View>
         <View style={s.grow}>
-          <Serif size={21} ls={0} style={s.title}>{row.name} never tapped</Serif>
+          <Serif size={21} ls={0} style={s.title}>{tr('{name} never tapped', { name: row.name })}</Serif>
           <T size={12} c={D.sub}>
-            Nº {pad(row.no)}{textedAt ? ` · texted ${minsSince(textedAt)} min ago` : ''} · he's next
+            {tr('Nº {no}{x} · he\'s next', { no: pad(row.no), x: textedAt ? tr(' · texted {textedAt} min ago', { textedAt: minsSince(textedAt) }) : '' })}
           </T>
         </View>
       </View>
 
       <View style={s.factCard}>
         <T size={12} c={D.textDim} style={{ lineHeight: 18.5 }}>
-          He put his name in from the web and we couldn't verify his number. He may be outside, or he
-          may have forgotten.
+          {tr('He put his name in from the web and we couldn\'t verify his number. He may be outside, or he may have forgotten.')}
         </T>
         {row.phone && (
           <View style={s.phoneRow}>
             <Ico name="phone" size={13} color={D.sub} />
             <T w="b" size={12} style={s.tnum}>{spaced(row.phone)}</T>
             <View style={s.grow} />
-            <T size={10.5} c={D.faint}>unverified</T>
+            <T size={10.5} c={D.faint}>{tr('unverified')}</T>
           </View>
         )}
       </View>
@@ -118,26 +117,25 @@ export function FrontSheet({ visible, row, textedAt, onClose, onCall, onDrop }: 
       <View style={{ gap: 8 }}>
         <Pressable onPress={onCall} accessibilityRole="button"
           style={({ pressed }) => [s.primary, pressed && s.pressed]}>
-          <T w="b" size={13} c="#fff" ls={0.65}>CALL HIM ANYWAY</T>
-          <T size={10.5} c="rgba(255,255,255,0.75)">Shout the name · 8-minute hold as usual</T>
+          <T w="b" size={13} c="#fff" ls={0.65}>{tr('CALL HIM ANYWAY')}</T>
+          <T size={10.5} c="rgba(255,255,255,0.75)">{tr('Shout the name · 8-minute hold as usual')}</T>
         </Pressable>
         <View style={s.pair}>
           {row.phone && (
             <Pressable onPress={() => Linking.openURL(`tel:${row.phone}`)} accessibilityRole="button"
               style={({ pressed }) => [s.secondary, pressed && s.pressed]}>
-              <T w="b" size={12.5} c={D.textDim}>Ring him</T>
+              <T w="b" size={12.5} c={D.textDim}>{tr('Ring him')}</T>
             </Pressable>
           )}
           <Pressable onPress={onDrop} accessibilityRole="button"
             style={({ pressed }) => [s.secondary, pressed && s.pressed]}>
-            <T w="b" size={12.5} c={D.red}>Drop him</T>
+            <T w="b" size={12.5} c={D.red}>{tr('Drop him')}</T>
           </Pressable>
         </View>
       </View>
 
       <T size={11} c={D.faint} style={s.foot}>
-        Asked once, here, and never again — there is no timer quietly deleting people from your line
-        behind your back.
+        {tr('Asked once, here, and never again — there is no timer quietly deleting people from your line behind your back.')}
       </T>
     </Sheet>
   );

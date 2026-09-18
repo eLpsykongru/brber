@@ -4,6 +4,7 @@ import { ActivityIndicator, Alert, Modal, Pressable, StyleSheet, Text, View } fr
 import { Display } from './ui';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, shadowLg } from '../theme';
+import { tr } from '../lib/i18n';
 
 // 8e of "Barber App.dc.html", customer end — a slot Youssef just lost has been
 // offered to you and one other person. The whole design of it is in one line:
@@ -65,7 +66,7 @@ export default function SlotOfferSheet({ myId, onTaken }: {
     const { data, error } = await supabase.rpc('claim_slot_offer',
       { p_offer: offer!.id, p_deposit_cents: canDeposit ? deposit : 0 });
     setBusy(false);
-    if (error) { setOffer(null); return Alert.alert('That slot is gone', error.message); }
+    if (error) { setOffer(null); return Alert.alert(tr('That slot is gone'), error.message); }
     setOffer(null);
     onTaken(data as string);
   }
@@ -87,22 +88,21 @@ export default function SlotOfferSheet({ myId, onTaken }: {
             <View style={s.icon}>
               <Ionicons name="flash-outline" size={26} color={colors.accent} />
             </View>
-            <Display size={23} style={s.title}>A slot opened</Display>
+            <Display size={23} style={s.title}>{tr('A slot opened')}</Display>
             <Text style={s.sub}>
-              {offer.barber.split(' ')[0]} has {at} free today — you're one of {offer.sent_to}
-              {' '}{offer.sent_to === 1 ? 'person' : 'people'} being asked.
+              {tr('{barber} has {at} free today — you\'re one of {sent_to} {x} being asked.', { barber: offer.barber.split(' ')[0], at, sent_to: offer.sent_to, x: offer.sent_to === 1 ? tr('person') : tr('people') })}
             </Text>
           </View>
 
           <View style={s.hero}>
             <View style={s.heroTop}>
               <View>
-                <Text style={s.heroEyebrow}>TODAY</Text>
+                <Text style={s.heroEyebrow}>{tr('TODAY')}</Text>
                 <Text style={s.heroTime}>{at}</Text>
               </View>
               <View style={s.right}>
                 <Text style={s.heroEyebrow}>{offer.service.toUpperCase()}</Text>
-                <Text style={s.heroPrice}>{dh(offer.price_cents)} DH</Text>
+                <Text style={s.heroPrice}>{tr('{price_cents} DH', { price_cents: dh(offer.price_cents) })}</Text>
               </View>
             </View>
             <View style={s.heroFoot}>
@@ -112,7 +112,7 @@ export default function SlotOfferSheet({ myId, onTaken }: {
                 </Text>
               </View>
               <Text style={s.heroWho} numberOfLines={1}>
-                {offer.barber.split(' ')[0]}{offer.salon ? ` · ${offer.salon}` : ''} · {offer.duration_min} min
+                {tr('{barber}{x} · {duration_min} min', { barber: offer.barber.split(' ')[0], x: offer.salon ? ` · ${offer.salon}` : '', duration_min: offer.duration_min })}
               </Text>
             </View>
           </View>
@@ -122,7 +122,7 @@ export default function SlotOfferSheet({ myId, onTaken }: {
               <Ionicons name="people-outline" size={15} color={colors.accent} />
             </View>
             <Text style={s.raceText}>
-              Sent to {offer.sent_to} {offer.sent_to === 1 ? 'person' : 'people'} — first to take it gets it.
+              {tr('Sent to {sent_to} {x} — first to take it gets it.', { sent_to: offer.sent_to, x: offer.sent_to === 1 ? tr('person') : tr('people') })}
             </Text>
             <Text style={s.raceClock}>{label}</Text>
           </View>
@@ -132,19 +132,19 @@ export default function SlotOfferSheet({ myId, onTaken }: {
               style={({ pressed }) => [s.takeBtn, (pressed || busy) && s.pressed]}>
               {busy ? <ActivityIndicator color="#fff" /> : (
                 <Text style={s.takeText}>
-                  TAKE {at}{canDeposit ? ` · ${dh(deposit)} DH DEPOSIT` : ''}
+                  {tr('TAKE {at}{x}', { at, x: canDeposit ? tr(' · {deposit} DH DEPOSIT', { deposit: dh(deposit) }) : '' })}
                 </Text>
               )}
             </Pressable>
             <Pressable onPress={decline} style={({ pressed }) => [s.noBtn, pressed && s.pressed]}>
-              <Text style={s.noText}>NO THANKS</Text>
+              <Text style={s.noText}>{tr('NO THANKS')}</Text>
             </Pressable>
           </View>
 
           <Text style={s.foot}>
             {canDeposit
-              ? 'Nothing is held until you tap take'
-              : 'Not enough in your wallet for a deposit — you\'ll pay at the shop'}
+              ? tr('Nothing is held until you tap take')
+              : tr('Not enough in your wallet for a deposit — you\'ll pay at the shop')}
           </Text>
         </View>
       </View>

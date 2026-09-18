@@ -5,6 +5,7 @@ import { pushPermission } from '../lib/push';
 import { Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
+import { tr } from '../lib/i18n';
 
 // Turn 4 — 4b the inbox, 4c the settings behind its gear. What buzzes is decided
 // server-side by notif_should_push() (0032); this screen owns the toggles it reads.
@@ -71,20 +72,20 @@ const ANSWERABLE: Kind[] = ['booking_request', 'reschedule'];
 type Live = { status: string; starts_at: string; openAsk: boolean };
 
 const CLOSED: Record<string, string> = {
-  confirmed: 'Accepted', cancelled: 'Cancelled', completed: 'Done', no_show: 'No-show',
+  confirmed: tr('Accepted'), cancelled: tr('Cancelled'), completed: tr('Done'), no_show: tr('No-show'),
 };
 
 // 0015 leaves a request whose start time has passed sitting at 'pending' — no cron
 // kills it, the app is meant to render it dead (DayScheduleScreen says "request
 // expired"). null means still open; anything else replaces the Accept/Decline pair.
 function closedLabel(kind: Kind, b: Live | undefined, now: number): string | null {
-  if (!b) return 'No longer available';
+  if (!b) return tr('No longer available');
   if (kind === 'reschedule') {
-    if (b.status !== 'pending' && b.status !== 'confirmed') return CLOSED[b.status] ?? 'Closed';
-    return b.openAsk ? null : 'Answered';
+    if (b.status !== 'pending' && b.status !== 'confirmed') return CLOSED[b.status] ?? tr('Closed');
+    return b.openAsk ? null : tr('Answered');
   }
-  if (b.status !== 'pending') return CLOSED[b.status] ?? 'Closed';
-  return new Date(b.starts_at).getTime() <= now ? 'Request expired' : null;
+  if (b.status !== 'pending') return CLOSED[b.status] ?? tr('Closed');
+  return new Date(b.starts_at).getTime() <= now ? tr('Request expired') : null;
 }
 
 export default function NotificationsScreen({ barberId, onBack, onOpenBooking, onOpenAsk, onOpenReview, onOpenGap }: {
@@ -107,7 +108,7 @@ export default function NotificationsScreen({ barberId, onBack, onOpenBooking, o
     const { data, error } = await supabase.from('notifications')
       .select('id, kind, title, body, booking_id, amount_cents, read_at, created_at')
       .eq('user_id', barberId).order('created_at', { ascending: false }).limit(80);
-    if (error) return Alert.alert('Could not load notifications', error.message);
+    if (error) return Alert.alert(tr('Could not load notifications'), error.message);
     const list = (data ?? []) as Notif[];
     setRows(list);
 
@@ -138,7 +139,7 @@ export default function NotificationsScreen({ barberId, onBack, onOpenBooking, o
   async function markAllRead() {
     setRows((cur) => cur?.map((n) => n.read_at ? n : { ...n, read_at: new Date().toISOString() }) ?? null);
     const { error } = await supabase.rpc('notif_mark_all_read');
-    if (error) { load(); Alert.alert('Could not update', error.message); }
+    if (error) { load(); Alert.alert(tr('Could not update'), error.message); }
   }
 
   async function markRead(n: Notif) {
@@ -154,14 +155,14 @@ export default function NotificationsScreen({ barberId, onBack, onOpenBooking, o
     if (n.kind === 'reschedule') {
       const { data: req } = await supabase.from('reschedule_requests')
         .select('id').eq('booking_id', n.booking_id).eq('status', 'pending').maybeSingle();
-      if (!req) { markRead(n); return Alert.alert('Already answered', 'That request is no longer open.'); }
+      if (!req) { markRead(n); return Alert.alert(tr('Already answered'), tr('That request is no longer open.')); }
       ({ error } = await supabase.rpc('respond_reschedule', { p_request: req.id, p_accept: accept }));
     } else {
       ({ error } = accept
         ? await supabase.rpc('accept_booking', { p_booking: n.booking_id })
         : await supabase.rpc('cancel_booking', { p_booking: n.booking_id, p_reason: 'Declined' }));
     }
-    if (error) return Alert.alert(accept ? 'Could not accept' : 'Could not decline', error.message);
+    if (error) return Alert.alert(accept ? tr('Could not accept') : tr('Could not decline'), error.message);
     markRead(n);
     load();
   }
@@ -214,13 +215,13 @@ export default function NotificationsScreen({ barberId, onBack, onOpenBooking, o
         </View>
         {actionable && (
           <View style={s.actions}>
-            <Pressable onPress={() => act(n, false)} accessibilityRole="button" accessibilityLabel="Decline"
+            <Pressable onPress={() => act(n, false)} accessibilityRole="button" accessibilityLabel={tr('Decline')}
               style={({ pressed }) => [s.decline, pressed && s.pressed]}>
-              <T w="b" size={12} c={D.sub}>Decline</T>
+              <T w="b" size={12} c={D.sub}>{tr('Decline')}</T>
             </Pressable>
-            <Pressable onPress={() => act(n, true)} accessibilityRole="button" accessibilityLabel="Accept"
+            <Pressable onPress={() => act(n, true)} accessibilityRole="button" accessibilityLabel={tr('Accept')}
               style={({ pressed }) => [s.accept, pressed && s.pressed]}>
-              <T w="eb" size={12} c={D.bg}>Accept</T>
+              <T w="eb" size={12} c={D.bg}>{tr('Accept')}</T>
             </Pressable>
           </View>
         )}
@@ -236,11 +237,11 @@ export default function NotificationsScreen({ barberId, onBack, onOpenBooking, o
 
   return (
     <Screen gap={13}>
-      <TopBar title="Notifications" onBack={onBack} plain
+      <TopBar title={tr('Notifications')} onBack={onBack} plain
         right="settings" onRight={() => setSettings(true)} />
 
       <View style={s.chipRow}>
-        {([['all', 'All'], ['bookings', 'Bookings'], ['money', 'Money'], ['reviews', 'Reviews']] as const)
+        {([['all', tr('All')], ['bookings', tr('Bookings')], ['money', tr('Money')], ['reviews', tr('Reviews')]] as const)
           .map(([k, label]) => (
             <Pressable key={k} onPress={() => setFilter(k)} accessibilityRole="button"
               accessibilityState={{ selected: filter === k }}
@@ -252,19 +253,19 @@ export default function NotificationsScreen({ barberId, onBack, onOpenBooking, o
           ))}
       </View>
 
-      {rows === null && <ActivityIndicator color={D.accent} accessibilityLabel="Loading notifications" />}
+      {rows === null && <ActivityIndicator color={D.accent} accessibilityLabel={tr('Loading notifications')} />}
       {rows !== null && shown.length === 0 && (
-        <T size={13} c={D.sub} style={s.empty}>Nothing here yet — this is where the shop talks to you.</T>
+        <T size={13} c={D.sub} style={s.empty}>{tr('Nothing here yet — this is where the shop talks to you.')}</T>
       )}
 
       {today.length > 0 && (
         <>
           <View style={s.sectionRow}>
-            <Eyebrow ls={1.65}>TODAY</Eyebrow>
+            <Eyebrow ls={1.65}>{tr('TODAY')}</Eyebrow>
             {unread > 0 && (
               <Pressable onPress={markAllRead} hitSlop={6} accessibilityRole="button"
-                accessibilityLabel="Mark all read" style={({ pressed }) => pressed && s.pressed}>
-                <T w="sb" size={12} c={D.accent}>Mark all read</T>
+                accessibilityLabel={tr('Mark all read')} style={({ pressed }) => pressed && s.pressed}>
+                <T w="sb" size={12} c={D.accent}>{tr('Mark all read')}</T>
               </Pressable>
             )}
           </View>
@@ -274,7 +275,7 @@ export default function NotificationsScreen({ barberId, onBack, onOpenBooking, o
 
       {older.length > 0 && (
         <>
-          <Eyebrow ls={1.65} style={{ marginTop: 2 }}>EARLIER</Eyebrow>
+          <Eyebrow ls={1.65} style={{ marginTop: 2 }}>{tr('EARLIER')}</Eyebrow>
           <View style={{ gap: 9 }}>{older.map((n) => row(n, true))}</View>
         </>
       )}
@@ -284,12 +285,12 @@ export default function NotificationsScreen({ barberId, onBack, onOpenBooking, o
 
 // ---- 4c · notification settings -------------------------------------------
 const PUSH_ROWS: { key: keyof Prefs; label: string; hint: string }[] = [
-  { key: 'push_booking_request', label: 'New booking requests', hint: 'Accept or decline from the banner' },
-  { key: 'push_cancellation', label: 'Cancellations', hint: 'A slot just opened up' },
-  { key: 'push_checked_in', label: 'Client checked in', hint: "He's in the shop waiting" },
-  { key: 'push_wallet', label: 'Wallet & top-ups', hint: 'Cash credited to a customer' },
-  { key: 'push_message', label: 'Messages', hint: 'From clients and the team' },
-  { key: 'push_review', label: 'New reviews', hint: 'Waits for the inbox' },
+  { key: 'push_booking_request', label: tr('New booking requests'), hint: tr('Accept or decline from the banner') },
+  { key: 'push_cancellation', label: tr('Cancellations'), hint: tr('A slot just opened up') },
+  { key: 'push_checked_in', label: tr('Client checked in'), hint: tr('He\'s in the shop waiting') },
+  { key: 'push_wallet', label: tr('Wallet & top-ups'), hint: tr('Cash credited to a customer') },
+  { key: 'push_message', label: tr('Messages'), hint: tr('From clients and the team') },
+  { key: 'push_review', label: tr('New reviews'), hint: tr('Waits for the inbox') },
 ];
 
 function NotificationSettings({ barberId, onBack }: { barberId: string; onBack: () => void }) {
@@ -319,7 +320,7 @@ function NotificationSettings({ barberId, onBack }: { barberId: string; onBack: 
     const { error } = await supabase.from('notification_prefs')
       .upsert({ user_id: barberId, ...next, updated_at: new Date().toISOString() },
         { onConflict: 'user_id' });
-    if (error) { setPrefs(prefs); Alert.alert('Could not save', error.message); }
+    if (error) { setPrefs(prefs); Alert.alert(tr('Could not save'), error.message); }
   }
 
   const openPct = hours ? (hours.start_min / 1440) * 100 : 40;
@@ -328,11 +329,11 @@ function NotificationSettings({ barberId, onBack }: { barberId: string; onBack: 
 
   return (
     <Screen gap={13}>
-      <TopBar title="Notifications" onBack={onBack} plain />
+      <TopBar title={tr('Notifications')} onBack={onBack} plain />
 
       <Pressable onPress={perm === 'granted' ? undefined : () => Linking.openSettings()}
         accessibilityRole={perm === 'granted' ? undefined : 'button'}
-        accessibilityLabel={perm === 'granted' ? 'Push is on' : 'Turn push on in system settings'}
+        accessibilityLabel={perm === 'granted' ? tr('Push is on') : tr('Turn push on in system settings')}
         style={({ pressed }) => [s.permCard, perm !== 'granted' && s.permCardOff, pressed && s.pressed]}>
         <View style={[s.permIcon, perm !== 'granted' && { backgroundColor: D.amberSoft16 }]}>
           <Ico name={perm === 'granted' ? 'bell' : 'bell-off'} size={17}
@@ -340,10 +341,10 @@ function NotificationSettings({ barberId, onBack }: { barberId: string; onBack: 
         </View>
         <View style={s.grow}>
           <T w="b" size={14} c={perm === 'granted' ? D.text : D.amber}>
-            {perm === 'granted' ? 'Push is on' : 'Push is off'}
+            {perm === 'granted' ? tr('Push is on') : tr('Push is off')}
           </T>
           <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-            {perm === 'granted' ? 'Allowed in your phone settings' : 'Tap to allow it in your phone settings'}
+            {perm === 'granted' ? tr('Allowed in your phone settings') : tr('Tap to allow it in your phone settings')}
           </T>
         </View>
       </Pressable>
@@ -351,14 +352,14 @@ function NotificationSettings({ barberId, onBack }: { barberId: string; onBack: 
       <View style={s.cuttingCard}>
         <View style={s.cuttingIcon}><Ico name="scissors" size={17} color={D.amber} /></View>
         <View style={s.grow}>
-          <T w="b" size={14} c={D.amber}>Silent while cutting</T>
-          <T size={11} c={D.sub} style={s.hint}>Nothing buzzes from check-in to mark-done</T>
+          <T w="b" size={14} c={D.amber}>{tr('Silent while cutting')}</T>
+          <T size={11} c={D.sub} style={s.hint}>{tr('Nothing buzzes from check-in to mark-done')}</T>
         </View>
         <Toggle on={prefs.silent_while_cutting} color={D.amber}
           onPress={() => set('silent_while_cutting', !prefs.silent_while_cutting)} />
       </View>
 
-      <Eyebrow ls={1.65} style={{ marginTop: 2 }}>PUSH ME FOR</Eyebrow>
+      <Eyebrow ls={1.65} style={{ marginTop: 2 }}>{tr('PUSH ME FOR')}</Eyebrow>
       <View style={s.listCard}>
         {PUSH_ROWS.map((r, i) => (
           <View key={r.key} style={[s.listRow, i < PUSH_ROWS.length - 1 && s.listLine]}>
@@ -372,13 +373,13 @@ function NotificationSettings({ barberId, onBack }: { barberId: string; onBack: 
         ))}
       </View>
 
-      <Eyebrow ls={1.65} style={{ marginTop: 2 }}>QUIET HOURS</Eyebrow>
+      <Eyebrow ls={1.65} style={{ marginTop: 2 }}>{tr('QUIET HOURS')}</Eyebrow>
       <View style={s.quietCard}>
         <View style={s.quietTop}>
           <View style={s.grow}>
-            <T w="b" size={14}>Outside working hours</T>
+            <T w="b" size={14}>{tr('Outside working hours')}</T>
             <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-              {hours ? `${hh(hours.end_min)} – ${hh(hours.start_min)} and days off` : 'Set your hours first'}
+              {hours ? tr('{end_min} – {start_min} and days off', { end_min: hh(hours.end_min), start_min: hh(hours.start_min) }) : tr('Set your hours first')}
             </T>
           </View>
           <Toggle on={prefs.quiet_outside_hours}
@@ -400,16 +401,16 @@ function NotificationSettings({ barberId, onBack }: { barberId: string; onBack: 
         </View>
         <View style={s.legend}>
           <View style={[s.swatch, { backgroundColor: 'rgba(232,68,46,0.35)' }]} />
-          <T size={12} c={D.sub} style={s.grow}>Buzzing</T>
+          <T size={12} c={D.sub} style={s.grow}>{tr('Buzzing')}</T>
           <View style={[s.swatch, { backgroundColor: 'rgba(255,255,255,0.06)' }]} />
-          <T size={12} c={D.sub}>Silent · lands in inbox</T>
+          <T size={12} c={D.sub}>{tr('Silent · lands in inbox')}</T>
         </View>
       </View>
 
       <View style={s.urgentCard}>
         <View style={s.grow}>
-          <T w="b" size={14}>Urgent gets through anyway</T>
-          <T size={11} c={D.sub} style={s.hint}>A cancellation inside 2 hours always buzzes</T>
+          <T w="b" size={14}>{tr('Urgent gets through anyway')}</T>
+          <T size={11} c={D.sub} style={s.hint}>{tr('A cancellation inside 2 hours always buzzes')}</T>
         </View>
         <Toggle on={prefs.urgent_always} color={D.accent}
           onPress={() => set('urgent_always', !prefs.urgent_always)} />

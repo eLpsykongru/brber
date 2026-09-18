@@ -6,6 +6,7 @@ import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
 import BarberQueueScreen from './BarberQueueScreen';
+import { tr, trRich } from '../lib/i18n';
 
 // OSH-19 — all chairs, the live lines (ADDENDUM-app-first, owner turn T9). OSH-03
 // answers "what does the day look like"; this answers the question an owner asks
@@ -46,7 +47,7 @@ export default function LinesScreen({ onBack }: { onBack: () => void }) {
   const load = useCallback(async (quiet = false) => {
     const { data, error } = await supabase.rpc('shop_lines_today');
     if (error) {
-      if (!quiet) Alert.alert('Could not load the lines', error.message);
+      if (!quiet) Alert.alert(tr('Could not load the lines'), error.message);
       return;
     }
     setChairs((data as Chair[]) ?? []);
@@ -75,53 +76,55 @@ export default function LinesScreen({ onBack }: { onBack: () => void }) {
 
   return (
     <Screen gap={12}>
-      <TopBar title="The lines" onBack={onBack} />
+      <TopBar title={tr('The lines')} onBack={onBack} />
 
       <View style={s.summary}>
         <View>
-          <T w="b" size={9.5} c={D.sub} ls={1.1}>WAITING IN THE SHOP</T>
+          <T w="b" size={9.5} c={D.sub} ls={1.1}>{tr('WAITING IN THE SHOP')}</T>
           <Serif size={36} ls={0} style={s.tnum}>{String(total)}</Serif>
         </View>
         <View style={s.rule} />
         <View style={[s.grow, { gap: 5 }]}>
           <T size={11.5} c={D.sub} style={{ lineHeight: 16.5 }}>
             {worst
-              ? <>Longest wait is <T w="b" size={11.5}>~{worst.wait_min} min</T> at {first(worst.name)}'s chair.{quickest && quickest.barber_id !== worst.barber_id ? ` ${first(quickest.name)} is quickest at ~${quickest.wait_min ?? 0} min.` : ''}</>
-              : taking.length ? 'Nobody is waiting long right now.' : 'No chair is taking walk-ins right now.'}
+              ? <>{trRich("Longest wait is <b>~{wait} min</b> at {name}'s chair.", {
+                b: (text, key) => <T key={key} w="b" size={11.5}>{text}</T>,
+              }, { wait: worst.wait_min, name: first(worst.name) })}{quickest && quickest.barber_id !== worst.barber_id ? ` ${tr('{name} is quickest at ~{wait_min} min.', { name: first(quickest.name), wait_min: quickest.wait_min ?? 0 })}` : ''}</>
+              : taking.length ? tr('Nobody is waiting long right now.') : tr('No chair is taking walk-ins right now.')}
           </T>
           {unconfirmed > 0 && (
-            <T size={11} c={D.amber}>{unconfirmed === 1 ? '1 name never confirmed' : `${unconfirmed} names never confirmed`}</T>
+            <T size={11} c={D.amber}>{unconfirmed === 1 ? tr('1 name never confirmed') : tr('{unconfirmed} names never confirmed', { unconfirmed })}</T>
           )}
         </View>
       </View>
 
-      <Eyebrow ls={1.5}>WORST WAIT FIRST</Eyebrow>
-      {chairs === null && <ActivityIndicator color={D.accent} accessibilityLabel="Loading the lines" />}
+      <Eyebrow ls={1.5}>{tr('WORST WAIT FIRST')}</Eyebrow>
+      {chairs === null && <ActivityIndicator color={D.accent} accessibilityLabel={tr('Loading the lines')} />}
       <View style={{ gap: 8 }}>
         {list.map((c, i) => {
           const isWorst = i === 0 && c === worst;
           const isQuick = c === quickest && !isWorst && taking.length > 1;
-          const sub = !c.working ? 'Not working today'
-            : c.paused ? `Line paused${c.paused_at ? ` ${hhmm(c.paused_at)}` : ''} · still cutting bookings`
-              : c.in_chair ? `${c.in_chair} in the chair` : 'Chair empty · free now';
+          const sub = !c.working ? tr('Not working today')
+            : c.paused ? (c.paused_at ? tr('Line paused {at} · still cutting bookings', { at: hhmm(c.paused_at) }) : tr('Line paused · still cutting bookings'))
+              : c.in_chair ? tr('{name} in the chair', { name: c.in_chair }) : tr('Chair empty · free now');
           return (
             <Pressable key={c.barber_id} onPress={() => setOpenId(c.barber_id)} accessibilityRole="button"
-              accessibilityLabel={`${first(c.name)}, ${c.waiting} waiting${c.paused ? ', paused' : ''}`}
+              accessibilityLabel={c.paused ? tr('{name}, {waiting} waiting, paused', { name: first(c.name), waiting: c.waiting }) : tr('{name}, {waiting} waiting', { name: first(c.name), waiting: c.waiting })}
               style={({ pressed }) => [s.chair, isWorst && s.chairWorst, (c.paused || !c.working) && s.chairQuiet, pressed && s.pressed]}>
               <Avatar size={40} warm={c.me} initials={initials(c.name)} />
               <View style={s.grow}>
-                <T w="b" size={13.5} c={c.paused || !c.working ? D.sub : D.text}>{first(c.name)}{c.me ? ' · you' : ''}</T>
+                <T w="b" size={13.5} c={c.paused || !c.working ? D.sub : D.text}>{first(c.name)}{c.me ? tr(' · you') : ''}</T>
                 <T size={11} c={!c.in_chair && c.working && !c.paused ? D.green : D.sub} style={{ marginTop: 2 }}>
                   {sub}
-                  {c.unconfirmed > 0 ? <T size={11} c={D.amber}> · {c.unconfirmed} unconfirmed</T> : null}
+                  {c.unconfirmed > 0 ? <T size={11} c={D.amber}>{' '}{tr('· {unconfirmed} unconfirmed', { unconfirmed: c.unconfirmed })}</T> : null}
                 </T>
               </View>
               {c.paused ? (
-                <View style={s.pausedChip}><T w="b" size={10} c={D.sub} ls={0.6}>PAUSED</T></View>
+                <View style={s.pausedChip}><T w="b" size={10} c={D.sub} ls={0.6}>{tr('PAUSED')}</T></View>
               ) : c.working ? (
                 <View style={{ alignItems: 'flex-end' }}>
                   <Serif size={19} ls={0} c={isWorst ? D.red : isQuick ? D.green : D.text} style={s.tnum}>{String(c.waiting)}</Serif>
-                  <T size={10} c={D.sub} style={{ marginTop: 3 }}>~{c.wait_min ?? 0} min</T>
+                  <T size={10} c={D.sub} style={{ marginTop: 3 }}>{tr('~{wait_min} min', { wait_min: c.wait_min ?? 0 })}</T>
                 </View>
               ) : null}
             </Pressable>
@@ -130,15 +133,15 @@ export default function LinesScreen({ onBack }: { onBack: () => void }) {
       </View>
 
       <View style={s.can}>
-        <T w="b" size={10} c={D.sub} ls={1.4}>WHAT YOU CAN DO FROM HERE</T>
-        <Can yes text="Open a chair and see that barber's line" />
-        <Can yes text="Pause the whole shop" />
-        <Can text="Move a man from one barber's line to another — that is the barber's call, at his chair" />
+        <T w="b" size={10} c={D.sub} ls={1.4}>{tr('WHAT YOU CAN DO FROM HERE')}</T>
+        <Can yes text={tr('Open a chair and see that barber\'s line')} />
+        <Can yes text={tr('Pause the whole shop')} />
+        <Can text={tr('Move a man from one barber\'s line to another — that is the barber\'s call, at his chair')} />
         <T size={10.5} c={D.faint} style={s.canFoot}>
-          Counts exclude whoever is in the chair, the same as each barber's own board.
+          {tr('Counts exclude whoever is in the chair, the same as each barber\'s own board.')}
         </T>
       </View>
-      <GhostBtn title="PAUSE THE WHOLE SHOP" color={D.textDim} onPress={() => setPauseOpen(true)} />
+      <GhostBtn title={tr('PAUSE THE WHOLE SHOP')} color={D.textDim} onPress={() => setPauseOpen(true)} />
 
       <ShopPauseSheet visible={pauseOpen} onClose={() => setPauseOpen(false)}
         onClosed={() => { setPauseOpen(false); load(); }} />
@@ -159,26 +162,26 @@ function Can({ yes, text }: { yes?: boolean; text: string }) {
 
 // Another barber's line, as his board shows it — and nothing to press on it.
 function ChairLine({ chair, onBack }: { chair: Chair; onBack: () => void }) {
-  const state = (l: LineEntry) => l.in_chair ? 'In the chair'
-    : l.unconfirmed ? "Put on from the web · hasn't tapped"
-      : l.called ? 'Called · not in the chair yet'
-        : l.dropped ? "Didn't come · at the end"
-          : `~${l.wait_min ?? 0} min`;
+  const state = (l: LineEntry) => l.in_chair ? tr('In the chair')
+    : l.unconfirmed ? tr("Put on from the web · hasn't tapped")
+      : l.called ? tr('Called · not in the chair yet')
+        : l.dropped ? tr("Didn't come · at the end")
+          : tr('~{wait_min} min', { wait_min: l.wait_min ?? 0 });
   return (
     <Screen gap={12}>
-      <TopBar title={`${first(chair.name)}'s line`} onBack={onBack} />
+      <TopBar title={tr('{name}\'s line', { name: first(chair.name) })} onBack={onBack} />
       <View style={s.summary}>
         <View>
-          <T w="b" size={9.5} c={D.sub} ls={1.1}>WAITING</T>
+          <T w="b" size={9.5} c={D.sub} ls={1.1}>{tr('WAITING')}</T>
           <Serif size={36} ls={0} style={s.tnum}>{String(chair.waiting)}</Serif>
         </View>
         <View style={s.rule} />
         <T size={11.5} c={D.sub} style={[s.grow, { lineHeight: 16.5 }]}>
-          {chair.paused ? 'His line is paused — he is still cutting his bookings.'
-            : chair.in_chair ? `${chair.in_chair} in the chair.` : 'His chair is empty.'}
+          {chair.paused ? tr('His line is paused — he is still cutting his bookings.')
+            : chair.in_chair ? tr('{in_chair} in the chair.', { in_chair: chair.in_chair }) : tr('His chair is empty.')}
         </T>
       </View>
-      {chair.line.length === 0 && <T size={13} c={D.sub}>Nobody in his line.</T>}
+      {chair.line.length === 0 && <T size={13} c={D.sub}>{tr('Nobody in his line.')}</T>}
       <View style={{ gap: 8 }}>
         {chair.line.map((l) => (
           <View key={l.no} style={[s.chair, l.in_chair && s.inChair, l.unconfirmed && s.unconfirmedRow]}>
@@ -195,8 +198,7 @@ function ChairLine({ chair, onBack }: { chair: Chair; onBack: () => void }) {
       <View style={s.readOnly}>
         <Ico name="info" size={14} color={D.sub} />
         <T size={11.5} c={D.sub} style={[s.grow, { lineHeight: 17 }]}>
-          Only {first(chair.name)} calls from this line — it is his chair and his judgement. This is what
-          his board shows him.
+          {tr('Only {name} calls from this line — it is his chair and his judgement. This is what his board shows him.', { name: first(chair.name) })}
         </T>
       </View>
     </Screen>

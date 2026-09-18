@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { countWord } from '../lib/inboxRules';
 import { colors, radius, shadow } from '../theme';
+import { loc, tr, trn } from '../lib/i18n';
 
 // NTF-10 of "Customer - Notifications.dc.html" — what replaces 14b's header when
 // the phone denies push. With push off every switch below it is decoration, and
@@ -28,7 +29,7 @@ function dotOf(kind: string) {
 
 function whenOf(iso: string) {
   const d = new Date(iso);
-  return `${d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}, ${d.toTimeString().slice(0, 5)}`;
+  return `${d.toLocaleDateString(loc('en-GB'), { weekday: 'short', day: 'numeric', month: 'short' })}, ${d.toTimeString().slice(0, 5)}`;
 }
 
 export default function PushOff({ missed, onOpenBooking, onOpenWallet }: {
@@ -47,32 +48,32 @@ export default function PushOff({ missed, onOpenBooking, onOpenWallet }: {
             <Ionicons name="notifications-off-outline" size={17} color={colors.accent} />
           </View>
           <View style={s.grow}>
-            <Text style={s.title}>Push is off for Sterncut</Text>
-            <Text style={s.sub}>Blocked in {PHONE} settings, not here</Text>
+            <Text style={s.title}>{tr('Push is off for Sterncut')}</Text>
+            <Text style={s.sub}>{tr('Blocked in {PHONE} settings, not here', { PHONE })}</Text>
           </View>
         </View>
         <Text style={s.body}>
           {missed === null
-            ? 'Checking what could not reach you…'
+            ? tr('Checking what could not reach you…')
             : n === 0
-              ? 'Nothing has failed to reach you yet — but while push is off, nothing will. We do not send SMS, so the app is the only way we can reach you.'
-              : `${countWord(n)} thing${n === 1 ? '' : 's'} could not reach you in the last two weeks. We do not send SMS, so the app is the only way we can reach you.`}
+              ? tr('Nothing has failed to reach you yet — but while push is off, nothing will. We do not send SMS, so the app is the only way we can reach you.')
+              : trn(n, '{n} thing could not reach you in the last two weeks. We do not send SMS, so the app is the only way we can reach you.', '{n} things could not reach you in the last two weeks. We do not send SMS, so the app is the only way we can reach you.', { n: countWord(n) })}
         </Text>
         <Pressable onPress={() => Linking.openSettings()} accessibilityRole="button"
           style={({ pressed }) => [s.btn, pressed && s.pressed]}>
-          <Text style={s.btnText}>OPEN {PHONE.toUpperCase()} SETTINGS</Text>
+          <Text style={s.btnText}>{tr('OPEN {PHONE} SETTINGS', { PHONE: PHONE.toUpperCase() })}</Text>
         </Pressable>
       </View>
 
       {n > 0 && (
         <>
-          <Text style={s.section}>WHAT YOU MISSED</Text>
+          <Text style={s.section}>{tr('WHAT YOU MISSED')}</Text>
           <View style={s.list}>
             {shown.map((m, i) => {
               const link = m.kind === 'wallet' && onOpenWallet
-                ? { label: 'it is still there', go: onOpenWallet }
+                ? { label: tr('it is still there'), go: onOpenWallet }
                 : m.booking_id && onOpenBooking
-                  ? { label: 'it is in your bookings', go: () => onOpenBooking(m.booking_id!) }
+                  ? { label: tr('it is in your bookings'), go: () => onOpenBooking(m.booking_id!) }
                   : null;
               return (
                 <View key={m.id} style={[s.row, i < shown.length - 1 && s.rowLine]}>
@@ -94,8 +95,7 @@ export default function PushOff({ missed, onOpenBooking, onOpenWallet }: {
             })}
           </View>
           <Text style={s.foot}>
-            {n === 1 ? 'It' : `All ${countWord(n).toLowerCase()}`} waited in your inbox the whole time. Nothing is
-            deleted for being unread.
+            {tr('{x} waited in your inbox the whole time. Nothing is deleted for being unread.', { x: n === 1 ? tr('It') : tr('All {n}', { n: countWord(n).toLowerCase() }) })}
           </Text>
         </>
       )}

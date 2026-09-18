@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Field, PillButton, ScreenHeader } from '../components/ui';
 import { colors, font, radius, sp, TOP_INSET } from '../theme';
+import { tr } from '../lib/i18n';
 
 // Richer review form (UI shell). Real submit currently lives in My Bookings → Rate.
 // TODO(backlog): wire submit to reviews insert + a specialist picker + photo attach.
@@ -16,19 +17,19 @@ export default function LeaveReviewScreen({ salonName, address, specialists, onB
 
   return (
     <View style={s.screen}>
-      <ScreenHeader title="Leave Review" onBack={onBack} />
+      <ScreenHeader title={tr('Leave Review')} onBack={onBack} />
       <ScrollView contentContainerStyle={s.content}>
         <View style={s.salonRow}>
           <View style={s.salonThumb}><Ionicons name="storefront-outline" size={22} color={colors.accent} /></View>
           <View style={s.grow}>
             <Text style={s.salonName}>{salonName}</Text>
-            <Text style={s.meta}>{address ?? 'Tangier, Morocco'}</Text>
+            <Text style={s.meta}>{address ?? tr('Tangier, Morocco')}</Text>
           </View>
         </View>
 
-        <Text style={s.shareTitle}>Share your service experience</Text>
+        <Text style={s.shareTitle}>{tr('Share your service experience')}</Text>
         <View style={s.ratingCard}>
-          <Text style={s.ratingLabel}>Your overall rating</Text>
+          <Text style={s.ratingLabel}>{tr('Your overall rating')}</Text>
           <View style={s.stars}>
             {[1, 2, 3, 4, 5].map((n) => (
               <Pressable key={n} onPress={() => setRating(n)} hitSlop={6}>
@@ -41,7 +42,7 @@ export default function LeaveReviewScreen({ salonName, address, specialists, onB
 
         {specialists.length > 0 && (
           <>
-            <Text style={s.label}>Specialist</Text>
+            <Text style={s.label}>{tr('Specialist')}</Text>
             <View style={s.chips}>
               {specialists.map((sp2) => (
                 <Pressable key={sp2} onPress={() => setSpecialist(sp2)}
@@ -53,16 +54,16 @@ export default function LeaveReviewScreen({ salonName, address, specialists, onB
           </>
         )}
 
-        <Text style={s.label}>Add detailed review</Text>
-        <Field placeholder="Enter here" multiline value={comment} onChangeText={setComment} style={s.comment} />
+        <Text style={s.label}>{tr('Add detailed review')}</Text>
+        <Field placeholder={tr('Enter here')} multiline value={comment} onChangeText={setComment} style={s.comment} />
         {/* TODO(backlog): photo attach to reviews */}
         <Pressable style={s.addPhoto} onPress={() => {}}>
           <Ionicons name="image-outline" size={18} color={colors.textSecondary} />
-          <Text style={s.meta}>add photo</Text>
+          <Text style={s.meta}>{tr('add photo')}</Text>
         </Pressable>
       </ScrollView>
       <View style={s.cta}>
-        <PillButton title="Submit" disabled={rating === 0}
+        <PillButton title={tr('Submit')} disabled={rating === 0}
           onPress={() => onSubmit({ rating, specialist, comment: comment.trim() })} />
       </View>
     </View>

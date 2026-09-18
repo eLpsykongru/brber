@@ -5,6 +5,7 @@ import MapView from 'react-native-maps';
 import { DEFAULT_REGION, LatLng } from '../lib/geo';
 import { colors, font, radius, sp } from '../theme';
 import { PillButton } from './ui';
+import { tr } from '../lib/i18n';
 
 // Center-pin picker: the map moves under a fixed pin; confirm takes the map center.
 export default function LocationPicker({ visible, initial, onPick, onClose }: {
@@ -30,12 +31,12 @@ export default function LocationPicker({ visible, initial, onPick, onClose }: {
         <View pointerEvents="none" style={s.pinWrap}>
           <Ionicons name="location" size={44} color={colors.accent} style={s.pin} />
         </View>
-        <Pressable onPress={onClose} style={s.closeBtn} hitSlop={8} accessibilityLabel="Cancel">
+        <Pressable onPress={onClose} style={s.closeBtn} hitSlop={8} accessibilityLabel={tr('Cancel')}>
           <Ionicons name="close" size={22} color={colors.text} />
         </Pressable>
         <View style={s.footer}>
-          <Text style={s.hint}>Move the map until the pin sits on your salon</Text>
-          <PillButton title="Use this location" onPress={() => onPick(center.current)} />
+          <Text style={s.hint}>{tr('Move the map until the pin sits on your salon')}</Text>
+          <PillButton title={tr('Use this location')} onPress={() => onPick(center.current)} />
         </View>
       </View>
     </Modal>

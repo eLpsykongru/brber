@@ -3,6 +3,7 @@ import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { colors } from '../theme';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
+import { tr } from '../lib/i18n';
 
 /**
  * A salon or a barber opened from an id alone.
@@ -29,7 +30,7 @@ export default function PreviewPage({ salonId, barberId, onBack, onBooked, onChr
     if (shopId || !barberId) return;
     supabase.from('barbers').select('salon_id').eq('id', barberId).single()
       .then(({ data, error }) => {
-        if (error || !data?.salon_id) { Alert.alert('Could not open', error?.message ?? 'No shop'); onBack(); return; }
+        if (error || !data?.salon_id) { Alert.alert(tr('Could not open'), error?.message ?? tr('No shop')); onBack(); return; }
         setShopId(data.salon_id);
       });
   }, [barberId, shopId]);
@@ -40,7 +41,7 @@ export default function PreviewPage({ salonId, barberId, onBack, onBooked, onChr
       .select('id, name, address, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, languages, profiles!barbers_id_fkey(full_name, avatar_url, phone, previous_name, name_changed_at), reviews!reviews_barber_id_fkey(rating), services(id, name, price_cents, duration_min, is_active, category))')
       .eq('id', shopId).single()
       .then(({ data, error }) => {
-        if (error) { Alert.alert('Could not load preview', error.message); onBack(); return; }
+        if (error) { Alert.alert(tr('Could not load preview'), error.message); onBack(); return; }
         const card = data as unknown as SalonCard;
         // a barber previewing their own page sees it before it is approved, too
         setSalon({ ...card, barbers: card.barbers.filter((b) => (preview && b.id === barberId)

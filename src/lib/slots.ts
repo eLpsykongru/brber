@@ -1,5 +1,7 @@
 // Pure slot math, shared by the specialist screen and the booking sheet.
 
+import { tr, trn } from './i18n';
+
 export type Window = { weekday: number; start_min: number; end_min: number };
 export type Range = { starts_at: string; ends_at: string };
 // partial-day unavailability; day = null recurs every day (e.g. lunch).
@@ -87,9 +89,9 @@ export function slotNote(start: Date, durationMin: number, windows: Window[], bo
   for (const w of windows.filter((x) => x.weekday === start.getDay())) edges.push(w.end_min);
 
   const next = edges.filter((e) => e >= endMin).sort((a, b) => a - b)[0];
-  if (next == null) return 'fits';
+  if (next == null) return tr('fits');
   const gap = next - endMin;
-  return gap > 0 && gap < 60 ? `fits · leaves a ${gap}-min gap after` : 'fits';
+  return gap > 0 && gap < 60 ? tr('fits · leaves a {gap}-min gap after', { gap }) : tr('fits');
 }
 
 // Barber turn 7c — how many sittings of `min` fit a day of `dayMin` run back to
@@ -141,8 +143,8 @@ export function makeRoomOptions(
   if (close + slotMin <= 24 * 60) {
     out.push({
       source: 'later', at: at(close), startMin: close, endMin: close + slotMin,
-      title: `Stay open ${slotMin} min later`,
-      sub: `Close ${hhmmOf(close + slotMin)} instead of ${hhmmOf(close)}`,
+      title: tr('Stay open {min} min later', { min: slotMin }),
+      sub: tr('Close {late} instead of {close}', { late: hhmmOf(close + slotMin), close: hhmmOf(close) }),
     });
   }
 
@@ -156,8 +158,8 @@ export function makeRoomOptions(
     const start = b.start_min + breakFloorMin;
     out.push({
       source: 'break', at: at(start), startMin: start, endMin: start + slotMin,
-      title: `Cut ${b.label ?? 'the break'} to ${breakFloorMin} min`,
-      sub: `Break ${hhmmOf(b.start_min)} – ${hhmmOf(start)}`,
+      title: tr('Cut {label} to {min} min', { label: b.label ?? tr('the break'), min: breakFloorMin }),
+      sub: tr('Break {from} – {to}', { from: hhmmOf(b.start_min), to: hhmmOf(start) }),
     });
   }
 
@@ -182,8 +184,8 @@ export function makeRoomOptions(
       const hi = Math.max(...edges.map((d) => d.getHours() * 60 + d.getMinutes()));
       out.push({
         source: 'buffers', at: freedAt.time, startMin, endMin: startMin + slotMin, warn: true,
-        title: `Drop the buffers, ${hhmmOf(lo)} – ${hhmmOf(hi)}`,
-        sub: `No cleaning time between ${touched.length} client${touched.length === 1 ? '' : 's'}`,
+        title: tr('Drop the buffers, {from} – {to}', { from: hhmmOf(lo), to: hhmmOf(hi) }),
+        sub: trn(touched.length, 'No cleaning time between {n} client', 'No cleaning time between {n} clients'),
       });
     }
   }

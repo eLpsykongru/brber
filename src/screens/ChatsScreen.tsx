@@ -11,6 +11,7 @@ import ReportProblemScreen, { CaseListRow, CaseRow, SupportCaseScreen } from './
 import { colors, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
 import { Pushed } from '../components/motion';
 import ChatScreen from './ChatScreen';
+import { loc, tr } from '../lib/i18n';
 
 const LIVE = ['pending', 'confirmed'];
 
@@ -32,7 +33,7 @@ type Row = Convo & { peer_id: string | null; last_at: string | null };
 type Thread = ThreadOf<Row>;
 
 function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  return new Date(iso).toLocaleTimeString(loc('en-US'), { hour: '2-digit', minute: '2-digit' });
 }
 
 function Avatar({ url, name, size, online }: { url?: string | null; name: string; size: number; online?: boolean }) {
@@ -153,14 +154,14 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
       <View style={st.header}>
         <View style={st.headerTop}>
           <View style={st.headerSide} />
-          <Text style={st.headerTitle}>Chat</Text>
+          <Text style={st.headerTitle}>{tr('Chat')}</Text>
           <Pressable onPress={() => { setSearching((v) => !v); setQuery(''); }} hitSlop={8}
-            accessibilityLabel="Search chats" style={st.headerSide}>
+            accessibilityLabel={tr('Search chats')} style={st.headerSide}>
             <Ionicons name={searching ? 'close' : 'search'} size={20} color={colors.onAccent} />
           </Pressable>
         </View>
         {searching ? (
-          <TextInput style={st.search} placeholder="Search by name…" placeholderTextColor={colors.tabInactiveText}
+          <TextInput style={st.search} placeholder={tr('Search by name…')} placeholderTextColor={colors.tabInactiveText}
             value={query} onChangeText={setQuery} autoFocus />
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={st.strip}>
@@ -171,7 +172,7 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
                   <Avatar url={t.head.barbers?.profiles?.avatar_url}
                     name={t.head.barbers?.profiles?.full_name ?? 'B'} size={56} online />
                   <Text style={st.stripName} numberOfLines={1}>
-                    {(t.head.barbers?.profiles?.full_name ?? 'Barber').split(' ')[0]}
+                    {(t.head.barbers?.profiles?.full_name ?? tr('Barber')).split(' ')[0]}
                   </Text>
                 </Pressable>
               ))}
@@ -183,13 +184,13 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
       {/* tabs */}
       <View style={st.tabs}>
         <Pressable onPress={() => setTab('all')} style={st.tabBtn}>
-          <Text style={[st.tabText, tab === 'all' && st.tabTextActive]}>All</Text>
+          <Text style={[st.tabText, tab === 'all' && st.tabTextActive]}>{tr('All')}</Text>
           <View style={[st.tabCount, tab === 'all' && st.tabCountActive]}>
             <Text style={[st.tabCountText, tab === 'all' && st.tabCountTextActive]}>{filtered.length}</Text>
           </View>
         </Pressable>
         <Pressable onPress={() => setTab('unread')} style={st.tabBtn}>
-          <Text style={[st.tabText, tab === 'unread' && st.tabTextActive]}>Unread</Text>
+          <Text style={[st.tabText, tab === 'unread' && st.tabTextActive]}>{tr('Unread')}</Text>
         </Pressable>
       </View>
 
@@ -199,7 +200,7 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
         contentContainerStyle={st.list}
         ListHeaderComponent={q || tab === 'unread' ? null : (
           <View style={st.helpBlock}>
-            <Text style={st.section}>HELP</Text>
+            <Text style={st.section}>{tr('HELP')}</Text>
             <Pressable onPress={() => { setReporting(true); onChromeHidden(true); }}
               accessibilityRole="button"
               style={({ pressed }) => [st.helpCard, pressed && st.rowPressed]}>
@@ -207,10 +208,10 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
                 <Ionicons name="chatbubble-ellipses-outline" size={20} color={colors.onAccent} />
               </View>
               <View style={st.rowBody}>
-                <Text style={st.rowName}>Sterncut Support</Text>
-                <Text style={st.rowPreview}>Reviewed within 24 hours</Text>
+                <Text style={st.rowName}>{tr('Sterncut Support')}</Text>
+                <Text style={st.rowPreview}>{tr('Reviewed within 24 hours')}</Text>
               </View>
-              <Text style={st.start}>START</Text>
+              <Text style={st.start}>{tr('START')}</Text>
             </Pressable>
 
             {/* an ops case is not something the customer can open - it opens
@@ -219,7 +220,7 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
               const live = c.status === 'open';
               return (
                 <Pressable key={c.id} onPress={() => { setCaseOpen(c); onChromeHidden(true); }}
-                  accessibilityRole="button" accessibilityLabel={`Case ${c.case_no}`}
+                  accessibilityRole="button" accessibilityLabel={tr('Case {case_no}', { case_no: c.case_no })}
                   style={({ pressed }) => [st.helpCard, live && st.helpCardLive, pressed && st.rowPressed]}>
                   <View style={[st.helpIcon, live ? st.helpIconLive : st.helpIconDone]}>
                     <Ionicons name={live ? 'card-outline' : 'checkmark'} size={19}
@@ -227,10 +228,10 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
                   </View>
                   <View style={st.rowBody}>
                     <Text style={st.rowName} numberOfLines={1}>
-                      {live ? 'Ops desk' : 'Ops desk · settled'} · {c.case_no}
+                      {live ? tr('Ops desk') : tr('Ops desk · settled')} · {c.case_no}
                     </Text>
                     <Text style={st.rowPreview} numberOfLines={1}>
-                      {c.detail || (c.salon ?? 'Under review')}
+                      {c.detail || (c.salon ?? tr('Under review'))}
                     </Text>
                   </View>
                   {c.unread > 0
@@ -240,22 +241,22 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
               );
             })}
 
-            {shown.length > 0 && <Text style={st.section}>BARBERS</Text>}
+            {shown.length > 0 && <Text style={st.section}>{tr('BARBERS')}</Text>}
           </View>
         )}
         ListEmptyComponent={
           tab === 'unread'
-            ? <Empty text="Unread tracking coming soon." />
-            : <Empty icon="chatbubble-outline" title="No chats yet"
-                text="Chats appear here once you have a booking with a barber." />
+            ? <Empty text={tr('Unread tracking coming soon.')} />
+            : <Empty icon="chatbubble-outline" title={tr('No chats yet')}
+                text={tr('Chats appear here once you have a booking with a barber.')} />
         }
         renderItem={({ item: thread }) => {
           const item = thread.head;
           const upcoming = thread.rows.filter((r) => LIVE.includes(r.status)).length;
-          const name = item.barbers?.profiles?.full_name ?? 'Barber';
+          const name = item.barbers?.profiles?.full_name ?? tr('Barber');
           const preview = item.last
-            ? (item.last.image_path ? '📷 Photo' : item.last.body ?? '')
-            : `Booking at ${item.barbers?.salon?.name ?? 'salon'}`;
+            ? (item.last.image_path ? tr('📷 Photo') : item.last.body ?? '')
+            : tr('Booking at {salon}', { salon: item.barbers?.salon?.name ?? tr('salon') });
           return (
             <Pressable onPress={() => openChat(thread)}
               style={({ pressed }) => [st.row, pressed && st.rowPressed]}>
@@ -264,7 +265,7 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
                 <Text style={st.rowName} numberOfLines={1}>{name}</Text>
                 <Text style={st.rowPreview} numberOfLines={1}>{preview}</Text>
                 {upcoming > 1 && (
-                  <Text style={st.rowMore}>{upcoming} bookings with him coming up · one thread</Text>
+                  <Text style={st.rowMore}>{tr('{upcoming} bookings with him coming up · one thread', { upcoming })}</Text>
                 )}
               </View>
               {!!item.last && <Text style={st.rowTime}>{fmtTime(item.last.created_at)}</Text>}
@@ -295,7 +296,7 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
     return (
       <Pushed onBack={() => openChat(null)} behind={list}>
         <ChatScreen bookingId={writeTarget(open)} threadWith={open.head.barbers?.id} myId={customerId}
-          title={open.head.barbers?.profiles?.full_name ?? 'Chat'}
+          title={open.head.barbers?.profiles?.full_name ?? tr('Chat')}
           subtitle={open.head.barbers?.salon?.name ?? undefined}
           avatarUrl={open.head.barbers?.profiles?.avatar_url ?? undefined}
           onBack={() => openChat(null)} />

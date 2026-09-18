@@ -18,6 +18,7 @@ import { colors, dark as D, font, inter, radius, sp, TOP_INSET } from '../theme'
 import ChatScreen from './ChatScreen';
 import WaitingListScreen from './WaitingListScreen';
 import OutboxScreen from './OutboxScreen';
+import { tr, trn, weekdayDate } from '../lib/i18n';
 
 const STEP = 30;
 
@@ -55,7 +56,7 @@ function upcomingDays(n: number) {
 }
 
 const nameOf = (b: DayBooking, barberId: string) =>
-  b.walk_in_name ?? (b.customer_id === barberId ? 'Walk-in' : b.customer?.full_name ?? 'Client');
+  b.walk_in_name ?? (b.customer_id === barberId ? tr('Walk-in') : b.customer?.full_name ?? tr('Client'));
 
 const initialsOf = (name: string) =>
   name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
@@ -78,7 +79,7 @@ function Avatar({ url, name, size = 44 }: { url?: string | null; name: string; s
 
 function RelStars({ n }: { n: number }) {
   return (
-    <View style={s.relRow} accessible accessibilityLabel={`${n} of 5 reliability stars`}>
+    <View style={s.relRow} accessible accessibilityLabel={tr('{n} of 5 reliability stars', { n })}>
       {[1, 2, 3, 4, 5].map((i) => (
         <Ionicons key={i} name="star" size={11} color={i <= n ? colors.star : D.border} />
       ))}
@@ -187,7 +188,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
         .gte('confirm_until', new Date().toISOString())
         .gte('starts_at', from.toISOString()).lt('starts_at', to.toISOString()),
     ]);
-    if (bk.error) Alert.alert('Could not load bookings', bk.error.message);
+    if (bk.error) Alert.alert(tr('Could not load bookings'), bk.error.message);
     else setAllBookings(bk.data as unknown as DayBooking[]);
     setWindows(av.data ?? []);
     setDaysOff((off.data ?? []).map((d) => d.day));
@@ -224,7 +225,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     const live = allBookings.filter((b) => b.status !== 'no_show' && sameDay(new Date(b.starts_at), today));
     const free = daySlots(today, STEP, windows, live, daysOff, blocks, bufferMin)
       .filter((sl) => sl.status === 'free');
-    if (!free.length) return Alert.alert('No free slot today', 'Pick a slot on the timeline yourself.');
+    if (!free.length) return Alert.alert(tr('No free slot today'), tr('Pick a slot on the timeline yourself.'));
     const minOf = (d: Date) => d.getHours() * 60 + d.getMinutes();
     const pick = preferMin == null ? free[0]
       : free.reduce((a, b) => (Math.abs(minOf(b.time) - preferMin) < Math.abs(minOf(a.time) - preferMin) ? b : a));
@@ -237,7 +238,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
       customer_id: barberId, barber_id: barberId, service_id: service.id,
       starts_at: addAt.toISOString(), walk_in_name: walkInName.trim() || null,
     };
-    const who = walkInName.trim() || 'Walk-in';
+    const who = walkInName.trim() || tr('Walk-in');
 
     // 10a — the chair does not wait for the network. Offline this goes on the
     // queue and onto his timeline immediately; `no_double_booking` still has the
@@ -245,7 +246,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     if (!online) {
       await enqueue({
         at: new Date().toISOString(), icon: 'plus',
-        label: `Walk-in added · ${who} ${hhmm(row.starts_at)}`,
+        label: tr('Walk-in added · {who} {starts_at}', { who, starts_at: hhmm(row.starts_at) }),
         meta: { startsAt: row.starts_at, who, service: service.name },
         call: { insert: 'bookings', row },
       });
@@ -258,8 +259,8 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     setAddBusy(false);
     if (error) {
       const msg = error.message.includes('no_double_booking')
-        ? 'That time overlaps another booking.' : error.message;
-      return Alert.alert('Could not add', msg);
+        ? tr('That time overlaps another booking.') : error.message;
+      return Alert.alert(tr('Could not add'), msg);
     }
     setAddAt(null); setWalkInName(''); setUsualServiceId(null); // habits apply to the first add only
     load();
@@ -279,7 +280,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     if (!online) {
       await enqueue({
         at: new Date().toISOString(), icon: 'check', cents: b.price_cents,
-        label: `${nameOf(b, barberId)} marked done · ${Math.round(b.price_cents / 100)} DH`,
+        label: tr('{b} marked done · {round} DH', { b: nameOf(b, barberId), round: Math.round(b.price_cents / 100) }),
         meta: { bookingId: b.id },
         call: { rpc: 'advance_booking', args: { p_booking: b.id, p_stage: 'complete' } },
       });
@@ -287,7 +288,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
       return;
     }
     const { error } = await supabase.rpc('advance_booking', { p_booking: b.id, p_stage: 'complete' });
-    if (error) return Alert.alert('Could not complete', error.message);
+    if (error) return Alert.alert(tr('Could not complete'), error.message);
     setToast({ booking: b, clearStart: !b.started_at, clearCheckin: !b.checked_in_at });
     setSheetBooking(null);
     load();
@@ -300,7 +301,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     const { error } = await supabase.rpc('revert_completion', {
       p_booking: booking.id, p_clear_start: clearStart, p_clear_checkin: clearCheckin,
     });
-    if (error) Alert.alert('Could not undo', error.message);
+    if (error) Alert.alert(tr('Could not undo'), error.message);
     load();
   }
 
@@ -309,7 +310,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     const { error } = await supabase.rpc('reschedule_booking', {
       p_booking: reschedule.id, p_new_start: rescheduleAt.toISOString(),
     });
-    if (error) Alert.alert('Could not reschedule', error.message);
+    if (error) Alert.alert(tr('Could not reschedule'), error.message);
     setReschedule(null); setRescheduleAt(null);
     load();
   }
@@ -371,7 +372,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
         deposit_cents: 0,
         visits: allBookings.filter((b) => b.customer_id === theirs.customer_id).length,
       } : null,
-      mine: { name: job.meta?.who ?? 'Walk-in', addedAt: hhmm(job.at) },
+      mine: { name: job.meta?.who ?? tr('Walk-in'), addedAt: hhmm(job.at) },
       freeAt: freeTicks.find((t) => t.getTime() > at.getTime()) ?? null,
     });
   }
@@ -395,9 +396,9 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     .map((j) => ({
       id: `queued:${j.id}`, starts_at: j.meta!.startsAt!,
       ends_at: new Date(new Date(j.meta!.startsAt!).getTime() + STEP * 60_000).toISOString(),
-      status: 'confirmed', price_cents: 0, walk_in_name: j.meta?.who ?? 'Walk-in',
+      status: 'confirmed', price_cents: 0, walk_in_name: j.meta?.who ?? tr('Walk-in'),
       customer_id: barberId, checked_in_at: null, started_at: null, completed_at: null,
-      services: { name: j.meta?.service ?? 'Service' }, customer: null,
+      services: { name: j.meta?.service ?? tr('Service') }, customer: null,
     } as unknown as DayBooking));
 
   const dayAll = [...allBookings.filter((b) => sameDay(new Date(b.starts_at), selectedDay)), ...queuedRows]
@@ -427,13 +428,13 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     <View style={s.screen}>
       <ScrollView ref={scrollRef} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.head}>
-          <Pressable onPress={onBack} hitSlop={8} accessibilityRole="button" accessibilityLabel="Back"
+          <Pressable onPress={onBack} hitSlop={8} accessibilityRole="button" accessibilityLabel={tr('Back')}
             style={({ pressed }) => [s.circleBtn, pressed && s.pressed]}>
             <Ico name="chevron-left" size={16} />
           </Pressable>
-          <Serif size={17} style={s.headTitle}>My day</Serif>
+          <Serif size={17} style={s.headTitle}>{tr('My day')}</Serif>
           <Pressable onPress={() => freeTicks[0] && setAddAt(freeTicks[0])} hitSlop={8}
-            accessibilityRole="button" accessibilityLabel="Add a booking"
+            accessibilityRole="button" accessibilityLabel={tr('Add a booking')}
             style={({ pressed }) => [s.circleBtn, pressed && s.pressed]}>
             <Ico name="plus" size={16} />
           </Pressable>
@@ -452,9 +453,9 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
             <Ico name="alert-triangle" size={16} color={D.amber} />
             <View style={s.grow}>
               <T w="b" size={13} c={D.amber}>
-                Two people at {hhmm(j.meta!.startsAt!)}
+                {tr('Two people at {hhmm}', { hhmm: hhmm(j.meta!.startsAt!) })}
               </T>
-              <T size={11} c={D.sub}>{j.meta?.who ?? 'Your walk-in'} couldn't be added — sort it</T>
+              <T size={11} c={D.sub}>{tr('{who} couldn\'t be added — sort it', { who: j.meta?.who ?? tr('Your walk-in') })}</T>
             </View>
             <Ico name="chevron-right" size={16} color={D.sub} />
           </Pressable>
@@ -470,13 +471,13 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
               const dot = sel ? '#fff' : closed ? 'transparent' : st.count ? D.accent : D.muted;
               return (
                 <Pressable key={d.toDateString()} onPress={() => setSelectedDay(d)}
-                  accessibilityRole="button" accessibilityLabel={`${d.toDateString()}, ${st.state}${st.state === 'partial' ? `, ${st.count} booked` : ''}`}
+                  accessibilityRole="button" accessibilityLabel={st.state === 'partial' ? tr('{day}, partial, {n} booked', { day: weekdayDate(d), n: st.count }) : tr('{day}, {state}', { day: weekdayDate(d), state: tr(st.state) })}
                   accessibilityState={{ selected: sel }}
                   style={({ pressed }) => [
                     s.dayCell, sel && s.dayCellSel, closed && s.dayCellOff, pressed && s.pressed,
                   ]}>
                   <T size={10} c={sel ? 'rgba(255,255,255,0.8)' : D.sub}>
-                    {d.toDateString().slice(0, 3)}
+                    {weekdayDate(d, false)}
                   </T>
                   <T w="b" size={14}>{String(d.getDate()).padStart(2, '0')}</T>
                   <View style={[s.dayDot, { backgroundColor: dot }]} />
@@ -496,10 +497,10 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
             // be booked into it and the day stops offering it.
             const start = at.getHours() * 60 + at.getMinutes();
             const { error } = await supabase.from('time_blocks').insert({
-              barber_id: barberId, label: 'Break', day: isoOf(at),
+              barber_id: barberId, label: tr('Break'), day: isoOf(at),
               start_min: start, end_min: start + minutes,
             });
-            if (error) Alert.alert('Could not add the break', error.message);
+            if (error) Alert.alert(tr('Could not add the break'), error.message);
             load();
           }}
           onWaitingList={setWaitlist}
@@ -512,12 +513,11 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
         {/* what the day adds up to */}
         <View style={s.summary}>
           <T size={11} c={D.sub}>
-            {dayLive.length} booked · {freeTicks.length} free
-            {dayBlocks.length ? ` · ${dayBlocks.length} break${dayBlocks.length > 1 ? 's' : ''}` : ''}
+            {tr('{count} booked · {count2} free{x}', { count: dayLive.length, count2: freeTicks.length, x: dayBlocks.length ? trn(dayBlocks.length, ' · {n} break', ' · {n} breaks') : '' })}
           </T>
           <View style={s.grow} />
           <T w="b" size={11} c={D.accent}>
-            {Math.round(dayLive.reduce((a, b) => a + b.price_cents, 0) / 100)} DH
+            {tr('{round} DH', { round: Math.round(dayLive.reduce((a, b) => a + b.price_cents, 0) / 100) })}
           </T>
         </View>
 
@@ -529,13 +529,13 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
               const stars = isWalkIn ? null : reliabilityOf(b.customer_id, history);
               return (
                 <Pressable key={b.id} onPress={() => goToClient(b)}
-                  accessibilityRole="button" accessibilityLabel={`${nameOf(b, barberId)} at ${hhmm(b.starts_at)}`}
+                  accessibilityRole="button" accessibilityLabel={tr('{b} at {starts_at}', { b: nameOf(b, barberId), starts_at: hhmm(b.starts_at) })}
                   style={({ pressed }) => [s.clientCard, highlightId === b.id && s.clientCardActive, pressed && s.pressed]}>
                   <Avatar url={isWalkIn ? null : b.customer?.avatar_url} name={nameOf(b, barberId)} />
                   <Text style={s.clientName} numberOfLines={1}>{nameOf(b, barberId)}</Text>
-                  {isWalkIn ? <Text style={s.clientTag}>Walk-in</Text>
+                  {isWalkIn ? <Text style={s.clientTag}>{tr('Walk-in')}</Text>
                     : stars != null ? <RelStars n={stars} />
-                    : <Text style={s.clientTag}>New</Text>}
+                    : <Text style={s.clientTag}>{tr('New')}</Text>}
                 </Pressable>
               );
             })}
@@ -544,9 +544,9 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
 
         {/* timeline */}
         <View style={s.timeline} onLayout={(e) => { timelineY.current = e.nativeEvent.layout.y; }}>
-          {isDayOff && <Text style={s.note}>Day off — the shop is closed.</Text>}
-          {!isDayOff && !worksThisDay && <Text style={s.note}>Not working this day (edit hours in the Calendar tab).</Text>}
-          {!isDayOff && worksThisDay && timeline.length === 0 && <Text style={s.note}>The day is over.</Text>}
+          {isDayOff && <Text style={s.note}>{tr('Day off — the shop is closed.')}</Text>}
+          {!isDayOff && !worksThisDay && <Text style={s.note}>{tr('Not working this day (edit hours in the Calendar tab).')}</Text>}
+          {!isDayOff && worksThisDay && timeline.length === 0 && <Text style={s.note}>{tr('The day is over.')}</Text>}
           {!isDayOff && timeline.map((item) => {
             if (item.block) {
               const blk = item.block;
@@ -561,9 +561,9 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
                     )}
                     <Ico name={blk.day === null ? 'coffee' : 'clock'} size={14} color={D.amber} />
                     <T w="sb" size={12} c={D.amber} style={s.grow}>
-                      {blk.label ?? 'Break'} · {blk.end_min - blk.start_min} min
+                      {tr('{label} · {x} min', { label: blk.label ?? tr('Break'), x: blk.end_min - blk.start_min })}
                     </T>
-                    {glowIds.includes(blk.id) && <T w="b" size={10} c={D.green}>updated</T>}
+                    {glowIds.includes(blk.id) && <T w="b" size={10} c={D.green}>{tr('updated')}</T>}
                   </View>
                 </View>
               );
@@ -581,7 +581,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
                 ? Math.floor((now - new Date(b.starts_at).getTime()) / 60_000) : 0;
               const overMin = inChair
                 ? Math.floor((now - new Date(b.ends_at).getTime()) / 60_000) : 0;
-              const lateLabel = overMin > 0 ? `${overMin} min over` : lateMin > 0 ? `${lateMin} min late` : null;
+              const lateLabel = overMin > 0 ? tr('{m} min over', { m: overMin }) : lateMin > 0 ? tr('{m} min late', { m: lateMin }) : null;
               const noShow = b.status === 'no_show';
               const hot = highlightId === b.id;
               // the rail colour is the whole status vocabulary in one 3px stripe
@@ -595,7 +595,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
                   <T w="b" size={11} c={hot ? D.accent : D.sub} style={s.ttime}>{hhmm(b.starts_at)}</T>
                   <View style={[s.trail, { backgroundColor: rail }]} />
                   <Pressable onPress={() => setSheetBooking(b)} accessibilityRole="button"
-                    accessibilityLabel={`${pending ? 'Request' : 'Booking'} at ${hhmm(b.starts_at)}`}
+                    accessibilityLabel={pending ? tr('Request at {at}', { at: hhmm(b.starts_at) }) : tr('Booking at {at}', { at: hhmm(b.starts_at) })}
                     style={({ pressed }) => [
                       s.slotBooked, hot && s.slotHighlight, done && s.slotDone, pressed && s.pressed,
                     ]}>
@@ -609,18 +609,18 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
                     {!hot && (
                       <Text style={[s.slotName, (noShow || expired || done) && s.struck]}>
                         {nameOf(b, barberId)}
-                        {inChair ? <Text style={s.chairTag}> · IN CHAIR</Text> : null}
-                        {pending ? <Text style={s.pendTag}> · PENDING</Text> : null}
-                        {isWalkIn ? <Text style={s.walkTag}> · NO ACCOUNT</Text> : null}
+                        {inChair ? <Text style={s.chairTag}>{' '}{tr('· IN CHAIR')}</Text> : null}
+                        {pending ? <Text style={s.pendTag}>{' '}{tr('· PENDING')}</Text> : null}
+                        {isWalkIn ? <Text style={s.walkTag}>{' '}{tr('· NO ACCOUNT')}</Text> : null}
                       </Text>
                     )}
                     <Text style={[s.slotMeta, hot && { marginTop: 6 }]}>
-                      {b.services?.name ?? 'Service'} · {(b.price_cents / 100).toFixed(0)} DH
-                      {noShow ? <Text style={s.lateTag}> · no-show</Text>
-                        : expired ? ' · request expired'
-                        : done ? ' · completed ✓'
-                        : inChair && b.started_at ? ` · started ${hhmm(b.started_at)}`
-                        : checkedIn ? ' · checked in' : ''}
+                      {b.services?.name ?? tr('Service')} · {(b.price_cents / 100).toFixed(0)} DH
+                      {noShow ? <Text style={s.lateTag}>{' '}{tr('· no-show')}</Text>
+                        : expired ? tr(' · request expired')
+                        : done ? tr(' · completed ✓')
+                        : inChair && b.started_at ? tr(' · started {started_at}', { started_at: hhmm(b.started_at) })
+                        : checkedIn ? tr(' · checked in') : ''}
                       {lateLabel && <Text style={s.lateTag}> · {lateLabel}</Text>}
                     </Text>
                   </Pressable>
@@ -634,14 +634,14 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
                   <T w="b" size={11} c={D.amber} style={s.ttime}>{hhmm(o.starts_at)}</T>
                   <View style={[s.trail, { backgroundColor: D.amber }]} />
                   <View style={s.slotOffer}
-                    accessibilityLabel={`${o.first_name ?? 'Walk-in'}, provisional, has not tapped the text`}>
+                    accessibilityLabel={tr('{first_name}, provisional, has not tapped the text', { first_name: o.first_name ?? tr('Walk-in') })}>
                     <Ico name="send" size={14} color={D.amber} />
                     <View style={s.grow}>
                       <T w="b" size={13} c={D.textDim}>
-                        {o.first_name ?? 'Walk-in'}<T w="b" size={10} c={D.amber} ls={0.8}> · PROVISIONAL</T>
+                        {o.first_name ?? tr('Walk-in')}<T w="b" size={10} c={D.amber} ls={0.8}>{' '}{tr('· PROVISIONAL')}</T>
                       </T>
                       <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-                        {o.services?.name ?? 'Service'} · texted, hasn't tapped · anyone can still book it
+                        {tr('{name} · texted, hasn\'t tapped · anyone can still book it', { name: o.services?.name ?? tr('Service') })}
                       </T>
                     </View>
                   </View>
@@ -653,10 +653,10 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
                 <T w="b" size={11} c={D.sub} style={s.ttime}>{item.at.toTimeString().slice(0, 5)}</T>
                 <View style={[s.trail, { backgroundColor: D.card2 }]} />
                 <Pressable onPress={() => setAddAt(item.at)} accessibilityRole="button"
-                  accessibilityLabel={`Add booking at ${item.at.toTimeString().slice(0, 5)}`}
+                  accessibilityLabel={tr('Add booking at {at}', { at: item.at.toTimeString().slice(0, 5) })}
                   style={({ pressed }) => [s.slotFree, pressed && s.pressed]}>
                   <Ico name="plus" size={14} color={D.sub} />
-                  <T size={12} c={D.sub}>Free — tap to add a walk-in</T>
+                  <T size={12} c={D.sub}>{tr('Free — tap to add a walk-in')}</T>
                 </Pressable>
               </View>
             );
@@ -666,7 +666,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
 
       {/* client profile panel */}
       <Modal visible={!!sheetBooking} transparent animationType="slide" onRequestClose={() => setSheetBooking(null)}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.sheetBackdrop} onPress={() => setSheetBooking(null)} />
+        <Pressable accessibilityRole="button" accessibilityLabel={tr('Close')} style={s.sheetBackdrop} onPress={() => setSheetBooking(null)} />
         {sheetBooking && (() => {
           const b = sheetBooking;
           const isWalkIn = b.customer_id === barberId;
@@ -680,53 +680,52 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
           return (
             <View style={s.sheet} onAccessibilityEscape={() => setSheetBooking(null)}>
               <Pressable onPress={() => { setSheetBooking(null); setSheetClient(clientRefOf(b)); }}
-                accessibilityRole="button" accessibilityLabel={`View ${nameOf(b, barberId)}'s profile and history`}
+                accessibilityRole="button" accessibilityLabel={tr('View {b}\'s profile and history', { b: nameOf(b, barberId) })}
                 style={({ pressed }) => [s.panelHead, pressed && s.pressed]}>
                 <Avatar url={isWalkIn ? null : b.customer?.avatar_url} name={nameOf(b, barberId)} size={56} />
                 <View style={s.grow}>
                   <Text style={s.panelName}>{nameOf(b, barberId)}</Text>
-                  {isWalkIn ? <Text style={s.clientTag}>Walk-in (no account)</Text>
+                  {isWalkIn ? <Text style={s.clientTag}>{tr('Walk-in (no account)')}</Text>
                     : stars != null ? <RelStars n={stars} />
-                    : <Text style={s.clientTag}>New client</Text>}
+                    : <Text style={s.clientTag}>{tr('New client')}</Text>}
                   {!isWalkIn && (
                     <Text style={s.panelMeta}>
-                      {visits === 0 ? 'First visit with you' : `${visits} previous visit${visits === 1 ? '' : 's'} with you`}
+                      {visits === 0 ? tr('First visit with you') : trn(visits, '{n} previous visit with you', '{n} previous visits with you')}
                     </Text>
                   )}
                 </View>
-                {pending && !started && <View style={s.pendingPill}><Text style={s.pendingPillText}>PENDING</Text></View>}
+                {pending && !started && <View style={s.pendingPill}><Text style={s.pendingPillText}>{tr('PENDING')}</Text></View>}
                 <Ionicons name="chevron-forward" size={18} color={D.sub} />
               </Pressable>
               <Text style={s.panelBooking}>
-                {b.services?.name ?? 'Service'} · {hhmm(b.starts_at)}–{hhmm(b.ends_at)} · {(b.price_cents / 100).toFixed(0)} DH
-                {b.status === 'no_show' ? ' · no-show' : done ? ` · completed ${hhmm(b.completed_at!)}` : ''}
+                {tr('{name} · {starts_at}–{ends_at} · {x} DH{x2}', { name: b.services?.name ?? tr('Service'), starts_at: hhmm(b.starts_at), ends_at: hhmm(b.ends_at), x: (b.price_cents / 100).toFixed(0), x2: b.status === 'no_show' ? tr(' · no-show') : done ? tr(' · completed {hhmm}', { hhmm: hhmm(b.completed_at!) }) : '' })}
               </Text>
 
               {pending && !started ? (
                 <View style={s.panelActions}>
-                  <PanelBtn icon="checkmark-circle-outline" label="Accept"
-                    onPress={() => rpcAndReload('accept_booking', b.id, 'Could not accept')} />
-                  <PanelBtn icon="swap-horizontal-outline" label="Reschedule"
+                  <PanelBtn icon="checkmark-circle-outline" label={tr('Accept')}
+                    onPress={() => rpcAndReload('accept_booking', b.id, tr('Could not accept'))} />
+                  <PanelBtn icon="swap-horizontal-outline" label={tr('Reschedule')}
                     onPress={() => { setSheetBooking(null); setReschedule(b); setRescheduleAt(null); }} />
-                  {!isWalkIn && <PanelBtn icon="chatbubble-ellipses-outline" label="Chat" onPress={() => openChat(b)} />}
-                  <PanelBtn danger icon="close-circle-outline" label="Decline"
-                    onPress={() => rpcAndReload('cancel_booking', b.id, 'Could not decline')} />
+                  {!isWalkIn && <PanelBtn icon="chatbubble-ellipses-outline" label={tr('Chat')} onPress={() => openChat(b)} />}
+                  <PanelBtn danger icon="close-circle-outline" label={tr('Decline')}
+                    onPress={() => rpcAndReload('cancel_booking', b.id, tr('Could not decline'))} />
                 </View>
               ) : (
                 <View style={s.panelActions}>
                   {!isWalkIn && phone && (
-                    <PanelBtn icon="call-outline" label="Call" onPress={() => Linking.openURL(`tel:${phone}`)} />
+                    <PanelBtn icon="call-outline" label={tr('Call')} onPress={() => Linking.openURL(`tel:${phone}`)} />
                   )}
                   {!isWalkIn && (
-                    <PanelBtn icon="chatbubble-ellipses-outline" label="Chat" onPress={() => openChat(b)} />
+                    <PanelBtn icon="chatbubble-ellipses-outline" label={tr('Chat')} onPress={() => openChat(b)} />
                   )}
                   {inChair && (
-                    <PanelBtn icon="checkbox-outline" label="Complete" onPress={() => markComplete(b)} />
+                    <PanelBtn icon="checkbox-outline" label={tr('Complete')} onPress={() => markComplete(b)} />
                   )}
                   {!done && !inChair && b.status !== 'no_show' && (!started || !isWalkIn) && (
                     <PanelBtn danger icon={started ? 'close-circle-outline' : 'trash-outline'}
-                      label={started ? 'No-show' : isWalkIn ? 'Remove' : 'Cancel'}
-                      onPress={() => rpcAndReload(started ? 'mark_no_show' : 'cancel_booking', b.id, 'Could not update')} />
+                      label={started ? tr('No-show') : isWalkIn ? tr('Remove') : tr('Cancel')}
+                      onPress={() => rpcAndReload(started ? 'mark_no_show' : 'cancel_booking', b.id, tr('Could not update'))} />
                   )}
                 </View>
               )}
@@ -738,17 +737,17 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
       {/* reschedule sheet */}
       <Modal visible={!!reschedule} transparent animationType="slide"
         onRequestClose={() => setReschedule(null)}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.sheetBackdrop} onPress={() => setReschedule(null)} />
+        <Pressable accessibilityRole="button" accessibilityLabel={tr('Close')} style={s.sheetBackdrop} onPress={() => setReschedule(null)} />
         {reschedule && (
           <View style={[s.sheet, s.sheetLight]} onAccessibilityEscape={() => setReschedule(null)}>
             <Text style={s.sheetTitleLight}>
-              Move {nameOf(reschedule, barberId)} · {(new Date(reschedule.ends_at).getTime() - new Date(reschedule.starts_at).getTime()) / 60_000} min
+              {tr('Move {reschedule} · {x} min', { reschedule: nameOf(reschedule, barberId), x: (new Date(reschedule.ends_at).getTime() - new Date(reschedule.starts_at).getTime()) / 60_000 })}
             </Text>
             {/* ponytail: SlotPicker is light-themed; lives on a light sheet until a dark variant matters */}
             <SlotPicker barberId={barberId}
               durationMin={(new Date(reschedule.ends_at).getTime() - new Date(reschedule.starts_at).getTime()) / 60_000}
               selected={rescheduleAt} onSelect={setRescheduleAt} />
-            <PillButton title={rescheduleAt ? `Move to ${rescheduleAt.toTimeString().slice(0, 5)}` : 'Pick a new time'}
+            <PillButton title={rescheduleAt ? tr('Move to {rescheduleAt}', { rescheduleAt: rescheduleAt.toTimeString().slice(0, 5) }) : tr('Pick a new time')}
               disabled={!rescheduleAt} onPress={confirmReschedule} />
           </View>
         )}
@@ -756,28 +755,30 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
 
       {/* add walk-in sheet */}
       <Modal visible={!!addAt} transparent animationType="slide" onRequestClose={() => setAddAt(null)}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.sheetBackdrop} onPress={() => setAddAt(null)} />
+        <Pressable accessibilityRole="button" accessibilityLabel={tr('Close')} style={s.sheetBackdrop} onPress={() => setAddAt(null)} />
         <View style={s.sheet} onAccessibilityEscape={() => setAddAt(null)}>
           <Text style={s.sheetTitle}>
-            New booking · {addAt ? `${addAt.toDateString().slice(0, 10)}, ${addAt.toTimeString().slice(0, 5)}` : ''}
+            {addAt ? tr('New booking · {day}, {time}', { day: weekdayDate(addAt), time: addAt.toTimeString().slice(0, 5) }) : tr('New booking')}
           </Text>
-          <Field placeholder="Client name (optional — shows as Walk-in)" placeholderTextColor={D.sub}
+          <Field placeholder={tr('Client name (optional — shows as Walk-in)')} placeholderTextColor={D.sub}
             style={s.darkField} value={walkInName} onChangeText={setWalkInName} />
-          <Text style={s.sheetLabel}>Service</Text>
-          {services.length === 0 && <Text style={s.note}>Add a service first (Profile → My Services).</Text>}
+          <Text style={s.sheetLabel}>{tr('Service')}</Text>
+          {services.length === 0 && <Text style={s.note}>{tr('Add a service first (Profile → My Services).')}</Text>}
           {[...services].sort((a, b) => Number(b.id === usualServiceId) - Number(a.id === usualServiceId)).map((sv) => (
             <Pressable key={sv.id} disabled={addBusy} onPress={() => addWalkIn(sv)}
               accessibilityRole="button"
-              accessibilityLabel={`${sv.name}, ${sv.duration_min} min, ${(sv.price_cents / 100).toFixed(0)} DH${sv.id === usualServiceId ? ', their usual' : ''}`}
+              accessibilityLabel={(sv.id === usualServiceId
+                ? tr('{name}, {duration_min} min, {price} DH, their usual', { name: sv.name, duration_min: sv.duration_min, price: (sv.price_cents / 100).toFixed(0) })
+                : tr('{name}, {duration_min} min, {price} DH', { name: sv.name, duration_min: sv.duration_min, price: (sv.price_cents / 100).toFixed(0) }))}
               style={({ pressed }) => [s.svcRow, sv.id === usualServiceId && s.svcRowUsual, pressed && s.pressed]}>
               <View style={s.grow}>
                 <View style={s.svcNameRow}>
                   <Text style={s.slotName}>{sv.name}</Text>
-                  {sv.id === usualServiceId && <View style={s.usualTag}><Text style={s.usualTagText}>USUAL</Text></View>}
+                  {sv.id === usualServiceId && <View style={s.usualTag}><Text style={s.usualTagText}>{tr('USUAL')}</Text></View>}
                 </View>
-                <Text style={s.slotMeta}>{sv.duration_min} min</Text>
+                <Text style={s.slotMeta}>{tr('{duration_min} min', { duration_min: sv.duration_min })}</Text>
               </View>
-              <Text style={s.slotPrice}>{(sv.price_cents / 100).toFixed(0)} DH</Text>
+              <Text style={s.slotPrice}>{tr('{x} DH', { x: (sv.price_cents / 100).toFixed(0) })}</Text>
             </Pressable>
           ))}
         </View>
@@ -798,8 +799,8 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
             // exclusion constraint will refuse it again, so put it in the only
             // place it can go — a break he shortens by hand. Say so plainly.
             await drop(c.job.id);
-            Alert.alert('Both kept',
-              'Add the second one at a time that is free — the book will not hold two people in one slot.');
+            Alert.alert(tr('Both kept'),
+              tr('Add the second one at a time that is free — the book will not hold two people in one slot.'));
             return load();
           }
           if (choice === 'move-mine') {
@@ -808,7 +809,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
               await drop(c.job.id);
               const { error } = await supabase.from('bookings')
                 .insert({ ...call.row, starts_at: c.freeAt.toISOString() });
-              if (error) Alert.alert('Could not move him', error.message);
+              if (error) Alert.alert(tr('Could not move him'), error.message);
             }
             return load();
           }
@@ -818,7 +819,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
           if (theirs) {
             const { error } = await supabase.rpc('reschedule_booking',
               { p_booking: theirs.id, p_starts_at: c.freeAt.toISOString() });
-            if (error) Alert.alert('Could not move it', error.message);
+            if (error) Alert.alert(tr('Could not move it'), error.message);
           }
           await drop(c.job.id);
           load();
@@ -828,10 +829,10 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
       {toast && (
         <View style={s.toast}>
           <Ionicons name="checkmark-circle" size={18} color={colors.success} />
-          <Text style={s.toastText} numberOfLines={1}>{nameOf(toast.booking, barberId)} — completed</Text>
-          <Pressable onPress={undoComplete} accessibilityRole="button" accessibilityLabel="Undo completion"
+          <Text style={s.toastText} numberOfLines={1}>{tr('{booking} — completed', { booking: nameOf(toast.booking, barberId) })}</Text>
+          <Pressable onPress={undoComplete} accessibilityRole="button" accessibilityLabel={tr('Undo completion')}
             hitSlop={8} style={({ pressed }) => pressed && s.pressed}>
-            <Text style={s.toastUndo}>UNDO</Text>
+            <Text style={s.toastUndo}>{tr('UNDO')}</Text>
           </Pressable>
         </View>
       )}

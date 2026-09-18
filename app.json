@@ -11,7 +11,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.sterncut.app",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleLocalizations": ["en", "fr", "ar"]
       }
     },
     "android": {

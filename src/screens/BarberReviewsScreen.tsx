@@ -7,6 +7,7 @@ import { ReviewFilter, ReviewRow, disputeOf, filterReviews, reviewSummary } from
 import { supabase } from '../lib/supabase';
 import { dark as D, serif } from '../theme';
 import { PublicReplyScreen, Restored, ReviewRestoredScreen } from './BarberSupportScreens';
+import { loc, tr, trn } from '../lib/i18n';
 
 // G2 of "Notification Routing.dc.html" — BRV-08 and BRV-09 of "Barber - Reviews".
 //
@@ -35,11 +36,11 @@ const COLS = 'id, booking_id, rating, comment, created_at, reply, replied_at, st
   + ' customer_id, customer:profiles!customer_id(full_name, avatar_url),'
   + ' booking:bookings(starts_at, price_cents, completed_at, services(name))';
 
-const who = (r: Row) => r.customer?.full_name ?? 'A client';
-const shortDay = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+const who = (r: Row) => r.customer?.full_name ?? tr('A client');
+const shortDay = (iso: string) => new Date(iso).toLocaleDateString(loc('en-GB'), { day: 'numeric', month: 'short' });
 const visitWhen = (iso: string) => {
   const d = new Date(iso);
-  return `${d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })} · ${d.toTimeString().slice(0, 5)}`;
+  return `${d.toLocaleDateString(loc('en-GB'), { weekday: 'short', day: 'numeric', month: 'short' })} · ${d.toTimeString().slice(0, 5)}`;
 };
 const initials = (n: string) => n.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 const stars = (n: number) => '★'.repeat(Math.max(0, Math.min(5, n)));
@@ -70,7 +71,7 @@ export default function BarberReviewsScreen({ barberId, onBack, openBookingId }:
       supabase.from('notifications').select('booking_id')
         .eq('user_id', barberId).eq('kind', 'review').is('read_at', null),
     ]);
-    if (rv.error) { Alert.alert('Could not load your reviews', rv.error.message); return; }
+    if (rv.error) { Alert.alert(tr('Could not load your reviews'), rv.error.message); return; }
     const list = (rv.data ?? []) as unknown as Row[];
     setRows(list);
     setRestored((rs.data ?? []) as Restored[]);
@@ -83,7 +84,7 @@ export default function BarberReviewsScreen({ barberId, onBack, openBookingId }:
       if (hit) setOpenId(hit.id);
       else {
         direct.current = false;
-        Alert.alert('Not on your page', 'That review is no longer on your page.');
+        Alert.alert(tr('Not on your page'), tr('That review is no longer on your page.'));
       }
     }
   }, [barberId]);
@@ -128,16 +129,15 @@ export default function BarberReviewsScreen({ barberId, onBack, openBookingId }:
   );
 
   function report(r: Row) {
-    Alert.alert('Report this review?',
-      'Sterncut reads it against the review rules, and it stays on your page while they do. '
-      + 'If it breaks them it comes down and you are told. If it does not, it stays up.',
+    Alert.alert(tr('Report this review?'),
+      tr('Sterncut reads it against the review rules, and it stays on your page while they do. If it breaks them it comes down and you are told. If it does not, it stays up.'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: tr('Cancel'), style: 'cancel' },
         {
-          text: 'Report', style: 'destructive',
+          text: tr('Report'), style: 'destructive',
           onPress: async () => {
             const { error } = await supabase.rpc('review_flag', { p_review: r.id });
-            if (error) { Alert.alert('Could not report it', error.message); return; }
+            if (error) { Alert.alert(tr('Could not report it'), error.message); return; }
             load();
           },
         },
@@ -179,7 +179,7 @@ export default function BarberReviewsScreen({ barberId, onBack, openBookingId }:
     const item = restored.find((x) => x.id === open.id) ?? null;
     return (
       <Screen gap={12}>
-        <TopBar title="One review" onBack={closeDetail} />
+        <TopBar title={tr('One review')} onBack={closeDetail} />
 
         <View style={s.card}>
           <View style={s.row12}>
@@ -187,30 +187,32 @@ export default function BarberReviewsScreen({ barberId, onBack, openBookingId }:
             <View style={s.grow}>
               <T w="b" size={14}>{who(open)}</T>
               <T size={11} c={D.sub} style={s.mt2}>
-                {visitN != null ? `${ordinal(visitN)} visit · ` : ''}reviewed {agoLabel(now - Date.parse(open.created_at))}
+                {visitN != null
+                  ? tr('{ordinal} visit · reviewed {ago}', { ordinal: ordinal(visitN), ago: agoLabel(now - Date.parse(open.created_at)) })
+                  : tr('reviewed {ago}', { ago: agoLabel(now - Date.parse(open.created_at)) })}
               </T>
             </View>
           </View>
           <T size={20} c={D.amber} ls={2}>
             {stars(open.rating)}<T size={20} c={D.muted} ls={2}>{stars(5 - open.rating)}</T>
           </T>
-          <T size={14} style={s.lh22}>{open.comment || 'A rating with no words.'}</T>
+          <T size={14} style={s.lh22}>{open.comment || tr('A rating with no words.')}</T>
         </View>
 
         <View style={s.facts}>
-          {open.booking && <Fact label="The visit" value={visitWhen(open.booking.starts_at)} />}
+          {open.booking && <Fact label={tr('The visit')} value={visitWhen(open.booking.starts_at)} />}
           {open.booking && (
-            <Fact label="The service"
-              value={`${open.booking.services?.name ?? 'Service'} · ${Math.round(open.booking.price_cents / 100)} DH`} />
+            <Fact label={tr('The service')}
+              value={tr('{name} · {round} DH', { name: open.booking.services?.name ?? tr('Service'), round: Math.round(open.booking.price_cents / 100) })} />
           )}
-          <Fact last label={`Counts towards your ${avgText ?? 'rating'}`}
-            value={open.state === 'held' ? 'Yes · while Sterncut reads it' : `Yes · since ${shortDay(open.created_at)}`}
+          <Fact last label={tr('Counts towards your {avgText}', { avgText: avgText ?? tr('rating') })}
+            value={open.state === 'held' ? tr('Yes · while Sterncut reads it') : tr('Yes · since {created_at}', { created_at: shortDay(open.created_at) })}
             tint={open.state === 'held' ? D.amber : D.green} />
         </View>
 
         {!!open.reply && (
           <View style={s.replyCard}>
-            <Eyebrow c={D.faint} ls={1.4}>YOUR PUBLIC REPLY</Eyebrow>
+            <Eyebrow c={D.faint} ls={1.4}>{tr('YOUR PUBLIC REPLY')}</Eyebrow>
             <T size={12.5} c={D.textDim} style={s.lh19}>{open.reply}</T>
             {!!open.replied_at && <T size={10.5} c={D.faint}>{shortDay(open.replied_at)}</T>}
           </View>
@@ -220,19 +222,19 @@ export default function BarberReviewsScreen({ barberId, onBack, openBookingId }:
           {!open.reply && (
             <Pressable onPress={() => setReplying(open)} accessibilityRole="button"
               style={({ pressed }) => [s.whiteBtn, pressed && s.pressed]}>
-              <T w="eb" size={12.5} c="#111" ls={0.5}>REPLY IN PUBLIC</T>
+              <T w="eb" size={12.5} c="#111" ls={0.5}>{tr('REPLY IN PUBLIC')}</T>
             </Pressable>
           )}
           {dispute === null && (
             <Pressable onPress={() => report(open)} accessibilityRole="button"
               style={({ pressed }) => [s.outlineBtn, pressed && s.pressed]}>
-              <T w="b" size={12.5} c={D.textDim}>Report it to Sterncut</T>
+              <T w="b" size={12.5} c={D.textDim}>{tr('Report it to Sterncut')}</T>
             </Pressable>
           )}
           {dispute === 'restored' && item && (
             <Pressable onPress={() => setShowing(item)} accessibilityRole="button"
               style={({ pressed }) => [s.outlineBtn, pressed && s.pressed]}>
-              <T w="b" size={12.5} c={D.textDim}>See how the dispute went</T>
+              <T w="b" size={12.5} c={D.textDim}>{tr('See how the dispute went')}</T>
             </Pressable>
           )}
         </View>
@@ -241,18 +243,18 @@ export default function BarberReviewsScreen({ barberId, onBack, openBookingId }:
           <Ico name="info" size={14} color={D.sub} />
           <T size={11.5} c={D.sub} style={[s.grow, s.lh17]}>
             {dispute === 'with_sterncut'
-              ? `With Sterncut since ${shortDay(open.flagged_at ?? open.created_at)}. It stays on your page and counts while they read it. If it comes down, you are told.`
+              ? tr('With Sterncut since {shortDay}. It stays on your page and counts while they read it. If it comes down, you are told.', { shortDay: shortDay(open.flagged_at ?? open.created_at) })
               : dispute === 'kept'
-                ? `Sterncut read it on ${shortDay(open.moderated_at!)} and left it up. It counts like any other review.`
+                ? tr('Sterncut read it on {shortDay} and left it up. It counts like any other review.', { shortDay: shortDay(open.moderated_at!) })
                 : dispute === 'restored'
-                  ? 'It was taken down, appealed, and put back. It counts like any other review.'
-                  : 'You cannot delete a review or hide one. Reporting sends it to Sterncut: if it breaks the review rules it comes down and you are told, and if not, it stays up.'}
+                  ? tr('It was taken down, appealed, and put back. It counts like any other review.')
+                  : tr('You cannot delete a review or hide one. Reporting sends it to Sterncut: if it breaks the review rules it comes down and you are told, and if not, it stays up.')}
           </T>
         </View>
 
         {!open.reply && (
           <T size={11} c={D.faint} style={s.foot}>
-            One public reply per review. It shows under the review on your page.
+            {tr('One public reply per review. It shows under the review on your page.')}
           </T>
         )}
       </Screen>
@@ -263,9 +265,9 @@ export default function BarberReviewsScreen({ barberId, onBack, openBookingId }:
   const shown = rows ? filterReviews(rows, filter, restoredIds) : [];
   return (
     <Screen gap={11}>
-      <TopBar title="Your reviews" onBack={onBack} />
+      <TopBar title={tr('Your reviews')} onBack={onBack} />
 
-      {rows === null && <ActivityIndicator color={D.accent} accessibilityLabel="Loading your reviews" />}
+      {rows === null && <ActivityIndicator color={D.accent} accessibilityLabel={tr('Loading your reviews')} />}
 
       {sum && (
         <>
@@ -276,7 +278,7 @@ export default function BarberReviewsScreen({ barberId, onBack, openBookingId }:
                 {stars(Math.round(sum.average ?? 0))}
                 <T size={12} c={D.muted} ls={1}>{stars(5 - Math.round(sum.average ?? 0))}</T>
               </T>
-              <T size={10.5} c={D.sub} style={s.mt2}>{sum.count} review{sum.count === 1 ? '' : 's'}</T>
+              <T size={10.5} c={D.sub} style={s.mt2}>{trn(sum.count, '{n} review', '{n} reviews')}</T>
             </View>
             <View style={s.bars}>
               {sum.histogram.map((n, i) => {
@@ -298,16 +300,16 @@ export default function BarberReviewsScreen({ barberId, onBack, openBookingId }:
 
           {sum.count > 0 && (
             <T size={10.5} c={D.faint} style={s.rule}>
-              The {avgText} is every review on your page. Only a review Sterncut takes down stops counting.
+              {tr('The {avgText} is every review on your page. Only a review Sterncut takes down stops counting.', { avgText })}
             </T>
           )}
 
           <View style={s.chips}>
             {([
-              ['all', `All ${sum.count}`],
-              ['unanswered', `Unanswered ${sum.unanswered}`],
-              ['low', `3★ and under ${sum.low}`],
-              ['disputed', `Disputed ${sum.disputed}`],
+              ['all', tr('All {n}', { n: sum.count })],
+              ['unanswered', tr('Unanswered {n}', { n: sum.unanswered })],
+              ['low', tr('3★ and under {n}', { n: sum.low })],
+              ['disputed', tr('Disputed {n}', { n: sum.disputed })],
             ] as const).map(([k, label]) => {
               const on = filter === k;
               return (
@@ -322,8 +324,8 @@ export default function BarberReviewsScreen({ barberId, onBack, openBookingId }:
           {shown.length === 0 && (
             <T size={13} c={D.sub} style={s.empty}>
               {sum.count === 0
-                ? 'No reviews yet. Every review a client leaves lands here, whether or not you reply.'
-                : 'Nothing under this filter.'}
+                ? tr('No reviews yet. Every review a client leaves lands here, whether or not you reply.')
+                : tr('Nothing under this filter.')}
             </T>
           )}
 
@@ -333,26 +335,26 @@ export default function BarberReviewsScreen({ barberId, onBack, openBookingId }:
             const isNew = fresh.has(r.booking_id) && !dispute;
             return (
               <Pressable key={r.id} onPress={() => setOpenId(r.id)} accessibilityRole="button"
-                accessibilityLabel={`${who(r)}, ${r.rating} stars`}
+                accessibilityLabel={tr('{r}, {rating} stars', { r: who(r), rating: r.rating })}
                 style={({ pressed }) => [lost ? s.rowLost : s.row, isNew && s.rowNew, pressed && s.pressed]}>
                 <View style={s.rowHead}>
                   <T w="b" size={13} c={lost ? D.sub : D.text} style={s.grow}>{who(r)}</T>
-                  {isNew ? <T w="b" size={10.5} c={D.accent} ls={0.8}>NEW</T>
-                    : dispute === 'with_sterncut' ? <Pill label="WITH STERNCUT" color={D.amber} bg={D.amberSoft} />
-                      : lost ? <Pill label="DISPUTE LOST" color={D.red} bg="rgba(248,113,113,0.14)" />
-                        : r.reply ? <T w="sb" size={10.5} c={D.faint}>Replied</T> : null}
+                  {isNew ? <T w="b" size={10.5} c={D.accent} ls={0.8}>{tr('NEW')}</T>
+                    : dispute === 'with_sterncut' ? <Pill label={tr('WITH STERNCUT')} color={D.amber} bg={D.amberSoft} />
+                      : lost ? <Pill label={tr('DISPUTE LOST')} color={D.red} bg="rgba(248,113,113,0.14)" />
+                        : r.reply ? <T w="sb" size={10.5} c={D.faint}>{tr('Replied')}</T> : null}
                 </View>
                 <View style={s.rowMeta}>
                   <T size={11.5} c={D.amber} ls={0.7}>{stars(r.rating)}</T>
                   <T size={11} c={D.sub} style={s.grow} numberOfLines={1}>
-                    {agoLabel(now - Date.parse(r.created_at))} · {lost ? 'counted' : r.booking?.services?.name ?? 'Service'}
+                    {agoLabel(now - Date.parse(r.created_at))} · {lost ? tr('counted') : r.booking?.services?.name ?? tr('Service')}
                   </T>
                 </View>
                 {lost ? (
                   <T size={12} c={D.sub} style={s.lh17}>
                     {dispute === 'restored'
-                      ? 'Back on your page after the appeal — open it to see how it went'
-                      : 'Sterncut read it and left it up'}
+                      ? tr('Back on your page after the appeal — open it to see how it went')
+                      : tr('Sterncut read it and left it up')}
                   </T>
                 ) : r.comment ? (
                   <T size={12.5} c={D.textDim} style={s.lh19} numberOfLines={3}>{r.comment}</T>

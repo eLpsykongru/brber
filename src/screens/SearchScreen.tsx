@@ -11,12 +11,14 @@ import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, shadow, sp, TOP_INSET } from '../theme';
 import type { SalonCard } from './SalonDetailScreen';
+import { en, tr, trn } from '../lib/i18n';
 
 const RECENT_KEY = 'search:recent';
 const RECENT_MAX = 6;
 // EXPL-15's chips. Free text on the row (0074 stores text[]), so this list is a
 // starting point for what people ask for, not a schema.
-const WANT_TAGS = ['Fade', 'Beard', 'Kids', 'Shave'];
+// sent as they are (set_search_notify), shown translated
+const WANT_TAGS = [en('Fade'), en('Beard'), en('Kids'), en('Shave')];
 
 type Specialist = SalonCard['barbers'][number];
 type Hit = { salon: SalonCard; barber: Specialist };
@@ -186,15 +188,15 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
       <View style={s.pill}>
         <Ionicons name="search" size={16} color={colors.text} />
         <TextInput style={s.input} value={query} onChangeText={setQuery} autoFocus
-          placeholder="Search salon or barber…" placeholderTextColor={colors.textSecondary}
+          placeholder={tr('Search salon or barber…')} placeholderTextColor={colors.textSecondary}
           returnKeyType="search" />
         {query.length > 0 && (
-          <Pressable hitSlop={8} onPress={() => setQuery('')} accessibilityLabel="Clear search">
+          <Pressable hitSlop={8} onPress={() => setQuery('')} accessibilityLabel={tr('Clear search')}>
             <Ionicons name="close" size={16} color={colors.textTertiary} />
           </Pressable>
         )}
       </View>
-      <Pressable hitSlop={8} onPress={onClose}><Text style={s.cancel}>Cancel</Text></Pressable>
+      <Pressable hitSlop={8} onPress={onClose}><Text style={s.cancel}>{tr('Cancel')}</Text></Pressable>
     </View>
   );
 
@@ -208,14 +210,14 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
             {recent.length > 0 && (
               <View style={s.section}>
                 <View style={s.sectionHead}>
-                  <Text style={s.eyebrow}>Recent</Text>
-                  <Pressable hitSlop={8} onPress={clearRecent}><Text style={s.link}>Clear</Text></Pressable>
+                  <Text style={s.eyebrow}>{tr('Recent')}</Text>
+                  <Pressable hitSlop={8} onPress={clearRecent}><Text style={s.link}>{tr('Clear')}</Text></Pressable>
                 </View>
                 {recent.map((r) => (
                   <Pressable key={r} style={s.recentRow} onPress={() => setQuery(r)}>
                     <Ionicons name="time-outline" size={15} color={colors.textSecondary} />
                     <Text style={s.recentText}>{r}</Text>
-                    <Pressable hitSlop={8} onPress={() => dropRecent(r)} accessibilityLabel={`Remove ${r}`}>
+                    <Pressable hitSlop={8} onPress={() => dropRecent(r)} accessibilityLabel={tr('Remove {r}', { r })}>
                       <Ionicons name="close" size={13} color={colors.textTertiary} />
                     </Pressable>
                   </Pressable>
@@ -224,7 +226,7 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
             )}
             {services.length > 0 && (
               <View style={s.section}>
-                <Text style={s.eyebrow}>Services</Text>
+                <Text style={s.eyebrow}>{tr('Services')}</Text>
                 <View style={s.wrapRow}>
                   {services.map((name) => (
                     <Pressable key={name} style={s.svcChip} onPress={() => setQuery(name)}>
@@ -236,7 +238,7 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
             )}
             {suggested.length > 0 && (
               <View style={s.section}>
-                <Text style={s.eyebrow}>Suggested</Text>
+                <Text style={s.eyebrow}>{tr('Suggested')}</Text>
                 {suggested.map(({ s: sal, avg }) => (
                   <Pressable key={sal.id} style={s.row} onPress={() => pick(sal)}>
                     <Thumb salon={sal} style={s.thumbSm} />
@@ -257,7 +259,7 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
           <>
             {salonHits.length > 0 && (
               <View style={s.section}>
-                <Text style={s.eyebrow}>Salons · {salonHits.length}</Text>
+                <Text style={s.eyebrow}>{tr('Salons · {count}', { count: salonHits.length })}</Text>
                 {salonHits.map((sal) => {
                   const avg = avgOf(sal.barbers.flatMap((b) => b.reviews));
                   const price = startingPrice(sal);
@@ -270,7 +272,7 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
                         <Text style={s.meta} numberOfLines={1}>
                           {[avg != null ? `${avg.toFixed(1)} ★` : null,
                             km != null ? `${km.toFixed(1)} Km` : sal.district,
-                            price != null ? `from ${Math.round(price / 100)} DH` : null,
+                            price != null ? tr('from {price} DH', { price: Math.round(price / 100) }) : null,
                           ].filter(Boolean).join(' · ')}
                         </Text>
                       </View>
@@ -282,7 +284,7 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
             )}
             {barberHits.length > 0 && (
               <View style={s.section}>
-                <Text style={s.eyebrow}>Specialists · {barberHits.length}</Text>
+                <Text style={s.eyebrow}>{tr('Specialists · {count}', { count: barberHits.length })}</Text>
                 {barberHits.map(({ salon: sal, barber: b }) => {
                   const avg = avgOf(b.reviews);
                   return (
@@ -291,7 +293,7 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
                         ? <Image source={{ uri: b.profiles.avatar_url }} style={s.avatar} />
                         : <View style={[s.avatar, { backgroundColor: colors.slotEmpty }]} />}
                       <View style={s.grow}>
-                        <Text style={s.cardTitle} numberOfLines={1}>{b.profiles?.full_name ?? 'Barber'}</Text>
+                        <Text style={s.cardTitle} numberOfLines={1}>{b.profiles?.full_name ?? tr('Barber')}</Text>
                         <Text style={s.meta} numberOfLines={1}>
                           {[b.specialty, sal.name].filter(Boolean).join(' · ')}
                         </Text>
@@ -317,21 +319,21 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
                 <Ionicons name="search" size={22} color={colors.textSecondary} />
               </View>
               <Display size={21} style={s.missTitle}>
-                {namedDistrict ? `Nothing in ${namedDistrict} yet` : 'Nothing matched that'}
+                {namedDistrict ? tr('Nothing in {namedDistrict} yet', { namedDistrict }) : tr('Nothing matched that')}
               </Display>
               <Text style={s.missBody}>
                 {namedDistrict
-                  ? `We have ${salons.length} shop${salons.length === 1 ? '' : 's'} in Tangier, but none in that district. Tell us and we'll go find one.`
-                  : `We have ${salons.length} shop${salons.length === 1 ? '' : 's'} in Tangier and none of them match. Tell us what you're after and we'll go find it.`}
+                  ? trn(salons.length, 'We have {n} shop in Tangier, but none in that district. Tell us and we\'ll go find one.', 'We have {n} shops in Tangier, but none in that district. Tell us and we\'ll go find one.')
+                  : trn(salons.length, 'We have {n} shop in Tangier and none of them match. Tell us what you\'re after and we\'ll go find it.', 'We have {n} shops in Tangier and none of them match. Tell us what you\'re after and we\'ll go find it.')}
               </Text>
             </View>
 
             <View style={s.tellCard}>
-              <Text style={s.tellEyebrow}>Tell us where</Text>
+              <Text style={s.tellEyebrow}>{tr('Tell us where')}</Text>
               <View style={s.tellPlace}>
                 <Ionicons name="location-outline" size={15} color={colors.accent} />
                 <Text style={s.tellPlaceText}>
-                  {namedDistrict ? `${namedDistrict}, Tangier` : `“${query.trim()}” · Tangier`}
+                  {namedDistrict ? tr('{namedDistrict}, Tangier', { namedDistrict }) : tr('“{query}” · Tangier', { query: query.trim() })}
                 </Text>
               </View>
               <View style={s.wrapRow}>
@@ -341,7 +343,7 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
                     <Pressable key={t} disabled={notified}
                       style={[s.tag, on && s.tagOn]}
                       onPress={() => setTags((p) => (on ? p.filter((x) => x !== t) : [...p, t]))}>
-                      <Text style={[s.tagText, on && s.tagTextOn]}>{t}</Text>
+                      <Text style={[s.tagText, on && s.tagTextOn]}>{tr(t)}</Text>
                     </Pressable>
                   );
                 })}
@@ -349,25 +351,25 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
               <Pressable style={[s.notifyBtn, notified && s.notifyDone]}
                 disabled={notified || !miss} onPress={notifyMe}>
                 <Text style={[s.notifyText, notified && s.notifyTextDone]}>
-                  {notified ? "WE'LL TELL YOU" : 'NOTIFY ME WHEN THERE IS ONE'}
+                  {notified ? tr('WE\'LL TELL YOU') : tr('NOTIFY ME WHEN THERE IS ONE')}
                 </Text>
               </Pressable>
               {miss != null && miss.asks > 1 && (
                 <Text style={s.tellFoot}>
-                  {miss.asks} people asked for {namedDistrict ?? 'this'} this month
+                  {tr('{asks} people asked for {namedDistrict} this month', { asks: miss.asks, namedDistrict: namedDistrict ?? tr('this') })}
                 </Text>
               )}
             </View>
 
             {closest && (
               <View style={s.section}>
-                <Text style={s.eyebrow}>{kmFor ? 'Closest instead' : 'Try instead'}</Text>
+                <Text style={s.eyebrow}>{kmFor ? tr('Closest instead') : tr('Try instead')}</Text>
                 <Pressable style={s.card} onPress={() => pick(closest)}>
                   <Thumb salon={closest} style={s.thumb} />
                   <View style={s.grow}>
                     <Text style={s.cardTitle} numberOfLines={1}>{closest.name}</Text>
                     <Text style={s.meta} numberOfLines={1}>
-                      {[kmFor?.(closest) != null ? `${kmFor!(closest)!.toFixed(1)} Km away` : closest.district,
+                      {[kmFor?.(closest) != null ? tr('{km} Km away', { km: kmFor!(closest)!.toFixed(1) }) : closest.district,
                         avgOf(closest.barbers.flatMap((b) => b.reviews))?.toFixed(1)
                           ? `${avgOf(closest.barbers.flatMap((b) => b.reviews))!.toFixed(1)} ★` : null,
                       ].filter(Boolean).join(' · ')}

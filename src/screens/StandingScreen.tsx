@@ -4,6 +4,7 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View
 import { Card, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { colors, font, inter, radius, sp, TOP_INSET } from '../theme';
+import { loc, tr } from '../lib/i18n';
 
 // 39b of "Customer App 3.dc.html" — your standing.
 //
@@ -25,9 +26,9 @@ type Visit = { at: string; salon: string; on_time: boolean };
 type Standing = { pays_full: boolean; streak: number; needed: number; marks: Mark[]; history: Visit[] };
 
 const day = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  new Date(iso).toLocaleDateString(loc('en-US'), { weekday: 'short', month: 'short', day: 'numeric' });
 const short = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  new Date(iso).toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' });
 
 export default function StandingScreen({ onBack, onDispute }: {
   onBack: () => void; onDispute?: (markId: string) => void;
@@ -36,7 +37,7 @@ export default function StandingScreen({ onBack, onDispute }: {
 
   const load = useCallback(() => {
     supabase.rpc('my_customer_standing').then(({ data, error }) => {
-      if (error) { Alert.alert('Could not load', error.message); return; }
+      if (error) { Alert.alert(tr('Could not load'), error.message); return; }
       setSt(data as Standing);
     });
   }, []);
@@ -46,7 +47,7 @@ export default function StandingScreen({ onBack, onDispute }: {
   if (!st) {
     return (
       <View style={s.screen}>
-        <ScreenHeader title="Your standing" onBack={onBack} />
+        <ScreenHeader title={tr('Your standing')} onBack={onBack} />
         <ActivityIndicator style={s.spin} />
       </View>
     );
@@ -56,7 +57,7 @@ export default function StandingScreen({ onBack, onDispute }: {
 
   return (
     <View style={s.screen}>
-      <ScreenHeader title="Your standing" onBack={onBack} />
+      <ScreenHeader title={tr('Your standing')} onBack={onBack} />
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
 
         {st.pays_full ? (
@@ -66,15 +67,14 @@ export default function StandingScreen({ onBack, onDispute }: {
                 <Ionicons name="time-outline" size={17} color="#8a6508" />
               </View>
               <View style={s.grow}>
-                <Text style={s.warnTitle}>Barbers ask you to pay up front</Text>
+                <Text style={s.warnTitle}>{tr('Barbers ask you to pay up front')}</Text>
                 <Text style={s.warnSub}>
-                  Because of {live.length} missed {live.length === 1 ? 'visit' : 'visits'}
+                  {tr('Because of {count} missed {x}', { count: live.length, x: live.length === 1 ? tr('visit') : tr('visits') })}
                 </Text>
               </View>
             </View>
             <Text style={s.warnBody}>
-              You can still book anywhere. You just can't split the payment 40/60 — the full
-              price comes from your wallet.
+              {tr('You can still book anywhere. You just can\'t split the payment 40/60 — the full price comes from your wallet.')}
             </Text>
           </View>
         ) : (
@@ -84,8 +84,8 @@ export default function StandingScreen({ onBack, onDispute }: {
                 <Ionicons name="checkmark" size={17} color={colors.success} />
               </View>
               <View style={s.grow}>
-                <Text style={s.okTitle}>You're in good standing</Text>
-                <Text style={s.warnSub}>Deposits are the usual 40%</Text>
+                <Text style={s.okTitle}>{tr('You\'re in good standing')}</Text>
+                <Text style={s.warnSub}>{tr('Deposits are the usual 40%')}</Text>
               </View>
             </View>
           </View>
@@ -95,9 +95,9 @@ export default function StandingScreen({ onBack, onDispute }: {
         {st.pays_full && (
           <Card>
             <View style={s.rowCenter}>
-              <Text style={s.eyebrow}>TURN UP TO THREE IN A ROW</Text>
+              <Text style={s.eyebrow}>{tr('TURN UP TO THREE IN A ROW')}</Text>
               <View style={s.grow} />
-              <Text style={s.count}>{st.streak} of {st.needed}</Text>
+              <Text style={s.count}>{tr('{streak} of {needed}', { streak: st.streak, needed: st.needed })}</Text>
             </View>
             <View style={s.bars}>
               {Array.from({ length: st.needed }, (_, i) => (
@@ -110,14 +110,14 @@ export default function StandingScreen({ onBack, onDispute }: {
                   <View style={s.stepDone}>
                     <Ionicons name="checkmark" size={11} color={colors.success} />
                   </View>
-                  <Text style={s.stepText}>{day(v.at)} · on time</Text>
+                  <Text style={s.stepText}>{tr('{at} · on time', { at: day(v.at) })}</Text>
                 </View>
               ))}
               {Array.from({ length: Math.max(0, st.needed - st.streak) }, (_, i) => (
                 <View key={`t${i}`} style={s.step}>
                   <View style={s.stepTodo} />
                   <Text style={s.stepTodoText}>
-                    {i === 0 ? 'Your next visit' : 'And the one after'}
+                    {i === 0 ? tr('Your next visit') : tr('And the one after')}
                   </Text>
                 </View>
               ))}
@@ -127,26 +127,26 @@ export default function StandingScreen({ onBack, onDispute }: {
 
         {st.marks.length > 0 && (
           <>
-            <Text style={s.section}>WHAT HAPPENED</Text>
+            <Text style={s.section}>{tr('WHAT HAPPENED')}</Text>
             <View style={s.list}>
               {st.marks.map((m, i) => (
                 <View key={m.id} style={[s.markRow, i < st.marks.length - 1 && s.markDivider]}>
                   <View style={s.grow}>
                     <Text style={s.markTitle}>
-                      {m.kind === 'late' && m.minutes != null ? `Arrived ${m.minutes} min late` : "Didn't turn up"}
+                      {m.kind === 'late' && m.minutes != null ? tr('Arrived {minutes} min late', { minutes: m.minutes }) : tr('Didn\'t turn up')}
                     </Text>
                     <Text style={s.markMeta}>{m.salon} · {short(m.at)}</Text>
                   </View>
                   {m.cleared ? (
-                    <Text style={s.cleared}>Cleared</Text>
+                    <Text style={s.cleared}>{tr('Cleared')}</Text>
                   ) : m.disputable ? (
                     <Pressable onPress={() => onDispute?.(m.id)} hitSlop={8}
-                      accessibilityLabel={`Dispute the mark from ${short(m.at)}`}
+                      accessibilityLabel={tr('Dispute the mark from {at}', { at: short(m.at) })}
                       style={({ pressed }) => pressed && s.pressed}>
-                      <Text style={s.dispute}>Dispute</Text>
+                      <Text style={s.dispute}>{tr('Dispute')}</Text>
                     </Pressable>
                   ) : (
-                    <Text style={s.tooOld}>Too old to dispute</Text>
+                    <Text style={s.tooOld}>{tr('Too old to dispute')}</Text>
                   )}
                 </View>
               ))}
@@ -161,8 +161,7 @@ export default function StandingScreen({ onBack, onDispute }: {
             <Ionicons name="lock-closed-outline" size={13} color={colors.textSecondary} />
           </View>
           <Text style={s.privacyText}>
-            Barbers see that you're asked to pay up front. They don't see anything they
-            wrote about you.
+            {tr('Barbers see that you\'re asked to pay up front. They don\'t see anything they wrote about you.')}
           </Text>
         </View>
       </ScrollView>

@@ -1,4 +1,5 @@
 import { Alert, Linking, Platform } from 'react-native';
+import { tr } from './i18n';
 
 export type LatLng = { latitude: number; longitude: number };
 
@@ -24,5 +25,5 @@ export function openDirections(lat: number, lng: number, name: string) {
     : `geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(name)})`;
   Linking.openURL(url).catch(() =>
     Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`)
-      .catch(() => Alert.alert('Directions', 'Could not open a maps app.')));
+      .catch(() => Alert.alert(tr('Directions'), tr('Could not open a maps app.'))));
 }

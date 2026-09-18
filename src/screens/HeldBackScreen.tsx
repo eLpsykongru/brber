@@ -8,6 +8,7 @@ import {
 } from '../lib/inboxRules';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
+import { loc, tr, trn, trRich } from '../lib/i18n';
 
 // G3 of "Notification Routing.dc.html" — BNT-05 of "Barber - Notifications".
 //
@@ -48,9 +49,9 @@ function when(iso: string) {
   const today = new Date();
   const tomorrow = new Date();
   tomorrow.setDate(today.getDate() + 1);
-  if (d.toDateString() === today.toDateString()) return `today ${hh(iso)}`;
-  if (d.toDateString() === tomorrow.toDateString()) return `tomorrow ${hh(iso)}`;
-  return `${d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })} ${hh(iso)}`;
+  if (d.toDateString() === today.toDateString()) return tr('today {at}', { at: hh(iso) });
+  if (d.toDateString() === tomorrow.toDateString()) return tr('tomorrow {at}', { at: hh(iso) });
+  return `${d.toLocaleDateString(loc('en-GB'), { weekday: 'short', day: 'numeric', month: 'short' })} ${hh(iso)}`;
 }
 
 /**
@@ -120,10 +121,10 @@ export async function loadHeld(barberId: string): Promise<Held | null> {
 }
 
 const readNote = (i: HeldItem) =>
-  i.action === 'open_review' ? 'nothing to answer'
-    : i.notif.kind === 'booking_request' || i.notif.kind === 'reschedule' ? 'no longer open'
-      : i.notif.kind === 'cancellation' ? 'nothing left to refill'
-        : i.notif.body ?? 'nothing to answer';
+  i.action === 'open_review' ? tr('nothing to answer')
+    : i.notif.kind === 'booking_request' || i.notif.kind === 'reschedule' ? tr('no longer open')
+      : i.notif.kind === 'cancellation' ? tr('nothing left to refill')
+        : i.notif.body ?? tr('nothing to answer');
 
 export default function HeldBackScreen({ barberId, held, onBack, onOpenAsk, onOpenReview, onChanged }: {
   barberId: string; held: Held; onBack: () => void;
@@ -143,7 +144,7 @@ export default function HeldBackScreen({ barberId, held, onBack, onOpenAsk, onOp
       ? await supabase.rpc('accept_booking', { p_booking: i.booking.id })
       : await supabase.rpc('cancel_booking', { p_booking: i.booking.id, p_reason: 'Declined' });
     setBusy(null);
-    if (error) { Alert.alert(accept ? 'Could not accept' : 'Could not decline', error.message); return; }
+    if (error) { Alert.alert(accept ? tr('Could not accept') : tr('Could not decline'), error.message); return; }
     setDone((d) => ({ ...d, [i.notif.id]: accept ? 'Accepted' : 'Declined' }));
     onChanged();
   }
@@ -153,54 +154,51 @@ export default function HeldBackScreen({ barberId, held, onBack, onOpenAsk, onOp
     const { error } = await supabase.from('notification_prefs').upsert(
       { user_id: barberId, cancel_breaks_silence: on, updated_at: new Date().toISOString() },
       { onConflict: 'user_id' });
-    if (error) { setBreakOn(!on); Alert.alert('Could not save', error.message); }
+    if (error) { setBreakOn(!on); Alert.alert(tr('Could not save'), error.message); }
   }
 
   const now = Date.now();
   const worth = sortWorth(held.items.filter((i) => i.worth));
   const read = held.items.filter((i) => !i.worth);
-  const inChair = held.cut.who ?? 'a walk-in';
-  const span = `from ${hh(held.cut.started_at)} to ${hh(held.cut.completed_at)}`;
+  const inChair = held.cut.who ?? tr('a walk-in');
+  const span = tr('from {from} to {to}', { from: hh(held.cut.started_at), to: hh(held.cut.completed_at) });
 
   return (
     <>
       <Screen gap={11}>
-        <TopBar title="Held back" onBack={onBack} />
+        <TopBar title={tr('Held back')} onBack={onBack} />
 
         <View style={s.amberCard}>
           <View style={s.row10}>
             <Ico name="scissors" size={16} color={D.amber} />
             <T w="b" size={14} c={D.amber} style={s.grow}>
-              {countWord(held.items.length)} waited for you to finish
+              {tr('{count} waited for you to finish', { count: countWord(held.items.length) })}
             </T>
           </View>
           <T size={11.5} c={D.textDim} style={s.lh17}>
             {held.gotThrough === 0
-              ? `Silent while cutting did its job — nothing buzzed ${span}, while ${inChair} was in the chair. Nothing was lost.`
-              : `Silent while cutting held everything else ${span}, while ${inChair} was in the chair — `
-                + `${countWord(held.gotThrough).toLowerCase()} cancellation${held.gotThrough === 1 ? '' : 's'} `
-                + 'still got through, as your settings say. Nothing was lost.'}
+              ? tr('Silent while cutting did its job — nothing buzzed {span}, while {inChair} was in the chair. Nothing was lost.', { span, inChair })
+              : trn(held.gotThrough, 'Silent while cutting held everything else {span}, while {inChair} was in the chair — {count} cancellation still got through, as your settings say. Nothing was lost.', 'Silent while cutting held everything else {span}, while {inChair} was in the chair — {count} cancellations still got through, as your settings say. Nothing was lost.', { span, inChair, count: countWord(held.gotThrough).toLowerCase() })}
           </T>
         </View>
 
-        {worth.length > 0 && <Eyebrow ls={1.65} style={s.mt2}>STILL WORTH DOING</Eyebrow>}
+        {worth.length > 0 && <Eyebrow ls={1.65} style={s.mt2}>{tr('STILL WORTH DOING')}</Eyebrow>}
         {worth.map((i) => {
           const b = i.booking!;
           const outcome = done[i.notif.id];
-          const name = whoOf(b, barberId) ?? 'A walk-in';
-          const service = b.services?.name ?? 'Service';
+          const name = whoOf(b, barberId) ?? tr('A walk-in');
+          const service = b.services?.name ?? tr('Service');
           const arrived = <T w="b" size={10.5} c={D.faint} style={s.tnum}>{hh(i.notif.created_at)}</T>;
 
           if (i.action === 'offer') {
             return (
               <View key={i.notif.id} style={[s.card, s.cardHot]}>
                 <View style={s.rowBase}>
-                  <T w="b" size={13.5} style={s.grow}>{hh(b.starts_at)} cancelled — slot is empty</T>
+                  <T w="b" size={13.5} style={s.grow}>{tr('{starts_at} cancelled — slot is empty', { starts_at: hh(b.starts_at) })}</T>
                   {arrived}
                 </View>
                 <T size={11.5} c={D.sub} style={s.lh17}>
-                  {name}&apos;s {hh(b.starts_at)} went {agoLabel(now - Date.parse(i.notif.created_at))}. Still{' '}
-                  {spanLabel(Date.parse(b.starts_at) - now)} of notice.
+                  {tr('{name}\'s {starts_at} went {agoLabel}. Still {spanLabel} of notice.', { name, starts_at: hh(b.starts_at), agoLabel: agoLabel(now - Date.parse(i.notif.created_at)), spanLabel: spanLabel(Date.parse(b.starts_at) - now) })}
                 </T>
                 {outcome
                   ? <T w="sb" size={11.5} c={D.green}>{outcome}</T>
@@ -214,7 +212,7 @@ export default function HeldBackScreen({ barberId, held, onBack, onOpenAsk, onOp
                         },
                       })}
                       style={({ pressed }) => [s.redCta, pressed && s.pressed]}>
-                      <T w="eb" size={11.5} c="#fff" ls={0.5}>OFFER {hh(b.starts_at)} TO THE WAITLIST</T>
+                      <T w="eb" size={11.5} c="#fff" ls={0.5}>{tr('OFFER {starts_at} TO THE WAITLIST', { starts_at: hh(b.starts_at) })}</T>
                     </Pressable>
                   )}
               </View>
@@ -225,24 +223,25 @@ export default function HeldBackScreen({ barberId, held, onBack, onOpenAsk, onOp
             return (
               <View key={i.notif.id} style={s.card}>
                 <View style={s.rowBase}>
-                  <T w="b" size={13.5} style={s.grow}>New request · {dh(b.price_cents)}</T>
+                  <T w="b" size={13.5} style={s.grow}>{tr('New request · {price_cents}', { price_cents: dh(b.price_cents) })}</T>
                   {arrived}
                 </View>
                 <T size={11.5} c={D.sub} style={s.lh17}>
-                  {name} wants {when(b.starts_at)}, {service}. A request stays open until its start time —{' '}
-                  <T w="b" size={11.5} c={D.amber}>this one has {spanLabel(Date.parse(b.starts_at) - now)} left</T>.
+                  {trRich('{name} wants {when}, {service}. A request stays open until its start time — <b>this one has {left} left</b>.', {
+                    b: (text, key) => <T key={key} w="b" size={11.5} c={D.amber}>{text}</T>,
+                  }, { name, when: when(b.starts_at), service, left: spanLabel(Date.parse(b.starts_at) - now) })}
                 </T>
                 {outcome
-                  ? <T w="sb" size={11.5} c={outcome === 'Accepted' ? D.green : D.sub}>{outcome}</T>
+                  ? <T w="sb" size={11.5} c={outcome === 'Accepted' ? D.green : D.sub}>{tr(outcome)}</T>
                   : (
                     <View style={s.row8}>
                       <Pressable onPress={() => answer(i, true)} disabled={busy === i.notif.id}
                         accessibilityRole="button" style={({ pressed }) => [s.whiteCta, s.grow, pressed && s.pressed]}>
-                        <T w="eb" size={11.5} c="#111" ls={0.5}>ACCEPT</T>
+                        <T w="eb" size={11.5} c="#111" ls={0.5}>{tr('ACCEPT')}</T>
                       </Pressable>
                       <Pressable onPress={() => answer(i, false)} disabled={busy === i.notif.id}
                         accessibilityRole="button" style={({ pressed }) => [s.greyCta, pressed && s.pressed]}>
-                        <T w="b" size={11.5} c={D.textDim}>Decline</T>
+                        <T w="b" size={11.5} c={D.textDim}>{tr('Decline')}</T>
                       </Pressable>
                     </View>
                   )}
@@ -253,15 +252,15 @@ export default function HeldBackScreen({ barberId, held, onBack, onOpenAsk, onOp
           return (
             <View key={i.notif.id} style={s.card}>
               <View style={s.rowBase}>
-                <T w="b" size={13.5} style={s.grow}>Reschedule ask</T>
+                <T w="b" size={13.5} style={s.grow}>{tr('Reschedule ask')}</T>
                 {arrived}
               </View>
               <T size={11.5} c={D.sub} style={s.lh17}>
-                {i.notif.body ?? `${name} asked to move ${when(b.starts_at)}.`}
+                {i.notif.body ?? tr('{name} asked to move {starts_at}.', { name, starts_at: when(b.starts_at) })}
               </T>
               <Pressable onPress={() => onOpenAsk(b.id)} accessibilityRole="button"
                 style={({ pressed }) => [s.whiteCta, pressed && s.pressed]}>
-                <T w="eb" size={11.5} c="#111" ls={0.5}>ANSWER IT</T>
+                <T w="eb" size={11.5} c="#111" ls={0.5}>{tr('ANSWER IT')}</T>
               </Pressable>
             </View>
           );
@@ -269,20 +268,20 @@ export default function HeldBackScreen({ barberId, held, onBack, onOpenAsk, onOp
 
         {read.length > 0 && (
           <>
-            <Eyebrow ls={1.65} style={s.mt2}>READ IT WHEN YOU CAN</Eyebrow>
+            <Eyebrow ls={1.65} style={s.mt2}>{tr('READ IT WHEN YOU CAN')}</Eyebrow>
             <View style={s.readList}>
               {read.map((i, idx) => (
                 <View key={i.notif.id} style={[s.readRow, idx < read.length - 1 && s.readLine]}>
                   <View style={s.grow}>
                     <T w="sb" size={12.5}>{i.notif.title}</T>
                     <T size={11} c={D.sub} style={s.mt2} numberOfLines={2}>
-                      Arrived {hh(i.notif.created_at)} · {readNote(i)}
+                      {tr('Arrived {created_at} · {i}', { created_at: hh(i.notif.created_at), i: readNote(i) })}
                     </T>
                   </View>
                   {i.action === 'open_review' && !!i.notif.booking_id && (
                     <Pressable onPress={() => onOpenReview(i.notif.booking_id!)} hitSlop={8}
                       accessibilityRole="button" style={({ pressed }) => pressed && s.pressed}>
-                      <T w="sb" size={11.5} c={D.accent}>Open</T>
+                      <T w="sb" size={11.5} c={D.accent}>{tr('Open')}</T>
                     </Pressable>
                   )}
                 </View>
@@ -293,14 +292,14 @@ export default function HeldBackScreen({ barberId, held, onBack, onOpenAsk, onOp
 
         <View style={s.exceptCard}>
           <T size={12} c={D.textDim} style={s.lh17}>
-            Cancellations are the only ones where waiting costs you money. Let them through anyway?
+            {tr('Cancellations are the only ones where waiting costs you money. Let them through anyway?')}
           </T>
           <View style={s.row12}>
-            <T w="b" size={12.5} style={s.grow}>Cancellations break the silence</T>
+            <T w="b" size={12.5} style={s.grow}>{tr('Cancellations break the silence')}</T>
             <Toggle on={breakOn} color={D.accent} onPress={() => toggleBreak(!breakOn)} />
           </View>
           <T size={10.5} c={D.faint} style={s.exceptFoot}>
-            One buzz for a cancellation. Everything else keeps waiting for you to finish.
+            {tr('One buzz for a cancellation. Everything else keeps waiting for you to finish.')}
           </T>
         </View>
       </Screen>

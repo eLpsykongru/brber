@@ -7,6 +7,7 @@ import { Btn, Ico, Screen, Sheet, T, TAB_INSET, TopBar } from '../components/dar
 import { supabase } from '../lib/supabase';
 import { enqueue, useConnection } from '../lib/sync';
 import { dark as D } from '../theme';
+import { loc, tr, trn, trRich } from '../lib/i18n';
 
 // AGT-01 … AGT-05 of "Ops Agent - Collection.dc.html".
 //
@@ -74,7 +75,7 @@ export default function AgentRoundScreen({ onBack }: { onBack?: () => void }) {
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.rpc('agent_visits');
-    if (error) return Alert.alert('Could not load your round', error.message);
+    if (error) return Alert.alert(tr('Could not load your round'), error.message);
     setR(data as Round);
     const { data: qd } = await supabase.rpc('agent_queue', {});
     if (qd) setQ(qd as Queue);
@@ -91,7 +92,7 @@ export default function AgentRoundScreen({ onBack }: { onBack?: () => void }) {
   // more than he is carrying, so the number cannot go negative here.
   const drop = async (cents: number) => {
     const { error } = await supabase.rpc('agent_drop', { p_cents: cents });
-    if (error) return Alert.alert('Not recorded', error.message);
+    if (error) return Alert.alert(tr('Not recorded'), error.message);
     setDropping(false);
     load();
   };
@@ -134,11 +135,11 @@ export default function AgentRoundScreen({ onBack }: { onBack?: () => void }) {
 
   return (
     <Screen bottom={TAB_INSET}>
-      <TopBar title="Your round" onBack={onBack} />
+      <TopBar title={tr('Your round')} onBack={onBack} />
       <ScrollView contentContainerStyle={s.pad} showsVerticalScrollIndicator={false}>
         <T size={12} c={D.sub} style={s.sub}>
-          {new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
-          {visits.length ? ` · ${visits.length} visit${visits.length === 1 ? '' : 's'} left` : ''}
+          {new Date().toLocaleDateString(loc('en-GB'), { weekday: 'long', day: 'numeric', month: 'long' })}
+          {visits.length ? trn(visits.length, ' · {n} visit left', ' · {n} visits left') : ''}
         </T>
 
         {q && (q.n > 0 || q.failed > 0) && (
@@ -148,15 +149,15 @@ export default function AgentRoundScreen({ onBack }: { onBack?: () => void }) {
             <View style={s.grow}>
               <T w="sb" size={12} c={q.failed ? '#F87171' : D.amber}>
                 {q.failed
-                  ? `${q.failed} code didn’t match`
-                  : `${q.n} of ${q.max_n} · ${dh(q.cents)} DH waiting to be checked`}
+                  ? tr('{failed} code didn’t match', { failed: q.failed })
+                  : tr('{n} of {max_n} · {cents} DH waiting to be checked', { n: q.n, max_n: q.max_n, cents: dh(q.cents) })}
               </T>
               <T size={10.5} c={D.sub} style={s.gap2}>
                 {q.failed
-                  ? 'Ops is ringing the owner. Your round is paused until that is sent.'
+                  ? tr('Ops is ringing the owner. Your round is paused until that is sent.')
                   : q.at_ceiling
-                    ? 'You cannot open another collection until these clear. Hand-overs still work.'
-                    : 'They go through on their own when you have signal.'}
+                    ? tr('You cannot open another collection until these clear. Hand-overs still work.')
+                    : tr('They go through on their own when you have signal.')}
               </T>
             </View>
           </View>
@@ -166,30 +167,29 @@ export default function AgentRoundScreen({ onBack }: { onBack?: () => void }) {
         {bag && (
           <View style={s.bag}>
             <View style={s.bagTop}>
-              <T w="b" size={10} c={D.sub} ls={1.5}>IN YOUR BAG NOW</T>
+              <T w="b" size={10} c={D.sub} ls={1.5}>{tr('IN YOUR BAG NOW')}</T>
               <View style={s.grow} />
-              <T size={11} c={D.sub} style={s.num}>Cap {dh(bag.cap_cents)} DH</T>
+              <T size={11} c={D.sub} style={s.num}>{tr('Cap {cap_cents} DH', { cap_cents: dh(bag.cap_cents) })}</T>
             </View>
-            <T style={s.bagBig}>{dh(bag.in_bag_cents)} DH</T>
+            <T style={s.bagBig}>{tr('{in_bag_cents} DH', { in_bag_cents: dh(bag.in_bag_cents) })}</T>
             <View style={s.track}>
               <View style={[s.fill, { width: `${pct}%`, backgroundColor: overCap ? D.amber : D.amber }]} />
             </View>
             <View style={s.tiles}>
               <View style={s.tile}>
-                <T size={10} c={D.faint} ls={1.2}>COLLECTED TODAY</T>
-                <T w="b" size={14} style={s.num}>{dh(bag.collected_cents)} DH</T>
+                <T size={10} c={D.faint} ls={1.2}>{tr('COLLECTED TODAY')}</T>
+                <T w="b" size={14} style={s.num}>{tr('{collected_cents} DH', { collected_cents: dh(bag.collected_cents) })}</T>
               </View>
               <View style={s.tile}>
-                <T size={10} c={D.faint} ls={1.2}>STILL TO HAND OVER</T>
-                <T w="b" size={14} style={s.num}>{dh(bag.handed_cents)} DH</T>
+                <T size={10} c={D.faint} ls={1.2}>{tr('STILL TO HAND OVER')}</T>
+                <T w="b" size={14} style={s.num}>{tr('{handed_cents} DH', { handed_cents: dh(bag.handed_cents) })}</T>
               </View>
             </View>
             {overCap && (
               <View style={s.warn}>
                 <Ico name="alert-triangle" size={13} color={D.amber} />
                 <T size={11.5} c={D.amber} style={s.grow}>
-                  The collections left on your round put you over the cap. Drop at
-                  the office first.
+                  {tr('The collections left on your round put you over the cap. Drop at the office first.')}
                 </T>
               </View>
             )}
@@ -199,7 +199,7 @@ export default function AgentRoundScreen({ onBack }: { onBack?: () => void }) {
             {bag.in_bag_cents > 0 && (
               <Pressable onPress={() => setDropping(true)} style={s.dropRow}>
                 <Ico name="briefcase" size={14} color={D.sub} />
-                <T size={12} c={D.textDim} style={s.grow}>Dropped at the office</T>
+                <T size={12} c={D.textDim} style={s.grow}>{tr('Dropped at the office')}</T>
                 <Ico name="chevron-right" size={14} color={D.muted} />
               </Pressable>
             )}
@@ -207,15 +207,15 @@ export default function AgentRoundScreen({ onBack }: { onBack?: () => void }) {
         )}
 
         <View style={s.head}>
-          <T w="b" size={10} c={D.sub} ls={1.5}>NEXT VISITS</T>
+          <T w="b" size={10} c={D.sub} ls={1.5}>{tr('NEXT VISITS')}</T>
           <View style={s.grow} />
-          <T size={10.5} c={D.faint}>Oldest money first</T>
+          <T size={10.5} c={D.faint}>{tr('Oldest money first')}</T>
         </View>
 
         {!visits.length && (
           <View style={s.empty}>
             <Ico name="check-circle" size={24} color={D.green} />
-            <T size={12.5} c={D.sub} style={s.centre}>Nothing left on your round.</T>
+            <T size={12.5} c={D.sub} style={s.centre}>{tr('Nothing left on your round.')}</T>
           </View>
         )}
 
@@ -224,10 +224,8 @@ export default function AgentRoundScreen({ onBack }: { onBack?: () => void }) {
             blocked={!!q?.at_ceiling && v.direction === 'collect'}
             onPress={() => {
               if (q?.at_ceiling && v.direction === 'collect') {
-                return Alert.alert('Too much unchecked cash',
-                  `You have ${q.n} collections worth ${dh(q.cents)} DH that we have not `
-                  + 'been able to check yet. Find signal and let them go through, or call ops. '
-                  + 'You can still hand over.');
+                return Alert.alert(tr('Too much unchecked cash'),
+                  tr('You have {n} collections worth {amount} DH that we have not been able to check yet. Find signal and let them go through, or call ops. You can still hand over.', { n: q.n, amount: dh(q.cents) }));
               }
               setOpen(v);
             }} />
@@ -255,10 +253,9 @@ function DropSheet({ visible, bag, onClose, onDrop }: {
 
   return (
     <Sheet visible={visible} onClose={onClose}>
-      <T w="b" size={17}>Dropped at the office</T>
+      <T w="b" size={17}>{tr('Dropped at the office')}</T>
       <T size={12} c={D.sub}>
-        You are carrying {dh(bag.in_bag_cents)} DH. Leave all of it, or keep back
-        what the hand-overs still on your round need.
+        {tr('You are carrying {in_bag_cents} DH. Leave all of it, or keep back what the hand-overs still on your round need.', { in_bag_cents: dh(bag.in_bag_cents) })}
       </T>
 
       <View style={[s.amount, over && { borderColor: '#F87171' }]}>
@@ -266,16 +263,16 @@ function DropSheet({ visible, bag, onClose, onDrop }: {
           {typed ? Number(typed).toLocaleString('en-US').replace(/,/g, ' ') : '0'}
         </T>
         <View style={s.grow} />
-        <T size={14} c={D.sub}>DH</T>
+        <T size={14} c={D.sub}>{tr('DH')}</T>
       </View>
 
       <View style={s.chips}>
         <Pressable onPress={() => setTyped(String(Math.round(bag.in_bag_cents / 100)))}
           style={s.pill}>
-          <T size={11.5} c={D.textDim}>All of it · {dh(bag.in_bag_cents)} DH</T>
+          <T size={11.5} c={D.textDim}>{tr('All of it · {in_bag_cents} DH', { in_bag_cents: dh(bag.in_bag_cents) })}</T>
         </Pressable>
         <Pressable onPress={() => setTyped('')} style={s.pill}>
-          <T size={11.5} c={D.sub}>Clear</T>
+          <T size={11.5} c={D.sub}>{tr('Clear')}</T>
         </Pressable>
       </View>
 
@@ -290,7 +287,7 @@ function DropSheet({ visible, bag, onClose, onDrop }: {
         ))}
       </View>
 
-      <Btn title={cents > 0 ? `RECORD ${dh(cents)} DH DROPPED` : 'HOW MUCH DID YOU LEAVE?'}
+      <Btn title={cents > 0 ? tr('RECORD {cents} DH DROPPED', { cents: dh(cents) }) : tr('HOW MUCH DID YOU LEAVE?')}
         bg={cents > 0 && !over ? D.green : D.card2}
         fg={cents > 0 && !over ? '#0D0D0F' : D.faint}
         height={54} ls={0.7}
@@ -320,17 +317,17 @@ function VisitCard({ v, later, blocked, onPress }: {
           <T w="sb" size={14} c={later ? D.sub : D.text}>{v.salon}</T>
           <T size={11} c={D.faint} style={s.gap2}>
             {later && v.window_from
-              ? `${new Date(v.window_from).toLocaleDateString('en-GB', { weekday: 'long' })} ${hhmm(v.window_from)}`
+              ? `${new Date(v.window_from).toLocaleDateString(loc('en-GB'), { weekday: 'long' })} ${hhmm(v.window_from)}`
               : v.address ?? ''}
-            {!later && v.window_from ? ` · window ${hhmm(v.window_from)}–${hhmm(v.window_to)}` : ''}
+            {!later && v.window_from ? tr(' · window {window_from}–{window_to}', { window_from: hhmm(v.window_from), window_to: hhmm(v.window_to) }) : ''}
           </T>
         </View>
         <View style={s.right}>
           {/* §2.1 — direction is a WORD. Colour only reinforces it. */}
           <T w="eb" size={10} c={collect ? D.accent : D.green} ls={1.3}>
-            {collect ? 'COLLECT' : 'HAND OVER'}
+            {collect ? tr('COLLECT') : tr('HAND OVER')}
           </T>
-          <T w="b" size={19} style={s.num}>{dh(v.amount_cents)} DH</T>
+          <T w="b" size={19} style={s.num}>{tr('{amount_cents} DH', { amount_cents: dh(v.amount_cents) })}</T>
         </View>
       </View>
 
@@ -344,20 +341,20 @@ function VisitCard({ v, later, blocked, onPress }: {
         {collect ? (
           <>
             <T size={11} c={late ? '#F87171' : D.sub}>
-              {v.age_days == null ? 'No money of ours yet' : `Day ${v.age_days} of ${v.limit_days}`}
+              {v.age_days == null ? tr('No money of ours yet') : tr('Day {age_days} of {limit_days}', { age_days: v.age_days, limit_days: v.limit_days })}
             </T>
             <View style={s.grow} />
             <T size={11} c={late ? '#F87171' : D.faint}>
-              {late ? 'Do this one first' : v.owner}
+              {late ? tr('Do this one first') : v.owner}
             </T>
           </>
         ) : (
           <>
             {/* §2.3: no age, and it is shown rather than faked */}
-            <T size={11} c={D.sub}>No age — they hold nothing of ours</T>
+            <T size={11} c={D.sub}>{tr('No age — they hold nothing of ours')}</T>
             <View style={s.grow} />
             <T size={11} c={D.faint}>
-              {v.waiting_days == null ? '' : `Waiting ${v.waiting_days} day${v.waiting_days === 1 ? '' : 's'}`}
+              {v.waiting_days == null ? '' : trn(v.waiting_days, 'Waiting {n} day', 'Waiting {n} days')}
             </T>
           </>
         )}
@@ -406,40 +403,40 @@ function CollectScreen({ v, bag, q, online, onBack, onDone }: {
         <View style={s.row}>
           <T size={12} c={D.sub} style={s.grow}>{v.owner}</T>
           <View style={[s.chip, { backgroundColor: 'rgba(232,68,46,0.16)' }]}>
-            <T w="eb" size={9.5} c={D.accent} ls={1.2}>COLLECT</T>
+            <T w="eb" size={9.5} c={D.accent} ls={1.2}>{tr('COLLECT')}</T>
           </View>
         </View>
 
         <View style={s.owes}>
           <View style={s.grow}>
-            <T w="b" size={10} c={D.sub} ls={1.5}>HE OWES THIS WEEK</T>
-            <T style={s.owesBig}>{dh(v.amount_cents)} DH</T>
+            <T w="b" size={10} c={D.sub} ls={1.5}>{tr('HE OWES THIS WEEK')}</T>
+            <T style={s.owesBig}>{tr('{amount_cents} DH', { amount_cents: dh(v.amount_cents) })}</T>
           </View>
           <View style={s.rightTop}>
-            <T size={11} c={D.faint}>Week {v.week.slice(-2)}</T>
+            <T size={11} c={D.faint}>{tr('Week {week}', { week: v.week.slice(-2) })}</T>
             {v.age_days != null && (
-              <T size={11} c={D.amber} style={s.gap2}>Day {v.age_days} of {v.limit_days}</T>
+              <T size={11} c={D.amber} style={s.gap2}>{tr('Day {age_days} of {limit_days}', { age_days: v.age_days, limit_days: v.limit_days })}</T>
             )}
           </View>
         </View>
 
         <T w="b" size={10} c={D.sub} ls={1.4} style={s.label}>
-          COUNT IT WITH HIM, THEN TYPE WHAT YOU HAVE
+          {tr('COUNT IT WITH HIM, THEN TYPE WHAT YOU HAVE')}
         </T>
         <View style={[s.amount, over && { borderColor: '#F87171' }]}>
           <T style={s.amountText}>{typed ? Number(typed).toLocaleString('en-US').replace(/,/g, ' ') : '0'}</T>
           <T style={s.caret}>|</T>
           <View style={s.grow} />
-          <T size={14} c={D.sub}>DH</T>
+          <T size={14} c={D.sub}>{tr('DH')}</T>
         </View>
 
         <View style={s.chips}>
           <Pressable onPress={() => setTyped(String(Math.round(v.amount_cents / 100)))}
             style={s.pill}>
-            <T size={11.5} c={D.textDim}>Full amount · {dh(v.amount_cents)} DH</T>
+            <T size={11.5} c={D.textDim}>{tr('Full amount · {amount_cents} DH', { amount_cents: dh(v.amount_cents) })}</T>
           </Pressable>
           <Pressable onPress={() => setTyped('')} style={s.pill}>
-            <T size={11.5} c={D.sub}>Clear</T>
+            <T size={11.5} c={D.sub}>{tr('Clear')}</T>
           </Pressable>
         </View>
 
@@ -457,29 +454,27 @@ function CollectScreen({ v, bag, q, online, onBack, onDone }: {
             button stays live; no dialog. Copy is verbatim so he can read it out. */}
         {short > 0 && cents > 0 && (
           <View style={s.shortPanel}>
-            <T w="b" size={12.5} c={D.amber}>{dh(short)} DH short — that is fine</T>
+            <T w="b" size={12.5} c={D.amber}>{tr('{short} DH short — that is fine', { short: dh(short) })}</T>
             <T size={11.5} c={D.sub} style={s.shortBody}>
-              The {dh(short)} DH stays on this week&rsquo;s line and comes back on next
-              Friday&rsquo;s statement. Nothing is added for being short, and nobody
-              will call him about it.
+              {tr('The {short} DH stays on this week’s line and comes back on next Friday’s statement. Nothing is added for being short, and nobody will call him about it.', { short: dh(short) })}
             </T>
           </View>
         )}
         {over && (
           <View style={s.overPanel}>
             <T size={11.5} c="#F87171">
-              He only owes {dh(v.amount_cents)} DH this week. Take that, not more.
+              {tr('He only owes {amount_cents} DH this week. Take that, not more.', { amount_cents: dh(v.amount_cents) })}
             </T>
           </View>
         )}
 
         <T w="sb" size={12} c={D.sub} style={s.leaveLink} onPress={() => setLadder(true)}>
-          He can&rsquo;t give me the code
+          {tr('He can’t give me the code')}
         </T>
       </ScrollView>
 
       <View style={s.foot}>
-        <Btn title={cents > 0 ? `TAKE ${dh(cents)} DH` : 'TYPE WHAT YOU HAVE'}
+        <Btn title={cents > 0 ? tr('TAKE {cents} DH', { cents: dh(cents) }) : tr('TYPE WHAT YOU HAVE')}
           bg={cents > 0 && !over ? D.accent : D.card2}
           fg={cents > 0 && !over ? '#fff' : D.faint}
           height={54} ls={0.7}
@@ -516,7 +511,7 @@ function ConfirmSheet({ visible, v, bag, cents, short, online, onClose, onDone }
       const clientRef = `c-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
       await enqueue({
         at: capturedAt,
-        label: `${v.salon} · ${dh(cents)} DH collected`,
+        label: tr('{salon} · {cents} DH collected', { salon: v.salon, cents: dh(cents) }),
         icon: 'check',
         cents,
         call: {
@@ -530,7 +525,7 @@ function ConfirmSheet({ visible, v, bag, cents, short, online, onClose, onDone }
       setBusy(false);
       setCode('');
       return onDone({
-        receipt: 'not yet issued', salon: v.salon, taken_cents: cents,
+        receipt: tr('not yet issued'), salon: v.salon, taken_cents: cents,
         open_cents: Math.max(0, v.amount_cents - cents), code,
         bag: { ...bag, in_bag_cents: bag.in_bag_cents + cents,
                collected_cents: bag.collected_cents + cents },
@@ -542,7 +537,7 @@ function ConfirmSheet({ visible, v, bag, cents, short, online, onClose, onDone }
       p_visit: v.id, p_cents: cents, p_code: code,
     });
     setBusy(false);
-    if (error) return Alert.alert('Not recorded', error.message);
+    if (error) return Alert.alert(tr('Not recorded'), error.message);
     const d = data as Done;
     setCode('');
     onDone({ ...d, direction: 'collect', visit: v });
@@ -551,15 +546,15 @@ function ConfirmSheet({ visible, v, bag, cents, short, online, onClose, onDone }
   return (
     <Sheet visible={visible} onClose={onClose} deep>
       <T w="b" size={19} style={s.sheetTitle}>
-        You are recording cash you have already counted.
+        {tr('You are recording cash you have already counted.')}
       </T>
 
       <View style={s.summary}>
         {[
           [`${dh(cents)} DH`, v.salon],
-          ['Direction', 'Collect'],
-          ...(short > 0 ? [['Stays on the line for next week', `${dh(short)} DH`]] : []),
-          ['Into your bag', `${dh(bag.in_bag_cents + cents)} DH`],
+          [tr('Direction'), tr('Collect')],
+          ...(short > 0 ? [[tr('Stays on the line for next week'), `${dh(short)} DH`]] : []),
+          [tr('Into your bag'), `${dh(bag.in_bag_cents + cents)} DH`],
         ].map(([a, b]) => (
           <View key={a + b} style={s.sumRow}>
             <T size={12} c={D.sub} style={s.grow}>{a}</T>
@@ -568,7 +563,7 @@ function ConfirmSheet({ visible, v, bag, cents, short, online, onClose, onDone }
         ))}
       </View>
 
-      <T w="b" size={12.5} style={s.codeAsk}>Ask {v.owner.split(' ')[0]} for the 4 digits on his phone</T>
+      <T w="b" size={12.5} style={s.codeAsk}>{tr('Ask {owner} for the 4 digits on his phone', { owner: v.owner.split(' ')[0] })}</T>
       <View style={s.codeRow}>
         {[0, 1, 2, 3].map((i) => (
           <Pressable key={i} onPress={() => setCode('')} style={s.codeBox}>
@@ -589,16 +584,13 @@ function ConfirmSheet({ visible, v, bag, cents, short, online, onClose, onDone }
         ))}
       </View>
       <T size={11} c={D.faint} style={s.codeWhy}>
-        His app shows it under this week&rsquo;s statement. It changes every visit,
-        and it is what proves you were in the shop.
+        {tr('His app shows it under this week’s statement. It changes every visit, and it is what proves you were in the shop.')}
       </T>
 
       <View style={s.noUndo}>
         <Ico name="lock" size={15} color={D.accent} />
         <T size={11.5} c={D.textDim} style={s.grow}>
-          There is no undo. The moment you tap, this is on his statement and in
-          our books. A wrong number can only be fixed by a new line next week —
-          so count it twice, not once.
+          {tr('There is no undo. The moment you tap, this is on his statement and in our books. A wrong number can only be fixed by a new line next week — so count it twice, not once.')}
         </T>
       </View>
 
@@ -608,21 +600,20 @@ function ConfirmSheet({ visible, v, bag, cents, short, online, onClose, onDone }
         <View style={s.offlinePanel}>
           <Ico name="wifi-off" size={15} color={D.amber} />
           <T size={11.5} c={D.textDim} style={s.grow}>
-            And I can&rsquo;t check {code || 'his code'} until we have signal. The
-            money is recorded now; the proof waits.
+            {tr('And I can’t check {code} until we have signal. The money is recorded now; the proof waits.', { code: code || tr('his code') })}
           </T>
         </View>
       )}
 
-      <Btn title={busy ? 'RECORDING…'
-          : online ? `RECORD ${dh(cents)} DH COLLECTED`
-          : `RECORD ${dh(cents)} DH · CHECK LATER`}
+      <Btn title={busy ? tr('RECORDING…')
+          : online ? tr('RECORD {cents} DH COLLECTED', { cents: dh(cents) })
+          : tr('RECORD {cents} DH · CHECK LATER', { cents: dh(cents) })}
         bg={code.length === 4 && !busy ? D.accent : D.card2}
         fg={code.length === 4 && !busy ? '#fff' : D.faint}
         height={54} ls={0.7}
         onPress={() => { if (code.length === 4 && !busy) record(); }} />
       <T w="sb" size={12} c={D.sub} style={s.centre} onPress={onClose}>
-        Go back and count again
+        {tr('Go back and count again')}
       </T>
     </Sheet>
   );
@@ -643,35 +634,35 @@ function ReceiptScreen({ d, onNext }: { d: Done; onNext: () => void }) {
         <View style={s.tick}>
           <Ico name="check" size={26} color={queued ? D.amber : collect ? D.accent : D.green} />
         </View>
-        <T style={s.rBig}>{dh(amount)} DH</T>
+        <T style={s.rBig}>{tr('{amount} DH', { amount: dh(amount) })}</T>
         <T size={12} c={D.sub} style={s.centre}>
-          {collect ? 'Collected from' : 'Handed to'} {d.salon} · {hhmm()}
+          {collect ? tr('Collected from') : tr('Handed to')} {d.salon} · {hhmm()}
         </T>
 
         {/* §5: RECORDED · HIS CODE NOT CHECKED YET. Amber and dashed, never red
             — red is for failure and he has not failed. */}
         {queued && (
           <View style={s.provisional}>
-            <T w="eb" size={9.5} c={D.amber} ls={1.3}>RECORDED · HIS CODE NOT CHECKED YET</T>
+            <T w="eb" size={9.5} c={D.amber} ls={1.3}>{tr('RECORDED · HIS CODE NOT CHECKED YET')}</T>
             <View style={s.provRow}>
-              <T size={11.5} c={D.sub} style={s.grow}>The money</T>
-              <T size={11.5} c={D.green}>in your bag, counted, done</T>
+              <T size={11.5} c={D.sub} style={s.grow}>{tr('The money')}</T>
+              <T size={11.5} c={D.green}>{tr('in your bag, counted, done')}</T>
             </View>
             <View style={s.provRow}>
-              <T size={11.5} c={D.sub} style={s.grow}>His code {d.code}</T>
-              <T size={11.5} c={D.amber}>waiting to be checked</T>
+              <T size={11.5} c={D.sub} style={s.grow}>{tr('His code {code}', { code: d.code })}</T>
+              <T size={11.5} c={D.amber}>{tr('waiting to be checked')}</T>
             </View>
           </View>
         )}
 
         <View style={s.facts}>
           {[
-            ['Receipt', d.receipt],
+            [tr('Receipt'), d.receipt],
             // the method is on the receipt because that is what makes it evidence
-            ['Confirmed by', !collect ? "the owner's signature"
-              : queued ? `his code ${d.code} — not checked yet`
-              : `the owner's code · ${d.code}`],
-            ['Week', `${d.visit.week.slice(-2)}`],
+            [tr('Confirmed by'), !collect ? tr("the owner's signature")
+              : queued ? tr('his code {code} — not checked yet', { code: d.code })
+              : tr("the owner's code · {code}", { code: d.code })],
+            [tr('Week'), `${d.visit.week.slice(-2)}`],
           ].map(([k, val]) => (
             <View key={k} style={s.factRow}>
               <T size={12} c={D.sub} style={s.grow}>{k}</T>
@@ -682,30 +673,26 @@ function ReceiptScreen({ d, onNext }: { d: Done; onNext: () => void }) {
 
         {collect && open > 0 && (
           <View style={s.shortPanel}>
-            <T w="b" size={12.5} c={D.amber}>{dh(open)} DH still with the shop</T>
+            <T w="b" size={12.5} c={D.amber}>{tr('{open} DH still with the shop', { open: dh(open) })}</T>
             <T size={11.5} c={D.sub} style={s.shortBody}>
-              It stays on week {d.visit.week.slice(-2)}&rsquo;s line and moves onto next
-              Friday&rsquo;s statement as its own line at day {d.visit.limit_days}. You do
-              not need to come back for it — the run will put it on someone&rsquo;s round.
+              {tr('It stays on week {week}’s line and moves onto next Friday’s statement as its own line at day {limit_days}. You do not need to come back for it — the run will put it on someone’s round.', { week: d.visit.week.slice(-2), limit_days: d.visit.limit_days })}
             </T>
           </View>
         )}
 
         <View style={s.note}>
           <T size={11.5} c={D.sub}>
-            He already has the receipt in his app and the line now reads {dh(amount)} DH
-            paid, so you do not need to send him anything.
+            {tr('He already has the receipt in his app and the line now reads {amount} DH paid, so you do not need to send him anything.', { amount: dh(amount) })}
           </T>
         </View>
         <View style={s.dashed}>
           <T size={11.5} c={D.faint}>
-            A wrong number cannot be changed here. Tell ops — they add a
-            correcting line to next week&rsquo;s statement, and it will say your name.
+            {tr('A wrong number cannot be changed here. Tell ops — they add a correcting line to next week’s statement, and it will say your name.')}
           </T>
         </View>
       </ScrollView>
       <View style={s.foot}>
-        <Btn title="NEXT VISIT" height={54} ls={0.8} onPress={onNext} />
+        <Btn title={tr('NEXT VISIT')} height={54} ls={0.8} onPress={onNext} />
       </View>
     </Screen>
   );
@@ -730,48 +717,46 @@ function MismatchScreen({ p, onDone }: { p: Paused; onDone: () => void }) {
       p_receipt: p.receipt, p_saw: saw,
     });
     setBusy(false);
-    if (error) return Alert.alert('Could not send that', error.message);
+    if (error) return Alert.alert(tr('Could not send that'), error.message);
     onDone();
   };
 
   return (
     <Screen bottom={TAB_INSET}>
-      <TopBar title="One code didn't match" plain />
+      <TopBar title={tr('One code didn\'t match')} plain />
       <ScrollView contentContainerStyle={s.pad} showsVerticalScrollIndicator={false}>
         <View style={s.mmHero}>
-          <T w="b" size={10} c={D.amber} ls={1.5}>THE CODE DIDN&rsquo;T MATCH</T>
-          <T style={s.owesBig}>{dh(p.cents)} DH</T>
+          <T w="b" size={10} c={D.amber} ls={1.5}>{tr('THE CODE DIDN’T MATCH')}</T>
+          <T style={s.owesBig}>{tr('{cents} DH', { cents: dh(p.cents) })}</T>
           <T size={12} c={D.sub} style={s.mmBody}>
-            {p.salon} · you typed {p.code}. That is not the number {p.owner}&rsquo;s app
-            issued — usually because his app had been closed a while and was
-            showing an old one.
+            {tr('{salon} · you typed {code}. That is not the number {owner}’s app issued — usually because his app had been closed a while and was showing an old one.', { salon: p.salon, code: p.code, owner: p.owner })}
           </T>
         </View>
 
         <View style={s.mmFacts}>
           <View style={s.provRow}>
-            <T size={11.5} c={D.sub} style={s.grow}>The money</T>
-            <T size={11.5} c={D.green}>stays as recorded — nothing reversed</T>
+            <T size={11.5} c={D.sub} style={s.grow}>{tr('The money')}</T>
+            <T size={11.5} c={D.green}>{tr('stays as recorded — nothing reversed')}</T>
           </View>
           <View style={s.provRow}>
-            <T size={11.5} c={D.sub} style={s.grow}>His statement</T>
-            <T size={11.5} c={D.textDim}>unchanged</T>
+            <T size={11.5} c={D.sub} style={s.grow}>{tr('His statement')}</T>
+            <T size={11.5} c={D.textDim}>{tr('unchanged')}</T>
           </View>
           <View style={s.provRow}>
-            <T size={11.5} c={D.sub} style={s.grow}>Who calls him</T>
-            <T size={11.5} c={D.textDim}>we do, not you</T>
+            <T size={11.5} c={D.sub} style={s.grow}>{tr('Who calls him')}</T>
+            <T size={11.5} c={D.textDim}>{tr('we do, not you')}</T>
           </View>
         </View>
 
-        <T w="b" size={10} c={D.sub} ls={1.5} style={s.section}>WHAT DID YOU SEE?</T>
+        <T w="b" size={10} c={D.sub} ls={1.5} style={s.section}>{tr('WHAT DID YOU SEE?')}</T>
         <T size={11.5} c={D.sub} style={s.mmAsk}>
-          This is the one thing only you know. Any of these is a normal answer.
+          {tr('This is the one thing only you know. Any of these is a normal answer.')}
         </T>
 
         {([
-          ['mistyped', 'I mistyped it', 'Four digits, one hand, in a hurry. It happens most weeks.'],
-          ['owner_read', `${p.owner} read it off his own phone`, 'Then his app was probably showing a stale number.'],
-          ['barber_read', 'A barber read it out, not the owner', 'The owner may not have been there at all.'],
+          ['mistyped', tr('I mistyped it'), tr('Four digits, one hand, in a hurry. It happens most weeks.')],
+          ['owner_read', tr('{owner} read it off his own phone', { owner: p.owner }), tr('Then his app was probably showing a stale number.')],
+          ['barber_read', tr('A barber read it out, not the owner'), tr('The owner may not have been there at all.')],
         ] as const).map(([k, title, why]) => (
           <Pressable key={k} disabled={busy} onPress={() => say(k)} style={s.mmOpt}>
             <View style={s.grow}>
@@ -783,8 +768,7 @@ function MismatchScreen({ p, onDone }: { p: Paused; onDone: () => void }) {
         ))}
 
         <T size={11} c={D.muted} style={s.mmFoot}>
-          Your round starts again as soon as you answer. You do not need to go
-          back to the shop, and you do not need to ring anyone.
+          {tr('Your round starts again as soon as you answer. You do not need to go back to the shop, and you do not need to ring anyone.')}
         </T>
       </ScrollView>
     </Screen>
@@ -819,10 +803,9 @@ function LadderScreen({ v, holding, onBack, onDone }: {
       p_visit: v.id, p_reason: reason,
     });
     setBusy(false);
-    if (error) return Alert.alert('Could not send that', error.message);
-    Alert.alert('The desk is ringing him',
-      'Stay in the shop and do not say the amount yet. They will ring the owner '
-      + 'on the number we have, ask him the amount first, then ask you.');
+    if (error) return Alert.alert(tr('Could not send that'), error.message);
+    Alert.alert(tr('The desk is ringing him'),
+      tr('Stay in the shop and do not say the amount yet. They will ring the owner on the number we have, ask him the amount first, then ask you.'));
     onDone();
   };
 
@@ -832,25 +815,25 @@ function LadderScreen({ v, holding, onBack, onDone }: {
       p_visit: v.id, p_reason: reason,
     });
     setBusy(false);
-    if (error) return Alert.alert('Could not record that', error.message);
+    if (error) return Alert.alert(tr('Could not record that'), error.message);
     onDone();
   };
 
   return (
     <Screen bottom={TAB_INSET}>
-      <TopBar title="He can't give me the code" onBack={onBack} />
+      <TopBar title={tr('He can\'t give me the code')} onBack={onBack} />
       <ScrollView contentContainerStyle={s.pad} showsVerticalScrollIndicator={false}>
         <T size={12} c={D.sub} style={s.sub}>
-          {v.salon} · {dh(v.amount_cents)} DH. Three things to try before we ring anyone.
+          {tr('{salon} · {amount_cents} DH. Three things to try before we ring anyone.', { salon: v.salon, amount_cents: dh(v.amount_cents) })}
         </T>
 
         {[
-          ['1', 'He is on the wrong screen',
-           'The four digits are top right of This week’s statement — not in the receipts list.'],
-          ['2', 'Any other phone',
-           'shop.sterncut.ma, and he types his own number. Log him out afterwards.'],
-          ['3', 'Ring him if he isn’t here',
-           'A barber cannot stand in for him. And if he answers, do not take the digits down the phone — that proves he agreed, not that you are here. Tap below and the desk takes it from there.'],
+          ['1', tr('He is on the wrong screen'),
+           tr('The four digits are top right of This week’s statement — not in the receipts list.')],
+          ['2', tr('Any other phone'),
+           tr('shop.sterncut.ma, and he types his own number. Log him out afterwards.')],
+          ['3', tr('Ring him if he isn’t here'),
+           tr('A barber cannot stand in for him. And if he answers, do not take the digits down the phone — that proves he agreed, not that you are here. Tap below and the desk takes it from there.')],
         ].map(([n, title, why]) => (
           <View key={n} style={s.rung}>
             <View style={s.rungNo}><T w="b" size={12} c={D.sub}>{n}</T></View>
@@ -865,18 +848,18 @@ function LadderScreen({ v, holding, onBack, onDone }: {
         {rates && (
           <View style={s.rateStrip}>
             <T size={11.5} c={D.sub} style={s.grow}>
-              You have asked for the desk{' '}
-              <T w="sb" size={11.5} c={D.textDim}>{rates.calls} times in 30 days</T>
-              {' '}· the team averages {rates.team_calls}.
+              {trRich('You have asked for the desk <b>{calls} times in 30 days</b> · the team averages {team}.', {
+                b: (text, key) => <T key={key} w="sb" size={11.5} c={D.textDim}>{text}</T>,
+              }, { calls: rates.calls, team: rates.team_calls })}
             </T>
           </View>
         )}
 
-        <T w="b" size={10} c={D.sub} ls={1.5} style={s.section}>ASK THE DESK TO RING HIM</T>
+        <T w="b" size={10} c={D.sub} ls={1.5} style={s.section}>{tr('ASK THE DESK TO RING HIM')}</T>
         {([
-          ['owner_unreachable', 'He isn’t here and isn’t answering'],
-          ['app_no_code', 'His app isn’t showing a code'],
-          ['code_rejected_3x', 'The code keeps being rejected'],
+          ['owner_unreachable', tr('He isn’t here and isn’t answering')],
+          ['app_no_code', tr('His app isn’t showing a code')],
+          ['code_rejected_3x', tr('The code keeps being rejected')],
         ] as const).map(([k, label]) => (
           <Pressable key={k} disabled={busy} onPress={() => call(k)} style={s.mmOpt}>
             <T w="sb" size={12.5} style={s.grow}>{label}</T>
@@ -890,28 +873,23 @@ function LadderScreen({ v, holding, onBack, onDone }: {
           <View style={s.noExit}>
             <Ico name="lock" size={15} color={D.amber} />
             <T size={11.5} c={D.textDim} style={s.grow}>
-              You have counted his money, so you cannot leave this open. The desk
-              is the only way out of a visit where cash has already moved.
+              {tr('You have counted his money, so you cannot leave this open. The desk is the only way out of a visit where cash has already moved.')}
             </T>
           </View>
         ) : !leaving ? (
           <T w="sb" size={12} c={D.sub} style={s.leaveLink} onPress={() => setLeaving(true)}>
-            Leave without closing
+            {tr('Leave without closing')}
           </T>
         ) : (
           <View style={s.leaveBox}>
-            <T w="b" size={12.5}>Leaving is recorded, not blank</T>
+            <T w="b" size={12.5}>{tr('Leaving is recorded, not blank')}</T>
             <T size={11.5} c={D.sub} style={s.leaveWhy}>
-              Your name, the time and where you are. {v.owner} sees a line saying
-              you came and could not close. The money does not go away — day{' '}
-              {v.age_days ?? '—'} of {v.limit_days} keeps counting and this shop
-              comes back tomorrow, at the top of your round.
-              {rates ? ` You have left ${rates.abandons} in 30 days; the team averages ${rates.team_abandons}.` : ''}
+              {tr('Your name, the time and where you are. {owner} sees a line saying you came and could not close. The money does not go away — day {age_days} of {limit_days} keeps counting and this shop comes back tomorrow, at the top of your round.{x}', { owner: v.owner, age_days: v.age_days ?? '—', limit_days: v.limit_days, x: rates ? tr(' You have left {abandons} in 30 days; the team averages {team_abandons}.', { abandons: rates.abandons, team_abandons: rates.team_abandons }) : '' })}
             </T>
             {([
-              ['shop_closed', 'The shop is closed'],
-              ['owner_absent', 'He isn’t here at all'],
-              ['other', 'Something else'],
+              ['shop_closed', tr('The shop is closed')],
+              ['owner_absent', tr('He isn’t here at all')],
+              ['other', tr('Something else')],
             ] as const).map(([k, label]) => (
               <Pressable key={k} disabled={busy} onPress={() => leave(k)} style={s.leaveOpt}>
                 <T size={12.5} style={s.grow}>{label}</T>
@@ -966,7 +944,7 @@ function HandOverScreen({ v, bag, onBack, onDone }: {
       p_visit: v.id, p_signature: JSON.stringify(paths),
     });
     setBusy(false);
-    if (error) return Alert.alert('Not recorded', error.message);
+    if (error) return Alert.alert(tr('Not recorded'), error.message);
     onDone({ ...(data as Done), direction: 'pay_out', visit: v });
   };
 
@@ -977,25 +955,24 @@ function HandOverScreen({ v, bag, onBack, onDone }: {
         <View style={s.row}>
           <T size={12} c={D.sub} style={s.grow}>{v.owner}</T>
           <View style={[s.chip, { backgroundColor: 'rgba(74,222,128,0.16)' }]}>
-            <T w="eb" size={9.5} c={D.green} ls={1.2}>HAND OVER</T>
+            <T w="eb" size={9.5} c={D.green} ls={1.2}>{tr('HAND OVER')}</T>
           </View>
         </View>
 
         <View style={s.give}>
-          <T w="b" size={10} c={D.green} ls={1.4}>COUNT OUT OF YOUR BAG AND GIVE HIM</T>
-          <T style={s.owesBig}>{dh(v.amount_cents)} DH</T>
+          <T w="b" size={10} c={D.green} ls={1.4}>{tr('COUNT OUT OF YOUR BAG AND GIVE HIM')}</T>
+          <T style={s.owesBig}>{tr('{amount_cents} DH', { amount_cents: dh(v.amount_cents) })}</T>
           <T size={11.5} c={D.sub} style={s.giveBody}>
-            All of it, or nothing. A hand-over is not partial — if you are short,
-            close the visit and ops puts it on another round.
+            {tr('All of it, or nothing. A hand-over is not partial — if you are short, close the visit and ops puts it on another round.')}
           </T>
           <View style={s.tiles}>
             <View style={s.tile}>
-              <T size={10} c={D.faint} ls={1.2}>IN YOUR BAG</T>
-              <T w="b" size={14} style={s.num}>{dh(bag.in_bag_cents)} DH</T>
+              <T size={10} c={D.faint} ls={1.2}>{tr('IN YOUR BAG')}</T>
+              <T w="b" size={14} style={s.num}>{tr('{in_bag_cents} DH', { in_bag_cents: dh(bag.in_bag_cents) })}</T>
             </View>
             <View style={s.tile}>
-              <T size={10} c={D.faint} ls={1.2}>AFTER THIS</T>
-              <T w="b" size={14} style={s.num}>{dh(bag.in_bag_cents - v.amount_cents)} DH</T>
+              <T size={10} c={D.faint} ls={1.2}>{tr('AFTER THIS')}</T>
+              <T w="b" size={14} style={s.num}>{tr('{dh} DH', { dh: dh(bag.in_bag_cents - v.amount_cents) })}</T>
             </View>
           </View>
         </View>
@@ -1005,7 +982,7 @@ function HandOverScreen({ v, bag, onBack, onDone }: {
             {counted && <Ico name="check" size={11} color="#0D0D0F" />}
           </View>
           <T size={12.5} c={counted ? D.green : D.textDim} style={s.grow}>
-            {counted ? `He counted it himself · ${hhmm()}` : 'He counted it himself'}
+            {counted ? tr('He counted it himself · {hhmm}', { hhmm: hhmm() }) : tr('He counted it himself')}
           </T>
         </Pressable>
 
@@ -1014,10 +991,10 @@ function HandOverScreen({ v, bag, onBack, onDone }: {
             {signed && <Ico name="check" size={11} color="#0D0D0F" />}
           </View>
           <T size={12.5} c={counted ? D.textDim : D.faint} style={s.grow}>
-            Hand him the phone to sign
+            {tr('Hand him the phone to sign')}
           </T>
           {signed && (
-            <T size={11} c={D.sub} onPress={() => setPaths([])}>Clear</T>
+            <T size={11} c={D.sub} onPress={() => setPaths([])}>{tr('Clear')}</T>
           )}
         </View>
 
@@ -1031,27 +1008,24 @@ function HandOverScreen({ v, bag, onBack, onDone }: {
           <View style={s.baseline} />
           {!counted && (
             <View style={s.padLock}>
-              <T size={11.5} c={D.faint}>Let him count it first</T>
+              <T size={11.5} c={D.faint}>{tr('Let him count it first')}</T>
             </View>
           )}
         </View>
         <T size={11} c={D.faint} style={s.signWhy}>
-          {v.owner} · on this phone · {hhmm()}. The signature is saved with the
-          time and this device. No code is asked for here — a code proves he was
-          present, and that was never the question.
+          {tr('{owner} · on this phone · {hhmm}. The signature is saved with the time and this device. No code is asked for here — a code proves he was present, and that was never the question.', { owner: v.owner, hhmm: hhmm() })}
         </T>
 
         <View style={s.noUndo}>
           <Ico name="lock" size={15} color={D.green} />
           <T size={11.5} c={D.textDim} style={s.grow}>
-            Tapping says the cash left your hand. His app shows it as received
-            within a minute. If it does not, do not tap again — call ops.
+            {tr('Tapping says the cash left your hand. His app shows it as received within a minute. If it does not, do not tap again — call ops.')}
           </T>
         </View>
       </ScrollView>
 
       <View style={s.foot}>
-        <Btn title={busy ? 'RECORDING…' : `RECORD ${dh(v.amount_cents)} DH HANDED OVER`}
+        <Btn title={busy ? tr('RECORDING…') : tr('RECORD {amount_cents} DH HANDED OVER', { amount_cents: dh(v.amount_cents) })}
           bg={signed && !busy ? D.green : D.card2}
           fg={signed && !busy ? '#0D0D0F' : D.faint}
           height={54} ls={0.7}

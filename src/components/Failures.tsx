@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Display } from './ui';
 import { colors, font, radius, shadow } from '../theme';
+import { tr, trn } from '../lib/i18n';
 
 // Turn 38 of "Customer App 3.dc.html" — the rest of the failures.
 //
@@ -27,15 +28,15 @@ export function NoLocationBar({ onAsk, onPickDistrict }: {
         <Ionicons name="location-outline" size={16} color={colors.accent} />
       </View>
       <View style={s.grow}>
-        <Text style={s.barTitle}>Can't see where you are</Text>
-        <Text style={s.barSub}>Location is off, so we can't sort by distance</Text>
+        <Text style={s.barTitle}>{tr('Can\'t see where you are')}</Text>
+        <Text style={s.barSub}>{tr('Location is off, so we can\'t sort by distance')}</Text>
         <View style={s.barBtns}>
           <Pressable onPress={onAsk} style={s.barPrimary}>
-            <Text style={s.barPrimaryText}>TURN IT ON</Text>
+            <Text style={s.barPrimaryText}>{tr('TURN IT ON')}</Text>
           </Pressable>
           {!!onPickDistrict && (
             <Pressable onPress={onPickDistrict} style={s.barGhost}>
-              <Text style={s.barGhostText}>PICK A DISTRICT</Text>
+              <Text style={s.barGhostText}>{tr('PICK A DISTRICT')}</Text>
             </Pressable>
           )}
         </View>
@@ -56,11 +57,11 @@ export function CameraBlockedNote({ onSettings }: { onSettings?: () => void }) {
         <Ionicons name="camera-outline" size={16} color={colors.accent} />
       </View>
       <View style={s.grow}>
-        <Text style={s.barTitle}>Camera is blocked</Text>
-        <Text style={s.barSub}>You can still join — type the code under the QR</Text>
+        <Text style={s.barTitle}>{tr('Camera is blocked')}</Text>
+        <Text style={s.barSub}>{tr('You can still join — type the code under the QR')}</Text>
         {!!onSettings && (
           <Pressable onPress={onSettings} hitSlop={6} style={s.barLinkRow}>
-            <Text style={s.barLink}>Let the camera work instead</Text>
+            <Text style={s.barLink}>{tr('Let the camera work instead')}</Text>
           </Pressable>
         )}
       </View>
@@ -86,27 +87,27 @@ export function LowWalletBlock({ balanceCents, floorCents, onRequest, onTopUp }:
             <Ionicons name="wallet-outline" size={16} color={colors.accent} />
           </View>
           <View style={s.grow}>
-            <Text style={s.lowTitle}>Not enough in your wallet</Text>
+            <Text style={s.lowTitle}>{tr('Not enough in your wallet')}</Text>
             <Text style={s.lowSub}>
-              You have {dh(balanceCents)} DH · the smallest deposit is {dh(floorCents)}
+              {tr('You have {balanceCents} DH · the smallest deposit is {floorCents}', { balanceCents: dh(balanceCents), floorCents: dh(floorCents) })}
             </Text>
           </View>
         </View>
         <View style={s.lowBarRow}>
-          <Text style={s.lowMeta}>MIN · {dh(floorCents)} DH</Text>
+          <Text style={s.lowMeta}>{tr('MIN · {floorCents} DH', { floorCents: dh(floorCents) })}</Text>
           <View style={s.grow} />
-          <Text style={s.lowShort}>{dh(short)} DH short</Text>
+          <Text style={s.lowShort}>{tr('{short} DH short', { short: dh(short) })}</Text>
         </View>
       </View>
 
-      <Text style={s.waysLabel}>TWO WAYS ROUND IT</Text>
+      <Text style={s.waysLabel}>{tr('TWO WAYS ROUND IT')}</Text>
       <Pressable onPress={onRequest} style={s.wayCard}>
         <View style={s.wayIcon}>
           <Ionicons name="chatbubble-ellipses-outline" size={16} color={colors.accent} />
         </View>
         <View style={s.grow}>
-          <Text style={s.wayTitle}>Book it without a deposit</Text>
-          <Text style={s.waySub}>Your barber confirms it himself · pay at the shop</Text>
+          <Text style={s.wayTitle}>{tr('Book it without a deposit')}</Text>
+          <Text style={s.waySub}>{tr('Your barber confirms it himself · pay at the shop')}</Text>
         </View>
         <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />
       </Pressable>
@@ -121,8 +122,8 @@ export function LowWalletBlock({ balanceCents, floorCents, onRequest, onTopUp }:
           <Ionicons name="cash-outline" size={16} color={colors.textSecondary} />
         </View>
         <View style={s.grow}>
-          <Text style={s.wayTitle}>Top up with cash first</Text>
-          <Text style={s.waySub}>Any Sterncut shop can take it</Text>
+          <Text style={s.wayTitle}>{tr('Top up with cash first')}</Text>
+          <Text style={s.waySub}>{tr('Any Sterncut shop can take it')}</Text>
         </View>
         {!!onTopUp && <Ionicons name="chevron-forward" size={16} color={colors.textTertiary} />}
       </Pressable>
@@ -142,28 +143,27 @@ export function UnderReviewStrip({ barberName, onCancel, onMessage }: {
   return (
     <View style={s.reviewCard}>
       <View style={s.reviewChip}>
-        <Text style={s.reviewChipText}>SHOP UNDER REVIEW</Text>
+        <Text style={s.reviewChipText}>{tr('SHOP UNDER REVIEW')}</Text>
       </View>
-      <Text style={s.reviewTitle}>This shop is hidden while we check its papers</Text>
+      <Text style={s.reviewTitle}>{tr('This shop is hidden while we check its papers')}</Text>
       <Text style={s.reviewBody}>
-        Your booking still stands and {first} is expecting you. You just won't find
-        them in search for now.
+        {tr('Your booking still stands and {first} is expecting you. You just won\'t find them in search for now.', { first })}
       </Text>
       <View style={s.reviewRefund}>
         <Ionicons name="shield-checkmark-outline" size={14} color={colors.success} />
         <Text style={s.reviewRefundText}>
-          If they can't open, you get a full refund.
+          {tr('If they can\'t open, you get a full refund.')}
         </Text>
       </View>
       <View style={s.reviewBtns}>
         {!!onCancel && (
           <Pressable onPress={onCancel} style={s.reviewGhost}>
-            <Text style={s.reviewGhostText}>CANCEL FREE</Text>
+            <Text style={s.reviewGhostText}>{tr('CANCEL FREE')}</Text>
           </Pressable>
         )}
         {!!onMessage && (
           <Pressable onPress={onMessage} style={s.reviewSolid}>
-            <Text style={s.reviewSolidText}>MESSAGE {first.toUpperCase()}</Text>
+            <Text style={s.reviewSolidText}>{tr('MESSAGE {first}', { first: first.toUpperCase() })}</Text>
           </Pressable>
         )}
       </View>
@@ -196,7 +196,7 @@ export function FullStop({ icon, tint, title, body, works, primary, onPrimary, f
       {works.length > 0 && (
         <View style={s.worksCard}>
           <Text style={s.worksLabel}>
-            {works.every((w) => w.ok) ? 'NOTHING IS LOST' : 'WHAT STILL WORKS'}
+            {works.every((w) => w.ok) ? tr('NOTHING IS LOST') : tr('WHAT STILL WORKS')}
           </Text>
           {works.map((w) => (
             <View key={w.text} style={s.worksRow}>
@@ -227,17 +227,17 @@ export function FullStop({ icon, tint, title, body, works, primary, onPrimary, f
 export function ServerDown({ since, onRetry }: { since?: string; onRetry: () => void }) {
   return (
     <FullStop icon="cloud-offline-outline" tint={colors.accent}
-      title={'Our end,\nnot yours'}
-      body="Something's wrong on Sterncut. We already know and we're on it."
+      title={tr('Our end,\nnot yours')}
+      body={tr('Something\'s wrong on Sterncut. We already know and we\'re on it.')}
       works={[
-        { ok: true, text: 'Your bookings are safe — nothing was lost' },
-        { ok: true, text: 'Your wallet balance is untouched' },
-        { ok: false, text: 'New bookings are paused for now' },
+        { ok: true, text: tr('Your bookings are safe — nothing was lost') },
+        { ok: true, text: tr('Your wallet balance is untouched') },
+        { ok: false, text: tr('New bookings are paused for now') },
       ]}
-      primary="TRY AGAIN" onPrimary={onRetry}
+      primary={tr('TRY AGAIN')} onPrimary={onRetry}
       foot={since
-        ? `Started ${since} · booked today? Just turn up — your barber has it on his phone.`
-        : 'Booked today? Just turn up — your barber has it on his phone.'} />
+        ? tr('Started {since} · booked today? Just turn up — your barber has it on his phone.', { since })
+        : tr('Booked today? Just turn up — your barber has it on his phone.')} />
   );
 }
 
@@ -248,16 +248,16 @@ export function TooOld({ version, minimum, bookings, walletCents, onUpdate }: {
 }) {
   return (
     <FullStop icon="cloud-download-outline" tint={colors.accent}
-      title={'Time for\na new version'}
-      body="This one can't talk to Sterncut any more."
+      title={tr('Time for\na new version')}
+      body={tr('This one can\'t talk to Sterncut any more.')}
       works={[
-        { ok: true, text: `Your ${bookings} booking${bookings === 1 ? '' : 's'} ${bookings === 1 ? 'is' : 'are'} still there` },
-        { ok: true, text: `Your ${dh(walletCents)} DH wallet is untouched` },
-        { ok: true, text: 'You stay signed in' },
+        { ok: true, text: trn(bookings, 'Your {n} booking is still there', 'Your {n} bookings are still there') },
+        { ok: true, text: tr('Your {walletCents} DH wallet is untouched', { walletCents: dh(walletCents) }) },
+        { ok: true, text: tr('You stay signed in') },
       ]}
-      primary="UPDATE FROM THE APP STORE"
+      primary={tr('UPDATE FROM THE APP STORE')}
       onPrimary={onUpdate ?? (() => Linking.openURL('https://apps.apple.com/'))}
-      foot={`Version ${version} · needs ${minimum} or newer`} />
+      foot={tr('Version {version} · needs {minimum} or newer', { version, minimum })} />
   );
 }
 
@@ -267,15 +267,15 @@ export function Suspended({ reason, onAppeal, onSupport }: {
 }) {
   return (
     <FullStop icon="pause-circle-outline" tint={colors.accent}
-      title={'Booking is\npaused for you'}
+      title={tr('Booking is\npaused for you')}
       body={reason}
       works={[
-        { ok: true, text: 'Bookings you already have still stand' },
-        { ok: true, text: 'Your wallet balance is yours' },
-        { ok: false, text: 'You can\'t make new bookings' },
+        { ok: true, text: tr('Bookings you already have still stand') },
+        { ok: true, text: tr('Your wallet balance is yours') },
+        { ok: false, text: tr('You can\'t make new bookings') },
       ]}
-      primary="ASK US TO LOOK AGAIN" onPrimary={onAppeal}
-      secondary={onSupport ? 'Message support' : undefined} onSecondary={onSupport} />
+      primary={tr('ASK US TO LOOK AGAIN')} onPrimary={onAppeal}
+      secondary={onSupport ? tr('Message support') : undefined} onSecondary={onSupport} />
   );
 }
 

@@ -8,6 +8,7 @@ import {
 } from '../components/dark';
 import { supabase } from '../lib/supabase';
 import { dark as d, inter, radius, serif, TOP_INSET } from '../theme';
+import { loc, tr, trRich } from '../lib/i18n';
 
 // Barber turns 5 (support console) and 6 (losing the dispute) of "Barber App.dc.html".
 //
@@ -30,36 +31,36 @@ type Msg = {
 };
 
 const REASON: Record<string, { label: string; icon: IconName }> = {
-  review: { label: 'A client disputed your rating', icon: 'star' },
-  money: { label: 'Money or float', icon: 'credit-card' },
-  booking: { label: 'A booking', icon: 'calendar' },
-  client: { label: "A client's behaviour", icon: 'user' },
-  app: { label: 'The app is broken', icon: 'alert-triangle' },
-  no_show: { label: 'A no-show', icon: 'user-x' },
-  wrong_amount: { label: 'Wrong amount', icon: 'credit-card' },
-  wrong_service: { label: 'Wrong service', icon: 'scissors' },
-  hygiene: { label: 'Hygiene or safety', icon: 'alert-triangle' },
-  other: { label: 'Something else', icon: 'help-circle' },
+  review: { label: tr('A client disputed your rating'), icon: 'star' },
+  money: { label: tr('Money or float'), icon: 'credit-card' },
+  booking: { label: tr('A booking'), icon: 'calendar' },
+  client: { label: tr('A client\'s behaviour'), icon: 'user' },
+  app: { label: tr('The app is broken'), icon: 'alert-triangle' },
+  no_show: { label: tr('A no-show'), icon: 'user-x' },
+  wrong_amount: { label: tr('Wrong amount'), icon: 'credit-card' },
+  wrong_service: { label: tr('Wrong service'), icon: 'scissors' },
+  hygiene: { label: tr('Hygiene or safety'), icon: 'alert-triangle' },
+  other: { label: tr('Something else'), icon: 'help-circle' },
 };
 
 const FAQ = [
-  'When do I get the deposit money?',
-  'Settling the cash float',
-  'Marking a client as a no-show',
-  'Asking a client to pay up front',
-  'Adding a barber to my shop',
+  tr('When do I get the deposit money?'),
+  tr('Settling the cash float'),
+  tr('Marking a client as a no-show'),
+  tr('Asking a client to pay up front'),
+  tr('Adding a barber to my shop'),
 ];
 
 const ago = (iso: string) => {
   const m = (Date.now() - new Date(iso).getTime()) / 60000;
-  if (m < 60) return `${Math.max(1, Math.round(m))}m ago`;
-  if (m < 1440) return `${Math.round(m / 60)}h ago`;
-  return `${Math.round(m / 1440)}d ago`;
+  if (m < 60) return tr('{m}m ago', { m: Math.max(1, Math.round(m)) });
+  if (m < 1440) return tr('{h}h ago', { h: Math.round(m / 60) });
+  return tr('{d}d ago', { d: Math.round(m / 1440) });
 };
 const at = (iso: string) => {
   const t = new Date(iso);
-  return `${t.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, `
-    + t.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  return `${t.toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' })}, `
+    + t.toLocaleTimeString(loc('en-US'), { hour: '2-digit', minute: '2-digit', hour12: false });
 };
 
 // ---- 5a ------------------------------------------------------------------
@@ -113,20 +114,20 @@ export default function BarberSupportScreen({ onBack, onOpenCase }: {
   return (
     <>
       <Screen gap={13}>
-        <TopBar title="Support" onBack={onBack} />
+        <TopBar title={tr('Support')} onBack={onBack} />
 
         <View style={s.search}>
           <Ico name="search" size={16} color={d.sub} />
-          <TextInput value={q} onChangeText={setQ} placeholder="Search help"
+          <TextInput value={q} onChangeText={setQ} placeholder={tr('Search help')}
             placeholderTextColor={d.sub} style={s.searchInput} />
         </View>
 
         <Card style={s.rowCard}>
           <View style={s.onlineDot}><View style={s.onlineDotInner} /></View>
           <View style={s.grow}>
-            <T w="b" size={13}>Ops is online</T>
+            <T w="b" size={13}>{tr('Ops is online')}</T>
             <T size={11} c={d.sub} style={{ marginTop: 2 }}>
-              Replies in about 40 min · Arabic, Français, English
+              {tr('Replies in about 40 min · Arabic, Français, English')}
             </T>
           </View>
         </Card>
@@ -137,9 +138,9 @@ export default function BarberSupportScreen({ onBack, onOpenCase }: {
               <Ico name="star" size={17} color={d.amber} />
             </View>
             <View style={s.grow}>
-              <T w="b" size={13}>A review is back on your profile</T>
+              <T w="b" size={13}>{tr('A review is back on your profile')}</T>
               <T size={11} c={d.sub} style={{ marginTop: 2 }}>
-                {r.ref} · {r.customer} · reviewed twice
+                {tr('{ref} · {customer} · reviewed twice', { ref: r.ref, customer: r.customer })}
               </T>
             </View>
             <Ico name="chevron-right" size={15} color={d.muted} />
@@ -147,13 +148,13 @@ export default function BarberSupportScreen({ onBack, onOpenCase }: {
         ))}
 
         <View style={s.sectionHead}>
-          <Eyebrow ls={1.65}>YOUR CASES</Eyebrow>
-          {closed > 0 && <T w="sb" size={12} c={d.accent}>Closed ({closed})</T>}
+          <Eyebrow ls={1.65}>{tr('YOUR CASES')}</Eyebrow>
+          {closed > 0 && <T w="sb" size={12} c={d.accent}>{tr('Closed ({closed})', { closed })}</T>}
         </View>
 
         <View style={{ gap: 9 }}>
           {shown.length === 0 && (
-            <Card><T size={12} c={d.sub}>No open cases. Ops answers within the hour.</T></Card>
+            <Card><T size={12} c={d.sub}>{tr('No open cases. Ops answers within the hour.')}</T></Card>
           )}
           {shown.map((c) => {
             const meta = REASON[c.reason] ?? REASON.other;
@@ -168,7 +169,7 @@ export default function BarberSupportScreen({ onBack, onOpenCase }: {
                   <T w={hot ? 'b' : 'sb'} size={13}>{meta.label}</T>
                   <T size={11} c={d.sub} style={{ marginTop: 2 }}>
                     {c.case_no}{c.other ? ` · ${c.other}` : ''}
-                    {hot ? ' · needs your reply' : ` · opened ${ago(c.created_at)}`}
+                    {hot ? tr(' · needs your reply') : tr(' · opened {created_at}', { created_at: ago(c.created_at) })}
                   </T>
                 </View>
                 {hot ? (
@@ -176,7 +177,7 @@ export default function BarberSupportScreen({ onBack, onOpenCase }: {
                 ) : (
                   <View style={[s.chip, c.status === 'open' && s.chipWait]}>
                     <T w="b" size={10} ls={0.8} c={c.status === 'open' ? d.amber : d.sub}>
-                      {c.status === 'open' ? 'WAITING' : 'CLOSED'}
+                      {c.status === 'open' ? tr('WAITING') : tr('CLOSED')}
                     </T>
                   </View>
                 )}
@@ -185,10 +186,10 @@ export default function BarberSupportScreen({ onBack, onOpenCase }: {
           })}
         </View>
 
-        <Eyebrow ls={1.65} style={{ marginTop: 2 }}>COMMON FOR BARBERS</Eyebrow>
+        <Eyebrow ls={1.65} style={{ marginTop: 2 }}>{tr('COMMON FOR BARBERS')}</Eyebrow>
         <View style={s.faq}>
           {FAQ.map((f, i) => (
-            <Pressable key={f} onPress={() => Alert.alert(f, 'Help article coming soon.')}
+            <Pressable key={f} onPress={() => Alert.alert(f, tr('Help article coming soon.'))}
               style={[s.faqRow, i < FAQ.length - 1 && s.faqLine]}>
               <T w="sb" size={13} style={s.grow}>{f}</T>
               <Ico name="chevron-right" size={14} color={d.muted} />
@@ -197,9 +198,9 @@ export default function BarberSupportScreen({ onBack, onOpenCase }: {
         </View>
 
         <View style={s.actions}>
-          <GhostBtn title="CALL OPS" onPress={() => Linking.openURL(`tel:${OPS_PHONE}`)}
+          <GhostBtn title={tr('CALL OPS')} onPress={() => Linking.openURL(`tel:${OPS_PHONE}`)}
             color={d.text} border={d.card2} style={{ flex: 1, backgroundColor: d.card2 }} />
-          <Btn title="NEW CASE" icon="plus" onPress={() => setReporting(true)}
+          <Btn title={tr('NEW CASE')} icon="plus" onPress={() => setReporting(true)}
             height={50} style={{ flex: 1.3 }} />
         </View>
       </Screen>
@@ -212,10 +213,10 @@ export default function BarberSupportScreen({ onBack, onOpenCase }: {
 
 // ---- 5c ------------------------------------------------------------------
 const ABOUT: { key: string; label: string; icon: IconName }[] = [
-  { key: 'booking', label: 'A booking', icon: 'calendar' },
-  { key: 'money', label: 'Money or float', icon: 'credit-card' },
-  { key: 'client', label: "A client's behaviour", icon: 'user' },
-  { key: 'app', label: 'The app is broken', icon: 'alert-triangle' },
+  { key: 'booking', label: tr('A booking'), icon: 'calendar' },
+  { key: 'money', label: tr('Money or float'), icon: 'credit-card' },
+  { key: 'client', label: tr('A client\'s behaviour'), icon: 'user' },
+  { key: 'app', label: tr('The app is broken'), icon: 'alert-triangle' },
 ];
 
 type Bk = {
@@ -246,10 +247,10 @@ export function BarberReportSheet({ visible, onClose, onFiled }: {
   }, [visible]);
 
   const bk = bookings.find((b) => b.id === bookingId) ?? null;
-  const who = (b: Bk) => b.walk_in_name || b.profiles?.full_name || 'Client';
+  const who = (b: Bk) => b.walk_in_name || b.profiles?.full_name || tr('Client');
 
   async function send() {
-    if (!detail.trim()) return Alert.alert('Tell ops what happened', 'A line or two is enough.');
+    if (!detail.trim()) return Alert.alert(tr('Tell ops what happened'), tr('A line or two is enough.'));
     setBusy(true);
     const { data, error } = await supabase.rpc('file_support_case', {
       p_booking: about === 'booking' || about === 'client' ? bookingId : null,
@@ -257,7 +258,7 @@ export function BarberReportSheet({ visible, onClose, onFiled }: {
       p_detail: detail.trim(),
     });
     setBusy(false);
-    if (error) return Alert.alert('Could not send', error.message);
+    if (error) return Alert.alert(tr('Could not send'), error.message);
     setDetail('');
     onFiled((data as CaseRow[])[0]);
   }
@@ -266,9 +267,9 @@ export function BarberReportSheet({ visible, onClose, onFiled }: {
 
   return (
     <Sheet visible={visible} onClose={onClose} gap={13} deep>
-      <SheetHead title="Report a problem" onClose={onClose} left />
+      <SheetHead title={tr('Report a problem')} onClose={onClose} left />
 
-      <Eyebrow ls={1.4}>WHAT&apos;S IT ABOUT?</Eyebrow>
+      <Eyebrow ls={1.4}>{tr('WHAT\'S IT ABOUT?')}</Eyebrow>
       <View style={{ gap: 8 }}>
         {ABOUT.map((a) => {
           const on = a.key === about;
@@ -288,7 +289,7 @@ export function BarberReportSheet({ visible, onClose, onFiled }: {
 
       {needsBooking && !!bk && (
         <>
-          <Eyebrow ls={1.4}>WHICH BOOKING?</Eyebrow>
+          <Eyebrow ls={1.4}>{tr('WHICH BOOKING?')}</Eyebrow>
           <Pressable onPress={() => setPicking((v) => !v)} style={s.bkRow}>
             <Avatar initials={who(bk).slice(0, 2).toUpperCase()} size={38} />
             <View style={s.grow}>
@@ -296,40 +297,40 @@ export function BarberReportSheet({ visible, onClose, onFiled }: {
                 {who(bk)} · {new Date(bk.starts_at).toTimeString().slice(0, 5)}
               </T>
               <T size={11} c={d.sub} style={{ marginTop: 2 }}>
-                {bk.services?.name ?? 'Service'} · {Math.round(bk.price_cents / 100)} DH
+                {tr('{name} · {round} DH', { name: bk.services?.name ?? tr('Service'), round: Math.round(bk.price_cents / 100) })}
               </T>
             </View>
-            <T w="sb" size={12} c={d.accent}>Change</T>
+            <T w="sb" size={12} c={d.accent}>{tr('Change')}</T>
           </Pressable>
           {picking && bookings.map((b) => (
             <Pressable key={b.id} onPress={() => { setBookingId(b.id); setPicking(false); }}
               style={[s.bkPick, b.id === bookingId && { borderColor: d.accent }]}>
               <T size={12} c={d.textDim}>
-                {who(b)} · {new Date(b.starts_at).toLocaleDateString('en-US',
-                  { month: 'short', day: 'numeric' })} · {b.services?.name ?? 'Service'}
+                {who(b)} · {new Date(b.starts_at).toLocaleDateString(loc('en-US'),
+                  { month: 'short', day: 'numeric' })} · {b.services?.name ?? tr('Service')}
               </T>
             </Pressable>
           ))}
         </>
       )}
 
-      <Eyebrow ls={1.4}>TELL US WHAT HAPPENED</Eyebrow>
+      <Eyebrow ls={1.4}>{tr('TELL US WHAT HAPPENED')}</Eyebrow>
       <TextInput value={detail} onChangeText={setDetail} multiline
-        placeholder="What went wrong?" placeholderTextColor={d.sub} style={s.textArea} />
+        placeholder={tr('What went wrong?')} placeholderTextColor={d.sub} style={s.textArea} />
 
       <View style={s.hintRow}>
         <View style={s.hintThumb}><Ico name="camera" size={16} color={d.sub} /></View>
         <T size={12} c={d.sub} style={[s.grow, { lineHeight: 17 }]}>
           {needsBooking
-            ? 'The check-in log is attached automatically.'
-            : 'Ops sees your shop and float from your account.'}
+            ? tr('The check-in log is attached automatically.')
+            : tr('Ops sees your shop and float from your account.')}
         </T>
       </View>
 
-      <Btn title="SEND TO OPS" onPress={send} height={54} ls={0.9}
+      <Btn title={tr('SEND TO OPS')} onPress={send} height={54} ls={0.9}
         bg={busy ? d.muted : d.accent} />
       <T size={11} c={d.sub} style={s.center}>
-        Usually answered within an hour during shop hours
+        {tr('Usually answered within an hour during shop hours')}
       </T>
     </Sheet>
   );
@@ -360,7 +361,7 @@ export function BarberCaseScreen({ caseRow, myId, onBack, onReplyPublicly }: {
     setText('');
     const { error } = await supabase.from('support_messages')
       .insert({ case_id: caseRow.id, sender_id: myId, body });
-    if (error) return Alert.alert('Could not send', error.message);
+    if (error) return Alert.alert(tr('Could not send'), error.message);
     load();
   }
 
@@ -368,19 +369,19 @@ export function BarberCaseScreen({ caseRow, myId, onBack, onReplyPublicly }: {
     <KeyboardAvoidingView style={s.caseScreen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={s.caseHead}>
-        <Pressable onPress={onBack} hitSlop={8} style={s.caseBack} accessibilityLabel="Go back">
+        <Pressable onPress={onBack} hitSlop={8} style={s.caseBack} accessibilityLabel={tr('Go back')}>
           <Ico name="arrow-left" size={17} />
         </Pressable>
         <View style={s.opsMark}><Ico name="scissors" size={19} color="#fff" /></View>
         <View style={s.grow}>
-          <T w="b" size={14}>Sterncut Ops</T>
+          <T w="b" size={14}>{tr('Sterncut Ops')}</T>
           <T size={11} c={d.sub}>
             {caseRow.case_no} · {(REASON[caseRow.reason]?.label ?? caseRow.reason).toLowerCase()}
           </T>
         </View>
         <View style={s.chip}>
           <T w="b" size={10} ls={0.8} c={closed ? d.sub : d.green}>
-            {closed ? 'CLOSED' : 'OPEN'}
+            {closed ? tr('CLOSED') : tr('OPEN')}
           </T>
         </View>
       </View>
@@ -399,31 +400,31 @@ export function BarberCaseScreen({ caseRow, myId, onBack, onReplyPublicly }: {
                 <T size={14} c={mine ? '#fff' : d.textDim} style={{ lineHeight: 20 }}>{item.body}</T>
               </View>
               <T size={10} c={d.sub} style={[s.stamp, mine && { textAlign: 'right' }]}>
-                {mine ? 'You' : item.author_name ?? 'Ops'} · {at(item.created_at)}
+                {mine ? tr('You') : item.author_name ?? tr('Ops')} · {at(item.created_at)}
               </T>
             </View>
           );
         }}
         ListFooterComponent={closed ? (
           <T size={11} c={d.sub} style={[s.center, { paddingVertical: 10 }]}>
-            This case is closed. Reply to reopen it.
+            {tr('This case is closed. Reply to reopen it.')}
           </T>
         ) : null}
       />
 
       <View style={s.composerWrap}>
         <View style={s.composer}>
-          <TextInput value={text} onChangeText={setText} placeholder="Reply to ops…"
+          <TextInput value={text} onChangeText={setText} placeholder={tr('Reply to ops…')}
             placeholderTextColor={d.sub} style={s.composerInput} />
           <Pressable onPress={send} disabled={!text.trim()}
-            style={[s.sendBtn, !text.trim() && { opacity: 0.5 }]} accessibilityLabel="Send">
+            style={[s.sendBtn, !text.trim() && { opacity: 0.5 }]} accessibilityLabel={tr('Send')}>
             <Ico name="arrow-up" size={17} color={text.trim() ? '#fff' : d.sub} />
           </Pressable>
         </View>
         {!!onReplyPublicly && caseRow.reason === 'review' && (
           <Pressable onPress={onReplyPublicly} style={s.publicBtn}>
             <Ico name="message-circle" size={14} />
-            <T w="b" size={12} ls={0.6}>REPLY TO THE REVIEW IN PUBLIC</T>
+            <T w="b" size={12} ls={0.6}>{tr('REPLY TO THE REVIEW IN PUBLIC')}</T>
           </Pressable>
         )}
       </View>
@@ -450,7 +451,7 @@ export function ReviewRestoredScreen({ item, onDone, onReply, onActionDone }: {
   // and the desk stops chasing.
   async function markDone() {
     const { error } = await supabase.rpc('complete_review_action', { p_appeal: item.appeal_id });
-    if (error) return Alert.alert('Could not save', error.message);
+    if (error) return Alert.alert(tr('Could not save'), error.message);
     setDoneAt(new Date().toISOString());
     onActionDone?.();
   }
@@ -459,14 +460,14 @@ export function ReviewRestoredScreen({ item, onDone, onReply, onActionDone }: {
     <Screen gap={14} bottom={40}>
       <View style={s.topRow}>
         <Pressable onPress={onDone} hitSlop={8} style={s.puck38}><Ico name="arrow-left" /></Pressable>
-        <T w="b" size={11} ls={2} c={d.sub} style={s.topRowTitle}>{item.ref} · RESTORED</T>
+        <T w="b" size={11} ls={2} c={d.sub} style={s.topRowTitle}>{tr('{ref} · RESTORED', { ref: item.ref })}</T>
         <View style={{ width: 38 }} />
       </View>
 
       <View>
-        <T style={s.serifTitle}>The review{'\n'}is back up</T>
+        <T style={s.serifTitle}>{tr('The review\nis back up')}</T>
         <T size={13} c={d.sub} style={{ marginTop: 9, lineHeight: 20 }}>
-          We reviewed it twice. This time it stands.
+          {tr('We reviewed it twice. This time it stands.')}
         </T>
       </View>
 
@@ -474,43 +475,43 @@ export function ReviewRestoredScreen({ item, onDone, onReply, onActionDone }: {
         <View style={s.rowMid}>
           <StarRow n={item.rating} size={15} />
           <T size={12} c={d.sub} style={s.grow}>
-            {item.customer} · {new Date(item.created_at).toLocaleDateString('en-US',
+            {item.customer} · {new Date(item.created_at).toLocaleDateString(loc('en-US'),
               { month: 'short', day: 'numeric' })}
           </T>
           <View style={s.pillGreen}>
             <View style={s.dotGreen} />
-            <T w="b" size={10} ls={0.8} c={d.green}>PUBLIC</T>
+            <T w="b" size={10} ls={0.8} c={d.green}>{tr('PUBLIC')}</T>
           </View>
         </View>
         <T size={14} c={d.textDim} style={{ lineHeight: 22 }}>
-          {item.comment ? `"${item.comment}"` : 'A rating with no words.'}
+          {item.comment ? `"${item.comment}"` : tr('A rating with no words.')}
         </T>
       </Card>
 
       <View style={s.amberCard}>
         <View style={s.rowMid}>
           <Ico name="alert-triangle" size={15} color={d.amber} />
-          <T w="b" size={11} ls={1.5} c={d.amber}>WHY IT STANDS</T>
+          <T w="b" size={11} ls={1.5} c={d.amber}>{tr('WHY IT STANDS')}</T>
         </View>
         <T size={14} c={d.textDim} style={{ lineHeight: 22 }}>{item.finding}</T>
         <View style={s.amberFoot}>
           <Avatar initials={(item.by ?? 'OPS').slice(0, 2).toUpperCase()} size={28} />
           <T size={12} c={d.sub} style={s.grow}>
-            {item.by ?? 'Ops'} · {new Date(item.restored_at).toLocaleDateString('en-US',
+            {item.by ?? tr('Ops')} · {new Date(item.restored_at).toLocaleDateString(loc('en-US'),
               { weekday: 'short', month: 'short', day: 'numeric' })}
           </T>
         </View>
       </View>
 
-      <Eyebrow ls={1.65} style={{ marginTop: 2 }}>WHAT THIS MEANS FOR YOU</Eyebrow>
+      <Eyebrow ls={1.65} style={{ marginTop: 2 }}>{tr('WHAT THIS MEANS FOR YOU')}</Eyebrow>
       <Card style={{ gap: 11 }}>
         <Consequence>
-          Your rating goes back to{' '}
-          <T w="b" size={12.5} c={d.textDim}>{item.rating_now ?? '—'}</T>
-          {' '}across {item.rating_count}
+          {trRich('Your rating goes back to <b>{rating}</b> across {count}', {
+            b: (text, key) => <T key={key} w="b" size={12.5} c={d.textDim}>{text}</T>,
+          }, { rating: item.rating_now ?? '—', count: item.rating_count })}
         </Consequence>
-        <Consequence>The client keeps their side of it — nothing was held against them</Consequence>
-        <Consequence green>No mark on your account — disputes are free</Consequence>
+        <Consequence>{tr('The client keeps their side of it — nothing was held against them')}</Consequence>
+        <Consequence green>{tr('No mark on your account — disputes are free')}</Consequence>
       </Card>
 
       {!!item.action && (
@@ -523,11 +524,11 @@ export function ReviewRestoredScreen({ item, onDone, onReply, onActionDone }: {
             <T w="b" size={13} c={doneAt ? d.sub : d.text}>{item.action}</T>
             <T size={11} c={overdue ? d.red : d.sub} style={{ marginTop: 2 }}>
               {doneAt
-                ? `Done ${new Date(doneAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                ? tr('Done {date}', { date: new Date(doneAt).toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' }) })
                 : item.action_due
-                  ? `${overdue ? 'Was due' : 'By'} ${new Date(item.action_due)
-                    .toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · tap when it's done`
-                  : "Tap when it's done"}
+                  ? tr(overdue ? 'Was due {date} · tap when it\'s done' : 'By {date} · tap when it\'s done', { date: new Date(item.action_due)
+                    .toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' }) })
+                  : tr('Tap when it\'s done')}
             </T>
           </View>
           {!doneAt && <Ico name="chevron-right" size={15} color={d.muted} />}
@@ -535,9 +536,9 @@ export function ReviewRestoredScreen({ item, onDone, onReply, onActionDone }: {
       )}
 
       <View style={s.actions}>
-        <GhostBtn title="REPLY IN PUBLIC" onPress={onReply} color={d.sub}
+        <GhostBtn title={tr('REPLY IN PUBLIC')} onPress={onReply} color={d.sub}
           border={d.card2} style={{ flex: 1, backgroundColor: d.card2 }} height={52} />
-        <Btn title="GOT IT" onPress={onDone} style={{ flex: 1 }} />
+        <Btn title={tr('GOT IT')} onPress={onDone} style={{ flex: 1 }} />
       </View>
     </Screen>
   );
@@ -566,10 +567,10 @@ function StarRow({ n, size = 12 }: { n: number; size?: number }) {
 
 // ---- 6c ------------------------------------------------------------------
 const STARTERS: { key: string; label: string; text: string }[] = [
-  { key: 'own', label: 'Own the wait', text: "You did wait and I'm sorry for that — " },
-  { key: 'explain', label: 'Explain calmly', text: 'Thanks for the feedback. What happened that day was ' },
-  { key: 'invite', label: 'Invite him back', text: 'Come back and let me put it right — ' },
-  { key: 'blank', label: 'Blank', text: '' },
+  { key: 'own', label: tr('Own the wait'), text: tr('You did wait and I\'m sorry for that — ') },
+  { key: 'explain', label: tr('Explain calmly'), text: tr('Thanks for the feedback. What happened that day was ') },
+  { key: 'invite', label: tr('Invite him back'), text: tr('Come back and let me put it right — ') },
+  { key: 'blank', label: tr('Blank'), text: '' },
 ];
 const MAX = 400;
 
@@ -584,11 +585,11 @@ export function PublicReplyScreen({ review, onClose, onPosted }: {
   const ok = clean.length > 15 && !/\d{6,}/.test(clean);   // no phone numbers, not a one-word snap
 
   async function post() {
-    if (!ok) return Alert.alert('Read it once more', 'A sentence or two, and no phone numbers.');
+    if (!ok) return Alert.alert(tr('Read it once more'), tr('A sentence or two, and no phone numbers.'));
     setBusy(true);
     const { error } = await supabase.rpc('review_reply', { p_review: review.id, p_reply: clean });
     setBusy(false);
-    if (error) return Alert.alert('Could not post', error.message);
+    if (error) return Alert.alert(tr('Could not post'), error.message);
     onPosted();
   }
 
@@ -596,9 +597,9 @@ export function PublicReplyScreen({ review, onClose, onPosted }: {
     <Screen gap={12}>
       <View style={s.topRow}>
         <Pressable onPress={onClose} hitSlop={8} style={s.puck38}><Ico name="x" /></Pressable>
-        <T w="b" size={11} ls={1.8} c={d.sub} style={s.topRowTitle}>REPLY IN PUBLIC</T>
+        <T w="b" size={11} ls={1.8} c={d.sub} style={s.topRowTitle}>{tr('REPLY IN PUBLIC')}</T>
         <Pressable onPress={post} hitSlop={8} disabled={!ok || busy}>
-          <T w="b" size={12} c={ok ? d.accent : d.muted}>POST</T>
+          <T w="b" size={12} c={ok ? d.accent : d.muted}>{tr('POST')}</T>
         </Pressable>
       </View>
 
@@ -606,16 +607,16 @@ export function PublicReplyScreen({ review, onClose, onPosted }: {
         <View style={s.rowMid}>
           <StarRow n={review.rating} />
           <T size={11} c={d.sub} style={s.grow}>
-            {review.customer} · {new Date(review.created_at).toLocaleDateString('en-US',
+            {review.customer} · {new Date(review.created_at).toLocaleDateString(loc('en-US'),
               { month: 'short', day: 'numeric' })}
           </T>
         </View>
         <T size={12.5} c={d.sub} style={{ lineHeight: 19 }}>
-          {review.comment ? `"${review.comment}"` : 'A rating with no words.'}
+          {review.comment ? `"${review.comment}"` : tr('A rating with no words.')}
         </T>
       </Card>
 
-      <Eyebrow ls={1.4}>START FROM</Eyebrow>
+      <Eyebrow ls={1.4}>{tr('START FROM')}</Eyebrow>
       <View style={s.starterRow}>
         {STARTERS.map((st) => {
           const on = starter === st.key;
@@ -629,7 +630,7 @@ export function PublicReplyScreen({ review, onClose, onPosted }: {
       </View>
 
       <TextInput value={text} onChangeText={(v) => setText(v.slice(0, MAX))} multiline
-        placeholder="Say it once, calmly." placeholderTextColor={d.sub}
+        placeholder={tr('Say it once, calmly.')} placeholderTextColor={d.sub}
         style={[s.textArea, { minHeight: 104 }]} />
 
       <View style={s.rowMid}>
@@ -637,24 +638,24 @@ export function PublicReplyScreen({ review, onClose, onPosted }: {
         {ok && (
           <View style={s.rowMid}>
             <Ico name="check" size={12} color={d.green} />
-            <T w="sb" size={11} c={d.green}>Reads well</T>
+            <T w="sb" size={11} c={d.green}>{tr('Reads well')}</T>
           </View>
         )}
       </View>
 
       <Card style={{ borderRadius: 16, padding: 15, gap: 10 }}>
-        <Eyebrow ls={1.4}>BEFORE YOU POST</Eyebrow>
-        <Consequence green>No accusation, no arguing the timeline</Consequence>
-        <Consequence green>No phone numbers or personal details</Consequence>
+        <Eyebrow ls={1.4}>{tr('BEFORE YOU POST')}</Eyebrow>
+        <Consequence green>{tr('No accusation, no arguing the timeline')}</Consequence>
+        <Consequence green>{tr('No phone numbers or personal details')}</Consequence>
         <View style={s.rowTop}>
           <Ico name="info" size={14} color={d.amber} />
           <T size={12} c={d.sub} style={[s.grow, { lineHeight: 18 }]}>
-            One reply per review and you can&apos;t edit it later — read it once more.
+            {tr('One reply per review and you can\'t edit it later — read it once more.')}
           </T>
         </View>
       </Card>
 
-      <Eyebrow ls={1.4}>HOW IT WILL LOOK</Eyebrow>
+      <Eyebrow ls={1.4}>{tr('HOW IT WILL LOOK')}</Eyebrow>
       <View style={s.preview}>
         <View style={s.rowMid}>
           <Avatar initials={review.customer.slice(0, 2).toUpperCase()} size={30} />
@@ -662,19 +663,19 @@ export function PublicReplyScreen({ review, onClose, onPosted }: {
             <T w="b" size={12}>{review.customer}</T>
             <T size={10} c={d.muted} style={{ marginTop: 1 }}>
               {review.rating.toFixed(1)} ★ · {new Date(review.created_at)
-                .toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                .toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' })}
             </T>
           </View>
         </View>
         <T size={12} c={d.sub} style={{ lineHeight: 18 }}>
-          {review.comment ? `"${review.comment}"` : 'A rating with no words.'}
+          {review.comment ? `"${review.comment}"` : tr('A rating with no words.')}
         </T>
         {!!clean && (
           <View style={s.quote}>
             <View style={s.rowMid}>
-              <T w="b" size={11}>You</T>
+              <T w="b" size={11}>{tr('You')}</T>
               <View style={s.pillAccent}>
-                <T w="b" size={9} ls={0.6} c={d.accent}>THE BARBER</T>
+                <T w="b" size={9} ls={0.6} c={d.accent}>{tr('THE BARBER')}</T>
               </View>
             </View>
             <T size={12} c={d.textDim} style={{ marginTop: 6, lineHeight: 18 }}>{clean}</T>
@@ -682,7 +683,7 @@ export function PublicReplyScreen({ review, onClose, onPosted }: {
         )}
       </View>
 
-      <Btn title="POST PUBLICLY" onPress={post} height={52} ls={0.9}
+      <Btn title={tr('POST PUBLICLY')} onPress={post} height={52} ls={0.9}
         bg={ok && !busy ? d.accent : d.muted} />
     </Screen>
   );

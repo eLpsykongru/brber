@@ -3,6 +3,7 @@ import { Alert, Linking, StyleSheet, View } from 'react-native';
 import { Btn, Card, Eyebrow, Ico, Sheet, T } from './dark';
 import { supabase } from '../lib/supabase';
 import { dark as d, inter, radius } from '../theme';
+import { tr, trn, trRich } from '../lib/i18n';
 
 // Barber turn 11c/11d of "Barber App.dc.html" — the float cap, finally on screen.
 //
@@ -51,7 +52,7 @@ export function FloatCapMeter({ st, onAsk }: { st: FloatStatus | null; onAsk: ()
     <>
       <View style={s.capRow}>
         <Eyebrow c={full ? d.red : d.amber} ls={0.6}>
-          {full ? 'CAP REACHED' : `${st.pct}% OF CAP`}
+          {full ? tr('CAP REACHED') : tr('{pct}% OF CAP', { pct: st.pct })}
         </Eyebrow>
       </View>
       <View style={s.track}>
@@ -59,16 +60,16 @@ export function FloatCapMeter({ st, onAsk }: { st: FloatStatus | null; onAsk: ()
       </View>
       <View style={s.capMeta}>
         <T size={11} c={d.sub}>
-          {full ? 'No more top-ups until it is collected' : `Room for ${dh(st.room_cents ?? 0)} more`}
+          {full ? tr('No more top-ups until it is collected') : tr('Room for {dh} more', { dh: dh(st.room_cents ?? 0) })}
         </T>
-        <T w="b" size={11} c={d.sub}>Cap {dh(st.cap_cents ?? 0)}</T>
+        <T w="b" size={11} c={d.sub}>{tr('Cap {dh}', { dh: dh(st.cap_cents ?? 0) })}</T>
       </View>
       <T size={12} c={d.textDim} style={s.capNote}>
         {full
-          ? 'You are holding the most we let a shop carry. Ops has to collect before you can take cash again.'
-          : `Once you hit the cap you can't take top-ups until ops collects. That's about ${st.more_customers} more ${st.more_customers === 1 ? 'customer' : 'customers'}.`}
+          ? tr('You are holding the most we let a shop carry. Ops has to collect before you can take cash again.')
+          : trn(st.more_customers ?? 0, 'Once you hit the cap you can\'t take top-ups until ops collects. That\'s about {n} more customer.', 'Once you hit the cap you can\'t take top-ups until ops collects. That\'s about {n} more customers.')}
       </T>
-      <Btn title={pending ? 'OPS HAS BEEN ASKED' : 'ASK THEM TO COME TODAY'}
+      <Btn title={pending ? tr('OPS HAS BEEN ASKED') : tr('ASK THEM TO COME TODAY')}
         icon={pending ? 'check' : 'phone'} bg={pending ? d.card2 : d.accent}
         fg={pending ? d.sub : '#fff'} height={50}
         onPress={() => { if (!pending) { setAsked(true); onAsk(); } }} />
@@ -112,10 +113,11 @@ export function CapHitSheet({ attempt, st, onClose, onGaveBack, opsPhone }: {
     <Sheet visible onClose={onClose} deep>
       <View style={s.hero}>
         <View style={s.heroChip}><Ico name="lock" size={25} color={d.amber} /></View>
-        <T w="b" size={19} style={s.heroTitle}>Can't take this one</T>
+        <T w="b" size={19} style={s.heroTitle}>{tr('Can\'t take this one')}</T>
         <T size={12.5} c={d.sub} style={s.heroSub}>
-          You're holding {dh(st?.net_cents ?? 0)} — the most we let a shop carry.{' '}
-          <T w="b" size={12.5}>Give the {dh(attempt.cents)} back.</T>
+          {trRich('You\'re holding {held} — the most we let a shop carry. <b>Give the {cents} back.</b>', {
+            b: (text, key) => <T key={key} w="b" size={12.5}>{text}</T>,
+          }, { held: dh(st?.net_cents ?? 0), cents: dh(attempt.cents) })}
         </T>
       </View>
 
@@ -123,25 +125,25 @@ export function CapHitSheet({ attempt, st, onClose, onGaveBack, opsPhone }: {
         <View style={s.who}>
           <View style={s.grow}>
             <T w="b" size={13}>{mask(attempt.phone)}</T>
-            <T size={11} c={d.sub} style={s.gap2}>Not credited</T>
+            <T size={11} c={d.sub} style={s.gap2}>{tr('Not credited')}</T>
           </View>
           <T w="eb" size={15} style={s.tnum}>{dh(attempt.cents)}</T>
         </View>
         <View style={s.assure}>
           <Ico name="shield" size={13} color={d.green} />
-          <T size={11.5} c={d.sub} style={s.grow}>Nothing was recorded. Their balance is unchanged.</T>
+          <T size={11.5} c={d.sub} style={s.grow}>{tr('Nothing was recorded. Their balance is unchanged.')}</T>
         </View>
       </Card>
 
-      <Eyebrow>WHAT THEY CAN DO INSTEAD</Eyebrow>
+      <Eyebrow>{tr('WHAT THEY CAN DO INSTEAD')}</Eyebrow>
       {near && (
         <Card ring={d.accent}>
           <View style={s.alt}>
             <View style={s.altChip}><Ico name="map-pin" size={15} color={d.accent} /></View>
             <View style={s.grow}>
-              <T w="b" size={12.5}>Top up at {near.name}</T>
+              <T w="b" size={12.5}>{tr('Top up at {name}', { name: near.name })}</T>
               <T size={11} c={d.sub} style={s.gap2}>
-                {[far(near.metres), `${near.agent.split(' ')[0]} has room for ${dh(near.room_cents)}`]
+                {[far(near.metres), tr('{name} has room for {room}', { name: near.agent.split(' ')[0], room: dh(near.room_cents) })]
                   .filter(Boolean).join(' · ')}
               </T>
             </View>
@@ -152,8 +154,8 @@ export function CapHitSheet({ attempt, st, onClose, onGaveBack, opsPhone }: {
         <View style={s.alt}>
           <View style={s.altChipDim}><Ico name="calendar" size={15} color={d.sub} /></View>
           <View style={s.grow}>
-            <T w="sb" size={12.5}>Just pay you at the shop</T>
-            <T size={11} c={d.sub} style={s.gap2}>They book with no deposit and pay cash</T>
+            <T w="sb" size={12.5}>{tr('Just pay you at the shop')}</T>
+            <T size={11} c={d.sub} style={s.gap2}>{tr('They book with no deposit and pay cash')}</T>
           </View>
         </View>
       </Card>
@@ -161,15 +163,15 @@ export function CapHitSheet({ attempt, st, onClose, onGaveBack, opsPhone }: {
       <View style={s.told}>
         <View style={s.toldChip}><Ico name="clock" size={14} color={d.amber} /></View>
         <View style={s.grow}>
-          <T w="b" size={12} c={d.amber}>Ops has been told automatically</T>
-          <T size={11} c={d.sub} style={s.gap2}>They'll come sooner than their next round</T>
+          <T w="b" size={12} c={d.amber}>{tr('Ops has been told automatically')}</T>
+          <T size={11} c={d.sub} style={s.gap2}>{tr('They\'ll come sooner than their next round')}</T>
         </View>
       </View>
 
-      <Btn title={`I GAVE THE ${dh(attempt.cents)} BACK`} height={52} ls={0.72}
+      <Btn title={tr('I GAVE THE {cents} BACK', { cents: dh(attempt.cents) })} height={52} ls={0.72}
         onPress={() => { onGaveBack(); onClose(); }} />
       <T w="sb" size={12} c={d.sub} style={s.call}
-        onPress={() => Linking.openURL(`tel:${opsPhone}`)}>Call ops now</T>
+        onPress={() => Linking.openURL(`tel:${opsPhone}`)}>{tr('Call ops now')}</T>
     </Sheet>
   );
 }
@@ -181,7 +183,7 @@ export function isCapError(message: string) {
 
 export function askCollection() {
   supabase.rpc('request_float_collection').then(({ error }) => {
-    if (error) Alert.alert('Could not send that', error.message);
+    if (error) Alert.alert(tr('Could not send that'), error.message);
   });
 }
 

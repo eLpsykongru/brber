@@ -3,6 +3,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { ScreenHeader } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, shadowLg, sp, TOP_INSET } from '../theme';
+import { tr } from '../lib/i18n';
 
 // One row of barber_day_queue(): today's confirmed bookings, names pre-trimmed server-side.
 export type DayQueueRow = {
@@ -32,7 +33,7 @@ export default function QueueScreen({ barberId, myBookingId, barberLine, onBack,
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.rpc('barber_day_queue', { p_barber: barberId });
-    if (error) { Alert.alert('Could not load the queue', error.message); return onBack(); }
+    if (error) { Alert.alert(tr('Could not load the queue'), error.message); return onBack(); }
     setRows((data as DayQueueRow[]) ?? []);
   }, [barberId, onBack]);
 
@@ -58,34 +59,34 @@ export default function QueueScreen({ barberId, myBookingId, barberLine, onBack,
   return (
     <View style={s.screen}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        <ScreenHeader title="Live queue" onBack={onBack} />
+        <ScreenHeader title={tr('Live queue')} onBack={onBack} />
 
         {/* your ticket (dark card) */}
         <View style={s.ticketCard}>
-          <Text style={s.ticketLabel}>YOUR TICKET</Text>
+          <Text style={s.ticketLabel}>{tr('YOUR TICKET')}</Text>
           <Text style={s.ticketNo}>Nº {String(ticketNo).padStart(2, '0')}</Text>
           <Text style={s.ticketSub}>{barberLine}</Text>
           <View style={s.ticketStats}>
             <View style={s.ticketStat}>
-              <Text style={s.ticketStatValue}>{inChairNow ? 'Now' : ahead.length}</Text>
-              <Text style={s.ticketStatLabel}>{inChairNow ? 'IN CHAIR' : 'AHEAD'}</Text>
+              <Text style={s.ticketStatValue}>{inChairNow ? tr('Now') : ahead.length}</Text>
+              <Text style={s.ticketStatLabel}>{inChairNow ? tr('IN CHAIR') : tr('AHEAD')}</Text>
             </View>
             <View style={s.ticketDivider} />
             <View style={s.ticketStat}>
               <Text style={s.ticketStatValue}>
-                ~{etaMin}<Text style={s.ticketStatUnit}> min</Text>
+                ~{etaMin}<Text style={s.ticketStatUnit}>{' '}{tr('min')}</Text>
               </Text>
-              <Text style={s.ticketStatLabel}>EST. WAIT</Text>
+              <Text style={s.ticketStatLabel}>{tr('EST. WAIT')}</Text>
             </View>
             <View style={s.ticketDivider} />
             <View style={s.ticketStat}>
               <Text style={s.ticketStatValue}>{myTime}</Text>
-              <Text style={s.ticketStatLabel}>YOUR SLOT</Text>
+              <Text style={s.ticketStatLabel}>{tr('YOUR SLOT')}</Text>
             </View>
           </View>
         </View>
 
-        <Text style={s.sectionLabel}>WHO'S UP</Text>
+        <Text style={s.sectionLabel}>{tr('WHO\'S UP')}</Text>
         <View style={s.rows}>
           {active.map((r) => {
             const isMe = r.booking_id === myBookingId;
@@ -102,13 +103,13 @@ export default function QueueScreen({ barberId, myBookingId, barberLine, onBack,
                   <Text style={s.rowName}>{r.label}</Text>
                   <Text style={s.rowMeta}>
                     {isMe && !chair
-                      ? "We'll notify you when you're next"
-                      : `${chair ? 'In the chair' : 'Waiting'}${r.service_name ? ` · ${r.service_name}` : ''}`}
+                      ? tr('We\'ll notify you when you\'re next')
+                      : `${chair ? tr('In the chair') : tr('Waiting')}${r.service_name ? ` · ${r.service_name}` : ''}`}
                   </Text>
                 </View>
                 {chair
-                  ? <View style={s.nowBadge}><Text style={s.nowBadgeText}>NOW</Text></View>
-                  : <Text style={[s.rowEta, isMe && s.rowEtaMine]}>~{minutesUntil(r.starts_at)} min</Text>}
+                  ? <View style={s.nowBadge}><Text style={s.nowBadgeText}>{tr('NOW')}</Text></View>
+                  : <Text style={[s.rowEta, isMe && s.rowEtaMine]}>{tr('~{starts_at} min', { starts_at: minutesUntil(r.starts_at) })}</Text>}
               </View>
             );
           })}
@@ -118,12 +119,12 @@ export default function QueueScreen({ barberId, myBookingId, barberLine, onBack,
       {/* bottom bar */}
       <View style={s.bottomBar}>
         <View style={s.grow}>
-          <Text style={s.bottomBig}>{inChairNow ? "You're up!" : `~${etaMin} min`}</Text>
-          <Text style={s.bottomSub}>{inChairNow ? 'take a seat' : 'estimated wait'}</Text>
+          <Text style={s.bottomBig}>{inChairNow ? tr('You\'re up!') : tr('~{etaMin} min', { etaMin })}</Text>
+          <Text style={s.bottomSub}>{inChairNow ? tr('take a seat') : tr('estimated wait')}</Text>
         </View>
         {onBookings && !inChairNow && (
           <Pressable onPress={onBookings} style={({ pressed }) => [s.ctaBtn, pressed && s.pressed]}>
-            <Text style={s.ctaText}>My booking</Text>
+            <Text style={s.ctaText}>{tr('My booking')}</Text>
           </Pressable>
         )}
       </View>

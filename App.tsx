@@ -30,6 +30,7 @@ import OnboardingScreen from './src/screens/OnboardingScreen';
 import QueueLinkScreen from './src/screens/QueueLinkScreen';
 import { colors } from './src/theme';
 import type { Barber, Profile } from './src/types';
+import { tr } from './src/lib/i18n';
 
 const INTRO_SEEN_KEY = 'intro_seen';
 
@@ -196,7 +197,7 @@ export default function App() {
   } else if (account?.suspended) {
     // 38h — booking is paused, everything he already has still stands, and the
     // reason is printed because 0056 refuses to record a suspension without one.
-    content = <Suspended reason={account.reason ?? 'Contact support to find out why.'}
+    content = <Suspended reason={account.reason ?? tr('Contact support to find out why.')}
       onAppeal={() => Linking.openURL(`tel:${SUPPORT_PHONE}`)} />;
   } else {
     content = <HomeScreen profile={user.profile} barber={user.barber}

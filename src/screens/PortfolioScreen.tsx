@@ -5,6 +5,7 @@ import { Btn, Ico, T, TAB_INSET, TopBar } from '../components/dark';
 import { listPortfolio } from '../lib/portfolio';
 import { supabase } from '../lib/supabase';
 import { dark as D, TOP_INSET } from '../theme';
+import { tr } from '../lib/i18n';
 
 // 1o — My work. Two-up grid, first photo is the cover customers see in search.
 export default function PortfolioScreen({ barberId, onBack }: { barberId: string; onBack?: () => void }) {
@@ -25,20 +26,20 @@ export default function PortfolioScreen({ barberId, onBack }: { barberId: string
       if (error) throw error;
       await load();
     } catch (e: any) {
-      Alert.alert('Could not upload', e.message ?? String(e));
+      Alert.alert(tr('Could not upload'), e.message ?? String(e));
     } finally {
       setBusy(false);
     }
   }
 
   function remove(name: string) {
-    Alert.alert('Remove photo?', '', [
-      { text: 'Keep', style: 'cancel' },
+    Alert.alert(tr('Remove photo?'), '', [
+      { text: tr('Keep'), style: 'cancel' },
       {
-        text: 'Remove', style: 'destructive',
+        text: tr('Remove'), style: 'destructive',
         onPress: async () => {
           const { error } = await supabase.storage.from('portfolio').remove([name]);
-          if (error) Alert.alert('Could not remove', error.message);
+          if (error) Alert.alert(tr('Could not remove'), error.message);
           else load();
         },
       },
@@ -51,11 +52,11 @@ export default function PortfolioScreen({ barberId, onBack }: { barberId: string
   return (
     <View style={s.screen}>
       <View style={s.head}>
-        <TopBar title="My work" onBack={onBack} plain />
-        <Btn title="ADD PHOTO" height={50} icon="plus" ls={0.6} onPress={add}
+        <TopBar title={tr('My work')} onBack={onBack} plain />
+        <Btn title={tr('ADD PHOTO')} height={50} icon="plus" ls={0.6} onPress={add}
           style={busy ? { opacity: 0.6 } : undefined} />
         <T size={11} c={D.sub} style={s.hint}>
-          The first photo is your cover — it's what customers see in search. Long-press to remove.
+          {tr('The first photo is your cover — it\'s what customers see in search. Long-press to remove.')}
         </T>
       </View>
       <FlatList
@@ -68,11 +69,11 @@ export default function PortfolioScreen({ barberId, onBack }: { barberId: string
         renderItem={({ item, index }) => {
           if (!item) {
             return (
-              <Pressable onPress={add} accessibilityRole="button" accessibilityLabel="Add photo"
+              <Pressable onPress={add} accessibilityRole="button" accessibilityLabel={tr('Add photo')}
                 style={({ pressed }) => [s.cell, pressed && s.pressed]}>
                 <View style={s.addTile}>
                   <Ico name="camera" size={20} color={D.sub} />
-                  <T w="sb" size={10} c={D.sub}>Add photo</T>
+                  <T w="sb" size={10} c={D.sub}>{tr('Add photo')}</T>
                 </View>
               </Pressable>
             );
@@ -80,18 +81,18 @@ export default function PortfolioScreen({ barberId, onBack }: { barberId: string
           return (
             <Pressable onLongPress={() => remove(item.name)} style={({ pressed }) => [s.cell, pressed && s.pressed]}
               accessibilityRole="imagebutton"
-              accessibilityLabel={`${index === 0 ? 'Cover photo' : 'Portfolio photo'}, long-press to remove`}>
+              accessibilityLabel={index === 0 ? tr('Cover photo, long-press to remove') : tr('Portfolio photo, long-press to remove')}>
               <View style={s.photoWrap}>
                 <Image source={{ uri: item.url }} style={s.photo} />
                 {index === 0 && (
                   <View style={s.coverBadge}>
                     <Ico name="star" size={10} color="#fff" />
-                    <T w="b" size={9} c="#fff">Cover</T>
+                    <T w="b" size={9} c="#fff">{tr('Cover')}</T>
                   </View>
                 )}
               </View>
               <T size={10} c={D.sub} style={s.caption}>
-                {index === 0 ? 'customers see this first' : 'long-press to remove'}
+                {index === 0 ? tr('customers see this first') : tr('long-press to remove')}
               </T>
             </Pressable>
           );

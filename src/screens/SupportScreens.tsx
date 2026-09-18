@@ -8,6 +8,7 @@ import {
 import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, shadowLg, TOP_INSET } from '../theme';
+import { loc, tr } from '../lib/i18n';
 
 // Turn 17 (17a report, 17b filed), 18b (the case thread) and 30a (support home).
 //
@@ -16,20 +17,20 @@ import { colors, font, radius, serif, shadow, shadowLg, TOP_INSET } from '../the
 // service role in the dashboard.
 
 const REASONS: { key: string; label: string; hint?: string }[] = [
-  { key: 'no_show', label: "The barber didn't show up" },
-  { key: 'wrong_amount', label: 'I was charged the wrong amount',
-    hint: "Deposit or shop payment doesn't match" },
-  { key: 'wrong_service', label: "Service wasn't what I booked" },
-  { key: 'hygiene', label: 'Hygiene or safety concern' },
-  { key: 'other', label: 'Something else' },
+  { key: 'no_show', label: tr('The barber didn\'t show up') },
+  { key: 'wrong_amount', label: tr('I was charged the wrong amount'),
+    hint: tr('Deposit or shop payment doesn\'t match') },
+  { key: 'wrong_service', label: tr('Service wasn\'t what I booked') },
+  { key: 'hygiene', label: tr('Hygiene or safety concern') },
+  { key: 'other', label: tr('Something else') },
 ];
 
 const REASON_LABEL: Record<string, string> = {
-  no_show: 'Barber did not show up',
-  wrong_amount: 'Wrong amount charged',
-  wrong_service: 'Wrong service',
-  hygiene: 'Hygiene or safety',
-  other: 'Something else',
+  no_show: tr('Barber did not show up'),
+  wrong_amount: tr('Wrong amount charged'),
+  wrong_service: tr('Wrong service'),
+  hygiene: tr('Hygiene or safety'),
+  other: tr('Something else'),
 };
 
 type Visit = {
@@ -53,8 +54,8 @@ export type CaseRow = {
 const dh = (c: number) => (c / 100).toFixed(0);
 const stamp = (iso: string) => {
   const d = new Date(iso);
-  return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, `
-    + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  return `${d.toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' })}, `
+    + d.toLocaleTimeString(loc('en-US'), { hour: 'numeric', minute: '2-digit' });
 };
 
 // ---- 17a / 17b -----------------------------------------------------------
@@ -109,7 +110,7 @@ export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
   }
 
   async function submit() {
-    if (!reason) return Alert.alert('Pick a reason', 'Tell us what went wrong first.');
+    if (!reason) return Alert.alert(tr('Pick a reason'), tr('Tell us what went wrong first.'));
     setBusy(true);
     let path: string | null = null;
     if (photo) {
@@ -126,7 +127,7 @@ export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
       p_amount_cents: reason === 'wrong_amount' && visit ? visit.deposit_cents || visit.price_cents : null,
     });
     setBusy(false);
-    if (error) return Alert.alert('Could not file the report', error.message);
+    if (error) return Alert.alert(tr('Could not file the report'), error.message);
     setFiled((data as CaseRow[])[0]);
   }
 
@@ -139,27 +140,25 @@ export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
             <Ionicons name="flag-outline" size={30} color={colors.accent} />
           </View>
           <View>
-            <Display size={28} style={s.center}>Report filed</Display>
+            <Display size={28} style={s.center}>{tr('Report filed')}</Display>
             <Text style={s.outcomeSub}>
-              Support is looking into {REASON_LABEL[filed.reason].toLowerCase()}
-              {visit?.barbers?.salon?.name ? ` at ${visit.barbers.salon.name}` : ''}.
-              You'll hear back within 24 hours.
+              {tr('Support is looking into {REASON_LABEL}{x}. You\'ll hear back within 24 hours.', { REASON_LABEL: REASON_LABEL[filed.reason].toLowerCase(), x: visit?.barbers?.salon?.name ? tr(' at {name}', { name: visit.barbers.salon.name }) : '' })}
             </Text>
           </View>
 
           <View style={s.outcomeCard}>
-            <Line k="Case number" v={`#${filed.case_no}`} />
+            <Line k={tr('Case number')} v={`#${filed.case_no}`} />
             {!!filed.booking_id && (
-              <Line k="Booking" v={`#${filed.booking_id.replace(/-/g, '').slice(0, 8).toUpperCase()}`} />
+              <Line k={tr('Booking')} v={`#${filed.booking_id.replace(/-/g, '').slice(0, 8).toUpperCase()}`} />
             )}
-            <Line k="Issue" v={REASON_LABEL[filed.reason]} />
-            <Line k="Filed" v={stamp(filed.created_at)} />
+            <Line k={tr('Issue')} v={REASON_LABEL[filed.reason]} />
+            <Line k={tr('Filed')} v={stamp(filed.created_at)} />
             {filed.amount_cents != null && filed.amount_cents > 0 && (
               <>
                 <View style={s.hr} />
                 <View style={s.disputeRow}>
-                  <Text style={s.disputeKey}>Amount in dispute</Text>
-                  <Text style={s.disputeVal}>{dh(filed.amount_cents)} DH</Text>
+                  <Text style={s.disputeKey}>{tr('Amount in dispute')}</Text>
+                  <Text style={s.disputeVal}>{tr('{amount_cents} DH', { amount_cents: dh(filed.amount_cents) })}</Text>
                 </View>
               </>
             )}
@@ -170,17 +169,17 @@ export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
               <Ionicons name="chatbubble-ellipses-outline" size={17} color="#fff" />
             </View>
             <View style={s.grow}>
-              <Text style={s.chatTitle}>Support chat opened</Text>
-              <Text style={s.chatSub}>Updates arrive in your Chat tab</Text>
+              <Text style={s.chatTitle}>{tr('Support chat opened')}</Text>
+              <Text style={s.chatSub}>{tr('Updates arrive in your Chat tab')}</Text>
             </View>
           </View>
 
           <Pressable onPress={onBack} style={({ pressed }) => [s.wideDark, pressed && s.pressed]}>
             {/* BKG-44 differs from PRO-03 by exactly this: onBack goes to the
                 booking, so the button says so rather than 'DONE'. */}
-            <Text style={s.wideDarkText}>{fromBooking ? 'BACK TO MY BOOKING' : 'DONE'}</Text>
+            <Text style={s.wideDarkText}>{fromBooking ? tr('BACK TO MY BOOKING') : tr('DONE')}</Text>
           </Pressable>
-          <Text style={s.link} onPress={() => onOpenCase(filed)}>View case</Text>
+          <Text style={s.link} onPress={() => onOpenCase(filed)}>{tr('View case')}</Text>
         </View>
       </View>
     );
@@ -191,10 +190,10 @@ export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.header}>
           <Pressable onPress={onBack} hitSlop={8}
-            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel="Go back">
+            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel={tr('Go back')}>
             <Ionicons name="arrow-back" size={16} color={colors.text} />
           </Pressable>
-          <Display size={18} style={s.headerTitle}>Report a problem</Display>
+          <Display size={18} style={s.headerTitle}>{tr('Report a problem')}</Display>
           <View style={s.puckGhost} />
         </View>
 
@@ -206,34 +205,32 @@ export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
               <Ionicons name="storefront-outline" size={20} color={colors.accent} />
             </View>
             <View style={s.grow}>
-              <Text style={s.visitName}>{visit.barbers?.salon?.name ?? 'Salon'}</Text>
+              <Text style={s.visitName}>{visit.barbers?.salon?.name ?? tr('Salon')}</Text>
               <Text style={s.visitMeta}>
-                {visit.services?.name ?? 'Service'} ·{' '}
-                {new Date(visit.starts_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })},{' '}
-                {new Date(visit.starts_at).toTimeString().slice(0, 5)} · {dh(visit.price_cents)} DH
+                {tr('{name} · {toLocaleDateString}, {x} · {price_cents} DH', { name: visit.services?.name ?? tr('Service'), toLocaleDateString: new Date(visit.starts_at).toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' }), x: new Date(visit.starts_at).toTimeString().slice(0, 5), price_cents: dh(visit.price_cents) })}
               </Text>
             </View>
             {fromBooking
-              ? <Text style={s.thisOne}>THIS ONE</Text>
-              : <Text style={s.change}>Change</Text>}
+              ? <Text style={s.thisOne}>{tr('THIS ONE')}</Text>
+              : <Text style={s.change}>{tr('Change')}</Text>}
           </Pressable>
         )}
         {fromBooking && (
           <Text style={s.fixedNote}>
-            You came here from the booking, so we already know which one — nothing to pick.
+            {tr('You came here from the booking, so we already know which one — nothing to pick.')}
           </Text>
         )}
         {!fromBooking && picking && visits.map((v) => (
           <Pressable key={v.id} onPress={() => { setVisitId(v.id); setPicking(false); }}
             style={({ pressed }) => [s.visitPick, v.id === visitId && s.visitPickOn, pressed && s.pressed]}>
             <Text style={s.visitPickText}>
-              {v.barbers?.salon?.name ?? 'Salon'} · {v.services?.name ?? 'Service'} ·{' '}
-              {new Date(v.starts_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              {v.barbers?.salon?.name ?? tr('Salon')} · {v.services?.name ?? tr('Service')} ·{' '}
+              {new Date(v.starts_at).toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' })}
             </Text>
           </Pressable>
         ))}
 
-        <Text style={s.eyebrow}>WHAT WENT WRONG?</Text>
+        <Text style={s.eyebrow}>{tr('WHAT WENT WRONG?')}</Text>
         <View style={s.optionList}>
           {REASONS.map((r) => {
             const on = reason === r.key;
@@ -254,31 +251,29 @@ export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
         </View>
 
         <TextInput style={s.detail} multiline value={detail} onChangeText={setDetail}
-          placeholder="Tell us what happened" placeholderTextColor={colors.textTertiary} />
+          placeholder={tr('Tell us what happened')} placeholderTextColor={colors.textTertiary} />
 
         {fromBooking && !!visit && (
           <View style={s.safeCard}>
             <Ionicons name="shield-checkmark-outline" size={15} color={colors.textSecondary}
               style={s.safeIcon} />
             <View style={s.grow}>
-              <Text style={s.safeTitle}>Your booking is not affected.</Text>
+              <Text style={s.safeTitle}>{tr('Your booking is not affected.')}</Text>
               <Text style={s.safeBody}>
-                {new Date(visit.starts_at).toTimeString().slice(0, 5)} still stands and{' '}
-                {(visit.barbers?.profiles?.full_name ?? 'the barber').split(' ')[0]} isn't told you've
-                reported anything — cancel separately if that's what you want.
+                {tr('{x} still stands and {name} isn\'t told you\'ve reported anything — cancel separately if that\'s what you want.', { x: new Date(visit.starts_at).toTimeString().slice(0, 5), name: (visit.barbers?.profiles?.full_name ?? tr('the barber')).split(' ')[0] })}
               </Text>
             </View>
           </View>
         )}
 
         <View style={s.photoRow}>
-          <Pressable onPress={addPhoto} accessibilityLabel="Add a photo"
+          <Pressable onPress={addPhoto} accessibilityLabel={tr('Add a photo')}
             style={({ pressed }) => [s.photoAdd, pressed && s.pressed]}>
             <Ionicons name="camera-outline" size={18} color={colors.textSecondary} />
           </Pressable>
           {!!photo && <Image source={{ uri: photo }} style={s.photoThumb} />}
           <Text style={s.photoHint}>
-            Add a photo or receipt · support reviews reports within 24 h
+            {tr('Add a photo or receipt · support reviews reports within 24 h')}
           </Text>
         </View>
       </ScrollView>
@@ -286,7 +281,7 @@ export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
       <View style={s.footer}>
         <Pressable onPress={submit} disabled={busy}
           style={({ pressed }) => [s.wideDark, (pressed || busy) && s.pressed]}>
-          <Text style={s.wideDarkText}>SUBMIT REPORT</Text>
+          <Text style={s.wideDarkText}>{tr('SUBMIT REPORT')}</Text>
         </Pressable>
       </View>
     </View>
@@ -334,7 +329,7 @@ export function SupportCaseScreen({ caseRow, myId, onBack }: {
     setText('');
     const { error } = await supabase.from('support_messages')
       .insert({ case_id: caseRow.id, sender_id: myId, body });
-    if (error) return Alert.alert('Could not send', error.message);
+    if (error) return Alert.alert(tr('Could not send'), error.message);
     load();
   }
 
@@ -344,19 +339,19 @@ export function SupportCaseScreen({ caseRow, myId, onBack }: {
     <KeyboardAvoidingView style={s.caseScreen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={s.caseHead}>
-        <Pressable onPress={onBack} hitSlop={8} style={s.caseBack} accessibilityLabel="Go back">
+        <Pressable onPress={onBack} hitSlop={8} style={s.caseBack} accessibilityLabel={tr('Go back')}>
           <Ionicons name="arrow-back" size={17} color="#fff" />
         </Pressable>
         <View style={s.caseAvatar}><Text style={s.caseAvatarText}>S</Text></View>
         <View style={s.grow}>
-          <Text style={s.caseName}>Sterncut Support</Text>
+          <Text style={s.caseName}>{tr('Sterncut Support')}</Text>
           <Text style={s.caseSub}>
-            Case #{caseRow.case_no} · {REASON_LABEL[caseRow.reason].toLowerCase()}
+            {tr('Case #{case_no} · {REASON_LABEL}', { case_no: caseRow.case_no, REASON_LABEL: REASON_LABEL[caseRow.reason].toLowerCase() })}
           </Text>
         </View>
         <View style={[s.caseChip, resolved && s.caseChipOk]}>
           <Text style={[s.caseChipText, resolved && s.caseChipTextOk]}>
-            {resolved ? 'RESOLVED' : 'OPEN'}
+            {resolved ? tr('RESOLVED') : tr('OPEN')}
           </Text>
         </View>
       </View>
@@ -369,7 +364,7 @@ export function SupportCaseScreen({ caseRow, myId, onBack }: {
         onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
         ListHeaderComponent={
           <Text style={s.dayLabel}>
-            {new Date(caseRow.created_at).toLocaleDateString('en-US',
+            {new Date(caseRow.created_at).toLocaleDateString(loc('en-US'),
               { month: 'short', day: 'numeric' }).toUpperCase()}
           </Text>
         }
@@ -383,8 +378,8 @@ export function SupportCaseScreen({ caseRow, myId, onBack }: {
               <View style={[s.metaRow, mine && s.metaRowMine]}>
                 {!mine && <View style={s.metaAvatar}><Text style={s.metaAvatarText}>S</Text></View>}
                 <Text style={s.metaText}>
-                  {mine ? 'You' : `${item.author_name ?? 'Support'} · Support`} ·{' '}
-                  {new Date(item.created_at).toLocaleTimeString('en-US',
+                  {mine ? tr('You') : tr('{author_name} · Support', { author_name: item.author_name ?? tr('Support') })} ·{' '}
+                  {new Date(item.created_at).toLocaleTimeString(loc('en-US'),
                     { hour: 'numeric', minute: '2-digit' }).toLowerCase()}
                 </Text>
               </View>
@@ -397,22 +392,22 @@ export function SupportCaseScreen({ caseRow, myId, onBack }: {
               <View style={s.refundCard}>
                 <View style={s.refundHead}>
                   <Ionicons name="checkmark" size={15} color="#16A34A" />
-                  <Text style={s.refundTitle}>Refund issued</Text>
+                  <Text style={s.refundTitle}>{tr('Refund issued')}</Text>
                 </View>
                 <View style={s.lineRow}>
-                  <Text style={s.lineKey}>To wallet</Text>
-                  <Text style={s.refundAmount}>+{dh(caseRow.refund_cents)} DH</Text>
+                  <Text style={s.lineKey}>{tr('To wallet')}</Text>
+                  <Text style={s.refundAmount}>{tr('+{refund_cents} DH', { refund_cents: dh(caseRow.refund_cents) })}</Text>
                 </View>
                 {balance != null && (
                   <View style={s.lineRow}>
-                    <Text style={s.lineKey}>New balance</Text>
-                    <Text style={s.lineVal}>{dh(balance)} DH</Text>
+                    <Text style={s.lineKey}>{tr('New balance')}</Text>
+                    <Text style={s.lineVal}>{tr('{balance} DH', { balance: dh(balance) })}</Text>
                   </View>
                 )}
               </View>
             )}
             {resolved && (
-              <Text style={s.closed}>Case closed. Reply here if anything's still off.</Text>
+              <Text style={s.closed}>{tr('Case closed. Reply here if anything\'s still off.')}</Text>
             )}
           </>
         }
@@ -420,7 +415,7 @@ export function SupportCaseScreen({ caseRow, myId, onBack }: {
 
       <View style={s.composer}>
         <TextInput style={s.input} value={text} onChangeText={setText}
-          placeholder="Reply to support…" placeholderTextColor={colors.textTertiary} />
+          placeholder={tr('Reply to support…')} placeholderTextColor={colors.textTertiary} />
         <Pressable onPress={send} disabled={!text.trim()}
           style={({ pressed }) => [s.send, (pressed || !text.trim()) && s.pressed]}>
           <Ionicons name="arrow-up" size={17} color="#fff" />
@@ -478,37 +473,37 @@ export function SupportHomeScreen({ onBack, onOpenCase, onNewCase }: {
       <ScrollView contentContainerStyle={s.homeContent} showsVerticalScrollIndicator={false}>
         <View style={s.header}>
           <Pressable onPress={onBack} hitSlop={8}
-            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel="Go back">
+            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel={tr('Go back')}>
             <Ionicons name="arrow-back" size={16} color={colors.text} />
           </Pressable>
-          <Display size={18} style={s.headerTitle}>Support</Display>
+          <Display size={18} style={s.headerTitle}>{tr('Support')}</Display>
           <View style={s.puckGhost} />
         </View>
 
         <View style={s.searchPill}>
           <Ionicons name="search" size={16} color={colors.textSecondary} />
-          <TextInput value={q} onChangeText={setQ} placeholder="Search help"
+          <TextInput value={q} onChangeText={setQ} placeholder={tr('Search help')}
             placeholderTextColor={colors.textSecondary} style={s.searchInput} />
         </View>
 
         <View style={s.onlineCard}>
           <View style={s.onlineDot}><View style={s.onlineDotInner} /></View>
           <View style={s.grow}>
-            <Text style={s.onlineTitle}>We&apos;re online</Text>
-            <Text style={s.onlineSub}>Replies in about an hour · العربية, Français, English</Text>
+            <Text style={s.onlineTitle}>{tr('We\'re online')}</Text>
+            <Text style={s.onlineSub}>{tr('Replies in about an hour · العربية, Français, English')}</Text>
           </View>
         </View>
 
         <View style={s.sectionHead}>
-          <Text style={s.eyebrow}>YOUR CASES</Text>
-          {closed > 0 && <Text style={s.link}>Closed ({closed})</Text>}
+          <Text style={s.eyebrow}>{tr('YOUR CASES')}</Text>
+          {closed > 0 && <Text style={s.link}>{tr('Closed ({closed})', { closed })}</Text>}
         </View>
 
         <View style={s.optionList}>
           {shown.length === 0 && (
             <View style={s.emptyCard}>
               <Text style={s.emptyText}>
-                Nothing open. Report a problem from a visit and we answer within a day.
+                {tr('Nothing open. Report a problem from a visit and we answer within a day.')}
               </Text>
             </View>
           )}
@@ -527,14 +522,14 @@ export function SupportHomeScreen({ onBack, onOpenCase, onNewCase }: {
                   </Text>
                   <Text style={s.caseMeta}>
                     {c.case_no}{c.salon ? ` · ${c.salon}` : ''}
-                    {c.amount_cents ? ` · ${dh(c.amount_cents)} DH` : ''}
+                    {c.amount_cents ? tr(' · {amount_cents} DH', { amount_cents: dh(c.amount_cents) }) : ''}
                   </Text>
                 </View>
                 {hot ? (
                   <View style={s.caseBadge}><Text style={s.caseBadgeText}>{c.unread}</Text></View>
                 ) : (
                   <View style={s.caseTag}>
-                    <Text style={s.caseTagText}>{c.status === 'open' ? 'OPEN' : 'CLOSED'}</Text>
+                    <Text style={s.caseTagText}>{c.status === 'open' ? tr('OPEN') : tr('CLOSED')}</Text>
                   </View>
                 )}
               </Pressable>
@@ -542,10 +537,10 @@ export function SupportHomeScreen({ onBack, onOpenCase, onNewCase }: {
           })}
         </View>
 
-        <Text style={[s.eyebrow, { marginTop: 2 }]}>COMMON QUESTIONS</Text>
+        <Text style={[s.eyebrow, { marginTop: 2 }]}>{tr('COMMON QUESTIONS')}</Text>
         <View style={s.faq}>
           {articles.map((h, i) => (
-            <Pressable key={h} onPress={() => Alert.alert(h, 'Help article coming soon.')}
+            <Pressable key={h} onPress={() => Alert.alert(h, tr('Help article coming soon.'))}
               style={[s.faqRow, i < articles.length - 1 && s.faqLine]}>
               <Text style={s.faqText}>{h}</Text>
               <Ionicons name="chevron-forward" size={14} color={colors.textTertiary} />
@@ -557,12 +552,12 @@ export function SupportHomeScreen({ onBack, onOpenCase, onNewCase }: {
           <Pressable onPress={() => Linking.openURL(`tel:${SUPPORT_PHONE}`)}
             style={({ pressed }) => [s.ghostWide, pressed && s.pressed]}>
             <Ionicons name="call-outline" size={15} color="#5c5c58" />
-            <Text style={s.ghostWideText}>CALL US</Text>
+            <Text style={s.ghostWideText}>{tr('CALL US')}</Text>
           </Pressable>
           <Pressable onPress={onNewCase}
             style={({ pressed }) => [s.darkWide, pressed && s.pressed]}>
             <Ionicons name="add" size={16} color="#fff" />
-            <Text style={s.wideDarkText}>NEW CASE</Text>
+            <Text style={s.wideDarkText}>{tr('NEW CASE')}</Text>
           </Pressable>
         </View>
       </ScrollView>

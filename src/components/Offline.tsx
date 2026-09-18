@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, font, radius, shadow } from '../theme';
 import { Display } from './ui';
+import { loc, tr } from '../lib/i18n';
 
 // 25a the banner over cached content, 25b the hard failure when there is no
 // cache to fall back on.
@@ -30,7 +31,7 @@ export function useOnline() {
 }
 
 const clock = (d: Date) =>
-  d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  d.toLocaleTimeString(loc('en-US'), { hour: 'numeric', minute: '2-digit' });
 
 // ---- 25a -----------------------------------------------------------------
 export function OfflineBanner({ since, onRetry }: { since: Date; onRetry?: () => void }) {
@@ -38,12 +39,12 @@ export function OfflineBanner({ since, onRetry }: { since: Date; onRetry?: () =>
     <View style={s.banner}>
       <Ionicons name="cloud-offline-outline" size={16} color={colors.accent} />
       <View style={s.grow}>
-        <Text style={s.bannerTitle}>You're offline</Text>
-        <Text style={s.bannerSub}>Showing what we saved at {clock(since)}</Text>
+        <Text style={s.bannerTitle}>{tr('You\'re offline')}</Text>
+        <Text style={s.bannerSub}>{tr('Showing what we saved at {since}', { since: clock(since) })}</Text>
       </View>
       <Pressable onPress={onRetry} disabled={!onRetry}
         style={({ pressed }) => [s.retry, pressed && s.pressed]}>
-        <Text style={s.retryText}>RETRY</Text>
+        <Text style={s.retryText}>{tr('RETRY')}</Text>
       </Pressable>
     </View>
   );
@@ -59,22 +60,21 @@ export function NoConnection({ title, onRetry, onBookings }: {
         <Ionicons name="cloud-offline-outline" size={36} color={colors.textTertiary} />
       </View>
       <View>
-        <Display size={21} style={s.title}>No connection</Display>
+        <Display size={21} style={s.title}>{tr('No connection')}</Display>
         <Text style={s.body}>
-          Sterncut needs a connection to {title ?? 'find salons near you'}. Your bookings and
-          coupons still work offline.
+          {tr('Sterncut needs a connection to {title}. Your bookings and coupons still work offline.', { title: title ?? tr('find salons near you') })}
         </Text>
       </View>
       <Pressable onPress={onRetry} style={({ pressed }) => [s.tryBtn, pressed && s.pressed]}>
-        <Text style={s.tryText}>TRY AGAIN</Text>
+        <Text style={s.tryText}>{tr('TRY AGAIN')}</Text>
       </Pressable>
-      {!!onBookings && <Text style={s.link} onPress={onBookings}>Open my bookings</Text>}
+      {!!onBookings && <Text style={s.link} onPress={onBookings}>{tr('Open my bookings')}</Text>}
 
       <View style={s.note}>
         <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary}
           style={s.noteIcon} />
         <Text style={s.noteText}>
-          Already in a queue? Your ticket stays valid — the shop sees it on their side.
+          {tr('Already in a queue? Your ticket stays valid — the shop sees it on their side.')}
         </Text>
       </View>
     </View>

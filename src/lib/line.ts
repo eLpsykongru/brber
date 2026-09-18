@@ -3,6 +3,7 @@
 // text (0119's guest_next_check); these decide what the barber sees and is asked.
 
 import type { Block, Range, Window } from './slots';
+import { tr } from './i18n';
 
 /** A5 — the called-chair hold. Barber-side: when it runs out he is asked (BTD-15), nothing is removed. */
 export const HOLD_MIN = 8;
@@ -157,10 +158,10 @@ export function ladderOf(r: ChairRow & { created_at: string }, barberId: string)
   const line = isLinePlace(r, barberId);
   const reached = { request: 0, waiting: 1, called: 2, in_chair: 3, done: 4 }[rungOf(r)];
   const steps: [string, string | null][] = [
-    [line ? 'In the line' : 'Booked', r.created_at],
-    [line ? 'Called' : "He's here", r.checked_in_at],
-    ['In the chair', r.started_at],
-    [`Done · ${Math.round(collectCents(r) / 100)} DH in cash`, r.completed_at],
+    [line ? tr('In the line') : tr('Booked'), r.created_at],
+    [line ? tr('Called') : tr("He's here"), r.checked_in_at],
+    [tr('In the chair'), r.started_at],
+    [tr('Done · {cash} DH in cash', { cash: Math.round(collectCents(r) / 100) }), r.completed_at],
   ];
   return steps.map(([label, at], i) => ({
     label, at, state: i < reached ? 'past' : i === reached ? 'next' : 'later',

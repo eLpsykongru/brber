@@ -6,6 +6,7 @@ import {
 import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { dark as d, inter, serif } from '../theme';
+import { loc, tr, trn, trRich } from '../lib/i18n';
 
 // OSH-11/12/13 — Owner · Shop turn 6, gap G3. One screen, three states: the
 // setting, the confirmation, and the shop that asks for nothing. 0076 is the
@@ -30,7 +31,7 @@ const money = (cents: number) => dh(cents).toLocaleString('fr-FR').replace(/ |
 function whenSet(iso: string | null) {
   if (!iso) return null;
   const dt = new Date(iso);
-  return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+  return dt.toLocaleDateString(loc('en-GB'), { day: 'numeric', month: 'long' });
 }
 
 export default function DepositScreen({ onBack }: { onBack: () => void }) {
@@ -43,14 +44,14 @@ export default function DepositScreen({ onBack }: { onBack: () => void }) {
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.rpc('shop_deposit_state');
-    if (error) { Alert.alert('Could not load the deposit', error.message); return; }
+    if (error) { Alert.alert(tr('Could not load the deposit'), error.message); return; }
     const s = data as State;
     setSt(s);
     setPct((p) => p ?? s.pct);
   }, []);
   useEffect(() => { load(); }, [load]);
 
-  if (!st || pct == null) return <Screen><TopBar title="Deposit" onBack={onBack} /></Screen>;
+  if (!st || pct == null) return <Screen><TopBar title={tr('Deposit')} onBack={onBack} /></Screen>;
 
   const on = pct > 0;
   const dirty = pct !== st.pct;
@@ -67,7 +68,7 @@ export default function DepositScreen({ onBack }: { onBack: () => void }) {
     setBusy(true);
     const { error } = await supabase.rpc('set_shop_deposit', { p_pct: next });
     setBusy(false);
-    if (error) { Alert.alert('Could not save', error.message); return; }
+    if (error) { Alert.alert(tr('Could not save'), error.message); return; }
     setConfirm(false);
     setPct(next);
     await load();
@@ -77,45 +78,45 @@ export default function DepositScreen({ onBack }: { onBack: () => void }) {
   if (!on) {
     return (
       <Screen>
-        <TopBar title="Deposit" onBack={onBack} />
+        <TopBar title={tr('Deposit')} onBack={onBack} />
 
         <Card style={s.row}>
           <View style={s.grow}>
-            <T w="b" size={13.5}>Ask for a deposit</T>
-            <T size={11} c={d.sub} style={s.gap3}>Off — customers book with nothing held</T>
+            <T w="b" size={13.5}>{tr('Ask for a deposit')}</T>
+            <T size={11} c={d.sub} style={s.gap3}>{tr('Off — customers book with nothing held')}</T>
           </View>
           <Toggle on={false} color={d.muted} onPress={() => setPct(st!.floor_pct)} />
         </Card>
 
         <Card style={s.bigCard}>
-          <Eyebrow ls={1.7}>Your shop asks for</Eyebrow>
+          <Eyebrow ls={1.7}>{tr('Your shop asks for')}</Eyebrow>
           <Text style={s.big}>0<Text style={s.bigUnit}>%</Text></Text>
           <T size={12.5} c={d.sub} style={s.lead}>
-            Bookings at {st.salon_name} work exactly as they do today: the whole price in cash
-            at the shop, nothing held in advance.
+            {tr('Bookings at {salon_name} work exactly as they do today: the whole price in cash at the shop, nothing held in advance.', { salon_name: st.salon_name })}
           </T>
         </Card>
 
-        <Eyebrow>What that means</Eyebrow>
+        <Eyebrow>{tr('What that means')}</Eyebrow>
         <Card style={s.meansRow}>
           <Ico name="clock" size={15} color={d.sub} />
           <T size={12} c={d.textDim} style={s.meansText}>
-            A slot costs nothing to break. Someone who doesn't turn up loses nothing.
+            {tr('A slot costs nothing to break. Someone who doesn\'t turn up loses nothing.')}
           </T>
         </Card>
         <Card style={s.meansRow}>
           <Ico name="alert-triangle" size={15} color={d.red} />
           <T size={12} c={d.textDim} style={s.meansText}>
             {st.no_shows > 0
-              ? <>Last month, your chairs lost <T w="b" c={d.red} size={12}>{st.no_shows} slot{st.no_shows === 1 ? '' : 's'}</T> to no-shows — {money(st.no_show_cents)} DH of chair time.</>
-              : <>No no-shows in the last month. A deposit is what keeps it that way when it changes.</>}
+              ? <>{trRich('Last month, your chairs lost <b>{slots}</b> to no-shows — {money} DH of chair time.', {
+                b: (text, key) => <T key={key} w="b" c={d.red} size={12}>{text}</T>,
+              }, { slots: trn(st.no_shows, '{n} slot', '{n} slots'), money: money(st.no_show_cents) })}</>
+              : <>{tr('No no-shows in the last month. A deposit is what keeps it that way when it changes.')}</>}
           </T>
         </Card>
         <Card style={s.meansRow}>
           <Ico name="list" size={15} color={d.sub} />
           <T size={12} c={d.textDim} style={s.meansText}>
-            Customers keep their wallets. Money already in one can't be spent here until you
-            turn deposits on.
+            {tr('Customers keep their wallets. Money already in one can\'t be spent here until you turn deposits on.')}
           </T>
         </Card>
 
@@ -123,12 +124,12 @@ export default function DepositScreen({ onBack }: { onBack: () => void }) {
           <View style={s.lockRow}>
             <Ico name="lock" size={14} color={d.faint} />
             <T size={11.5} c={d.sub} style={s.grow}>
-              Turn it back on and the lowest Sterncut allows is {st.floor_pct}%.
+              {tr('Turn it back on and the lowest Sterncut allows is {floor_pct}%.', { floor_pct: st.floor_pct })}
             </T>
           </View>
         </Note>
 
-        <Btn title={dirty ? 'SAVE · NO DEPOSIT' : 'NO DEPOSIT'} bg={d.card2}
+        <Btn title={dirty ? tr('SAVE · NO DEPOSIT') : tr('NO DEPOSIT')} bg={d.card2}
           onPress={() => (dirty ? save(0) : onBack())} />
       </Screen>
     );
@@ -138,12 +139,12 @@ export default function DepositScreen({ onBack }: { onBack: () => void }) {
   return (
     <>
       <Screen>
-        <TopBar title="Deposit" onBack={onBack} />
+        <TopBar title={tr('Deposit')} onBack={onBack} />
 
         <Card style={s.row}>
           <View style={s.grow}>
-            <T w="b" size={13.5}>Ask for a deposit</T>
-            <T size={11} c={d.sub} style={s.gap3}>Held from the customer's wallet at booking</T>
+            <T w="b" size={13.5}>{tr('Ask for a deposit')}</T>
+            <T size={11} c={d.sub} style={s.gap3}>{tr('Held from the customer\'s wallet at booking')}</T>
           </View>
           <Toggle on color={d.accent} onPress={() => setPct(0)} />
         </Card>
@@ -151,14 +152,14 @@ export default function DepositScreen({ onBack }: { onBack: () => void }) {
         <Card style={s.bigCard}>
           <View style={s.headRow}>
             <View>
-              <Eyebrow ls={1.7}>Your shop asks for</Eyebrow>
+              <Eyebrow ls={1.7}>{tr('Your shop asks for')}</Eyebrow>
               <Text style={s.big}>{pct}<Text style={s.bigUnit}>%</Text></Text>
             </View>
             {sample && (
               <View style={s.right}>
                 {/* amber: held, not earned */}
-                <T w="eb" size={18} c={d.amber}>{dh(sampleHeld)} DH</T>
-                <T size={10.5} c={d.sub} style={s.gap3}>on a {dh(sample.price_cents)} DH cut</T>
+                <T w="eb" size={18} c={d.amber}>{tr('{sampleHeld} DH', { sampleHeld: dh(sampleHeld) })}</T>
+                <T size={10.5} c={d.sub} style={s.gap3}>{tr('on a {price_cents} DH cut', { price_cents: dh(sample.price_cents) })}</T>
               </View>
             )}
           </View>
@@ -175,9 +176,9 @@ export default function DepositScreen({ onBack }: { onBack: () => void }) {
           <View style={s.boundsRow}>
             <View style={s.lockRow}>
               <Ico name="lock" size={11} color={d.faint} />
-              <T w="b" size={10.5} c={d.faint}>{st.floor_pct}% Sterncut floor</T>
+              <T w="b" size={10.5} c={d.faint}>{tr('{floor_pct}% Sterncut floor', { floor_pct: st.floor_pct })}</T>
             </View>
-            <T w="b" size={10.5} c={d.faint}>{st.ceiling_pct}% ceiling</T>
+            <T w="b" size={10.5} c={d.faint}>{tr('{ceiling_pct}% ceiling', { ceiling_pct: st.ceiling_pct })}</T>
           </View>
 
           {/* ponytail: five taps, not a drag. A real slider is a gesture
@@ -193,16 +194,15 @@ export default function DepositScreen({ onBack }: { onBack: () => void }) {
           </View>
 
           <T size={11} c={d.faint} style={s.foot}>
-            {whenSet(st.since)
-              ? `Now ${st.pct}%, set ${whenSet(st.since)}. `
-              : `Now ${st.pct}%. `}
-            A customer may always choose to pay more — up to the full price — never less.
+            {tr('{x}A customer may always choose to pay more — up to the full price — never less.', { x: whenSet(st.since)
+              ? tr('Now {pct}%, set {since}. ', { pct: st.pct, since: whenSet(st.since) })
+              : tr('Now {pct}%. ', { pct: st.pct }) })}
           </T>
         </Card>
 
         {st.services.length > 0 && (
           <>
-            <Eyebrow>What a customer will be asked</Eyebrow>
+            <Eyebrow>{tr('What a customer will be asked')}</Eyebrow>
             <Card style={s.table}>
               {st.services.slice(0, 4).map((sv, i, a) => {
                 const held = Math.ceil((sv.price_cents * pct) / 100);
@@ -210,11 +210,11 @@ export default function DepositScreen({ onBack }: { onBack: () => void }) {
                   <View key={sv.name}
                     style={[s.svcRow, i < a.length - 1 && s.svcDivider]}>
                     <T size={12.5} w="sb" style={s.grow} numberOfLines={1}>
-                      {sv.name} <T size={12.5} c={d.faint}>{dh(sv.price_cents)} DH</T>
+                      {sv.name} <T size={12.5} c={d.faint}>{tr('{price_cents} DH', { price_cents: dh(sv.price_cents) })}</T>
                     </T>
-                    <T w="b" size={12.5} c={d.amber}>{dh(held)} DH</T>
+                    <T w="b" size={12.5} c={d.amber}>{tr('{held} DH', { held: dh(held) })}</T>
                     <T size={11.5} c={d.sub} style={s.cash}>
-                      {dh(sv.price_cents - held)} DH cash
+                      {tr('{dh} DH cash', { dh: dh(sv.price_cents - held) })}
                     </T>
                   </View>
                 );
@@ -226,38 +226,39 @@ export default function DepositScreen({ onBack }: { onBack: () => void }) {
         <View style={s.heldNote}>
           <Ico name="lock" size={14} color={d.amber} />
           <T size={11.5} c={d.amber} style={s.heldText}>
-            A deposit is <T w="b" size={11.5} c={d.amber}>held</T>, not paid to you. It becomes
-            the shop's when the cut is done, or if the customer doesn't turn up. Rounded to the dirham.
+            {trRich("A deposit is <b>held</b>, not paid to you. It becomes the shop's when the cut is done, or if the customer doesn't turn up. Rounded to the dirham.", {
+              b: (text, key) => <T key={key} w="b" size={11.5} c={d.amber}>{text}</T>,
+            })}
           </T>
         </View>
 
-        <Btn title={dirty ? `SAVE · ${pct}% DEPOSIT` : `${pct}% DEPOSIT`}
+        <Btn title={dirty ? tr('SAVE · {pct}% DEPOSIT', { pct }) : tr('{pct}% DEPOSIT', { pct })}
           onPress={() => (dirty ? setConfirm(true) : onBack())} />
       </Screen>
 
       {/* ---- OSH-12 · confirm, from today, forward only ---- */}
       <Sheet visible={confirm} onClose={() => setConfirm(false)} deep>
         <Serif size={24} style={s.confirmTitle}>
-          {pct > st.pct ? 'Raise' : 'Lower'} the deposit to {pct}%?
+          {tr('{x} the deposit to {pct}%?', { x: pct > st.pct ? tr('Raise') : tr('Lower'), pct })}
         </Serif>
 
         <Card style={s.beforeAfter}>
           <View style={s.baCol}>
-            <Eyebrow ls={1.4} c={d.faint}>Until now</Eyebrow>
+            <Eyebrow ls={1.4} c={d.faint}>{tr('Until now')}</Eyebrow>
             <Text style={s.baNum}>{st.pct}%</Text>
             {sample && (
               <T size={10.5} c={d.faint} style={s.gap3}>
-                {dh(Math.ceil((sample.price_cents * st.pct) / 100))} DH on {dh(sample.price_cents)} DH
+                {tr('{dh} DH on {price_cents} DH', { dh: dh(Math.ceil((sample.price_cents * st.pct) / 100)), price_cents: dh(sample.price_cents) })}
               </T>
             )}
           </View>
           <Ico name="arrow-right" size={17} color={d.muted} />
           <View style={s.baCol}>
-            <Eyebrow ls={1.4} c={d.accent}>From today</Eyebrow>
+            <Eyebrow ls={1.4} c={d.accent}>{tr('From today')}</Eyebrow>
             <Text style={[s.baNum, s.baNumNew]}>{pct}%</Text>
             {sample && (
               <T size={10.5} c={d.amber} style={s.gap3}>
-                {dh(sampleHeld)} DH on {dh(sample.price_cents)} DH
+                {tr('{sampleHeld} DH on {price_cents} DH', { sampleHeld: dh(sampleHeld), price_cents: dh(sample.price_cents) })}
               </T>
             )}
           </View>
@@ -265,17 +266,17 @@ export default function DepositScreen({ onBack }: { onBack: () => void }) {
 
         <Card style={s.table}>
           <View style={[s.svcRow, s.svcDivider]}>
-            <T size={12.5} c={d.sub} style={s.grow}>Applies to</T>
-            <T w="b" size={12.5}>Bookings taken from now</T>
+            <T size={12.5} c={d.sub} style={s.grow}>{tr('Applies to')}</T>
+            <T w="b" size={12.5}>{tr('Bookings taken from now')}</T>
           </View>
           <View style={[s.svcRow, s.svcDivider]}>
-            <T size={12.5} c={d.sub} style={s.grow}>Already booked</T>
-            <T w="b" size={12.5}>{st.already_booked} keep their {st.pct}%</T>
+            <T size={12.5} c={d.sub} style={s.grow}>{tr('Already booked')}</T>
+            <T w="b" size={12.5}>{tr('{already_booked} keep their {pct}%', { already_booked: st.already_booked, pct: st.pct })}</T>
           </View>
           <View style={s.svcRow}>
-            <T size={12.5} c={d.sub} style={s.grow}>Recorded as</T>
+            <T size={12.5} c={d.sub} style={s.grow}>{tr('Recorded as')}</T>
             <T w="b" size={12.5}>
-              Effective {new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long' })}
+              {tr('Effective {toLocaleDateString}', { toLocaleDateString: new Date().toLocaleDateString(loc('en-GB'), { weekday: 'short', day: 'numeric', month: 'long' }) })}
             </T>
           </View>
         </Card>
@@ -283,14 +284,13 @@ export default function DepositScreen({ onBack }: { onBack: () => void }) {
         <View style={s.lockRow}>
           <Ico name="info" size={14} color={d.sub} />
           <T size={11.5} c={d.sub} style={s.grow}>
-            Every customer who has already booked pays the deposit he agreed to. Nothing you
-            change here reaches bookings already taken.
+            {tr('Every customer who has already booked pays the deposit he agreed to. Nothing you change here reaches bookings already taken.')}
           </T>
         </View>
 
-        <Btn title={busy ? 'SAVING…' : `SET ${pct}% FROM TODAY`}
+        <Btn title={busy ? tr('SAVING…') : tr('SET {pct}% FROM TODAY', { pct })}
           onPress={() => !busy && save(pct)} />
-        <GhostBtn title={`KEEP ${st.pct}%`} border="transparent"
+        <GhostBtn title={tr('KEEP {pct}%', { pct: st.pct })} border="transparent"
           onPress={() => { setPct(st.pct); setConfirm(false); }} />
       </Sheet>
     </>

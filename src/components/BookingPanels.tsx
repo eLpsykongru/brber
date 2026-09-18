@@ -8,6 +8,7 @@ import { dark as D } from '../theme';
 import {
   Avatar, Btn, Eyebrow, GhostBtn, Ico, IconName, Note, Sheet, SheetHead, Stars, T,
 } from './dark';
+import { loc, tr, trn } from '../lib/i18n';
 
 // BTD-21 (one row of the chair, on its rungs) and 3d (a request from a flagged client).
 // Both read client_reliability, which is barber-private (0030).
@@ -83,20 +84,20 @@ export type RowSheet = {
 const VERB_SUB = (v: Verb, sheet: RowSheet, isWalkIn: boolean): string => {
   switch (v) {
     case 'CALL HIM':
-      return sheet.unconfirmed ? "He never tapped his text · you'll be asked first"
-        : isWalkIn ? 'Shout the name · the chair holds eight minutes'
-          : "Tells him in chat he's next · the chair holds eight minutes";
-    case "HE'S HERE": return 'He walked in · seat him when the chair is free';
+      return sheet.unconfirmed ? tr("He never tapped his text · you'll be asked first")
+        : isWalkIn ? tr('Shout the name · the chair holds eight minutes')
+          : tr("Tells him in chat he's next · the chair holds eight minutes");
+    case "HE'S HERE": return tr('He walked in · seat him when the chair is free');
     case 'SEAT HIM':
-      return sheet.frees ? `Starts the clock · frees Nº ${String(sheet.frees).padStart(2, '0')} to be called` : 'Starts the clock';
-    case 'DONE': return 'Can be put back until the next man sits down';
+      return sheet.frees ? tr('Starts the clock · frees Nº {no} to be called', { no: String(sheet.frees).padStart(2, '0') }) : tr('Starts the clock');
+    case 'DONE': return tr('Can be put back until the next man sits down');
   }
 };
 
 function whenOf(iso: string) {
   const d = new Date(iso);
   return d.toDateString() === new Date().toDateString()
-    ? hhmm(iso) : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    ? hhmm(iso) : d.toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' });
 }
 
 export default function BookingPanelSheet({
@@ -129,17 +130,17 @@ export default function BookingPanelSheet({
         <View style={s.grow}>
           <T w="b" size={16}>{b.name}</T>
           <T size={11.5} c={D.sub} style={{ marginTop: 3 }}>
-            {b.service} · {b.durationMin} min · {b.isWalkIn ? 'no account'
-              : rel ? `${rel.visits} visit${rel.visits === 1 ? '' : 's'}` : ' '}
+            {tr('{service} · {durationMin} min · {x}', { service: b.service, durationMin: b.durationMin, x: b.isWalkIn ? tr('no account')
+              : rel ? trn(rel.visits, '{n} visit', '{n} visits') : ' ' })}
           </T>
         </View>
-        <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel="Close"
+        <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel={tr('Close')}
           style={({ pressed }) => [s.close, pressed && s.pressed]}>
           <Ico name="x" size={15} />
         </Pressable>
       </View>
 
-      <View style={s.ladder} accessibilityLabel={`Where he is: ${steps.find((x) => x.state === 'next')?.label ?? 'done'}`}>
+      <View style={s.ladder} accessibilityLabel={tr('Where he is: {label}', { label: steps.find((x) => x.state === 'next')?.label ?? tr('done') })}>
         {steps.map((step, i) => (
           <View key={step.label} style={[s.rungRow, i > 0 && s.rungSeam, step.state === 'later' && s.dim]}>
             {step.state === 'past' ? (
@@ -152,7 +153,7 @@ export default function BookingPanelSheet({
             <T w={step.state === 'next' ? 'eb' : 'sb'} size={step.state === 'next' ? 13.5 : 13}
               c={step.state === 'next' ? D.text : D.sub} style={s.grow}>{step.label}</T>
             {step.state === 'next'
-              ? <T w="b" size={11} c={D.accent} ls={0.66}>NEXT STEP</T>
+              ? <T w="b" size={11} c={D.accent} ls={0.66}>{tr('NEXT STEP')}</T>
               : step.at && step.state === 'past'
                 ? <T size={11.5} c={D.faint} style={s.tnum}>{whenOf(step.at)}</T>
                 : null}
@@ -165,32 +166,32 @@ export default function BookingPanelSheet({
         <View style={s.asked}>
           <View style={s.askedHead}>
             <Ico name="message-square" size={13} color={D.amber} />
-            <T w="b" size={9.5} c={D.amber} ls={1.3}>HE ASKED FOR</T>
+            <T w="b" size={9.5} c={D.amber} ls={1.3}>{tr('HE ASKED FOR')}</T>
           </View>
           <T size={13} style={{ lineHeight: 19.5 }}>“{b.notes}”</T>
         </View>
       ) : null}
 
       <View style={s.tiles}>
-        {!b.isWalkIn && <Tile icon="message-circle" label="Chat" onPress={onChat} />}
-        {b.phone && <Tile icon="phone" label="Call" onPress={() => Linking.openURL(`tel:${b.phone}`)} />}
-        {verb === 'DONE' && onService && <Tile icon="scissors" label="Service" onPress={onService} />}
-        <Tile icon="clock" label="History" onPress={onHistory} />
+        {!b.isWalkIn && <Tile icon="message-circle" label={tr('Chat')} onPress={onChat} />}
+        {b.phone && <Tile icon="phone" label={tr('Call')} onPress={() => Linking.openURL(`tel:${b.phone}`)} />}
+        {verb === 'DONE' && onService && <Tile icon="scissors" label={tr('Service')} onPress={onService} />}
+        <Tile icon="clock" label={tr('History')} onPress={onHistory} />
       </View>
       {b.isWalkIn && (
         <T size={11} c={D.faint} style={s.fact}>
-          No chat with a guest — there's no account to message.{b.phone ? ' Use the phone.' : ''}
+          {tr('No chat with a guest — there\'s no account to message.{x}', { x: b.phone ? tr(' Use the phone.') : '' })}
         </T>
       )}
 
       {verb && (
         <Pressable onPress={onPrimary} accessibilityRole="button"
-          accessibilityLabel={verb === 'DONE' ? `Done, collect ${cash}` : verb}
+          accessibilityLabel={verb === 'DONE' ? tr('Done, collect {cash}', { cash }) : tr(verb)}
           style={({ pressed }) => [s.primary, verb === 'DONE' && { backgroundColor: D.green }, pressed && s.pressed]}>
           <View style={s.primaryTitle}>
             {verb === 'DONE' && <Ico name="check" size={15} color={D.bg} />}
             <T w="eb" size={13} c={verb === 'DONE' ? D.bg : '#fff'} ls={0.65}>
-              {verb === 'DONE' ? `DONE · COLLECT ${cash}` : verb}
+              {verb === 'DONE' ? tr('DONE · COLLECT {cash}', { cash }) : tr(verb)}
             </T>
           </View>
           <T size={10.5} c={verb === 'DONE' ? 'rgba(13,13,15,0.7)' : 'rgba(255,255,255,0.75)'}>
@@ -202,20 +203,20 @@ export default function BookingPanelSheet({
       {ahead && (
         <View style={s.footRow}>
           <Pressable onPress={sheet.anotherDayOff ? undefined : onAnotherDay} disabled={!!sheet.anotherDayOff}
-            accessibilityRole="button" accessibilityLabel="Another day"
+            accessibilityRole="button" accessibilityLabel={tr('Another day')}
             style={({ pressed }) => [s.second, !!sheet.anotherDayOff && s.off, pressed && s.pressed]}>
-            <T w="b" size={12} c={D.textDim}>Another day</T>
+            <T w="b" size={12} c={D.textDim}>{tr('Another day')}</T>
           </Pressable>
           {takeOff && (
             <Pressable onPress={onTakeOff} accessibilityRole="button"
               style={({ pressed }) => [s.second, { borderColor: D.redLine }, pressed && s.pressed]}>
-              <T w="b" size={12} c={D.red}>{b.isWalkIn ? 'Take him off' : 'No-show'}</T>
+              <T w="b" size={12} c={D.red}>{b.isWalkIn ? tr('Take him off') : tr('No-show')}</T>
             </Pressable>
           )}
         </View>
       )}
       {ahead && sheet.anotherDayOff && (
-        <T size={11} c={D.faint} style={s.fact}>Another day · {sheet.anotherDayOff}</T>
+        <T size={11} c={D.faint} style={s.fact}>{tr('Another day · {anotherDayOff}', { anotherDayOff: sheet.anotherDayOff })}</T>
       )}
     </Sheet>
   );
@@ -236,7 +237,7 @@ export function BookingRequestSheet({
 
   return (
     <Sheet visible={visible} onClose={onClose} deep>
-      <SheetHead title="Booking request" onClose={onClose} left />
+      <SheetHead title={tr('Booking request')} onClose={onClose} left />
 
       <View style={s.reqHead}>
         <Avatar size={52} initials={b.initials} />
@@ -245,7 +246,7 @@ export function BookingRequestSheet({
           <View style={s.reqMeta}>
             {stars != null && <Stars n={stars} size={11} />}
             <T size={11} c={D.sub}>
-              {rel ? `${rel.visits} visit${rel.visits === 1 ? '' : 's'}${rel.no_shows ? ` · ${rel.no_shows} no-show${rel.no_shows > 1 ? 's' : ''}` : ''}` : 'New client'}
+              {rel ? trn(rel.visits, '{n} visit{x2}', '{n} visits{x2}', { x2: rel.no_shows ? trn(rel.no_shows, ' · {n} no-show', ' · {n} no-shows') : '' }) : tr('New client')}
             </T>
           </View>
         </View>
@@ -255,12 +256,12 @@ export function BookingRequestSheet({
         <View style={s.flagCard}>
           <View style={s.flagTitle}>
             <Ico name="alert-triangle" size={15} color={D.amber} />
-            <T w="b" size={11} c={D.amber} ls={1.4}>FLAGGED BY YOUR SHOP</T>
+            <T w="b" size={11} c={D.amber} ls={1.4}>{tr('FLAGGED BY YOUR SHOP')}</T>
           </View>
           <T size={13} c={D.textDim} style={s.flagBody}>
-            {rel?.reason ?? 'Reliability flag on this client.'}
-            {rel?.no_shows ? ` ${rel.no_shows} missed booking${rel.no_shows > 1 ? 's' : ''}` : ''}
-            {rel?.last_no_show_days != null ? `, last one ${rel.last_no_show_days} days ago.` : '.'}
+            {rel?.reason ?? tr('Reliability flag on this client.')}
+            {rel?.no_shows ? trn(rel.no_shows, ' {n} missed booking', ' {n} missed bookings') : ''}
+            {rel?.last_no_show_days != null ? tr(', last one {last_no_show_days} days ago.', { last_no_show_days: rel.last_no_show_days }) : '.'}
           </T>
           {rel?.require_full_payment && (
             <View style={s.flagFoot}>
@@ -268,7 +269,7 @@ export function BookingRequestSheet({
               {/* ponytail: the wallet is credit-only (0022), so we state the terms, not a
                   settled payment — the debit rail is the open BACKLOG Phase-2 item. */}
               <T w="sb" size={12} c={D.amber}>
-                You asked for {dh(b.priceCents)} up front · due at the shop
+                {tr('You asked for {priceCents} up front · due at the shop', { priceCents: dh(b.priceCents) })}
               </T>
             </View>
           )}
@@ -276,26 +277,26 @@ export function BookingRequestSheet({
       )}
 
       <View style={s.detail}>
-        <Row label="Service" value={`${b.service} · ${b.durationMin} min`} />
-        <Row label="Slot" value={`${b.whenLabel} · ${b.timeLabel}`} />
+        <Row label={tr('Service')} value={tr('{service} · {durationMin} min', { service: b.service, durationMin: b.durationMin })} />
+        <Row label={tr('Slot')} value={`${b.whenLabel} · ${b.timeLabel}`} />
         {/* 39d — he reads this in the chair, which is why it sits with the service */}
-        {b.notes ? <Row label="They said" value={b.notes} /> : null}
-        <Row label="Price" value={dh(b.priceCents)} />
+        {b.notes ? <Row label={tr('They said')} value={b.notes} /> : null}
+        <Row label={tr('Price')} value={dh(b.priceCents)} />
       </View>
 
       <Note bg={D.card2} radius={14}>
-        Declining frees the slot straight away and tells {b.name.split(' ')[0]} in chat.
+        {tr('Declining frees the slot straight away and tells {name} in chat.', { name: b.name.split(' ')[0] })}
       </Note>
 
       <View style={s.footRow}>
-        <GhostBtn title="DECLINE" height={54} style={s.grow} onPress={onDecline} />
-        <Btn title="ACCEPT" height={54} icon="check" bg={D.green} fg={D.bg}
+        <GhostBtn title={tr('DECLINE')} height={54} style={s.grow} onPress={onDecline} />
+        <Btn title={tr('ACCEPT')} height={54} icon="check" bg={D.green} fg={D.bg}
           style={s.growWide} onPress={onAccept} />
       </View>
       {flagged && (
         <Pressable onPress={onClearFlag} accessibilityRole="button"
           style={({ pressed }) => pressed && s.pressed}>
-          <T w="sb" size={12} c={D.sub} style={s.center}>Clear his flag</T>
+          <T w="sb" size={12} c={D.sub} style={s.center}>{tr('Clear his flag')}</T>
         </Pressable>
       )}
     </Sheet>

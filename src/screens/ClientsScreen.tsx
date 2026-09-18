@@ -6,6 +6,7 @@ import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { dark as D, inter, TOP_INSET } from '../theme';
 import ChatScreen from './ChatScreen';
+import { tr, trn } from '../lib/i18n';
 
 // Client book v1 (BACKLOG bet #3, partial): everyone who ever sat in the chair,
 // aggregated from booking history. Preferences + debt ledger are still TODO.
@@ -36,10 +37,10 @@ const REGULAR_VISITS = 3; // ponytail: 3+ cuts is a regular until someone says o
 
 function agoLabel(iso: string): string {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
-  if (days < 1) return 'today';
-  if (days < 30) return `${days}d ago`;
+  if (days < 1) return tr('today');
+  if (days < 30) return tr('{d}d ago', { d: days });
   const m = Math.floor(days / 30);
-  return m < 12 ? `${m}mo ago` : `${Math.floor(m / 12)}y ago`;
+  return m < 12 ? tr('{m}mo ago', { m }) : tr('{y}y ago', { y: Math.floor(m / 12) });
 }
 
 export default function ClientsScreen({ barberId, onChromeHidden }: {
@@ -57,15 +58,15 @@ export default function ClientsScreen({ barberId, onChromeHidden }: {
       .in('status', ['confirmed', 'no_show'])
       .lt('starts_at', new Date().toISOString())
       .order('starts_at', { ascending: false });
-    if (error) return Alert.alert('Could not load clients', error.message);
+    if (error) return Alert.alert(tr('Could not load clients'), error.message);
 
     const map = new Map<string, Client>();
     for (const r of (data as unknown as Row[])) {
       const isWalkIn = r.customer_id === barberId;
-      const key = isWalkIn ? `w:${(r.walk_in_name ?? 'Walk-in').trim().toLowerCase()}` : r.customer_id;
+      const key = isWalkIn ? `w:${(r.walk_in_name ?? tr('Walk-in')).trim().toLowerCase()}` : r.customer_id;
       const c = map.get(key) ?? {
         key,
-        name: isWalkIn ? (r.walk_in_name ?? 'Walk-in') : (r.customer?.full_name ?? 'Client'),
+        name: isWalkIn ? (r.walk_in_name ?? tr('Walk-in')) : (r.customer?.full_name ?? tr('Client')),
         avatar: isWalkIn ? null : r.customer?.avatar_url ?? null,
         phone: isWalkIn ? null : r.customer?.phone ?? null,
         isWalkIn,
@@ -103,17 +104,17 @@ export default function ClientsScreen({ barberId, onChromeHidden }: {
   return (
     <View style={s.screen}>
       <View style={s.head}>
-        <Serif size={17} ls={0.18} style={s.title}>Clients</Serif>
+        <Serif size={17} ls={0.18} style={s.title}>{tr('Clients')}</Serif>
         <View style={s.search}>
           <Ico name="search" size={16} color={D.sub} />
           <TextInput value={query} onChangeText={setQuery}
-            placeholder="Search clients" placeholderTextColor={D.sub}
-            accessibilityLabel="Search clients" style={s.searchInput} />
+            placeholder={tr('Search clients')} placeholderTextColor={D.sub}
+            accessibilityLabel={tr('Search clients')} style={s.searchInput} />
         </View>
         <View style={s.tiles}>
-          <Tile label="TOTAL" value={String(clients.length)} />
-          <Tile label="REGULARS" value={String(regulars)} />
-          <Tile label="NO-SHOWS" value={String(noShows)} color={noShows ? D.red : undefined} />
+          <Tile label={tr('TOTAL')} value={String(clients.length)} />
+          <Tile label={tr('REGULARS')} value={String(regulars)} />
+          <Tile label={tr('NO-SHOWS')} value={String(noShows)} color={noShows ? D.red : undefined} />
         </View>
       </View>
 
@@ -123,7 +124,7 @@ export default function ClientsScreen({ barberId, onChromeHidden }: {
         contentContainerStyle={s.list}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <T size={13} c={D.sub} style={s.empty}>No clients yet — they appear after their first visit.</T>}
+          <T size={13} c={D.sub} style={s.empty}>{tr('No clients yet — they appear after their first visit.')}</T>}
         renderItem={({ item }) => {
           const stars = item.visits + item.noShows > 0 ? Math.max(1, 5 - item.noShows) : null;
           const warm = item.visits >= REGULAR_VISITS && !item.noShows;
@@ -144,12 +145,10 @@ export default function ClientsScreen({ barberId, onChromeHidden }: {
               <View style={s.grow}>
                 <T w="b" size={14}>
                   {item.name}
-                  {item.isWalkIn ? <T w="m" size={11} c={D.sub}> · walk-in</T> : null}
+                  {item.isWalkIn ? <T w="m" size={11} c={D.sub}>{' '}{tr('· walk-in')}</T> : null}
                 </T>
                 <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-                  {item.visits} visit{item.visits === 1 ? '' : 's'} · last {agoLabel(item.lastVisit)}
-                  {item.noShows ? ` · ${item.noShows} no-show${item.noShows === 1 ? '' : 's'}` : ''}
-                  {item.isWalkIn ? ' · no account' : ''}
+                  {trn(item.visits, '{n} visit · last {lastVisit}{x2}{x3}', '{n} visits · last {lastVisit}{x2}{x3}', { lastVisit: agoLabel(item.lastVisit), x2: item.noShows ? trn(item.noShows, ' · {n} no-show', ' · {n} no-shows') : '', x3: item.isWalkIn ? tr(' · no account') : '' })}
                 </T>
               </View>
               {stars != null && !item.isWalkIn && <Stars n={stars} />}

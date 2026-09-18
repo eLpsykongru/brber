@@ -8,6 +8,7 @@ import { Display } from '../components/ui';
 import { isUuid, parseShopCode } from '../lib/shopCode';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow } from '../theme';
+import { tr } from '../lib/i18n';
 
 // Turn 27 (walk-in check-in) and turn 28 (the full-screen "You're next").
 //
@@ -46,7 +47,7 @@ export default function CheckInScreen({ onClose, onJoined }: {
     if (looking.current) return false;
     const parsed = parseShopCode(raw);
     if (!parsed) {
-      Alert.alert('Not a Sterncut code', 'That code is not one of ours.');
+      Alert.alert(tr('Not a Sterncut code'), tr('That code is not one of ours.'));
       return false;
     }
     let ids: { salon: string; barber?: string } = { salon: parsed.shop, barber: parsed.barber };
@@ -57,12 +58,12 @@ export default function CheckInScreen({ onClose, onJoined }: {
         { p_shop: parsed.shop, p_barber: parsed.barber ?? null });
       looking.current = false;
       if (error) {
-        Alert.alert('Could not check that code', error.message);
+        Alert.alert(tr('Could not check that code'), error.message);
         return false;
       }
       const found = data as { salon: string | null; barber: string | null } | null;
       if (!found?.salon) {
-        Alert.alert('Not a Sterncut code', 'That code is not one of ours.');
+        Alert.alert(tr('Not a Sterncut code'), tr('That code is not one of ours.'));
         return false;
       }
       ids = { salon: found.salon, barber: found.barber ?? undefined };
@@ -87,12 +88,12 @@ export default function CheckInScreen({ onClose, onJoined }: {
       <View style={s.scanVeil} />
 
       <View style={s.scanTop}>
-        <Pressable onPress={onClose} hitSlop={8} accessibilityLabel="Close"
+        <Pressable onPress={onClose} hitSlop={8} accessibilityLabel={tr('Close')}
           style={({ pressed }) => [s.glassPuck, pressed && s.pressed]}>
           <Ionicons name="close" size={16} color="#fff" />
         </Pressable>
-        <Text style={s.scanTitle}>CHECK IN</Text>
-        <Pressable onPress={() => setTorch((t) => !t)} hitSlop={8} accessibilityLabel="Torch"
+        <Text style={s.scanTitle}>{tr('CHECK IN')}</Text>
+        <Pressable onPress={() => setTorch((t) => !t)} hitSlop={8} accessibilityLabel={tr('Torch')}
           style={({ pressed }) => [s.glassPuck, pressed && s.pressed]}>
           <Ionicons name={torch ? 'flashlight' : 'flashlight-outline'} size={17} color="#fff" />
         </Pressable>
@@ -108,15 +109,15 @@ export default function CheckInScreen({ onClose, onJoined }: {
 
       <View style={s.scanCopy}>
         <Display size={24} style={s.scanHead}>
-          {permission?.granted ? 'Scan the code\nat the counter' : 'Shop code'}
+          {permission?.granted ? tr('Scan the code\nat the counter') : tr('Shop code')}
         </Display>
         <Text style={s.scanSub}>
           {permission?.granted
-            ? 'Every Sterncut shop has one by the mirror. It puts you in today\'s queue.'
+            ? tr('Every Sterncut shop has one by the mirror. It puts you in today\'s queue.')
             // 38b — the QR is a convenience, not the mechanism. Six characters
             // under the poster do the same job, so lead with that rather than
             // with the permission he has already refused once.
-            : 'Six characters, printed under the QR on the shop\'s poster.'}
+            : tr('Six characters, printed under the QR on the shop\'s poster.')}
         </Text>
       </View>
 
@@ -124,11 +125,11 @@ export default function CheckInScreen({ onClose, onJoined }: {
         <Pressable onPress={() => setManual(true)}
           style={({ pressed }) => [s.glassBtn, pressed && s.pressed]}>
           <Ionicons name="qr-code-outline" size={16} color="#fff" />
-          <Text style={s.glassBtnText}>Enter the shop code instead</Text>
+          <Text style={s.glassBtnText}>{tr('Enter the shop code instead')}</Text>
         </Pressable>
-        <Text style={s.scanFine}>No code at the shop? Search the salon and tap Join queue.</Text>
+        <Text style={s.scanFine}>{tr('No code at the shop? Search the salon and tap Join queue.')}</Text>
         {permission && !permission.granted && (
-          <Text style={s.scanLink} onPress={() => Linking.openSettings()}>Allow the camera</Text>
+          <Text style={s.scanLink} onPress={() => Linking.openSettings()}>{tr('Allow the camera')}</Text>
         )}
       </View>
 
@@ -136,13 +137,13 @@ export default function CheckInScreen({ onClose, onJoined }: {
         <Pressable style={s.scrim} onPress={() => setManual(false)} />
         <View style={s.sheet}>
           <View style={s.grabber} />
-          <Display size={18} style={s.center}>Shop code</Display>
+          <Display size={18} style={s.center}>{tr('Shop code')}</Display>
           <TextInput style={s.codeInput} value={code} onChangeText={setCode}
-            autoCapitalize="none" placeholder="Paste the link or code"
+            autoCapitalize="none" placeholder={tr('Paste the link or code')}
             placeholderTextColor={colors.textTertiary} />
           <Pressable onPress={() => take(code)} disabled={!code.trim()}
             style={({ pressed }) => [s.wideDark, !code.trim() && s.disabled, pressed && s.pressed]}>
-            <Text style={s.wideDarkText}>CHECK IN</Text>
+            <Text style={s.wideDarkText}>{tr('CHECK IN')}</Text>
           </Pressable>
         </View>
       </Modal>
@@ -186,12 +187,12 @@ function ConfirmWalkIn({ salonId, preferBarber, onClose, onJoined }: {
     ?? services.find((v) => v.name === serviceName) ?? null;
 
   async function take() {
-    if (!chosen || !service) return Alert.alert('Pick a service', 'Choose what you are having.');
+    if (!chosen || !service) return Alert.alert(tr('Pick a service'), tr('Choose what you are having.'));
     setBusy(true);
     const { data, error } = await supabase.rpc('join_queue',
       { p_barber: chosen.barber_id, p_service: service.id });
     setBusy(false);
-    if (error) return Alert.alert('Could not join the queue', error.message);
+    if (error) return Alert.alert(tr('Could not join the queue'), error.message);
     onJoined(data as string);
   }
 
@@ -204,7 +205,7 @@ function ConfirmWalkIn({ salonId, preferBarber, onClose, onJoined }: {
         <View style={s.grabber} />
         <View style={s.sheetHead}>
           <View style={s.sheetSlot} />
-          <Display size={18} style={s.sheetTitle}>Join the queue</Display>
+          <Display size={18} style={s.sheetTitle}>{tr('Join the queue')}</Display>
           <Pressable onPress={onClose} hitSlop={8} style={[s.sheetSlot, s.sheetSlotEnd]}>
             <Ionicons name="close" size={16} color={colors.text} />
           </Pressable>
@@ -215,38 +216,37 @@ function ConfirmWalkIn({ salonId, preferBarber, onClose, onJoined }: {
             <Ionicons name="storefront-outline" size={20} color={colors.accent} />
           </View>
           <View style={s.grow}>
-            <Text style={s.shopName}>{salon?.name ?? 'Salon'}</Text>
-            <Text style={s.shopSub}>You're at the shop · code verified</Text>
+            <Text style={s.shopName}>{salon?.name ?? tr('Salon')}</Text>
+            <Text style={s.shopSub}>{tr('You\'re at the shop · code verified')}</Text>
           </View>
           <View style={s.tick}><Ionicons name="checkmark" size={11} color="#16A34A" /></View>
         </View>
 
         <View style={s.waitCard}>
           <View style={s.waitNow}>
-            <Text style={s.waitLabel}>WAIT NOW</Text>
-            <Text style={s.waitValue}>~{chosen?.wait_min ?? 0} min</Text>
+            <Text style={s.waitLabel}>{tr('WAIT NOW')}</Text>
+            <Text style={s.waitValue}>{tr('~{wait_min} min', { wait_min: chosen?.wait_min ?? 0 })}</Text>
           </View>
           <View style={s.waitDivider} />
           <Text style={s.waitCopy}>
-            {chosen?.ahead ?? 0} {chosen?.ahead === 1 ? 'person' : 'people'} ahead ·
-            {' '}you'd be ticket Nº {String(ticketNo).padStart(2, '0')}
+            {tr('{ahead} {x} ahead · you\'d be ticket Nº {ticketNo}', { ahead: chosen?.ahead ?? 0, x: chosen?.ahead === 1 ? tr('person') : tr('people'), ticketNo: String(ticketNo).padStart(2, '0') })}
           </Text>
         </View>
 
-        <Text style={s.eyebrow}>SERVICE</Text>
+        <Text style={s.eyebrow}>{tr('SERVICE')}</Text>
         <View style={s.chipRow}>
           {menu.map((v) => {
             const on = serviceName === v.name;
             return (
               <Pressable key={v.name} onPress={() => setServiceName(v.name)}
                 style={[s.chip, on && s.chipOn]}>
-                <Text style={[s.chipText, on && s.chipTextOn]}>{v.name} · {dh(v.price_cents)} DH</Text>
+                <Text style={[s.chipText, on && s.chipTextOn]}>{tr('{name} · {price_cents} DH', { name: v.name, price_cents: dh(v.price_cents) })}</Text>
               </Pressable>
             );
           })}
         </View>
 
-        <Text style={s.eyebrow}>BARBER</Text>
+        <Text style={s.eyebrow}>{tr('BARBER')}</Text>
         <View style={s.barberRow}>
           {ests.slice(0, 3).map((e) => {
             const on = chosen?.barber_id === e.barber_id;
@@ -260,7 +260,7 @@ function ConfirmWalkIn({ salonId, preferBarber, onClose, onJoined }: {
                   </Text>
                 </View>
                 <Text style={s.barberName}>{e.name.split(' ')[0]}</Text>
-                <Text style={[s.barberWait, soon && s.barberWaitSoon]}>~{e.wait_min} min</Text>
+                <Text style={[s.barberWait, soon && s.barberWaitSoon]}>{tr('~{wait_min} min', { wait_min: e.wait_min })}</Text>
               </Pressable>
             );
           })}
@@ -270,14 +270,13 @@ function ConfirmWalkIn({ salonId, preferBarber, onClose, onJoined }: {
           <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary}
             style={s.noteIcon} />
           <Text style={s.noteText}>
-            No deposit for walk-ins — pay in cash at the chair. Stay in the shop or you lose your
-            place.
+            {tr('No deposit for walk-ins — pay in cash at the chair. Stay in the shop or you lose your place.')}
           </Text>
         </View>
 
         <Pressable onPress={take} disabled={busy || !service}
           style={({ pressed }) => [s.wideDark, (busy || !service) && s.disabled, pressed && s.pressed]}>
-          <Text style={s.wideDarkText}>TAKE TICKET Nº {String(ticketNo).padStart(2, '0')}</Text>
+          <Text style={s.wideDarkText}>{tr('TAKE TICKET Nº {ticketNo}', { ticketNo: String(ticketNo).padStart(2, '0') })}</Text>
         </Pressable>
       </View>
     </Modal>
@@ -295,30 +294,29 @@ export function WalkInTicketScreen({ ticketNo, ahead, waitMin, barberName, salon
         <Ionicons name="checkmark" size={32} color="#16A34A" />
       </View>
       <View>
-        <Display size={28} style={s.center}>You're in</Display>
+        <Display size={28} style={s.center}>{tr('You\'re in')}</Display>
         <Text style={s.centreSub}>
-          Take a seat — we'll ping you when you're next. Pay {barberName.split(' ')[0]} in cash at
-          the chair.
+          {tr('Take a seat — we\'ll ping you when you\'re next. Pay {barberName} in cash at the chair.', { barberName: barberName.split(' ')[0] })}
         </Text>
       </View>
 
       <View style={s.ticketCard}>
-        <Text style={s.ticketLabel}>WALK-IN TICKET</Text>
+        <Text style={s.ticketLabel}>{tr('WALK-IN TICKET')}</Text>
         <Text style={s.ticketNo}>Nº {String(ticketNo).padStart(2, '0')}</Text>
         <Text style={s.ticketWho}>{barberName.split(' ')[0]} · {salonName}</Text>
         <View style={s.ticketStats}>
-          <Stat value={`${ahead}`} label="AHEAD" />
+          <Stat value={`${ahead}`} label={tr('AHEAD')} />
           <View style={s.statDivider} />
-          <Stat value={`~${waitMin}`} unit=" min" label="EST. WAIT" />
+          <Stat value={`~${waitMin}`} unit={tr(' min')} label={tr('EST. WAIT')} />
           <View style={s.statDivider} />
-          <Stat value={dh(priceCents)} unit=" DH" label="IN CASH" />
+          <Stat value={dh(priceCents)} unit={tr(' DH')} label={tr('IN CASH')} />
         </View>
       </View>
 
       <Pressable onPress={onQueue} style={({ pressed }) => [s.wideDark, pressed && s.pressed]}>
-        <Text style={s.wideDarkText}>VIEW LIVE QUEUE</Text>
+        <Text style={s.wideDarkText}>{tr('VIEW LIVE QUEUE')}</Text>
       </Pressable>
-      <Text style={s.link} onPress={onLeave}>Leave the queue</Text>
+      <Text style={s.link} onPress={onLeave}>{tr('Leave the queue')}</Text>
     </View>
   );
 }
@@ -353,7 +351,7 @@ export function YoureNextScreen({ phase, ticketNo, barberName, salonName, addres
         <View style={s.liveRow}>
           <View style={[s.liveDot, chair && s.liveDotGreen]} />
           <Text style={[s.liveText, chair && s.liveTextDim]}>
-            {chair ? 'IN PROGRESS' : 'LIVE QUEUE'}
+            {chair ? tr('IN PROGRESS') : tr('LIVE QUEUE')}
           </Text>
         </View>
         {/* ponytail: the chair state has no dismiss in the mock. It needs one —
@@ -361,7 +359,7 @@ export function YoureNextScreen({ phase, ticketNo, barberName, salonName, addres
             customer on a takeover. Tapping the ticket is the escape hatch. */}
         <Pressable onPress={chair ? onAck : undefined} disabled={!chair} hitSlop={8}
           style={[s.takeTicket, chair && s.takeTicketChair]}>
-          <Text style={s.takeTicketText}>TICKET Nº {String(ticketNo).padStart(2, '0')}</Text>
+          <Text style={s.takeTicketText}>{tr('TICKET Nº {ticketNo}', { ticketNo: String(ticketNo).padStart(2, '0') })}</Text>
         </Pressable>
       </View>
 
@@ -381,31 +379,33 @@ export function YoureNextScreen({ phase, ticketNo, barberName, salonName, addres
 
         <View>
           <Text style={[s.takeTitle, chair && s.takeTitleChair]}>
-            {chair ? 'In the chair' : "You're\nnext"}
+            {chair ? tr('In the chair') : tr('You\'re\nnext')}
           </Text>
           <Text style={[s.takeSub, chair && s.takeSubChair]}>
             {chair
-              ? `${first} started your cut${startedAt ? ` at ${new Date(startedAt).toTimeString().slice(0, 5)}` : ''}. Enjoy it.`
-              : `Head to the chair — ${first} is finishing up. ${salonName}${address ? `, ${address}` : ''}.`}
+              ? (startedAt
+                ? tr('{first} started your cut at {at}. Enjoy it.', { first, at: new Date(startedAt).toTimeString().slice(0, 5) })
+                : tr('{first} started your cut. Enjoy it.', { first }))
+              : tr('Head to the chair — {first} is finishing up. {place}.', { first, place: address ? `${salonName}, ${address}` : salonName })}
           </Text>
         </View>
 
         {chair && priceCents > 0 ? (
           <View style={s.chairMoney}>
             <View>
-              <Text style={s.chairMoneyLabel}>PAID FROM WALLET</Text>
-              <Text style={s.chairMoneyPaid}>{dh(depositCents)} DH</Text>
+              <Text style={s.chairMoneyLabel}>{tr('PAID FROM WALLET')}</Text>
+              <Text style={s.chairMoneyPaid}>{tr('{depositCents} DH', { depositCents: dh(depositCents) })}</Text>
             </View>
             <View style={s.right}>
-              <Text style={s.chairMoneyLabel}>DUE AT THE COUNTER</Text>
-              <Text style={s.chairMoneyDue}>{dh(priceCents - depositCents)} DH</Text>
+              <Text style={s.chairMoneyLabel}>{tr('DUE AT THE COUNTER')}</Text>
+              <Text style={s.chairMoneyDue}>{tr('{dh} DH', { dh: dh(priceCents - depositCents) })}</Text>
             </View>
           </View>
         ) : chair ? null : (
           <View style={s.etaPill}>
             <Ionicons name="time-outline" size={15} color="#fff" />
             <Text style={s.etaText}>
-              About {etaMin ?? 5} minutes{distanceKm != null ? ` · ${distanceKm.toFixed(1)} Km away` : ''}
+              {tr('About {etaMin} minutes{x}', { etaMin: etaMin ?? 5, x: distanceKm != null ? tr(' · {distanceKm} Km away', { distanceKm: distanceKm.toFixed(1) }) : '' })}
             </Text>
           </View>
         )}
@@ -414,19 +414,19 @@ export function YoureNextScreen({ phase, ticketNo, barberName, salonName, addres
       <View style={s.takeFoot}>
         {chair ? (
           <Text style={s.chairFine}>
-            You'll be asked to rate {first} when he marks the cut done.
+            {tr('You\'ll be asked to rate {first} when he marks the cut done.', { first })}
           </Text>
         ) : (
           <>
             <Pressable onPress={onAck} style={({ pressed }) => [s.onMyWay, pressed && s.pressed]}>
-              <Text style={s.onMyWayText}>I'M ON MY WAY</Text>
+              <Text style={s.onMyWayText}>{tr('I\'M ON MY WAY')}</Text>
             </Pressable>
             <Pressable onPress={onMessage} style={({ pressed }) => [s.ghostBtn, pressed && s.pressed]}>
               <Ionicons name="chatbubble-ellipses-outline" size={15} color="#fff" />
-              <Text style={s.ghostText}>MESSAGE {first.toUpperCase()}</Text>
+              <Text style={s.ghostText}>{tr('MESSAGE {first}', { first: first.toUpperCase() })}</Text>
             </Pressable>
             <Text style={s.takeFine}>
-              Need 10 more minutes? Ask {first} to hold your place.
+              {tr('Need 10 more minutes? Ask {first} to hold your place.', { first })}
             </Text>
           </>
         )}

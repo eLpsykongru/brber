@@ -5,6 +5,7 @@ import { dark as D, inter } from '../theme';
 import {
   Avatar, Btn, Eyebrow, GhostBtn, Ico, RadioRow, Serif, Sheet, SheetHead, Stars, T, Toggle,
 } from './dark';
+import { en, tr, trn } from '../lib/i18n';
 
 // "Barber App.dc.html" turn 3 — 3a rate → 3b what went wrong (≤2 stars) → 3c saved.
 // Barber-side stars are about reliability, not the haircut, and never leave the shop.
@@ -20,8 +21,9 @@ export type NextInChair = {
   ticket: string; label: string; service: string; waitingMin: number; priceCents: number;
 };
 
-const TAGS = ['On time', 'Knew what he wanted', 'Easy going', 'Tipped', 'Regular'];
-const VERDICT = ['', 'Hard to have in', 'Difficult', 'Fine', 'Good client', 'Great client'];
+// tags and reasons are saved in English (client_ratings, client_flags) and shown translated
+const TAGS = [en('On time'), en('Knew what he wanted'), en('Easy going'), en('Tipped'), en('Regular')];
+const VERDICT = ['', tr('Hard to have in'), tr('Difficult'), tr('Fine'), tr('Good client'), tr('Great client')];
 const dh = (cents: number) => `${Math.round(cents / 100)} DH`;
 const ordinal = (n: number) => `${n}${['th', 'st', 'nd', 'rd'][(n % 100 - 20) % 10] ?? ['th', 'st', 'nd', 'rd'][n % 100] ?? 'th'}`;
 
@@ -60,8 +62,9 @@ export default function RateClientSheet({
   if (!booking) return null;
   const b = booking;
   const firstName = b.name.split(' ')[0];
-  const lateReason = b.lateMin ? `Turned up ${b.lateMin} min late` : 'Turned up late';
-  const REASONS = [lateReason, "Didn't turn up at all", 'Argued over the price', 'Left without paying', 'Disrespectful'];
+  const lateReason = b.lateMin ? `Turned up ${b.lateMin} min late` : en('Turned up late');
+  const REASONS = [lateReason, en("Didn't turn up at all"), en('Argued over the price'), en('Left without paying'), en('Disrespectful')];
+  const reasonLabel = (r: string) => (r === lateReason && b.lateMin ? tr('Turned up {n} min late', { n: b.lateMin }) : tr(r));
 
   const toggleTag = (t: string) =>
     setTags((cur) => cur.includes(t) ? cur.filter((x) => x !== t) : [...cur, t]);
@@ -74,14 +77,14 @@ export default function RateClientSheet({
     });
     if (error && !error.message.includes('duplicate')) {
       setSaving(false);
-      return Alert.alert('Could not save', error.message);
+      return Alert.alert(tr('Could not save'), error.message);
     }
     if (alsoFlag) {
       const { error: fe } = await supabase.from('client_flags').upsert({
         barber_id: barberId, customer_id: b.customerId,
         reason, require_full_payment: upFront, blocked,
       });
-      if (fe) { setSaving(false); return Alert.alert('Could not flag', fe.message); }
+      if (fe) { setSaving(false); return Alert.alert(tr('Could not flag'), fe.message); }
     }
     setSaving(false);
     setStep('done');
@@ -98,23 +101,23 @@ export default function RateClientSheet({
       <Sheet visible={visible} onClose={onDone} deep gap={15}>
         <View style={s.doneHead}>
           <View style={s.doneCircle}><Ico name="check" size={27} color={D.green} /></View>
-          <Serif size={23} ls={0.02} style={{ marginTop: 13 }}>Cut logged</Serif>
+          <Serif size={23} ls={0.02} style={{ marginTop: 13 }}>{tr('Cut logged')}</Serif>
           <T size={13} c={D.sub} style={s.doneSub}>
-            {firstName}'s rated and paid up. Your day is {dh(b.priceCents)} better.
+            {tr('{firstName}\'s rated and paid up. Your day is {priceCents} better.', { firstName, priceCents: dh(b.priceCents) })}
           </T>
         </View>
         <View style={s.summary}>
-          <Row label="Service" value={b.service} />
-          <Row label="Collected in cash" value={dh(b.priceCents)} />
+          <Row label={tr('Service')} value={b.service} />
+          <Row label={tr('Collected in cash')} value={dh(b.priceCents)} />
           {!b.isWalkIn && (
             <View style={s.sumRow}>
-              <T size={13} c={D.sub}>You rated him</T>
+              <T size={13} c={D.sub}>{tr('You rated him')}</T>
               <Stars n={stars} size={13} />
             </View>
           )}
           <View style={s.rule} />
           <View style={s.sumRowBase}>
-            <T w="b" size={13}>Taken today</T>
+            <T w="b" size={13}>{tr('Taken today')}</T>
             <T w="eb" size={20} c={D.accent} style={s.tnum}>{dh(takenTodayCents)}</T>
           </View>
         </View>
@@ -122,19 +125,19 @@ export default function RateClientSheet({
           <View style={s.nextCard}>
             <View style={s.ticket}><T w="b" size={12} c={D.sub}>{next.ticket}</T></View>
             <View style={{ flex: 1 }}>
-              <Eyebrow ls={1.4}>NEXT IN THE CHAIR</Eyebrow>
+              <Eyebrow ls={1.4}>{tr('NEXT IN THE CHAIR')}</Eyebrow>
               <T w="b" size={14} style={{ marginTop: 3 }}>{next.label} · {next.service}</T>
               <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-                Waiting {next.waitingMin} min · {dh(next.priceCents)}
+                {tr('Waiting {waitingMin} min · {priceCents}', { waitingMin: next.waitingMin, priceCents: dh(next.priceCents) })}
               </T>
             </View>
           </View>
         )}
-        <Btn title={next ? 'CALL NEXT CLIENT' : 'BACK TO THE CHAIR'} height={54} onPress={onDone} />
+        <Btn title={next ? tr('CALL NEXT CLIENT') : tr('BACK TO THE CHAIR')} height={54} onPress={onDone} />
         {!b.isWalkIn && onAskInChat && (
           <Pressable onPress={onAskInChat} accessibilityRole="button"
             style={({ pressed }) => pressed && s.pressed}>
-            <T w="sb" size={12} c={D.sub} style={s.center}>Ask {firstName} for a review</T>
+            <T w="sb" size={12} c={D.sub} style={s.center}>{tr('Ask {firstName} for a review', { firstName })}</T>
           </Pressable>
         )}
       </Sheet>
@@ -145,7 +148,7 @@ export default function RateClientSheet({
   if (step === 'wrong') {
     return (
       <Sheet visible={visible} onClose={onClose} deep>
-        <SheetHead title="What went wrong?" onBack={() => setStep('rate')} onClose={onClose} />
+        <SheetHead title={tr('What went wrong?')} onBack={() => setStep('rate')} onClose={onClose} />
         <View style={s.clientRow}>
           <Avatar size={48} initials={b.initials} />
           <View style={{ flex: 1 }}>
@@ -156,28 +159,28 @@ export default function RateClientSheet({
         </View>
         <View style={{ gap: 8 }}>
           {REASONS.map((r) => (
-            <RadioRow key={r} label={r} on={reason === r} onPress={() => setReason(r)} />
+            <RadioRow key={r} label={reasonLabel(r)} on={reason === r} onPress={() => setReason(r)} />
           ))}
         </View>
         <View style={s.flagCard}>
           <View style={s.flagIcon}><Ico name="alert-triangle" size={16} color={D.amber} /></View>
           <View style={{ flex: 1 }}>
-            <T w="b" size={13}>Ask for full payment next time</T>
-            <T size={11} c={D.sub} style={{ marginTop: 2 }}>He can only book with 100% up front</T>
+            <T w="b" size={13}>{tr('Ask for full payment next time')}</T>
+            <T size={11} c={D.sub} style={{ marginTop: 2 }}>{tr('He can only book with 100% up front')}</T>
           </View>
           <Toggle on={upFront} onPress={() => setUpFront(!upFront)} color={D.accent} />
         </View>
         <View style={s.privateNote}>
           <Ico name="info" size={14} color={D.sub} />
           <T size={12} c={D.sub} style={s.privateNoteText}>
-            {firstName} never sees this. It shows to your shop as a flag when he books again.
+            {tr('{firstName} never sees this. It shows to your shop as a flag when he books again.', { firstName })}
           </T>
         </View>
-        <Btn title="SAVE PRIVATELY" height={54} onPress={() => save(true)} />
-        <GhostBtn title="BLOCK FROM BOOKING ME" color={D.red} border={D.redLine} height={50}
-          onPress={() => Alert.alert('Block this client?', `${b.name} will not be able to book you again.`, [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Block', style: 'destructive', onPress: () => save(true, true) },
+        <Btn title={tr('SAVE PRIVATELY')} height={54} onPress={() => save(true)} />
+        <GhostBtn title={tr('BLOCK FROM BOOKING ME')} color={D.red} border={D.redLine} height={50}
+          onPress={() => Alert.alert(tr('Block this client?'), tr('{name} will not be able to book you again.', { name: b.name }), [
+            { text: tr('Cancel'), style: 'cancel' },
+            { text: tr('Block'), style: 'destructive', onPress: () => save(true, true) },
           ])} />
       </Sheet>
     );
@@ -186,11 +189,11 @@ export default function RateClientSheet({
   // ---- 3a · rate the client
   return (
     <Sheet visible={visible} onClose={onClose} deep>
-      <SheetHead title="Rate the client" onClose={onClose} />
+      <SheetHead title={tr('Rate the client')} onClose={onClose} />
       <View style={s.collected}>
         <Ico name="check" size={15} color={D.green} />
         <T w="sb" size={12} c={D.green} style={{ flex: 1 }}>
-          Done · {dh(b.priceCents)} collected in cash
+          {tr('Done · {priceCents} collected in cash', { priceCents: dh(b.priceCents) })}
         </T>
       </View>
       <View style={s.clientRow}>
@@ -198,24 +201,24 @@ export default function RateClientSheet({
         <View style={{ flex: 1 }}>
           <T w="b" size={15}>{b.name}</T>
           <T size={11} c={D.sub} style={{ marginTop: 3 }}>
-            {visits ? `${ordinal(visits)} visit · ` : ''}{b.service} · {b.time}
+            {visits ? tr('{ordinal} visit · {service} · {time}', { ordinal: ordinal(visits), service: b.service, time: b.time }) : `${b.service} · ${b.time}`}
           </T>
         </View>
       </View>
 
       {b.isWalkIn ? (
         <T size={13} c={D.sub} style={s.center}>
-          Walk-ins have no account, so there's nothing to rate.
+          {tr('Walk-ins have no account, so there\'s nothing to rate.')}
         </T>
       ) : (
         <>
           <T size={13} c={D.sub} style={[s.center, { marginTop: 2 }]}>
-            Was {firstName} easy to have in the chair?
+            {tr('Was {firstName} easy to have in the chair?', { firstName })}
           </T>
           <View style={s.starsRow}>
             {[1, 2, 3, 4, 5].map((i) => (
               <Pressable key={i} onPress={() => setStars(i)} hitSlop={4}
-                accessibilityRole="button" accessibilityLabel={`${i} star${i > 1 ? 's' : ''}`}
+                accessibilityRole="button" accessibilityLabel={trn(i, '{n} star', '{n} stars')}
                 accessibilityState={{ selected: stars >= i }}>
                 <Ico name="star" size={40} color={stars >= i ? D.amber : D.muted} />
               </Pressable>
@@ -229,7 +232,7 @@ export default function RateClientSheet({
                 <Pressable key={t} onPress={() => toggleTag(t)} accessibilityRole="button"
                   accessibilityState={{ selected: on }}
                   style={({ pressed }) => [s.tag, on && s.tagOn, pressed && s.pressed]}>
-                  <T w={on ? 'b' : 'sb'} size={12} c={on ? '#fff' : D.sub}>{t}</T>
+                  <T w={on ? 'b' : 'sb'} size={12} c={on ? '#fff' : D.sub}>{tr(t)}</T>
                 </Pressable>
               );
             })}
@@ -237,19 +240,19 @@ export default function RateClientSheet({
           <View style={{ gap: 8 }}>
             <View style={s.lockRow}>
               <Ico name="lock" size={11} color={D.sub} />
-              <Eyebrow ls={1.4}>PRIVATE NOTE · ONLY YOUR SHOP SEES THIS</Eyebrow>
+              <Eyebrow ls={1.4}>{tr('PRIVATE NOTE · ONLY YOUR SHOP SEES THIS')}</Eyebrow>
             </View>
             <TextInput value={note} onChangeText={setNote}
-              placeholder="Skin fade, no clippers on top" placeholderTextColor={D.sub}
-              accessibilityLabel="Private note about this client" style={s.noteInput} />
+              placeholder={tr('Skin fade, no clippers on top')} placeholderTextColor={D.sub}
+              accessibilityLabel={tr('Private note about this client')} style={s.noteInput} />
           </View>
         </>
       )}
 
-      <Btn title={b.isWalkIn ? 'NEXT CLIENT' : 'SAVE & NEXT CLIENT'} height={54}
+      <Btn title={b.isWalkIn ? tr('NEXT CLIENT') : tr('SAVE & NEXT CLIENT')} height={54}
         onPress={onPrimary} style={saving ? { opacity: 0.6 } : undefined} />
       <Pressable onPress={onDone} accessibilityRole="button" style={({ pressed }) => pressed && s.pressed}>
-        <T w="sb" size={12} c={D.sub} style={s.center}>Skip</T>
+        <T w="sb" size={12} c={D.sub} style={s.center}>{tr('Skip')}</T>
       </Pressable>
     </Sheet>
   );

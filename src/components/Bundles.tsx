@@ -8,6 +8,7 @@ import {
   Block, daySlots, fitCount, Range, sameDay, slotNote, SLOT_STEP_MIN, Window,
 } from '../lib/slots';
 import { colors, font, radius, serif, shadow, shadowLg, sp } from '../theme';
+import { loc, tr, trn, trRich } from '../lib/i18n';
 
 // Turn 34 of "Customer App 3.dc.html" — the one-visit bundle. Turn 33 drew the
 // prepaid pass; the call was option (a), so a bundle is n services with one
@@ -48,19 +49,19 @@ export function BundlesTab({ bundles, allServices, onBook, onBuild }: {
 
   return (
     <>
-      <Text style={s.section}>Bundles <Text style={s.count}>({bundles.length})</Text></Text>
+      <Text style={s.section}>{tr('Bundles')} <Text style={s.count}>({bundles.length})</Text></Text>
 
       {top && (
         <Pressable onPress={() => onBook(top)} style={({ pressed }) => [s.hero, pressed && s.pressed]}>
           <View style={s.heroTop}>
             <View style={s.grow}>
-              <Text style={s.heroEyebrow}>MOST BOOKED</Text>
+              <Text style={s.heroEyebrow}>{tr('MOST BOOKED')}</Text>
               <Text style={s.heroName}>{top.name}</Text>
             </View>
             <View style={s.right}>
-              <Text style={s.heroPrice}>{dh(top.price_cents)} DH</Text>
+              <Text style={s.heroPrice}>{tr('{price_cents} DH', { price_cents: dh(top.price_cents) })}</Text>
               {top.list_cents > top.price_cents && (
-                <Text style={s.heroWas}>{dh(top.list_cents)} DH</Text>
+                <Text style={s.heroWas}>{tr('{list_cents} DH', { list_cents: dh(top.list_cents) })}</Text>
               )}
             </View>
           </View>
@@ -70,7 +71,7 @@ export function BundlesTab({ bundles, allServices, onBook, onBuild }: {
               <View key={sv.id} style={s.heroRow}>
                 <View style={s.dot} />
                 <Text style={s.heroSvc} numberOfLines={1}>{sv.name}</Text>
-                <Text style={s.heroMin}>{sv.duration_min} min</Text>
+                <Text style={s.heroMin}>{tr('{duration_min} min', { duration_min: sv.duration_min })}</Text>
               </View>
             ))}
           </View>
@@ -78,10 +79,10 @@ export function BundlesTab({ bundles, allServices, onBook, onBuild }: {
           <View style={s.heroFoot}>
             <View style={s.heroFootLeft}>
               <Ionicons name="time-outline" size={15} color="#FFFFFF" />
-              <Text style={s.heroFootText}>{top.duration_min} min in one sitting</Text>
+              <Text style={s.heroFootText}>{tr('{duration_min} min in one sitting', { duration_min: top.duration_min })}</Text>
             </View>
             {top.list_cents > top.price_cents && (
-              <Text style={s.savePill}>SAVE {dh(top.list_cents - top.price_cents)} DH</Text>
+              <Text style={s.savePill}>{tr('SAVE {dh} DH', { dh: dh(top.list_cents - top.price_cents) })}</Text>
             )}
           </View>
         </Pressable>
@@ -100,13 +101,13 @@ export function BundlesTab({ bundles, allServices, onBook, onBuild }: {
               <View style={s.grow}>
                 <Text style={s.cardName}>{b.name}</Text>
                 <Text style={s.cardSub} numberOfLines={2}>
-                  {b.services.map((sv) => sv.name).join(' + ')} · {b.duration_min} min
+                  {tr('{map} · {duration_min} min', { map: b.services.map((sv) => sv.name).join(' + '), duration_min: b.duration_min })}
                 </Text>
               </View>
               <View style={s.right}>
-                <Text style={s.cardPrice}>{dh(b.price_cents)} DH</Text>
+                <Text style={s.cardPrice}>{tr('{price_cents} DH', { price_cents: dh(b.price_cents) })}</Text>
                 {b.list_cents > b.price_cents && (
-                  <Text style={s.cardWas}>{dh(b.list_cents)} DH</Text>
+                  <Text style={s.cardWas}>{tr('{list_cents} DH', { list_cents: dh(b.list_cents) })}</Text>
                 )}
               </View>
             </View>
@@ -114,8 +115,7 @@ export function BundlesTab({ bundles, allServices, onBook, onBuild }: {
               <View style={s.note}>
                 <Ionicons name="information-circle-outline" size={16} color={colors.textSecondary} />
                 <Text style={s.noteText}>
-                  Same as the {dh(twin.price_cents)} DH “{twin.name}” under Services — bundles
-                  overlap the service list.
+                  {tr('Same as the {price_cents} DH “{name}” under Services — bundles overlap the service list.', { price_cents: dh(twin.price_cents), name: twin.name })}
                 </Text>
               </View>
             )}
@@ -126,14 +126,14 @@ export function BundlesTab({ bundles, allServices, onBook, onBuild }: {
       <Pressable onPress={onBuild} style={({ pressed }) => [s.buildRow, pressed && s.pressed]}>
         <View style={s.buildIcon}><Ionicons name="add" size={19} color={colors.text} /></View>
         <View style={s.grow}>
-          <Text style={s.cardName}>Build your own</Text>
-          <Text style={s.cardSub}>Any services, one sitting · no discount</Text>
+          <Text style={s.cardName}>{tr('Build your own')}</Text>
+          <Text style={s.cardSub}>{tr('Any services, one sitting · no discount')}</Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
       </Pressable>
 
       {bundles.length === 0 && (
-        <Text style={s.emptyHint}>No bundles yet — build your own from this shop's services.</Text>
+        <Text style={s.emptyHint}>{tr('No bundles yet — build your own from this shop\'s services.')}</Text>
       )}
     </>
   );
@@ -254,11 +254,11 @@ export function BundleSheet({ visible, bundle, bundles, barbers, onClose, onBook
       : await supabase.rpc('book_custom',
         { p_barber: barber.id, p_services: picked, p_starts_at: time.toISOString(), p_deposit_cents: deposit });
     setBusy(false);
-    if (error) return Alert.alert('Could not book that', error.message);
+    if (error) return Alert.alert(tr('Could not book that'), error.message);
     onBooked(data as string);
   }
 
-  const title = step === 1 ? 'One sitting' : step === 2 ? 'Pick a time' : 'Overview';
+  const title = step === 1 ? tr('One sitting') : step === 2 ? tr('Pick a time') : tr('Overview');
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -296,7 +296,7 @@ export function BundleSheet({ visible, bundle, bundles, barbers, onClose, onBook
                   </ScrollView>
                 )}
 
-                <Text style={s.eyebrow}>TICK WHAT YOU WANT</Text>
+                <Text style={s.eyebrow}>{tr('TICK WHAT YOU WANT')}</Text>
                 {menu.map((sv) => {
                   const on = picked.includes(sv.id);
                   return (
@@ -304,23 +304,24 @@ export function BundleSheet({ visible, bundle, bundles, barbers, onClose, onBook
                       onPress={() => setPicked((xs) => on ? xs.filter((x) => x !== sv.id) : [...xs, sv.id])}>
                       <View style={s.grow}>
                         <Text style={[s.pickName, on && s.pickNameOn]}>{sv.name}</Text>
-                        <Text style={s.pickMin}>{sv.duration_min} min</Text>
+                        <Text style={s.pickMin}>{tr('{duration_min} min', { duration_min: sv.duration_min })}</Text>
                       </View>
-                      <Text style={[s.pickPrice, !on && s.pickPriceOff]}>{dh(sv.price_cents)} DH</Text>
+                      <Text style={[s.pickPrice, !on && s.pickPriceOff]}>{tr('{price_cents} DH', { price_cents: dh(sv.price_cents) })}</Text>
                       <View style={[s.box, on && s.boxOn]}>
                         {on && <Ionicons name="checkmark" size={13} color={colors.onAccent} />}
                       </View>
                     </Pressable>
                   );
                 })}
-                {menu.length === 0 && <Text style={s.emptyHint}>This barber has no services yet.</Text>}
+                {menu.length === 0 && <Text style={s.emptyHint}>{tr('This barber has no services yet.')}</Text>}
 
                 {cellsFor(totalMin) >= 2 && (
                   <View style={s.warn}>
                     <Ionicons name="alert-circle-outline" size={17} color="#9A6B00" />
                     <Text style={s.warnText}>
-                      {totalMin} min needs <Text style={s.warnBold}>{cellsFor(totalMin)} slots in a row</Text>
-                      {' '}— that's rare later in the day.
+                      {trRich('{totalMin} min needs <b>{cells} slots in a row</b> — that\'s rare later in the day.', {
+                        b: (text, key) => <Text key={key} style={s.warnBold}>{text}</Text>,
+                      }, { totalMin, cells: cellsFor(totalMin) })}
                     </Text>
                   </View>
                 )}
@@ -331,7 +332,7 @@ export function BundleSheet({ visible, bundle, bundles, barbers, onClose, onBook
             {step === 2 && (
               <>
                 <Text style={s.sheetSub}>
-                  {bundle ? `${bundle.name} · ` : ''}{chosen.length} service{chosen.length === 1 ? '' : 's'} · {totalMin} min
+                  {trn(chosen.length, '{x}{n} service · {totalMin} min', '{x}{n} services · {totalMin} min', { x: bundle ? `${bundle.name} · ` : '', totalMin })}
                 </Text>
 
                 <View style={s.dayRow}>
@@ -342,14 +343,14 @@ export function BundleSheet({ visible, bundle, bundles, barbers, onClose, onBook
                     return (
                       <Pressable key={d.toISOString()} disabled={closed} style={[s.dayCol, closed && s.dayClosed]}
                         onPress={() => { setDay(d); setTime(null); }}>
-                        <Text style={s.dayDow}>{d.toLocaleDateString('en-US', { weekday: 'short' })}</Text>
+                        <Text style={s.dayDow}>{d.toLocaleDateString(loc('en-US'), { weekday: 'short' })}</Text>
                         <View style={[s.dayNum, sel && s.dayNumOn]}>
                           <Text style={[s.dayNumText, sel && s.dayNumTextOn]}>
                             {String(d.getDate()).padStart(2, '0')}
                           </Text>
                         </View>
                         <Text style={[s.dayFit, sel && s.dayFitOn]}>
-                          {closed ? 'closed' : `${c.fits} fit`}
+                          {closed ? tr('closed') : tr('{fits} fit', { fits: c.fits })}
                         </Text>
                       </Pressable>
                     );
@@ -359,8 +360,9 @@ export function BundleSheet({ visible, bundle, bundles, barbers, onClose, onBook
                 <View style={s.info}>
                   <Ionicons name="information-circle-outline" size={17} color={colors.textSecondary} />
                   <Text style={s.infoText}>
-                    <Text style={s.infoBold}>{counts.fits} of {counts.all} times</Text> that day can hold
-                    {' '}{totalMin} min. Single services fit anywhere.
+                    {trRich('<b>{fits} of {all} times</b> that day can hold {totalMin} min. Single services fit anywhere.', {
+                      b: (text, key) => <Text key={key} style={s.infoBold}>{text}</Text>,
+                    }, { fits: counts.fits, all: counts.all, totalMin })}
                   </Text>
                 </View>
 
@@ -392,10 +394,10 @@ export function BundleSheet({ visible, bundle, bundles, barbers, onClose, onBook
                       </Pressable>
                     );
                   })}
-                  {grid.length === 0 && <Text style={s.emptyHint}>Not working that day.</Text>}
+                  {grid.length === 0 && <Text style={s.emptyHint}>{tr('Not working that day.')}</Text>}
                 </View>
 
-                <Pressable onPress={onSplit}><Text style={s.splitLink}>Or split it across two visits</Text></Pressable>
+                <Pressable onPress={onSplit}><Text style={s.splitLink}>{tr('Or split it across two visits')}</Text></Pressable>
               </>
             )}
 
@@ -404,30 +406,30 @@ export function BundleSheet({ visible, bundle, bundles, barbers, onClose, onBook
               <>
                 <View style={s.summary}>
                   <View style={s.sumHead}>
-                    <Text style={s.sumEyebrow}>{(matched?.name ?? 'One sitting').toUpperCase()}</Text>
+                    <Text style={s.sumEyebrow}>{(matched?.name ?? tr('One sitting')).toUpperCase()}</Text>
                     <Text style={s.sumWhen}>
-                      {time.toTimeString().slice(0, 5)} – {new Date(time.getTime() + totalMin * 60_000).toTimeString().slice(0, 5)} · {totalMin} min
+                      {tr('{time} – {x} · {totalMin} min', { time: time.toTimeString().slice(0, 5), x: new Date(time.getTime() + totalMin * 60_000).toTimeString().slice(0, 5), totalMin })}
                     </Text>
                   </View>
                   {chosen.map((sv) => (
                     <View key={sv.id} style={s.sumRow}>
                       <Text style={s.sumSvc}>{sv.name}</Text>
-                      <Text style={s.sumPrice}>{dh(sv.price_cents)} DH</Text>
+                      <Text style={s.sumPrice}>{tr('{price_cents} DH', { price_cents: dh(sv.price_cents) })}</Text>
                     </View>
                   ))}
                   <View style={s.hr} />
                   {saving > 0 && (
                     <View style={s.sumRow}>
-                      <Text style={s.sumMuted}>Bundle saving</Text>
-                      <Text style={s.sumSaving}>− {dh(saving)} DH</Text>
+                      <Text style={s.sumMuted}>{tr('Bundle saving')}</Text>
+                      <Text style={s.sumSaving}>{tr('− {saving} DH', { saving: dh(saving) })}</Text>
                     </View>
                   )}
                   <View style={s.sumRow}>
-                    <Text style={s.sumTotalK}>Total</Text>
-                    <Text style={s.sumTotalV}>{dh(price)} DH</Text>
+                    <Text style={s.sumTotalK}>{tr('Total')}</Text>
+                    <Text style={s.sumTotalV}>{tr('{price} DH', { price: dh(price) })}</Text>
                   </View>
                   <Text style={s.sumWho}>
-                    {barber?.name} · {time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                    {barber?.name} · {time.toLocaleDateString(loc('en-US'), { weekday: 'short', month: 'short', day: 'numeric' })}
                   </Text>
                 </View>
 
@@ -436,8 +438,8 @@ export function BundleSheet({ visible, bundle, bundles, barbers, onClose, onBook
                     <View style={s.depHead}>
                       <View style={s.depIcon}><Ionicons name="wallet-outline" size={17} color="#FFFFFF" /></View>
                       <View style={s.grow}>
-                        <Text style={s.depTitle}>Deposit from wallet</Text>
-                        <Text style={s.depSub}>Balance {dh(walletCents!)} DH · covers it</Text>
+                        <Text style={s.depTitle}>{tr('Deposit from wallet')}</Text>
+                        <Text style={s.depSub}>{tr('Balance {dh} DH · covers it', { dh: dh(walletCents!) })}</Text>
                       </View>
                       <Pressable onPress={() => setDepositOn((v) => !v)} hitSlop={6}
                         accessibilityRole="switch" accessibilityState={{ checked: depositOn }}
@@ -450,12 +452,12 @@ export function BundleSheet({ visible, bundle, bundles, barbers, onClose, onBook
                       <View style={s.depBody}>
                         <View style={s.depNums}>
                           <View>
-                            <Text style={s.depEyebrow}>DEPOSIT NOW</Text>
-                            <Text style={s.depBig}>{dh(deposit)} DH</Text>
+                            <Text style={s.depEyebrow}>{tr('DEPOSIT NOW')}</Text>
+                            <Text style={s.depBig}>{tr('{deposit} DH', { deposit: dh(deposit) })}</Text>
                           </View>
                           <View style={s.right}>
-                            <Text style={s.depEyebrow}>AT THE SHOP</Text>
-                            <Text style={s.depRest}>{dh(price - deposit)} DH</Text>
+                            <Text style={s.depEyebrow}>{tr('AT THE SHOP')}</Text>
+                            <Text style={s.depRest}>{tr('{dh} DH', { dh: dh(price - deposit) })}</Text>
                           </View>
                         </View>
                         <View style={s.track}>
@@ -475,9 +477,9 @@ export function BundleSheet({ visible, bundle, bundles, barbers, onClose, onBook
                         <View style={s.depFoot}>
                           <View style={s.depFootLeft}>
                             <Ionicons name="lock-closed" size={11} color="rgba(255,255,255,0.45)" />
-                            <Text style={s.depMin}>MIN {MIN_PCT}%</Text>
+                            <Text style={s.depMin}>{tr('MIN {MIN_PCT}%', { MIN_PCT })}</Text>
                           </View>
-                          <Text style={s.depOf}>{Math.round((deposit / price) * 100)}% of {dh(price)} DH</Text>
+                          <Text style={s.depOf}>{tr('{round}% of {price} DH', { round: Math.round((deposit / price) * 100), price: dh(price) })}</Text>
                         </View>
                       </View>
                     )}
@@ -488,8 +490,7 @@ export function BundleSheet({ visible, bundle, bundles, barbers, onClose, onBook
                   <View style={s.note}>
                     <Ionicons name="information-circle-outline" size={16} color={colors.textSecondary} />
                     <Text style={s.noteText}>
-                      Skip a service on the day and you're charged the {chosen.length} prices
-                      separately — the {dh(saving)} DH saving goes.
+                      {tr('Skip a service on the day and you\'re charged the {count} prices separately — the {saving} DH saving goes.', { count: chosen.length, saving: dh(saving) })}
                     </Text>
                   </View>
                 )}
@@ -508,9 +509,9 @@ export function BundleSheet({ visible, bundle, bundles, barbers, onClose, onBook
               pressed && s.pressed]}>
             {busy ? <ActivityIndicator color={colors.onAccent} /> : (
               <Text style={s.ctaText}>
-                {step === 1 ? `FIND A ${totalMin}-MIN SLOT`
-                  : step === 2 ? 'REVIEW'
-                    : deposit > 0 ? `PAY ${dh(deposit)} DH & CONFIRM` : 'CONFIRM BOOKING'}
+                {step === 1 ? tr('FIND A {totalMin}-MIN SLOT', { totalMin })
+                  : step === 2 ? tr('REVIEW')
+                    : deposit > 0 ? tr('PAY {deposit} DH & CONFIRM', { deposit: dh(deposit) }) : tr('CONFIRM BOOKING')}
               </Text>
             )}
           </Pressable>

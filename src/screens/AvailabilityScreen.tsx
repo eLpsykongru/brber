@@ -9,9 +9,10 @@ import { Field } from '../components/ui';
 import { setLastFix } from '../lib/lastFix';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, inter, radius, sp, TOP_INSET } from '../theme';
+import { tr, trn, weekdayName, weekdayDate, lang } from '../lib/i18n';
 
 const AMBER = D.amber;
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6].map((i) => weekdayName(i));
 const DISPLAY_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Mon-first
 const STEP = 30;
 
@@ -23,9 +24,9 @@ type SheetKind = 'break' | 'dayoff' | 'vacation' | 'custom';
 // how buffer conflicts get auto-fixed
 type Strategy = 'trim' | 'extend' | 'shift';
 const STRATEGIES: { key: Strategy; label: string }[] = [
-  { key: 'trim', label: 'TRIM BUFFER' },
-  { key: 'extend', label: 'EXTEND BREAK' },
-  { key: 'shift', label: 'SHIFT HOURS' },
+  { key: 'trim', label: tr('TRIM BUFFER') },
+  { key: 'extend', label: tr('EXTEND BREAK') },
+  { key: 'shift', label: tr('SHIFT HOURS') },
 ];
 type FixPlan = {
   strategy: Strategy;
@@ -57,8 +58,9 @@ const toHHMM = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${
 const isoOf = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const prettyDay = (iso: string) => {
-  const ds = new Date(`${iso}T12:00:00`).toDateString(); // "Mon Jul 21 2026"
-  return `${ds.slice(0, 3)}, ${ds.slice(4, 10)}`;
+  const d = new Date(`${iso}T12:00:00`);
+  const ds = d.toDateString(); // "Mon Jul 21 2026"
+  return lang() === 'en' ? `${ds.slice(0, 3)}, ${ds.slice(4, 10)}` : weekdayDate(d);
 };
 
 function upcomingDays(n: number) {
@@ -79,12 +81,12 @@ function TimeBox({ value, onChange, label, min = 0, max = 24 * 60 }: {
   };
   return (
     <View style={s.timeBox}>
-      <Pressable onPress={() => step(-STEP)} hitSlop={10} accessibilityLabel={`${label} earlier`}
+      <Pressable onPress={() => step(-STEP)} hitSlop={10} accessibilityLabel={tr('{label} earlier', { label })}
         style={({ pressed }) => pressed && s.pressed}>
         <Ionicons name="remove" size={13} color={D.sub} />
       </Pressable>
       <Text style={s.timeText}>{value}</Text>
-      <Pressable onPress={() => step(STEP)} hitSlop={10} accessibilityLabel={`${label} later`}
+      <Pressable onPress={() => step(STEP)} hitSlop={10} accessibilityLabel={tr('{label} later', { label })}
         style={({ pressed }) => pressed && s.pressed}>
         <Ionicons name="add" size={13} color={D.sub} />
       </Pressable>
@@ -103,11 +105,11 @@ function BufferCol({ icon, label, value, onPick }: {
         <Ionicons name={icon} size={12} color={D.sub} />
         <Text style={s.bufColLabel}>{label}</Text>
       </View>
-      <Text style={s.bufValue}>{value} <Text style={s.bufUnit}>min</Text></Text>
+      <Text style={s.bufValue}>{value} <Text style={s.bufUnit}>{tr('min')}</Text></Text>
       <View style={s.chipWrap}>
         {[0, 5, 10, 15, 30].map((v) => (
           <Pressable key={v} onPress={() => onPick(v)}
-            accessibilityLabel={`${label.toLowerCase()} ${v} minutes`}
+            accessibilityLabel={tr('{label} {v} minutes', { label: label.toLowerCase(), v })}
             accessibilityState={{ selected: value === v }}
             style={({ pressed }) => [s.bufChip, value === v && s.bufChipOn, pressed && s.pressed]}>
             <Text style={[s.bufChipText, value === v && s.bufChipTextOn]}>{v}</Text>
@@ -255,7 +257,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
     setAccepting(v);
     const { error } = await supabase.from('barbers')
       .update({ accepting_bookings: v }).eq('id', barberId);
-    if (error) { setAccepting(!v); Alert.alert('Could not update', error.message); }
+    if (error) { setAccepting(!v); Alert.alert(tr('Could not update'), error.message); }
   }
 
   function setDay(i: number, patch: Partial<DayRow>) {
@@ -273,11 +275,11 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
     for (let i = 0; i < 7; i++) {
       if (!days[i].open) continue;
       if (toMin(days[i].end) <= toMin(days[i].start)) {
-        return Alert.alert('Invalid hours', `${WEEKDAYS[i]}: closing time must be after opening.`);
+        return Alert.alert(tr('Invalid hours'), tr('{WEEKDAYS}: closing time must be after opening.', { WEEKDAYS: WEEKDAYS[i] }));
       }
       if (envelope && (toMin(days[i].start) < envelope.open || toMin(days[i].end) > envelope.close)) {
-        return Alert.alert('Outside salon hours',
-          `${WEEKDAYS[i]}: hours must be within the salon's ${toHHMM(envelope.open)}–${toHHMM(envelope.close)}.`);
+        return Alert.alert(tr('Outside salon hours'),
+          tr('{WEEKDAYS}: hours must be within the salon\'s {open}–{close}.', { WEEKDAYS: WEEKDAYS[i], open: toHHMM(envelope.open), close: toHHMM(envelope.close) }));
       }
       rows.push({ barber_id: barberId, weekday: i, start_min: toMin(days[i].start), end_min: toMin(days[i].end) });
     }
@@ -289,11 +291,11 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
       .update({ buffer_before_min: before, buffer_after_min: after }).eq('id', barberId);
     setBusy(false);
     const error = del.error ?? ins.error ?? buf.error;
-    if (error) Alert.alert('Could not save', error.message);
+    if (error) Alert.alert(tr('Could not save'), error.message);
     else {
       serverDays.current = days.map((d) => ({ ...d }));
       serverBuf.current = { before, after };
-      Alert.alert('Saved', 'Your availability is updated.');
+      Alert.alert(tr('Saved'), tr('Your availability is updated.'));
     }
   }
 
@@ -367,11 +369,11 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
   async function applyPlan(plan: FixPlan) {
     const nChanges = plan.blocks.length + plan.inserts.length;
     const undo: UndoPayload = {
-      label: plan.strategy === 'trim' ? 'Buffers trimmed'
-        : plan.strategy === 'shift' ? 'Breaks extended, hours shifted'
-        : plan.scopeDay ? `Fixed for ${prettyDay(plan.scopeDay)} only`
-        : nChanges === 1 && plan.blocks.length ? `"${plan.blocks[0].b.label ?? 'Block'}" extended`
-        : `${nChanges} blocks extended`,
+      label: plan.strategy === 'trim' ? tr('Buffers trimmed')
+        : plan.strategy === 'shift' ? tr('Breaks extended, hours shifted')
+        : plan.scopeDay ? tr('Fixed for {scopeDay} only', { scopeDay: prettyDay(plan.scopeDay) })
+        : nChanges === 1 && plan.blocks.length ? tr('"{label}" extended', { label: plan.blocks[0].b.label ?? tr('Block') })
+        : tr('{nChanges} blocks extended', { nChanges }),
       blocks: plan.blocks.map(({ b }) => ({ id: b.id, end_min: b.end_min })),
     };
     let error = null;
@@ -414,7 +416,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
         serverDays.current = next.map((d) => ({ ...d }));
       }
     }
-    if (error) Alert.alert('Could not apply fix', error.message);
+    if (error) Alert.alert(tr('Could not apply fix'), error.message);
     else {
       setUndoFix(undo);
       if (undoTimer.current) clearTimeout(undoTimer.current);
@@ -455,7 +457,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
         serverDays.current = undoFix.hours.map((d) => ({ ...d }));
       }
     }
-    if (error) Alert.alert('Could not undo', error.message);
+    if (error) Alert.alert(tr('Could not undo'), error.message);
     else setLastFix(undoFix.blocks.map((b) => b.id)); // reverted blocks glow too
     setUndoFix(null);
     loadOff();
@@ -469,36 +471,36 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
   }
 
   async function addBreakOrCustom() {
-    if (toMin(end) <= toMin(start)) return Alert.alert('Invalid time', 'End must be after start.');
-    if (sheet === 'custom' && !pickedDay) return Alert.alert('Pick a date', 'Choose the day to block.');
+    if (toMin(end) <= toMin(start)) return Alert.alert(tr('Invalid time'), tr('End must be after start.'));
+    if (sheet === 'custom' && !pickedDay) return Alert.alert(tr('Pick a date'), tr('Choose the day to block.'));
     const { error } = await supabase.from('time_blocks').insert({
       barber_id: barberId,
-      label: label.trim() || (sheet === 'break' ? 'Break' : 'Blocked'),
+      label: label.trim() || (sheet === 'break' ? tr('Break') : tr('Blocked')),
       day: sheet === 'break' ? null : pickedDay,
       start_min: toMin(start), end_min: toMin(end),
     });
-    if (error) return Alert.alert('Could not add', error.message);
+    if (error) return Alert.alert(tr('Could not add'), error.message);
     setSheet(null); loadOff();
   }
 
   async function addDayOff(iso: string) {
     const { error } = await supabase.from('days_off')
-      .insert({ barber_id: barberId, day: iso, label: 'Day off' });
-    if (error) return Alert.alert('Could not add', error.message);
+      .insert({ barber_id: barberId, day: iso, label: tr('Day off') });
+    if (error) return Alert.alert(tr('Could not add'), error.message);
     setSheet(null); loadOff();
   }
 
   async function addVacation() {
-    if (!rangeStart || !rangeEnd) return Alert.alert('Pick the dates', 'Choose first and last day.');
+    if (!rangeStart || !rangeEnd) return Alert.alert(tr('Pick the dates'), tr('Choose first and last day.'));
     const from = new Date(`${rangeStart}T12:00:00`);
     const to = new Date(`${rangeEnd}T12:00:00`);
     const rows = [];
     for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) {
-      rows.push({ barber_id: barberId, day: isoOf(d), label: 'Vacation' });
+      rows.push({ barber_id: barberId, day: isoOf(d), label: tr('Vacation') });
     }
     const { error } = await supabase.from('days_off')
       .upsert(rows, { onConflict: 'barber_id,day', ignoreDuplicates: true });
-    if (error) return Alert.alert('Could not add', error.message);
+    if (error) return Alert.alert(tr('Could not add'), error.message);
     setSheet(null); loadOff();
   }
 
@@ -531,8 +533,8 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
   ] as ({ kind: 'block'; b: BlockRow; sortKey: string } | { kind: 'day'; o: OffRow; sortKey: string })[];
 
   const vacationLabel = rangeStart && rangeEnd
-    ? `Add vacation (${Math.round((new Date(rangeEnd).getTime() - new Date(rangeStart).getTime()) / 86_400_000) + 1} days)`
-    : 'Pick first and last day';
+    ? trn(Math.round((new Date(rangeEnd).getTime() - new Date(rangeStart).getTime()) / 86_400_000) + 1, 'Add vacation ({n} day)', 'Add vacation ({n} days)')
+    : tr('Pick first and last day');
 
   return (
     <View style={s.screen}>
@@ -540,24 +542,24 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
         {/* header */}
         <View style={s.head}>
           {onBack
-            ? <Pressable onPress={onBack} hitSlop={8} accessibilityRole="button" accessibilityLabel="Back"
+            ? <Pressable onPress={onBack} hitSlop={8} accessibilityRole="button" accessibilityLabel={tr('Back')}
                 style={({ pressed }) => [s.backBtn, pressed && s.pressed]}>
                 <Ico name="arrow-left" size={16} />
               </Pressable>
             : <View style={s.headSide} />}
-          <Serif size={17} ls={0.16} style={s.headTitle}>Schedule</Serif>
+          <Serif size={17} ls={0.16} style={s.headTitle}>{tr('Schedule')}</Serif>
           <View style={s.headSide} />
         </View>
 
         {/* the gap in one line; the pill opens the prep/cleanup detail */}
         <Pressable onPress={() => setBufOpen(!bufOpen)} accessibilityRole="button"
-          accessibilityState={{ expanded: bufOpen }} accessibilityLabel="Buffer between clients"
+          accessibilityState={{ expanded: bufOpen }} accessibilityLabel={tr('Buffer between clients')}
           style={({ pressed }) => [s.bufRow, pressed && s.pressed]}>
           <View style={s.grow}>
-            <T w="b" size={13}>Buffer between clients</T>
-            <T size={11} c={D.sub} style={{ marginTop: 2 }}>{before} min prep · {after} min cleanup</T>
+            <T w="b" size={13}>{tr('Buffer between clients')}</T>
+            <T size={11} c={D.sub} style={{ marginTop: 2 }}>{tr('{before} min prep · {after} min cleanup', { before, after })}</T>
           </View>
-          <View style={s.bufPill}><T w="b" size={12}>{totalGap} min</T></View>
+          <View style={s.bufPill}><T w="b" size={12}>{tr('{totalGap} min', { totalGap })}</T></View>
         </Pressable>
 
         {bufOpen && (
@@ -565,24 +567,24 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
             <View style={s.bufHead}>
               <View style={s.bufTitleRow}>
                 <Ico name="shield" size={14} color={D.sub} />
-                <Text style={s.sectionLabel}>BOOKING BUFFERS</Text>
+                <Text style={s.sectionLabel}>{tr('BOOKING BUFFERS')}</Text>
               </View>
               <Pressable onPress={() => { setLinkBoth(!linkBoth); if (!linkBoth) setAfter(before); }}
-                accessibilityLabel="Link both buffers" accessibilityState={{ checked: linkBoth }}
+                accessibilityLabel={tr('Link both buffers')} accessibilityState={{ checked: linkBoth }}
                 style={({ pressed }) => [s.linkRow, pressed && s.pressed]}>
                 <View style={[s.miniTrack, linkBoth && s.miniTrackOn]}>
                   <View style={[s.miniThumb, linkBoth && s.miniThumbOn]} />
                 </View>
-                <Text style={s.linkText}>LINK BOTH</Text>
+                <Text style={s.linkText}>{tr('LINK BOTH')}</Text>
               </Pressable>
             </View>
             <Text style={s.cardNote}>
-              Auto-protect gaps around every booking. Clients won't see these slots.
+              {tr('Auto-protect gaps around every booking. Clients won\'t see these slots.')}
             </Text>
             <View style={s.bufCols}>
-              <BufferCol icon="log-in-outline" label="PREP BEFORE" value={before} onPick={pickBefore} />
+              <BufferCol icon="log-in-outline" label={tr('PREP BEFORE')} value={before} onPick={pickBefore} />
               <View style={s.bufDivider} />
-              <BufferCol icon="log-out-outline" label="CLEANUP AFTER" value={after} onPick={pickAfter} />
+              <BufferCol icon="log-out-outline" label={tr('CLEANUP AFTER')} value={after} onPick={pickAfter} />
             </View>
           </View>
         )}
@@ -592,13 +594,13 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
           <>
             <View style={s.conflictHead}>
               <T w="b" size={11} c={D.red} ls={1.65} style={s.grow}>
-                {conflicts.length} BUFFER CONFLICT{conflicts.length === 1 ? '' : 'S'}
+                {trn(conflicts.length, '{n} BUFFER CONFLICT', '{n} BUFFER CONFLICTS')}
               </T>
               {conflicts.length > 1 && (
                 <Pressable onPress={() => setFixPreview(buildPlan(strategy, conflicts))}
-                  accessibilityRole="button" accessibilityLabel="Fix all conflicts"
+                  accessibilityRole="button" accessibilityLabel={tr('Fix all conflicts')}
                   style={({ pressed }) => [s.fixPill, pressed && s.pressed]}>
-                  <T w="b" size={11}>Fix all</T>
+                  <T w="b" size={11}>{tr('Fix all')}</T>
                 </Pressable>
               )}
             </View>
@@ -608,26 +610,26 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                   <View style={[s.swatch, { backgroundColor: b.day === null ? AMBER : 'rgba(232,161,0,0.5)' }]} />
                   <View style={s.grow}>
                     <T w="b" size={13}>
-                      {b.label ?? 'Blocked'} · {toHHMM(b.start_min)} – {toHHMM(b.end_min)}
+                      {b.label ?? tr('Blocked')} · {toHHMM(b.start_min)} – {toHHMM(b.end_min)}
                     </T>
                     <T size={11} c={D.red} style={{ marginTop: 2 }}>
-                      Buffer needs {totalGap} min, only {b.end_min - b.start_min} free
+                      {tr('Buffer needs {totalGap} min, only {x} free', { totalGap, x: b.end_min - b.start_min })}
                     </T>
                   </View>
                   <Pressable onPress={() => setFixPreview(buildPlan(strategy, [b]))}
-                    accessibilityRole="button" accessibilityLabel={`Fix conflict with ${b.label ?? 'block'}`}
+                    accessibilityRole="button" accessibilityLabel={tr('Fix conflict with {label}', { label: b.label ?? tr('block') })}
                     style={({ pressed }) => [s.fixPill, pressed && s.pressed]}>
-                    <T w="b" size={11}>Fix</T>
+                    <T w="b" size={11}>{tr('Fix')}</T>
                   </Pressable>
                 </View>
               ))}
             </View>
 
-            <T w="b" size={11} c={D.sub} ls={1.65} style={{ marginTop: 2 }}>HOW TO FIX IT</T>
+            <T w="b" size={11} c={D.sub} ls={1.65} style={{ marginTop: 2 }}>{tr('HOW TO FIX IT')}</T>
             <View style={s.stratRowNew}>
               {STRATEGIES.map((st) => (
                 <Pressable key={st.key} onPress={() => pickStrategy(st.key)}
-                  accessibilityRole="button" accessibilityLabel={`Auto-fix strategy: ${st.label}`}
+                  accessibilityRole="button" accessibilityLabel={tr('Auto-fix strategy: {label}', { label: st.label })}
                   accessibilityState={{ selected: strategy === st.key }}
                   style={({ pressed }) => [s.stratBtn, strategy === st.key && s.stratBtnOn, pressed && s.pressed]}>
                   <T w="b" size={11} ls={0.55} c={strategy === st.key ? '#fff' : D.sub}>
@@ -649,11 +651,12 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                   <View style={s.previewCard}>
                     <View>
                       <T w="b" size={13}>
-                        {b.label ?? 'Blocked'} → {toHHMM(b.start_min)} – {toHHMM(newEnd)}
+                        {b.label ?? tr('Blocked')} → {toHHMM(b.start_min)} – {toHHMM(newEnd)}
                       </T>
                       <T size={11} c={D.sub} style={{ marginTop: 3 }}>
-                        Adds {newEnd - b.end_min} min so the buffer fits.{' '}
-                        {b.day === null ? 'Every day.' : prettyDay(b.day) + ' only.'}
+                        {b.day === null
+                          ? tr('Adds {x} min so the buffer fits. Every day.', { x: newEnd - b.end_min })
+                          : tr('Adds {x} min so the buffer fits. {day} only.', { x: newEnd - b.end_min, day: prettyDay(b.day) })}
                       </T>
                     </View>
                     <RangeBar domain={[d0, d1]} lanes={[
@@ -662,16 +665,15 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                       [{ from: b.end_min, to: newEnd, color: BAR.added }],
                     ]} />
                     <Legend items={[
-                      { color: BAR.ctx, label: 'working hours' },
-                      { color: BAR.block, label: 'break now' },
-                      { color: BAR.added, label: 'added' },
+                      { color: BAR.ctx, label: tr('working hours') },
+                      { color: BAR.block, label: tr('break now') },
+                      { color: BAR.added, label: tr('added') },
                     ]} />
                   </View>
                   {i === 0 && (
                     <T size={11} c={D.sub} style={s.footnote}>
-                      Nothing is saved until you apply.
-                      {rest === 1 ? ` “${previews[1].b.label ?? 'Blocked'}” has its own preview below.`
-                        : rest > 1 ? ` ${rest} more previews below.` : ''}
+                      {tr('Nothing is saved until you apply.{x}', { x: rest === 1 ? tr(' “{label}” has its own preview below.', { label: previews[1].b.label ?? tr('Blocked') })
+                        : rest > 1 ? tr(' {rest} more previews below.', { rest }) : '' })}
                     </T>
                   )}
                 </View>
@@ -683,8 +685,8 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
         {/* accepting bookings */}
         <View style={s.card}>
           <View style={s.grow}>
-            <Text style={s.cardTitle}>Accepting bookings</Text>
-            <Text style={s.cardSub}>Open {openCount} day{openCount === 1 ? '' : 's'}/week</Text>
+            <Text style={s.cardTitle}>{tr('Accepting bookings')}</Text>
+            <Text style={s.cardSub}>{trn(openCount, 'Open {n} day/week', 'Open {n} days/week')}</Text>
           </View>
           <Toggle on={accepting} onPress={() => toggleAccepting(!accepting)} color={colors.accent} />
         </View>
@@ -693,28 +695,28 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
         <View style={s.segment}>
           <Pressable onPress={() => setSeg('hours')} accessibilityState={{ selected: seg === 'hours' }}
             style={[s.segItem, seg === 'hours' && s.segOn]}>
-            <Text style={[s.segText, seg === 'hours' && s.segTextOn]}>WEEKLY HOURS</Text>
+            <Text style={[s.segText, seg === 'hours' && s.segTextOn]}>{tr('WEEKLY HOURS')}</Text>
           </Pressable>
           <Pressable onPress={() => setSeg('off')} accessibilityState={{ selected: seg === 'off' }}
             style={[s.segItem, seg === 'off' && s.segOn]}>
-            <Text style={[s.segText, seg === 'off' && s.segTextOn]}>TIME OFF</Text>
+            <Text style={[s.segText, seg === 'off' && s.segTextOn]}>{tr('TIME OFF')}</Text>
           </Pressable>
         </View>
 
         {seg === 'hours' ? (
           <>
             <View style={s.sectionRow}>
-              <Text style={s.sectionLabel}>RECURRING AVAILABILITY</Text>
-              <Pressable onPress={copyToAll} hitSlop={6} accessibilityLabel="Copy first open day's hours to all"
+              <Text style={s.sectionLabel}>{tr('RECURRING AVAILABILITY')}</Text>
+              <Pressable onPress={copyToAll} hitSlop={6} accessibilityLabel={tr('Copy first open day\'s hours to all')}
                 style={({ pressed }) => [s.copyAll, pressed && s.pressed]}>
                 <Ionicons name="copy-outline" size={13} color={colors.accent} />
-                <Text style={s.copyAllText}>Copy to all</Text>
+                <Text style={s.copyAllText}>{tr('Copy to all')}</Text>
               </Pressable>
             </View>
             {envelope && (
               <View style={s.envelopeHint}>
                 <Ico name="home" size={14} color={D.sub} />
-                <Text style={s.envelopeText}>Salon is open {toHHMM(envelope.open)}–{toHHMM(envelope.close)} — set your hours within it.</Text>
+                <Text style={s.envelopeText}>{tr('Salon is open {open}–{close} — set your hours within it.', { open: toHHMM(envelope.open), close: toHHMM(envelope.close) })}</Text>
               </View>
             )}
             <View style={s.stack9}>
@@ -724,7 +726,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
               return (
                 <View key={i} style={[s.dayCard, !d.open && s.dayCardClosed]}>
                   <Pressable onPress={() => setDay(i, { open: !d.open })}
-                    accessibilityLabel={`${WEEKDAYS[i]} ${d.open ? 'open' : 'closed'}`}
+                    accessibilityLabel={d.open ? tr('{day} open', { day: WEEKDAYS[i] }) : tr('{day} closed', { day: WEEKDAYS[i] })}
                     style={({ pressed }) => [s.check, d.open ? s.checkOn : s.checkOff, pressed && s.pressed]}>
                     {d.open
                       ? <Ionicons name="checkmark" size={16} color={colors.accent} />
@@ -732,14 +734,14 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                   </Pressable>
                   <View style={s.grow}>
                     <Text style={s.dayName}>{name}</Text>
-                    <Text style={s.cardSub}>{d.open ? `${d.start} — ${d.end}` : 'Closed'}</Text>
+                    <Text style={s.cardSub}>{d.open ? `${d.start} — ${d.end}` : tr('Closed')}</Text>
                     {d.open && (
                       <View style={s.timesRow}>
-                        <TimeBox value={d.start} label={`${WEEKDAYS[i]} opening`}
+                        <TimeBox value={d.start} label={tr('{WEEKDAYS} opening', { WEEKDAYS: WEEKDAYS[i] })}
                           min={envelope?.open ?? 0} max={envelope?.close ?? 24 * 60}
                           onChange={(v) => setDay(i, { start: v })} />
                         <Text style={s.dash}>–</Text>
-                        <TimeBox value={d.end} label={`${WEEKDAYS[i]} closing`}
+                        <TimeBox value={d.end} label={tr('{WEEKDAYS} closing', { WEEKDAYS: WEEKDAYS[i] })}
                           min={envelope?.open ?? 0} max={envelope?.close ?? 24 * 60}
                           onChange={(v) => setDay(i, { end: v })} />
                       </View>
@@ -753,10 +755,10 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
         ) : (
           <>
             {/* 1u: the block kinds sit inside TIME OFF, above the list they add to */}
-            <Text style={s.sectionLabel}>ADD A BLOCK</Text>
+            <Text style={s.sectionLabel}>{tr('ADD A BLOCK')}</Text>
             <View style={s.addRow}>
-              {([['break', 'BREAK', 'coffee', AMBER], ['dayoff', 'DAY OFF', 'slash', D.sub],
-                ['vacation', 'VACATION', 'calendar', D.sub]] as const).map(([kind, label, icon, tint]) => (
+              {([['break', tr('BREAK'), 'coffee', AMBER], ['dayoff', tr('DAY OFF'), 'slash', D.sub],
+                ['vacation', tr('VACATION'), 'calendar', D.sub]] as const).map(([kind, label, icon, tint]) => (
                 <Pressable key={kind} onPress={() => openSheet(kind)} accessibilityRole="button"
                   accessibilityLabel={label}
                   style={({ pressed }) => [s.addBtn, pressed && s.pressed]}>
@@ -766,7 +768,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
               ))}
             </View>
 
-            <Text style={s.sectionLabel}>BLOCKS • {offList.length}</Text>
+            <Text style={s.sectionLabel}>{tr('BLOCKS • {count}', { count: offList.length })}</Text>
 
             <View style={s.stack9}>
             {offList.map((item) => item.kind === 'block' ? (
@@ -776,13 +778,13 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                     color={item.b.day === null ? '#E8B84B' : D.text} />
                 </View>
                 <View style={s.grow}>
-                  <Text style={s.cardTitle}>{item.b.label ?? 'Blocked'}</Text>
+                  <Text style={s.cardTitle}>{item.b.label ?? tr('Blocked')}</Text>
                   <Text style={s.cardSub}>
-                    {item.b.day === null ? 'Every day' : prettyDay(item.b.day)} • {toHHMM(item.b.start_min)} – {toHHMM(item.b.end_min)}
+                    {item.b.day === null ? tr('Every day') : prettyDay(item.b.day)} • {toHHMM(item.b.start_min)} – {toHHMM(item.b.end_min)}
                   </Text>
                 </View>
                 <Pressable onPress={() => removeOff('block', item.b.id)} hitSlop={6}
-                  accessibilityLabel={`Remove ${item.b.label ?? 'block'}`}
+                  accessibilityLabel={tr('Remove {label}', { label: item.b.label ?? tr('block') })}
                   style={({ pressed }) => pressed && s.pressed}>
                   <Ionicons name="trash-outline" size={17} color={D.sub} />
                 </Pressable>
@@ -793,21 +795,21 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                   <Ionicons name="ban" size={17} color={colors.accent} />
                 </View>
                 <View style={s.grow}>
-                  <Text style={s.cardTitle}>{item.o.label ?? 'Day off'}</Text>
-                  <Text style={s.cardSub}>{prettyDay(item.o.day)} • All day</Text>
+                  <Text style={s.cardTitle}>{item.o.label ?? tr('Day off')}</Text>
+                  <Text style={s.cardSub}>{tr('{day} • All day', { day: prettyDay(item.o.day) })}</Text>
                 </View>
                 <Pressable onPress={() => removeOff('day', item.o.id)} hitSlop={6}
-                  accessibilityLabel={`Remove ${item.o.label ?? 'day off'}`}
+                  accessibilityLabel={tr('Remove {label}', { label: item.o.label ?? tr('day off') })}
                   style={({ pressed }) => pressed && s.pressed}>
                   <Ionicons name="trash-outline" size={17} color={D.sub} />
                 </Pressable>
               </View>
             ))}
 
-            <Pressable onPress={() => openSheet('custom')} accessibilityLabel="Block off custom time"
+            <Pressable onPress={() => openSheet('custom')} accessibilityLabel={tr('Block off custom time')}
               style={({ pressed }) => [s.customRow, pressed && s.pressed]}>
               <Ionicons name="add" size={15} color={D.sub} />
-              <Text style={s.customText}>Block off custom time</Text>
+              <Text style={s.customText}>{tr('Block off custom time')}</Text>
             </Pressable>
             </View>
           </>
@@ -819,22 +821,22 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
         <View style={s.snackbar}>
           <Ionicons name="checkmark-circle-outline" size={16} color={D.green} />
           <Text style={s.snackText} numberOfLines={1}>{undoFix.label}</Text>
-          <Pressable onPress={undoLastFix} hitSlop={8} accessibilityLabel="Undo last fix"
+          <Pressable onPress={undoLastFix} hitSlop={8} accessibilityLabel={tr('Undo last fix')}
             style={({ pressed }) => pressed && s.pressed}>
-            <Text style={s.snackUndo}>UNDO</Text>
+            <Text style={s.snackUndo}>{tr('UNDO')}</Text>
           </Pressable>
         </View>
       )}
 
       {/* bottom bar */}
       <View style={s.bottomBar}>
-        <Pressable onPress={cancel} accessibilityLabel="Cancel"
+        <Pressable onPress={cancel} accessibilityLabel={tr('Cancel')}
           style={({ pressed }) => [s.cancelBtn, pressed && s.pressed]}>
-          <Text style={s.cancelText}>Cancel</Text>
+          <Text style={s.cancelText}>{tr('Cancel')}</Text>
         </Pressable>
-        <Pressable onPress={save} disabled={busy} accessibilityLabel="Save availability"
+        <Pressable onPress={save} disabled={busy} accessibilityLabel={tr('Save availability')}
           style={({ pressed }) => [s.saveBtn, pressed && s.pressed]}>
-          <Text style={s.saveText}>{busy ? 'Saving…' : 'Save availability'}</Text>
+          <Text style={s.saveText}>{busy ? tr('Saving…') : tr('Save availability')}</Text>
         </Pressable>
       </View>
 
@@ -846,30 +848,29 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
             + (fixPreview.buffer ? 1 : 0) + (fixPreview.hours?.length ?? 0);
           return (
             <View style={s.sheet}>
-              <Text style={s.sheetTitle}>Preview — {n} change{n === 1 ? '' : 's'}</Text>
+              <Text style={s.sheetTitle}>{trn(n, 'Preview — {n} change', 'Preview — {n} changes')}</Text>
               <Text style={s.cardSub}>
-                {fixPreview.strategy === 'trim'
-                  ? 'Buffers shrink to fit the break. This gap applies around every booking.'
+                {tr('{x} Nothing is saved until you apply.', { x: fixPreview.strategy === 'trim'
+                  ? tr('Buffers shrink to fit the break. This gap applies around every booking.')
                   : fixPreview.strategy === 'shift'
-                  ? 'Breaks extend to the buffer gap and your closing time moves later to keep the same bookable hours.'
-                  : `Blocks extend to match your ${totalGap}-min buffer gap.`}
-                {' '}Nothing is saved until you apply.
+                  ? tr('Breaks extend to the buffer gap and your closing time moves later to keep the same bookable hours.')
+                  : tr('Blocks extend to match your {totalGap}-min buffer gap.', { totalGap }) })}
               </Text>
               {fixPreview.strategy === 'extend' && (
                 <>
                   <View style={s.scopeRow}>
                     <Pressable onPress={() => setFixPreview(buildPlan('extend', fixPreview.targets, null))}
-                      accessibilityLabel="Apply to entire week"
+                      accessibilityLabel={tr('Apply to entire week')}
                       accessibilityState={{ selected: !fixPreview.scopeDay }}
                       style={({ pressed }) => [s.bufChip, !fixPreview.scopeDay && s.bufChipOn, pressed && s.pressed]}>
-                      <Text style={[s.bufChipText, !fixPreview.scopeDay && s.bufChipTextOn]}>ENTIRE WEEK</Text>
+                      <Text style={[s.bufChipText, !fixPreview.scopeDay && s.bufChipTextOn]}>{tr('ENTIRE WEEK')}</Text>
                     </Pressable>
                     <Pressable
                       onPress={() => setFixPreview(buildPlan('extend', fixPreview.targets, fixPreview.scopeDay ?? isoOf(new Date())))}
-                      accessibilityLabel="Apply to one day only"
+                      accessibilityLabel={tr('Apply to one day only')}
                       accessibilityState={{ selected: !!fixPreview.scopeDay }}
                       style={({ pressed }) => [s.bufChip, !!fixPreview.scopeDay && s.bufChipOn, pressed && s.pressed]}>
-                      <Text style={[s.bufChipText, !!fixPreview.scopeDay && s.bufChipTextOn]}>ONE DAY</Text>
+                      <Text style={[s.bufChipText, !!fixPreview.scopeDay && s.bufChipTextOn]}>{tr('ONE DAY')}</Text>
                     </Pressable>
                   </View>
                   {fixPreview.scopeDay && (
@@ -892,7 +893,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                     </ScrollView>
                   )}
                   {fixPreview.scopeDay && n === 0 && (
-                    <Text style={s.cardSub}>No conflicting blocks touch {prettyDay(fixPreview.scopeDay)}.</Text>
+                    <Text style={s.cardSub}>{tr('No conflicting blocks touch {scopeDay}.', { scopeDay: prettyDay(fixPreview.scopeDay) })}</Text>
                   )}
                 </>
               )}
@@ -907,13 +908,13 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                         color={b.day === null ? '#E8B84B' : D.text} />
                     </View>
                     <View style={s.grow}>
-                      <Text style={s.cardTitle}>{b.label ?? 'Blocked'}</Text>
-                      <Text style={s.cardSub}>{b.day === null ? 'Every day' : prettyDay(b.day)}</Text>
+                      <Text style={s.cardTitle}>{b.label ?? tr('Blocked')}</Text>
+                      <Text style={s.cardSub}>{b.day === null ? tr('Every day') : prettyDay(b.day)}</Text>
                       <View style={s.previewDiff}>
                         <Text style={s.previewOld}>{toHHMM(b.start_min)} – {toHHMM(b.end_min)}</Text>
                         <Ionicons name="arrow-forward" size={13} color={D.sub} />
                         <Text style={s.previewNew}>{toHHMM(b.start_min)} – {toHHMM(newEnd)}</Text>
-                        <Text style={s.previewDelta}>+{newEnd - b.end_min} min</Text>
+                        <Text style={s.previewDelta}>{tr('+{x} min', { x: newEnd - b.end_min })}</Text>
                       </View>
                       <RangeBar domain={[d0, d1]} lanes={[
                         ...(win ? [[{ from: win.start, to: win.end, color: BAR.ctx }]] : []),
@@ -921,9 +922,9 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                         [{ from: b.end_min, to: newEnd, color: BAR.added }],
                       ]} />
                       <Legend items={[
-                        ...(win ? [{ color: BAR.ctx, label: 'working hours' }] : []),
-                        { color: BAR.block, label: 'break now' },
-                        { color: BAR.added, label: 'added' },
+                        ...(win ? [{ color: BAR.ctx, label: tr('working hours') }] : []),
+                        { color: BAR.block, label: tr('break now') },
+                        { color: BAR.added, label: tr('added') },
                       ]} />
                     </View>
                   </View>
@@ -939,13 +940,13 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                       <Ionicons name="calendar-outline" size={17} color="#E8B84B" />
                     </View>
                     <View style={s.grow}>
-                      <Text style={s.cardTitle}>{b.label ?? 'Blocked'} — {prettyDay(day)} only</Text>
-                      <Text style={s.cardSub}>weekly break stays {toHHMM(b.start_min)} – {toHHMM(b.end_min)}</Text>
+                      <Text style={s.cardTitle}>{tr('{label} — {day} only', { label: b.label ?? tr('Blocked'), day: prettyDay(day) })}</Text>
+                      <Text style={s.cardSub}>{tr('weekly break stays {start_min} – {end_min}', { start_min: toHHMM(b.start_min), end_min: toHHMM(b.end_min) })}</Text>
                       <View style={s.previewDiff}>
                         <Text style={s.previewOld}>{toHHMM(b.start_min)} – {toHHMM(b.end_min)}</Text>
                         <Ionicons name="arrow-forward" size={13} color={D.sub} />
                         <Text style={s.previewNew}>{toHHMM(start_min)} – {toHHMM(end_min)}</Text>
-                        <Text style={s.previewDelta}>+{end_min - b.end_min} min that day</Text>
+                        <Text style={s.previewDelta}>{tr('+{x} min that day', { x: end_min - b.end_min })}</Text>
                       </View>
                       <RangeBar domain={[d0, d1]} lanes={[
                         ...(win ? [[{ from: win.start, to: win.end, color: BAR.ctx }]] : []),
@@ -953,9 +954,9 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                         [{ from: b.end_min, to: end_min, color: BAR.added }],
                       ]} />
                       <Legend items={[
-                        ...(win ? [{ color: BAR.ctx, label: 'working hours' }] : []),
-                        { color: BAR.block, label: 'break now' },
-                        { color: BAR.added, label: 'added that day' },
+                        ...(win ? [{ color: BAR.ctx, label: tr('working hours') }] : []),
+                        { color: BAR.block, label: tr('break now') },
+                        { color: BAR.added, label: tr('added that day') },
                       ]} />
                     </View>
                   </View>
@@ -971,13 +972,13 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                       <Ionicons name="shield-outline" size={17} color={D.text} />
                     </View>
                     <View style={s.grow}>
-                      <Text style={s.cardTitle}>Booking buffers</Text>
-                      <Text style={s.cardSub}>Prep + cleanup, around every booking</Text>
+                      <Text style={s.cardTitle}>{tr('Booking buffers')}</Text>
+                      <Text style={s.cardSub}>{tr('Prep + cleanup, around every booking')}</Text>
                       <View style={s.previewDiff}>
-                        <Text style={s.previewOld}>{before} + {after} min</Text>
+                        <Text style={s.previewOld}>{tr('{before} + {after} min', { before, after })}</Text>
                         <Ionicons name="arrow-forward" size={13} color={D.sub} />
-                        <Text style={s.previewNew}>{fixPreview.buffer.before} + {fixPreview.buffer.after} min</Text>
-                        <Text style={s.previewDelta}>−{totalGap - newGap} min gap</Text>
+                        <Text style={s.previewNew}>{tr('{before} + {after} min', { before: fixPreview.buffer.before, after: fixPreview.buffer.after })}</Text>
+                        <Text style={s.previewDelta}>{tr('−{x} min gap', { x: totalGap - newGap })}</Text>
                       </View>
                       {anchor && (
                         <>
@@ -991,8 +992,8 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                             ]} />
                           <Legend items={[
                             { color: BAR.block, label: `"${anchor.label ?? 'break'}"` },
-                            { color: BAR.overflow, label: 'gap now (overflows)' },
-                            { color: colors.success, label: 'gap after fix' },
+                            { color: BAR.overflow, label: tr('gap now (overflows)') },
+                            { color: colors.success, label: tr('gap after fix') },
                           ]} />
                         </>
                       )}
@@ -1010,7 +1011,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                       <Ionicons name="time-outline" size={17} color={D.text} />
                     </View>
                     <View style={s.grow}>
-                      <Text style={s.cardTitle}>{WEEKDAYS[weekday].slice(0, 3)} — closing time</Text>
+                      <Text style={s.cardTitle}>{tr('{WEEKDAYS} — closing time', { WEEKDAYS: WEEKDAYS[weekday].slice(0, 3) })}</Text>
                       <View style={s.previewDiff}>
                         <Text style={s.previewOld}>{days[weekday].end}</Text>
                         <Ionicons name="arrow-forward" size={13} color={D.sub} />
@@ -1021,22 +1022,22 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                         [{ from: oldEnd, to: newEndMin, color: colors.success }],
                       ]} />
                       <Legend items={[
-                        { color: BAR.ctx, label: 'hours now' },
-                        { color: colors.success, label: 'added' },
+                        { color: BAR.ctx, label: tr('hours now') },
+                        { color: colors.success, label: tr('added') },
                       ]} />
                     </View>
                   </View>
                 );
               })}
               <View style={s.previewActions}>
-                <Pressable onPress={() => setFixPreview(null)} accessibilityLabel="Cancel"
+                <Pressable onPress={() => setFixPreview(null)} accessibilityLabel={tr('Cancel')}
                   style={({ pressed }) => [s.cancelBtn, pressed && s.pressed]}>
-                  <Text style={s.cancelText}>Cancel</Text>
+                  <Text style={s.cancelText}>{tr('Cancel')}</Text>
                 </Pressable>
                 <Pressable onPress={() => applyPlan(fixPreview)} disabled={n === 0}
-                  accessibilityLabel="Apply changes"
+                  accessibilityLabel={tr('Apply changes')}
                   style={({ pressed }) => [s.saveBtn, n === 0 && s.btnDisabled, pressed && s.pressed]}>
-                  <Text style={s.saveText}>Apply {n === 1 ? 'change' : `${n} changes`}</Text>
+                  <Text style={s.saveText}>{tr('Apply {x}', { x: n === 1 ? tr('change') : tr('{n} changes', { n }) })}</Text>
                 </Pressable>
               </View>
             </View>
@@ -1049,13 +1050,13 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
         <Pressable style={s.sheetBackdrop} onPress={() => setSheet(null)} />
         <View style={s.sheet}>
           <Text style={s.sheetTitle}>
-            {sheet === 'break' ? 'Add a break' : sheet === 'dayoff' ? 'Day off'
-              : sheet === 'vacation' ? 'Vacation' : 'Block off custom time'}
+            {sheet === 'break' ? tr('Add a break') : sheet === 'dayoff' ? tr('Day off')
+              : sheet === 'vacation' ? tr('Vacation') : tr('Block off custom time')}
           </Text>
 
           {(sheet === 'break' || sheet === 'custom') && (
             <>
-              <Field placeholder={sheet === 'break' ? 'Label (e.g. Lunch)' : 'Label (e.g. Dentist)'}
+              <Field placeholder={sheet === 'break' ? tr('Label (e.g. Lunch)') : tr('Label (e.g. Dentist)')}
                 placeholderTextColor={D.sub} style={s.darkField}
                 value={label} onChangeText={setLabel} />
               {sheet === 'custom' && (
@@ -1077,20 +1078,20 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                 </ScrollView>
               )}
               <View style={s.sheetTimes}>
-                <TimeBox value={start} label="Start" onChange={setStart} />
+                <TimeBox value={start} label={tr('Start')} onChange={setStart} />
                 <Text style={s.dash}>–</Text>
-                <TimeBox value={end} label="End" onChange={setEnd} />
+                <TimeBox value={end} label={tr('End')} onChange={setEnd} />
               </View>
-              <Pressable onPress={addBreakOrCustom} accessibilityLabel="Add block"
+              <Pressable onPress={addBreakOrCustom} accessibilityLabel={tr('Add block')}
                 style={({ pressed }) => [s.saveBtn, pressed && s.pressed]}>
-                <Text style={s.saveText}>{sheet === 'break' ? 'Add break (every day)' : 'Block this time'}</Text>
+                <Text style={s.saveText}>{sheet === 'break' ? tr('Add break (every day)') : tr('Block this time')}</Text>
               </Pressable>
             </>
           )}
 
           {sheet === 'dayoff' && (
             <>
-              <Text style={s.cardSub}>Tap the day the shop is closed.</Text>
+              <Text style={s.cardSub}>{tr('Tap the day the shop is closed.')}</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View style={s.dayStrip}>
                   {upcomingDays(30).map((d) => {
@@ -1114,8 +1115,8 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
             <>
               <Text style={s.cardSub}>
                 {rangeStart && rangeEnd ? `${prettyDay(rangeStart)} → ${prettyDay(rangeEnd)}`
-                  : rangeStart ? `${prettyDay(rangeStart)} → tap the last day`
-                  : 'Tap the first day.'}
+                  : rangeStart ? tr('{rangeStart} → tap the last day', { rangeStart: prettyDay(rangeStart) })
+                  : tr('Tap the first day.')}
               </Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View style={s.dayStrip}>
@@ -1134,7 +1135,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                 </View>
               </ScrollView>
               <Pressable onPress={addVacation} disabled={!rangeStart || !rangeEnd}
-                accessibilityLabel="Add vacation"
+                accessibilityLabel={tr('Add vacation')}
                 style={({ pressed }) => [s.saveBtn, (!rangeStart || !rangeEnd) && s.btnDisabled, pressed && s.pressed]}>
                 <Text style={s.saveText}>{vacationLabel}</Text>
               </Pressable>

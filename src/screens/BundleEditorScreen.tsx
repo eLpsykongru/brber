@@ -6,6 +6,7 @@ import {
 import { fitsPerDay } from '../lib/slots';
 import { supabase } from '../lib/supabase';
 import { dark as D, inter, serif } from '../theme';
+import { tr, trn } from '../lib/i18n';
 
 // Turn 7 of "Barber App.dc.html" — the shop side of option (a). 0047 built what
 // a customer books (34a–34f); this is where Youssef builds it.
@@ -41,7 +42,7 @@ export default function BundleEditorScreen({ onBack }: { onBack?: () => void }) 
 
   const load = useCallback(async () => {
     const { data: j, error } = await supabase.rpc('my_bundles');
-    if (error) return Alert.alert('Could not load bundles', error.message);
+    if (error) return Alert.alert(tr('Could not load bundles'), error.message);
     setData(j as Payload);
   }, []);
   useEffect(() => { load(); }, [load]);
@@ -72,7 +73,7 @@ function MyBundles({ data, onBack, onEdit, onNew, onReload }: {
   async function toggle(b: Bundle) {
     const { error } = await supabase.from('bundles')
       .update({ is_active: !b.is_active }).eq('id', b.id);
-    if (error) return Alert.alert('Could not update', error.message);
+    if (error) return Alert.alert(tr('Could not update'), error.message);
     onReload();
   }
 
@@ -89,44 +90,44 @@ function MyBundles({ data, onBack, onEdit, onNew, onReload }: {
     const rs = await Promise.all(next.map((b, k) =>
       supabase.from('bundles').update({ sort: k }).eq('id', b.id)));
     const bad = rs.find((r) => r.error);
-    if (bad?.error) return Alert.alert('Could not reorder', bad.error.message);
+    if (bad?.error) return Alert.alert(tr('Could not reorder'), bad.error.message);
     onReload();
   }
 
   return (
     <Screen bottom={TAB_INSET}>
-      <TopBar title="My bundles" onBack={onBack} plain />
+      <TopBar title={tr('My bundles')} onBack={onBack} plain />
 
       <Card>
         <View style={s.statRow}>
           <View style={s.statIcon}><Ico name="package" size={16} color={D.accent} /></View>
           <View style={s.grow}>
-            <T w="b" size={13}>{live} live · {data?.month_booked ?? 0} booked this month</T>
+            <T w="b" size={13}>{tr('{live} live · {month_booked} booked this month', { live, month_booked: data?.month_booked ?? 0 })}</T>
             <T size={11} c={D.sub} style={s.mt2}>
-              {dh(data?.month_bundle_cents ?? 0)} DH · {share}% of your takings
+              {tr('{dh} DH · {share}% of your takings', { dh: dh(data?.month_bundle_cents ?? 0), share })}
             </T>
           </View>
         </View>
       </Card>
 
-      <Eyebrow ls={1.65}>BUNDLES · TAP ⇅ TO REORDER</Eyebrow>
+      <Eyebrow ls={1.65}>{tr('BUNDLES · TAP ⇅ TO REORDER')}</Eyebrow>
 
       <View style={s.list}>
         {bundles.map((b, i) => (
           <Card key={b.id} style={!b.is_active ? s.dim : undefined}>
             <View style={s.cardTop}>
               <Pressable onPress={() => bump(i)} hitSlop={8} disabled={i === 0}
-                accessibilityLabel="Move up" style={i === 0 ? s.handleOff : undefined}>
+                accessibilityLabel={tr('Move up')} style={i === 0 ? s.handleOff : undefined}>
                 <Ico name="menu" size={17} color={D.sub} />
               </Pressable>
               <Pressable style={s.grow} onPress={() => onEdit(b)}>
                 <T w="b" size={14} c={b.is_active ? D.text : D.sub}
                   style={!b.is_active ? s.struck : undefined}>{b.name}</T>
                 <T size={11} c={D.sub} style={s.mt2}>
-                  {b.services.length} service{b.services.length === 1 ? '' : 's'} · {b.duration_min} min · {dh2(b.price_cents)} DH
+                  {trn(b.services.length, '{n} service · {duration_min} min · {price_cents} DH', '{n} services · {duration_min} min · {price_cents} DH', { duration_min: b.duration_min, price_cents: dh2(b.price_cents) })}
                 </T>
               </Pressable>
-              {!b.is_active && <View style={s.hiddenChip}><T w="b" size={9} c={D.sub} ls={0.72}>HIDDEN</T></View>}
+              {!b.is_active && <View style={s.hiddenChip}><T w="b" size={9} c={D.sub} ls={0.72}>{tr('HIDDEN')}</T></View>}
               <Toggle on={b.is_active} color={D.accent} onPress={() => toggle(b)} />
             </View>
 
@@ -138,7 +139,7 @@ function MyBundles({ data, onBack, onEdit, onNew, onReload }: {
                   </View>
                 ))}
                 <View style={s.grow} />
-                {b.booked > 0 && <T w="b" size={11} c={D.accent}>{b.booked} booked</T>}
+                {b.booked > 0 && <T w="b" size={11} c={D.accent}>{tr('{booked} booked', { booked: b.booked })}</T>}
               </View>
             )}
 
@@ -146,7 +147,7 @@ function MyBundles({ data, onBack, onEdit, onNew, onReload }: {
               <View style={s.amberNote}>
                 <Ico name="alert-triangle" size={14} color={D.amber} />
                 <T size={11.5} c={D.amber} style={s.amberText}>
-                  Same services as your {dh(b.price_cents)} DH “{b.twin}”. Customers see both.
+                  {tr('Same services as your {price_cents} DH “{twin}”. Customers see both.', { price_cents: dh(b.price_cents), twin: b.twin })}
                 </T>
               </View>
             )}
@@ -156,11 +157,11 @@ function MyBundles({ data, onBack, onEdit, onNew, onReload }: {
 
       <Pressable onPress={onNew} style={s.newBtn}>
         <Ico name="plus" size={16} color={D.sub} />
-        <T w="sb" size={13} c={D.sub}>New bundle</T>
+        <T w="sb" size={13} c={D.sub}>{tr('New bundle')}</T>
       </Pressable>
 
       <T size={11} c={D.sub} style={s.foot}>
-        Hidden bundles stay on past bookings but customers can't pick them.
+        {tr('Hidden bundles stay on past bookings but customers can\'t pick them.')}
       </T>
     </Screen>
   );
@@ -188,9 +189,9 @@ function EditBundle({ bundle, menu, dayMin, bufferMin, onBack, onSaved }: {
   const slots = Math.ceil(durationMin / SLOT);
 
   async function save(opts: { is_active: boolean; max_per_day?: number | null; morning_only?: boolean }) {
-    if (!name.trim()) return Alert.alert('Name it', 'A bundle needs a name customers will recognise.');
-    if (picked.length < 2) return Alert.alert('Pick at least two', 'A bundle of one service is just a service.');
-    if (priceCents <= 0) return Alert.alert('Set a price', 'What does the whole sitting cost?');
+    if (!name.trim()) return Alert.alert(tr('Name it'), tr('A bundle needs a name customers will recognise.'));
+    if (picked.length < 2) return Alert.alert(tr('Pick at least two'), tr('A bundle of one service is just a service.'));
+    if (priceCents <= 0) return Alert.alert(tr('Set a price'), tr('What does the whole sitting cost?'));
     setBusy(true);
 
     const row = {
@@ -203,20 +204,20 @@ function EditBundle({ bundle, menu, dayMin, bufferMin, onBack, onSaved }: {
     let id = bundle?.id;
     if (id) {
       const { error } = await supabase.from('bundles').update(row).eq('id', id);
-      if (error) { setBusy(false); return Alert.alert('Could not save', error.message); }
+      if (error) { setBusy(false); return Alert.alert(tr('Could not save'), error.message); }
       await supabase.from('bundle_services').delete().eq('bundle_id', id);
     } else {
       const me = (await supabase.auth.getUser()).data.user?.id;
       const { data, error } = await supabase.from('bundles')
         .insert({ ...row, barber_id: me }).select('id').single();
-      if (error || !data) { setBusy(false); return Alert.alert('Could not save', error?.message ?? 'Failed'); }
+      if (error || !data) { setBusy(false); return Alert.alert(tr('Could not save'), error?.message ?? tr('Failed')); }
       id = data.id;
     }
 
     const { error: e2 } = await supabase.from('bundle_services')
       .insert(picked.map((sid, i) => ({ bundle_id: id!, service_id: sid, sort: i })));
     setBusy(false);
-    if (e2) return Alert.alert('Could not save the services', e2.message);
+    if (e2) return Alert.alert(tr('Could not save the services'), e2.message);
     onSaved();
   }
 
@@ -228,18 +229,18 @@ function EditBundle({ bundle, menu, dayMin, bufferMin, onBack, onSaved }: {
           <Pressable onPress={onBack} hitSlop={8} style={s.puck38}>
             <Ico name="arrow-left" />
           </Pressable>
-          <T w="b" size={17} style={s.headTitle}>Edit bundle</T>
+          <T w="b" size={17} style={s.headTitle}>{tr('Edit bundle')}</T>
           <Pressable hitSlop={8} disabled={busy}
             onPress={() => save({ is_active: bundle?.is_active ?? true })}>
-            <T w="b" size={13} c={D.accent}>{busy ? 'Saving…' : 'Save'}</T>
+            <T w="b" size={13} c={D.accent}>{busy ? tr('Saving…') : tr('Save')}</T>
           </Pressable>
         </View>
 
-        <Eyebrow>NAME</Eyebrow>
-        <TextInput value={name} onChangeText={setName} placeholder="The Groom"
+        <Eyebrow>{tr('NAME')}</Eyebrow>
+        <TextInput value={name} onChangeText={setName} placeholder={tr('The Groom')}
           placeholderTextColor={D.muted} style={s.input} />
 
-        <Eyebrow>WHAT'S IN IT · {picked.length} PICKED</Eyebrow>
+        <Eyebrow>{tr('WHAT\'S IN IT · {count} PICKED', { count: picked.length })}</Eyebrow>
         <View style={s.list8}>
           {menu.map((sv) => {
             const on = picked.includes(sv.id);
@@ -250,40 +251,40 @@ function EditBundle({ bundle, menu, dayMin, bufferMin, onBack, onSaved }: {
                   {on && <Ico name="check" size={12} color="#fff" />}
                 </View>
                 <T w={on ? 'b' : 'sb'} size={13.5} c={on ? D.text : D.sub} style={s.grow}>{sv.name}</T>
-                <T size={11} c={D.sub}>{sv.duration_min} min</T>
-                <T w="b" size={13} c={on ? D.text : D.sub} style={s.num}>{dh(sv.price_cents)} DH</T>
+                <T size={11} c={D.sub}>{tr('{duration_min} min', { duration_min: sv.duration_min })}</T>
+                <T w="b" size={13} c={on ? D.text : D.sub} style={s.num}>{tr('{price_cents} DH', { price_cents: dh(sv.price_cents) })}</T>
               </Pressable>
             );
           })}
-          {menu.length === 0 && <T size={13} c={D.sub}>Add services first — a bundle is made of them.</T>}
+          {menu.length === 0 && <T size={13} c={D.sub}>{tr('Add services first — a bundle is made of them.')}</T>}
         </View>
 
-        <Eyebrow>YOUR PRICE</Eyebrow>
+        <Eyebrow>{tr('YOUR PRICE')}</Eyebrow>
         <View style={s.priceRow}>
           <View style={s.priceField}>
             <TextInput value={price} onChangeText={setPrice} keyboardType="numeric"
               placeholder="0" placeholderTextColor={D.muted} style={s.priceInput} />
-            <T size={13} c={D.sub}>DH</T>
+            <T size={13} c={D.sub}>{tr('DH')}</T>
           </View>
           <View style={s.offCard}>
             <T w="eb" size={18} c={D.accent}>{pctOff}%</T>
-            <T w="b" size={10} c={D.sub} ls={0.6}>OFF</T>
+            <T w="b" size={10} c={D.sub} ls={0.6}>{tr('OFF')}</T>
           </View>
         </View>
 
         <Card>
           <View style={s.kv}>
-            <T size={13} c={D.sub}>Services add up to</T>
-            <T w="b" size={13} style={s.num}>{dh(listCents)} DH</T>
+            <T size={13} c={D.sub}>{tr('Services add up to')}</T>
+            <T w="b" size={13} style={s.num}>{tr('{listCents} DH', { listCents: dh(listCents) })}</T>
           </View>
           <View style={s.kv}>
-            <T size={13} c={D.sub}>You're giving away</T>
-            <T w="b" size={13} c={D.amber} style={s.num}>− {dh(givingAway)} DH</T>
+            <T size={13} c={D.sub}>{tr('You\'re giving away')}</T>
+            <T w="b" size={13} c={D.amber} style={s.num}>{tr('− {givingAway} DH', { givingAway: dh(givingAway) })}</T>
           </View>
           <View style={s.hr} />
           <View style={s.kv}>
-            <T w="b" size={13}>Chair time</T>
-            <T w="eb" size={17} style={s.num}>{durationMin} min · {slots} slot{slots === 1 ? '' : 's'}</T>
+            <T w="b" size={13}>{tr('Chair time')}</T>
+            <T w="eb" size={17} style={s.num}>{trn(slots, '{durationMin} min · {n} slot', '{durationMin} min · {n} slots', { durationMin })}</T>
           </View>
         </Card>
 
@@ -291,19 +292,18 @@ function EditBundle({ bundle, menu, dayMin, bufferMin, onBack, onSaved }: {
           <View style={s.warnBox}>
             <Ico name="alert-triangle" size={15} color={D.amber} />
             <T size={11.5} c={D.textDim} style={s.warnText}>
-              {durationMin} min only fits where you have {slots} free slots in a row — check what
-              that does to your day.
+              {tr('{durationMin} min only fits where you have {slots} free slots in a row — check what that does to your day.', { durationMin, slots })}
             </T>
           </View>
         )}
 
         {/* 7c reasons about a real sitting — it has nothing to say about an
             empty pick or a bundle with no price on it yet */}
-        <Btn title="CHECK MY DAY" height={50} ls={0.78} onPress={() => {
+        <Btn title={tr('CHECK MY DAY')} height={50} ls={0.78} onPress={() => {
           if (picked.length < 2) {
-            return Alert.alert('Pick at least two', 'A bundle of one service is just a service.');
+            return Alert.alert(tr('Pick at least two'), tr('A bundle of one service is just a service.'));
           }
-          if (priceCents <= 0) return Alert.alert('Set a price', 'What does the whole sitting cost?');
+          if (priceCents <= 0) return Alert.alert(tr('Set a price'), tr('What does the whole sitting cost?'));
           setChecking(true);
         }} />
       </Screen>
@@ -347,87 +347,86 @@ function PublishCheck({
   // ponytail: the design names the window ("09:30 – 19:00"); `my_bundles` returns
   // the longest window's LENGTH, not its edges, so this says how much chair time
   // rather than inventing a start hour. Return start_min too if the edges matter.
-  const hours = dayMin > 0 ? `${Math.floor(dayMin / 60)}h ${dayMin % 60}m` : 'your day';
+  const hours = dayMin > 0 ? tr('{h}h {m}m', { h: Math.floor(dayMin / 60), m: dayMin % 60 }) : tr('your day');
 
   // Without working hours there is no day to reason about, and every figure
   // below would be a confident zero. Say why instead.
   if (dayMin <= 0) {
     return (
       <Sheet visible={visible} onClose={onClose} deep>
-        <SheetHead title="Before you publish" onClose={onClose} left />
+        <SheetHead title={tr('Before you publish')} onClose={onClose} left />
         <T size={13} c={D.sub} style={s.lh}>
-          Set your weekly hours first — without them there's no day to measure a
-          {' '}{durationMin}-min sitting against.
+          {tr('Set your weekly hours first — without them there\'s no day to measure a {durationMin}-min sitting against.', { durationMin })}
         </T>
-        <Btn title="SAVE AS HIDDEN" onPress={onHide} ls={0.78} bg={D.card2} />
+        <Btn title={tr('SAVE AS HIDDEN')} onPress={onHide} ls={0.78} bg={D.card2} />
       </Sheet>
     );
   }
 
   return (
     <Sheet visible={visible} onClose={onClose} deep>
-      <SheetHead title="Before you publish" onClose={onClose} left />
+      <SheetHead title={tr('Before you publish')} onClose={onClose} left />
       <T size={13} c={D.sub} style={s.lh}>
-        A full {hours} of chair time, back to back with your {bufferMin}-min buffer.
+        {tr('A full {hours} of chair time, back to back with your {bufferMin}-min buffer.', { hours, bufferMin })}
       </T>
 
       <View style={s.compareRow}>
         <View style={[s.compare, s.compareOn]}>
-          <T w="b" size={10} c={D.accent} ls={1}>ALL BUNDLES</T>
-          <T style={s.big}>{dh(groomCents)} DH</T>
-          <T size={11} c={D.sub}>{grooms} clients · {dh(priceCents)} each</T>
+          <T w="b" size={10} c={D.accent} ls={1}>{tr('ALL BUNDLES')}</T>
+          <T style={s.big}>{tr('{groomCents} DH', { groomCents: dh(groomCents) })}</T>
+          <T size={11} c={D.sub}>{tr('{grooms} clients · {priceCents} each', { grooms, priceCents: dh(priceCents) })}</T>
         </View>
         <View style={s.compare}>
-          <T w="b" size={10} c={D.sub} ls={1}>ALL SINGLE CUTS</T>
-          <T style={s.big}>{dh(singleCents)} DH</T>
+          <T w="b" size={10} c={D.sub} ls={1}>{tr('ALL SINGLE CUTS')}</T>
+          <T style={s.big}>{tr('{singleCents} DH', { singleCents: dh(singleCents) })}</T>
           <T size={11} c={D.sub}>
-            {singles} clients · {anchor ? dh(anchor.price_cents) : 0} each
+            {tr('{singles} clients · {x} each', { singles, x: anchor ? dh(anchor.price_cents) : 0 })}
           </T>
         </View>
       </View>
 
       <Card>
-        <Eyebrow>SO, HONESTLY</Eyebrow>
+        <Eyebrow>{tr('SO, HONESTLY')}</Eyebrow>
         <Bullet icon="trending-up">
           {close
-            ? `Roughly the same money per hour — the ${pctOff}% off cancels the time you save.`
+            ? tr('Roughly the same money per hour — the {pctOff}% off cancels the time you save.', { pctOff })
             : delta < 0
-              ? `${dh(-delta)} DH less across a full day — the ${pctOff}% off outruns the time you save.`
-              : `${dh(delta)} DH more across a full day.`}
+              ? tr('{dh} DH less across a full day — the {pctOff}% off outruns the time you save.', { dh: dh(-delta), pctOff })
+              : tr('{delta} DH more across a full day.', { delta: dh(delta) })}
         </Bullet>
         <Bullet icon="users">
-          Bigger tickets, fewer of them — {fewer} fewer chance{fewer === 1 ? '' : 's'} to be booked.
+          {trn(fewer, 'Bigger tickets, fewer of them — {n} fewer chance to be booked.', 'Bigger tickets, fewer of them — {n} fewer chances to be booked.')}
         </Bullet>
         <Bullet icon="alert-triangle" amber>
-          One late client and a {durationMin}-min booking wrecks the whole afternoon.
+          {tr('One late client and a {durationMin}-min booking wrecks the whole afternoon.', { durationMin })}
         </Bullet>
       </Card>
 
       <Card>
         <View style={s.ctlRow}>
           <View style={s.grow}>
-            <T w="b" size={13}>Cap it per day</T>
-            <T size={11} c={D.sub} style={s.mt2}>Keep the rest of the grid for single cuts</T>
+            <T w="b" size={13}>{tr('Cap it per day')}</T>
+            <T size={11} c={D.sub} style={s.mt2}>{tr('Keep the rest of the grid for single cuts')}</T>
           </View>
           <Pressable onPress={() => setCap((c) => (c == null ? 1 : c >= 4 ? null : c + 1))}
             style={s.capChip}>
-            <T w="b" size={13}>{cap == null ? 'No cap' : `${cap} a day`}</T>
+            <T w="b" size={13}>{cap == null ? tr('No cap') : tr('{cap} a day', { cap })}</T>
           </Pressable>
         </View>
         <View style={[s.ctlRow, s.ctlRowTop]}>
           <View style={s.grow}>
-            <T w="b" size={13}>Mornings only</T>
-            <T size={11} c={D.sub} style={s.mt2}>Before 13:00, when the gaps exist</T>
+            <T w="b" size={13}>{tr('Mornings only')}</T>
+            <T size={11} c={D.sub} style={s.mt2}>{tr('Before 13:00, when the gaps exist')}</T>
           </View>
           <Toggle on={morning} onPress={() => setMorning((v) => !v)} />
         </View>
       </Card>
 
       <Btn
-        title={busy ? 'SAVING…' : `PUBLISH${cap == null ? '' : ` · MAX ${cap} A DAY`}`}
+        title={busy ? tr('SAVING…') : cap == null ? tr('PUBLISH') : tr('PUBLISH · MAX {cap} A DAY', { cap })}
         onPress={() => !busy && onPublish(cap, morning)} ls={0.78} />
       <Pressable onPress={() => !busy && onHide()} style={s.hideBtn}>
-        <T w="sb" size={12} c={D.sub}>Save as hidden instead</T>
+        <T w="sb" size={12} c={D.sub}>{tr('Save as hidden instead')}</T>
       </Pressable>
     </Sheet>
   );

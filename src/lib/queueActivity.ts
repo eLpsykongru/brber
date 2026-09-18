@@ -1,5 +1,6 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import { tr } from './i18n';
 
 // 29b — the lock-screen card that follows your place in the queue.
 //
@@ -38,7 +39,7 @@ async function ensureChannel() {
   if (Platform.OS !== 'android' || channelReady) return;
   // LOW keeps it on the lock screen without a sound or heads-up banner
   await Notifications.setNotificationChannelAsync(CHANNEL, {
-    name: 'Queue tracker',
+    name: tr('Queue tracker'),
     importance: Notifications.AndroidImportance.LOW,
     sound: null,
     vibrationPattern: null,
@@ -52,22 +53,22 @@ function body(a: QueueActivity) {
   switch (a.phase) {
     case 'next':
       return {
-        title: "You're next — head over",
+        title: tr("You're next — head over"),
         text: `${first} · ${a.salonName}`,
       };
     case 'chair': {
       const dep = (a.depositCents ?? 0) / 100;
       const due = ((a.priceCents ?? 0) - (a.depositCents ?? 0)) / 100;
       return {
-        title: `In the chair with ${first}`,
+        title: tr('In the chair with {name}', { name: first }),
         text: a.priceCents
-          ? `${dep.toFixed(0)} DH paid · ${due.toFixed(0)} DH at the counter`
+          ? tr('{paid} DH paid · {due} DH at the counter', { paid: dep.toFixed(0), due: due.toFixed(0) })
           : a.salonName,
       };
     }
     default:
       return {
-        title: `${a.ahead} ahead · ~${a.etaMin} min`,
+        title: tr('{ahead} ahead · ~{eta} min', { ahead: a.ahead, eta: a.etaMin }),
         text: `${first} · ${a.salonName}`,
       };
   }

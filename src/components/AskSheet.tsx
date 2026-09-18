@@ -4,6 +4,7 @@ import { ActivityIndicator, Alert, Modal, Pressable, StyleSheet, Text, View } fr
 import { Display } from './ui';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, shadow, shadowLg } from '../theme';
+import { loc, tr, trn } from '../lib/i18n';
 
 // Turn 36 of "Customer App 3.dc.html" — the missing write. Barber 8d ranks
 // candidates by evidence of wanting the slot and puts a green ASKED at the top,
@@ -15,14 +16,14 @@ import { colors, font, radius, shadow, shadowLg } from '../theme';
 // still chooses who gets offered — so the copy never implies a queue position.
 
 const CHIPS: { label: string; min: number | null }[] = [
-  { label: 'Any time', min: null },
-  { label: 'After 10:00', min: 10 * 60 },
-  { label: 'After 15:00', min: 15 * 60 },
+  { label: tr('Any time'), min: null },
+  { label: tr('After 10:00'), min: 10 * 60 },
+  { label: tr('After 15:00'), min: 15 * 60 },
 ];
 
-const dayName = (d: Date) => d.toLocaleDateString('en-US', { weekday: 'long' });
+const dayName = (d: Date) => d.toLocaleDateString(loc('en-US'), { weekday: 'long' });
 const dayShort = (d: Date) =>
-  d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  d.toLocaleDateString(loc('en-US'), { weekday: 'short', month: 'short', day: 'numeric' });
 const isoDay = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
@@ -51,7 +52,7 @@ export function AskBlock({ salonId, barberId, barberName, salonName, serviceId, 
 
   async function ask() {
     if (!salonId) {
-      return Alert.alert('Not available here', 'This shop has no page yet, so asks can\'t be recorded.');
+      return Alert.alert(tr('Not available here'), tr('This shop has no page yet, so asks can\'t be recorded.'));
     }
     setBusy(true);
     const { data, error } = await supabase.rpc('ask_for_day', {
@@ -59,10 +60,10 @@ export function AskBlock({ salonId, barberId, barberName, salonName, serviceId, 
       p_barber: anyBarber ? null : barberId, p_earliest_min: earliest,
     });
     setBusy(false);
-    if (error) return Alert.alert('Could not record that', error.message);
+    if (error) return Alert.alert(tr('Could not record that'), error.message);
     onAsked({
       id: data as string, day, earliestMin: earliest, anyBarber,
-      barberName, salonName: salonName ?? 'the shop', serviceName, priceCents, closesMin,
+      barberName, salonName: salonName ?? tr('the shop'), serviceName, priceCents, closesMin,
     });
   }
 
@@ -72,23 +73,22 @@ export function AskBlock({ salonId, barberId, barberName, salonName, serviceId, 
         <View style={s.fullCircle}>
           <Ionicons name="calendar-clear-outline" size={22} color="#C9C5BB" />
         </View>
-        <Text style={s.fullTitle}>{dayName(day)} is full</Text>
+        <Text style={s.fullTitle}>{tr('{day} is full', { day: dayName(day) })}</Text>
         <Text style={s.fullSub}>
-          Every slot with {barberName.split(' ')[0]} is taken. Cancellations happen most mornings.
+          {tr('Every slot with {barberName} is taken. Cancellations happen most mornings.', { barberName: barberName.split(' ')[0] })}
         </Text>
       </View>
 
       <View style={s.hero}>
         <View>
-          <Text style={s.heroEyebrow}>TELL ME IF IT OPENS</Text>
+          <Text style={s.heroEyebrow}>{tr('TELL ME IF IT OPENS')}</Text>
           <Text style={s.heroBody}>
-            If someone cancels, {barberName.split(' ')[0]} can offer you the slot.
-            First to take it gets it.
+            {tr('If someone cancels, {barberName} can offer you the slot. First to take it gets it.', { barberName: barberName.split(' ')[0] })}
           </Text>
         </View>
 
         <View style={s.heroSection}>
-          <Text style={s.heroLabel}>EARLIEST I CAN COME</Text>
+          <Text style={s.heroLabel}>{tr('EARLIEST I CAN COME')}</Text>
           <View style={s.chipRow}>
             {CHIPS.map((c) => {
               const on = earliest === c.min;
@@ -106,9 +106,9 @@ export function AskBlock({ salonId, barberId, barberName, salonName, serviceId, 
           <View style={s.heroSection}>
             <View style={s.anyRow}>
               <View style={s.grow}>
-                <Text style={s.anyTitle}>Any barber at {salonName ?? 'the shop'}</Text>
+                <Text style={s.anyTitle}>{tr('Any barber at {salonName}', { salonName: salonName ?? tr('the shop') })}</Text>
                 <Text style={s.anySub}>
-                  {coBarbers.slice(0, 2).join(' and ')} work{coBarbers.length === 1 ? 's' : ''} that day too
+                  {trn(coBarbers.length, '{coBarbers} works that day too', '{coBarbers} work that day too', { coBarbers: coBarbers.slice(0, 2).join(tr(' and ')) })}
                 </Text>
               </View>
               <Pressable onPress={() => setAnyBarber((v) => !v)} hitSlop={6}
@@ -124,9 +124,9 @@ export function AskBlock({ salonId, barberId, barberName, salonName, serviceId, 
       <Pressable onPress={ask} disabled={busy}
         style={({ pressed }) => [s.askBtn, (pressed || busy) && s.pressed]}>
         {busy ? <ActivityIndicator color="#fff" />
-          : <Text style={s.askText}>ASK FOR {dayName(day).toUpperCase()}</Text>}
+          : <Text style={s.askText}>{tr('ASK FOR {day}', { day: dayName(day).toUpperCase() })}</Text>}
       </Pressable>
-      <Text style={s.askFoot}>Not a booking · nothing is held or charged</Text>
+      <Text style={s.askFoot}>{tr('Not a booking · nothing is held or charged')}</Text>
     </>
   );
 }
@@ -151,22 +151,21 @@ export function AskedSheet({ rec, onDone, onBookOther }: {
             <View style={s.okCircle}>
               <Ionicons name="checkmark" size={28} color={colors.success} />
             </View>
-            <Display size={23} style={s.title}>You're on the list</Display>
+            <Display size={23} style={s.title}>{tr('You\'re on the list')}</Display>
             <Text style={s.sub}>
-              {rec.barberName.split(' ')[0]} sees you asked. If {dayName(rec.day)} opens up,
-              you get a push.
+              {tr('{barberName} sees you asked. If {day} opens up, you get a push.', { barberName: rec.barberName.split(' ')[0], day: dayName(rec.day) })}
             </Text>
           </View>
 
           <View style={s.card}>
-            <Text style={s.cardEyebrow}>WHAT WE RECORDED</Text>
-            <Row k="Day" v={dayShort(rec.day)} />
-            <Row k="Earliest" v={rec.earliestMin == null ? 'Any time'
-              : `After ${String(Math.floor(rec.earliestMin / 60)).padStart(2, '0')}:00`} />
-            <Row k="Barber" v={rec.anyBarber ? `Any at ${rec.salonName}` : `${rec.barberName.split(' ')[0]} only`} />
-            <Row k="Service" v={`${rec.serviceName} · ${(rec.priceCents / 100).toFixed(0)} DH`} />
+            <Text style={s.cardEyebrow}>{tr('WHAT WE RECORDED')}</Text>
+            <Row k={tr('Day')} v={dayShort(rec.day)} />
+            <Row k={tr('Earliest')} v={rec.earliestMin == null ? tr('Any time')
+              : tr('After {floor}:00', { floor: String(Math.floor(rec.earliestMin / 60)).padStart(2, '0') })} />
+            <Row k={tr('Barber')} v={rec.anyBarber ? tr('Any at {salonName}', { salonName: rec.salonName }) : tr('{barberName} only', { barberName: rec.barberName.split(' ')[0] })} />
+            <Row k={tr('Service')} v={tr('{serviceName} · {x} DH', { serviceName: rec.serviceName, x: (rec.priceCents / 100).toFixed(0) })} />
             <View style={s.hr} />
-            <Row k="Expires" v={closes ? `${closes} · when he closes` : 'End of that day'} />
+            <Row k={tr('Expires')} v={closes ? tr('{closes} · when he closes', { closes }) : tr('End of that day')} />
           </View>
 
           {/* the honest part: an ask is not a queue position */}
@@ -175,19 +174,19 @@ export function AskedSheet({ rec, onDone, onBookOther }: {
               <Ionicons name="people-outline" size={15} color={colors.textSecondary} />
             </View>
             <View style={s.grow}>
-              <Text style={s.warnTitle}>You might not be the only one asked</Text>
+              <Text style={s.warnTitle}>{tr('You might not be the only one asked')}</Text>
               <Text style={s.warnBody}>
-                A freed slot can go to a few people at once. Nothing is yours until you tap take.
+                {tr('A freed slot can go to a few people at once. Nothing is yours until you tap take.')}
               </Text>
             </View>
           </View>
 
           <View style={s.ctas}>
             <Pressable onPress={onBookOther} style={({ pressed }) => [s.ghostBtn, pressed && s.pressed]}>
-              <Text style={s.ghostText}>PICK ANOTHER DAY</Text>
+              <Text style={s.ghostText}>{tr('PICK ANOTHER DAY')}</Text>
             </Pressable>
             <Pressable onPress={onDone} style={({ pressed }) => [s.doneBtn, pressed && s.pressed]}>
-              <Text style={s.doneText}>DONE</Text>
+              <Text style={s.doneText}>{tr('DONE')}</Text>
             </Pressable>
           </View>
         </View>

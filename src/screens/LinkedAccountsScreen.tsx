@@ -6,6 +6,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 're
 import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, TOP_INSET } from '../theme';
+import { loc, tr } from '../lib/i18n';
 
 // 21a linked accounts (and the biometric toggle that 24b acts on).
 
@@ -19,10 +20,10 @@ export async function biometricLockOn() {
 type Identity = { provider: string; email?: string | null; created_at?: string };
 
 const LOOK: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap }> = {
-  email: { label: 'Email & password', icon: 'mail-outline' },
-  phone: { label: 'Phone number', icon: 'call-outline' },
-  google: { label: 'Google', icon: 'logo-google' },
-  apple: { label: 'Apple', icon: 'logo-apple' },
+  email: { label: tr('Email & password'), icon: 'mail-outline' },
+  phone: { label: tr('Phone number'), icon: 'call-outline' },
+  google: { label: tr('Google'), icon: 'logo-google' },
+  apple: { label: tr('Apple'), icon: 'logo-apple' },
 };
 
 export default function LinkedAccountsScreen({ onBack, onSetPassword }: {
@@ -49,7 +50,7 @@ export default function LinkedAccountsScreen({ onBack, onSetPassword }: {
   async function toggleLock(next: boolean) {
     if (next) {
       const res = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Turn on unlock for Sterncut',
+        promptMessage: tr('Turn on unlock for Sterncut'),
       });
       if (!res.success) return;
     }
@@ -65,14 +66,14 @@ export default function LinkedAccountsScreen({ onBack, onSetPassword }: {
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.header}>
           <Pressable onPress={onBack} hitSlop={8}
-            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel="Go back">
+            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel={tr('Go back')}>
             <Ionicons name="arrow-back" size={16} color={colors.text} />
           </Pressable>
-          <Display size={18} style={s.headerTitle}>Linked accounts</Display>
+          <Display size={18} style={s.headerTitle}>{tr('Linked accounts')}</Display>
           <View style={s.puckGhost} />
         </View>
 
-        <Text style={s.section}>SIGN-IN METHODS</Text>
+        <Text style={s.section}>{tr('SIGN-IN METHODS')}</Text>
         <View style={s.card}>
           {identities.map((id, i) => {
             const look = LOOK[id.provider] ?? { label: id.provider, icon: 'key-outline' as const };
@@ -83,20 +84,20 @@ export default function LinkedAccountsScreen({ onBack, onSetPassword }: {
                 </View>
                 <View style={s.grow}>
                   <Text style={s.rowLabel}>{look.label}</Text>
-                  <Text style={s.rowHint}>{id.email ?? email ?? 'Connected'}</Text>
+                  <Text style={s.rowHint}>{id.email ?? email ?? tr('Connected')}</Text>
                 </View>
                 {id.provider === primary
-                  ? <View style={s.chip}><Text style={s.chipText}>SIGN-IN</Text></View>
+                  ? <View style={s.chip}><Text style={s.chipText}>{tr('SIGN-IN')}</Text></View>
                   : (
-                    <Pressable onPress={() => Alert.alert('Unlink',
-                      'Unlinking a provider needs a second sign-in method — set a password first.')}>
-                      <Text style={s.unlink}>Unlink</Text>
+                    <Pressable onPress={() => Alert.alert(tr('Unlink'),
+                      tr('Unlinking a provider needs a second sign-in method — set a password first.'))}>
+                      <Text style={s.unlink}>{tr('Unlink')}</Text>
                     </Pressable>
                   )}
               </View>
             );
           })}
-          {identities.length === 0 && <Text style={s.empty}>No sign-in methods to show.</Text>}
+          {identities.length === 0 && <Text style={s.empty}>{tr('No sign-in methods to show.')}</Text>}
         </View>
 
         {/* Google and Apple are drawn in 21a but no OAuth provider is configured
@@ -105,37 +106,36 @@ export default function LinkedAccountsScreen({ onBack, onSetPassword }: {
           <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary}
             style={s.noteIcon} />
           <Text style={s.noteText}>
-            Google and Apple sign-in aren't switched on for Sterncut yet. When they are, they'll
-            appear here to link.
+            {tr('Google and Apple sign-in aren\'t switched on for Sterncut yet. When they are, they\'ll appear here to link.')}
           </Text>
         </View>
 
-        <Text style={s.section}>PASSWORD</Text>
+        <Text style={s.section}>{tr('PASSWORD')}</Text>
         <View style={s.card}>
           <Pressable onPress={onSetPassword} style={({ pressed }) => [s.row, pressed && s.pressed]}>
             <View style={s.rowIcon}>
               <Ionicons name="lock-closed-outline" size={17} color={colors.text} />
             </View>
             <View style={s.grow}>
-              <Text style={s.rowLabel}>Set a password</Text>
-              <Text style={s.rowHint}>A second way in, and what you'd use to unlink</Text>
+              <Text style={s.rowLabel}>{tr('Set a password')}</Text>
+              <Text style={s.rowHint}>{tr('A second way in, and what you\'d use to unlink')}</Text>
             </View>
             <Ionicons name="chevron-forward" size={15} color={colors.textTertiary} />
           </Pressable>
         </View>
 
-        <Text style={s.section}>DEVICE</Text>
+        <Text style={s.section}>{tr('DEVICE')}</Text>
         <View style={s.card}>
           <View style={s.row}>
             <View style={s.rowIcon}>
               <Ionicons name="finger-print-outline" size={17} color={colors.text} />
             </View>
             <View style={s.grow}>
-              <Text style={s.rowLabel}>Unlock with Face ID</Text>
+              <Text style={s.rowLabel}>{tr('Unlock with Face ID')}</Text>
               <Text style={s.rowHint}>
                 {hasBiometrics
-                  ? 'Protects your wallet, deposits and bookings'
-                  : 'No biometrics enrolled on this phone'}
+                  ? tr('Protects your wallet, deposits and bookings')
+                  : tr('No biometrics enrolled on this phone')}
               </Text>
             </View>
             <Switch value={lock} onValueChange={toggleLock} disabled={!hasBiometrics}
@@ -145,12 +145,12 @@ export default function LinkedAccountsScreen({ onBack, onSetPassword }: {
 
         {!!sessionSince && (
           <View style={s.sessionCard}>
-            <Text style={s.sessionLabel}>THIS DEVICE</Text>
+            <Text style={s.sessionLabel}>{tr('THIS DEVICE')}</Text>
             <Text style={s.sessionValue}>
-              Signed in {new Date(sessionSince).toLocaleDateString('en-US',
-                { month: 'short', day: 'numeric' })}
+              {tr('Signed in {toLocaleDateString}', { toLocaleDateString: new Date(sessionSince).toLocaleDateString(loc('en-US'),
+                { month: 'short', day: 'numeric' }) })}
             </Text>
-            <Text style={s.link} onPress={() => supabase.auth.signOut()}>Sign out everywhere</Text>
+            <Text style={s.link} onPress={() => supabase.auth.signOut()}>{tr('Sign out everywhere')}</Text>
           </View>
         )}
       </ScrollView>
@@ -167,7 +167,7 @@ export function LockScreen({ ticketLine, onUnlocked, onPassword }: {
   const tryUnlock = useCallback(async () => {
     setBusy(true);
     const res = await LocalAuthentication.authenticateAsync({
-      promptMessage: 'Unlock Sterncut', fallbackLabel: 'Enter password',
+      promptMessage: tr('Unlock Sterncut'), fallbackLabel: tr('Enter password'),
     });
     setBusy(false);
     if (res.success) onUnlocked();
@@ -177,14 +177,14 @@ export function LockScreen({ ticketLine, onUnlocked, onPassword }: {
 
   return (
     <View style={s.lock}>
-      <Text style={s.wordmark}>STERNCUT</Text>
+      <Text style={s.wordmark}>{tr('STERNCUT')}</Text>
       <View style={s.lockMiddle}>
         <View style={s.faceBox}>
           <Ionicons name="scan-outline" size={40} color="#fff" />
         </View>
         <View>
-          <Display size={26} style={s.lockTitle}>Unlock Sterncut</Display>
-          <Text style={s.lockSub}>Face ID protects your wallet, deposits and bookings.</Text>
+          <Display size={26} style={s.lockTitle}>{tr('Unlock Sterncut')}</Display>
+          <Text style={s.lockSub}>{tr('Face ID protects your wallet, deposits and bookings.')}</Text>
         </View>
         {!!ticketLine && (
           <View style={s.lockTicket}>
@@ -196,9 +196,9 @@ export function LockScreen({ ticketLine, onUnlocked, onPassword }: {
       <View style={s.lockFoot}>
         <Pressable onPress={tryUnlock} disabled={busy}
           style={({ pressed }) => [s.unlockBtn, pressed && s.pressed]}>
-          <Text style={s.unlockText}>UNLOCK WITH FACE ID</Text>
+          <Text style={s.unlockText}>{tr('UNLOCK WITH FACE ID')}</Text>
         </Pressable>
-        <Text style={s.lockLink} onPress={onPassword}>Enter password instead</Text>
+        <Text style={s.lockLink} onPress={onPassword}>{tr('Enter password instead')}</Text>
       </View>
     </View>
   );

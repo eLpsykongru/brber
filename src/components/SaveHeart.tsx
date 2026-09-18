@@ -3,6 +3,7 @@ import { StyleSheet, ViewStyle } from 'react-native';
 import { useSaved } from '../lib/wishlist';
 import { colors, radius } from '../theme';
 import { Press } from './motion';
+import { tr } from '../lib/i18n';
 
 // EXPL-29 — one heart for both halves of the wishlist.
 //
@@ -24,7 +25,7 @@ export default function SaveHeart({ kind, id, variant = 'plain', style }: {
   const puck = variant === 'puck';
   return (
     <Press onPress={toggle} hitSlop={8} scale={0.86}
-      accessibilityLabel={saved ? 'Remove from saved' : 'Save to saved'}
+      accessibilityLabel={saved ? tr('Remove from saved') : tr('Save to saved')}
       style={[puck ? (saved ? s.puckOn : s.puck) : s.plain, style] as ViewStyle[]}>
       <Ionicons
         name={saved ? 'heart' : 'heart-outline'}

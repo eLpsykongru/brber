@@ -6,6 +6,7 @@ import { dayGaps, dayWords, firstFits, Gap, hhmmOf, offerText } from '../lib/lin
 import type { Block, Range, Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
+import { loc, tr, weekdayName, weekdayDate, lang } from '../lib/i18n';
 
 // BTD-16 "Come back tomorrow" and BTD-19, its day picker (ADDENDUM-app-first, B10).
 // Leaving today's line for another day's book is a conversion, not a move: there is
@@ -18,7 +19,7 @@ export type OfferFor = {
   startsAt: string; waitingSince: string;
 };
 
-const DAY_LETTERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const DAY_LETTERS = [0, 1, 2, 3, 4, 5, 6].map((i) => weekdayName(i, 'short').charAt(0));
 const SPAN_DAYS = 14;
 const pad = (n: number) => String(n).padStart(2, '0');
 const isoDay = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -27,7 +28,8 @@ const minsTo = (iso: string) => Math.max(0, Math.round((new Date(iso).getTime() 
 /** "Tomorrow 10:00", "Sat 19 Sep 10:00" */
 const said = (at: Date) => {
   const d = dayWords(at);
-  return `${d === 'tomorrow' ? 'Tomorrow' : d} ${hhmmOf(at)}`;
+  if (d === 'tomorrow') return tr('Tomorrow {at}', { at: hhmmOf(at) });
+  return lang() === 'en' ? `${d} ${hhmmOf(at)}` : `${weekdayDate(at)} ${hhmmOf(at)}`;
 };
 
 type Book = {
@@ -66,7 +68,7 @@ export default function OfferDayScreen({ barberId, row, onBack, onSent }: {
         ? (await supabase.from('salons').select('name').eq('id', me.data.salon_id).single()).data?.name
         : null;
       if (av.error || bk.error) {
-        Alert.alert('Could not load your days', (av.error ?? bk.error)!.message);
+        Alert.alert(tr('Could not load your days'), (av.error ?? bk.error)!.message);
         return;
       }
       const loaded: Book = {
@@ -75,8 +77,8 @@ export default function OfferDayScreen({ barberId, row, onBack, onSent }: {
         blocks: (blk.data ?? []) as Block[],
         booked: (bk.data ?? []) as Range[],
         bufferMin: (me.data?.buffer_before_min ?? 0) + (me.data?.buffer_after_min ?? 0),
-        barber: (who.data?.full_name ?? 'Your barber').split(' ')[0],
-        shop: shop ?? 'the shop',
+        barber: (who.data?.full_name ?? tr('Your barber')).split(' ')[0],
+        shop: shop ?? tr('the shop'),
       };
       setBook(loaded);
       const first = firstFits(tomorrow, SPAN_DAYS, row.durationMin, loaded.windows, loaded.booked,
@@ -98,8 +100,8 @@ export default function OfferDayScreen({ barberId, row, onBack, onSent }: {
     setBusy(true);
     const { error } = await supabase.rpc('queue_offer_day', { p_booking: row.bookingId, p_starts: picked.toISOString() });
     setBusy(false);
-    if (error) return Alert.alert('Could not offer that time', error.message);
-    Alert.alert('Offer sent', `${row.name} gets one text. ${said(picked)} shows as provisional on your day until he taps — anyone else can still book it.`);
+    if (error) return Alert.alert(tr('Could not offer that time'), error.message);
+    Alert.alert(tr('Offer sent'), tr('{name} gets one text. {picked} shows as provisional on your day until he taps — anyone else can still book it.', { name: row.name, picked: said(picked) }));
     onSent();
   }
 
@@ -113,18 +115,18 @@ export default function OfferDayScreen({ barberId, row, onBack, onSent }: {
     const busyDay = (d: Date) => book.booked.some((b) => isoDay(new Date(b.starts_at)) === isoDay(d));
     const shown = day ?? days.find(works) ?? days[0];
     const gaps: Gap[] = dayGaps(shown, row.durationMin, book.windows, book.booked, book.daysOff, book.blocks, book.bufferMin);
-    const dayName = shown.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric' }).toUpperCase();
+    const dayName = shown.toLocaleDateString(loc('en-GB'), { weekday: 'long', day: 'numeric' }).toUpperCase();
     const gapSub = (g: Gap, i: number) => {
-      if (!g.fits) return `Only ${g.minutes} min — too short for him`;
+      if (!g.fits) return tr('Only {m} min — too short for him', { m: g.minutes });
       const firstChair = i === 0 && book.windows.some((w) => w.weekday === shown.getDay() && w.start_min === g.startMin);
-      if (firstChair) return `First chair · ${g.minutes} min clear`;
-      if (i === gaps.length - 1) return `Last gap of the day · ${g.minutes} min`;
-      return `${g.minutes} min clear`;
+      if (firstChair) return tr('First chair · {m} min clear', { m: g.minutes });
+      if (i === gaps.length - 1) return tr('Last gap of the day · {m} min', { m: g.minutes });
+      return tr('{m} min clear', { m: g.minutes });
     };
 
     return (
       <Screen gap={13}>
-        <TopBar title={`A time for ${row.name}`} onBack={() => setChoosing(false)} />
+        <TopBar title={tr('A time for {name}', { name: row.name })} onBack={() => setChoosing(false)} />
         <View style={s.card}>
           <View style={s.grid}>
             {days.slice(0, 7).map((d, i) => (
@@ -145,15 +147,15 @@ export default function OfferDayScreen({ barberId, row, onBack, onSent }: {
             })}
           </View>
           <T size={10.5} c={D.faint} style={s.cardFoot}>
-            Days you don't work are dimmed. Dots are how full you already are, not how free.
+            {tr('Days you don\'t work are dimmed. Dots are how full you already are, not how free.')}
           </T>
         </View>
 
         <View style={s.labelRow}>
-          <Eyebrow ls={1.5}>{dayName} · YOUR GAPS</Eyebrow>
-          <T size={11} c={D.faint}>{row.durationMin} min needed</T>
+          <Eyebrow ls={1.5}>{tr('{dayName} · YOUR GAPS', { dayName })}</Eyebrow>
+          <T size={11} c={D.faint}>{tr('{durationMin} min needed', { durationMin: row.durationMin })}</T>
         </View>
-        {gaps.length === 0 && <T size={12.5} c={D.sub}>Nothing free that day.</T>}
+        {gaps.length === 0 && <T size={12.5} c={D.sub}>{tr('Nothing free that day.')}</T>}
         <View style={{ gap: 8 }}>
           {gaps.map((g, i) => {
             const on = dayPick?.getTime() === g.start.getTime();
@@ -172,15 +174,14 @@ export default function OfferDayScreen({ barberId, row, onBack, onSent }: {
         <View style={s.recessedNote}>
           <Ico name="info" size={14} color={D.sub} />
           <T size={11.5} c={D.sub} style={[s.grow, { lineHeight: 17 }]}>
-            Only gaps that fit {row.service} are offered. Picking one brings you back to the message
-            before anything is sent.
+            {tr('Only gaps that fit {service} are offered. Picking one brings you back to the message before anything is sent.', { service: row.service })}
           </T>
         </View>
         {dayPick && (
           <Pressable onPress={() => { setPicked(dayPick); setChoosing(false); }} accessibilityRole="button"
             style={({ pressed }) => [s.white, pressed && s.pressed]}>
-            <T w="eb" size={12.5} c="#111" ls={0.5}>USE {said(dayPick).toUpperCase()}</T>
-            <T size={10} c="rgba(0,0,0,0.55)">Back to the text he'll get</T>
+            <T w="eb" size={12.5} c="#111" ls={0.5}>{tr('USE {dayPick}', { dayPick: said(dayPick).toUpperCase() })}</T>
+            <T size={10} c="rgba(0,0,0,0.55)">{tr('Back to the text he\'ll get')}</T>
           </Pressable>
         )}
       </Screen>
@@ -205,31 +206,31 @@ export default function OfferDayScreen({ barberId, row, onBack, onSent }: {
 
   return (
     <Screen gap={13}>
-      <TopBar title="Move him off today" onBack={onBack} />
+      <TopBar title={tr('Move him off today')} onBack={onBack} />
       <View style={s.who}>
         <View style={s.ticket}><T w="b" size={12} c={D.sub}>{pad(row.no)}</T></View>
         <View style={s.grow}>
           <T w="b" size={14}>{row.name}</T>
-          <T size={11} c={D.sub} style={{ marginTop: 2 }}>{row.service} · waiting {minsFrom(row.waitingSince)} min</T>
+          <T size={11} c={D.sub} style={{ marginTop: 2 }}>{tr('{service} · waiting {waitingSince} min', { service: row.service, waitingSince: minsFrom(row.waitingSince) })}</T>
         </View>
-        <T size={11} c={D.sub}>~{minsTo(row.startsAt)} min left</T>
+        <T size={11} c={D.sub}>{tr('~{startsAt} min left', { startsAt: minsTo(row.startsAt) })}</T>
       </View>
 
-      <Eyebrow ls={1.5}>GIVE HIM A TIME INSTEAD</Eyebrow>
-      {!book && <ActivityIndicator color={D.accent} accessibilityLabel="Loading your days" />}
+      <Eyebrow ls={1.5}>{tr('GIVE HIM A TIME INSTEAD')}</Eyebrow>
+      {!book && <ActivityIndicator color={D.accent} accessibilityLabel={tr('Loading your days')} />}
       {book && (
         <View style={{ gap: 8 }}>
           {suggestions.map((g, i) => option(g.start, said(g.start),
-            i === 0 ? `First time that fits · ${g.minutes} min clear` : `Next one · ${g.minutes} min clear`))}
-          {pickedIsOwn && picked && option(picked, said(picked), 'Picked from your days')}
+            i === 0 ? tr('First time that fits · {m} min clear', { m: g.minutes }) : tr('Next one · {m} min clear', { m: g.minutes })))}
+          {pickedIsOwn && picked && option(picked, said(picked), tr('Picked from your days'))}
           {suggestions.length === 0 && !picked && (
-            <T size={12.5} c={D.sub}>Nothing fits {row.service} in the next two weeks.</T>
+            <T size={12.5} c={D.sub}>{tr('Nothing fits {service} in the next two weeks.', { service: row.service })}</T>
           )}
           <Pressable onPress={() => { setChoosing(true); setDay(null); setDayPick(null); }} accessibilityRole="button"
             style={({ pressed }) => [s.option, pressed && s.pressed]}>
             <View style={s.grow}>
-              <T w="b" size={13.5}>Pick another day</T>
-              <T size={11} c={D.sub} style={{ marginTop: 2 }}>Only gaps long enough for him</T>
+              <T w="b" size={13.5}>{tr('Pick another day')}</T>
+              <T size={11} c={D.sub} style={{ marginTop: 2 }}>{tr('Only gaps long enough for him')}</T>
             </View>
             <Ico name="chevron-right" size={14} color={D.sub} />
           </Pressable>
@@ -238,13 +239,12 @@ export default function OfferDayScreen({ barberId, row, onBack, onSent }: {
 
       {book && picked && (
         <View style={s.textCard}>
-          <Eyebrow ls={1.4}>HE GETS ONE TEXT</Eyebrow>
+          <Eyebrow ls={1.4}>{tr('HE GETS ONE TEXT')}</Eyebrow>
           <View style={s.bubble}>
             <T size={12} c={D.textDim} style={{ lineHeight: 18.5 }}>{offerText(book.barber, picked, book.shop)}</T>
           </View>
           <T size={11} c={D.faint} style={{ lineHeight: 16.5 }}>
-            The same tap as a web name's confirm. Until he taps, {said(picked)} shows provisional on your
-            day and stays bookable by anyone else — you haven't lost the slot to a man who may not come.
+            {tr('The same tap as a web name\'s confirm. Until he taps, {picked} shows provisional on your day and stays bookable by anyone else — you haven\'t lost the slot to a man who may not come.', { picked: said(picked) })}
           </T>
         </View>
       )}
@@ -253,13 +253,13 @@ export default function OfferDayScreen({ barberId, row, onBack, onSent }: {
         <Pressable disabled={!picked || busy} onPress={send} accessibilityRole="button"
           style={({ pressed }) => [s.white, (!picked || busy) && s.off, pressed && s.pressed]}>
           <T w="eb" size={12.5} c="#111" ls={0.5}>
-            {picked ? `OFFER HIM ${said(picked).toUpperCase()}` : 'PICK A TIME FIRST'}
+            {picked ? tr('OFFER HIM {picked}', { picked: said(picked).toUpperCase() }) : tr('PICK A TIME FIRST')}
           </T>
-          <T size={10} c="rgba(0,0,0,0.55)">Takes him out of today's line</T>
+          <T size={10} c="rgba(0,0,0,0.55)">{tr('Takes him out of today\'s line')}</T>
         </Pressable>
         <Pressable onPress={onBack} accessibilityRole="button"
           style={({ pressed }) => [s.keep, pressed && s.pressed]}>
-          <T w="b" size={12.5} c={D.textDim}>Keep him waiting today</T>
+          <T w="b" size={12.5} c={D.textDim}>{tr('Keep him waiting today')}</T>
         </Pressable>
       </View>
     </Screen>

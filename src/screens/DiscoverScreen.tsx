@@ -20,13 +20,14 @@ import { QueueLinkOpen } from './QueueLinkScreen';
 import QueueScreen, { DayQueueRow, minutesUntil, QUEUE_POLL_MS } from './QueueScreen';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
 import SearchScreen from './SearchScreen';
+import { tr, trn } from '../lib/i18n';
 
 // category chips filter by service-name keywords — no category column needed
 const CATEGORIES: { label: string; icon: keyof typeof Ionicons.glyphMap; re: RegExp }[] = [
-  { label: 'Haircut', icon: 'cut-outline', re: /hair|cut/i },
-  { label: 'Beard', icon: 'man-outline', re: /beard/i },
-  { label: 'Shave', icon: 'water-outline', re: /shav|rasage/i },
-  { label: 'Color', icon: 'color-palette-outline', re: /color|couleur/i },
+  { label: tr('Haircut'), icon: 'cut-outline', re: /hair|cut/i },
+  { label: tr('Beard'), icon: 'man-outline', re: /beard/i },
+  { label: tr('Shave'), icon: 'water-outline', re: /shav|rasage/i },
+  { label: tr('Color'), icon: 'color-palette-outline', re: /color|couleur/i },
 ];
 
 // salon card image = first portfolio photo found among its barbers.
@@ -60,7 +61,7 @@ function avgOf(reviews: { rating: number }[]): number | null {
 
 function greeting() {
   const h = new Date().getHours();
-  return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+  return h < 12 ? tr('Good morning') : h < 18 ? tr('Good afternoon') : tr('Good evening');
 }
 
 type MyBooking = {
@@ -90,8 +91,8 @@ function useQueueActivity(
       ticketNo: queue.findIndex((r) => r.booking_id === mine.booking_id) + 1,
       ahead,
       etaMin: minutesUntil(mine.starts_at),
-      barberName: booking.barbers?.profiles?.full_name ?? 'Your barber',
-      salonName: booking.barbers?.salon?.name ?? 'the shop',
+      barberName: booking.barbers?.profiles?.full_name ?? tr('Your barber'),
+      salonName: booking.barbers?.salon?.name ?? tr('the shop'),
     });
   }, [mine?.booking_id, mine?.stage, mine?.starts_at, queue.length, booking?.id]);
 
@@ -181,7 +182,7 @@ export default function DiscoverScreen({
       .order('name')
       .then(({ data, error }) => {
         setLoading(false);
-        if (error) return Alert.alert('Could not load salons', error.message);
+        if (error) return Alert.alert(tr('Could not load salons'), error.message);
         const cards = (data as unknown as SalonCard[])
           .map((s) => ({ ...s, barbers: s.barbers.filter((b) => b.status === 'approved' && b.salon_status === 'approved') }))
           .filter((s) => s.barbers.length > 0);
@@ -242,10 +243,10 @@ export default function DiscoverScreen({
   );
 
   if (phase && booking && ackedTakeover !== `${booking.id}:${phase}`) {
-    const bName = booking.barbers?.profiles?.full_name ?? 'Your barber';
+    const bName = booking.barbers?.profiles?.full_name ?? tr('Your barber');
     return <YoureNextScreen phase={phase}
       ticketNo={dayQueue.findIndex((r) => r.booking_id === booking.id) + 1}
-      barberName={bName} salonName={booking.barbers?.salon?.name ?? 'the shop'}
+      barberName={bName} salonName={booking.barbers?.salon?.name ?? tr('the shop')}
       etaMin={minutesUntil(mineQ!.starts_at)}
       startedAt={mineQ!.stage === 'in_chair' ? mineQ!.starts_at : null}
       depositCents={0} priceCents={0}
@@ -269,8 +270,8 @@ export default function DiscoverScreen({
     return <WalkInTicketScreen
       ticketNo={Math.max(1, dayQueue.findIndex((r) => r.booking_id === walkIn) + 1)}
       ahead={aheadOfMe} waitMin={minutesUntil(booking.starts_at)}
-      barberName={booking.barbers?.profiles?.full_name ?? 'Your barber'}
-      salonName={booking.barbers?.salon?.name ?? 'the shop'}
+      barberName={booking.barbers?.profiles?.full_name ?? tr('Your barber')}
+      salonName={booking.barbers?.salon?.name ?? tr('the shop')}
       priceCents={0}
       onQueue={() => { setWalkIn(null); setQueueOpen(true); }}
       onLeave={async () => {
@@ -304,7 +305,7 @@ export default function DiscoverScreen({
   }
   if (queueOpen && booking?.barbers?.id) {
     return <QueueScreen barberId={booking.barbers.id} myBookingId={booking.id}
-      barberLine={`${(booking.barbers.profiles?.full_name ?? 'Barber').split(' ')[0]} · ${booking.barbers.salon?.name ?? 'Salon'}`}
+      barberLine={`${(booking.barbers.profiles?.full_name ?? tr('Barber')).split(' ')[0]} · ${booking.barbers.salon?.name ?? tr('Salon')}`}
       onBack={() => { setQueueOpen(false); onChromeHidden?.(false); }}
       onBookings={() => { setQueueOpen(false); setDetailOpen(true); onChromeHidden?.(true); }} />;
   }
@@ -330,20 +331,20 @@ export default function DiscoverScreen({
       {/* ponytail: single-city launch — location is a label, not a picker */}
       <View style={styles.locationHead}>
         <View>
-          <Text style={styles.locationLabel}>Location</Text>
+          <Text style={styles.locationLabel}>{tr('Location')}</Text>
           <View style={styles.locationRow}>
             <Ionicons name="location" size={16} color={colors.accent} />
-            <Text style={styles.locationText}>Tangier, Morocco</Text>
+            <Text style={styles.locationText}>{tr('Tangier, Morocco')}</Text>
           </View>
         </View>
         <View style={styles.headActions}>
           {/* 27a — scanning the counter code is the walk-in's way in */}
-          <TouchableOpacity style={styles.bellBtn} accessibilityLabel="Check in with a shop code"
+          <TouchableOpacity style={styles.bellBtn} accessibilityLabel={tr('Check in with a shop code')}
             onPress={() => { setCheckIn(true); onChromeHidden?.(true); }}>
             <Ionicons name="qr-code-outline" size={18} color={colors.text} />
           </TouchableOpacity>
           {/* 14a — the inbox behind the bell; the dot is a real unread count */}
-          <TouchableOpacity style={styles.bellBtn} accessibilityLabel="Notifications"
+          <TouchableOpacity style={styles.bellBtn} accessibilityLabel={tr('Notifications')}
             onPress={() => { setInboxOpen(true); onChromeHidden?.(true); }}>
             <Ionicons name="notifications-outline" size={18} color={colors.text} />
             {unread > 0 && <View style={styles.bellDot} />}
@@ -356,10 +357,10 @@ export default function DiscoverScreen({
       </Display>
 
       <TouchableOpacity style={styles.searchPill} activeOpacity={0.8}
-        accessibilityRole="search" accessibilityLabel="Search salon or barber"
+        accessibilityRole="search" accessibilityLabel={tr('Search salon or barber')}
         onPress={() => { setSearchOpen(true); onChromeHidden?.(true); }}>
         <Ionicons name="search" size={17} color={colors.textSecondary} />
-        <Text style={styles.searchPlaceholder}>Search salon or barber…</Text>
+        <Text style={styles.searchPlaceholder}>{tr('Search salon or barber…')}</Text>
       </TouchableOpacity>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.catStrip}>
@@ -396,15 +397,15 @@ export default function DiscoverScreen({
             <View style={styles.qTop}>
               <View style={styles.qLiveRow}>
                 <View style={styles.qLiveDot} />
-                <Text style={styles.qLiveLabel}>LIVE QUEUE</Text>
+                <Text style={styles.qLiveLabel}>{tr('LIVE QUEUE')}</Text>
               </View>
               <View style={styles.qTicketBadge}>
-                <Text style={styles.qTicketBadgeText}>TICKET Nº {String(Math.max(ticketNo, 1)).padStart(2, '0')}</Text>
+                <Text style={styles.qTicketBadgeText}>{tr('TICKET Nº {ticketNo}', { ticketNo: String(Math.max(ticketNo, 1)).padStart(2, '0') })}</Text>
               </View>
             </View>
-            <Text style={styles.qBig}>{inChair ? "You're up" : `${ahead.length} ahead`}</Text>
+            <Text style={styles.qBig}>{inChair ? tr('You\'re up') : tr('{count} ahead', { count: ahead.length })}</Text>
             <Text style={styles.qSub}>
-              {inChair ? 'Take a seat — the chair is yours' : `Estimated wait ~${etaMin} min · your slot ${slot}`}
+              {inChair ? tr('Take a seat — the chair is yours') : tr('Estimated wait ~{etaMin} min · your slot {slot}', { etaMin, slot })}
             </Text>
             <View style={styles.qProgress}>
               {[0, 1, 2, 3].map((i) => (
@@ -414,7 +415,7 @@ export default function DiscoverScreen({
             <View style={styles.qFoot}>
               <View style={styles.qAvatar}><Text style={styles.qAvatarText}>{initials}</Text></View>
               <Text style={styles.qFootText}>
-                {(booking.barbers?.profiles?.full_name ?? 'Barber').split(' ')[0]} · {booking.barbers?.salon?.name ?? 'Salon'}
+                {(booking.barbers?.profiles?.full_name ?? tr('Barber')).split(' ')[0]} · {booking.barbers?.salon?.name ?? tr('Salon')}
               </Text>
               <View style={styles.qArrow}>
                 <Ionicons name="arrow-up" size={13} color={colors.accent} style={styles.qArrowIcon} />
@@ -427,8 +428,8 @@ export default function DiscoverScreen({
       {topRated.length > 0 && !category && (
         <>
           <View style={styles.sectionRow}>
-            <Text style={styles.section}>Top rated</Text>
-            {onExplore && <Text style={styles.seeAll} onPress={onExplore}>See all</Text>}
+            <Text style={styles.section}>{tr('Top rated')}</Text>
+            {onExplore && <Text style={styles.seeAll} onPress={onExplore}>{tr('See all')}</Text>}
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.topStrip}>
             <View style={styles.topRow}>
@@ -446,7 +447,7 @@ export default function DiscoverScreen({
         </>
       )}
 
-      <Text style={styles.section}>All salons</Text>
+      <Text style={styles.section}>{tr('All salons')}</Text>
     </View>
   );
 
@@ -457,7 +458,7 @@ export default function DiscoverScreen({
         keyExtractor={(s) => s.id}
         contentContainerStyle={styles.list}
         ListHeaderComponent={header}
-        ListEmptyComponent={<Text style={styles.empty}>No salons match.</Text>}
+        ListEmptyComponent={<Text style={styles.empty}>{tr('No salons match.')}</Text>}
         renderItem={({ item }) => {
           const avg = avgOf(item.barbers.flatMap((b) => b.reviews));
           return (
@@ -469,7 +470,7 @@ export default function DiscoverScreen({
                 <Text style={styles.meta}>{item.address}</Text>
                 <View style={styles.chipRow}>
                   <Text style={styles.chipText}>
-                    {item.barbers.length} barber{item.barbers.length > 1 ? 's' : ''}
+                    {trn(item.barbers.length, '{n} barber', '{n} barbers')}
                   </Text>
                 </View>
               </View>

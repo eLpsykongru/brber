@@ -6,6 +6,7 @@ import { summarise } from '../lib/outbox';
 import { drop, flush, useConnection, useOutbox } from '../lib/sync';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
+import { loc, tr, trn } from '../lib/i18n';
 
 // 10f / 10e of "Barber App.dc.html" — the two screens about standing rather than
 // about the day: what hasn't reached us, and what happens when we've had to hide
@@ -34,13 +35,12 @@ export default function OutboxScreen({ onBack, onOps }: {
   if (jobs.length === 0) {
     return (
       <Screen bottom={TAB_INSET}>
-        <TopBar title="WAITING TO SEND" onBack={onBack} plain />
+        <TopBar title={tr('WAITING TO SEND')} onBack={onBack} plain />
         <View style={s.empty}>
           <View style={s.emptyCircle}><Ico name="check" size={28} color={D.green} /></View>
-          <Serif size={20} style={s.center}>Everything's sent</Serif>
+          <Serif size={20} style={s.center}>{tr('Everything\'s sent')}</Serif>
           <T size={13} c={D.sub} style={s.emptyBody}>
-            Nothing is waiting on this phone. Anything you do without a signal shows
-            up here until it lands.
+            {tr('Nothing is waiting on this phone. Anything you do without a signal shows up here until it lands.')}
           </T>
         </View>
       </Screen>
@@ -49,24 +49,25 @@ export default function OutboxScreen({ onBack, onOps }: {
 
   return (
     <Screen bottom={TAB_INSET}>
-      <TopBar title="WAITING TO SEND" onBack={onBack} plain />
+      <TopBar title={tr('WAITING TO SEND')} onBack={onBack} plain />
 
       <View style={s.head}>
         <View style={s.headIcon}><Ico name="refresh-cw" size={16} color={D.red} /></View>
         <View style={s.grow}>
           <T w="b" size={13} c={D.red}>
-            {sum.count} thing{sum.count === 1 ? '' : 's'} won't send
+            {trn(sum.count, '{n} thing won\'t send', '{n} things won\'t send')}
           </T>
           <T size={11} c={D.sub} style={s.mt2}>
-            {sum.tries > 0
-              ? `Tried ${sum.tries} time${sum.tries === 1 ? '' : 's'}${sum.since ? ` since ${clock(sum.since)}` : ''}`
-              : 'Not tried yet'}
-            {' · '}they're safe on this phone
+            {tr('{x} · they\'re safe on this phone', { x: sum.tries > 0
+              ? (sum.since
+                ? trn(sum.tries, 'Tried {n} time since {since}', 'Tried {n} times since {since}', { since: clock(sum.since) })
+                : trn(sum.tries, 'Tried {n} time', 'Tried {n} times'))
+              : tr('Not tried yet') })}
           </T>
         </View>
       </View>
 
-      <T w="b" size={11} c={D.sub} ls={1.65} style={s.mt2}>STUCK</T>
+      <T w="b" size={11} c={D.sub} ls={1.65} style={s.mt2}>{tr('STUCK')}</T>
       {jobs.map((j) => (
         <View key={j.id} style={[s.row, j.conflict && s.rowClash]}>
           <View style={[s.rowIcon, j.conflict && s.rowIconClash]}>
@@ -77,14 +78,14 @@ export default function OutboxScreen({ onBack, onOps }: {
             <T w="sb" size={12.5}>{j.label}</T>
             <T size={10.5} c={j.conflict ? D.amber : D.sub} style={s.mt2}>
               {clock(j.at)}
-              {j.conflict ? ' · the slot went to someone else' : ''}
+              {j.conflict ? tr(' · the slot went to someone else') : ''}
             </T>
           </View>
           {/* only a job that can never send gets a way off the list — dropping a
               retryable one is how work disappears silently */}
           {j.conflict && (
             <Pressable hitSlop={8} onPress={() => drop(j.id)}>
-              <T w="b" size={11} c={D.accent}>Drop</T>
+              <T w="b" size={11} c={D.accent}>{tr('Drop')}</T>
             </Pressable>
           )}
         </View>
@@ -93,18 +94,17 @@ export default function OutboxScreen({ onBack, onOps }: {
       <View style={s.note}>
         <Ico name="info" size={14} color={D.sub} />
         <T size={12} c={D.sub} style={s.noteText}>
-          Keep working. Don't reinstall the app or clear it — that's the only way to
-          lose these.
+          {tr('Keep working. Don\'t reinstall the app or clear it — that\'s the only way to lose these.')}
         </T>
       </View>
 
       <Pressable disabled={busy} onPress={retry} style={[s.primary, busy && s.dim55]}>
         <T w="b" size={12.5} c="#fff" ls={0.78}>
-          {busy ? 'SENDING…' : online ? 'TRY SENDING NOW' : 'NO SIGNAL YET'}
+          {busy ? tr('SENDING…') : online ? tr('TRY SENDING NOW') : tr('NO SIGNAL YET')}
         </T>
       </Pressable>
       <Pressable onPress={onOps} style={s.centerBtn}>
-        <T w="sb" size={12} c={D.sub}>Tell ops about it</T>
+        <T w="sb" size={12} c={D.sub}>{tr('Tell ops about it')}</T>
       </Pressable>
     </Screen>
   );
@@ -131,14 +131,14 @@ export function HiddenScreen({ onBack, onOps, onSent }: {
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.rpc('my_standing');
-    if (error) return Alert.alert('Could not load your standing', error.message);
+    if (error) return Alert.alert(tr('Could not load your standing'), error.message);
     setSt(data as Standing);
   }, []);
   useEffect(() => { load(); }, [load]);
 
   async function sendLicence() {
     const perm = await ImagePicker.requestCameraPermissionsAsync();
-    if (!perm.granted) return Alert.alert('Camera is off', 'Sterncut needs it to photograph the licence.');
+    if (!perm.granted) return Alert.alert(tr('Camera is off'), tr('Sterncut needs it to photograph the licence.'));
     const shot = await ImagePicker.launchCameraAsync({ quality: 0.6 });
     if (shot.canceled || !shot.assets[0]) return;
 
@@ -148,54 +148,54 @@ export function HiddenScreen({ onBack, onOps, onSent }: {
     const body = await (await fetch(shot.assets[0].uri)).arrayBuffer();
     const up = await supabase.storage.from('id-documents')
       .upload(path, body, { contentType: 'image/jpeg', upsert: true });
-    if (up.error) { setBusy(false); return Alert.alert('Could not send it', up.error.message); }
+    if (up.error) { setBusy(false); return Alert.alert(tr('Could not send it'), up.error.message); }
 
     const { error } = await supabase.rpc('submit_licence', { p_path: path, p_expires: null });
     setBusy(false);
-    if (error) return Alert.alert('Could not send it', error.message);
-    Alert.alert('Sent', 'Ops looks at it within a day. The shop comes back the moment they accept it.');
+    if (error) return Alert.alert(tr('Could not send it'), error.message);
+    Alert.alert(tr('Sent'), tr('Ops looks at it within a day. The shop comes back the moment they accept it.'));
     load();
     onSent?.();
   }
 
-  if (!st) return <Screen bottom={TAB_INSET}><TopBar title="Your shop" onBack={onBack} /></Screen>;
+  if (!st) return <Screen bottom={TAB_INSET}><TopBar title={tr('Your shop')} onBack={onBack} /></Screen>;
 
   const on = st.licence_expires_at
     ? new Date(`${st.licence_expires_at}T00:00:00`)
-      .toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      .toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' })
     : null;
   const cuts = st.search_cuts_per_day;
 
   return (
     <Screen bottom={TAB_INSET}>
-      <TopBar title="Your shop" onBack={onBack} />
+      <TopBar title={tr('Your shop')} onBack={onBack} />
 
       <View style={s.hero}>
         <View style={s.heroCircle}><Ico name="eye-off" size={27} color={D.red} /></View>
-        <Serif size={23} style={s.heroTitle}>Nobody new{'\n'}can find you</Serif>
+        <Serif size={23} style={s.heroTitle}>{tr('Nobody new\ncan find you')}</Serif>
         <T size={12.5} c={D.sub} style={s.heroBody}>
           {st.expired && on
-            ? `Your licence expired on ${on} and we had to hide the shop. Send us the new one and you're back in minutes.`
-            : 'Ops has hidden the shop for now. Message them to find out what they need.'}
+            ? tr('Your licence expired on {on} and we had to hide the shop. Send us the new one and you\'re back in minutes.', { on })
+            : tr('Ops has hidden the shop for now. Message them to find out what they need.')}
         </T>
       </View>
 
       <View style={s.worksCard}>
-        <T w="b" size={10} c={D.sub} ls={1.4}>WHAT STILL WORKS</T>
+        <T w="b" size={10} c={D.sub} ls={1.4}>{tr('WHAT STILL WORKS')}</T>
         <Works ok>
-          Your {st.bookings_ahead} booking{st.bookings_ahead === 1 ? '' : 's'} ahead stand
+          {trn(st.bookings_ahead, 'Your {n} booking ahead stand', 'Your {n} bookings ahead stand')}
         </Works>
-        <Works ok>Walk-ins and the QR still work</Works>
-        <Works ok>Regulars who follow you can still book</Works>
-        <Works>You're out of Explore and the map</Works>
+        <Works ok>{tr('Walk-ins and the QR still work')}</Works>
+        <Works ok>{tr('Regulars who follow you can still book')}</Works>
+        <Works>{tr('You\'re out of Explore and the map')}</Works>
       </View>
 
       {cuts != null && cuts > 0 && (
         <View style={s.costCard}>
           <View style={s.costIcon}><Ico name="trending-up" size={16} color={D.sub} /></View>
           <View style={s.grow}>
-            <T w="b" size={12.5}>Costing you about {cuts} cut{cuts === 1 ? '' : 's'} a day</T>
-            <T size={11} c={D.sub} style={s.mt2}>Based on what search normally brings you</T>
+            <T w="b" size={12.5}>{trn(cuts, 'Costing you about {n} cut a day', 'Costing you about {n} cuts a day')}</T>
+            <T size={11} c={D.sub} style={s.mt2}>{tr('Based on what search normally brings you')}</T>
           </View>
         </View>
       )}
@@ -204,25 +204,25 @@ export function HiddenScreen({ onBack, onOps, onSent }: {
         <Pressable disabled={busy} onPress={sendLicence} style={[s.bigPrimary, busy && s.dim55]}>
           <Ico name="camera" size={16} color="#fff" />
           <T w="b" size={13} c="#fff" ls={0.65}>
-            {busy ? 'SENDING…' : 'SEND THE NEW LICENCE'}
+            {busy ? tr('SENDING…') : tr('SEND THE NEW LICENCE')}
           </T>
         </Pressable>
       )}
       <View style={s.twoBtns}>
         <Pressable onPress={onOps} style={s.solidGhost}>
-          <T w="b" size={12} ls={0.4}>MESSAGE OPS</T>
+          <T w="b" size={12} ls={0.4}>{tr('MESSAGE OPS')}</T>
         </Pressable>
         <Pressable onPress={() => Alert.alert(
-          st.licence_task ? 'It\'s with ops' : 'Nothing received yet',
+          st.licence_task ? tr('It\'s with ops') : tr('Nothing received yet'),
           st.licence_task
-            ? 'They have it. The shop comes back the moment they accept it.'
-            : 'We have no licence photo from you. Send one and it goes straight to ops.',
+            ? tr('They have it. The shop comes back the moment they accept it.')
+            : tr('We have no licence photo from you. Send one and it goes straight to ops.'),
         )} style={s.outlineGhost}>
-          <T w="b" size={12} c={D.sub} ls={0.4}>I ALREADY SENT IT</T>
+          <T w="b" size={12} c={D.sub} ls={0.4}>{tr('I ALREADY SENT IT')}</T>
         </Pressable>
       </View>
       <T size={11} c={D.muted} style={s.footNote}>
-        The shop un-hides itself the moment ops accepts it — no waiting on us.
+        {tr('The shop un-hides itself the moment ops accepts it — no waiting on us.')}
       </T>
     </Screen>
   );

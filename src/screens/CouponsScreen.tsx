@@ -6,6 +6,7 @@ import {
 import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, TOP_INSET } from '../theme';
+import { loc, tr } from '../lib/i18n';
 
 // 16a (active) and 17c (used & expired). A coupon is a code you show at the
 // shop — nothing here touches a booking's price. Redemption is recorded by
@@ -27,7 +28,7 @@ type Coupon = {
 };
 
 const dayOf = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  new Date(iso).toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' });
 
 export default function CouponsScreen({ onBack }: { onBack: () => void }) {
   const [rows, setRows] = useState<Coupon[]>([]);
@@ -44,7 +45,7 @@ export default function CouponsScreen({ onBack }: { onBack: () => void }) {
       supabase.rpc('my_coupons'),
       supabase.rpc('my_referral_code'),
     ]);
-    if (list.error) Alert.alert('Could not load coupons', list.error.message);
+    if (list.error) Alert.alert(tr('Could not load coupons'), list.error.message);
     else setRows((list.data as Coupon[]) ?? []);
     if (!ref.error) setReferral(ref.data as string);
   }, []);
@@ -55,7 +56,7 @@ export default function CouponsScreen({ onBack }: { onBack: () => void }) {
     setBusy(true);
     const { error } = await supabase.rpc('claim_coupon', { p_code: code.trim() });
     setBusy(false);
-    if (error) return Alert.alert('Could not add that code', error.message);
+    if (error) return Alert.alert(tr('Could not add that code'), error.message);
     setCode(''); setCodeOpen(false); load();
   }
 
@@ -73,10 +74,10 @@ export default function CouponsScreen({ onBack }: { onBack: () => void }) {
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.header}>
           <Pressable onPress={onBack} hitSlop={8}
-            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel="Go back">
+            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel={tr('Go back')}>
             <Ionicons name="arrow-back" size={16} color={colors.text} />
           </Pressable>
-          <Display size={18} style={s.headerTitle}>My coupons</Display>
+          <Display size={18} style={s.headerTitle}>{tr('My coupons')}</Display>
           <View style={s.puckGhost} />
         </View>
 
@@ -84,13 +85,13 @@ export default function CouponsScreen({ onBack }: { onBack: () => void }) {
           <Pressable onPress={() => setTab('active')} style={s.tab}
             accessibilityRole="tab" accessibilityState={{ selected: tab === 'active' }}>
             <Text style={[s.tabText, tab === 'active' && s.tabTextOn]}>
-              Active <Text style={s.tabCount}>{active.length}</Text>
+              {tr('Active')} <Text style={s.tabCount}>{active.length}</Text>
             </Text>
             {tab === 'active' && <View style={s.tabBar} />}
           </Pressable>
           <Pressable onPress={() => setTab('past')} style={s.tab}
             accessibilityRole="tab" accessibilityState={{ selected: tab === 'past' }}>
-            <Text style={[s.tabText, tab === 'past' && s.tabTextOn]}>Used &amp; expired</Text>
+            <Text style={[s.tabText, tab === 'past' && s.tabTextOn]}>{tr('Used & expired')}</Text>
             {tab === 'past' && <View style={s.tabBar} />}
           </Pressable>
         </View>
@@ -98,8 +99,8 @@ export default function CouponsScreen({ onBack }: { onBack: () => void }) {
         {shown.length === 0 && (
           <Text style={s.empty}>
             {tab === 'active'
-              ? 'No active coupons. Add a code below when a salon gives you one.'
-              : 'Nothing used or expired yet.'}
+              ? tr('No active coupons. Add a code below when a salon gives you one.')
+              : tr('Nothing used or expired yet.')}
           </Text>
         )}
 
@@ -116,9 +117,9 @@ export default function CouponsScreen({ onBack }: { onBack: () => void }) {
               <View style={s.stub}>
                 <Text style={[s.stubValue, (spent || dead) && s.stubValueOff]}>
                   {c.percent_off != null ? c.percent_off : (c.amount_off_cents ?? 0) / 100}
-                  <Text style={s.stubUnit}>{c.percent_off != null ? '%' : ' DH'}</Text>
+                  <Text style={s.stubUnit}>{c.percent_off != null ? '%' : tr(' DH')}</Text>
                 </Text>
-                <Text style={s.stubOff}>OFF</Text>
+                <Text style={s.stubOff}>{tr('OFF')}</Text>
               </View>
               <View style={s.perf} />
               <View style={s.ticketBody}>
@@ -127,24 +128,26 @@ export default function CouponsScreen({ onBack }: { onBack: () => void }) {
                 </Text>
                 <Text style={s.ticketNote} numberOfLines={1}>
                   {spent
-                    ? `Used ${dayOf(c.used_at!)}${c.saved_cents ? ` · saved ${(c.saved_cents / 100).toFixed(2)} DH` : ''}`
+                    ? c.saved_cents
+                      ? tr('Used {day} · saved {saved} DH', { day: dayOf(c.used_at!), saved: (c.saved_cents / 100).toFixed(2) })
+                      : tr('Used {day}', { day: dayOf(c.used_at!) })
                     : dead
-                      ? `Expired ${dayOf(c.expires_on!)} · never used`
+                      ? tr('Expired {dayOf} · never used', { dayOf: dayOf(c.expires_on!) })
                       // 37a's greyed row says why in the shop's own words
-                      : c.blocked ?? `${c.note ? `${c.note} · ` : ''}${c.expires_on ? `expires ${dayOf(c.expires_on)}` : ''}`}
+                      : c.blocked ?? `${c.note ? `${c.note} · ` : ''}${c.expires_on ? tr('expires {day}', { day: dayOf(c.expires_on) }) : ''}`}
                 </Text>
                 {!spent && !dead && !c.blocked && (
                   <View style={s.codeRow}>
                     <View style={s.codePill}>
                       <Text style={s.codeText}>{c.code}</Text>
                     </View>
-                    <Text style={s.showAt}>Pick it at checkout</Text>
+                    <Text style={s.showAt}>{tr('Pick it at checkout')}</Text>
                   </View>
                 )}
               </View>
               {(spent || dead) && (
                 <View style={[s.stateChip, dead && s.stateChipDead]}>
-                  <Text style={[s.stateText, dead && s.stateTextDead]}>{dead ? 'EXPIRED' : 'USED'}</Text>
+                  <Text style={[s.stateText, dead && s.stateTextDead]}>{dead ? tr('EXPIRED') : tr('USED')}</Text>
                 </View>
               )}
             </View>
@@ -159,23 +162,23 @@ export default function CouponsScreen({ onBack }: { onBack: () => void }) {
                 <Ionicons name="people-outline" size={17} color={colors.accent} />
               </View>
               <View style={s.grow}>
-                <Text style={s.referTitle}>20 DH for you and a friend</Text>
-                <Text style={s.referSub}>When they finish their first cut</Text>
+                <Text style={s.referTitle}>{tr('20 DH for you and a friend')}</Text>
+                <Text style={s.referSub}>{tr('When they finish their first cut')}</Text>
               </View>
             </View>
             <View style={s.referCodeRow}>
               <Text style={s.referCode}>{referral}</Text>
               <Pressable hitSlop={8} onPress={() => Share.share({
-                message: `Use my code ${referral} on Sterncut and we both get 20 DH.`,
+                message: tr('Use my code {code} on Sterncut and we both get 20 DH.', { code: referral }),
               })}>
-                <Text style={s.referShare}>Share</Text>
+                <Text style={s.referShare}>{tr('Share')}</Text>
               </Pressable>
             </View>
           </View>
         )}
 
         {tab === 'active' && (
-          <Text style={s.stackNote}>One coupon per booking. They can't be stacked.</Text>
+          <Text style={s.stackNote}>{tr('One coupon per booking. They can\'t be stacked.')}</Text>
         )}
 
         {tab === 'active' && (
@@ -185,8 +188,8 @@ export default function CouponsScreen({ onBack }: { onBack: () => void }) {
               <Ionicons name="add" size={17} color={colors.text} />
             </View>
             <View style={s.grow}>
-              <Text style={s.addTitle}>Have a code?</Text>
-              <Text style={s.addSub}>Add it to your coupons</Text>
+              <Text style={s.addTitle}>{tr('Have a code?')}</Text>
+              <Text style={s.addSub}>{tr('Add it to your coupons')}</Text>
             </View>
             <Ionicons name="chevron-forward" size={15} color={colors.textTertiary} />
           </Pressable>
@@ -195,12 +198,12 @@ export default function CouponsScreen({ onBack }: { onBack: () => void }) {
         {tab === 'past' && rows.length > 0 && (
           <View style={s.totals}>
             <View>
-              <Text style={s.totalLabel}>COUPONS USED</Text>
+              <Text style={s.totalLabel}>{tr('COUPONS USED')}</Text>
               <Text style={s.totalValue}>{usedCount}</Text>
             </View>
             <View style={s.right}>
-              <Text style={s.totalLabel}>TOTAL SAVED</Text>
-              <Text style={[s.totalValue, s.totalSaved]}>{totalSaved.toFixed(0)} DH</Text>
+              <Text style={s.totalLabel}>{tr('TOTAL SAVED')}</Text>
+              <Text style={[s.totalValue, s.totalSaved]}>{tr('{totalSaved} DH', { totalSaved: totalSaved.toFixed(0) })}</Text>
             </View>
           </View>
         )}
@@ -210,12 +213,12 @@ export default function CouponsScreen({ onBack }: { onBack: () => void }) {
         <Pressable style={s.scrim} onPress={() => setCodeOpen(false)} />
         <View style={s.sheet}>
           <View style={s.grabber} />
-          <Display size={18} style={s.sheetTitle}>Add a code</Display>
+          <Display size={18} style={s.sheetTitle}>{tr('Add a code')}</Display>
           <TextInput style={s.input} value={code} onChangeText={setCode} autoCapitalize="characters"
-            placeholder="e.g. FADE10" placeholderTextColor={colors.textTertiary} />
+            placeholder={tr('e.g. FADE10')} placeholderTextColor={colors.textTertiary} />
           <Pressable onPress={claim} disabled={busy || !code.trim()}
             style={({ pressed }) => [s.saveBtn, (pressed || busy || !code.trim()) && s.pressed]}>
-            <Text style={s.saveText}>ADD COUPON</Text>
+            <Text style={s.saveText}>{tr('ADD COUPON')}</Text>
           </Pressable>
         </View>
       </Modal>
@@ -231,8 +234,8 @@ export default function CouponsScreen({ onBack }: { onBack: () => void }) {
 // a customer who thinks his barber is discounting will haggle at the chair.
 function HeroTicket({ c }: { c: Coupon }) {
   const value = c.percent_off != null
-    ? `${c.percent_off}% off`
-    : `${Math.round((c.amount_off_cents ?? 0) / 100)} DH off`;
+    ? tr('{pct}% off', { pct: c.percent_off })
+    : tr('{amount} DH off', { amount: Math.round((c.amount_off_cents ?? 0) / 100) });
   return (
     <View style={s.hero}>
       {/* the notches that make it a ticket rather than a card */}
@@ -240,10 +243,10 @@ function HeroTicket({ c }: { c: Coupon }) {
       <View style={s.notchR} />
 
       <View style={s.heroTop}>
-        {c.is_new && <View style={s.newChip}><Text style={s.newText}>NEW</Text></View>}
+        {c.is_new && <View style={s.newChip}><Text style={s.newText}>{tr('NEW')}</Text></View>}
         <View style={s.grow} />
         {!!c.expires_on && (
-          <Text style={s.heroEnds}>Ends {dayOf(c.expires_on)}</Text>
+          <Text style={s.heroEnds}>{tr('Ends {expires_on}', { expires_on: dayOf(c.expires_on) })}</Text>
         )}
       </View>
 
@@ -251,24 +254,24 @@ function HeroTicket({ c }: { c: Coupon }) {
         <Text style={s.heroValue}>{value}</Text>
         <Text style={s.heroSub}>
           {c.title}
-          {c.min_spend_cents ? ` · on ${Math.round(c.min_spend_cents / 100)} DH or more` : ''}
+          {c.min_spend_cents ? tr(' · on {round} DH or more', { round: Math.round(c.min_spend_cents / 100) }) : ''}
         </Text>
       </View>
 
       <View style={s.heroCodeRow}>
         <View style={s.grow}>
-          <Text style={s.heroCodeLabel}>CODE</Text>
+          <Text style={s.heroCodeLabel}>{tr('CODE')}</Text>
           <Text style={s.heroCode}>{c.code}</Text>
         </View>
         <View style={s.heroUse}>
-          <Text style={s.heroUseText}>USE IT</Text>
+          <Text style={s.heroUseText}>{tr('USE IT')}</Text>
         </View>
       </View>
 
       <View style={s.heroNote}>
         <Ionicons name="information-circle-outline" size={13} color="rgba(255,255,255,0.5)" />
         <Text style={s.heroNoteText}>
-          Comes off what you pay from your wallet. Your barber still gets the full price.
+          {tr('Comes off what you pay from your wallet. Your barber still gets the full price.')}
         </Text>
       </View>
     </View>

@@ -3,6 +3,7 @@ import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { Ico, Screen, Serif, T, TAB_INSET, TopBar } from '../components/dark';
 import { supabase } from '../lib/supabase';
 import { dark as D, serif } from '../theme';
+import { tr, trn } from '../lib/i18n';
 
 // 9e / 9f of "Barber App.dc.html" — the float, hand to hand.
 //
@@ -35,7 +36,7 @@ export default function SettleFloatScreen({ onBack }: { onBack?: () => void }) {
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.rpc('my_float');
-    if (error) return Alert.alert('Could not load your float', error.message);
+    if (error) return Alert.alert(tr('Could not load your float'), error.message);
     const j = data as Float;
     setF(j);
     setCode(j.code);
@@ -54,17 +55,17 @@ export default function SettleFloatScreen({ onBack }: { onBack?: () => void }) {
   // there is nothing to undo — no cash moved and the code expires on its own.
   // A server call here would only pretend something happened.
   function notToday() {
-    Alert.alert('Kept for next time',
-      'Your cash stays where it is. Open this again when someone comes.');
+    Alert.alert(tr('Kept for next time'),
+      tr('Your cash stays where it is. Open this again when someone comes.'));
     onBack?.();
   }
 
-  if (!f) return <Screen bottom={TAB_INSET}><TopBar title="Settle up" onBack={onBack} /></Screen>;
+  if (!f) return <Screen bottom={TAB_INSET}><TopBar title={tr('Settle up')} onBack={onBack} /></Screen>;
   if (!f.salon) {
     return (
       <Screen bottom={TAB_INSET}>
-        <TopBar title="Settle up" onBack={onBack} />
-        <T size={13} c={D.sub}>Only a shop owner holds a float.</T>
+        <TopBar title={tr('Settle up')} onBack={onBack} />
+        <T size={13} c={D.sub}>{tr('Only a shop owner holds a float.')}</T>
       </Screen>
     );
   }
@@ -79,60 +80,58 @@ export default function SettleFloatScreen({ onBack }: { onBack?: () => void }) {
 
   return (
     <Screen bottom={TAB_INSET}>
-      <TopBar title="Settle up" onBack={onBack} />
+      <TopBar title={tr('Settle up')} onBack={onBack} />
 
       <View style={[s.handOver, late && s.handOverLate]}>
-        <T w="b" size={10} c={D.sub} ls={1.5}>{ours ? 'HAND OVER' : 'WE OWE YOU'}</T>
-        <T style={s.huge}>{dh(Math.abs(f.net_cents))} DH</T>
+        <T w="b" size={10} c={D.sub} ls={1.5}>{ours ? tr('HAND OVER') : tr('WE OWE YOU')}</T>
+        <T style={s.huge}>{tr('{dh} DH', { dh: dh(Math.abs(f.net_cents)) })}</T>
         {f.held_days != null && (
           <View style={[s.heldRow, late && s.heldRowLate]}>
             <Ico name="clock" size={13} color={late ? D.amber : D.sub} />
             <T size={11.5} c={late ? D.amber : D.sub}>
-              Held {f.held_days} day{f.held_days === 1 ? '' : 's'}
-              {late ? ' · the cap is 14' : ''}
+              {trn(f.held_days, 'Held {n} day{x2}', 'Held {n} days{x2}', { x2: late ? tr(' · the cap is 14') : '' })}
             </T>
           </View>
         )}
       </View>
 
       <View style={s.card}>
-        <T w="b" size={10} c={D.sub} ls={1.4}>WHAT MAKES IT UP</T>
+        <T w="b" size={10} c={D.sub} ls={1.4}>{tr('WHAT MAKES IT UP')}</T>
         <View style={s.line}>
           <T size={12.5} c={D.sub} style={s.grow}>
-            {f.topups} top-up{f.topups === 1 ? '' : 's'}
+            {trn(f.topups, '{n} top-up', '{n} top-ups')}
           </T>
-          <T w="b" size={12.5} style={s.num}>{dh(f.float_cents)} DH</T>
+          <T w="b" size={12.5} style={s.num}>{tr('{float_cents} DH', { float_cents: dh(f.float_cents) })}</T>
         </View>
         <View style={s.line}>
-          <T size={12.5} c={D.sub} style={s.grow}>Commission</T>
-          <T w="b" size={12.5} c={D.green}>0 DH</T>
+          <T size={12.5} c={D.sub} style={s.grow}>{tr('Commission')}</T>
+          <T w="b" size={12.5} c={D.green}>{tr('0 DH')}</T>
         </View>
         {f.owed_cents > 0 && (
           <View style={s.line}>
-            <T size={12.5} c={D.sub} style={s.grow}>We owe you for finished cuts</T>
-            <T w="b" size={12.5} c={D.green} style={s.num}>−{dh(f.owed_cents)} DH</T>
+            <T size={12.5} c={D.sub} style={s.grow}>{tr('We owe you for finished cuts')}</T>
+            <T w="b" size={12.5} c={D.green} style={s.num}>{tr('−{owed_cents} DH', { owed_cents: dh(f.owed_cents) })}</T>
           </View>
         )}
         <View style={s.rule} />
         <View style={s.line}>
-          <T w="b" size={12.5} style={s.grow}>{ours ? 'You hand over' : 'We hand over'}</T>
-          <T w="eb" size={18} style={s.num}>{dh(Math.abs(f.net_cents))} DH</T>
+          <T w="b" size={12.5} style={s.grow}>{ours ? tr('You hand over') : tr('We hand over')}</T>
+          <T w="eb" size={18} style={s.num}>{tr('{dh} DH', { dh: dh(Math.abs(f.net_cents)) })}</T>
         </View>
         <T size={11} c={D.muted} style={s.fine}>
-          It isn't your money — customers paid you cash and we credited their wallets
-          on the spot.
+          {tr('It isn\'t your money — customers paid you cash and we credited their wallets on the spot.')}
         </T>
       </View>
 
-      <T w="b" size={11} c={D.sub} ls={1.65} style={s.mt2}>HOW</T>
+      <T w="b" size={11} c={D.sub} ls={1.65} style={s.mt2}>{tr('HOW')}</T>
       <Pressable onPress={() => setHow('collect')}
         style={[s.howRow, how === 'collect' && s.howRowOn]}>
         <View style={[s.radio, how === 'collect' && s.radioOn]}>
           {how === 'collect' && <Ico name="check" size={11} color="#fff" />}
         </View>
         <View style={s.grow}>
-          <T w={how === 'collect' ? 'b' : 'sb'} size={13}>Someone collects it</T>
-          <T size={11} c={D.sub} style={s.mt2}>Show them the code below</T>
+          <T w={how === 'collect' ? 'b' : 'sb'} size={13}>{tr('Someone collects it')}</T>
+          <T size={11} c={D.sub} style={s.mt2}>{tr('Show them the code below')}</T>
         </View>
       </Pressable>
       <Pressable onPress={() => setHow('bank')} style={[s.howRow, how === 'bank' && s.howRowOn]}>
@@ -140,40 +139,38 @@ export default function SettleFloatScreen({ onBack }: { onBack?: () => void }) {
           {how === 'bank' && <Ico name="check" size={11} color="#fff" />}
         </View>
         <View style={s.grow}>
-          <T w={how === 'bank' ? 'b' : 'sb'} size={13}>Pay it in at the bank</T>
-          <T size={11} c={D.sub} style={s.mt2}>Slip photo needed · clears next day</T>
+          <T w={how === 'bank' ? 'b' : 'sb'} size={13}>{tr('Pay it in at the bank')}</T>
+          <T size={11} c={D.sub} style={s.mt2}>{tr('Slip photo needed · clears next day')}</T>
         </View>
       </Pressable>
 
       {how === 'collect' ? (
         <View style={s.codeCard}>
-          <T w="b" size={10} c={D.sub} ls={1.5}>SHOW THEM THIS CODE</T>
+          <T w="b" size={10} c={D.sub} ls={1.5}>{tr('SHOW THEM THIS CODE')}</T>
           <T style={s.code}>{nothing ? '— — — —' : (code ?? '····').split('').join(' ')}</T>
           <T size={11} c={D.muted} style={s.codeNote}>
-            They type it in to confirm they have the cash. Don't hand anything over
-            without it.
+            {tr('They type it in to confirm they have the cash. Don\'t hand anything over without it.')}
           </T>
         </View>
       ) : (
         <View style={s.note}>
           <Ico name="info" size={15} color={D.sub} />
           <T size={12} c={D.sub} style={s.noteText}>
-            Paying in at the bank isn't wired up yet — for now, hand it to whoever
-            collects in your area and use the code.
+            {tr('Paying in at the bank isn\'t wired up yet — for now, hand it to whoever collects in your area and use the code.')}
           </T>
         </View>
       )}
 
       {!nothing && (
         <Pressable disabled={busy} onPress={notToday} style={[s.ghost, busy && s.dim55]}>
-          <T w="b" size={12} ls={0.6}>NOBODY'S COMING TODAY</T>
+          <T w="b" size={12} ls={0.6}>{tr('NOBODY\'S COMING TODAY')}</T>
         </Pressable>
       )}
       {nothing && (
         <View style={s.note}>
           <Ico name="check" size={15} color={D.green} />
           <T size={12} c={D.sub} style={s.noteText}>
-            Nothing to hand over. Cash top-ups you take will show up here.
+            {tr('Nothing to hand over. Cash top-ups you take will show up here.')}
           </T>
         </View>
       )}
@@ -214,7 +211,7 @@ export function CollectionRoundScreen({ onBack }: { onBack?: () => void }) {
       p_salon: stop.id, p_code: digits, p_declared_cents: stop.float_cents,
     });
     setBusy(false);
-    if (error) return Alert.alert('Not collected', error.message);
+    if (error) return Alert.alert(tr('Not collected'), error.message);
     setDigits('');
     setAt(0);
     load();
@@ -223,13 +220,13 @@ export function CollectionRoundScreen({ onBack }: { onBack?: () => void }) {
   if (denied) {
     return (
       <Screen bottom={TAB_INSET}>
-        <TopBar title="Collection round" onBack={onBack} />
-        <T size={13} c={D.sub}>Collections are ops only.</T>
+        <TopBar title={tr('Collection round')} onBack={onBack} />
+        <T size={13} c={D.sub}>{tr('Collections are ops only.')}</T>
       </Screen>
     );
   }
   if (!round) {
-    return <Screen bottom={TAB_INSET}><TopBar title="Collection round" onBack={onBack} /></Screen>;
+    return <Screen bottom={TAB_INSET}><TopBar title={tr('Collection round')} onBack={onBack} /></Screen>;
   }
 
   const stop = round.stops[at];
@@ -237,26 +234,25 @@ export function CollectionRoundScreen({ onBack }: { onBack?: () => void }) {
 
   return (
     <Screen bottom={TAB_INSET}>
-      <TopBar title="Collection round" onBack={onBack} />
+      <TopBar title={tr('Collection round')} onBack={onBack} />
 
       <View style={s.roundHead}>
         <View style={s.grow}>
-          <T w="b" size={10} c={D.sub} ls={1.4}>CARRYING</T>
-          <T style={s.big}>{dh(round.carrying_cents)} DH</T>
+          <T w="b" size={10} c={D.sub} ls={1.4}>{tr('CARRYING')}</T>
+          <T style={s.big}>{tr('{carrying_cents} DH', { carrying_cents: dh(round.carrying_cents) })}</T>
         </View>
         <View style={s.right}>
-          <T w="b" size={10} c={D.sub} ls={1.4}>STILL TO GET</T>
-          <T w="b" size={17} c={D.amber} style={[s.num, s.mt6]}>{dh(remaining)} DH</T>
+          <T w="b" size={10} c={D.sub} ls={1.4}>{tr('STILL TO GET')}</T>
+          <T w="b" size={17} c={D.amber} style={[s.num, s.mt6]}>{tr('{remaining} DH', { remaining: dh(remaining) })}</T>
         </View>
       </View>
 
       {!stop && (
         <View style={s.empty}>
           <View style={s.emptyCircle}><Ico name="check" size={28} color={D.green} /></View>
-          <Serif size={20} style={s.center}>Round done</Serif>
+          <Serif size={20} style={s.center}>{tr('Round done')}</Serif>
           <T size={13} c={D.sub} style={s.emptyBody}>
-            {round.done_today} shop{round.done_today === 1 ? '' : 's'} collected today.
-            Nothing else is holding cash.
+            {trn(round.done_today, '{n} shop collected today. Nothing else is holding cash.', '{n} shops collected today. Nothing else is holding cash.')}
           </T>
         </View>
       )}
@@ -275,23 +271,23 @@ export function CollectionRoundScreen({ onBack }: { onBack?: () => void }) {
             </View>
             {stop.held_days != null && stop.held_days > 14 && (
               <View style={s.overdueChip}>
-                <T w="b" size={10} c="#0D0D0F" ls={0.6}>OVERDUE</T>
+                <T w="b" size={10} c="#0D0D0F" ls={0.6}>{tr('OVERDUE')}</T>
               </View>
             )}
           </View>
 
           <View style={s.countRow}>
             <View style={s.grow}>
-              <T w="b" size={10} c={D.sub} ls={1.2}>COUNT OUT</T>
-              <T style={s.big}>{dh(stop.float_cents)} DH</T>
+              <T w="b" size={10} c={D.sub} ls={1.2}>{tr('COUNT OUT')}</T>
+              <T style={s.big}>{tr('{float_cents} DH', { float_cents: dh(stop.float_cents) })}</T>
             </View>
             <T size={11} c={D.muted}>
-              {stop.topups} top-up{stop.topups === 1 ? '' : 's'}
+              {trn(stop.topups, '{n} top-up', '{n} top-ups')}
             </T>
           </View>
 
           <View style={s.codeBlock}>
-            <T w="b" size={10} c={D.sub} ls={1.4}>THEIR CODE</T>
+            <T w="b" size={10} c={D.sub} ls={1.4}>{tr('THEIR CODE')}</T>
             <Pressable style={s.boxes} onPress={() => setDigits('')}>
               {[0, 1, 2, 3].map((i) => (
                 <View key={i} style={[s.box, digits.length === i && s.boxOn]}>
@@ -315,16 +311,15 @@ export function CollectionRoundScreen({ onBack }: { onBack?: () => void }) {
           <Pressable disabled={digits.length < 4 || busy} onPress={() => confirm(stop)}
             style={[s.confirm, (digits.length < 4 || busy) && s.dim45]}>
             <T w="b" size={12.5} c="#fff" ls={0.6}>
-              {busy ? 'CONFIRMING…' : `CONFIRM ${dh(stop.float_cents)} DH RECEIVED`}
+              {busy ? tr('CONFIRMING…') : tr('CONFIRM {float_cents} DH RECEIVED', { float_cents: dh(stop.float_cents) })}
             </T>
           </Pressable>
           <T size={11} c={D.muted} style={s.confirmNote}>
-            Confirming moves their float to 0 and closes the task. It can't be undone
-            in the shop.
+            {tr('Confirming moves their float to 0 and closes the task. It can\'t be undone in the shop.')}
           </T>
           {!stop.ready && (
             <T size={11} c={D.amber} style={s.center}>
-              They haven't opened Settle up yet — ask them to, so a code exists.
+              {tr('They haven\'t opened Settle up yet — ask them to, so a code exists.')}
             </T>
           )}
         </View>
@@ -332,14 +327,14 @@ export function CollectionRoundScreen({ onBack }: { onBack?: () => void }) {
 
       {round.stops.length > 1 && (
         <>
-          <T w="b" size={11} c={D.sub} ls={1.65} style={s.mt2}>NEXT STOPS</T>
+          <T w="b" size={11} c={D.sub} ls={1.65} style={s.mt2}>{tr('NEXT STOPS')}</T>
           {round.stops.map((x, i) => i === at ? null : (
             <Pressable key={x.id} onPress={() => { setAt(i); setDigits(''); }} style={s.nextRow}>
               <View style={s.nextAvatar}><T w="b" size={10} c={D.sub}>{initials(x.name)}</T></View>
               <View style={s.grow}>
                 <T w="sb" size={12.5}>{x.name}</T>
                 <T size={10.5} c={D.sub} style={s.mt2}>
-                  {dh(x.float_cents)} DH{x.held_days != null ? ` · ${x.held_days} days held` : ''}
+                  {tr('{float_cents} DH{x}', { float_cents: dh(x.float_cents), x: x.held_days != null ? tr(' · {held_days} days held', { held_days: x.held_days }) : '' })}
                 </T>
               </View>
               <Ico name="chevron-right" size={15} color={D.muted} />

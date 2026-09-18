@@ -5,6 +5,7 @@ import {
 } from '../components/dark';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
+import { loc, tr, trn } from '../lib/i18n';
 
 // Turn 2 of "Barber App.dc.html" — the shop above the chair. 2a dashboard,
 // 2b all chairs, 2c barber detail. Commission, chairs and per-barber earnings
@@ -40,7 +41,7 @@ const isoDay = (d: Date) =>
 const initials = (n: string) => n.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 const first = (n: string) => n.split(' ')[0];
 const clientOf = (b: LiveBooking) =>
-  b.walk_in_name ?? (b.customer?.full_name ? `${first(b.customer.full_name)} ${(b.customer.full_name.split(' ')[1] ?? '')[0] ?? ''}.`.trim() : 'Walk-in');
+  b.walk_in_name ?? (b.customer?.full_name ? `${first(b.customer.full_name)} ${(b.customer.full_name.split(' ')[1] ?? '')[0] ?? ''}.`.trim() : tr('Walk-in'));
 
 export type ShopMeta = {
   id: string; name: string; address: string | null;
@@ -107,38 +108,38 @@ export function OwnerDashboard({ salon, team, onBack, onAllChairs, onLines, onRe
   const occupancy = Math.min(100, Math.round((bookedMin / openMin) * 100));
 
   const today = new Date();
-  const dateLabel = today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
+  const dateLabel = today.toLocaleDateString(loc('en-GB'), { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
 
   return (
     <Screen gap={14}>
       <View style={s.headRow}>
         <View style={s.grow}>
-          <Eyebrow ls={1.8}>OWNER · {dateLabel}</Eyebrow>
+          <Eyebrow ls={1.8}>{tr('OWNER · {dateLabel}', { dateLabel })}</Eyebrow>
           <Serif size={24} ls={0.03} style={{ marginTop: 5 }}>{salon.name}</Serif>
         </View>
-        <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel="Back to my chair"
+        <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel={tr('Back to my chair')}
           style={({ pressed }) => [s.myChair, pressed && s.pressed]}>
           <Ico name="scissors" size={13} />
-          <T w="b" size={11}>My chair</T>
+          <T w="b" size={11}>{tr('My chair')}</T>
         </Pressable>
       </View>
 
       <View>
-        <Eyebrow ls={1.6}>SHOP TAKE TODAY</Eyebrow>
+        <Eyebrow ls={1.6}>{tr('SHOP TAKE TODAY')}</Eyebrow>
         <Serif size={44} ls={0} style={s.hero}>{dh(revenue)}</Serif>
         <T size={12} c={D.sub} style={{ marginTop: 6 }}>
-          {bookings} booking{bookings === 1 ? '' : 's'} across {onFloor} chair{onFloor === 1 ? '' : 's'} · {dh(shopCut)} commission
+          {trn(bookings, '{n} booking across {chairs} · {shopCut} commission', '{n} bookings across {chairs} · {shopCut} commission', { chairs: trn(onFloor, '{n} chair', '{n} chairs'), shopCut: dh(shopCut) })}
         </T>
       </View>
 
       <View style={s.tiles}>
-        <Stat label="OCCUPANCY" value={String(occupancy)} unit="%" />
-        <Stat label="WAITING" value={String(waiting)} />
-        <Stat label="NO-SHOWS" value={String(noShows)} valueColor={noShows ? D.red : undefined} />
+        <Stat label={tr('OCCUPANCY')} value={String(occupancy)} unit="%" />
+        <Stat label={tr('WAITING')} value={String(waiting)} />
+        <Stat label={tr('NO-SHOWS')} value={String(noShows)} valueColor={noShows ? D.red : undefined} />
       </View>
 
-      <Eyebrow ls={1.65}>THE CHAIRS · RIGHT NOW</Eyebrow>
-      {rows === null && <ActivityIndicator color={D.accent} accessibilityLabel="Loading the shop" />}
+      <Eyebrow ls={1.65}>{tr('THE CHAIRS · RIGHT NOW')}</Eyebrow>
+      {rows === null && <ActivityIndicator color={D.accent} accessibilityLabel={tr('Loading the shop')} />}
       <View style={{ gap: 9 }}>
         {team.filter((m) => m.status === 'approved').map((m) => {
           const mine = confirmed.filter((b) => b.barber_id === m.id);
@@ -158,18 +159,18 @@ export function OwnerDashboard({ salon, team, onBack, onAllChairs, onLines, onRe
                 <View style={s.nameRow}>
                   <T w="b" size={14}>{first(m.name)}</T>
                   {m.role === 'owner' && (
-                    <View style={s.youChip}><T w="b" size={9} c={D.accent} ls={0.7}>YOU</T></View>
+                    <View style={s.youChip}><T w="b" size={9} c={D.accent} ls={0.7}>{tr('YOU')}</T></View>
                   )}
                 </View>
                 <T size={11} c={D.sub} style={{ marginTop: 3 }}>
-                  {inChair ? `Cutting ${clientOf(inChair)} · free ${freeAt}`
-                    : off ? 'Nothing booked today'
-                    : `${mine.length} today · next ${mine[0] ? hhmm(mine[0].starts_at) : '—'}`}
+                  {inChair ? tr('Cutting {inChair} · free {freeAt}', { inChair: clientOf(inChair), freeAt })
+                    : off ? tr('Nothing booked today')
+                    : tr('{count} today · next {x}', { count: mine.length, x: mine[0] ? hhmm(mine[0].starts_at) : '—' })}
                 </T>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
                 <T w="b" size={14} c={off || moneyHidden ? D.muted : D.text} style={s.tnum}>{moneyHidden ? '—' : dh(rev)}</T>
-                <T size={10} c={D.sub} style={{ marginTop: 2 }}>{mine.length} today</T>
+                <T size={10} c={D.sub} style={{ marginTop: 2 }}>{tr('{count} today', { count: mine.length })}</T>
               </View>
             </Pressable>
           );
@@ -177,13 +178,13 @@ export function OwnerDashboard({ salon, team, onBack, onAllChairs, onLines, onRe
       </View>
 
       {!!due?.total && (
-        <Pressable onPress={onReports} accessibilityRole="button" accessibilityLabel="Weekly settlement due"
+        <Pressable onPress={onReports} accessibilityRole="button" accessibilityLabel={tr('Weekly settlement due')}
           style={({ pressed }) => [s.settleCard, pressed && s.pressed]}>
           <View style={s.settleIcon}><Ico name="alert-triangle" size={16} color={D.accent} /></View>
           <View style={s.grow}>
-            <T w="b" size={13}>Weekly settlement due</T>
+            <T w="b" size={13}>{tr('Weekly settlement due')}</T>
             <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-              {dh(due.total)} commission across {due.barbers} barber{due.barbers === 1 ? '' : 's'}
+              {trn(due.barbers, '{total} commission across {n} barber', '{total} commission across {n} barbers', { total: dh(due.total) })}
             </T>
           </View>
           <Ico name="chevron-right" size={15} color={D.accent} />
@@ -191,11 +192,11 @@ export function OwnerDashboard({ salon, team, onBack, onAllChairs, onLines, onRe
       )}
 
       <View style={s.quickRow}>
-        <Quick icon="calendar" label="All chairs" onPress={onAllChairs} />
-        <Quick icon="list" label="Lines" onPress={onLines} />
-        <Quick icon="trending-up" label="Reports" onPress={onReports} />
-        <Quick icon="star" label="Reviews" onPress={onReviews} />
-        <Quick icon="users" label="Team" onPress={onTeam} />
+        <Quick icon="calendar" label={tr('All chairs')} onPress={onAllChairs} />
+        <Quick icon="list" label={tr('Lines')} onPress={onLines} />
+        <Quick icon="trending-up" label={tr('Reports')} onPress={onReports} />
+        <Quick icon="star" label={tr('Reviews')} onPress={onReviews} />
+        <Quick icon="users" label={tr('Team')} onPress={onTeam} />
       </View>
     </Screen>
   );
@@ -260,18 +261,18 @@ export function AllChairsScreen({ salon, team, onBack, onAdd }: {
 
   return (
     <Screen gap={12}>
-      <TopBar title="All chairs" onBack={onBack} plain right="plus" onRight={onAdd} />
+      <TopBar title={tr('All chairs')} onBack={onBack} plain right="plus" onRight={onAdd} />
 
       <View style={s.dayNav}>
         <Pressable onPress={() => setDay(new Date(day.getTime() - 86_400_000))} hitSlop={8}
-          accessibilityRole="button" accessibilityLabel="Previous day">
+          accessibilityRole="button" accessibilityLabel={tr('Previous day')}>
           <Ico name="chevron-left" size={14} />
         </Pressable>
         <T w="b" size={13} style={s.dayNavLabel}>
-          {day.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'long' })}
+          {day.toLocaleDateString(loc('en-US'), { weekday: 'short', day: 'numeric', month: 'long' })}
         </T>
         <Pressable onPress={() => setDay(new Date(day.getTime() + 86_400_000))} hitSlop={8}
-          accessibilityRole="button" accessibilityLabel="Next day">
+          accessibilityRole="button" accessibilityLabel={tr('Next day')}>
           <Ico name="chevron-right" size={14} />
         </Pressable>
       </View>
@@ -288,7 +289,7 @@ export function AllChairsScreen({ salon, team, onBack, onAdd }: {
         })}
       </View>
 
-      {rows === null && <ActivityIndicator color={D.accent} accessibilityLabel="Loading the day" />}
+      {rows === null && <ActivityIndicator color={D.accent} accessibilityLabel={tr('Loading the day')} />}
 
       <View style={s.laneRow}>
         <View style={s.gutter}>
@@ -302,7 +303,7 @@ export function AllChairsScreen({ salon, team, onBack, onAdd }: {
           if (off) {
             return (
               <View key={m.id} style={s.lane}>
-                <View style={s.laneOffBody}><T w="b" size={10} c={D.muted} ls={1}>DAY OFF</T></View>
+                <View style={s.laneOffBody}><T w="b" size={10} c={D.muted} ls={1}>{tr('DAY OFF')}</T></View>
               </View>
             );
           }
@@ -317,7 +318,7 @@ export function AllChairsScreen({ salon, team, onBack, onAdd }: {
                   height: Math.max(18, (b.end_min - b.start_min) * PX_PER_MIN),
                   backgroundColor: 'rgba(232,161,0,0.5)',
                 }]}>
-                  <T w="b" size={9} c={D.bg}>{b.label ?? 'Break'}</T>
+                  <T w="b" size={9} c={D.bg}>{b.label ?? tr('Break')}</T>
                 </View>
               ))}
               {mine.map((b) => {
@@ -333,12 +334,12 @@ export function AllChairsScreen({ salon, team, onBack, onAdd }: {
                     ...(noShow ? { borderWidth: 1, borderStyle: 'dashed' as const, borderColor: 'rgba(248,113,113,0.7)' } : null),
                   }]}>
                     <T w="b" size={10} c={noShow ? D.red : inChair ? D.bg : '#fff'}>
-                      {noShow ? 'No-show' : clientOf(b)}
+                      {noShow ? tr('No-show') : clientOf(b)}
                     </T>
                     {h >= 38 && (
                       <T size={9} c={inChair ? 'rgba(13,13,15,0.7)' : 'rgba(255,255,255,0.75)'}
                         style={{ marginTop: 2 }}>
-                        {inChair ? 'In chair' : b.services?.name ?? 'Service'}
+                        {inChair ? tr('In chair') : b.services?.name ?? tr('Service')}
                       </T>
                     )}
                   </View>
@@ -350,11 +351,11 @@ export function AllChairsScreen({ salon, team, onBack, onAdd }: {
       </View>
 
       <View style={s.legendRow}>
-        <LegendDot color={D.green} label="In chair" />
-        <LegendDot color="rgba(232,161,0,0.5)" label="Break" />
-        <LegendDot color="rgba(248,113,113,0.5)" label="No-show" />
+        <LegendDot color={D.green} label={tr('In chair')} />
+        <LegendDot color="rgba(232,161,0,0.5)" label={tr('Break')} />
+        <LegendDot color="rgba(248,113,113,0.5)" label={tr('No-show')} />
         <View style={s.grow} />
-        <T w="b" size={11} c={D.sub}>{occupancy}% full</T>
+        <T w="b" size={11} c={D.sub}>{tr('{occupancy}% full', { occupancy })}</T>
       </View>
     </Screen>
   );
@@ -390,7 +391,7 @@ export function OwnerBarberScreen({ member, salon, onBack, onChat, onSchedule, o
         const r = ((data ?? []) as any[]).find((x) => x.barber_id === member.id);
         if (r) {
           setWeek({
-            label: 'This week', bookings: r.bookings, booked: r.booked_cents ?? 0,
+            label: tr('This week'), bookings: r.bookings, booked: r.booked_cents ?? 0,
             commission: r.commission_cents ?? 0, noShows: r.no_shows,
           });
         }
@@ -414,18 +415,18 @@ export function OwnerBarberScreen({ member, salon, onBack, onChat, onSchedule, o
     setBusy(true);
     const { error } = await supabase.rpc('salon_set_cash_agent', { p_barber: next ? member.id : null });
     setBusy(false);
-    if (error) { setCashAgent(!next); Alert.alert('Could not update', error.message); }
+    if (error) { setCashAgent(!next); Alert.alert(tr('Could not update'), error.message); }
     else onChanged();
   }
 
   function remove() {
-    Alert.alert('Remove from shop?', `${member.name} keeps their own clients and bookings, but leaves ${salon.name}.`, [
-      { text: 'Keep', style: 'cancel' },
+    Alert.alert(tr('Remove from shop?'), tr('{name} keeps their own clients and bookings, but leaves {name2}.', { name: member.name, name2: salon.name }), [
+      { text: tr('Keep'), style: 'cancel' },
       {
-        text: 'Remove', style: 'destructive',
+        text: tr('Remove'), style: 'destructive',
         onPress: async () => {
           const { error } = await supabase.rpc('salon_remove_member', { p_barber: member.id });
-          if (error) Alert.alert('Could not remove', error.message);
+          if (error) Alert.alert(tr('Could not remove'), error.message);
           else { onChanged(); onBack(); }
         },
       },
@@ -442,8 +443,8 @@ export function OwnerBarberScreen({ member, salon, onBack, onChat, onSchedule, o
     <Screen gap={14}>
       <TopBar title="" onBack={onBack} plain right="more-vertical"
         onRight={() => Alert.alert(member.name, undefined, [
-          { text: 'Remove from shop', style: 'destructive', onPress: remove },
-          { text: 'Cancel', style: 'cancel' },
+          { text: tr('Remove from shop'), style: 'destructive', onPress: remove },
+          { text: tr('Cancel'), style: 'cancel' },
         ])} />
 
       <View style={s.profileRow}>
@@ -453,28 +454,28 @@ export function OwnerBarberScreen({ member, salon, onBack, onChat, onSchedule, o
           <T w="b" size={17}>{member.name}</T>
           {member.reviews > 0 && <View style={{ marginTop: 3 }}><Stars n={stars} size={11} /></View>}
           <T size={12} c={D.sub} style={{ marginTop: 3 }}>
-            {member.role === 'owner' ? 'Owner' : member.chair ? `Barber · ${member.chair}` : 'Barber'}
-            {member.reviews > 0 ? ` · ${member.rating.toFixed(1)} (${member.reviews})` : ' · no reviews yet'}
+            {member.role === 'owner' ? tr('Owner') : member.chair ? tr('Barber · {chair}', { chair: member.chair }) : tr('Barber')}
+            {member.reviews > 0 ? ` · ${member.rating.toFixed(1)} (${member.reviews})` : tr(' · no reviews yet')}
           </T>
         </View>
       </View>
 
       <View style={s.actionRow}>
-        {phone && <Pill icon="phone" label="Call" onPress={() => Linking.openURL(`tel:${phone}`)} />}
-        {onChat && <Pill icon="message-circle" label="Chat" onPress={onChat} />}
-        {onSchedule && <Pill icon="calendar" label="Schedule" onPress={onSchedule} />}
+        {phone && <Pill icon="phone" label={tr('Call')} onPress={() => Linking.openURL(`tel:${phone}`)} />}
+        {onChat && <Pill icon="message-circle" label={tr('Chat')} onPress={onChat} />}
+        {onSchedule && <Pill icon="calendar" label={tr('Schedule')} onPress={onSchedule} />}
       </View>
 
-      <Eyebrow ls={1.65}>THIS WEEK</Eyebrow>
+      <Eyebrow ls={1.65}>{tr('THIS WEEK')}</Eyebrow>
       <View style={s.weekCard}>
         <View style={s.weekTop}>
           <View>
-            <Eyebrow ls={1.2}>BOOKED VALUE</Eyebrow>
+            <Eyebrow ls={1.2}>{tr('BOOKED VALUE')}</Eyebrow>
             <Serif size={28} ls={0} style={s.weekValue}>{dh(week?.booked ?? 0)}</Serif>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
             <Eyebrow ls={1.2}>
-              {member.pay === 'rent' ? 'RENT' : `SHOP CUT · ${100 - member.split}%`}
+              {member.pay === 'rent' ? tr('RENT') : tr('SHOP CUT · {x}%', { x: 100 - member.split })}
             </Eyebrow>
             <T w="b" size={18} c={D.accent} style={[s.tnum, { marginTop: 6 }]}>
               {dh(member.pay === 'rent' ? member.rent : week?.commission ?? 0)}
@@ -490,26 +491,26 @@ export function OwnerBarberScreen({ member, salon, onBack, onChat, onSchedule, o
           ))}
         </View>
         <View style={s.weekStats}>
-          <MiniStat value={String(week?.bookings ?? 0)} label="CLIENTS" />
-          <MiniStat value={`${occupancy}%`} label="OCCUPANCY" />
-          <MiniStat value={String(week?.noShows ?? 0)} label="NO-SHOWS" />
-          <MiniStat value={dh(avgTicket)} label="AVG TICKET" />
+          <MiniStat value={String(week?.bookings ?? 0)} label={tr('CLIENTS')} />
+          <MiniStat value={`${occupancy}%`} label={tr('OCCUPANCY')} />
+          <MiniStat value={String(week?.noShows ?? 0)} label={tr('NO-SHOWS')} />
+          <MiniStat value={dh(avgTicket)} label={tr('AVG TICKET')} />
         </View>
       </View>
 
-      <Eyebrow ls={1.65}>ACCESS</Eyebrow>
+      <Eyebrow ls={1.65}>{tr('ACCESS')}</Eyebrow>
       <View style={s.accessCard}>
         <View style={[s.accessRow, s.accessLine]}>
           <View style={s.grow}>
-            <T w="sb" size={13}>Take cash top-ups</T>
-            <T size={11} c={D.sub} style={{ marginTop: 2 }}>Acts as an agent for the shop float</T>
+            <T w="sb" size={13}>{tr('Take cash top-ups')}</T>
+            <T size={11} c={D.sub} style={{ marginTop: 2 }}>{tr('Acts as an agent for the shop float')}</T>
           </View>
           <Toggle small on={cashAgent} color={D.accent}
             onPress={busy ? undefined : () => setAgent(!cashAgent)} />
         </View>
         <View style={s.accessRow}>
           <T w="sb" size={13} style={s.grow}>
-            {member.pay === 'rent' ? 'Chair rent' : 'Commission rate'}
+            {member.pay === 'rent' ? tr('Chair rent') : tr('Commission rate')}
           </T>
           <View style={s.ratePill}>
             <T w="b" size={12}>
@@ -519,7 +520,7 @@ export function OwnerBarberScreen({ member, salon, onBack, onChat, onSchedule, o
         </View>
       </View>
 
-      <GhostBtn title="REMOVE FROM SHOP" height={48} color={D.red} border={D.redLine} onPress={remove} />
+      <GhostBtn title={tr('REMOVE FROM SHOP')} height={48} color={D.red} border={D.redLine} onPress={remove} />
     </Screen>
   );
 }

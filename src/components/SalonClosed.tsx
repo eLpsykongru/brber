@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { colors, inter, radius } from '../theme';
+import { loc, tr } from '../lib/i18n';
 
 // 39a of "Customer App 3.dc.html" — the customer end of barber 11a.
 //
@@ -40,7 +41,7 @@ export function ClosedBadge({ c }: { c: Closure | null }) {
     <View style={s.badge}>
       <View style={s.badgeDot} />
       <Text style={s.badgeText}>
-        {c.until ? 'CLOSED TODAY' : 'CLOSED'}
+        {c.until ? tr('CLOSED TODAY') : tr('CLOSED')}
       </Text>
     </View>
   );
@@ -56,7 +57,7 @@ export function ClosedCard({ c, salonId, onBookLater }: {
   const tomorrow = back != null
     && back.toDateString() === new Date(Date.now() + 86400000).toDateString();
   const backLabel = back
-    ? (tomorrow ? 'tomorrow' : back.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }))
+    ? (tomorrow ? tr('tomorrow') : back.toLocaleDateString(loc('en-GB'), { weekday: 'long', day: 'numeric', month: 'short' }))
     : null;
   const at = c.open_min != null ? hhmm(c.open_min) : null;
 
@@ -70,7 +71,7 @@ export function ClosedCard({ c, salonId, onBookLater }: {
       .insert({ customer_id: u.user.id, salon_id: salonId, day });
     // the partial unique index means "already asked" is a success, not a failure
     if (error && !/duplicate key/i.test(error.message)) {
-      Alert.alert('Could not do that', error.message);
+      Alert.alert(tr('Could not do that'), error.message);
       return;
     }
     setTold(true);
@@ -85,38 +86,37 @@ export function ClosedCard({ c, salonId, onBookLater }: {
           </View>
           <View style={s.grow}>
             <Text style={s.cardTitle}>
-              {c.until ? 'The shop is shut for today' : 'The shop is shut'}
+              {c.until ? tr('The shop is shut for today') : tr('The shop is shut')}
             </Text>
             <Text style={s.cardSub}>
               {backLabel
-                ? `Opens again ${backLabel}${at ? ` at ${at}` : ''}`
-                : 'No reopening date yet'}
+                ? at ? tr('Opens again {backLabel} at {at}', { backLabel, at }) : tr('Opens again {backLabel}', { backLabel })
+                : tr('No reopening date yet')}
             </Text>
           </View>
         </View>
         <Text style={s.cardBody}>
-          You can't book or take a ticket here today.
-          {c.my_booking ? ' Your booking still stands.' : ' If you already have a booking, it still stands.'}
+          {tr('You can\'t book or take a ticket here today.{x}', { x: c.my_booking ? tr(' Your booking still stands.') : tr(' If you already have a booking, it still stands.') })}
         </Text>
       </View>
 
       <View style={s.actions}>
         {c.back_on && (
           <Pressable onPress={() => onBookLater?.(c.back_on!)}
-            accessibilityLabel={`Book ${backLabel}`}
+            accessibilityLabel={tr('Book {backLabel}', { backLabel })}
             style={({ pressed }) => [s.primary, pressed && s.pressed]}>
             <Text style={s.primaryText}>
-              BOOK {backLabel?.toUpperCase()}{at ? ` · ${at}` : ''}
+              {tr('BOOK {backLabel}{x}', { backLabel: backLabel?.toUpperCase(), x: at ? ` · ${at}` : '' })}
             </Text>
           </Pressable>
         )}
         <Pressable onPress={tellMe} disabled={told}
-          accessibilityLabel="Tell me if they reopen"
+          accessibilityLabel={tr('Tell me if they reopen')}
           style={({ pressed }) => [s.secondary, pressed && s.pressed, told && s.done]}>
           <Ionicons name={told ? 'checkmark' : 'time-outline'} size={15}
             color={told ? colors.success : '#5c5c58'} />
           <Text style={[s.secondaryText, told && s.doneText]}>
-            {told ? "WE'LL TELL YOU" : 'TELL ME IF THEY REOPEN'}
+            {told ? tr('WE\'LL TELL YOU') : tr('TELL ME IF THEY REOPEN')}
           </Text>
         </Pressable>
       </View>

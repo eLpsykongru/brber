@@ -1,5 +1,7 @@
 import { registerRootComponent } from 'expo';
 
+// before App: it sets the language and the direction every screen loads into
+import './src/lib/language';
 import App from './App';
 
 // registerRootComponent calls AppRegistry.registerComponent('main', () => App);

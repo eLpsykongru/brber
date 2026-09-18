@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { dark as d, inter, serif, TOP_INSET } from '../theme';
 import { Press, useBack } from './motion';
+import { tr } from '../lib/i18n';
 
 // The barber side's shared vocabulary, transcribed from "Barber App.dc.html" turn 1.
 // Every screen there repeats the same six shapes — screen frame, sheet, top bar,
@@ -128,7 +129,7 @@ export function TopBar({ title, onBack, backIcon = 'arrow-left', right, onRight,
   return (
     <View style={s.topBar}>
       {back
-        ? <Pressable onPress={back} hitSlop={8} accessibilityLabel="Go back"
+        ? <Pressable onPress={back} hitSlop={8} accessibilityLabel={tr('Go back')}
             style={s.puck38}><Ico name={backIcon} /></Pressable>
         : <View style={s.puck38Ghost} />}
       {plain

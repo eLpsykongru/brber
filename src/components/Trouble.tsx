@@ -3,6 +3,7 @@ import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { Ico, Sheet, T } from './dark';
 import { Job, summarise } from '../lib/outbox';
 import { dark as D } from '../theme';
+import { loc, tr, trn, trRich } from '../lib/i18n';
 
 // Turn 10 of "Barber App.dc.html" — when it breaks in the shop.
 //
@@ -29,10 +30,10 @@ export function OfflineBar({ since, jobs, onOpen }: {
         <View style={s.offIcon}><Ico name="wifi-off" size={16} color={D.amber} /></View>
         <View style={s.grow}>
           <T w="b" size={13} c={D.amber}>
-            No signal{since ? ` since ${clock(since)}` : ''}
+            {tr('No signal{x}', { x: since ? tr(' since {since}', { since: clock(since) }) : '' })}
           </T>
           <T size={11} c={D.sub} style={s.mt2}>
-            Carry on — everything saves and sends itself later
+            {tr('Carry on — everything saves and sends itself later')}
           </T>
         </View>
       </Pressable>
@@ -40,16 +41,16 @@ export function OfflineBar({ since, jobs, onOpen }: {
       {sum.count > 0 && (
         <View style={s.statRow}>
           <Pressable onPress={onOpen} style={s.stat}>
-            <T w="b" size={10} c={D.sub} ls={0.8}>DONE OFFLINE</T>
+            <T w="b" size={10} c={D.sub} ls={0.8}>{tr('DONE OFFLINE')}</T>
             <T w="b" size={20} style={s.num}>{sum.count}</T>
-            <T size={10} c={D.amber} style={s.mt2}>waiting to send</T>
+            <T size={10} c={D.amber} style={s.mt2}>{tr('waiting to send')}</T>
           </Pressable>
           <View style={s.stat}>
-            <T w="b" size={10} c={D.sub} ls={0.8}>CASH TAKEN</T>
+            <T w="b" size={10} c={D.sub} ls={0.8}>{tr('CASH TAKEN')}</T>
             <T w="b" size={20} style={s.num}>
-              {dh(sum.cents)}<T size={11} c={D.sub}> DH</T>
+              {dh(sum.cents)}<T size={11} c={D.sub}>{' '}{tr('DH')}</T>
             </T>
-            <T size={10} c={D.sub} style={s.mt2}>counted here</T>
+            <T size={10} c={D.sub} style={s.mt2}>{tr('counted here')}</T>
           </View>
         </View>
       )}
@@ -61,8 +62,8 @@ export function OfflineBar({ since, jobs, onOpen }: {
 export function OfflineLimits() {
   return (
     <View style={s.limits}>
-      <T w="b" size={10} c={D.sub} ls={1.4}>WHAT YOU CAN'T DO UNTIL IT'S BACK</T>
-      {['Take a cash top-up for someone\'s wallet', 'See new bookings coming in'].map((t) => (
+      <T w="b" size={10} c={D.sub} ls={1.4}>{tr('WHAT YOU CAN\'T DO UNTIL IT\'S BACK')}</T>
+      {[tr('Take a cash top-up for someone\'s wallet'), tr('See new bookings coming in')].map((t) => (
         <View key={t} style={s.limitRow}>
           <View style={s.limitDot}><Ico name="x" size={10} color={D.muted} /></View>
           <T size={12} c={D.sub} style={s.grow}>{t}</T>
@@ -106,10 +107,9 @@ export function ConflictSheet({ clash, onClose, onResolve }: {
     <Sheet visible={!!clash} onClose={onClose} deep gap={13}>
       <View style={s.center}>
         <View style={s.warnCircle}><Ico name="alert-triangle" size={25} color={D.amber} /></View>
-        <T w="b" size={19} style={s.mt12}>Two people at {at}</T>
+        <T w="b" size={19} style={s.mt12}>{tr('Two people at {at}', { at })}</T>
         <T size={12.5} c={D.sub} style={s.centerBody}>
-          {clash.theirs?.name.split(' ')[0] ?? 'Someone'} booked while you were offline.
-          You'd already put {mineFirst} in the same slot.
+          {tr('{name} booked while you were offline. You\'d already put {mineFirst} in the same slot.', { name: clash.theirs?.name.split(' ')[0] ?? tr('Someone'), mineFirst })}
         </T>
       </View>
 
@@ -121,13 +121,11 @@ export function ConflictSheet({ clash, onClose, onResolve }: {
           <View style={s.grow}>
             <T w="b" size={13}>{clash.theirs.name}</T>
             <T size={11} c={D.sub} style={s.mt2}>
-              Booked {clash.theirs.bookedAt}
-              {clash.theirs.deposit_cents > 0 ? ` · ${dh(clash.theirs.deposit_cents)} DH paid` : ''}
-              {' · '}{clash.theirs.visits} visit{clash.theirs.visits === 1 ? '' : 's'}
+              {trn(clash.theirs.visits, 'Booked {bookedAt}{x} · {n} visit', 'Booked {bookedAt}{x} · {n} visits', { bookedAt: clash.theirs.bookedAt, x: clash.theirs.deposit_cents > 0 ? tr(' · {deposit_cents} DH paid', { deposit_cents: dh(clash.theirs.deposit_cents) }) : '' })}
             </T>
           </View>
           {clash.theirs.deposit_cents > 0 && (
-            <View style={s.paidChip}><T w="b" size={9.5} c={D.accent} ls={0.6}>PAID</T></View>
+            <View style={s.paidChip}><T w="b" size={9.5} c={D.accent} ls={0.6}>{tr('PAID')}</T></View>
           )}
         </View>
       )}
@@ -136,30 +134,30 @@ export function ConflictSheet({ clash, onClose, onResolve }: {
         <View style={s.grow}>
           <T w="sb" size={13}>{clash.mine.name}</T>
           <T size={11} c={D.sub} style={s.mt2}>
-            You added {clash.mine.addedAt} · walk-in · no deposit
+            {tr('You added {addedAt} · walk-in · no deposit', { addedAt: clash.mine.addedAt })}
           </T>
         </View>
       </View>
 
-      <T w="b" size={10} c={D.sub} ls={1.4}>SORT IT</T>
+      <T w="b" size={10} c={D.sub} ls={1.4}>{tr('SORT IT')}</T>
       <Choice on={pick === 'move-mine'} onPress={() => setPick('move-mine')}
-        title={`Move ${mineFirst} to ${free ?? 'later'}`}
-        sub={free ? "It's free · he's a walk-in with nothing paid" : 'Nothing free today — he keeps his place in line'} />
+        title={tr('Move {mineFirst} to {free}', { mineFirst, free: free ?? tr('later') })}
+        sub={free ? tr('It\'s free · he\'s a walk-in with nothing paid') : tr('Nothing free today — he keeps his place in line')} />
       <Choice on={pick === 'move-theirs'} onPress={() => setPick('move-theirs')}
-        title={`Move ${clash.theirs?.name.split(' ')[0] ?? 'the booking'} to ${free ?? 'later'}`}
-        sub="They get a push and can refuse" disabled={!free || !clash.theirs} />
+        title={tr('Move {name} to {free}', { name: clash.theirs?.name.split(' ')[0] ?? tr('the booking'), free: free ?? tr('later') })}
+        sub={tr('They get a push and can refuse')} disabled={!free || !clash.theirs} />
       <Choice on={pick === 'both'} onPress={() => setPick('both')}
-        title="Take both, 20 min each" sub="Tight for a cut and a beard" />
+        title={tr('Take both, 20 min each')} sub={tr('Tight for a cut and a beard')} />
 
       <Pressable onPress={() => onResolve(pick)} style={s.primary}>
         <T w="b" size={12.5} c="#fff" ls={0.78}>
-          {pick === 'both' ? 'TAKE BOTH'
-            : pick === 'move-mine' ? `MOVE ${mineFirst.toUpperCase()} & TELL HIM`
-              : 'MOVE THE BOOKING & TELL THEM'}
+          {pick === 'both' ? tr('TAKE BOTH')
+            : pick === 'move-mine' ? tr('MOVE {mineFirst} & TELL HIM', { mineFirst: mineFirst.toUpperCase() })
+              : tr('MOVE THE BOOKING & TELL THEM')}
         </T>
       </Pressable>
       <T size={11} c={D.muted} style={s.footNote}>
-        Whoever paid keeps the slot unless you say otherwise.
+        {tr('Whoever paid keeps the slot unless you say otherwise.')}
       </T>
     </Sheet>
   );
@@ -208,8 +206,8 @@ export function TopUpFailedSheet({ attempt, onClose, onRetry, onCallOps }: {
   // reverse and his float is untouched — writing a "gave it back" note would be
   // inventing a transaction to describe the absence of one.
   function gaveItBack() {
-    Alert.alert('Nothing to undo',
-      `${first}'s wallet was never credited and your float never moved. Hand the cash back.`);
+    Alert.alert(tr('Nothing to undo'),
+      tr('{first}\'s wallet was never credited and your float never moved. Hand the cash back.', { first }));
     onClose();
   }
 
@@ -217,10 +215,11 @@ export function TopUpFailedSheet({ attempt, onClose, onRetry, onCallOps }: {
     <Sheet visible={!!attempt} onClose={onClose} deep gap={13}>
       <View style={s.center}>
         <View style={s.failCircle}><Ico name="x" size={25} color={D.red} /></View>
-        <T w="b" size={19} style={s.mt12}>Didn't go through</T>
+        <T w="b" size={19} style={s.mt12}>{tr('Didn\'t go through')}</T>
         <T size={12.5} c={D.sub} style={s.centerBody}>
-          {first}'s wallet was <T w="b" size={12.5}>not</T> credited. If you've taken his{' '}
-          {dh(attempt.cents)} DH, give it back or try again now.
+          {trRich("{first}'s wallet was <b>not</b> credited. If you've taken his {amount} DH, give it back or try again now.", {
+            b: (text, key) => <T key={key} w="b" size={12.5}>{text}</T>,
+          }, { first, amount: dh(attempt.cents) })}
         </T>
       </View>
 
@@ -235,36 +234,36 @@ export function TopUpFailedSheet({ attempt, onClose, onRetry, onCallOps }: {
               <T size={11} c={D.sub} style={s.mt2}>{attempt.customer.phone}</T>
             )}
           </View>
-          <T w="eb" size={15} style={s.num}>{dh(attempt.cents)} DH</T>
+          <T w="eb" size={15} style={s.num}>{tr('{cents} DH', { cents: dh(attempt.cents) })}</T>
         </View>
         {attempt.balance_cents != null && (
           <View style={s.moneyLine}>
-            <T size={12} c={D.sub} style={s.grow}>Their balance now</T>
-            <T w="b" size={12}>{dh(attempt.balance_cents)} DH · unchanged</T>
+            <T size={12} c={D.sub} style={s.grow}>{tr('Their balance now')}</T>
+            <T w="b" size={12}>{tr('{balance_cents} DH · unchanged', { balance_cents: dh(attempt.balance_cents) })}</T>
           </View>
         )}
         <View style={attempt.balance_cents == null ? s.moneyLine : s.row11}>
-          <T size={12} c={D.sub} style={s.grow}>Your float</T>
-          <T w="b" size={12}>{dh(attempt.float_cents)} DH · unchanged</T>
+          <T size={12} c={D.sub} style={s.grow}>{tr('Your float')}</T>
+          <T w="b" size={12}>{tr('{float_cents} DH · unchanged', { float_cents: dh(attempt.float_cents) })}</T>
         </View>
       </View>
 
       <View style={s.shieldNote}>
         <Ico name="shield" size={14} color={D.green} />
         <T size={11.5} c={D.sub} style={s.shieldText}>
-          Nothing was taken twice. A top-up only counts once we've confirmed it.
+          {tr('Nothing was taken twice. A top-up only counts once we\'ve confirmed it.')}
         </T>
       </View>
 
       <Pressable onPress={onRetry} style={s.primary}>
-        <T w="b" size={12.5} c="#fff" ls={0.78}>TRY AGAIN · {dh(attempt.cents)} DH</T>
+        <T w="b" size={12.5} c="#fff" ls={0.78}>{tr('TRY AGAIN · {cents} DH', { cents: dh(attempt.cents) })}</T>
       </Pressable>
       <View style={s.twoBtns}>
         <Pressable onPress={gaveItBack} style={s.solidGhost}>
-          <T w="b" size={12} ls={0.4}>GAVE IT BACK</T>
+          <T w="b" size={12} ls={0.4}>{tr('GAVE IT BACK')}</T>
         </Pressable>
         <Pressable onPress={onCallOps} style={s.outlineGhost}>
-          <T w="b" size={12} c={D.sub} ls={0.4}>CALL OPS</T>
+          <T w="b" size={12} c={D.sub} ls={0.4}>{tr('CALL OPS')}</T>
         </Pressable>
       </View>
     </Sheet>
@@ -284,26 +283,25 @@ export function LicenceBanner({ standing, onSend }: {
   if (standing.days_left < 0 || standing.days_left > 30) return null;
 
   const on = new Date(`${standing.licence_expires_at}T00:00:00`)
-    .toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    .toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' });
 
   return (
     <View style={s.licence}>
       <View style={s.row11}>
         <View style={s.warnPuck}><Ico name="alert-triangle" size={16} color={D.amber} /></View>
         <View style={s.grow}>
-          <T w="b" size={13} c={D.amber}>Your licence expires {on}</T>
+          <T w="b" size={13} c={D.amber}>{tr('Your licence expires {on}', { on })}</T>
           <T size={11} c={D.sub} style={s.mt2}>
-            {standing.days_left === 0 ? 'Today' : `${standing.days_left} days`} · takes two minutes to sort
+            {tr('{x} · takes two minutes to sort', { x: standing.days_left === 0 ? tr('Today') : tr('{days_left} days', { days_left: standing.days_left }) })}
           </T>
         </View>
       </View>
       <T size={12} c={D.textDim} style={s.licenceBody}>
-        After that we have to hide you from search until it's renewed. Bookings you
-        already have would still stand.
+        {tr('After that we have to hide you from search until it\'s renewed. Bookings you already have would still stand.')}
       </T>
       <Pressable onPress={onSend} style={s.amberBtn}>
         <Ico name="camera" size={15} color="#0D0D0F" />
-        <T w="eb" size={12} c="#0D0D0F" ls={0.6}>PHOTOGRAPH THE NEW ONE</T>
+        <T w="eb" size={12} c="#0D0D0F" ls={0.6}>{tr('PHOTOGRAPH THE NEW ONE')}</T>
       </Pressable>
     </View>
   );

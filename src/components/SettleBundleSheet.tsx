@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { dark, font, radius, serif } from '../theme';
+import { tr, trn } from '../lib/i18n';
 
 // 34f of "Customer App 3.dc.html" — "he skipped the shave". The barber ticks off
 // what he actually did before the booking is marked done, because a bundle price
@@ -44,10 +45,10 @@ export default function SettleBundleSheet({ booking, ask = false, onDone, onClos
     setBusy(true);
     const settle = await supabase.rpc('settle_booking_services',
       { p_booking: booking.id, p_done: ids });
-    if (settle.error) { setBusy(false); return Alert.alert('Could not settle', settle.error.message); }
+    if (settle.error) { setBusy(false); return Alert.alert(tr('Could not settle'), settle.error.message); }
     const adv = await supabase.rpc('advance_booking', { p_booking: booking.id, p_stage: 'complete' });
     setBusy(false);
-    if (adv.error) return Alert.alert('Could not complete', adv.error.message);
+    if (adv.error) return Alert.alert(tr('Could not complete'), adv.error.message);
     onDone();
   }, [booking, onDone]);
 
@@ -104,7 +105,7 @@ export default function SettleBundleSheet({ booking, ask = false, onDone, onClos
             <View style={s.grow}>
               <Text style={s.name} numberOfLines={1}>{booking.client}</Text>
               <Text style={s.sub}>
-                {bundle ? `${bundle.name} · ` : ''}{hhmm(start)} – {hhmm(new Date(start.getTime() + totalMin * 60_000))} · {totalMin} min
+                {tr('{x}{start} – {hhmm} · {totalMin} min', { x: bundle ? `${bundle.name} · ` : '', start: hhmm(start), hhmm: hhmm(new Date(start.getTime() + totalMin * 60_000)), totalMin })}
               </Text>
             </View>
             <Pressable onPress={onClose} hitSlop={8} style={s.closeBtn}>
@@ -113,7 +114,7 @@ export default function SettleBundleSheet({ booking, ask = false, onDone, onClos
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.body}>
-            <Text style={s.eyebrow}>TICK OFF WHAT YOU DID</Text>
+            <Text style={s.eyebrow}>{tr('TICK OFF WHAT YOU DID')}</Text>
             <View style={s.list}>
               {items.map((i) => {
                 const on = done.includes(i.service_id);
@@ -124,9 +125,9 @@ export default function SettleBundleSheet({ booking, ask = false, onDone, onClos
                       {on && <Ionicons name="checkmark" size={13} color={dark.bg} />}
                     </View>
                     <Text style={[s.rowName, !on && s.rowNameOff]} numberOfLines={1}>
-                      {i.services?.name ?? 'Service'}
+                      {i.services?.name ?? tr('Service')}
                     </Text>
-                    <Text style={[s.rowPrice, !on && s.rowPriceOff]}>{dh(i.price_cents)} DH</Text>
+                    <Text style={[s.rowPrice, !on && s.rowPriceOff]}>{tr('{price_cents} DH', { price_cents: dh(i.price_cents) })}</Text>
                   </Pressable>
                 );
               })}
@@ -136,28 +137,26 @@ export default function SettleBundleSheet({ booking, ask = false, onDone, onClos
               <View style={s.broken}>
                 <View style={s.brokenHead}>
                   <Ionicons name="alert-circle-outline" size={16} color={dark.amber} />
-                  <Text style={s.brokenTitle}>BUNDLE BROKEN</Text>
+                  <Text style={s.brokenTitle}>{tr('BUNDLE BROKEN')}</Text>
                 </View>
                 <Text style={s.brokenBody}>
-                  {doneItems.length} of {items.length} done, so it's charged as
-                  {' '}{doneItems.length === 1 ? 'a single service' : `${doneItems.length} separate services`}.
-                  {' '}The {dh(savingCents)} DH bundle saving doesn't apply.
+                  {tr('{count} of {count2} done, so it\'s charged as {x}. The {savingCents} DH bundle saving doesn\'t apply.', { count: doneItems.length, count2: items.length, x: doneItems.length === 1 ? tr('a single service') : tr('{count} separate services', { count: doneItems.length }), savingCents: dh(savingCents) })}
                 </Text>
                 <View style={s.brokenRows}>
                   <View style={s.bRow}>
-                    <Text style={s.bK}>Was, as a bundle</Text>
-                    <Text style={s.bWas}>{dh(bundle!.price_cents)} DH</Text>
+                    <Text style={s.bK}>{tr('Was, as a bundle')}</Text>
+                    <Text style={s.bWas}>{tr('{price_cents} DH', { price_cents: dh(bundle!.price_cents) })}</Text>
                   </View>
                   <View style={s.bRow}>
                     <Text style={s.bK}>
-                      Now, {doneItems.length} service{doneItems.length === 1 ? '' : 's'}
+                      {trn(doneItems.length, 'Now, {n} service', 'Now, {n} services')}
                     </Text>
-                    <Text style={s.bV}>{dh(partsCents)} DH</Text>
+                    <Text style={s.bV}>{tr('{partsCents} DH', { partsCents: dh(partsCents) })}</Text>
                   </View>
                   {depositCents > 0 && (
                     <View style={s.bRow}>
-                      <Text style={s.bK}>Deposit already paid</Text>
-                      <Text style={s.bV}>− {dh(depositCents)} DH</Text>
+                      <Text style={s.bK}>{tr('Deposit already paid')}</Text>
+                      <Text style={s.bV}>{tr('− {depositCents} DH', { depositCents: dh(depositCents) })}</Text>
                     </View>
                   )}
                 </View>
@@ -165,8 +164,8 @@ export default function SettleBundleSheet({ booking, ask = false, onDone, onClos
             )}
 
             <View style={s.collect}>
-              <Text style={s.collectK}>Collect in cash</Text>
-              <Text style={s.collectV}>{dh(collect)} DH</Text>
+              <Text style={s.collectK}>{tr('Collect in cash')}</Text>
+              <Text style={s.collectV}>{tr('{collect} DH', { collect: dh(collect) })}</Text>
             </View>
           </ScrollView>
 
@@ -175,13 +174,13 @@ export default function SettleBundleSheet({ booking, ask = false, onDone, onClos
             {busy ? <ActivityIndicator color={dark.bg} /> : (
               <>
                 <Ionicons name="checkmark-circle" size={17} color={dark.bg} />
-                <Text style={s.ctaText}>MARK DONE · COLLECT {dh(collect)} DH</Text>
+                <Text style={s.ctaText}>{tr('MARK DONE · COLLECT {collect} DH', { collect: dh(collect) })}</Text>
               </>
             )}
           </Pressable>
           {freedMin > 0 && (
             <Text style={s.freed}>
-              Freed {freedMin} min — that time is open again.
+              {tr('Freed {freedMin} min — that time is open again.', { freedMin })}
             </Text>
           )}
         </View>

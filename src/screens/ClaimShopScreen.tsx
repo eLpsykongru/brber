@@ -4,6 +4,7 @@ import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Btn, GhostBtn, Ico, Screen, Serif, T } from '../components/dark';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
+import { loc, tr } from '../lib/i18n';
 
 // Turn 12 of "Barber App.dc.html" — Brahim claims the shop Nadia created. The
 // other end of admin 11a, and the reason admin 11 could stop where it did:
@@ -28,7 +29,7 @@ export type Invite = {
 };
 
 const hhmm = (iso: string) =>
-  new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  new Date(iso).toLocaleTimeString(loc('en-GB'), { hour: '2-digit', minute: '2-digit' });
 
 /** 12b prints the date the way a licence does, and we only check name + expiry. */
 function parseExpiry(d: string, m: string, y: string): string | null {
@@ -68,15 +69,15 @@ export default function ClaimShopScreen({ invite, onDone, onGo }: {
       if (error) throw error;
       setStep('licence');
     } catch (e: any) {
-      Alert.alert('Could not claim it', e.message ?? 'Try again in a moment.');
+      Alert.alert(tr('Could not claim it'), e.message ?? tr('Try again in a moment.'));
     } finally { setBusy(false); }
   }
 
   function notMyShop() {
-    Alert.alert('This isn\'t your shop?', 'It goes back to the Sterncut team. Nobody sees it.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(tr('This isn\'t your shop?'), tr('It goes back to the Sterncut team. Nobody sees it.'), [
+      { text: tr('Cancel'), style: 'cancel' },
       {
-        text: 'It isn\'t mine', style: 'destructive',
+        text: tr('It isn\'t mine'), style: 'destructive',
         onPress: async () => {
           try {
             await supabase.rpc('decline_invite', { p_token: invite.token, p_reason: null });
@@ -93,7 +94,7 @@ export default function ClaimShopScreen({ invite, onDone, onGo }: {
 
   async function saveLicence() {
     const iso = parseExpiry(dd, mm, yy);
-    if (!iso) return Alert.alert('The date', 'Day, month and year off the licence.');
+    if (!iso) return Alert.alert(tr('The date'), tr('Day, month and year off the licence.'));
     setBusy(true);
     try {
       let path: string | null = null;
@@ -110,7 +111,7 @@ export default function ClaimShopScreen({ invite, onDone, onGo }: {
       if (error) throw error;
       setStep('sent');
     } catch (e: any) {
-      Alert.alert('Could not save it', e.message ?? 'Try again in a moment.');
+      Alert.alert(tr('Could not save it'), e.message ?? tr('Try again in a moment.'));
     } finally { setBusy(false); }
   }
 
@@ -127,7 +128,7 @@ export default function ClaimShopScreen({ invite, onDone, onGo }: {
         </View>
         {key && (
           <Pressable onPress={() => setEditing(editing === key ? null : key)} hitSlop={8}>
-            <T size={12} w="sb" c={D.accent}>{editing === key ? 'Done' : 'Change'}</T>
+            <T size={12} w="sb" c={D.accent}>{editing === key ? tr('Done') : tr('Change')}</T>
           </Pressable>
         )}
       </View>
@@ -136,58 +137,58 @@ export default function ClaimShopScreen({ invite, onDone, onGo }: {
     return (
       <Screen gap={16}>
         <View style={s.who}>
-          <View style={s.dot}><T size={10} w="b">NL</T></View>
+          <View style={s.dot}><T size={10} w="b">{tr('NL')}</T></View>
           <T size={12} c={D.sub} style={{ flex: 1 }}>
-            {invite.invited_by} set this up with you today at {hhmm(invite.invited_at)}.
+            {tr('{invited_by} set this up with you today at {invited_at}.', { invited_by: invite.invited_by, invited_at: hhmm(invite.invited_at) })}
           </T>
         </View>
 
-        <Serif size={30}>Is this{'\n'}your shop?</Serif>
-        <T size={13} c={D.sub}>Check what she wrote down. You can change any of it.</T>
+        <Serif size={30}>{tr('Is this\nyour shop?')}</Serif>
+        <T size={13} c={D.sub}>{tr('Check what she wrote down. You can change any of it.')}</T>
 
         <View style={{ gap: 10, marginTop: 4 }}>
           {editing === 'name'
             ? (
               <View style={s.fact}>
                 <View style={{ flex: 1 }}>
-                  <T size={9} w="b" c={D.sub} style={{ letterSpacing: 1.6 }}>SHOP</T>
+                  <T size={9} w="b" c={D.sub} style={{ letterSpacing: 1.6 }}>{tr('SHOP')}</T>
                   <TextInput value={name} onChangeText={setName} style={s.input}
-                    placeholder="Coiffure Atlas" placeholderTextColor={D.muted} />
+                    placeholder={tr('Coiffure Atlas')} placeholderTextColor={D.muted} />
                 </View>
                 <Pressable onPress={() => setEditing(null)} hitSlop={8}>
-                  <T size={12} w="sb" c={D.accent}>Done</T>
+                  <T size={12} w="sb" c={D.accent}>{tr('Done')}</T>
                 </Pressable>
               </View>
             )
-            : fact('SHOP', [name], 'name')}
+            : fact(tr('SHOP'), [name], 'name')}
 
           {editing === 'where'
             ? (
               <View style={s.fact}>
                 <View style={{ flex: 1 }}>
-                  <T size={9} w="b" c={D.sub} style={{ letterSpacing: 1.6 }}>WHERE</T>
+                  <T size={9} w="b" c={D.sub} style={{ letterSpacing: 1.6 }}>{tr('WHERE')}</T>
                   <TextInput value={address} onChangeText={setAddress} style={s.input}
-                    placeholder="18 Bd Moulay Youssef" placeholderTextColor={D.muted} />
+                    placeholder={tr('18 Bd Moulay Youssef')} placeholderTextColor={D.muted} />
                   <TextInput value={district} onChangeText={setDistrict} style={s.input}
-                    placeholder="Malabata" placeholderTextColor={D.muted} />
+                    placeholder={tr('Malabata')} placeholderTextColor={D.muted} />
                 </View>
                 <Pressable onPress={() => setEditing(null)} hitSlop={8}>
-                  <T size={12} w="sb" c={D.accent}>Done</T>
+                  <T size={12} w="sb" c={D.accent}>{tr('Done')}</T>
                 </Pressable>
               </View>
             )
-            : fact('WHERE', [address || '—', district ? `${district}, Tangier` : 'Tangier'], 'where')}
+            : fact(tr('WHERE'), [address || '—', district ? tr('{district}, Tangier', { district }) : tr('Tangier')], 'where')}
 
           {/* the phone is the one thing he cannot change here: it is what the
               invite was matched on, and editing it would orphan the shop */}
-          {fact('YOU', [invite.owner_name || '—', `${invite.owner_phone ?? ''} · this phone`], null)}
+          {fact(tr('YOU'), [invite.owner_name || '—', tr('{phone} · this phone', { phone: invite.owner_phone ?? '' })], null)}
         </View>
 
         <View style={s.left}>
           <T size={9} w="b" c={D.sub} style={{ letterSpacing: 1.6 }}>
-            THREE THINGS LEFT · ABOUT 5 MINUTES
+            {tr('THREE THINGS LEFT · ABOUT 5 MINUTES')}
           </T>
-          {['A photo of your licence', 'A pin on your door', 'Your prices and a few photos']
+          {[tr('A photo of your licence'), tr('A pin on your door'), tr('Your prices and a few photos')]
             .map((l, i) => (
               <View key={l} style={s.step}>
                 <View style={s.num}><T size={10} w="b" c={D.sub}>{i + 1}</T></View>
@@ -196,10 +197,10 @@ export default function ClaimShopScreen({ invite, onDone, onGo }: {
             ))}
         </View>
 
-        <Btn title={busy ? 'ONE MOMENT…' : 'YES, THIS IS MY SHOP'}
+        <Btn title={busy ? tr('ONE MOMENT…') : tr('YES, THIS IS MY SHOP')}
           onPress={busy ? () => {} : yesThisIsMine} />
         <Pressable onPress={notMyShop} style={{ alignSelf: 'center', paddingVertical: 10 }}>
-          <T size={13} c={D.sub}>This isn&apos;t my shop</T>
+          <T size={13} c={D.sub}>{tr('This isn\'t my shop')}</T>
         </Pressable>
       </Screen>
     );
@@ -209,22 +210,22 @@ export default function ClaimShopScreen({ invite, onDone, onGo }: {
   if (step === 'licence') {
     return (
       <Screen gap={16}>
-        <T size={9} w="b" c={D.sub} style={{ letterSpacing: 1.6 }}>STEP 1 OF 3</T>
-        <Serif size={28}>Your licence</Serif>
+        <T size={9} w="b" c={D.sub} style={{ letterSpacing: 1.6 }}>{tr('STEP 1 OF 3')}</T>
+        <Serif size={28}>{tr('Your licence')}</Serif>
         <T size={13} c={D.sub}>
-          Lay it flat and get the whole page in. We only check the name and the expiry date.
+          {tr('Lay it flat and get the whole page in. We only check the name and the expiry date.')}
         </T>
 
         <Pressable onPress={pickLicence} style={[s.shot, photo ? s.shotOn : null]}>
           <Ico name={photo ? 'check-circle' : 'camera'} size={22}
             color={photo ? D.green : D.sub} />
           <T size={13} c={photo ? D.green : D.sub} style={{ marginTop: 8 }}>
-            {photo ? 'Photo added — tap to retake' : 'Photograph the licence'}
+            {photo ? tr('Photo added — tap to retake') : tr('Photograph the licence')}
           </T>
         </Pressable>
 
         <T size={9} w="b" c={D.sub} style={{ letterSpacing: 1.6, marginTop: 4 }}>
-          WHEN DOES IT RUN OUT?
+          {tr('WHEN DOES IT RUN OUT?')}
         </T>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <TextInput value={dd} onChangeText={setDd} placeholder="14" maxLength={2}
@@ -238,14 +239,14 @@ export default function ClaimShopScreen({ invite, onDone, onGo }: {
             style={[s.input, s.date, { width: 78 }]} />
         </View>
         <T size={12} c={D.sub}>
-          We&apos;ll warn you nine days before it expires, so it never catches you out.
+          {tr('We\'ll warn you nine days before it expires, so it never catches you out.')}
         </T>
 
-        <Btn title={busy ? 'SAVING…' : 'NEXT · THE PIN'} onPress={busy ? () => {} : saveLicence} />
+        <Btn title={busy ? tr('SAVING…') : tr('NEXT · THE PIN')} onPress={busy ? () => {} : saveLicence} />
         {/* the turn offers this on purpose — the licence is his to fetch, and he
             may not have it on him. The shop stays unlisted either way. */}
         <Pressable onPress={() => setStep('sent')} style={{ alignSelf: 'center', paddingVertical: 10 }}>
-          <T size={13} c={D.sub}>I&apos;ll do this later</T>
+          <T size={13} c={D.sub}>{tr('I\'ll do this later')}</T>
         </Pressable>
       </Screen>
     );
@@ -266,32 +267,32 @@ export default function ClaimShopScreen({ invite, onDone, onGo }: {
   return (
     <Screen gap={16}>
       <View style={s.tick}><Ico name="check" size={26} color={D.green} /></View>
-      <Serif size={28}>All three done</Serif>
+      <Serif size={28}>{tr('All three done')}</Serif>
       <T size={13} c={D.sub}>
-        {invite.invited_by} checks it and turns you on. Usually the same day.
+        {tr('{invited_by} checks it and turns you on. Usually the same day.', { invited_by: invite.invited_by })}
       </T>
 
       <View style={{ gap: 2, marginTop: 6 }}>
-        {line(`${invite.invited_by} added your shop`, 'In the shop with you', hhmm(invite.invited_at), true)}
-        {line('You finished your bit', 'Licence, pin, services, photos', 'Now', true)}
-        {line(`${invite.invited_by} turns you on`,
-          `Then people searching ${district || 'Tangier'} find you`, 'Soon', false)}
+        {line(tr('{name} added your shop', { name: invite.invited_by }), tr('In the shop with you'), hhmm(invite.invited_at), true)}
+        {line(tr('You finished your bit'), tr('Licence, pin, services, photos'), tr('Now'), true)}
+        {line(tr('{name} turns you on', { name: invite.invited_by }),
+          tr('Then people searching {district} find you', { district: district || tr('Tangier') }), tr('Soon'), false)}
       </View>
 
       <View style={s.left}>
-        <T size={9} w="b" c={D.sub} style={{ letterSpacing: 1.6 }}>WHILE YOU WAIT</T>
+        <T size={9} w="b" c={D.sub} style={{ letterSpacing: 1.6 }}>{tr('WHILE YOU WAIT')}</T>
         <T size={13} c={D.textDim} style={{ marginTop: 6 }}>
-          Nobody can book you yet, but you can set your hours so your first day isn&apos;t a mess.
+          {tr('Nobody can book you yet, but you can set your hours so your first day isn\'t a mess.')}
         </T>
         <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
-          <GhostBtn title="SET HOURS" style={{ flex: 1 }}
+          <GhostBtn title={tr('SET HOURS')} style={{ flex: 1 }}
             onPress={() => { onGo?.('hours'); onDone(); }} />
-          <GhostBtn title="ADD A BARBER" style={{ flex: 1 }}
+          <GhostBtn title={tr('ADD A BARBER')} style={{ flex: 1 }}
             onPress={() => { onGo?.('team'); onDone(); }} />
         </View>
       </View>
 
-      <Btn title="GO TO MY SHOP" onPress={onDone} />
+      <Btn title={tr('GO TO MY SHOP')} onPress={onDone} />
     </Screen>
   );
 }

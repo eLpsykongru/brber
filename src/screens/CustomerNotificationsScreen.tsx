@@ -9,6 +9,7 @@ import { missedWhilePushOff } from '../lib/inboxRules';
 import { pushDeniedSince, pushPermission } from '../lib/push';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, shadow, TOP_INSET } from '../theme';
+import { loc, tr, trn } from '../lib/i18n';
 
 // Turns 14 and 15, customer side — 14a the inbox behind the Home bell, 14b its
 // settings, 15a the reminder-timing picker, 15b the empty inbox.
@@ -59,18 +60,18 @@ const LOOK: Record<Kind, { icon: keyof typeof Ionicons.glyphMap; tint: string; b
 
 // 15a's options. -1 is the evening before; 0 turns reminders off entirely.
 const LEADS: { min: number; label: string; hint?: string }[] = [
-  { min: 15, label: '15 minutes before' },
-  { min: 30, label: '30 minutes before' },
-  { min: 60, label: '1 hour before' },
-  { min: 120, label: '2 hours before' },
-  { min: -1, label: 'The evening before', hint: 'Sent at 8:00 PM' },
+  { min: 15, label: tr('15 minutes before') },
+  { min: 30, label: tr('30 minutes before') },
+  { min: 60, label: tr('1 hour before') },
+  { min: 120, label: tr('2 hours before') },
+  { min: -1, label: tr('The evening before'), hint: tr('Sent at 8:00 PM') },
 ];
 
 const leadLabel = (m: number) =>
-  m === -1 ? 'Evening' : m === 0 ? 'Off' : m >= 60 ? `${m / 60} h` : `${m} min`;
+  m === -1 ? tr('Evening') : m === 0 ? tr('Off') : m >= 60 ? tr('{h} h', { h: m / 60 }) : tr('{m} min', { m });
 
 function clock(iso: string) {
-  return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  return new Date(iso).toLocaleTimeString(loc('en-US'), { hour: 'numeric', minute: '2-digit' });
 }
 function bucket(iso: string): 'TODAY' | 'YESTERDAY' | 'EARLIER' {
   const d = new Date(iso);
@@ -94,7 +95,7 @@ export default function CustomerNotificationsScreen({ userId, onBack, onOpenBook
     const { data, error } = await supabase.from('notifications')
       .select('id, kind, title, body, booking_id, amount_cents, read_at, created_at')
       .eq('user_id', userId).order('created_at', { ascending: false }).limit(80);
-    if (error) return Alert.alert('Could not load notifications', error.message);
+    if (error) return Alert.alert(tr('Could not load notifications'), error.message);
     setRows((data ?? []) as Notif[]);
   }, [userId]);
 
@@ -103,7 +104,7 @@ export default function CustomerNotificationsScreen({ userId, onBack, onOpenBook
   async function markAllRead() {
     setRows((cur) => cur?.map((n) => n.read_at ? n : { ...n, read_at: new Date().toISOString() }) ?? null);
     const { error } = await supabase.rpc('notif_mark_all_read');
-    if (error) { load(); Alert.alert('Could not update', error.message); }
+    if (error) { load(); Alert.alert(tr('Could not update'), error.message); }
   }
 
   async function markRead(n: Notif) {
@@ -128,15 +129,15 @@ export default function CustomerNotificationsScreen({ userId, onBack, onOpenBook
   const header = (
     <View style={s.header}>
       <Pressable onPress={onBack} hitSlop={8}
-        style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel="Go back">
+        style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel={tr('Go back')}>
         <Ionicons name="arrow-back" size={16} color={colors.text} />
       </Pressable>
-      <Display size={18} style={s.headerTitle}>Notifications</Display>
+      <Display size={18} style={s.headerTitle}>{tr('Notifications')}</Display>
       <View style={s.headerEnd}>
-        {unread > 0 && <Text style={s.markAll} onPress={markAllRead}>Mark all read</Text>}
+        {unread > 0 && <Text style={s.markAll} onPress={markAllRead}>{tr('Mark all read')}</Text>}
         <Pressable onPress={() => setSettings(true)} hitSlop={8}
           style={({ pressed }) => [s.puck, pressed && s.pressed]}
-          accessibilityLabel="Notification settings">
+          accessibilityLabel={tr('Notification settings')}>
           <Ionicons name="options-outline" size={16} color={colors.text} />
         </Pressable>
       </View>
@@ -153,14 +154,14 @@ export default function CustomerNotificationsScreen({ userId, onBack, onOpenBook
             <Ionicons name="notifications-outline" size={34} color={colors.textTertiary} />
           </View>
           <View>
-            <Display size={19} style={s.emptyTitle}>All caught up</Display>
+            <Display size={19} style={s.emptyTitle}>{tr('All caught up')}</Display>
             <Text style={s.emptyText}>
-              Queue updates, booking answers and wallet activity land here.
+              {tr('Queue updates, booking answers and wallet activity land here.')}
             </Text>
           </View>
           <Pressable onPress={() => setSettings(true)}
             style={({ pressed }) => [s.emptyBtn, pressed && s.pressed]}>
-            <Text style={s.emptyBtnText}>NOTIFICATION SETTINGS</Text>
+            <Text style={s.emptyBtnText}>{tr('NOTIFICATION SETTINGS')}</Text>
           </Pressable>
         </View>
       </View>
@@ -173,7 +174,7 @@ export default function CustomerNotificationsScreen({ userId, onBack, onOpenBook
       <ScrollView contentContainerStyle={s.list} showsVerticalScrollIndicator={false}>
         {groups.map(([label, list]) => (
           <View key={label} style={s.group}>
-            <Text style={s.groupLabel}>{label}</Text>
+            <Text style={s.groupLabel}>{tr(label)}</Text>
             <View style={s.groupRows}>
               {list.map((n) => {
                 const look = LOOK[n.kind] ?? LOOK.digest;
@@ -193,14 +194,14 @@ export default function CustomerNotificationsScreen({ userId, onBack, onOpenBook
                         <View style={s.rowActionLine}>
                           <Pressable onPress={() => { markRead(n); onRate?.(n.booking_id!); }}
                             style={({ pressed }) => [s.rateBtn, pressed && s.pressed]}>
-                            <Text style={s.rateText}>RATE NOW</Text>
+                            <Text style={s.rateText}>{tr('RATE NOW')}</Text>
                           </Pressable>
                           <Text style={s.rowTime}>{clock(n.created_at)}</Text>
                         </View>
                       ) : (
                         <Text style={s.rowTime}>
                           {label === 'EARLIER'
-                            ? new Date(n.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                            ? new Date(n.created_at).toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' })
                             : clock(n.created_at)}
                         </Text>
                       )}
@@ -219,14 +220,14 @@ export default function CustomerNotificationsScreen({ userId, onBack, onOpenBook
 
 // ---- 14b -----------------------------------------------------------------
 const QUEUE_ROWS: { key: keyof Prefs; label: string; hint: string }[] = [
-  { key: 'push_queue_next', label: "You're next in line", hint: 'When one person is ahead of you' },
-  { key: 'push_queue_moves', label: 'Queue position changes', hint: 'Every time the line moves' },
-  { key: 'push_booking_answer', label: 'Booking confirmed or declined', hint: 'Includes reschedule answers' },
+  { key: 'push_queue_next', label: tr('You\'re next in line'), hint: tr('When one person is ahead of you') },
+  { key: 'push_queue_moves', label: tr('Queue position changes'), hint: tr('Every time the line moves') },
+  { key: 'push_booking_answer', label: tr('Booking confirmed or declined'), hint: tr('Includes reschedule answers') },
 ];
 const MONEY_ROWS: { key: keyof Prefs; label: string; hint: string }[] = [
-  { key: 'push_wallet', label: 'Deposits & refunds', hint: 'Money in or out of your wallet' },
-  { key: 'push_message', label: 'New messages', hint: 'From your barber' },
-  { key: 'push_review_ask', label: 'Review reminders', hint: 'After a completed visit' },
+  { key: 'push_wallet', label: tr('Deposits & refunds'), hint: tr('Money in or out of your wallet') },
+  { key: 'push_message', label: tr('New messages'), hint: tr('From your barber') },
+  { key: 'push_review_ask', label: tr('Review reminders'), hint: tr('After a completed visit') },
 ];
 
 function NotificationSettings({ userId, onBack, onOpenBooking, onOpenWallet }: {
@@ -276,7 +277,7 @@ function NotificationSettings({ userId, onBack, onOpenBooking, onOpenWallet }: {
     const { error } = await supabase.from('notification_prefs')
       .upsert({ user_id: userId, ...next, updated_at: new Date().toISOString() },
         { onConflict: 'user_id' });
-    if (error) Alert.alert('Could not save', error.message);
+    if (error) Alert.alert(tr('Could not save'), error.message);
   }
 
   const rowsCard = (list: typeof QUEUE_ROWS) => (
@@ -298,22 +299,21 @@ function NotificationSettings({ userId, onBack, onOpenBooking, onOpenWallet }: {
     setProbing(true);
     const { data, error } = await supabase.rpc('push_probe', { p_title: 'Sterncut' });
     setProbing(false);
-    if (error) return Alert.alert('Could not send', error.message);
+    if (error) return Alert.alert(tr('Could not send'), error.message);
     const r = data as { sent: boolean; why?: string; tokens?: number };
-    if (!r?.sent) return Alert.alert('Nothing to send to', r?.why ?? 'No push token on this account.');
-    Alert.alert('Sent',
-      `Went out to ${r.tokens} device${r.tokens === 1 ? '' : 's'}. If nothing arrives in a few `
-      + 'seconds, the token is registered but the push was refused — ask ops to check push_delivery().');
+    if (!r?.sent) return Alert.alert(tr('Nothing to send to'), r?.why ?? tr('No push token on this account.'));
+    Alert.alert(tr('Sent'),
+      trn(r.tokens ?? 0, 'Went out to {n} device. If nothing arrives in a few seconds, the token is registered but the push was refused — ask ops to check push_delivery().', 'Went out to {n} devices. If nothing arrives in a few seconds, the token is registered but the push was refused — ask ops to check push_delivery().'));
   }
 
   return (
     <View style={s.screen}>
       <View style={s.header}>
         <Pressable onPress={onBack} hitSlop={8}
-          style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel="Go back">
+          style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel={tr('Go back')}>
           <Ionicons name="arrow-back" size={16} color={colors.text} />
         </Pressable>
-        <Display size={18} style={s.headerTitle}>Notifications</Display>
+        <Display size={18} style={s.headerTitle}>{tr('Notifications')}</Display>
         <View style={s.puckGhost} />
       </View>
 
@@ -327,10 +327,10 @@ function NotificationSettings({ userId, onBack, onOpenBooking, onOpenWallet }: {
             <Ionicons name="notifications-outline" size={17} color="#fff" />
           </View>
           <View style={s.grow}>
-            <Text style={s.permTitle}>Push notifications</Text>
+            <Text style={s.permTitle}>{tr('Push notifications')}</Text>
             <Text style={s.permSub}>
-              {granted === null ? 'Checking…'
-                : granted ? 'Allowed on this phone' : 'Blocked — tap to open Settings'}
+              {granted === null ? tr('Checking…')
+                : granted ? tr('Allowed on this phone') : tr('Blocked — tap to open Settings')}
             </Text>
           </View>
           {granted
@@ -349,15 +349,15 @@ function NotificationSettings({ userId, onBack, onOpenBooking, onOpenWallet }: {
           style={({ pressed }) => [s.testRow, (pressed || probing) && s.pressed]}
           accessibilityRole="button">
           <Ionicons name="paper-plane-outline" size={15} color={colors.textSecondary} />
-          <Text style={s.testText}>{probing ? 'Sending…' : 'Send me a test notification'}</Text>
+          <Text style={s.testText}>{probing ? tr('Sending…') : tr('Send me a test notification')}</Text>
           <Ionicons name="chevron-forward" size={14} color={colors.textTertiary} />
         </Pressable>
         </>)}
 
         {/* NTF-10 — with push off the switches stay, greyed and out of force */}
-        {denied && <Text style={s.section}>YOUR CHOICES, SAVED FOR LATER</Text>}
+        {denied && <Text style={s.section}>{tr('YOUR CHOICES, SAVED FOR LATER')}</Text>}
         <View style={denied ? s.saved : s.savedOn} pointerEvents={denied ? 'none' : 'auto'}>
-        <Text style={s.section}>QUEUE &amp; BOOKINGS</Text>
+        <Text style={s.section}>{tr('QUEUE & BOOKINGS')}</Text>
         <View style={s.card}>
           {QUEUE_ROWS.map((r) => (
             <View key={r.key} style={[s.prefRow, s.prefRowBorder]}>
@@ -371,13 +371,13 @@ function NotificationSettings({ userId, onBack, onOpenBooking, onOpenWallet }: {
             </View>
           ))}
           <Pressable onPress={() => setPickerOpen(true)} style={s.prefRow}
-            accessibilityRole="button" accessibilityLabel="Reminder timing">
+            accessibilityRole="button" accessibilityLabel={tr('Reminder timing')}>
             <View style={s.grow}>
-              <Text style={s.prefLabel}>Reminder before your slot</Text>
+              <Text style={s.prefLabel}>{tr('Reminder before your slot')}</Text>
               <Text style={s.prefHint}>
-                {prefs.reminder_min === 0 ? 'Off'
-                  : prefs.reminder_min === -1 ? 'The evening before'
-                    : `${leadLabel(prefs.reminder_min)} before`}
+                {prefs.reminder_min === 0 ? tr('Off')
+                  : prefs.reminder_min === -1 ? tr('The evening before')
+                    : tr('{reminder_min} before', { reminder_min: leadLabel(prefs.reminder_min) })}
               </Text>
             </View>
             <Text style={s.prefValue}>{leadLabel(prefs.reminder_min)}</Text>
@@ -385,15 +385,15 @@ function NotificationSettings({ userId, onBack, onOpenBooking, onOpenWallet }: {
           </Pressable>
         </View>
 
-        <Text style={s.section}>WALLET &amp; MESSAGES</Text>
+        <Text style={s.section}>{tr('WALLET & MESSAGES')}</Text>
         {rowsCard(MONEY_ROWS)}
 
-        <Text style={s.section}>OFFERS</Text>
+        <Text style={s.section}>{tr('OFFERS')}</Text>
         <View style={s.card}>
           <View style={s.prefRow}>
             <View style={s.grow}>
-              <Text style={s.prefLabel}>Deals near you</Text>
-              <Text style={s.prefHint}>Discounts from Tangier salons</Text>
+              <Text style={s.prefLabel}>{tr('Deals near you')}</Text>
+              <Text style={s.prefHint}>{tr('Discounts from Tangier salons')}</Text>
             </View>
             <Switch value={prefs.push_offers} onValueChange={(v) => save({ push_offers: v })}
               trackColor={{ false: '#DDD9CF', true: denied ? '#DDD9CF' : colors.accent }} disabled={denied} thumbColor="#fff" />
@@ -402,7 +402,7 @@ function NotificationSettings({ userId, onBack, onOpenBooking, onOpenWallet }: {
         </View>
         {denied && (
           <Text style={s.savedNote}>
-            These stay exactly as you set them. They start working again the moment you allow push.
+            {tr('These stay exactly as you set them. They start working again the moment you allow push.')}
           </Text>
         )}
       </ScrollView>
@@ -428,19 +428,19 @@ function ReminderSheet({ visible, value, onClose, onPick }: {
         <View style={s.grabber} />
         <View style={s.sheetHead}>
           <View style={s.sheetSlot} />
-          <Display size={18} style={s.sheetTitle}>Remind me</Display>
+          <Display size={18} style={s.sheetTitle}>{tr('Remind me')}</Display>
           <Pressable onPress={onClose} hitSlop={8} style={[s.sheetSlot, s.sheetSlotEnd]}>
             <Ionicons name="close" size={16} color={colors.text} />
           </Pressable>
         </View>
-        <Text style={s.sheetSub}>How long before your slot should we ping you?</Text>
+        <Text style={s.sheetSub}>{tr('How long before your slot should we ping you?')}</Text>
 
         <View style={s.optionList}>
           {LEADS.map((o) => {
             const on = draft === o.min;
             // the mock recommends 1 h off the salon's travel time; without a
             // distance we say why it is the default instead of inventing minutes
-            const hint = o.hint ?? (o.min === 60 ? 'Recommended' : undefined);
+            const hint = o.hint ?? (o.min === 60 ? tr('Recommended') : undefined);
             return (
               <Pressable key={o.min} onPress={() => setDraft(o.min)}
                 accessibilityRole="radio" accessibilityState={{ selected: on }}
@@ -460,13 +460,13 @@ function ReminderSheet({ visible, value, onClose, onPick }: {
         <View style={s.noteCard}>
           <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary} />
           <Text style={s.noteText}>
-            Queue tickets always ping you when you're next, whatever you pick here.
+            {tr('Queue tickets always ping you when you\'re next, whatever you pick here.')}
           </Text>
         </View>
 
         <Pressable onPress={() => onPick(draft)}
           style={({ pressed }) => [s.saveBtn, pressed && s.pressed]}>
-          <Text style={s.saveText}>SAVE</Text>
+          <Text style={s.saveText}>{tr('SAVE')}</Text>
         </Pressable>
       </View>
     </Modal>

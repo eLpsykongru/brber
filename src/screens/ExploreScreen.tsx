@@ -16,6 +16,7 @@ import { colors, font, radius, shadow, shadowLg, sp, TOP_INSET } from '../theme'
 import { NoLocationBar } from '../components/Failures';
 import SalonDetailScreen, { SalonCard } from './SalonDetailScreen';
 import SearchScreen from './SearchScreen';
+import { tr, trn } from '../lib/i18n';
 
 const CARD_W = 300;
 const CARD_GAP = sp(3);
@@ -53,9 +54,9 @@ function SalonPhoto({ salon, style }: { salon: SalonCard; style: object }) {
   );
 }
 
-const RATING_OPTS = [{ label: 'Any', v: null }, { label: '4+', v: 4 }, { label: '4.5+', v: 4.5 }] as const;
-const KM_OPTS = [{ label: 'Any', v: null }, { label: '< 1 Km', v: 1 }, { label: '< 3 Km', v: 3 }, { label: '< 5 Km', v: 5 }] as const;
-const PRICE_OPTS = [{ label: 'Any', v: null }, { label: '≤ 50 DH', v: 5000 }, { label: '≤ 100 DH', v: 10000 }, { label: '≤ 200 DH', v: 20000 }] as const;
+const RATING_OPTS = [{ label: tr('Any'), v: null }, { label: '4+', v: 4 }, { label: '4.5+', v: 4.5 }] as const;
+const KM_OPTS = [{ label: tr('Any'), v: null }, { label: tr('< 1 Km'), v: 1 }, { label: tr('< 3 Km'), v: 3 }, { label: tr('< 5 Km'), v: 5 }] as const;
+const PRICE_OPTS = [{ label: tr('Any'), v: null }, { label: tr('≤ 50 DH'), v: 5000 }, { label: tr('≤ 100 DH'), v: 10000 }, { label: tr('≤ 200 DH'), v: 20000 }] as const;
 
 export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
   onChromeHidden?: (hidden: boolean) => void; onBookings?: () => void;
@@ -84,7 +85,7 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
       .select('id, name, address, district, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, languages, profiles!barbers_id_fkey(full_name, avatar_url, phone, previous_name, name_changed_at), reviews!reviews_barber_id_fkey(rating), services(id, name, price_cents, duration_min, is_active, category))')
       .order('name')
       .then(({ data, error }) => {
-        if (error) return Alert.alert('Could not load salons', error.message);
+        if (error) return Alert.alert(tr('Could not load salons'), error.message);
         const cards = (data as unknown as SalonCard[])
           .map((s) => ({ ...s, barbers: s.barbers.filter((b) => b.status === 'approved' && b.salon_status === 'approved') }))
           .filter((s) => s.barbers.length > 0);
@@ -101,8 +102,8 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
       // front of a screen that is perfectly usable.
       setNoLocation(true);
       if (recenter) {
-        Alert.alert('Location is off',
-          'Turn it on in Settings to see distances and recenter the map.');
+        Alert.alert(tr('Location is off'),
+          tr('Turn it on in Settings to see distances and recenter the map.'));
       }
       return;
     }
@@ -174,7 +175,7 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
   if (!online && salons.length === 0) {
     return (
       <View style={styles.screen}>
-        <Display size={18} style={styles.offlineTitle}>Explore</Display>
+        <Display size={18} style={styles.offlineTitle}>{tr('Explore')}</Display>
         <NoConnection onRetry={() => setReload((n) => n + 1)} onBookings={onBookings} />
       </View>
     );
@@ -185,13 +186,13 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
       {/* search + filter */}
       <View style={styles.searchRow}>
         <TouchableOpacity style={[styles.grow, styles.searchPill]} activeOpacity={0.8}
-          accessibilityRole="search" accessibilityLabel="Search salon or specialist"
+          accessibilityRole="search" accessibilityLabel={tr('Search salon or specialist')}
           onPress={() => { setSearchOpen(true); onChromeHidden?.(true); }}>
           <Ionicons name="search" size={17} color={colors.textSecondary} />
-          <Text style={styles.searchPlaceholder}>Search Salon or Specialist</Text>
+          <Text style={styles.searchPlaceholder}>{tr('Search Salon or Specialist')}</Text>
         </TouchableOpacity>
         <Pressable style={({ pressed }) => [styles.filterBtn, pressed && styles.pressed]}
-          accessibilityLabel="Filters" onPress={() => setFilterOpen(true)}>
+          accessibilityLabel={tr('Filters')} onPress={() => setFilterOpen(true)}>
           <Ionicons name="options-outline" size={22} color={colors.onAccent} />
           {filtersOn && <View style={styles.filterDot} />}
         </Pressable>
@@ -216,7 +217,7 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
                   <View style={[styles.pin, sel && styles.pinSelected]}>
                     <Ionicons name="cut" size={16} color={sel ? colors.onAccent : colors.accent} />
                   </View>
-                  {km != null && <Text style={styles.pinLabel}>{km.toFixed(1)} Km</Text>}
+                  {km != null && <Text style={styles.pinLabel}>{tr('{km} Km', { km: km.toFixed(1) })}</Text>}
                 </View>
               </Marker>
             );
@@ -224,7 +225,7 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
         </MapView>
         {/* locate-me FAB */}
         <Pressable style={({ pressed }) => [styles.locateBtn, pressed && styles.pressed]}
-          accessibilityLabel="Locate me" onPress={() => locate(true)}>
+          accessibilityLabel={tr('Locate me')} onPress={() => locate(true)}>
           <Ionicons name="locate" size={20} color={colors.text} />
         </Pressable>
       </View>
@@ -248,7 +249,7 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
           keyExtractor={(s) => s.id}
           contentContainerStyle={styles.carouselContent}
           getItemLayout={(_, i) => ({ length: CARD_W + CARD_GAP, offset: i * (CARD_W + CARD_GAP), index: i })}
-          ListEmptyComponent={<Text style={styles.meta}>No salons match.</Text>}
+          ListEmptyComponent={<Text style={styles.meta}>{tr('No salons match.')}</Text>}
           renderItem={({ item }) => {
             const avg = avgOf(item.barbers.flatMap((b) => b.reviews));
             const price = startingPrice(item);
@@ -261,7 +262,7 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
                   {/* TODO(backlog): real promotions */}
                   <View style={styles.offBadge}>
                     <Ionicons name="pricetag" size={11} color={colors.accent} />
-                    <Text style={styles.offText}>5% OFF</Text>
+                    <Text style={styles.offText}>{tr('5% OFF')}</Text>
                   </View>
                   {/* 39c — real since 0065 */}
                   <SaveHeart kind="salon" id={item.id} style={styles.heart} />
@@ -273,26 +274,26 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
                 </View>
                 <View style={styles.iconLine}>
                   <Ionicons name="location-outline" size={13} color={colors.textSecondary} />
-                  <Text style={styles.meta} numberOfLines={1}>{item.address ?? 'Tangier'}</Text>
+                  <Text style={styles.meta} numberOfLines={1}>{item.address ?? tr('Tangier')}</Text>
                 </View>
                 <View style={styles.iconLine}>
                   <Ionicons name="pricetag-outline" size={13} color={colors.textSecondary} />
                   <Text style={styles.meta}>
-                    {price != null ? `Starting @ ${(price / 100).toFixed(2)} DH` : 'No services yet'}
+                    {price != null ? tr('Starting @ {x} DH', { x: (price / 100).toFixed(2) }) : tr('No services yet')}
                   </Text>
                 </View>
                 <View style={styles.cardBottomRow}>
                   <View style={styles.iconLine}>
                     <Ionicons name="walk-outline" size={13} color={colors.textSecondary} />
                     <Text style={styles.meta}>
-                      {km != null ? `${km.toFixed(1)} Km • ${walkMin(km)} Min` : 'Distance unknown'}
+                      {km != null ? tr('{km} Km • {km2} Min', { km: km.toFixed(1), km2: walkMin(km) }) : tr('Distance unknown')}
                     </Text>
                   </View>
                   <Pressable style={({ pressed }) => [styles.navBtn, pressed && styles.pressed]}
-                    accessibilityLabel="Navigate to salon"
+                    accessibilityLabel={tr('Navigate to salon')}
                     onPress={() => (item.lat != null && item.lng != null
                       ? openDirections(item.lat, item.lng, item.name)
-                      : Alert.alert('Directions', 'This salon has not set its map location yet.'))}>
+                      : Alert.alert(tr('Directions'), tr('This salon has not set its map location yet.')))}>
                     <Ionicons name="paper-plane" size={16} color={colors.onAccent} />
                   </Pressable>
                 </View>
@@ -309,38 +310,38 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
         <View style={styles.sheet}>
           <View style={styles.sheetHandle} />
           <View style={styles.sheetHeader}>
-            <Display size={22}>Filters</Display>
+            <Display size={22}>{tr('Filters')}</Display>
             <Pressable hitSlop={8}
               onPress={() => { setMinRating(null); setMaxKm(null); setMaxPrice(null); setDistrict(null); }}>
-              <Text style={styles.sheetReset}>Reset</Text>
+              <Text style={styles.sheetReset}>{tr('Reset')}</Text>
             </Pressable>
           </View>
           {districts.length > 0 && (
             <>
-              <Text style={styles.sheetLabel}>District</Text>
+              <Text style={styles.sheetLabel}>{tr('District')}</Text>
               <View style={styles.chipRow}>
-                <Chip label="Any" active={district === null} onPress={() => setDistrict(null)} />
+                <Chip label={tr('Any')} active={district === null} onPress={() => setDistrict(null)} />
                 {districts.map((d) => (
                   <Chip key={d} label={d} active={district === d} onPress={() => setDistrict(d)} />
                 ))}
               </View>
             </>
           )}
-          <Text style={styles.sheetLabel}>Rating</Text>
+          <Text style={styles.sheetLabel}>{tr('Rating')}</Text>
           <View style={styles.chipRow}>
             {RATING_OPTS.map((o) => (
               <Chip key={o.label} label={o.label} active={minRating === o.v}
                 onPress={() => setMinRating(o.v)} />
             ))}
           </View>
-          <Text style={styles.sheetLabel}>Distance{!userLoc ? ' (needs location access)' : ''}</Text>
+          <Text style={styles.sheetLabel}>{tr('Distance{x}', { x: !userLoc ? tr(' (needs location access)') : '' })}</Text>
           <View style={styles.chipRow}>
             {KM_OPTS.map((o) => (
               <Chip key={o.label} label={o.label} active={maxKm === o.v}
                 onPress={() => setMaxKm(o.v)} />
             ))}
           </View>
-          <Text style={styles.sheetLabel}>Starting price</Text>
+          <Text style={styles.sheetLabel}>{tr('Starting price')}</Text>
           <View style={styles.chipRow}>
             {PRICE_OPTS.map((o) => (
               <Chip key={o.label} label={o.label} active={maxPrice === o.v}
@@ -349,7 +350,7 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
           </View>
           <Pressable style={({ pressed }) => [styles.sheetDone, pressed && styles.pressed]}
             onPress={() => setFilterOpen(false)}>
-            <Text style={styles.sheetDoneText}>Show {sorted.length} salon{sorted.length === 1 ? '' : 's'}</Text>
+            <Text style={styles.sheetDoneText}>{trn(sorted.length, 'Show {n} salon', 'Show {n} salons')}</Text>
           </Pressable>
         </View>
       </Modal>

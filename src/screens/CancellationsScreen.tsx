@@ -3,6 +3,7 @@ import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import { Ico, Screen, Sheet, SheetHead, T, TAB_INSET, TopBar } from '../components/dark';
 import { supabase } from '../lib/supabase';
 import { dark as D, serif } from '../theme';
+import { loc, tr, trn } from '../lib/i18n';
 
 // 8c of "Barber App.dc.html" — the pattern behind the reasons. One cancellation
 // is a shrug; eleven of them with the same sentence in the free-text box is
@@ -27,7 +28,7 @@ export default function CancellationsScreen({ onBack }: { onBack?: () => void })
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.rpc('cancellation_stats');
-    if (error) return Alert.alert('Could not load cancellations', error.message);
+    if (error) return Alert.alert(tr('Could not load cancellations'), error.message);
     setSt(data as Stats);
   }, []);
   useEffect(() => { load(); }, [load]);
@@ -41,34 +42,34 @@ export default function CancellationsScreen({ onBack }: { onBack?: () => void })
   return (
     <>
       <Screen bottom={TAB_INSET}>
-        <TopBar title="Cancellations" onBack={onBack} plain />
+        <TopBar title={tr('Cancellations')} onBack={onBack} plain />
 
         <View>
-          <T w="b" size={10} c={D.sub} ls={1.6}>LAST 30 DAYS</T>
+          <T w="b" size={10} c={D.sub} ls={1.6}>{tr('LAST 30 DAYS')}</T>
           <T style={s.big}>{st?.cancelled ?? 0}</T>
           <T size={12} c={D.sub} style={s.mt6}>
-            of {st?.total ?? 0} bookings · {pct}% · {dh(st?.lost_cents ?? 0)} DH of chair time
+            {tr('of {total} bookings · {pct}% · {dh} DH of chair time', { total: st?.total ?? 0, pct, dh: dh(st?.lost_cents ?? 0) })}
           </T>
         </View>
 
         <View style={s.statRow}>
           <View style={s.stat}>
-            <T w="b" size={10} c={D.sub} ls={0.8}>REFILLED</T>
+            <T w="b" size={10} c={D.sub} ls={0.8}>{tr('REFILLED')}</T>
             <T w="b" size={21} style={s.num}>{st?.refilled ?? 0}</T>
           </View>
           <View style={s.stat}>
-            <T w="b" size={10} c={D.sub} ls={0.8}>LOST</T>
+            <T w="b" size={10} c={D.sub} ls={0.8}>{tr('LOST')}</T>
             <T w="b" size={21} c={D.red} style={s.num}>{lost}</T>
           </View>
           <View style={s.stat}>
-            <T w="b" size={10} c={D.sub} ls={0.8}>DEPOSITS KEPT</T>
+            <T w="b" size={10} c={D.sub} ls={0.8}>{tr('DEPOSITS KEPT')}</T>
             <T w="b" size={21} style={s.num}>
-              {dh(st?.deposits_kept_cents ?? 0)}<T size={11} c={D.sub}> DH</T>
+              {dh(st?.deposits_kept_cents ?? 0)}<T size={11} c={D.sub}>{' '}{tr('DH')}</T>
             </T>
           </View>
         </View>
 
-        <T w="b" size={11} c={D.sub} ls={1.65} style={s.mt2}>WHY THEY SAID</T>
+        <T w="b" size={11} c={D.sub} ls={1.65} style={s.mt2}>{tr('WHY THEY SAID')}</T>
         <View style={s.list9}>
           {(st?.reasons ?? []).map((r) => {
             const flag = r.reason === 'Other';
@@ -76,7 +77,7 @@ export default function CancellationsScreen({ onBack }: { onBack?: () => void })
               <View key={r.reason} style={[s.reason, flag && s.reasonFlag]}>
                 <T w="b" size={13} c={flag ? D.amber : D.text} style={s.count}>{r.n}</T>
                 <View style={s.grow}>
-                  <T w={flag ? 'b' : 'sb'} size={13}>{r.reason}</T>
+                  <T w={flag ? 'b' : 'sb'} size={13}>{tr(r.reason)}</T>
                   <View style={s.bar}>
                     <View style={[s.barFill, flag && s.barFillFlag,
                       { width: `${Math.round((r.n * 100) / top)}%` }]} />
@@ -86,7 +87,7 @@ export default function CancellationsScreen({ onBack }: { onBack?: () => void })
             );
           })}
           {(st?.reasons.length ?? 0) === 0 && (
-            <T size={13} c={D.sub}>Nobody has cancelled on you in 30 days.</T>
+            <T size={13} c={D.sub}>{tr('Nobody has cancelled on you in 30 days.')}</T>
           )}
         </View>
 
@@ -95,34 +96,32 @@ export default function CancellationsScreen({ onBack }: { onBack?: () => void })
           <View style={s.worth}>
             <View style={s.worthHead}>
               <Ico name="alert-triangle" size={15} color={D.amber} />
-              <T w="b" size={11} c={D.amber} ls={1.5}>WORTH A LOOK</T>
+              <T w="b" size={11} c={D.amber} ls={1.5}>{tr('WORTH A LOOK')}</T>
             </View>
             <T size={13} c={D.textDim} style={s.worthBody}>
-              {st!.written.length} of the {other} “Other” answer{other === 1 ? '' : 's'}
-              {st!.written.length === 1 ? ' is' : ' are'} written in full. They're the only place a
-              client tells you what actually went wrong.
+              {trn(st!.written.length, '{n} of the {other} “Other” answers is written in full. It is the only place a client tells you what actually went wrong.', '{n} of the {other} “Other” answers are written in full. They\'re the only place a client tells you what actually went wrong.', { other })}
             </T>
             <Pressable style={s.worthBtn} onPress={() => setReading(true)}>
               <T w="eb" size={12} c={D.bg} ls={0.6}>
-                READ {st!.written.length === 1 ? 'IT' : `THE ${st!.written.length}`}
+                {trn(st!.written.length, 'READ IT', 'READ THE {n}')}
               </T>
             </Pressable>
           </View>
         )}
 
         <T size={11} c={D.sub} style={s.foot}>
-          Reasons are optional and shown as written. You can't reply to one or dispute it.
+          {tr('Reasons are optional and shown as written. You can\'t reply to one or dispute it.')}
         </T>
       </Screen>
 
       <Sheet visible={reading} onClose={() => setReading(false)} deep>
-        <SheetHead title="What they wrote" onClose={() => setReading(false)} left />
+        <SheetHead title={tr('What they wrote')} onClose={() => setReading(false)} left />
         {(st?.written ?? []).map((w) => (
           <View key={w.id} style={s.wroteCard}>
             <View style={s.wroteHead}>
               <T w="b" size={12}>{w.who}</T>
               <T size={11} c={D.sub}>
-                {new Date(w.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                {new Date(w.at).toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' })}
                 {' · '}{new Date(w.at).toTimeString().slice(0, 5)}
               </T>
             </View>
@@ -130,7 +129,7 @@ export default function CancellationsScreen({ onBack }: { onBack?: () => void })
           </View>
         ))}
         <T size={11} c={D.sub} style={s.foot}>
-          Their words, unedited. Nothing you do here is shown to them.
+          {tr('Their words, unedited. Nothing you do here is shown to them.')}
         </T>
       </Sheet>
     </>

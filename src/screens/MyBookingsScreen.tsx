@@ -12,6 +12,7 @@ import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
 import { BookingDetailSheet } from './MyBookingScreen';
 import QueueScreen, { DayQueueRow, minutesUntil } from './QueueScreen';
+import { loc, tr, trn } from '../lib/i18n';
 
 // Turn 6 of "Customer App 1.dc.html" — the three tabs with per-state cards:
 // 6a upcoming (live queue hero + confirmed + pending), 6b completed
@@ -53,7 +54,7 @@ function shortId(id: string) {
 }
 function stamp(iso: string) {
   const d = new Date(iso);
-  return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+  return `${d.toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric', year: 'numeric' })}`
     + ` – ${d.toTimeString().slice(0, 5)}`;
 }
 
@@ -70,7 +71,7 @@ function AsksSection({ asks, onCancel }: { asks: Ask[]; onCancel: (id: string) =
   return (
     <View style={s.asksWrap}>
       <View style={s.asksHead}>
-        <Text style={s.asksTitle}>ASKS · {live} WAITING</Text>
+        <Text style={s.asksTitle}>{tr('ASKS · {live} WAITING', { live })}</Text>
       </View>
       {asks.map((a) => {
         const dead = a.status !== 'waiting';
@@ -83,22 +84,22 @@ function AsksSection({ asks, onCancel }: { asks: Ask[]; onCancel: (id: string) =
             </View>
             <View style={s.grow}>
               <Text style={[s.askDay, dead && s.askDayDead]}>
-                {d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                {d.toLocaleDateString(loc('en-US'), { weekday: 'short', month: 'short', day: 'numeric' })}
                 {' · '}
                 {a.earliest_min == null
-                  ? 'any time'
-                  : `after ${String(Math.floor(a.earliest_min / 60)).padStart(2, '0')}:00`}
+                  ? tr('any time')
+                  : tr('after {floor}:00', { floor: String(Math.floor(a.earliest_min / 60)).padStart(2, '0') })}
               </Text>
               <Text style={s.askMeta}>
                 {dead
-                  ? 'Nothing opened up · expired'
-                  : `${a.barber ? `${a.barber.split(' ')[0]} only` : `Any barber${a.salon ? ` · ${a.salon}` : ''}`}`
+                  ? tr('Nothing opened up · expired')
+                  : (a.barber ? tr('{name} only', { name: a.barber.split(' ')[0] }) : a.salon ? tr('Any barber · {salon}', { salon: a.salon }) : tr('Any barber'))
                     + (a.service ? ` · ${a.service}` : '')}
               </Text>
             </View>
             {!dead && (
               <Pressable onPress={() => onCancel(a.id)} hitSlop={8}>
-                <Text style={s.askCancel}>Cancel</Text>
+                <Text style={s.askCancel}>{tr('Cancel')}</Text>
               </Pressable>
             )}
           </View>
@@ -127,7 +128,7 @@ function ServiceList({ row }: { row: Row }) {
         return (
           <View key={it.service_id} style={s.svcRow}>
             <View style={s.svcNum}><Text style={s.svcNumText}>{i + 1}</Text></View>
-            <Text style={s.svcName} numberOfLines={1}>{it.services?.name ?? 'Service'}</Text>
+            <Text style={s.svcName} numberOfLines={1}>{it.services?.name ?? tr('Service')}</Text>
             <Text style={s.svcAt}>{start.toTimeString().slice(0, 5)}</Text>
           </View>
         );
@@ -136,7 +137,7 @@ function ServiceList({ row }: { row: Row }) {
   );
 }
 function firstName(n: string | null | undefined) {
-  return (n ?? 'the barber').split(' ')[0];
+  return (n ?? tr('the barber')).split(' ')[0];
 }
 function initialsOf(name: string) {
   return name.split(' ').filter(Boolean).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
@@ -222,7 +223,7 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
         .limit(50),
       supabase.from('reviews').select('booking_id, rating').eq('customer_id', customerId),
     ]);
-    if (bk.error) Alert.alert('Could not load bookings', bk.error.message);
+    if (bk.error) Alert.alert(tr('Could not load bookings'), bk.error.message);
     else setRows(bk.data as unknown as Row[]);
     if (rv.data) setRated(new Map(rv.data.map((r) => [r.booking_id, r.rating])));
     // 36c — asks live alongside bookings because that's where you look for
@@ -261,7 +262,7 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
 
   if (queueOpen?.barbers?.id) {
     return <QueueScreen barberId={queueOpen.barbers.id} myBookingId={queueOpen.id}
-      barberLine={`${firstName(queueOpen.barbers.profiles?.full_name)} · ${queueOpen.barbers.salon?.name ?? 'Salon'}`}
+      barberLine={`${firstName(queueOpen.barbers.profiles?.full_name)} · ${queueOpen.barbers.salon?.name ?? tr('Salon')}`}
       onBack={() => { setQueueOpen(null); openOverlay(false); }}
       onBookings={() => { setDetail({ id: queueOpen.id }); setQueueOpen(null); openOverlay(false); }} />;
   }
@@ -274,7 +275,7 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
 
   const awaitingReview = rows.filter((r) => isDone(r) && !rated.has(r.id)).length;
   const TAB_LABEL: Record<Filter, string> = {
-    upcoming: 'Upcoming', completed: 'Completed', cancelled: 'Cancelled',
+    upcoming: tr('Upcoming'), completed: tr('Completed'), cancelled: tr('Cancelled'),
   };
 
   const mine = queue?.find((q) => q.booking_id === ticketRow?.id) ?? null;
@@ -289,22 +290,22 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
       <View style={s.heroTop}>
         <View style={s.heroLive}>
           <View style={s.dot} />
-          <Text style={s.heroLiveText}>IN QUEUE NOW</Text>
+          <Text style={s.heroLiveText}>{tr('IN QUEUE NOW')}</Text>
         </View>
         <View style={s.heroTicket}>
-          <Text style={s.heroTicketText}>TICKET Nº {String(ticketNo).padStart(2, '0')}</Text>
+          <Text style={s.heroTicketText}>{tr('TICKET Nº {ticketNo}', { ticketNo: String(ticketNo).padStart(2, '0') })}</Text>
         </View>
       </View>
       <View style={s.heroMid}>
         <View>
-          <Text style={s.heroBig}>{mine.stage === 'in_chair' ? "You're up" : `${ahead} ahead`}</Text>
+          <Text style={s.heroBig}>{mine.stage === 'in_chair' ? tr('You\'re up') : tr('{ahead} ahead', { ahead })}</Text>
           <Text style={s.heroSub}>
-            {ticketRow.barbers?.salon?.name ?? 'Salon'} · with {firstName(ticketRow.barbers?.profiles?.full_name)}
+            {tr('{name} · with {full_name}', { name: ticketRow.barbers?.salon?.name ?? tr('Salon'), full_name: firstName(ticketRow.barbers?.profiles?.full_name) })}
           </Text>
         </View>
         <View style={s.right}>
-          <Text style={s.heroEta}>~{minutesUntil(mine.starts_at)} min</Text>
-          <Text style={s.heroEtaLabel}>EST. WAIT</Text>
+          <Text style={s.heroEta}>{tr('~{starts_at} min', { starts_at: minutesUntil(mine.starts_at) })}</Text>
+          <Text style={s.heroEtaLabel}>{tr('EST. WAIT')}</Text>
         </View>
       </View>
       <View style={s.heroBars}>
@@ -314,7 +315,7 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
       </View>
       <Pressable onPress={() => { setQueueOpen(ticketRow); openOverlay(true); }}
         style={({ pressed }) => [s.heroBtn, pressed && s.pressed]}>
-        <Text style={s.heroBtnText}>VIEW LIVE QUEUE</Text>
+        <Text style={s.heroBtnText}>{tr('VIEW LIVE QUEUE')}</Text>
       </Pressable>
     </View>
   ) : null;
@@ -323,7 +324,7 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
     <View style={s.reviewBanner}>
       <Ionicons name="star" size={16} color={colors.accent} />
       <Text style={s.reviewBannerText}>
-        {awaitingReview} visit{awaitingReview > 1 ? 's' : ''} waiting for your review
+        {trn(awaitingReview, '{n} visit waiting for your review', '{n} visits waiting for your review')}
       </Text>
     </View>
   ) : null;
@@ -333,8 +334,8 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
   const list = (
     <View style={s.screen}>
       {onBack
-        ? <ScreenHeader title="My bookings" onBack={onBack} />
-        : <Display size={24} style={s.title}>My bookings</Display>}
+        ? <ScreenHeader title={tr('My bookings')} onBack={onBack} />
+        : <Display size={24} style={s.title}>{tr('My bookings')}</Display>}
       <View style={s.tabsRow}>
         {(['upcoming', 'completed', 'cancelled'] as Filter[]).map((f) => (
           <Pressable key={f} onPress={() => setFilter(f)} style={s.tabBtn}
@@ -354,7 +355,7 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
         ListFooterComponent={filter === 'upcoming'
           ? <AsksSection asks={asks} onCancel={async (id) => {
             const { error } = await supabase.rpc('cancel_ask', { p_id: id });
-            if (error) return Alert.alert('Could not cancel that', error.message);
+            if (error) return Alert.alert(tr('Could not cancel that'), error.message);
             load();
           }} />
           : null}
@@ -363,9 +364,9 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
             <View style={s.emptyCircle}>
               <Ionicons name="calendar-outline" size={34} color={colors.textTertiary} />
             </View>
-            <Display size={19} style={s.emptyTitle}>No {filter} bookings</Display>
+            <Display size={19} style={s.emptyTitle}>{tr('No {filter} bookings', { filter })}</Display>
             <Text style={s.emptyText}>
-              When you book a chair, it shows up here with its ticket and receipt.
+              {tr('When you book a chair, it shows up here with its ticket and receipt.')}
             </Text>
           </View>
         }
@@ -433,24 +434,23 @@ function ConfirmedCard({ row, onOpen, onCancel, onReschedule }: {
   return (
     <Pressable onPress={onOpen} style={({ pressed }) => [s.card, pressed && s.pressed]}>
       <View style={s.chipRow}>
-        <Chip text="CONFIRMED" tone="ink" />
+        <Chip text={tr('CONFIRMED')} tone="ink" />
         {multi(row)
-          ? <Chip text={`${(row.bundle?.name ?? 'BUNDLE').toUpperCase()} · ${row.booking_services.length} SERVICES`} tone="accent" />
+          ? <Chip text={tr('{name} · {count} SERVICES', { name: (row.bundle?.name ?? tr('BUNDLE')).toUpperCase(), count: row.booking_services.length })} tone="accent" />
           : !!row.services?.name && <Chip text={row.services.name.toUpperCase()} tone="accent" />}
       </View>
       <View style={s.bodyRow}>
         <BookingPhoto barberId={row.barbers?.id} size={80} />
         <View style={s.grow}>
-          <Text style={s.salon} numberOfLines={1}>{row.barbers?.salon?.name ?? 'Salon'}</Text>
+          <Text style={s.salon} numberOfLines={1}>{row.barbers?.salon?.name ?? tr('Salon')}</Text>
           <View style={s.metaLine}>
             <Ionicons name="location-outline" size={12} color={colors.textSecondary} />
-            <Text style={s.meta} numberOfLines={1}>{row.barbers?.salon?.address ?? 'Tangier'}</Text>
+            <Text style={s.meta} numberOfLines={1}>{row.barbers?.salon?.address ?? tr('Tangier')}</Text>
           </View>
           <View style={s.metaLine}>
             <Ionicons name="time-outline" size={12} color={colors.textSecondary} />
             <Text style={s.meta}>
-              {minsOf(row)} Mins · with {firstName(row.barbers?.profiles?.full_name)}
-              {' '}· {dh(row.price_cents)} DH
+              {tr('{row} Mins · with {full_name} · {price_cents} DH', { row: minsOf(row), full_name: firstName(row.barbers?.profiles?.full_name), price_cents: dh(row.price_cents) })}
             </Text>
           </View>
         </View>
@@ -458,23 +458,23 @@ function ConfirmedCard({ row, onOpen, onCancel, onReschedule }: {
       <ServiceList row={row} />
       <View style={s.idRow}>
         <View>
-          <Text style={s.idLabel}>BOOKING ID</Text>
+          <Text style={s.idLabel}>{tr('BOOKING ID')}</Text>
           <Text style={s.idValue}>{shortId(row.id)}</Text>
         </View>
         {row.deposit_cents > 0 && (
           <View style={s.right}>
-            <Text style={s.idLabel}>DEPOSIT PAID</Text>
-            <Text style={s.idValue}>{dh(row.deposit_cents)} DH / {dh(row.price_cents)} DH</Text>
+            <Text style={s.idLabel}>{tr('DEPOSIT PAID')}</Text>
+            <Text style={s.idValue}>{tr('{deposit_cents} DH / {price_cents} DH', { deposit_cents: dh(row.deposit_cents), price_cents: dh(row.price_cents) })}</Text>
           </View>
         )}
         <View style={s.right}>
-          <Text style={s.idLabel}>DATE & TIME</Text>
+          <Text style={s.idLabel}>{tr('DATE & TIME')}</Text>
           <Text style={s.idValue}>{stamp(row.starts_at)}</Text>
         </View>
       </View>
       <View style={s.btnRow}>
-        <Btn title="CANCEL" onPress={onCancel} />
-        <Btn title="RESCHEDULE" dark onPress={onReschedule} />
+        <Btn title={tr('CANCEL')} onPress={onCancel} />
+        <Btn title={tr('RESCHEDULE')} dark onPress={onReschedule} />
       </View>
       {/* 34e — a long sitting can't be moved into any old gap; say so before
           they tap Reschedule and find three-quarters of the day refuses.
@@ -486,9 +486,9 @@ function ConfirmedCard({ row, onOpen, onCancel, onReschedule }: {
             <Ionicons name="alert-circle-outline" size={15} color={colors.star} />
           </View>
           <View style={s.grow}>
-            <Text style={s.hardTitle}>Rescheduling is harder</Text>
+            <Text style={s.hardTitle}>{tr('Rescheduling is harder')}</Text>
             <Text style={s.hardBody}>
-              Moving this needs another {Math.ceil(minsOf(row) / 30)}-slot gap in one run.
+              {tr('Moving this needs another {ceil}-slot gap in one run.', { ceil: Math.ceil(minsOf(row) / 30) })}
             </Text>
           </View>
         </View>
@@ -501,18 +501,17 @@ function PendingCard({ row, onOpen }: { row: Row; onOpen: () => void }) {
   return (
     <Pressable onPress={onOpen} style={({ pressed }) => [s.card, pressed && s.pressed]}>
       <View style={s.chipRow}>
-        <Chip text="WAITING FOR BARBER" tone="muted" />
+        <Chip text={tr('WAITING FOR BARBER')} tone="muted" />
         {!!row.services?.name && <Chip text={row.services.name.toUpperCase()} tone="accent" />}
       </View>
       <View style={s.bodyRow}>
         <BookingPhoto barberId={row.barbers?.id} size={64} />
         <View style={s.grow}>
-          <Text style={s.salonSm} numberOfLines={1}>{row.barbers?.salon?.name ?? 'Salon'}</Text>
+          <Text style={s.salonSm} numberOfLines={1}>{row.barbers?.salon?.name ?? tr('Salon')}</Text>
           <View style={s.metaLine}>
             <Ionicons name="time-outline" size={12} color={colors.textSecondary} />
             <Text style={s.meta}>
-              {row.services?.duration_min ?? 0} Mins · with {firstName(row.barbers?.profiles?.full_name)}
-              {' '}· {dh(row.price_cents)} DH
+              {tr('{duration_min} Mins · with {full_name} · {price_cents} DH', { duration_min: row.services?.duration_min ?? 0, full_name: firstName(row.barbers?.profiles?.full_name), price_cents: dh(row.price_cents) })}
             </Text>
           </View>
         </View>
@@ -529,34 +528,34 @@ function CompletedCard({ row, rating, onReceipt, onRate, onRebook }: {
   return (
     <View style={s.card}>
       <View style={s.chipRow}>
-        <Chip text="COMPLETED" tone="ink" />
+        <Chip text={tr('COMPLETED')} tone="ink" />
         {!!row.services?.name && <Chip text={row.services.name.toUpperCase()} tone="accent" />}
       </View>
       <View style={s.bodyRow}>
         <BookingPhoto barberId={row.barbers?.id} size={80} />
         <View style={s.grow}>
-          <Text style={s.salon} numberOfLines={1}>{row.barbers?.salon?.name ?? 'Salon'}</Text>
+          <Text style={s.salon} numberOfLines={1}>{row.barbers?.salon?.name ?? tr('Salon')}</Text>
           <View style={s.metaLine}>
             <Ionicons name="time-outline" size={12} color={colors.textSecondary} />
             <Text style={s.meta}>
-              {row.services?.duration_min ?? 0} Mins · with {firstName(row.barbers?.profiles?.full_name)}
+              {tr('{duration_min} Mins · with {full_name}', { duration_min: row.services?.duration_min ?? 0, full_name: firstName(row.barbers?.profiles?.full_name) })}
             </Text>
           </View>
           <Text style={s.meta}>
-            {stamp(row.starts_at)} · <Text style={s.paid}>{dh(row.price_cents)} DH paid</Text>
+            {stamp(row.starts_at)} · <Text style={s.paid}>{tr('{price_cents} DH paid', { price_cents: dh(row.price_cents) })}</Text>
           </Text>
           {rating != null && (
             <Text style={s.meta}>
-              <Text style={s.stars}>{'★'.repeat(rating)}{'☆'.repeat(5 - rating)}</Text> You rated {rating}
+              <Text style={s.stars}>{'★'.repeat(rating)}{'☆'.repeat(5 - rating)}</Text> {tr('You rated {rating}', { rating })}
             </Text>
           )}
         </View>
       </View>
       <View style={[s.btnRow, s.btnRowTop]}>
-        <Btn title="RECEIPT" onPress={onReceipt} />
+        <Btn title={tr('RECEIPT')} onPress={onReceipt} />
         {rating == null
-          ? <Btn title="RATE VISIT" accent icon="star" onPress={onRate} />
-          : <Btn title="BOOK AGAIN" dark onPress={() => onRebook?.()} />}
+          ? <Btn title={tr('RATE VISIT')} accent icon="star" onPress={onRate} />
+          : <Btn title={tr('BOOK AGAIN')} dark onPress={() => onRebook?.()} />}
       </View>
     </View>
   );
@@ -572,17 +571,17 @@ function CancelledCard({ row, customerId, onRebook, onReport }: {
   return (
     <View style={s.card}>
       <View style={s.chipRow}>
-        <Chip text={noShow ? 'NO-SHOW' : byBarber ? 'CANCELLED BY BARBER' : 'YOU CANCELLED'}
+        <Chip text={noShow ? tr('NO-SHOW') : byBarber ? tr('CANCELLED BY BARBER') : tr('YOU CANCELLED')}
           tone={noShow ? 'review' : byBarber ? 'red' : 'muted'} />
       </View>
       <View style={s.bodyRow}>
         <BookingPhoto barberId={row.barbers?.id} size={80} dim />
         <View style={s.grow}>
-          <Text style={s.salonOff} numberOfLines={1}>{row.barbers?.salon?.name ?? 'Salon'}</Text>
+          <Text style={s.salonOff} numberOfLines={1}>{row.barbers?.salon?.name ?? tr('Salon')}</Text>
           <Text style={s.meta}>
-            {row.services?.name ?? 'Service'} · with {firstName(row.barbers?.profiles?.full_name)}
+            {tr('{name} · with {full_name}', { name: row.services?.name ?? tr('Service'), full_name: firstName(row.barbers?.profiles?.full_name) })}
           </Text>
-          <Text style={[s.meta, s.struck]}>{stamp(row.starts_at)} · {dh(row.price_cents)} DH</Text>
+          <Text style={[s.meta, s.struck]}>{tr('{starts_at} · {price_cents} DH', { starts_at: stamp(row.starts_at), price_cents: dh(row.price_cents) })}</Text>
         </View>
       </View>
 
@@ -591,8 +590,7 @@ function CancelledCard({ row, customerId, onRebook, onReport }: {
           <Ionicons name="alert-circle-outline" size={14} color={colors.textSecondary}
             style={s.reasonIcon} />
           <Text style={s.reasonText}>
-            {firstName(row.barbers?.profiles?.full_name)} marked this a no-show — the chair was held and
-            nobody came. If that isn't right, tell us and we'll ask him.
+            {tr('{full_name} marked this a no-show — the chair was held and nobody came. If that isn\'t right, tell us and we\'ll ask him.', { full_name: firstName(row.barbers?.profiles?.full_name) })}
           </Text>
         </View>
       )}
@@ -602,7 +600,7 @@ function CancelledCard({ row, customerId, onRebook, onReport }: {
           <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary}
             style={s.reasonIcon} />
           <Text style={s.reasonText}>
-            {firstName(row.barbers?.profiles?.full_name)} cancelled — {row.cancel_reason}
+            {tr('{full_name} cancelled — {cancel_reason}', { full_name: firstName(row.barbers?.profiles?.full_name), cancel_reason: row.cancel_reason })}
           </Text>
         </View>
       )}
@@ -610,27 +608,27 @@ function CancelledCard({ row, customerId, onRebook, onReport }: {
       {dep > 0 && (noShow ? (
         <View style={s.keptBox}>
           <Ionicons name="lock-closed-outline" size={14} color={colors.textSecondary} />
-          <Text style={s.keptText}>Deposit kept by the shop</Text>
-          <Text style={s.keptAmount}>{dh(dep)} DH</Text>
+          <Text style={s.keptText}>{tr('Deposit kept by the shop')}</Text>
+          <Text style={s.keptAmount}>{tr('{dep} DH', { dep: dh(dep) })}</Text>
         </View>
       ) : byBarber ? (
         <View style={s.refundBox}>
           <Ionicons name="checkmark" size={14} color="#16A34A" />
-          <Text style={s.refundText}>Deposit refunded to your wallet</Text>
-          <Text style={s.refundAmount}>+{dh(dep)} DH</Text>
+          <Text style={s.refundText}>{tr('Deposit refunded to your wallet')}</Text>
+          <Text style={s.refundAmount}>{tr('+{dep} DH', { dep: dh(dep) })}</Text>
         </View>
       ) : (
         <View style={s.keptBox}>
           <Ionicons name="lock-closed-outline" size={14} color={colors.textSecondary} />
-          <Text style={s.keptText}>Deposit not refunded — you cancelled</Text>
-          <Text style={s.keptAmount}>{dh(dep)} DH</Text>
+          <Text style={s.keptText}>{tr('Deposit not refunded — you cancelled')}</Text>
+          <Text style={s.keptAmount}>{tr('{dep} DH', { dep: dh(dep) })}</Text>
         </View>
       ))}
 
       <View style={s.btnRow}>
-        {noShow && <Btn title="THIS IS WRONG" onPress={() => onReport?.()} />}
-        {byBarber && <Btn title="FIND ANOTHER" onPress={() => onRebook?.()} />}
-        <Btn title="REBOOK" dark onPress={() => onRebook?.()} />
+        {noShow && <Btn title={tr('THIS IS WRONG')} onPress={() => onReport?.()} />}
+        {byBarber && <Btn title={tr('FIND ANOTHER')} onPress={() => onRebook?.()} />}
+        <Btn title={tr('REBOOK')} dark onPress={() => onRebook?.()} />
       </View>
     </View>
   );
@@ -643,20 +641,20 @@ function Receipt({ booking, onBack, onRate, onRebook }: {
   const d = new Date(booking.starts_at);
   const dep = booking.deposit_cents;
   const lines: [string, string][] = [
-    ['Booking ID', shortId(booking.id)],
-    ['Salon', booking.barbers?.salon?.name ?? '—'],
-    ['Barber', booking.barbers?.profiles?.full_name ?? '—'],
-    ['Service', booking.services?.name ?? '—'],
-    ['Date', d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })],
-    ['Time', d.toTimeString().slice(0, 5)],
-    ['Duration', `${booking.services?.duration_min ?? 0} min`],
+    [tr('Booking ID'), shortId(booking.id)],
+    [tr('Salon'), booking.barbers?.salon?.name ?? '—'],
+    [tr('Barber'), booking.barbers?.profiles?.full_name ?? '—'],
+    [tr('Service'), booking.services?.name ?? '—'],
+    [tr('Date'), d.toLocaleDateString(loc('en-US'), { month: 'long', day: 'numeric', year: 'numeric' })],
+    [tr('Time'), d.toTimeString().slice(0, 5)],
+    [tr('Duration'), tr('{m} min', { m: booking.services?.duration_min ?? 0 })],
   ];
   return (
     <ScrollView style={s.screen} contentContainerStyle={s.receiptContent}>
-      <ScreenHeader title="Receipt" onBack={onBack} />
+      <ScreenHeader title={tr('Receipt')} onBack={onBack} />
       <View style={s.receiptCard}>
         <Ionicons name="checkmark-circle" size={48} color={colors.accent} style={s.receiptIcon} />
-        <Text style={s.receiptTitle}>Booking {booking.status}</Text>
+        <Text style={s.receiptTitle}>{tr('Booking {status}', { status: booking.status })}</Text>
         {/* ponytail: no QR — barbers have no scanner; add when a check-in flow exists */}
         {lines.map(([k, v]) => (
           <View key={k} style={s.receiptRow}>
@@ -667,34 +665,34 @@ function Receipt({ booking, onBack, onRate, onRebook }: {
         <View style={s.receiptDivider} />
         {dep > 0 && (
           <View style={s.receiptRow}>
-            <Text style={s.receiptKey}>Deposit paid from wallet</Text>
-            <Text style={s.receiptVal}>{dh(dep)} DH</Text>
+            <Text style={s.receiptKey}>{tr('Deposit paid from wallet')}</Text>
+            <Text style={s.receiptVal}>{tr('{dep} DH', { dep: dh(dep) })}</Text>
           </View>
         )}
         <View style={s.receiptRow}>
           {/* the visit already happened - 'due' would read like a bill */}
-          <Text style={s.receiptTotalKey}>Paid at the shop</Text>
-          <Text style={s.receiptTotalVal}>{dh(booking.price_cents - dep)} DH</Text>
+          <Text style={s.receiptTotalKey}>{tr('Paid at the shop')}</Text>
+          <Text style={s.receiptTotalVal}>{tr('{dh} DH', { dh: dh(booking.price_cents - dep) })}</Text>
         </View>
       </View>
 
       {/* ponytail: no QR - barbers have no scanner. Say so, or he hunts for it. */}
       <Text style={s.receiptNote}>
-        No code to scan — barbers have no scanner. This is your copy of what happened, nothing you
-        have to show anyone.
+        {tr('No code to scan — barbers have no scanner. This is your copy of what happened, nothing you have to show anyone.')}
       </Text>
 
       <View style={s.btnRow}>
-        <Btn title="RATE VISIT" onPress={() => onRate?.()} />
-        <Btn title="BOOK AGAIN" dark onPress={() => onRebook?.()} />
+        <Btn title={tr('RATE VISIT')} onPress={() => onRate?.()} />
+        <Btn title={tr('BOOK AGAIN')} dark onPress={() => onRebook?.()} />
       </View>
     </ScrollView>
   );
 }
 
 // ---- 5a · review as a sheet ----------------------------------------------
-const RATING_WORD = ['', 'Poor', 'Okay', 'Good', 'Very good', 'Excellent'];
-const REVIEW_TAGS = ['Clean fade', 'On time', 'Friendly', 'Great value', 'Clean shop'];
+const RATING_WORD = ['', tr('Poor'), tr('Okay'), tr('Good'), tr('Very good'), tr('Excellent')];
+// the tags fold into the review's own words, so they are written in the reviewer's language
+const REVIEW_TAGS = [tr('Clean fade'), tr('On time'), tr('Friendly'), tr('Great value'), tr('Clean shop')];
 
 function ReviewSheet({ booking, onClose, onDone }: {
   booking: Row | null; onClose: () => void; onDone: () => void;
@@ -714,14 +712,14 @@ function ReviewSheet({ booking, onClose, onDone }: {
   const d = new Date(booking.starts_at);
 
   async function submit() {
-    if (rating === 0) return Alert.alert('Pick a rating', 'Tap the stars first.');
+    if (rating === 0) return Alert.alert(tr('Pick a rating'), tr('Tap the stars first.'));
     setBusy(true);
     // ponytail: tags fold into the comment — no tags column until reviews need filtering by tag
     const body = [[...tags].join(' · '), comment.trim()].filter(Boolean).join(' — ');
     const { error } = await supabase.from('reviews')
       .insert({ booking_id: booking!.id, rating, comment: body || null });
     setBusy(false);
-    if (error) return Alert.alert('Could not submit', error.message);
+    if (error) return Alert.alert(tr('Could not submit'), error.message);
     setSent(true);
   }
 
@@ -731,10 +729,9 @@ function ReviewSheet({ booking, onClose, onDone }: {
       <Modal visible transparent={false} animationType="fade" onRequestClose={onDone}>
         <View style={[s.screen, s.sentScreen]}>
           <View style={s.sentBadge}><Ionicons name="star" size={30} color={colors.accent} /></View>
-          <Display size={28}>Shukran!</Display>
+          <Display size={28}>{tr('Shukran!')}</Display>
           <Text style={s.sentSub}>
-            Your {rating}-star review for {firstName(name)} is live. Reviews help the best barbers in
-            Tangier get found.
+            {tr('Your {rating}-star review for {name} is live. Reviews help the best barbers in Tangier get found.', { rating, name: firstName(name) })}
           </Text>
           <View style={s.sentCard}>
             <View style={s.avatar}><Text style={s.avatarText}>{initialsOf(name)}</Text></View>
@@ -747,7 +744,7 @@ function ReviewSheet({ booking, onClose, onDone }: {
             </View>
           </View>
           <Pressable onPress={onDone} style={({ pressed }) => [s.submitBtn, pressed && s.pressed]}>
-            <Text style={s.submitText}>DONE</Text>
+            <Text style={s.submitText}>{tr('DONE')}</Text>
           </Pressable>
         </View>
       </Modal>
@@ -760,8 +757,8 @@ function ReviewSheet({ booking, onClose, onDone }: {
       <View style={s.reviewSheet}>
         <View style={s.grabber} />
         <View style={s.reviewHead}>
-          <Text style={s.skip} onPress={onClose}>Skip</Text>
-          <Display size={18} style={s.reviewTitle}>Leave a review</Display>
+          <Text style={s.skip} onPress={onClose}>{tr('Skip')}</Text>
+          <Display size={18} style={s.reviewTitle}>{tr('Leave a review')}</Display>
           <Pressable onPress={onClose} hitSlop={8} style={s.reviewClose}>
             <Ionicons name="close" size={16} color={colors.text} />
           </Pressable>
@@ -772,18 +769,16 @@ function ReviewSheet({ booking, onClose, onDone }: {
           <View style={s.grow}>
             <Text style={s.reviewName}>{name}</Text>
             <Text style={s.meta} numberOfLines={1}>
-              {booking.services?.name ?? 'Service'} ·{' '}
-              {d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ·{' '}
-              {dh(booking.price_cents)} DH
+              {tr('{name} · {toLocaleDateString} · {price_cents} DH', { name: booking.services?.name ?? tr('Service'), toLocaleDateString: d.toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' }), price_cents: dh(booking.price_cents) })}
             </Text>
           </View>
         </View>
 
-        <Text style={s.tapHint}>Tap a star to rate {firstName(name)}</Text>
+        <Text style={s.tapHint}>{tr('Tap a star to rate {name}', { name: firstName(name) })}</Text>
         <View style={s.starsRow}>
           {[1, 2, 3, 4, 5].map((n) => (
             <Pressable key={n} onPress={() => setRating(n)} hitSlop={6}
-              accessibilityLabel={`${n} star${n > 1 ? 's' : ''}`}>
+              accessibilityLabel={trn(n, '{n} star', '{n} stars')}>
               <Ionicons name={n <= rating ? 'star' : 'star-outline'} size={38}
                 color={n <= rating ? colors.text : '#C9C5BB'} />
             </Pressable>
@@ -806,12 +801,12 @@ function ReviewSheet({ booking, onClose, onDone }: {
           })}
         </View>
 
-        <Field placeholder="Anything to add? (optional)" multiline value={comment}
+        <Field placeholder={tr('Anything to add? (optional)')} multiline value={comment}
           onChangeText={setComment} style={s.commentField} />
 
         <Pressable onPress={submit} disabled={busy}
           style={({ pressed }) => [s.submitBtn, (pressed || busy) && s.pressed]}>
-          <Text style={s.submitText}>SUBMIT REVIEW</Text>
+          <Text style={s.submitText}>{tr('SUBMIT REVIEW')}</Text>
         </Pressable>
       </View>
     </Modal>

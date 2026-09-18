@@ -1204,14 +1204,17 @@ Still open:
 **Darija/Arabic + French UI, WhatsApp-first sharing.** Cheap for us, and the
 difference between "an app" and "our app". Booksy will never do this well.
 **Trigger:** before any paid client acquisition.
+*BET PULLED 2026-09-18 — the app speaks French and Arabic, both sides, with RTL.
+See "French and Arabic, both sides of the app" at the end. Darija, the web queue page
+and everything the server writes are still English.*
 
 ## Profile menu rows  → `src/screens/ProfileScreen.tsx` (customer)
 - **Payment Methods** — needs a payment rail (no Stripe in Morocco; pay at shop
   for now). **My Wallet** is real since 0022 (cash top-ups at the salon); card
   top-ups + spending the balance still need the rail.
 - **My Coupons** — needs the same `promotions`/coupons table as Explore badges.
-- **Settings** — placeholder. Likely: notification prefs (push), password change
-  (`supabase.auth.updateUser`), language (ar/fr/en).
+- **Settings** — language is real now: 20b drives the app (2026-09-18). Notification
+  prefs (push) and password change (`supabase.auth.updateUser`) are still placeholders.
 - **Help Center** — placeholder. Static FAQ + contact links (WhatsApp/phone).
 
 ## SMS rail — BLOCKED, needed by admin turn 11 (0072)
@@ -2719,9 +2722,9 @@ Not built, because nothing true can be said yet:
   written (QL-18's own default). The barber sees it on the row.
 - **French and Arabic** for every page string and both new texts; RTL (A8).
 Still open:
-- **0118 is NOT APPLIED.** Apply it together with deploying `web/`: it drops the
-  functions the old page calls. The app changes need a new build (expo-application,
-  the extra intent filter).
+- ~~**0118 is NOT APPLIED**~~ — applied 2026-09-17, with 0119 … 0121. It drops the
+  functions the old page calls, so `web/` must be deployed if it is not already. The app
+  changes need a new build (expo-application, the extra intent filter).
 - **QL-23 is switched off until texts send.** With no SMS account a web name could
   never be confirmed while the page says "we just texted you", so the page offers
   no remote form unless the host sets `SMS_SENDS=1`. **Trigger:** the SMS rail.
@@ -2795,8 +2798,8 @@ Not built, because nothing true can be said yet:
   row's wait is still its own start time, as before.
 - **Arabic, French, RTL** for every new string.
 Still open:
-- **0119 is NOT APPLIED.** Apply 0118 and 0119 together, then deploy `web/`; the app
-  needs a build. No database here, so neither migration has run anywhere yet.
+- ~~**0119 is NOT APPLIED**~~ — applied 2026-09-17. Deploy `web/` if not done; the app
+  needs a build.
 - ~~**The owner dashboard (OSH-02) under-counts**~~ — fixed in **0120** (2026-09-17), which
   does not need 0118/0119. The owner screens read bookings straight from the table,
   and bookings' only read policy (0001) shows a barber his own — so the dashboard,
@@ -2848,5 +2851,99 @@ Not built, or said differently:
   does not (a called booking there reads HERE). **Trigger:** barbers confused by the two.
 - **Arabic, French, RTL** for every new string.
 Still open:
-- **0121 is NOT APPLIED.** It stands alone, but Home already needs 0118 and 0119 (dropped
-  men, `joined_line`, `queue_take_off`). Apply 0118 → 0121 in order; the app needs a build.
+- ~~**0121 is NOT APPLIED**~~ — applied 2026-09-17, with 0118 … 0120. The app needs a build
+  for B11 to show.
+- **EAS build settings were pointing at the wrong database** (found 2026-09-17, fixed). All
+  three environments had `EXPO_PUBLIC_SUPABASE_URL` = sbjwoagtfecqzkdwkkhy, while the app,
+  `.env` and `admin/config.js` use **seheucmfrsbbwtrbcfpx** (where 0118–0121 were applied);
+  and the key was stored as `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, a name the app never
+  reads (`src/lib/supabase.ts` reads `EXPO_PUBLIC_SUPABASE_ANON_KEY`). The URL variable is
+  one variable shared by all three environments; it now points at seheucmfrsbbwtrbcfpx, and
+  `EXPO_PUBLIC_SUPABASE_ANON_KEY` was added to all three. The old PUBLISHABLE_KEY variable
+  is left in place and unused — delete it once nobody needs sbjwoagtfecqzkdwkkhy.
+- **Android preview build** queued 2026-09-17 with B11 in it:
+  https://expo.dev/accounts/adeeel/projects/brber/builds/d4fae933-a0b0-470a-8206-e5519f3ca090
+  **iPhone preview build** queued the same day (ad hoc — installs only on the one registered
+  iPhone, UDID 00008110-000E6C693698401E; each barber iPhone needs eas device:create and a
+  rebuild): https://expo.dev/accounts/adeeel/projects/brber/builds/b2755c83-810d-494b-89ac-aee54c150015
+  Results: **Android finished** — APK
+  https://expo.dev/artifacts/eas/BEkXYge-CCc42MzlQIqi2DdkZAi89V5xdiP1_8fI6Ds.apk (code as uploaded
+  18:17, before the i18n `tr()` edits). **iPhone failed:** the ad hoc provisioning profile
+  (made 2026-09-06) lacks the Associated Domains capability that app.config.js's
+  `applinks:` needs. Fix needs the owner's Apple login: run `npx eas-cli build --platform ios
+  --profile preview` interactively and let EAS sync capabilities and regenerate the profile.
+  `web/` is still not deployed (owner, 2026-09-17: not now) — the old queue page is
+  broken until it is, because 0118 dropped the functions it calls.
+
+## French and Arabic, both sides of the app (2026-09-18)
+The owner asked for it, which pulls the **Localisation** bet above ("before any paid
+client acquisition"). Every sentence the app puts on a screen — customer, barber,
+owner and agent — now exists in French and Arabic, and Arabic flips the layout.
+
+**The English sentence is the key.** `tr('Pay at the shop')` reads like the screen it
+draws, and a sentence nobody has translated yet still shows — in English — instead of
+`booking.pay.hint`. `src/lib/i18n.dict.ts` maps each English sentence to `[French,
+Arabic]`; 3,461 of them. `npm run i18n` is the only place a gap is visible: it walks
+the source, collects every `tr()`, `trn()`, `trRich()` and `en()`, and refuses when one
+has no translation or when the `{placeholders}` and `<tags>` do not match the English.
+`npm run check` now also runs `i18n.check.ts`, which asks the real thing for a French
+and an Arabic sentence.
+
+**Why `tr`, not `t`:** `t` is already a timer, a thread and a tag in half the screens.
+
+**Counts are `trn(n, one, other)`**, not `'s'` glued on the end: French makes 0 and 1
+singular, Arabic has one / two / few (3–10, and 0) / many. A sentence with a bold or
+tappable piece inside is `trRich('… <b>{amount}</b> …')`, translated whole, so the
+piece can move — the alternative was translating half-sentences that no language can
+reassemble.
+
+**English kept as data.** A cancel reason, a rating tag, a queue verb (`CALL HIM`) is
+stored and compared in English and translated only where it shows: `tr(reason)`. The
+18 such call sites are listed in `.i18ncheck.cjs` (`DATA_KEYS`) so the check still
+holds their translations.
+
+**Which language, and RTL.** The pick is saved on the phone (`lib/language.ts`, before
+any screen loads, so a `tr()` at module scope already speaks it), and `profiles.language`
+is written too, for whatever sends texts later. The phone's pick wins over the column,
+because the column defaults to `'fr'` (0039) and cannot tell a choice from a default —
+a new English signup would otherwise flip to French. No pick yet: the phone's own
+language if the app speaks it, else French. Arabic sets `I18nManager.forceRTL` and
+**reloads the app** (`reloadAppAsync`, from `expo` — no new dependency); that is the
+only way React Native changes direction. The reload is why the language sits behind a
+"the app restarts to switch" line in both pickers. Layout, `left`/`right` and text
+alignment flip themselves; three things do not, and are patched centrally in
+`lib/language.ts`: back/forward glyphs (Ionicons and Feather), and the design's
+tracked-out capitals, which put a gap between every letter of an Arabic word
+(`letterSpacing` is dropped in RTL).
+
+**The barber had no language picker at all** — his Settings row is still a placeholder
+(`soon('Settings')`), so Language sits in the Profile menu itself. The customer's 20b
+picker existed and did nothing; it now drops Darija and Spanish, which the app does not
+speak, and drives the real thing.
+
+**Also fixed on the way:** `CalendarScreen.tsx` had UTF-8 read as Latin-1 committed into
+it — `Â·`, `â€“`, `â†'` — showing as junk to every user on those rows.
+
+Not built, because nothing true can be said yet:
+- **Darija.** 20b offered it; the app does not speak it. MSA reads correctly to a
+  Moroccan and Darija is not the builder's to invent. **Trigger:** a Darija speaker to
+  write it — the dictionary takes a third column without touching a screen.
+- **Anything the server writes stays English:** push titles and bodies (0104),
+  `sms_outbox` texts, notification rows, RPC error messages shown in an Alert, and the
+  chat line `cancel_booking` composes from a reason. A Moroccan customer with the app
+  in Arabic still gets an English push. **Trigger:** the SMS account — the same rail
+  that blocks the four texts — plus a `language` read in those functions.
+- **The queue page (`web/src/copy.js`) is still English only**, and the printed poster
+  is trilingual by design. The page has no way to ask for a language yet.
+- **RTL still has no design (A8).** What ships is the mechanical flip, not a drawn
+  right-to-left layout: the Playfair display face has no Arabic glyphs and falls back to
+  the system face, and nobody has looked at a dark barber screen in Arabic on a real
+  phone. **Trigger:** the first Arabic user, or the design.
+Still open:
+- **Both language pickers need a build to work.** `expo-sqlite/kv-store` and
+  `reloadAppAsync` are already in the app, but `app.json` now declares
+  `CFBundleLocalizations: ["en", "fr", "ar"]` so iOS reports the phone's real language
+  instead of always `en`. Until a new build, a fresh install can only fall back to French.
+- **Nobody has read the Arabic on a screen.** It is grammatical MSA with Western digits
+  and prices left in DH ("Numbers stay LTR inside Arabic lines", slice 1's rule), but
+  line lengths in the dark kit's tight rows are unproven.

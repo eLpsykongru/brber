@@ -42,6 +42,7 @@ import HeldBackScreen, { Held, loadHeld } from './HeldBackScreen';
 import RescheduleAskScreen from './RescheduleAskScreen';
 import OfferDayScreen, { OfferFor } from './OfferDayScreen';
 import { countWord } from '../lib/inboxRules';
+import { loc, tr } from '../lib/i18n';
 
 // ADDENDUM-app-first, turn B11: Home is THE CHAIR (BTD-20). NEXT UP and the live queue
 // were the same list shown twice with two sets of verbs; now bookings and walk-ins are
@@ -92,7 +93,7 @@ const isoDay = (d: Date) =>
 const HELD_SEEN_KEY = 'held_seen_cut';
 
 const nameOf = (b: BookingRow, barberId: string) =>
-  b.walk_in_name ?? (b.customer_id === barberId ? 'Walk-in' : b.customer?.full_name ?? 'Client');
+  b.walk_in_name ?? (b.customer_id === barberId ? tr('Walk-in') : b.customer?.full_name ?? tr('Client'));
 const initialsOf = (name: string) =>
   name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
@@ -182,7 +183,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
       supabase.from('barbers').select('accepting_bookings').eq('id', barberId).single(),
       supabase.rpc('barber_guests_today'),
     ]);
-    if (book.error) { if (!quiet) Alert.alert('Could not load bookings', book.error.message); }
+    if (book.error) { if (!quiet) Alert.alert(tr('Could not load bookings'), book.error.message); }
     else setBookings(book.data as unknown as BookingRow[]);
     if (me.data) setLineOpen(me.data.accepting_bookings);
     const byBooking: Record<string, Guest> = {};
@@ -235,18 +236,18 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
 
   async function accept(b: BookingRow) {
     const { error } = await supabase.rpc('accept_booking', { p_booking: b.id });
-    if (error) Alert.alert('Could not accept', error.message);
+    if (error) Alert.alert(tr('Could not accept'), error.message);
     load();
   }
 
   function decline(b: BookingRow) {
-    Alert.alert('Decline this request?', `${nameOf(b, barberId)} · ${hhmm(b.starts_at)}`, [
-      { text: 'Keep', style: 'cancel' },
+    Alert.alert(tr('Decline this request?'), `${nameOf(b, barberId)} · ${hhmm(b.starts_at)}`, [
+      { text: tr('Keep'), style: 'cancel' },
       {
-        text: 'Decline', style: 'destructive',
+        text: tr('Decline'), style: 'destructive',
         onPress: async () => {
           const { error } = await supabase.rpc('cancel_booking', { p_booking: b.id });
-          if (error) Alert.alert('Could not decline', error.message);
+          if (error) Alert.alert(tr('Could not decline'), error.message);
           load();
         },
       },
@@ -262,9 +263,9 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   const panelOf = (b: BookingRow): PanelBooking => ({
     id: b.id, customerId: b.customer_id, name: nameOf(b, barberId),
     initials: initialsOf(nameOf(b, barberId)),
-    service: b.services?.name ?? 'Service',
+    service: b.services?.name ?? tr('Service'),
     durationMin: Math.round((new Date(b.ends_at).getTime() - new Date(b.starts_at).getTime()) / 60_000),
-    whenLabel: new Date(b.starts_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
+    whenLabel: new Date(b.starts_at).toLocaleDateString(loc('en-US'), { weekday: 'short', month: 'short', day: 'numeric' }),
     timeLabel: hhmm(b.starts_at),
     priceCents: b.price_cents,
     depositCents: b.deposit_cents ?? 0,
@@ -305,13 +306,13 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     if (!anyway && unconfirmed(b)) return setFrontAsk(b.id);
     // only a man called up from somewhere else is told; a walk-in is standing there
     const error = await checkIn(b.id, isLinePlace(b, barberId) && b.customer_id !== barberId);
-    if (error) Alert.alert('Could not call', error);
+    if (error) Alert.alert(tr('Could not call'), error);
     loadLine();
   }
 
   async function seat(b: BookingRow) {
     const { error } = await supabase.rpc('advance_booking', { p_booking: b.id, p_stage: 'start' });
-    if (error) Alert.alert('Could not seat him', error.message);
+    if (error) Alert.alert(tr('Could not seat him'), error.message);
     loadLine();
   }
 
@@ -329,31 +330,31 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   // BTD-15 "Take him off", BTD-17 "Drop him" — the no-show 0119's queue_take_off writes
   async function dropNow(b: BookingRow) {
     const { error } = await supabase.rpc('queue_take_off', { p_booking: b.id });
-    if (error) Alert.alert('Could not take him off', error.message);
+    if (error) Alert.alert(tr('Could not take him off'), error.message);
     loadLine();
   }
 
   function takeOff(b: BookingRow) {
     const walkIn = b.customer_id === barberId;
-    Alert.alert(`Take ${nameOf(b, barberId)} off the line?`,
-      walkIn ? "He leaves today's line. Nothing is recorded against a walk-in." : 'Marks him a no-show and frees the slot.', [
-        { text: 'Keep', style: 'cancel' },
-        { text: walkIn ? 'Take off' : 'No-show', style: 'destructive', onPress: () => dropNow(b) },
+    Alert.alert(tr('Take {b} off the line?', { b: nameOf(b, barberId) }),
+      walkIn ? tr('He leaves today\'s line. Nothing is recorded against a walk-in.') : tr('Marks him a no-show and frees the slot.'), [
+        { text: tr('Keep'), style: 'cancel' },
+        { text: walkIn ? tr('Take off') : tr('No-show'), style: 'destructive', onPress: () => dropNow(b) },
       ]);
   }
 
   // BTD-22 — status and money go back together (0121)
   async function undoDone(b: BookingRow) {
     const { error } = await supabase.rpc('revert_completion', { p_booking: b.id });
-    if (error) Alert.alert('Could not put him back', error.message);
+    if (error) Alert.alert(tr('Could not put him back'), error.message);
     load();
   }
 
   /** An account moves his own booking; a walk-in is offered a time by text, which needs his number and a way to send it (BTD-16). */
   function anotherDayOff(b: BookingRow): string | null {
     if (b.customer_id !== barberId) return null;
-    if (!phoneOf(b)) return "Needs his number — you'll only have his name";
-    if (!smsSends()) return 'Waits until Sterncut can send texts';
+    if (!phoneOf(b)) return tr("Needs his number — you'll only have his name");
+    if (!smsSends()) return tr('Waits until Sterncut can send texts');
     return null;
   }
 
@@ -361,7 +362,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     setPanel(null);
     if (b.customer_id !== barberId) { setResched(b); setReschedAt(null); return; }
     setOfferFor({
-      bookingId: b.id, no: noOf(b), name: nameOf(b, barberId), service: b.services?.name ?? 'Service',
+      bookingId: b.id, no: noOf(b), name: nameOf(b, barberId), service: b.services?.name ?? tr('Service'),
       durationMin: b.services?.duration_min
         ?? Math.round((new Date(b.ends_at).getTime() - new Date(b.starts_at).getTime()) / 60_000),
       startsAt: b.starts_at, waitingSince: guests[b.id]?.joined_at ?? b.created_at,
@@ -374,19 +375,19 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     const { error } = await supabase.rpc('reschedule_booking', {
       p_booking: resched.id, p_new_start: reschedAt.toISOString(),
     });
-    if (error) Alert.alert('Could not reschedule', error.message);
+    if (error) Alert.alert(tr('Could not reschedule'), error.message);
     setResched(null); setReschedAt(null);
     load();
   }
 
   const reviewMsg = (b: BookingRow) =>
-    `Thanks for coming in! How was your ${b.services?.name ?? 'cut'}? You can rate it in the app: My Bookings → Rate ⭐`;
+    tr('Thanks for coming in! How was your {service}? You can rate it in the app: My Bookings → Rate ⭐', { service: b.services?.name ?? tr('cut') });
 
   async function askReviewInChat(b: BookingRow) {
     const { error } = await supabase.from('messages')
       .insert({ booking_id: b.id, sender_id: barberId, body: reviewMsg(b) });
-    if (error) Alert.alert('Could not send', error.message);
-    else Alert.alert('Sent', 'Review ask sent in chat.');
+    if (error) Alert.alert(tr('Could not send'), error.message);
+    else Alert.alert(tr('Sent'), tr('Review ask sent in chat.'));
   }
 
   function askReviewBySms(b: BookingRow) {
@@ -394,7 +395,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     if (!to) return;
     const sep = Platform.OS === 'ios' ? '&' : '?';
     Linking.openURL(`sms:${to}${sep}body=${encodeURIComponent(reviewMsg(b))}`)
-      .catch(() => Alert.alert('SMS', 'Could not open the SMS app.'));
+      .catch(() => Alert.alert(tr('SMS'), tr('Could not open the SMS app.')));
   }
 
   const todayOff = daysOff.find((d) => d.day === isoDay(new Date()));
@@ -403,14 +404,14 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
       await supabase.from('days_off').delete().eq('id', todayOff.id);
       return load();
     }
-    Alert.alert('Clock out?', 'The shop closes for the rest of today — new bookings for today are blocked. Existing ones stay.', [
-      { text: 'Keep working', style: 'cancel' },
+    Alert.alert(tr('Clock out?'), tr('The shop closes for the rest of today — new bookings for today are blocked. Existing ones stay.'), [
+      { text: tr('Keep working'), style: 'cancel' },
       {
-        text: 'Clock out', style: 'destructive',
+        text: tr('Clock out'), style: 'destructive',
         onPress: async () => {
           const { error } = await supabase.from('days_off')
-            .insert({ barber_id: barberId, day: isoDay(new Date()), label: 'Clocked out' });
-          if (error) Alert.alert('Could not clock out', error.message);
+            .insert({ barber_id: barberId, day: isoDay(new Date()), label: tr('Clocked out') });
+          if (error) Alert.alert(tr('Could not clock out'), error.message);
           load();
         },
       },
@@ -469,16 +470,16 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
 
   const today = new Date();
   const dateLabel = today
-    .toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })
+    .toLocaleDateString(loc('en-GB'), { weekday: 'long', day: 'numeric', month: 'long' })
     .toUpperCase();
-  const firstName = (profile.full_name ?? 'Barber').split(' ')[0];
+  const firstName = (profile.full_name ?? tr('Barber')).split(' ')[0];
   const nextShift = windows.length
     ? (() => {
       for (let i = 1; i <= 7; i++) {
         const d = new Date(); d.setDate(d.getDate() + i);
         const w = windows.find((x) => x.weekday === d.getDay());
         if (w && !daysOff.some((o) => o.day === isoDay(d))) {
-          return `${d.toLocaleDateString('en-US', { weekday: 'short' })} ${minLabel(w.start_min)}`;
+          return `${d.toLocaleDateString(loc('en-US'), { weekday: 'short' })} ${minLabel(w.start_min)}`;
         }
       }
       return '—';
@@ -495,7 +496,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
       const free = daySlots(day, 30, windows, busy, off, blocks)
         .find((sl) => sl.status === 'free');
       if (free) {
-        return `${free.time.toLocaleDateString('en-US', { weekday: 'short' })} ${free.time.toTimeString().slice(0, 5)}`;
+        return `${free.time.toLocaleDateString(loc('en-US'), { weekday: 'short' })} ${free.time.toTimeString().slice(0, 5)}`;
       }
     }
     return null;
@@ -508,24 +509,24 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
 
   /** What a row says under the name: what is happening to it now, or where the place came from */
   function subOf(b: BookingRow): string {
-    const service = b.services?.name ?? 'Service';
+    const service = b.services?.name ?? tr('Service');
     const g = guests[b.id];
     switch (rungOf(b)) {
-      case 'request': return `${hhmm(b.starts_at)} booking · asked to come in`;
-      case 'in_chair': return `${service} · ${minsSince(b.started_at!)} min in`;
+      case 'request': return tr('{at} booking · asked to come in', { at: hhmm(b.starts_at) });
+      case 'in_chair': return tr('{service} · {m} min in', { service, m: minsSince(b.started_at!) });
       case 'called':
-        if (g && !g.confirmed) return `Called ${hhmm(b.checked_in_at!)} anyway · hasn't tapped`;
-        if (isLinePlace(b, barberId)) return `${service} · called ${hhmm(b.checked_in_at!)}`;
+        if (g && !g.confirmed) return tr("Called {at} anyway · hasn't tapped", { at: hhmm(b.checked_in_at!) });
+        if (isLinePlace(b, barberId)) return tr('{service} · called {at}', { service, at: hhmm(b.checked_in_at!) });
         return (b.deposit_cents ?? 0) > 0
-          ? `${hhmm(b.starts_at)} booking · ${dh(b.deposit_cents)} paid · ${whole(collectCents(b))} in cash`
-          : `${hhmm(b.starts_at)} booking · ${dh(collectCents(b))} in cash`;
+          ? tr('{at} booking · {paid} paid · {cash} in cash', { at: hhmm(b.starts_at), paid: dh(b.deposit_cents), cash: whole(collectCents(b)) })
+          : tr('{at} booking · {cash} in cash', { at: hhmm(b.starts_at), cash: dh(collectCents(b)) });
       default:
-        if (g && !g.confirmed) return `Texted ${minsSince(g.joined_at)} min ago · hasn't tapped`;
-        if (b.dropped_at) return `${service} · didn't come · at the end`;
-        if (g) return `${service} · ${g.source === 'link' ? 'took your link' : 'put his name in from the web'}`;
-        if (b.customer_id === barberId) return `${service} · you wrote him down`;
-        if (b.joined_line) return `${service} · held his own place in the app`;
-        return `${hhmm(b.starts_at)} booking · ${service}`;
+        if (g && !g.confirmed) return tr("Texted {m} min ago · hasn't tapped", { m: minsSince(g.joined_at) });
+        if (b.dropped_at) return tr("{service} · didn't come · at the end", { service });
+        if (g) return g.source === 'link' ? tr('{service} · took your link', { service }) : tr('{service} · put his name in from the web', { service });
+        if (b.customer_id === barberId) return tr('{service} · you wrote him down', { service });
+        if (b.joined_line) return tr('{service} · held his own place in the app', { service });
+        return tr('{at} booking · {service}', { at: hhmm(b.starts_at), service });
     }
   }
 
@@ -541,10 +542,10 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
 
     if (rung === 'in_chair' || rung === 'called') {
       const cutting = rung === 'in_chair';
-      const label = cutting ? `DONE · COLLECT ${dh(collectCents(b))}` : 'SEAT HIM';
+      const label = cutting ? tr('DONE · COLLECT {cash}', { cash: dh(collectCents(b)) }) : tr('SEAT HIM');
       return (
         <View key={b.id} style={[s.bigRow, { borderColor: cutting ? D.green : D.accent }]}>
-          <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={`${name}, open`}
+          <Pressable onPress={open} accessibilityRole="button" accessibilityLabel={tr('{name}, open', { name })}
             style={({ pressed }) => [s.bigTop, pressed && s.pressed]}>
             <Badge b={b} barberId={barberId} no={noOf(b)} tone={cutting ? 'green' : 'coral'} />
             <View style={s.grow}>
@@ -553,7 +554,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
             </View>
             <View style={[s.chip, { backgroundColor: cutting ? D.green : D.accentSoft }]}>
               <T w="b" size={10} c={cutting ? D.bg : D.accent} ls={0.8}>
-                {cutting ? 'IN CHAIR' : line ? 'CALLED' : 'HERE'}
+                {cutting ? tr('IN CHAIR') : line ? tr('CALLED') : tr('HERE')}
               </T>
             </View>
           </Pressable>
@@ -577,26 +578,26 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
         </View>
         {rung === 'request' ? (
           <View style={s.pucks}>
-            <Pressable onPress={() => decline(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel={`Decline ${name}`}
+            <Pressable onPress={() => decline(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel={tr('Decline {name}', { name })}
               style={({ pressed }) => [s.puck34, pressed && s.pressed]}>
               <Ico name="x" size={14} color={D.red} />
             </Pressable>
-            <Pressable onPress={() => accept(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel={`Accept ${name}`}
+            <Pressable onPress={() => accept(b)} hitSlop={6} accessibilityRole="button" accessibilityLabel={tr('Accept {name}', { name })}
               style={({ pressed }) => [s.puck34, { backgroundColor: D.green }, pressed && s.pressed]}>
               <Ico name="check" size={14} color={D.bg} />
             </Pressable>
           </View>
         ) : grey ? (
           <View style={[s.chip, { backgroundColor: D.amberSoft12 }]}>
-            <T w="b" size={10} c={D.amber} ls={0.6}>UNCONFIRMED</T>
+            <T w="b" size={10} c={D.amber} ls={0.6}>{tr('UNCONFIRMED')}</T>
           </View>
         ) : isNext ? (
           <Pressable onPress={() => primary(b)} hitSlop={4} accessibilityRole="button"
             style={({ pressed }) => [s.callPill, pressed && s.pressed]}>
-            <T w="b" size={11.5}>{verbOf(b, barberId) === 'CALL HIM' ? 'Call him' : "He's here"}</T>
+            <T w="b" size={11.5}>{verbOf(b, barberId) === 'CALL HIM' ? tr('Call him') : tr('He\'s here')}</T>
           </Pressable>
         ) : b.dropped_at ? null : (
-          <T size={11} c={D.sub} style={s.tnum}>{line ? `~${minsTo(b.starts_at)} min` : hhmm(b.starts_at)}</T>
+          <T size={11} c={D.sub} style={s.tnum}>{line ? tr('~{starts_at} min', { starts_at: minsTo(b.starts_at) }) : hhmm(b.starts_at)}</T>
         )}
       </Pressable>
     );
@@ -612,11 +613,11 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
               is just the greeting. */}
           <View style={s.grow}>
             <Eyebrow ls={1.8}>{dateLabel}</Eyebrow>
-            <Serif size={26} ls={0.03} style={s.greet}>Salam, {firstName}</Serif>
+            <Serif size={26} ls={0.03} style={s.greet}>{tr('Salam, {firstName}', { firstName })}</Serif>
           </View>
           <Pressable onPress={() => { setInboxOpen(true); onChromeHidden?.(true); }}
             accessibilityRole="button"
-            accessibilityLabel={`Notifications, ${unread} unread`}
+            accessibilityLabel={tr('Notifications, {unread} unread', { unread })}
             style={({ pressed }) => [s.bell, pressed && s.pressed]}>
             <Ico name="bell" size={16} />
             {unread > 0 && <View style={s.bellDot} />}
@@ -640,14 +641,14 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
           <View style={s.clockedCard}>
             <View style={s.clockedIcon}><Ico name="scissors" size={16} color={D.amber} /></View>
             <View style={s.grow}>
-              <T w="b" size={13} c={D.amber}>{countWord(held.items.length)} waited for you to finish</T>
+              <T w="b" size={13} c={D.amber}>{tr('{count} waited for you to finish', { count: countWord(held.items.length) })}</T>
               <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-                Held {hhmm(held.cut.started_at)}–{hhmm(held.cut.completed_at)} while you were cutting
+                {tr('Held {started_at}–{completed_at} while you were cutting', { started_at: hhmm(held.cut.started_at), completed_at: hhmm(held.cut.completed_at) })}
               </T>
             </View>
-            <Pressable onPress={openHeld} accessibilityRole="button" accessibilityLabel="See what was held back"
+            <Pressable onPress={openHeld} accessibilityRole="button" accessibilityLabel={tr('See what was held back')}
               style={({ pressed }) => [s.undoBtn, pressed && s.pressed]}>
-              <T w="eb" size={11} c={D.bg} ls={0.55}>SEE</T>
+              <T w="eb" size={11} c={D.bg} ls={0.55}>{tr('SEE')}</T>
             </Pressable>
           </View>
         )}
@@ -657,12 +658,12 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
           <View style={s.clockedCard}>
             <View style={s.clockedIcon}><Ico name="slash" size={16} color={D.amber} /></View>
             <View style={s.grow}>
-              <T w="b" size={13} c={D.amber}>Clocked out for today</T>
-              <T size={11} c={D.sub} style={{ marginTop: 2 }}>New bookings for today are blocked</T>
+              <T w="b" size={13} c={D.amber}>{tr('Clocked out for today')}</T>
+              <T size={11} c={D.sub} style={{ marginTop: 2 }}>{tr('New bookings for today are blocked')}</T>
             </View>
-            <Pressable onPress={toggleClockOut} accessibilityRole="button" accessibilityLabel="Clock back in"
+            <Pressable onPress={toggleClockOut} accessibilityRole="button" accessibilityLabel={tr('Clock back in')}
               style={({ pressed }) => [s.undoBtn, pressed && s.pressed]}>
-              <T w="eb" size={11} c={D.bg} ls={0.55}>UNDO</T>
+              <T w="eb" size={11} c={D.bg} ls={0.55}>{tr('UNDO')}</T>
             </Pressable>
           </View>
         )}
@@ -672,51 +673,51 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
             of the card opens Earnings. */}
         <View style={s.moneyCard}>
           <Pressable onPress={() => openEarnings(true)} accessibilityRole="button"
-            accessibilityLabel={`Taken today ${dh(takenCents)} of ${dh(bookedCents)} booked, earnings details`}
+            accessibilityLabel={tr('Taken today {takenCents} of {bookedCents} booked, earnings details', { takenCents: dh(takenCents), bookedCents: dh(bookedCents) })}
             style={({ pressed }) => [s.moneyTap, pressed && s.pressed]}>
             <View>
-              <T w="b" size={9.5} c={D.sub} ls={1.15}>TAKEN TODAY</T>
+              <T w="b" size={9.5} c={D.sub} ls={1.15}>{tr('TAKEN TODAY')}</T>
               <Serif size={25} ls={0} style={[s.money, todayOff && { color: D.muted }]}>{dh(takenCents)}</Serif>
             </View>
             <View style={s.moneyRule} />
             <View style={s.grow}>
               <T size={11.5} c={D.sub} style={{ lineHeight: 16.5 }}>
                 {done
-                  ? `Up ${dh(done.row.price_cents)} from ${nameOf(done.row, barberId).split(' ')[0]} · ${waiting.length} waiting`
-                  : `${waiting.length} waiting · ${whole(takenCents)} of ${dh(bookedCents)} booked`}
+                  ? tr('Up {price_cents} from {row} · {count} waiting', { price_cents: dh(done.row.price_cents), row: nameOf(done.row, barberId).split(' ')[0], count: waiting.length })
+                  : tr('{count} waiting · {takenCents} of {bookedCents} booked', { count: waiting.length, takenCents: whole(takenCents), bookedCents: dh(bookedCents) })}
               </T>
               {notConfirmed > 0 && (
                 <T size={11} c={D.amber} style={{ marginTop: 2 }}>
-                  {notConfirmed === 1 ? '1 name not confirmed' : `${notConfirmed} names not confirmed`}
+                  {notConfirmed === 1 ? tr('1 name not confirmed') : tr('{notConfirmed} names not confirmed', { notConfirmed })}
                 </T>
               )}
             </View>
           </Pressable>
           <Pressable onPress={() => { setShowQueue(true); onChromeHidden?.(true); }} hitSlop={8}
             accessibilityRole="button"
-            accessibilityLabel={`The line is ${lineOpen ? 'open' : 'paused'}, open the live queue`}
+            accessibilityLabel={(lineOpen ? tr('The line is open, open the live queue') : tr('The line is paused, open the live queue'))}
             style={({ pressed }) => [s.linePill, !lineOpen && { backgroundColor: D.card2 }, pressed && s.pressed]}>
             <View style={[s.linePillDot, !lineOpen && { backgroundColor: D.sub }]} />
-            <T w="eb" size={9} c={lineOpen ? D.green : D.sub} ls={0.9}>{lineOpen ? 'OPEN' : 'PAUSED'}</T>
+            <T w="eb" size={9} c={lineOpen ? D.green : D.sub} ls={0.9}>{lineOpen ? tr('OPEN') : tr('PAUSED')}</T>
           </Pressable>
         </View>
 
         {/* 11b — the money did not go anywhere, and what closing switched off */}
         {shop?.open === false && (
-          <T size={12} c={D.sub} style={s.closedNote}>Nothing was cancelled — closing only stops new ones</T>
+          <T size={12} c={D.sub} style={s.closedNote}>{tr('Nothing was cancelled — closing only stops new ones')}</T>
         )}
         {shop && <ShopClosedTiles st={shop} />}
 
         {(list.length > 0 || done) && (
           <View style={s.sectionRow}>
-            <Eyebrow ls={1.65}>{done && !chairTaken ? 'THE CHAIR IS EMPTY' : 'THE CHAIR'}</Eyebrow>
+            <Eyebrow ls={1.65}>{done && !chairTaken ? tr('THE CHAIR IS EMPTY') : tr('THE CHAIR')}</Eyebrow>
             <T size={11} c={D.faint}>
-              {done && !chairTaken ? `${waiting.length} waiting` : 'bookings and walk-ins, in order'}
+              {done && !chairTaken ? tr('{count} waiting', { count: waiting.length }) : tr('bookings and walk-ins, in order')}
             </T>
           </View>
         )}
 
-        {bookings === null && <ActivityIndicator color={D.accent} accessibilityLabel="Loading the chair" />}
+        {bookings === null && <ActivityIndicator color={D.accent} accessibilityLabel={tr('Loading the chair')} />}
 
         {/* BTD-22 — done is the only rung that moves money, so it is the only one with a way back */}
         {done && (
@@ -724,21 +725,21 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
             <View style={s.bigTop}>
               <View style={s.doneTick}><Ico name="check" size={20} color={D.bg} /></View>
               <View style={s.grow}>
-                <T w="b" size={14.5}>{nameOf(done.row, barberId)} is done</T>
+                <T w="b" size={14.5}>{tr('{row} is done', { row: nameOf(done.row, barberId) })}</T>
                 <T size={11.5} c={D.sub} style={{ marginTop: 2 }}>
-                  {dh(collectCents(done.row))} in cash · chair free since {hhmm(done.row.completed_at!)}
+                  {tr('{dh} in cash · chair free since {hhmm}', { dh: dh(collectCents(done.row)), hhmm: hhmm(done.row.completed_at!) })}
                 </T>
               </View>
             </View>
             <View style={s.undoStrip}>
               <Ico name="rotate-ccw" size={14} color={D.sub} />
               <T size={11.5} c={D.sub} style={[s.grow, { lineHeight: 16.5 }]}>
-                Wrong man? Put him back any time until the next man sits down — the cash goes back too.
+                {tr('Wrong man? Put him back any time until the next man sits down — the cash goes back too.')}
               </T>
               <Pressable onPress={() => undoDone(done.row)} accessibilityRole="button"
-                accessibilityLabel={`Undo, put ${nameOf(done.row, barberId)} back in the chair`}
+                accessibilityLabel={tr('Undo, put {row} back in the chair', { row: nameOf(done.row, barberId) })}
                 style={({ pressed }) => [s.undoPill, pressed && s.pressed]}>
-                <T w="b" size={11.5}>Undo</T>
+                <T w="b" size={11.5}>{tr('Undo')}</T>
               </Pressable>
             </View>
           </View>
@@ -749,15 +750,15 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
         {(list.length > 0 || done) && (
           <T size={11} c={D.faint} style={s.footnote}>
             {done
-              ? "Done is the only rung that moves money, so it is the only one with a way back. Once someone else is in the chair the cash is counted, and a wrong one is the owner's to fix — he's holding it."
-              : "Bookings keep their clock time; walk-ins fill the space between. Waiting leaves out the man in the chair and any request you haven't answered."}
+              ? tr('Done is the only rung that moves money, so it is the only one with a way back. Once someone else is in the chair the cash is counted, and a wrong one is the owner\'s to fix — he\'s holding it.')
+              : tr('Bookings keep their clock time; walk-ins fill the space between. Waiting leaves out the man in the chair and any request you haven\'t answered.')}
           </T>
         )}
 
         {!todayOff && bookings !== null && (
-          <Pressable onPress={toggleClockOut} accessibilityRole="button" accessibilityLabel="Clock out"
+          <Pressable onPress={toggleClockOut} accessibilityRole="button" accessibilityLabel={tr('Clock out')}
             style={({ pressed }) => [s.clockOutWide, pressed && s.pressed]}>
-            <T w="b" size={11.5} c={D.textDim} ls={0.55}>CLOCK OUT</T>
+            <T w="b" size={11.5} c={D.textDim} ls={0.55}>{tr('CLOCK OUT')}</T>
           </Pressable>
         )}
 
@@ -766,16 +767,16 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
           <View style={s.emptyWrap}>
             <View style={s.emptyCircle}><Ico name="scissors" size={32} color={D.muted} /></View>
             <View style={{ alignItems: 'center' }}>
-              <Serif size={19} ls={0.03}>Nothing left today</Serif>
+              <Serif size={19} ls={0.03}>{tr('Nothing left today')}</Serif>
               <T size={13} c={D.sub} style={s.emptyText}>
                 {todayOff
-                  ? `Enjoy the day. You're back ${nextShift}.`
-                  : 'Enjoy the day. The chair is free until tomorrow.'}
+                  ? tr('Enjoy the day. You\'re back {nextShift}.', { nextShift })
+                  : tr('Enjoy the day. The chair is free until tomorrow.')}
               </T>
             </View>
-            <Pressable onPress={goSchedule} accessibilityRole="button" accessibilityLabel="See the schedule"
+            <Pressable onPress={goSchedule} accessibilityRole="button" accessibilityLabel={tr('See the schedule')}
               style={({ pressed }) => [s.emptyBtn, pressed && s.pressed]}>
-              <T w="b" size={12} ls={0.72}>SEE THE SCHEDULE</T>
+              <T w="b" size={12} ls={0.72}>{tr('SEE THE SCHEDULE')}</T>
             </Pressable>
           </View>
         )}
@@ -813,7 +814,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
           customerId: completedB.customer_id,
           name: nameOf(completedB, barberId),
           initials: initialsOf(nameOf(completedB, barberId)),
-          service: completedB.services?.name ?? 'Service',
+          service: completedB.services?.name ?? tr('Service'),
           time: hhmm(completedB.starts_at),
           priceCents: completedB.price_cents,
           isWalkIn: completedB.customer_id === barberId,
@@ -832,7 +833,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
           return {
             ticket: pad(noOf(n)),
             label: nameOf(n, barberId),
-            service: n.services?.name ?? 'Service',
+            service: n.services?.name ?? tr('Service'),
             waitingMin: Math.max(0, Math.round((now - new Date(n.starts_at).getTime()) / 60_000)),
             priceCents: n.price_cents,
           };
@@ -880,7 +881,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
           const { error } = await supabase.from('client_flags')
             .update({ reason: null, require_full_payment: false, blocked: false })
             .eq('barber_id', barberId).eq('customer_id', b.customer_id);
-          if (error) Alert.alert('Could not clear the flag', error.message);
+          if (error) Alert.alert(tr('Could not clear the flag'), error.message);
         }}
       />
 
@@ -902,7 +903,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
       <FrontSheet visible={!!frontRow}
         row={frontRow && {
           no: noOf(frontRow), name: nameOf(frontRow, barberId),
-          service: frontRow.services?.name ?? 'Service', phone: phoneOf(frontRow),
+          service: frontRow.services?.name ?? tr('Service'), phone: phoneOf(frontRow),
         }}
         textedAt={frontRow ? guests[frontRow.id]?.joined_at ?? null : null}
         onClose={() => setFrontAsk(null)}
@@ -911,17 +912,17 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
 
       {/* reschedule */}
       <Modal visible={!!resched} transparent animationType="slide" onRequestClose={() => setResched(null)}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Close" style={s.sheetBackdrop} onPress={() => setResched(null)} />
+        <Pressable accessibilityRole="button" accessibilityLabel={tr('Close')} style={s.sheetBackdrop} onPress={() => setResched(null)} />
         {resched && (
           <View style={[s.menuSheet, s.sheetLight]} onAccessibilityEscape={() => setResched(null)}>
             <Text style={s.sheetTitleLight}>
-              Move {nameOf(resched, barberId)} · {(new Date(resched.ends_at).getTime() - new Date(resched.starts_at).getTime()) / 60_000} min
+              {tr('Move {resched} · {x} min', { resched: nameOf(resched, barberId), x: (new Date(resched.ends_at).getTime() - new Date(resched.starts_at).getTime()) / 60_000 })}
             </Text>
             {/* ponytail: SlotPicker is light-themed; lives on a light sheet until a dark variant matters */}
             <SlotPicker barberId={barberId}
               durationMin={(new Date(resched.ends_at).getTime() - new Date(resched.starts_at).getTime()) / 60_000}
               selected={reschedAt} onSelect={setReschedAt} />
-            <PillButton title={reschedAt ? `Move to ${reschedAt.toTimeString().slice(0, 5)}` : 'Pick a new time'}
+            <PillButton title={reschedAt ? tr('Move to {reschedAt}', { reschedAt: reschedAt.toTimeString().slice(0, 5) }) : tr('Pick a new time')}
               disabled={!reschedAt} onPress={confirmReschedule} />
           </View>
         )}

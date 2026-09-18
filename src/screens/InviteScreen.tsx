@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, TOP_INSET } from '../theme';
+import { loc, tr } from '../lib/i18n';
 
 // 18a — the referral screen. Dark, like the barber side, because it is the one
 // customer screen that is a pitch rather than a tool.
@@ -26,7 +27,7 @@ function initials(name: string) {
   return name.split(' ').filter(Boolean).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 }
 function shortName(name: string | null | undefined) {
-  if (!name) return 'A friend';
+  if (!name) return tr('A friend');
   const [first, last] = name.split(' ');
   return last ? `${first} ${last[0]}.` : first;
 }
@@ -43,7 +44,7 @@ export default function InviteScreen({ onBack }: { onBack: () => void }) {
         .select('id, status, created_at, rewarded_at, invitee:profiles!invitee_id(full_name)')
         .order('created_at', { ascending: false }),
     ]);
-    if (c.error) Alert.alert('Could not load your code', c.error.message);
+    if (c.error) Alert.alert(tr('Could not load your code'), c.error.message);
     else setCode(c.data as string);
     setInvites((r.data ?? []) as unknown as Invite[]);
   }, []);
@@ -60,7 +61,7 @@ export default function InviteScreen({ onBack }: { onBack: () => void }) {
   async function share() {
     if (!code) return;
     await Share.share({
-      message: `Get ${REWARD_DH} DH off your first cut on Sterncut with my code ${code} — ${LINK(code)}`,
+      message: tr('Get {reward} DH off your first cut on Sterncut with my code {code} — {link}', { reward: REWARD_DH, code, link: LINK(code) }),
     });
   }
 
@@ -72,42 +73,41 @@ export default function InviteScreen({ onBack }: { onBack: () => void }) {
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.header}>
           <Pressable onPress={onBack} hitSlop={8}
-            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel="Go back">
+            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel={tr('Go back')}>
             <Ionicons name="arrow-back" size={16} color="#fff" />
           </Pressable>
-          <Text style={s.headerTitle}>INVITE FRIENDS</Text>
+          <Text style={s.headerTitle}>{tr('INVITE FRIENDS')}</Text>
           <View style={s.puckGhost} />
         </View>
 
         <View style={s.pitch}>
-          <Text style={s.pitchTitle}>Give {REWARD_DH} DH,{'\n'}get {REWARD_DH} DH.</Text>
+          <Text style={s.pitchTitle}>{tr('Give {REWARD_DH} DH,\nget {REWARD_DH} DH.', { REWARD_DH })}</Text>
           <Text style={s.pitchSub}>
-            Your friend gets {REWARD_DH} DH off their first cut. You get {REWARD_DH} DH in your
-            wallet once they've been.
+            {tr('Your friend gets {REWARD_DH} DH off their first cut. You get {REWARD_DH} DH in your wallet once they\'ve been.', { REWARD_DH })}
           </Text>
         </View>
 
         <View style={s.codeCard}>
-          <Text style={s.codeLabel}>YOUR CODE</Text>
+          <Text style={s.codeLabel}>{tr('YOUR CODE')}</Text>
           <View style={s.codeRow}>
             <Text style={s.code}>{code ?? '…'}</Text>
             <Pressable onPress={copy} disabled={!code}
               style={({ pressed }) => [s.copyBtn, pressed && s.pressed]}>
               <Ionicons name={copied ? 'checkmark' : 'copy-outline'} size={14} color={colors.text} />
-              <Text style={s.copyText}>{copied ? 'COPIED' : 'COPY'}</Text>
+              <Text style={s.copyText}>{copied ? tr('COPIED') : tr('COPY')}</Text>
             </Pressable>
           </View>
           <View style={s.shareRow}>
             <Pressable onPress={share} disabled={!code}
               style={({ pressed }) => [s.shareBtn, pressed && s.pressed]}>
               <Ionicons name="send" size={14} color="#fff" />
-              <Text style={s.shareText}>SHARE LINK</Text>
+              <Text style={s.shareText}>{tr('SHARE LINK')}</Text>
             </Pressable>
-            <Pressable onPress={share} disabled={!code} accessibilityLabel="Share to a chat"
+            <Pressable onPress={share} disabled={!code} accessibilityLabel={tr('Share to a chat')}
               style={({ pressed }) => [s.shareIcon, pressed && s.pressed]}>
               <Ionicons name="chatbubble-ellipses-outline" size={17} color={colors.text} />
             </Pressable>
-            <Pressable onPress={copy} disabled={!code} accessibilityLabel="Copy the invite link"
+            <Pressable onPress={copy} disabled={!code} accessibilityLabel={tr('Copy the invite link')}
               style={({ pressed }) => [s.shareIcon, pressed && s.pressed]}>
               <Ionicons name="qr-code-outline" size={17} color={colors.text} />
             </Pressable>
@@ -117,18 +117,18 @@ export default function InviteScreen({ onBack }: { onBack: () => void }) {
         <View style={s.stats}>
           <View style={s.stat}>
             <Text style={s.statValue}>{joined}</Text>
-            <Text style={s.statLabel}>Friends joined</Text>
+            <Text style={s.statLabel}>{tr('Friends joined')}</Text>
           </View>
           <View style={s.stat}>
-            <Text style={[s.statValue, s.statGreen]}>{earned} DH</Text>
-            <Text style={s.statLabel}>Earned so far</Text>
+            <Text style={[s.statValue, s.statGreen]}>{tr('{earned} DH', { earned })}</Text>
+            <Text style={s.statLabel}>{tr('Earned so far')}</Text>
           </View>
         </View>
 
-        <Text style={s.section}>YOUR INVITES</Text>
+        <Text style={s.section}>{tr('YOUR INVITES')}</Text>
         {invites.length === 0 && (
           <Text style={s.emptyText}>
-            No invites yet. Share your code and it shows up here the moment someone signs up.
+            {tr('No invites yet. Share your code and it shows up here the moment someone signs up.')}
           </Text>
         )}
         <View style={s.inviteList}>
@@ -144,20 +144,20 @@ export default function InviteScreen({ onBack }: { onBack: () => void }) {
                   <Text style={s.inviteName}>{name}</Text>
                   <Text style={s.inviteMeta}>
                     {done
-                      ? `First cut ${new Date(i.rewarded_at!).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-                      : "Signed up · hasn't booked yet"}
+                      ? tr('First cut {toLocaleDateString}', { toLocaleDateString: new Date(i.rewarded_at!).toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' }) })
+                      : tr('Signed up · hasn\'t booked yet')}
                   </Text>
                 </View>
                 {done
-                  ? <Text style={s.inviteReward}>+{REWARD_DH} DH</Text>
-                  : <View style={s.pendingChip}><Text style={s.pendingText}>PENDING</Text></View>}
+                  ? <Text style={s.inviteReward}>{tr('+{REWARD_DH} DH', { REWARD_DH })}</Text>
+                  : <View style={s.pendingChip}><Text style={s.pendingText}>{tr('PENDING')}</Text></View>}
               </View>
             );
           })}
         </View>
 
         <Text style={s.footNote}>
-          Rewards land in your wallet after your friend's first completed visit.
+          {tr('Rewards land in your wallet after your friend\'s first completed visit.')}
         </Text>
       </ScrollView>
     </View>

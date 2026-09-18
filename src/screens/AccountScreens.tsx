@@ -6,6 +6,7 @@ import {
 import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, shadow, TOP_INSET } from '../theme';
+import { tr, trRich } from '../lib/i18n';
 
 // 22a set a password · 23a/b/c forgot password · 24a session expired.
 //
@@ -14,16 +15,16 @@ import { colors, font, radius, shadow, TOP_INSET } from '../theme';
 // capital" is the whole spec and a zxcvbn would be 400 KB to say the same thing.
 
 const RULES = [
-  { key: 'len', label: 'At least 8 characters', ok: (p: string) => p.length >= 8 },
-  { key: 'num', label: 'One number', ok: (p: string) => /\d/.test(p) },
-  { key: 'cap', label: 'One capital letter', ok: (p: string) => /[A-Z]/.test(p) },
+  { key: 'len', label: tr('At least 8 characters'), ok: (p: string) => p.length >= 8 },
+  { key: 'num', label: tr('One number'), ok: (p: string) => /\d/.test(p) },
+  { key: 'cap', label: tr('One capital letter'), ok: (p: string) => /[A-Z]/.test(p) },
 ];
 
 function strengthOf(p: string) {
   const score = RULES.filter((r) => r.ok(p)).length;
   return {
     score,
-    label: score <= 1 ? 'Weak' : score === 2 ? 'Fair' : 'Strong',
+    label: score <= 1 ? tr('Weak') : score === 2 ? tr('Fair') : tr('Strong'),
     colour: score <= 1 ? colors.textTertiary : score === 2 ? colors.accent : '#16A34A',
     valid: score === 3,
   };
@@ -74,7 +75,7 @@ function Secret({ label, value, onChange, focused, trailing }: {
       </View>
       {trailing ?? (
         <Pressable onPress={() => setShow((v) => !v)} hitSlop={8}
-          accessibilityLabel={show ? 'Hide password' : 'Show password'}>
+          accessibilityLabel={show ? tr('Hide password') : tr('Show password')}>
           <Ionicons name={show ? 'eye-off-outline' : 'eye-outline'} size={17}
             color={colors.textTertiary} />
         </Pressable>
@@ -85,7 +86,7 @@ function Secret({ label, value, onChange, focused, trailing }: {
 
 function BackPuck({ onPress, icon }: { onPress: () => void; icon?: keyof typeof Ionicons.glyphMap }) {
   return (
-    <Pressable onPress={onPress} hitSlop={8} accessibilityLabel="Go back"
+    <Pressable onPress={onPress} hitSlop={8} accessibilityLabel={tr('Go back')}
       style={({ pressed }) => [s.puck, pressed && s.pressed]}>
       <Ionicons name={icon ?? 'arrow-back'} size={16} color={colors.text} />
     </Pressable>
@@ -112,7 +113,7 @@ export function SetPasswordScreen({ mode, email, onBack, onDone }: {
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password: pw });
     setBusy(false);
-    if (error) return Alert.alert('Could not save the password', error.message);
+    if (error) return Alert.alert(tr('Could not save the password'), error.message);
     onDone();
   }
 
@@ -123,19 +124,20 @@ export function SetPasswordScreen({ mode, email, onBack, onDone }: {
 
         <View style={s.head}>
           <Display size={mode === 'reset' ? 30 : 30} style={s.headTitle}>
-            {mode === 'reset' ? 'Choose a new\npassword.' : 'Set a\npassword.'}
+            {mode === 'reset' ? tr('Choose a new\npassword.') : tr('Set a\npassword.')}
           </Display>
           <Text style={s.headSub}>
             {mode === 'reset'
-              ? <>Resetting for <Text style={s.strong}>{email ?? 'your account'}</Text>.
-                {' '}You'll be signed out on other devices.</>
-              : 'So you can sign in with your email as well as the link we send you.'}
+              ? trRich('Resetting for <b>{email}</b>. You\'ll be signed out on other devices.', {
+                b: (text, key) => <Text key={key} style={s.strong}>{text}</Text>,
+              }, { email: email ?? tr('your account') })
+              : tr('So you can sign in with your email as well as the link we send you.')}
           </Text>
         </View>
 
         <View style={s.fieldList}>
-          <Secret label="NEW PASSWORD" value={pw} onChange={setPw} focused={!pw || !st.valid} />
-          <Secret label="CONFIRM PASSWORD" value={confirm} onChange={setConfirm}
+          <Secret label={tr('NEW PASSWORD')} value={pw} onChange={setPw} focused={!pw || !st.valid} />
+          <Secret label={tr('CONFIRM PASSWORD')} value={confirm} onChange={setConfirm}
             focused={st.valid && !matches}
             trailing={matches ? (
               <View style={s.tick}><Ionicons name="checkmark" size={11} color="#16A34A" /></View>
@@ -148,7 +150,7 @@ export function SetPasswordScreen({ mode, email, onBack, onDone }: {
         <Pressable onPress={save} disabled={!armed}
           style={({ pressed }) => [s.wideDark, !armed && s.disabled, pressed && s.pressed]}>
           <Text style={s.wideDarkText}>
-            {mode === 'reset' ? 'RESET & SIGN IN' : 'SAVE PASSWORD'}
+            {mode === 'reset' ? tr('RESET & SIGN IN') : tr('SAVE PASSWORD')}
           </Text>
         </Pressable>
       </ScrollView>
@@ -181,13 +183,13 @@ export function ForgotPasswordScreen({ initialEmail, onBack }: {
 
   async function send() {
     const to = email.trim();
-    if (!to.includes('@')) return Alert.alert('Check the email', 'That does not look like an email.');
+    if (!to.includes('@')) return Alert.alert(tr('Check the email'), tr('That does not look like an email.'));
     setBusy(true);
     // the link lands back in the app via the scheme in app.json; PASSWORD_RECOVERY
     // then routes to SetPasswordScreen in reset mode
     const { error } = await supabase.auth.resetPasswordForEmail(to, { redirectTo: 'brber://reset' });
     setBusy(false);
-    if (error) return Alert.alert('Could not send the link', error.message);
+    if (error) return Alert.alert(tr('Could not send the link'), error.message);
     setSent(true);
     countdown();
   }
@@ -201,15 +203,16 @@ export function ForgotPasswordScreen({ initialEmail, onBack }: {
             <Ionicons name="mail-outline" size={30} color={colors.accent} />
           </View>
           <View>
-            <Display size={28} style={s.center}>Check your{'\n'}inbox</Display>
+            <Display size={28} style={s.center}>{tr('Check your\ninbox')}</Display>
             <Text style={s.inboxSub}>
-              We sent a reset link to <Text style={s.strong}>{email.trim()}</Text>.
-              {' '}It expires in 30 minutes.
+              {trRich('We sent a reset link to <b>{email}</b>. It expires in 30 minutes.', {
+                b: (text, key) => <Text key={key} style={s.strong}>{text}</Text>,
+              }, { email: email.trim() })}
             </Text>
           </View>
 
           <View style={s.stepsCard}>
-            {['Open the mail from Sterncut', 'Tap the reset link', 'Choose a new password']
+            {[tr('Open the mail from Sterncut'), tr('Tap the reset link'), tr('Choose a new password')]
               .map((step, i) => (
                 <View key={step} style={s.stepRow}>
                   <View style={s.stepNo}><Text style={s.stepNoText}>{i + 1}</Text></View>
@@ -220,16 +223,16 @@ export function ForgotPasswordScreen({ initialEmail, onBack }: {
 
           <Pressable onPress={() => Linking.openURL('message://').catch(() => {})}
             style={({ pressed }) => [s.wideDark, pressed && s.pressed]}>
-            <Text style={s.wideDarkText}>OPEN MAIL APP</Text>
+            <Text style={s.wideDarkText}>{tr('OPEN MAIL APP')}</Text>
           </Pressable>
 
           <Text style={s.resend}>
-            Didn't get it?{' '}
+            {tr("Didn't get it?")}{' '}
             {wait > 0
-              ? <Text style={s.resendWait}>Resend in 0:{String(wait).padStart(2, '0')}</Text>
-              : <Text style={s.link} onPress={send}>Resend</Text>}
+              ? <Text style={s.resendWait}>{tr('Resend in 0:{wait}', { wait: String(wait).padStart(2, '0') })}</Text>
+              : <Text style={s.link} onPress={send}>{tr('Resend')}</Text>}
           </Text>
-          <Text style={s.link} onPress={() => setSent(false)}>Use a different email</Text>
+          <Text style={s.link} onPress={() => setSent(false)}>{tr('Use a different email')}</Text>
         </View>
       </View>
     );
@@ -241,28 +244,28 @@ export function ForgotPasswordScreen({ initialEmail, onBack }: {
       <ScrollView contentContainerStyle={s.authContent} showsVerticalScrollIndicator={false}>
         <BackPuck onPress={onBack} />
         <View style={s.head}>
-          <Display size={32} style={s.headTitle}>Forgot your{'\n'}password?</Display>
+          <Display size={32} style={s.headTitle}>{tr('Forgot your\npassword?')}</Display>
           <Text style={s.headSub}>
-            Enter the email on your Sterncut account and we'll send a reset link.
+            {tr('Enter the email on your Sterncut account and we\'ll send a reset link.')}
           </Text>
         </View>
 
         <View style={[s.field, s.fieldFocus]}>
           <View style={s.grow}>
-            <Text style={s.fieldLabel}>EMAIL</Text>
+            <Text style={s.fieldLabel}>{tr('EMAIL')}</Text>
             <TextInput style={s.fieldInput} value={email} onChangeText={setEmail}
               autoCapitalize="none" keyboardType="email-address" autoComplete="email"
-              placeholder="you@example.com" placeholderTextColor={colors.textTertiary} />
+              placeholder={tr('you@example.com')} placeholderTextColor={colors.textTertiary} />
           </View>
         </View>
 
         <Pressable onPress={send} disabled={busy}
           style={({ pressed }) => [s.wideDark, busy && s.disabled, pressed && s.pressed]}>
-          <Text style={s.wideDarkText}>SEND RESET LINK</Text>
+          <Text style={s.wideDarkText}>{tr('SEND RESET LINK')}</Text>
         </Pressable>
 
         <View style={s.orRow}>
-          <View style={s.orLine} /><Text style={s.orText}>OR</Text><View style={s.orLine} />
+          <View style={s.orLine} /><Text style={s.orText}>{tr('OR')}</Text><View style={s.orLine} />
         </View>
 
         {/* the mock offers Google here; social sign-in is not configured yet, so
@@ -271,8 +274,7 @@ export function ForgotPasswordScreen({ initialEmail, onBack }: {
           <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary}
             style={s.noteIcon} />
           <Text style={s.noteText}>
-            No email on your account? Sign in with your phone number instead, or report a problem
-            and support will verify you by phone.
+            {tr('No email on your account? Sign in with your phone number instead, or report a problem and support will verify you by phone.')}
           </Text>
         </View>
       </ScrollView>
@@ -297,14 +299,14 @@ export function SessionExpiredSheet({ visible, name, email, onSignIn, onNotYou }
           <View style={s.warnCircle}>
             <Ionicons name="time-outline" size={26} color={colors.accent} />
           </View>
-          <Display size={24} style={s.sheetTitle}>Session expired</Display>
+          <Display size={24} style={s.sheetTitle}>{tr('Session expired')}</Display>
           <Text style={s.sheetSub}>
-            You've been signed out for security. Sign back in to pick up where you left off.
+            {tr('You\'ve been signed out for security. Sign back in to pick up where you left off.')}
           </Text>
         </View>
 
         <View style={s.safeCard}>
-          {['Your ticket is still holding your place', 'Wallet balance and deposits are safe']
+          {[tr('Your ticket is still holding your place'), tr('Wallet balance and deposits are safe')]
             .map((line) => (
               <View key={line} style={s.safeRow}>
                 <View style={s.tick}><Ionicons name="checkmark" size={11} color="#16A34A" /></View>
@@ -317,15 +319,15 @@ export function SessionExpiredSheet({ visible, name, email, onSignIn, onNotYou }
           <View style={s.whoRow}>
             <View style={s.whoAvatar}><Text style={s.whoAvatarText}>{initials}</Text></View>
             <View style={s.grow}>
-              <Text style={s.whoName}>{name ?? 'Your account'}</Text>
+              <Text style={s.whoName}>{name ?? tr('Your account')}</Text>
               <Text style={s.whoEmail}>{email}</Text>
             </View>
-            <Text style={s.link} onPress={onNotYou}>Not you?</Text>
+            <Text style={s.link} onPress={onNotYou}>{tr('Not you?')}</Text>
           </View>
         )}
 
         <Pressable onPress={onSignIn} style={({ pressed }) => [s.wideDark, pressed && s.pressed]}>
-          <Text style={s.wideDarkText}>SIGN IN AGAIN</Text>
+          <Text style={s.wideDarkText}>{tr('SIGN IN AGAIN')}</Text>
         </Pressable>
       </View>
     </Modal>

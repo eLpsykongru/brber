@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 import { PillButton } from '../components/ui';
 import { colors, font, radius, sp } from '../theme';
+import { tr } from '../lib/i18n';
 
 // Reusable onboarding permission prompt. TODO(backlog): wire to expo-notifications /
 // expo-location and place in the first-run flow.
@@ -25,16 +26,16 @@ export default function PermissionScreen({ icon, title, subtitle, primaryLabel, 
 
 // Convenience presets matching the mockups.
 export const NotificationPermission = (p: { onAllow: () => void; onSkip: () => void }) => (
-  <PermissionScreen icon="notifications-outline" title="Enable Notification Access"
-    subtitle="Enable notifications to receive real-time updates."
-    primaryLabel="Allow Notification" secondaryLabel="Maybe Later"
+  <PermissionScreen icon="notifications-outline" title={tr('Enable Notification Access')}
+    subtitle={tr('Enable notifications to receive real-time updates.')}
+    primaryLabel={tr('Allow Notification')} secondaryLabel={tr('Maybe Later')}
     onPrimary={p.onAllow} onSecondary={p.onSkip} />
 );
 
 export const LocationPermission = (p: { onAllow: () => void; onManual: () => void }) => (
-  <PermissionScreen icon="location-outline" title="What is Your Location?"
-    subtitle="Allow location access to find services near you."
-    primaryLabel="Allow Location Access" secondaryLabel="Enter Location Manually"
+  <PermissionScreen icon="location-outline" title={tr('What is Your Location?')}
+    subtitle={tr('Allow location access to find services near you.')}
+    primaryLabel={tr('Allow Location Access')} secondaryLabel={tr('Enter Location Manually')}
     onPrimary={p.onAllow} onSecondary={p.onManual} />
 );
 

@@ -5,19 +5,17 @@ import {
   Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View,
 } from 'react-native';
 import { Display } from '../components/ui';
+import { chooseLanguage, LANGUAGE_ROWS } from '../lib/language';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, TOP_INSET } from '../theme';
 import type { Profile } from '../types';
+import { tr, trn, lang } from '../lib/i18n';
+import type { Lang } from '../lib/i18n';
 
 // 19a Settings, 19b Edit profile, 20a Delete account, 20b Language.
 
-export const LANGUAGES: { key: string; native: string; english: string; rtl?: boolean }[] = [
-  { key: 'fr', native: 'Français', english: 'French' },
-  { key: 'ary', native: 'الدارجة', english: 'Moroccan Darija', rtl: true },
-  { key: 'ar', native: 'العربية', english: 'Arabic', rtl: true },
-  { key: 'en', native: 'English', english: 'English' },
-  { key: 'es', native: 'Español', english: 'Spanish' },
-];
+// each row names itself in its own language; the hint names it in yours
+const LANGUAGE_HINT: Record<Lang, string> = { fr: tr('French'), ar: tr('Arabic'), en: tr('English') };
 
 type Summary = {
   wallet_cents: number; active_coupons: number; live_deposit_cents: number;
@@ -31,7 +29,6 @@ export default function SettingsScreen({ profile, onBack, onProfileChanged, go }
   profile: Profile; onBack: () => void; onProfileChanged: () => void;
   go: (view: 'edit' | 'notifications' | 'invite' | 'password' | 'linked') => void;
 }) {
-  const [language, setLanguage] = useState(profile.language ?? 'fr');
   const [langOpen, setLangOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [locationOn, setLocationOn] = useState(true);
@@ -41,39 +38,41 @@ export default function SettingsScreen({ profile, onBack, onProfileChanged, go }
     supabase.rpc('my_account_summary').then(({ data }) => setSummary((data ?? [])[0] ?? null));
   }, []);
 
-  async function saveLanguage(next: string) {
-    setLanguage(next);
+  // What the app reads is the pick saved on this phone (lib/language.ts). The
+  // profile keeps it too, for whatever sends texts later; offline, the switch
+  // still happens.
+  async function saveLanguage(next: Lang) {
     setLangOpen(false);
-    const { error } = await supabase.from('profiles').update({ language: next }).eq('id', profile.id);
-    if (error) Alert.alert('Could not save', error.message);
-    else onProfileChanged();
+    if (next === lang()) return;
+    await supabase.from('profiles').update({ language: next }).eq('id', profile.id);
+    await chooseLanguage(next);
   }
 
-  const current = LANGUAGES.find((l) => l.key === language) ?? LANGUAGES[0];
+  const current = LANGUAGE_ROWS.find((l) => l.key === lang()) ?? LANGUAGE_ROWS[0];
 
   return (
     <View style={s.screen}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        <Header title="Settings" onBack={onBack} />
+        <Header title={tr('Settings')} onBack={onBack} />
 
-        <Text style={s.section}>PREFERENCES</Text>
+        <Text style={s.section}>{tr('PREFERENCES')}</Text>
         <View style={s.card}>
-          <Row label="Language" value={current.native} onPress={() => setLangOpen(true)} border />
+          <Row label={tr('Language')} value={current.native} onPress={() => setLangOpen(true)} border />
           {/* ponytail: single-city launch — the city is a fact, not a picker */}
-          <Row label="City" value="Tangier" border />
-          <Row label="Notifications" hint="Queue, bookings, wallet"
+          <Row label={tr('City')} value={tr('Tangier')} border />
+          <Row label={tr('Notifications')} hint={tr('Queue, bookings, wallet')}
             onPress={() => go('notifications')} border />
           <View style={s.row}>
             <View style={s.grow}>
-              <Text style={s.rowLabel}>Location while booking</Text>
-              <Text style={s.rowHint}>Used to sort salons by distance</Text>
+              <Text style={s.rowLabel}>{tr('Location while booking')}</Text>
+              <Text style={s.rowHint}>{tr('Used to sort salons by distance')}</Text>
             </View>
             <Switch value={locationOn} onValueChange={setLocationOn}
               trackColor={{ false: '#DDD9CF', true: colors.accent }} thumbColor="#fff" />
           </View>
         </View>
 
-        <Text style={s.section}>APPEARANCE</Text>
+        <Text style={s.section}>{tr('APPEARANCE')}</Text>
         <View style={s.cardPad}>
           <View style={s.segRow}>
             {(['Light', 'Dark', 'System'] as const).map((mode) => {
@@ -82,41 +81,41 @@ export default function SettingsScreen({ profile, onBack, onProfileChanged, go }
                 <Pressable key={mode} disabled={!on}
                   onPress={() => {}}
                   style={[s.seg, on && s.segOn, !on && s.segOff]}>
-                  <Text style={[s.segText, on && s.segTextOn]}>{mode}</Text>
+                  <Text style={[s.segText, on && s.segTextOn]}>{tr(mode)}</Text>
                 </Pressable>
               );
             })}
           </View>
           {/* the customer app has no dark theme yet — the dark kit is the barber
               side's. A switch that did nothing would be worse than saying so. */}
-          <Text style={s.segNote}>Dark mode is coming — the customer app is light for now.</Text>
+          <Text style={s.segNote}>{tr('Dark mode is coming — the customer app is light for now.')}</Text>
         </View>
 
-        <Text style={s.section}>ACCOUNT</Text>
+        <Text style={s.section}>{tr('ACCOUNT')}</Text>
         <View style={s.card}>
-          <Row label="Your profile" onPress={() => go('edit')} border />
-          <Row label="Linked accounts" value="Email" border onPress={() => go('linked')} />
-          <Row label="Invite friends" value="20 DH" accentValue onPress={() => go('invite')} border />
-          <Row label="Terms & Privacy"
-            onPress={() => Alert.alert('Terms & Privacy', 'Coming with the public site.')} />
+          <Row label={tr('Your profile')} onPress={() => go('edit')} border />
+          <Row label={tr('Linked accounts')} value={tr('Email')} border onPress={() => go('linked')} />
+          <Row label={tr('Invite friends')} value={tr('20 DH')} accentValue onPress={() => go('invite')} border />
+          <Row label={tr('Terms & Privacy')}
+            onPress={() => Alert.alert(tr('Terms & Privacy'), tr('Coming with the public site.'))} />
         </View>
 
         <View style={[s.card, s.dangerCard]}>
-          <Pressable onPress={() => Alert.alert('Log out', 'Are you sure you want to log out?', [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Yes, log out', style: 'destructive', onPress: () => supabase.auth.signOut() },
+          <Pressable onPress={() => Alert.alert(tr('Log out'), tr('Are you sure you want to log out?'), [
+            { text: tr('Cancel'), style: 'cancel' },
+            { text: tr('Yes, log out'), style: 'destructive', onPress: () => supabase.auth.signOut() },
           ])} style={({ pressed }) => [s.row, s.rowBorder, pressed && s.pressed]}>
-            <Text style={[s.rowLabel, s.danger]}>Log out</Text>
+            <Text style={[s.rowLabel, s.danger]}>{tr('Log out')}</Text>
           </Pressable>
           <Pressable onPress={() => setDeleteOpen(true)}
             style={({ pressed }) => [s.row, pressed && s.pressed]}>
-            <Text style={[s.rowLabel, s.danger, s.grow]}>Delete my account</Text>
+            <Text style={[s.rowLabel, s.danger, s.grow]}>{tr('Delete my account')}</Text>
             <Ionicons name="chevron-forward" size={15} color={colors.accent} />
           </Pressable>
         </View>
       </ScrollView>
 
-      <LanguageSheet visible={langOpen} value={language}
+      <LanguageSheet visible={langOpen} value={lang()}
         onClose={() => setLangOpen(false)} onPick={saveLanguage} />
       <DeleteAccountSheet visible={deleteOpen} summary={summary}
         onClose={() => setDeleteOpen(false)} />
@@ -128,7 +127,7 @@ function Header({ title, onBack }: { title: string; onBack: () => void }) {
   return (
     <View style={s.header}>
       <Pressable onPress={onBack} hitSlop={8}
-        style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel="Go back">
+        style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel={tr('Go back')}>
         <Ionicons name="arrow-back" size={16} color={colors.text} />
       </Pressable>
       <Display size={18} style={s.headerTitle}>{title}</Display>
@@ -162,7 +161,7 @@ function Row({ label, hint, value, accentValue, onPress, border }: {
 
 // ---- 20b -----------------------------------------------------------------
 function LanguageSheet({ visible, value, onClose, onPick }: {
-  visible: boolean; value: string; onClose: () => void; onPick: (key: string) => void;
+  visible: boolean; value: Lang; onClose: () => void; onPick: (key: Lang) => void;
 }) {
   const [draft, setDraft] = useState(value);
   useEffect(() => { if (visible) setDraft(value); }, [visible, value]);
@@ -174,14 +173,14 @@ function LanguageSheet({ visible, value, onClose, onPick }: {
         <View style={s.grabber} />
         <View style={s.sheetHead}>
           <View style={s.sheetSlot} />
-          <Display size={18} style={s.sheetTitle}>Language</Display>
+          <Display size={18} style={s.sheetTitle}>{tr('Language')}</Display>
           <Pressable onPress={onClose} hitSlop={8} style={[s.sheetSlot, s.sheetSlotEnd]}>
             <Ionicons name="close" size={16} color={colors.text} />
           </Pressable>
         </View>
 
         <View style={s.optionList}>
-          {LANGUAGES.map((l) => {
+          {LANGUAGE_ROWS.map((l) => {
             const on = draft === l.key;
             return (
               <Pressable key={l.key} onPress={() => setDraft(l.key)}
@@ -189,7 +188,7 @@ function LanguageSheet({ visible, value, onClose, onPick }: {
                 style={({ pressed }) => [s.option, on && s.optionOn, pressed && s.pressed]}>
                 <View style={s.grow}>
                   <Text style={[s.optionLabel, on && s.optionLabelOn]}>{l.native}</Text>
-                  <Text style={s.optionHint}>{l.english}</Text>
+                  <Text style={s.optionHint}>{LANGUAGE_HINT[l.key]}</Text>
                 </View>
                 <View style={[s.radio, on && s.radioOn]}>
                   {on && <Ionicons name="checkmark" size={11} color="#fff" />}
@@ -202,13 +201,13 @@ function LanguageSheet({ visible, value, onClose, onPick }: {
         <View style={s.noteCard}>
           <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary} />
           <Text style={s.noteText}>
-            Arabic and Darija flip the app right-to-left. Prices stay in DH.
+            {tr('Arabic turns the app right-to-left. Prices stay in DH. The app restarts to switch.')}
           </Text>
         </View>
 
         <Pressable onPress={() => onPick(draft)}
           style={({ pressed }) => [s.wideDark, pressed && s.pressed]}>
-          <Text style={s.wideDarkText}>SAVE</Text>
+          <Text style={s.wideDarkText}>{tr('SAVE')}</Text>
         </Pressable>
       </View>
     </Modal>
@@ -230,7 +229,7 @@ function DeleteAccountSheet({ visible, summary, onClose }: {
     setBusy(true);
     const { error } = await supabase.rpc('delete_my_account', { p_confirm: typed.trim() });
     setBusy(false);
-    if (error) return Alert.alert('Could not delete', error.message);
+    if (error) return Alert.alert(tr('Could not delete'), error.message);
     await supabase.auth.signOut();
   }
 
@@ -243,9 +242,9 @@ function DeleteAccountSheet({ visible, summary, onClose }: {
           <View style={s.warnCircle}>
             <Ionicons name="trash-outline" size={26} color={colors.accent} />
           </View>
-          <Display size={24} style={s.sheetTitleTight}>Delete account?</Display>
+          <Display size={24} style={s.sheetTitleTight}>{tr('Delete account?')}</Display>
           <Text style={s.sheetSub}>
-            This removes your bookings, chats, coupons and review history. It cannot be undone.
+            {tr('This removes your bookings, chats, coupons and review history. It cannot be undone.')}
           </Text>
         </View>
 
@@ -256,39 +255,38 @@ function DeleteAccountSheet({ visible, summary, onClose }: {
                 <Ionicons name="warning-outline" size={15} color={colors.accent} style={s.warnIcon} />
                 <Text style={s.warnBody}>
                   <Text style={s.warnStrong}>
-                    You have a live booking with a {dh(summary!.live_deposit_cents)} DH deposit.
+                    {tr('You have a live booking with a {live_deposit_cents} DH deposit.', { live_deposit_cents: dh(summary!.live_deposit_cents) })}
                   </Text>
-                  {' '}Cancel it or let it complete first — deposits aren't refunded on account
-                  deletion.
+                  {' '}{tr("Cancel it or let it complete first — deposits aren't refunded on account deletion.")}
                 </Text>
               </View>
               <View style={s.hr} />
             </>
           )}
           <View style={s.sumRow}>
-            <Text style={s.sumKey}>Wallet balance</Text>
-            <Text style={s.sumVal}>{dh(summary?.wallet_cents ?? 0)} DH</Text>
+            <Text style={s.sumKey}>{tr('Wallet balance')}</Text>
+            <Text style={s.sumVal}>{tr('{dh} DH', { dh: dh(summary?.wallet_cents ?? 0) })}</Text>
           </View>
           <View style={s.sumRow}>
-            <Text style={s.sumKey}>Active coupons</Text>
-            <Text style={s.sumVal}>{summary?.active_coupons ?? 0} · lost on delete</Text>
+            <Text style={s.sumKey}>{tr('Active coupons')}</Text>
+            <Text style={s.sumVal}>{tr('{active_coupons} · lost on delete', { active_coupons: summary?.active_coupons ?? 0 })}</Text>
           </View>
         </View>
 
         <View style={s.confirmBlock}>
-          <Text style={s.section}>TYPE DELETE TO CONFIRM</Text>
+          <Text style={s.section}>{tr('TYPE DELETE TO CONFIRM')}</Text>
           <TextInput style={s.confirmInput} value={typed} onChangeText={setTyped}
-            autoCapitalize="characters" placeholder="DELETE"
+            autoCapitalize="characters" placeholder={tr('DELETE')}
             placeholderTextColor={colors.textTertiary} />
         </View>
 
         <View style={s.sheetCtas}>
           <Pressable onPress={destroy} disabled={!armed || busy}
             style={({ pressed }) => [s.dangerBtn, (!armed || busy) && s.disabled, pressed && s.pressed]}>
-            <Text style={s.dangerText}>DELETE MY ACCOUNT</Text>
+            <Text style={s.dangerText}>{tr('DELETE MY ACCOUNT')}</Text>
           </Pressable>
           <Pressable onPress={onClose} style={({ pressed }) => [s.keepBtn, pressed && s.pressed]}>
-            <Text style={s.keepText}>KEEP MY ACCOUNT</Text>
+            <Text style={s.keepText}>{tr('KEEP MY ACCOUNT')}</Text>
           </Pressable>
         </View>
       </View>
@@ -318,8 +316,8 @@ export function EditProfileScreen({ profile, onBack, onDone }: {
       const rec = b as unknown as { profiles: { full_name: string | null } | null; salon: { name: string } | null } | null;
       if (rec) {
         setTop({
-          name: rec.profiles?.full_name ?? 'Your barber',
-          salon: rec.salon?.name ?? 'Salon',
+          name: rec.profiles?.full_name ?? tr('Your barber'),
+          salon: rec.salon?.name ?? tr('Salon'),
           visits: row.top_barber_visits ?? 0,
         });
       }
@@ -358,7 +356,7 @@ export function EditProfileScreen({ profile, onBack, onDone }: {
       avatar_url: avatarUrl,
     }).eq('id', profile.id);
     setBusy(false);
-    if (error) return Alert.alert('Could not save', error.message);
+    if (error) return Alert.alert(tr('Could not save'), error.message);
     onDone();
   }
 
@@ -367,10 +365,10 @@ export function EditProfileScreen({ profile, onBack, onDone }: {
   return (
     <View style={s.screen}>
       <ScrollView contentContainerStyle={s.contentTall} showsVerticalScrollIndicator={false}>
-        <Header title="Your profile" onBack={onBack} />
+        <Header title={tr('Your profile')} onBack={onBack} />
 
         <View style={s.avatarBlock}>
-          <Pressable onPress={pickAvatar} style={s.avatarWrap} accessibilityLabel="Change photo">
+          <Pressable onPress={pickAvatar} style={s.avatarWrap} accessibilityLabel={tr('Change photo')}>
             {avatar
               ? <Image source={{ uri: avatar }} style={s.avatarImg} />
               : <View style={[s.avatarImg, s.avatarFallback]}>
@@ -380,47 +378,47 @@ export function EditProfileScreen({ profile, onBack, onDone }: {
               <Ionicons name="camera-outline" size={12} color="#fff" />
             </View>
           </Pressable>
-          <Text style={s.changePhoto} onPress={pickAvatar}>Change photo</Text>
+          <Text style={s.changePhoto} onPress={pickAvatar}>{tr('Change photo')}</Text>
         </View>
 
         <View style={s.fieldList}>
           <View style={[s.field, s.fieldFocus]}>
-            <Text style={s.fieldLabel}>FULL NAME</Text>
+            <Text style={s.fieldLabel}>{tr('FULL NAME')}</Text>
             <TextInput style={s.fieldInput} value={name} onChangeText={setName}
-              placeholder="Your name" placeholderTextColor={colors.textTertiary} />
+              placeholder={tr('Your name')} placeholderTextColor={colors.textTertiary} />
           </View>
 
           <View style={s.field}>
             <View style={s.grow}>
-              <Text style={s.fieldLabel}>EMAIL</Text>
-              <Text style={s.fieldLocked}>{profile.email ?? 'Not set'}</Text>
+              <Text style={s.fieldLabel}>{tr('EMAIL')}</Text>
+              <Text style={s.fieldLocked}>{profile.email ?? tr('Not set')}</Text>
             </View>
             <Ionicons name="lock-closed-outline" size={14} color={colors.textTertiary} />
           </View>
 
           <View style={s.field}>
             <View style={s.grow}>
-              <Text style={s.fieldLabel}>PHONE</Text>
-              <Text style={s.fieldValue}>{profile.phone ?? 'Not set'}</Text>
+              <Text style={s.fieldLabel}>{tr('PHONE')}</Text>
+              <Text style={s.fieldValue}>{profile.phone ?? tr('Not set')}</Text>
             </View>
             {!!profile.phone && (
               <View style={s.verified}>
                 <Ionicons name="checkmark" size={11} color="#16A34A" />
-                <Text style={s.verifiedText}>VERIFIED</Text>
+                <Text style={s.verifiedText}>{tr('VERIFIED')}</Text>
               </View>
             )}
           </View>
 
           <View style={s.field}>
-            <Text style={s.fieldLabel}>DATE OF BIRTH</Text>
+            <Text style={s.fieldLabel}>{tr('DATE OF BIRTH')}</Text>
             <TextInput style={s.fieldInput} value={dob} onChangeText={setDob}
-              placeholder="Optional · YYYY-MM-DD" placeholderTextColor={colors.textTertiary} />
+              placeholder={tr('Optional · YYYY-MM-DD')} placeholderTextColor={colors.textTertiary} />
           </View>
         </View>
 
         {top && (
           <>
-            <Text style={s.section}>PREFERRED BARBER</Text>
+            <Text style={s.section}>{tr('PREFERRED BARBER')}</Text>
             <View style={s.prefRow}>
               <View style={s.prefAvatar}>
                 <Text style={s.prefAvatarText}>
@@ -429,7 +427,7 @@ export function EditProfileScreen({ profile, onBack, onDone }: {
               </View>
               <View style={s.grow}>
                 <Text style={s.prefName}>{top.name}</Text>
-                <Text style={s.rowHint}>{top.salon} · {top.visits} visit{top.visits === 1 ? '' : 's'}</Text>
+                <Text style={s.rowHint}>{trn(top.visits, '{salon} · {n} visit', '{salon} · {n} visits', { salon: top.salon })}</Text>
               </View>
             </View>
           </>
@@ -437,7 +435,7 @@ export function EditProfileScreen({ profile, onBack, onDone }: {
 
         {services.length > 0 && (
           <>
-            <Text style={s.section}>USUAL SERVICE</Text>
+            <Text style={s.section}>{tr('USUAL SERVICE')}</Text>
             <View style={s.chipRow}>
               {services.map((n) => {
                 const on = usual === n;
@@ -456,7 +454,7 @@ export function EditProfileScreen({ profile, onBack, onDone }: {
       <View style={s.footer}>
         <Pressable onPress={save} disabled={busy}
           style={({ pressed }) => [s.wideDark, (pressed || busy) && s.pressed]}>
-          <Text style={s.wideDarkText}>SAVE CHANGES</Text>
+          <Text style={s.wideDarkText}>{tr('SAVE CHANGES')}</Text>
         </Pressable>
       </View>
     </View>

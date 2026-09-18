@@ -8,6 +8,7 @@ import type { LatLng } from '../lib/geo';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, sp } from '../theme';
 import type { Barber, Salon } from '../types';
+import { tr } from '../lib/i18n';
 
 type Props = { barber: Barber; onDone: () => void };
 
@@ -40,16 +41,16 @@ export default function OnboardingScreen({ barber, onDone }: Props) {
 
   async function submit() {
     if (mode === 'create' && (!salonName.trim() || !salonAddress.trim())) {
-      return Alert.alert('Missing info', 'Salon name and address are required.');
+      return Alert.alert(tr('Missing info'), tr('Salon name and address are required.'));
     }
     if (mode === 'create' && !coords) {
-      return Alert.alert('Missing location', 'Set your salon location on the map so clients can find you.');
+      return Alert.alert(tr('Missing location'), tr('Set your salon location on the map so clients can find you.'));
     }
     if (mode === 'join' && !joinSalonId) {
-      return Alert.alert('Missing info', 'Pick the salon you work at.');
+      return Alert.alert(tr('Missing info'), tr('Pick the salon you work at.'));
     }
     if (!photoUri) {
-      return Alert.alert('Missing ID', 'A photo of your ID is required for verification.');
+      return Alert.alert(tr('Missing ID'), tr('A photo of your ID is required for verification.'));
     }
     setBusy(true);
     try {
@@ -81,7 +82,7 @@ export default function OnboardingScreen({ barber, onDone }: Props) {
       if (error) throw error;
       onDone();
     } catch (e: any) {
-      Alert.alert('Could not submit', e.message ?? String(e));
+      Alert.alert(tr('Could not submit'), e.message ?? String(e));
     } finally {
       setBusy(false);
     }
@@ -89,30 +90,30 @@ export default function OnboardingScreen({ barber, onDone }: Props) {
 
   return (
     <ScrollView contentContainerStyle={s.form} keyboardShouldPersistTaps="handled">
-      <Text style={s.title}>Set up your profile</Text>
-      <Text style={s.hint}>This is reviewed manually before you appear in the app.</Text>
+      <Text style={s.title}>{tr('Set up your profile')}</Text>
+      <Text style={s.hint}>{tr('This is reviewed manually before you appear in the app.')}</Text>
 
       <View style={s.modeRow}>
-        <Chip label="New salon" active={mode === 'create'} onPress={() => setMode('create')} />
-        <Chip label="Join a salon" active={mode === 'join'} onPress={() => setMode('join')} />
+        <Chip label={tr('New salon')} active={mode === 'create'} onPress={() => setMode('create')} />
+        <Chip label={tr('Join a salon')} active={mode === 'join'} onPress={() => setMode('join')} />
       </View>
 
       {mode === 'create' ? (
         <>
-          <Field placeholder="Salon name" value={salonName} onChangeText={setSalonName} />
-          <Field placeholder="Salon address" value={salonAddress} onChangeText={setSalonAddress} />
+          <Field placeholder={tr('Salon name')} value={salonName} onChangeText={setSalonName} />
+          <Field placeholder={tr('Salon address')} value={salonAddress} onChangeText={setSalonAddress} />
           <TouchableOpacity style={s.locationBtn} onPress={() => setPickerOpen(true)}
-            accessibilityLabel="Set salon location on map">
+            accessibilityLabel={tr('Set salon location on map')}>
             <Ionicons name={coords ? 'checkmark-circle' : 'location-outline'} size={20}
               color={coords ? colors.success : colors.accent} />
             <Text style={s.locationBtnText}>
-              {coords ? 'Location set — tap to adjust' : 'Set location on map'}
+              {coords ? tr('Location set — tap to adjust') : tr('Set location on map')}
             </Text>
           </TouchableOpacity>
         </>
       ) : (
         <View style={s.salonList}>
-          {salons.length === 0 && <Text style={s.hint}>No salons yet — create one instead.</Text>}
+          {salons.length === 0 && <Text style={s.hint}>{tr('No salons yet — create one instead.')}</Text>}
           {salons.map((sl) => (
             <Card key={sl.id} onPress={() => setJoinSalonId(sl.id)}
               style={joinSalonId === sl.id ? s.salonActive : undefined}>
@@ -124,19 +125,19 @@ export default function OnboardingScreen({ barber, onDone }: Props) {
       )}
 
       <View style={s.fieldRow}>
-        <Field placeholder="Specialty (e.g. Barber)" value={specialty} onChangeText={setSpecialty}
+        <Field placeholder={tr('Specialty (e.g. Barber)')} value={specialty} onChangeText={setSpecialty}
           style={s.grow} />
-        <Field placeholder="Years exp." keyboardType="number-pad" value={yearsExp}
+        <Field placeholder={tr('Years exp.')} keyboardType="number-pad" value={yearsExp}
           onChangeText={setYearsExp} style={s.years} />
       </View>
-      <Field placeholder="Short bio (optional)" multiline value={bio} onChangeText={setBio}
+      <Field placeholder={tr('Short bio (optional)')} multiline value={bio} onChangeText={setBio}
         style={s.multiline} />
-      <TouchableOpacity style={s.photoBox} onPress={pickPhoto} accessibilityLabel="Add a photo of your ID">
+      <TouchableOpacity style={s.photoBox} onPress={pickPhoto} accessibilityLabel={tr('Add a photo of your ID')}>
         {photoUri
           ? <Image source={{ uri: photoUri }} style={s.photo} resizeMode="cover" />
-          : <Text style={s.photoHint}>Tap to add a photo of your ID</Text>}
+          : <Text style={s.photoHint}>{tr('Tap to add a photo of your ID')}</Text>}
       </TouchableOpacity>
-      <PillButton title="Submit for review" onPress={submit} loading={busy} />
+      <PillButton title={tr('Submit for review')} onPress={submit} loading={busy} />
       <LocationPicker visible={pickerOpen} initial={coords}
         onPick={(c) => { setCoords(c); setPickerOpen(false); }}
         onClose={() => setPickerOpen(false)} />

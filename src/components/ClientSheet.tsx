@@ -3,6 +3,7 @@ import { ActivityIndicator, Image, Linking, Pressable, StyleSheet, View } from '
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
 import { Avatar, Eyebrow, Ico, IconName, Sheet, Stars, T } from './dark';
+import { tr, trn } from '../lib/i18n';
 
 // Client quick-view (1h): who they are, their history with you, what's coming up.
 // Works for app clients (customerId) and walk-ins (grouped by walkInName).
@@ -84,18 +85,16 @@ export default function ClientSheet({ client, barberId, onClose, onChat }: {
         <View style={s.grow}>
           <T w="b" size={17}>{client.name}</T>
           {isWalkIn
-            ? <T w="sb" size={11} c={D.sub} style={{ marginTop: 3 }}>Walk-in (no account)</T>
+            ? <T w="sb" size={11} c={D.sub} style={{ marginTop: 3 }}>{tr('Walk-in (no account)')}</T>
             : stars != null
               ? <View style={{ marginTop: 3 }} accessible
-                  accessibilityLabel={`Reliability ${stars} of 5 stars`}><Stars n={stars} size={11} /></View>
-              : <T w="sb" size={11} c={D.sub} style={{ marginTop: 3 }}>New client</T>}
+                  accessibilityLabel={tr('Reliability {stars} of 5 stars', { stars })}><Stars n={stars} size={11} /></View>
+              : <T w="sb" size={11} c={D.sub} style={{ marginTop: 3 }}>{tr('New client')}</T>}
           <T size={12} c={D.sub} style={{ marginTop: 3 }}>
-            {visits} visit{visits === 1 ? '' : 's'}
-            {noShows ? ` · ${noShows} no-show${noShows === 1 ? '' : 's'}` : ''}
-            {spent ? ` · ${dh(spent)} spent` : ''}
+            {trn(visits, '{n} visit{x2}{x3}', '{n} visits{x2}{x3}', { x2: noShows ? trn(noShows, ' · {n} no-show', ' · {n} no-shows') : '', x3: spent ? tr(' · {spent} spent', { spent: dh(spent) }) : '' })}
           </T>
         </View>
-        <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel="Close"
+        <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel={tr('Close')}
           style={({ pressed }) => [s.close, pressed && s.pressed]}>
           <Ico name="x" size={16} />
         </Pressable>
@@ -104,22 +103,22 @@ export default function ClientSheet({ client, barberId, onClose, onChat }: {
       {!isWalkIn && (client.phone || (onChat && chatBooking)) && (
         <View style={s.actions}>
           {client.phone && (
-            <ActionBtn icon="phone" label="Call" onPress={() => Linking.openURL(`tel:${client.phone}`)} />
+            <ActionBtn icon="phone" label={tr('Call')} onPress={() => Linking.openURL(`tel:${client.phone}`)} />
           )}
           {onChat && chatBooking && (
-            <ActionBtn icon="message-circle" label="Chat" onPress={() => onChat(chatBooking.id, client.name)} />
+            <ActionBtn icon="message-circle" label={tr('Chat')} onPress={() => onChat(chatBooking.id, client.name)} />
           )}
         </View>
       )}
 
       {rows === null && (
-        <ActivityIndicator style={s.spinner} color={D.accent} accessibilityLabel="Loading client history" />
+        <ActivityIndicator style={s.spinner} color={D.accent} accessibilityLabel={tr('Loading client history')} />
       )}
 
       {rows !== null && (
         <>
-          <Eyebrow ls={1.4}>UPCOMING</Eyebrow>
-          {upcoming.length === 0 && <T size={12} c={D.sub}>Nothing booked.</T>}
+          <Eyebrow ls={1.4}>{tr('UPCOMING')}</Eyebrow>
+          {upcoming.length === 0 && <T size={12} c={D.sub}>{tr('Nothing booked.')}</T>}
           {upcoming.map((r) => (
             <View key={r.id} style={s.row}>
               <View style={s.rowLeft}>
@@ -127,15 +126,15 @@ export default function ClientSheet({ client, barberId, onClose, onChat }: {
                 <T size={10} c={D.sub} style={s.tnum}>{hhmm(r.starts_at)}–{hhmm(r.ends_at)}</T>
               </View>
               <View style={s.grow}>
-                <T w="sb" size={12}>{r.services?.name ?? 'Service'}</T>
-                {r.status === 'pending' && <T w="b" size={9} c={D.amber} ls={0.5}>PENDING</T>}
+                <T w="sb" size={12}>{r.services?.name ?? tr('Service')}</T>
+                {r.status === 'pending' && <T w="b" size={9} c={D.amber} ls={0.5}>{tr('PENDING')}</T>}
               </View>
               <T w="b" size={12} style={s.tnum}>{dh(r.price_cents)}</T>
             </View>
           ))}
 
-          <Eyebrow ls={1.4}>HISTORY</Eyebrow>
-          {history.length === 0 && <T size={12} c={D.sub}>No past visits yet.</T>}
+          <Eyebrow ls={1.4}>{tr('HISTORY')}</Eyebrow>
+          {history.length === 0 && <T size={12} c={D.sub}>{tr('No past visits yet.')}</T>}
           {history.slice(0, 15).map((r) => (
             <View key={r.id} style={s.row}>
               <View style={s.rowLeft}>
@@ -145,9 +144,9 @@ export default function ClientSheet({ client, barberId, onClose, onChat }: {
               <View style={s.grow}>
                 <T w="sb" size={12} c={r.status === 'no_show' ? D.sub : D.text}
                   style={r.status === 'no_show' && s.struck}>
-                  {r.services?.name ?? 'Service'}
+                  {r.services?.name ?? tr('Service')}
                 </T>
-                {r.status === 'no_show' && <T w="b" size={9} c={D.red} ls={0.5}>NO-SHOW</T>}
+                {r.status === 'no_show' && <T w="b" size={9} c={D.red} ls={0.5}>{tr('NO-SHOW')}</T>}
               </View>
               <T w="b" size={12} c={r.status === 'no_show' ? D.sub : D.text}
                 style={[s.tnum, r.status === 'no_show' && s.struck]}>
@@ -156,7 +155,7 @@ export default function ClientSheet({ client, barberId, onClose, onChat }: {
             </View>
           ))}
           {history.length > 15 && (
-            <T size={12} c={D.sub}>+ {history.length - 15} older visits</T>
+            <T size={12} c={D.sub}>{tr('+ {x} older visits', { x: history.length - 15 })}</T>
           )}
         </>
       )}

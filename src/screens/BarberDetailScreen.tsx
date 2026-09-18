@@ -12,6 +12,7 @@ import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
 import type { Service, Specialist } from '../types';
 import ChatScreen from './ChatScreen';
+import { loc, tr, trn, weekdayName } from '../lib/i18n';
 
 type Props = {
   barber: Specialist;
@@ -34,7 +35,7 @@ type Review = {
   customer: { full_name: string | null } | null;
 };
 
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6].map((i) => weekdayName(i));
 const SLOT_STEP_MIN = 30;
 
 function toHHMM(mins: number) {
@@ -47,12 +48,12 @@ function localDateStr(d: Date) {
 
 function timeAgo(iso: string) {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
-  if (days < 1) return 'today';
-  if (days < 30) return `${days} day${days > 1 ? 's' : ''} ago`;
+  if (days < 1) return tr('today');
+  if (days < 30) return trn(days, '{n} day ago', '{n} days ago');
   const months = Math.floor(days / 30);
-  if (months < 12) return `${months} month${months > 1 ? 's' : ''} ago`;
+  if (months < 12) return trn(months, '{n} month ago', '{n} months ago');
   const years = Math.floor(months / 12);
-  return `${years} year${years > 1 ? 's' : ''} ago`;
+  return trn(years, '{n} year ago', '{n} years ago');
 }
 
 type SlotStatus = 'free' | 'full' | 'past';
@@ -112,7 +113,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
   // hook runs fine here (no map), and the header wants its own puck.
   const [saved, toggleSaved] = useSaved('barber', barber.id);
 
-  const name = barber.profiles?.full_name ?? 'Barber';
+  const name = barber.profiles?.full_name ?? tr('Barber');
   // 0109 — for thirty days after a rename the page still says who this was
   const formerly = formerlyName(barber.profiles?.previous_name ?? null,
     barber.profiles?.name_changed_at ?? null, Date.now());
@@ -176,7 +177,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
   }, [barber.id]);
 
   function share() {
-    Share.share({ message: `${name} — ${barber.specialty ?? 'Barber'} at ${salonName}. Book on Sterncut!` });
+    Share.share({ message: tr('{name} — {specialty} at {salon}. Book on Sterncut!', { name, specialty: barber.specialty ?? tr('Barber'), salon: salonName }) });
   }
 
   async function openChat() {
@@ -186,7 +187,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
       .eq('customer_id', auth.user!.id).eq('barber_id', barber.id)
       .in('status', ['pending', 'confirmed']).order('starts_at').limit(1);
     if (!data?.length) {
-      return Alert.alert('No booking yet', 'Book an appointment first to message this barber.');
+      return Alert.alert(tr('No booking yet'), tr('Book an appointment first to message this barber.'));
     }
     setMeId(auth.user!.id);
     setChatBookingId(data[0].id);
@@ -203,11 +204,11 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
     if (preview) return;
     const svc = selected!;
     const when = `${slot.toDateString()} ${slot.toTimeString().slice(0, 5)}`;
-    Alert.alert('Confirm booking',
-      `${svc.name} with ${name} at ${salonName}\n${when}\n${(svc.price_cents / 100).toFixed(2)} DH, paid at the shop`, [
-        { text: 'Cancel', style: 'cancel' },
+    Alert.alert(tr('Confirm booking'),
+      tr('{name} with {name2} at {salonName}\n{when}\n{x} DH, paid at the shop', { name: svc.name, name2: name, salonName, when, x: (svc.price_cents / 100).toFixed(2) }), [
+        { text: tr('Cancel'), style: 'cancel' },
         {
-          text: 'Book',
+          text: tr('Book'),
           onPress: async () => {
             setBusy(true);
             const { data: auth } = await supabase.auth.getUser();
@@ -216,7 +217,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
               service_id: svc.id, starts_at: slot.toISOString(),
             });
             setBusy(false);
-            if (error) Alert.alert('Could not book', error.message);
+            if (error) Alert.alert(tr('Could not book'), error.message);
             else {
               setSlotMode(false);
               setSelected(null);
@@ -224,9 +225,9 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
               loadCalendar();
               // leave on OK, not before it: the alert is the only confirmation
               // this path has, so it has to be read before the screen changes
-              Alert.alert('Request sent!',
-                'The barber will confirm your booking shortly. Pay at the shop.',
-                [{ text: 'OK', onPress: () => onBooked?.() }]);
+              Alert.alert(tr('Request sent!'),
+                tr('The barber will confirm your booking shortly. Pay at the shop.'),
+                [{ text: tr('OK'), onPress: () => onBooked?.() }]);
             }
           },
         },
@@ -246,21 +247,21 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
     const slots = daySlots(selectedDay, selected.duration_min, windows, booked, daysOff);
     return (
       <View style={s.screen}>
-        <ScreenHeader title="Pick a time" onBack={() => setSlotMode(false)} />
+        <ScreenHeader title={tr('Pick a time')} onBack={() => setSlotMode(false)} />
         <Text style={s.slotSubtitle}>
-          {selected.name} · {selected.duration_min} min · {(selected.price_cents / 100).toFixed(2)} DH
+          {tr('{name} · {duration_min} min · {x} DH', { name: selected.name, duration_min: selected.duration_min, x: (selected.price_cents / 100).toFixed(2) })}
         </Text>
 
         {/* week header — no month/year, just navigation */}
         <View style={s.weekHead}>
-          <Text style={s.weekLabel}>Select a date</Text>
+          <Text style={s.weekLabel}>{tr('Select a date')}</Text>
           <View style={s.weekNav}>
             <Pressable onPress={() => changeWeek('prev')} disabled={!canGoPrev} hitSlop={6}
-              accessibilityLabel="Previous week"
+              accessibilityLabel={tr('Previous week')}
               style={({ pressed }) => [s.navBtn, pressed && s.pressed, !canGoPrev && s.navDisabled]}>
               <Ionicons name="chevron-back" size={18} color={colors.text} />
             </Pressable>
-            <Pressable onPress={() => changeWeek('next')} hitSlop={6} accessibilityLabel="Next week"
+            <Pressable onPress={() => changeWeek('next')} hitSlop={6} accessibilityLabel={tr('Next week')}
               style={({ pressed }) => [s.navBtn, pressed && s.pressed]}>
               <Ionicons name="chevron-forward" size={18} color={colors.text} />
             </Pressable>
@@ -276,7 +277,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
               <Pressable key={d.toISOString()} disabled={isPast} style={s.dayCol}
                 onPress={() => { setSelectedDay(d); setSelectedTime(null); }}>
                 <Text style={[s.dayDow, isPast && s.dayMuted]}>
-                  {d.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 2)}
+                  {d.toLocaleDateString(loc('en-US'), { weekday: 'short' }).slice(0, 2)}
                 </Text>
                 <View style={[s.dayNum, isSel && s.dayNumActive, isPast && s.dayNumPast]}>
                   <Text style={[s.dayNumText, isSel && s.dayNumTextActive, isPast && s.dayMuted]}>
@@ -290,7 +291,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
 
         {/* time grid */}
         <ScrollView contentContainerStyle={s.slotScroll}>
-          {slots.length === 0 && <Empty text="Not working this day." />}
+          {slots.length === 0 && <Empty text={tr('Not working this day.')} />}
           <View style={s.slotGrid}>
             {slots.map(({ time, status }) => {
               const isSel = selectedTime?.getTime() === time.getTime();
@@ -312,13 +313,13 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
             })}
           </View>
           {slots.some((sl) => sl.status === 'full') && (
-            <Text style={s.legend}>Crossed-out times are already booked.</Text>
+            <Text style={s.legend}>{tr('Crossed-out times are already booked.')}</Text>
           )}
         </ScrollView>
 
         {/* confirm */}
         <View style={s.slotCta}>
-          <PillButton title={selectedTime ? `Book ${selectedTime.toTimeString().slice(0, 5)}` : 'Select a time'}
+          <PillButton title={selectedTime ? tr('Book {selectedTime}', { selectedTime: selectedTime.toTimeString().slice(0, 5) }) : tr('Select a time')}
             disabled={!selectedTime || busy} onPress={() => selectedTime && book(selectedTime)} />
         </View>
       </View>
@@ -335,24 +336,24 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
     .filter((x) => x.w);
 
   const stats: { value: string; unit: string; label: string }[] = [
-    { value: customerCount != null ? String(customerCount) : '–', unit: 'clients', label: 'Customers' },
-    { value: barber.years_experience != null ? `${barber.years_experience}+` : '–', unit: 'yrs', label: 'Experience' },
-    { value: avg != null ? avg.toFixed(1) : '–', unit: '★', label: 'Rating' },
-    { value: String(barber.reviews.length), unit: 'total', label: 'Reviews' },
+    { value: customerCount != null ? String(customerCount) : '–', unit: tr('clients'), label: tr('Customers') },
+    { value: barber.years_experience != null ? `${barber.years_experience}+` : '–', unit: tr('yrs'), label: tr('Experience') },
+    { value: avg != null ? avg.toFixed(1) : '–', unit: '★', label: tr('Rating') },
+    { value: String(barber.reviews.length), unit: tr('total'), label: tr('Reviews') },
   ];
 
   return (
     <View style={s.screen}>
-      {preview ? <PreviewBar onDone={onBack} /> : <ScreenHeader title="Specialist" onBack={onBack}
+      {preview ? <PreviewBar onDone={onBack} /> : <ScreenHeader title={tr('Specialist')} onBack={onBack}
         right={
           <>
             <Pressable onPress={toggleSaved} hitSlop={8}
-              accessibilityLabel={saved ? `Remove ${name} from saved` : `Save ${name}`}
+              accessibilityLabel={saved ? tr('Remove {name} from saved', { name }) : tr('Save {name}', { name })}
               style={({ pressed }) => [s.headBtn, saved && s.headBtnOn, pressed && s.pressed]}>
               <Ionicons name={saved ? 'heart' : 'heart-outline'} size={17}
                 color={saved ? colors.onAccent : colors.text} />
             </Pressable>
-            <Pressable onPress={share} hitSlop={8} accessibilityLabel="Share this specialist"
+            <Pressable onPress={share} hitSlop={8} accessibilityLabel={tr('Share this specialist')}
               style={({ pressed }) => [s.headBtn, pressed && s.pressed]}>
               <Ionicons name="share-social-outline" size={16} color={colors.text} />
             </Pressable>
@@ -379,15 +380,15 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
           <View style={s.profileText}>
             <Text style={s.name}>{name}</Text>
             <Text style={s.subtitle} numberOfLines={1}>
-              {barber.specialty ?? 'Barber'} | {salonName}
+              {barber.specialty ?? tr('Barber')} | {salonName}
             </Text>
-            {!!formerly && <Text style={s.formerly}>formerly {formerly}</Text>}
+            {!!formerly && <Text style={s.formerly}>{tr('formerly {formerly}', { formerly })}</Text>}
             {/* EXPL-28 — saving is instant and silent, so the only confirmation
                 is this. No sheet: `useSaved` is optimistic on purpose. */}
             {saved && (
               <View style={s.savedChip}>
                 <Ionicons name="heart" size={11} color={colors.accent} />
-                <Text style={s.savedChipText}>IN YOUR SAVED</Text>
+                <Text style={s.savedChipText}>{tr('IN YOUR SAVED')}</Text>
               </View>
             )}
           </View>
@@ -417,7 +418,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
             <Pressable key={t} onPress={() => setTab(t)} style={s.tabBtn}
               accessibilityRole="tab" accessibilityState={{ selected: tab === t }}>
               <Text style={[s.tabText, tab === t && s.tabTextActive]}>
-                {t === 'reviews' ? 'Review' : t[0].toUpperCase() + t.slice(1)}
+                {t === 'reviews' ? tr('Review') : t[0].toUpperCase() + t.slice(1)}
               </Text>
               {tab === t && <View style={s.tabUnderline} />}
             </Pressable>
@@ -427,8 +428,8 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
         {/* SERVICES */}
         {tab === 'services' && (
           <View style={s.tabBody}>
-            <Text style={s.sectionTitle}>Services <Text style={s.count}>({services.length})</Text></Text>
-            {services.length === 0 && <Empty text="No services listed yet." />}
+            <Text style={s.sectionTitle}>{tr('Services')} <Text style={s.count}>({services.length})</Text></Text>
+            {services.length === 0 && <Empty text={tr('No services listed yet.')} />}
             {services.map((sv) => {
               const on = selected?.id === sv.id;
               return (
@@ -436,9 +437,9 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
                   onPress={() => setSelected(on ? null : sv)}>
                   <View style={s.grow}>
                     <Text style={s.serviceName}>{sv.name}</Text>
-                    <Text style={s.meta}>{sv.duration_min} minutes</Text>
+                    <Text style={s.meta}>{tr('{duration_min} minutes', { duration_min: sv.duration_min })}</Text>
                   </View>
-                  <Text style={s.servicePrice}>{(sv.price_cents / 100).toFixed(2)} DH</Text>
+                  <Text style={s.servicePrice}>{tr('{x} DH', { x: (sv.price_cents / 100).toFixed(2) })}</Text>
                   <Ionicons name={on ? 'checkmark-circle' : 'ellipse-outline'} size={22}
                     color={on ? colors.accent : colors.border} />
                 </TouchableOpacity>
@@ -450,19 +451,19 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
         {/* ABOUT */}
         {tab === 'about' && (
           <View style={s.tabBody}>
-            <Text style={s.sectionTitle}>About specialist</Text>
+            <Text style={s.sectionTitle}>{tr('About specialist')}</Text>
             {barber.bio ? (
               <Pressable onPress={() => setBioExpanded(!bioExpanded)}>
                 <Text style={s.bodyText} numberOfLines={bioExpanded ? undefined : 3}>{barber.bio}</Text>
                 {barber.bio.length > 120 && (
-                  <Text style={s.readMore}>{bioExpanded ? 'Read less' : 'Read more'}</Text>
+                  <Text style={s.readMore}>{bioExpanded ? tr('Read less') : tr('Read more')}</Text>
                 )}
               </Pressable>
-            ) : <Text style={s.meta}>No bio yet.</Text>}
+            ) : <Text style={s.meta}>{tr('No bio yet.')}</Text>}
 
             {!!barber.languages?.length && (
               <>
-                <Text style={s.sectionTitle}>Languages in the chair</Text>
+                <Text style={s.sectionTitle}>{tr('Languages in the chair')}</Text>
                 <View style={s.langRow}>
                   {LANGUAGES.filter((l) => barber.languages!.includes(l.key)).map((l) => (
                     <View key={l.key} style={s.langChip}><Text style={s.langText}>{l.label}</Text></View>
@@ -471,7 +472,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
               </>
             )}
 
-            <Text style={s.sectionTitle}>Specialist contact</Text>
+            <Text style={s.sectionTitle}>{tr('Specialist contact')}</Text>
             <View style={s.contactRow}>
               <View style={[s.contactAvatar, s.avatarFallback]}>
                 <Text style={s.contactInitials}>
@@ -480,22 +481,22 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
               </View>
               <View style={s.grow}>
                 <Text style={s.contactName}>{name}</Text>
-                <Text style={s.meta}>{barber.specialty ?? 'Barber'}</Text>
+                <Text style={s.meta}>{barber.specialty ?? tr('Barber')}</Text>
               </View>
-              <Pressable onPress={openChat} hitSlop={6} accessibilityLabel="Message"
+              <Pressable onPress={openChat} hitSlop={6} accessibilityLabel={tr('Message')}
                 style={({ pressed }) => [s.roundBtn, pressed && s.pressed]}>
                 <Ionicons name="chatbubble-ellipses-outline" size={18} color={colors.text} />
               </Pressable>
               {!!barber.profiles?.phone && (
-                <Pressable onPress={call} hitSlop={6} accessibilityLabel="Call"
+                <Pressable onPress={call} hitSlop={6} accessibilityLabel={tr('Call')}
                   style={({ pressed }) => [s.roundBtn, pressed && s.pressed]}>
                   <Ionicons name="call-outline" size={18} color={colors.text} />
                 </Pressable>
               )}
             </View>
 
-            <Text style={s.sectionTitle}>Working hours</Text>
-            {openDays.length === 0 && <Text style={s.meta}>Hours not set yet.</Text>}
+            <Text style={s.sectionTitle}>{tr('Working hours')}</Text>
+            {openDays.length === 0 && <Text style={s.meta}>{tr('Hours not set yet.')}</Text>}
             {openDays.map(({ label, w }) => (
               <View key={label} style={s.hoursRow}>
                 <Text style={s.bodyText}>{label}</Text>
@@ -508,8 +509,8 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
         {/* GALLERY */}
         {tab === 'gallery' && (
           <View style={s.tabBody}>
-            <Text style={s.sectionTitle}>Gallery <Text style={s.count}>({photos.length})</Text></Text>
-            {photos.length === 0 && <Empty text="No photos yet." />}
+            <Text style={s.sectionTitle}>{tr('Gallery')} <Text style={s.count}>({photos.length})</Text></Text>
+            {photos.length === 0 && <Empty text={tr('No photos yet.')} />}
             <View style={s.galleryGrid}>
               {photos.map((p) => (
                 <Image key={p.name} source={{ uri: p.url }} style={s.galleryPhoto} />
@@ -521,15 +522,15 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
         {/* REVIEWS */}
         {tab === 'reviews' && (
           <View style={s.tabBody}>
-            <Text style={s.sectionTitle}>Reviews <Text style={s.count}>({reviews.length})</Text></Text>
+            <Text style={s.sectionTitle}>{tr('Reviews')} <Text style={s.count}>({reviews.length})</Text></Text>
             {reviews.length > 3 && (
-              <Field placeholder="Search in reviews" value={reviewQuery} onChangeText={setReviewQuery} />
+              <Field placeholder={tr('Search in reviews')} value={reviewQuery} onChangeText={setReviewQuery} />
             )}
-            {filteredReviews.length === 0 && <Empty text="No reviews yet." />}
+            {filteredReviews.length === 0 && <Empty text={tr('No reviews yet.')} />}
             {filteredReviews.map((r) => (
               <View key={r.id} style={s.reviewCard}>
                 <View style={s.reviewTop}>
-                  <Text style={s.reviewName}>{r.customer?.full_name ?? 'Customer'}</Text>
+                  <Text style={s.reviewName}>{r.customer?.full_name ?? tr('Customer')}</Text>
                   <Text style={s.meta}>{timeAgo(r.created_at)}</Text>
                 </View>
                 {!!r.comment && <Text style={s.bodyText}>{r.comment}</Text>}
@@ -539,9 +540,9 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
                   <View style={s.replyQuote}>
                     <View style={s.replyHead}>
                       <Text style={s.replyName}>
-                        {barber.profiles?.full_name?.split(' ')[0] ?? 'The barber'}
+                        {barber.profiles?.full_name?.split(' ')[0] ?? tr('The barber')}
                       </Text>
-                      <View style={s.replyTag}><Text style={s.replyTagText}>THE BARBER</Text></View>
+                      <View style={s.replyTag}><Text style={s.replyTagText}>{tr('THE BARBER')}</Text></View>
                       {!!r.replied_at && <Text style={s.meta}>{timeAgo(r.replied_at)}</Text>}
                     </View>
                     <Text style={s.replyBody}>{r.reply}</Text>
@@ -557,14 +558,14 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
       <View style={s.cta}>
         {preview ? (
           <View style={s.dead}>
-            <View style={s.deadBtn}><Text style={s.deadText}>BOOK {name.split(' ')[0].toUpperCase()}</Text></View>
-            <Text style={s.deadNote}>Dead in preview. You cannot book yourself, and nothing here writes to your day.</Text>
+            <View style={s.deadBtn}><Text style={s.deadText}>{tr('BOOK {name}', { name: name.split(' ')[0].toUpperCase() })}</Text></View>
+            <Text style={s.deadNote}>{tr('Dead in preview. You cannot book yourself, and nothing here writes to your day.')}</Text>
           </View>
-        ) : <PillButton title="Book Appointment"
+        ) : <PillButton title={tr('Book Appointment')}
           onPress={() => {
             if (!selected) {
               setTab('services');
-              return Alert.alert('Pick a service', 'Select a service first, then book.');
+              return Alert.alert(tr('Pick a service'), tr('Select a service first, then book.'));
             }
             setWeekStart(weekStartOf(today));
             setSelectedDay(today);
@@ -583,12 +584,12 @@ function PreviewBar({ onDone }: { onDone: () => void }) {
   return (
     <View style={s.previewBar}>
       <View style={s.grow}>
-        <Text style={s.previewEyebrow}>PREVIEW</Text>
-        <Text style={s.previewSub}>Exactly what a customer opens</Text>
+        <Text style={s.previewEyebrow}>{tr('PREVIEW')}</Text>
+        <Text style={s.previewSub}>{tr('Exactly what a customer opens')}</Text>
       </View>
       <Pressable onPress={onDone} accessibilityRole="button"
         style={({ pressed }) => [s.previewDone, pressed && s.pressed]}>
-        <Text style={s.previewDoneText}>Done</Text>
+        <Text style={s.previewDoneText}>{tr('Done')}</Text>
       </Pressable>
     </View>
   );

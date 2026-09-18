@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Ico, Sheet, T, Toggle } from './dark';
+import { ordinal } from '../lib/inboxRules';
 import { sameDay } from '../lib/slots';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
+import { loc, tr, trn } from '../lib/i18n';
 
 // Turn 8 of "Barber App.dc.html" — a customer cancels and Youssef is left with a
 // hole. 8b is the hole and what to do about it; 8f is the same block once
@@ -30,12 +32,12 @@ const hhmm = (iso: string | Date) =>
 const initials = (n: string) => n.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
 function ago(iso: string | null) {
-  if (!iso) return 'just now';
+  if (!iso) return tr('just now');
   const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
-  if (m < 1) return 'just now';
-  if (m < 60) return `${m} min ago`;
+  if (m < 1) return tr('just now');
+  if (m < 60) return tr('{m} min ago', { m });
   const h = Math.floor(m / 60);
-  return h < 24 ? `${h} h ago` : `${Math.floor(h / 24)} d ago`;
+  return h < 24 ? tr('{h} h ago', { h }) : tr('{d} d ago', { d: Math.floor(h / 24) });
 }
 
 /** the offerable bits of a slot. `id` is the cancelled booking it came from —
@@ -95,8 +97,8 @@ export default function CancelledGap({
         id: r.id, starts_at: r.starts_at, price_cents: r.price_cents,
         deposit_cents: r.deposit_cents, cancel_reason: r.cancel_reason,
         cancelled_at: null, customer_id: r.customer_id,
-        service: r.services?.name ?? 'Service', duration_min: r.services?.duration_min ?? 30,
-        who: r.customer?.full_name ?? 'A client',
+        service: r.services?.name ?? tr('Service'), duration_min: r.services?.duration_min ?? 30,
+        who: r.customer?.full_name ?? tr('A client'),
         visits: (visitCount.get(r.customer_id) ?? 0) + 1,
         offer: o ? {
           id: o.id, claimed_at: o.claimed_at, claimed_booking: o.claimed_booking,
@@ -135,34 +137,34 @@ export default function CancelledGap({
                 <View style={s.tookIcon}><Ico name="check" size={17} color={D.green} /></View>
                 <View style={s.grow}>
                   <T w="b" size={13} c={D.green}>
-                    {(r.offer!.taker ?? 'Someone').split(' ')[0]} took {at}
+                    {tr('{name} took {at}', { name: (r.offer!.taker ?? tr('Someone')).split(' ')[0], at })}
                   </T>
                   <T size={11} c={D.sub} style={s.mt2}>
-                    {ago(r.offer!.claimed_at)} · {dh(r.deposit_cents)} DH deposit paid
+                    {tr('{claimed_at} · {deposit_cents} DH deposit paid', { claimed_at: ago(r.offer!.claimed_at), deposit_cents: dh(r.deposit_cents) })}
                   </T>
                 </View>
                 {!!r.offer!.claimed_booking && (
                   <Pressable hitSlop={8}
-                    onPress={() => onChat(r.offer!.claimed_booking!, r.offer!.taker ?? 'Client')}>
-                    <T w="b" size={11} c={D.green}>Chat</T>
+                    onPress={() => onChat(r.offer!.claimed_booking!, r.offer!.taker ?? tr('Client'))}>
+                    <T w="b" size={11} c={D.green}>{tr('Chat')}</T>
                   </Pressable>
                 )}
               </View>
 
               <View style={s.statRow}>
                 <View style={s.stat}>
-                  <T w="b" size={10} c={D.sub} ls={0.8}>BOOKED TODAY</T>
+                  <T w="b" size={10} c={D.sub} ls={0.8}>{tr('BOOKED TODAY')}</T>
                   <T w="b" size={20} style={s.num}>
-                    {dh(bookedTodayCents)}<T size={11} c={D.sub}> DH</T>
+                    {dh(bookedTodayCents)}<T size={11} c={D.sub}>{' '}{tr('DH')}</T>
                   </T>
-                  <T size={10} c={D.green} style={s.mt2}>back where it was</T>
+                  <T size={10} c={D.green} style={s.mt2}>{tr('back where it was')}</T>
                 </View>
                 <View style={s.stat}>
-                  <T w="b" size={10} c={D.sub} ls={0.8}>KEPT DEPOSIT</T>
+                  <T w="b" size={10} c={D.sub} ls={0.8}>{tr('KEPT DEPOSIT')}</T>
                   <T w="b" size={20} c={D.green} style={s.num}>
-                    +{dh(r.deposit_cents)}<T size={11} c={D.sub}> DH</T>
+                    +{dh(r.deposit_cents)}<T size={11} c={D.sub}>{' '}{tr('DH')}</T>
                   </T>
-                  <T size={10} c={D.sub} style={s.mt2}>from {r.who.split(' ')[0]}</T>
+                  <T size={10} c={D.sub} style={s.mt2}>{tr('from {name}', { name: r.who.split(' ')[0] })}</T>
                 </View>
               </View>
             </View>
@@ -177,14 +179,14 @@ export default function CancelledGap({
               <View style={s.expiredCard}>
                 <View style={s.expiredIcon}><Ico name="clock" size={16} color={D.sub} /></View>
                 <View style={s.grow}>
-                  <T w="b" size={13}>Offer expired · {at} still free</T>
+                  <T w="b" size={13}>{tr('Offer expired · {at} still free', { at })}</T>
                   <T size={11} c={D.sub} style={s.mt2}>
-                    Sent to {r.offer!.sent} · nobody took it
+                    {tr('Sent to {sent} · nobody took it', { sent: r.offer!.sent })}
                   </T>
                 </View>
               </View>
 
-              <T w="b" size={11} c={D.sub} ls={1.65} style={s.eyebrow}>WHAT NOW</T>
+              <T w="b" size={11} c={D.sub} ls={1.65} style={s.eyebrow}>{tr('WHAT NOW')}</T>
               <View style={s.list9}>
                 {/* the one that costs him nothing and reaches furthest */}
                 <Pressable style={[s.whatRow, !r.offer!.public_too && s.whatRowOn]}
@@ -192,7 +194,7 @@ export default function CancelledGap({
                   onPress={async () => {
                     const { error } = await supabase.from('slot_offers')
                       .update({ public_too: true, expires_at: r.starts_at }).eq('id', r.offer!.id);
-                    if (error) return Alert.alert('Could not open it', error.message);
+                    if (error) return Alert.alert(tr('Could not open it'), error.message);
                     load();
                   }}>
                   <View style={[s.whatIcon, !r.offer!.public_too && s.whatIconOn]}>
@@ -200,10 +202,10 @@ export default function CancelledGap({
                   </View>
                   <View style={s.grow}>
                     <T w={r.offer!.public_too ? 'sb' : 'b'} size={13}>
-                      {r.offer!.public_too ? 'Open to everyone already' : 'Open it to everyone'}
+                      {r.offer!.public_too ? tr('Open to everyone already') : tr('Open it to everyone')}
                     </T>
                     <T size={11} c={D.sub} style={s.mt2}>
-                      Shows as a free {at} on your page
+                      {tr('Shows as a free {at} on your page', { at })}
                     </T>
                   </View>
                   {!r.offer!.public_too && <Ico name="chevron-right" size={16} color={D.sub} />}
@@ -212,8 +214,8 @@ export default function CancelledGap({
                 <Pressable style={s.whatRow} onPress={() => setOffering(r)}>
                   <View style={s.whatIcon}><Ico name="user-plus" size={16} color={D.sub} /></View>
                   <View style={s.grow}>
-                    <T w="sb" size={13}>Ask someone else</T>
-                    <T size={11} c={D.sub} style={s.mt2}>Pick from your clients again</T>
+                    <T w="sb" size={13}>{tr('Ask someone else')}</T>
+                    <T size={11} c={D.sub} style={s.mt2}>{tr('Pick from your clients again')}</T>
                   </View>
                   <Ico name="chevron-right" size={16} color={D.sub} />
                 </Pressable>
@@ -224,9 +226,9 @@ export default function CancelledGap({
                     <Ico name="coffee" size={16} color={D.amber} />
                   </View>
                   <View style={s.grow}>
-                    <T w="sb" size={13}>Make it a break</T>
+                    <T w="sb" size={13}>{tr('Make it a break')}</T>
                     <T size={11} c={D.sub} style={s.mt2}>
-                      Back at {hhmm(new Date(new Date(r.starts_at).getTime() + r.duration_min * 60_000))}
+                      {tr('Back at {hhmm}', { hhmm: hhmm(new Date(new Date(r.starts_at).getTime() + r.duration_min * 60_000)) })}
                     </T>
                   </View>
                   <Ico name="chevron-right" size={16} color={D.sub} />
@@ -243,10 +245,9 @@ export default function CancelledGap({
               <View style={s.row11}>
                 <View style={s.avatar}><T w="b" size={11} c={D.sub}>{initials(r.who)}</T></View>
                 <View style={s.grow}>
-                  <T w="b" size={13}>{r.who.split(' ')[0]} cancelled · {ago(r.cancelled_at)}</T>
+                  <T w="b" size={13}>{tr('{name} cancelled · {cancelled_at}', { name: r.who.split(' ')[0], cancelled_at: ago(r.cancelled_at) })}</T>
                   <T size={11} c={D.sub} style={s.mt2}>
-                    {r.service} · was {at} · {r.visits}
-                    {r.visits === 1 ? 'st' : r.visits === 2 ? 'nd' : r.visits === 3 ? 'rd' : 'th'} visit
+                    {tr('{service} · was {at} · {ordinal} visit', { service: r.service, at, ordinal: ordinal(r.visits) })}
                   </T>
                 </View>
               </View>
@@ -262,9 +263,9 @@ export default function CancelledGap({
               {r.deposit_cents > 0 && (
                 <View style={s.depRow}>
                   <T size={11} c={D.sub} style={s.grow}>
-                    His {dh(r.deposit_cents)} DH deposit stays with you
+                    {tr('His {deposit_cents} DH deposit stays with you', { deposit_cents: dh(r.deposit_cents) })}
                   </T>
-                  <T w="eb" size={13} c={D.green} style={s.num}>+{dh(r.deposit_cents)} DH</T>
+                  <T w="eb" size={13} c={D.green} style={s.num}>{tr('+{deposit_cents} DH', { deposit_cents: dh(r.deposit_cents) })}</T>
                 </View>
               )}
             </View>
@@ -272,7 +273,7 @@ export default function CancelledGap({
             {!past && (
               <>
                 <T w="b" size={11} c={D.sub} ls={1.65} style={s.eyebrow}>
-                  {r.duration_min} MIN FREE FROM {at}
+                  {tr('{duration_min} MIN FREE FROM {at}', { duration_min: r.duration_min, at })}
                 </T>
 
                 <View style={s.tlRow}>
@@ -280,18 +281,18 @@ export default function CancelledGap({
                   <View style={s.tlRail} />
                   <View style={s.openCard}>
                     <View>
-                      <T w="b" size={13} c={D.accent}>Just opened up</T>
+                      <T w="b" size={13} c={D.accent}>{tr('Just opened up')}</T>
                       <T size={11} c={D.sub} style={s.mt2}>
-                        {r.duration_min} min · fill it before someone walks in
+                        {tr('{duration_min} min · fill it before someone walks in', { duration_min: r.duration_min })}
                       </T>
                     </View>
                     <View style={s.btnRow}>
                       <Pressable onPress={() => setOffering(r)} style={s.offerBtn}>
-                        <T w="b" size={11} c="#fff" ls={0.44}>OFFER IT</T>
+                        <T w="b" size={11} c="#fff" ls={0.44}>{tr('OFFER IT')}</T>
                       </Pressable>
                       <Pressable style={s.breakBtn}
                         onPress={() => onBreak(new Date(r.starts_at), r.duration_min)}>
-                        <T w="b" size={11} c={D.sub} ls={0.44}>TAKE A BREAK</T>
+                        <T w="b" size={11} c={D.sub} ls={0.44}>{tr('TAKE A BREAK')}</T>
                       </Pressable>
                     </View>
                   </View>
@@ -301,9 +302,9 @@ export default function CancelledGap({
                   <Pressable style={s.waitCard} onPress={() => onWaitingList(r)}>
                     <View style={s.waitIcon}><Ico name="users" size={15} color={D.sub} /></View>
                     <View style={s.grow}>
-                      <T w="b" size={13}>Tell your waiting list</T>
+                      <T w="b" size={13}>{tr('Tell your waiting list')}</T>
                       <T size={11} c={D.sub} style={s.mt2}>
-                        {waiting} client{waiting === 1 ? '' : 's'} asked about today
+                        {trn(waiting, '{n} client asked about today', '{n} clients asked about today')}
                       </T>
                     </View>
                     <Ico name="chevron-right" size={16} color={D.sub} />
@@ -351,7 +352,7 @@ export function OfferSlotSheet({ booking, preselect, madeNote, onClose, onSent }
       const me = (await supabase.auth.getUser()).data.user?.id;
       const { data, error } = await supabase.rpc('offer_candidates',
         { p_barber: me, p_starts_at: booking.starts_at });
-      if (error) return Alert.alert('Could not load your clients', error.message);
+      if (error) return Alert.alert(tr('Could not load your clients'), error.message);
       const list = (data as Candidate[]) ?? [];
       setCands(list);
       // 8d opens with the people who actually asked already ticked
@@ -373,24 +374,24 @@ export function OfferSlotSheet({ booking, preselect, madeNote, onClose, onSent }
         p_starts_at: booking.starts_at, p_customers: picked, p_public: publicToo, p_minutes: 30,
       });
     setBusy(false);
-    if (error) return Alert.alert('Could not send the offer', error.message);
+    if (error) return Alert.alert(tr('Could not send the offer'), error.message);
     onSent();
   }
 
   const at = booking ? hhmm(booking.starts_at) : '';
   const when = booking && !sameDay(new Date(booking.starts_at), new Date())
-    ? new Date(booking.starts_at).toLocaleDateString('en-US', { weekday: 'short' })
+    ? new Date(booking.starts_at).toLocaleDateString(loc('en-US'), { weekday: 'short' })
     : null;
 
   return (
     <Sheet visible={!!booking} onClose={onClose} deep gap={12}>
       <View style={s.offerHead}>
         <View style={s.grow}>
-          <T w="b" size={17}>Offer {when ? `${when} ` : ''}{at}</T>
+          <T w="b" size={17}>{when ? tr('Offer {when} {at}', { when, at }) : tr('Offer {at}', { at })}</T>
           <T size={11} c={D.sub} style={s.mt2}>
             {madeNote
-              ? `${booking?.duration_min ?? 30} min · you just opened it`
-              : `${when ?? 'Today'} · ${booking?.duration_min ?? 30} min · ${booking?.service ?? 'Service'}`}
+              ? tr('{duration_min} min · you just opened it', { duration_min: booking?.duration_min ?? 30 })
+              : tr('{when} · {duration_min} min · {service}', { when: when ?? tr('Today'), duration_min: booking?.duration_min ?? 30, service: booking?.service ?? tr('Service') })}
           </T>
         </View>
         <Pressable onPress={onClose} hitSlop={8} style={s.puck32}><Ico name="x" size={15} /></Pressable>
@@ -408,11 +409,11 @@ export function OfferSlotSheet({ booking, preselect, madeNote, onClose, onSent }
       <View style={s.note}>
         <Ico name="info" size={15} color={D.sub} />
         <T size={12} c={D.sub} style={s.noteText}>
-          First to tap it gets it. Nobody else is charged or held.
+          {tr('First to tap it gets it. Nobody else is charged or held.')}
         </T>
       </View>
 
-      <T w="b" size={10} c={D.sub} ls={1.4}>ASK · {picked.length} PICKED</T>
+      <T w="b" size={10} c={D.sub} ls={1.4}>{tr('ASK · {count} PICKED', { count: picked.length })}</T>
       <View style={s.list8}>
         {cands.map((c) => {
           const blocked = c.no_shows >= 2;
@@ -430,27 +431,27 @@ export function OfferSlotSheet({ booking, preselect, madeNote, onClose, onSent }
               <View style={s.grow}>
                 <T w={on ? 'b' : 'sb'} size={13} c={blocked ? D.sub : D.text}>{c.name}</T>
                 <T size={11} c={blocked ? D.red : D.sub} style={s.mt2}>
-                  {blocked ? `${c.no_shows} no-shows · not offered` : c.why}
+                  {blocked ? tr('{no_shows} no-shows · not offered', { no_shows: c.no_shows }) : c.why}
                 </T>
               </View>
               {c.kind === 'asked' && !blocked && (
-                <View style={s.askedChip}><T w="b" size={10} c={D.green} ls={0.6}>ASKED</T></View>
+                <View style={s.askedChip}><T w="b" size={10} c={D.green} ls={0.6}>{tr('ASKED')}</T></View>
               )}
               {c.kind === 'move' && !blocked && (
-                <View style={s.moveChip}><T w="b" size={10} c={D.sub} ls={0.6}>MOVE</T></View>
+                <View style={s.moveChip}><T w="b" size={10} c={D.sub} ls={0.6}>{tr('MOVE')}</T></View>
               )}
             </Pressable>
           );
         })}
         {cands.length === 0 && (
-          <T size={13} c={D.sub}>Nobody to ask yet — clients appear here once they've booked with you.</T>
+          <T size={13} c={D.sub}>{tr('Nobody to ask yet — clients appear here once they\'ve booked with you.')}</T>
         )}
       </View>
 
       <View style={s.pubRow}>
         <View style={s.grow}>
-          <T w="b" size={13}>Put it on your public page too</T>
-          <T size={11} c={D.sub} style={s.mt2}>Anyone browsing the shop sees a free {at}</T>
+          <T w="b" size={13}>{tr('Put it on your public page too')}</T>
+          <T size={11} c={D.sub} style={s.mt2}>{tr('Anyone browsing the shop sees a free {at}', { at })}</T>
         </View>
         <Toggle on={publicToo} onPress={() => setPublicToo((v) => !v)} />
       </View>
@@ -458,14 +459,14 @@ export function OfferSlotSheet({ booking, preselect, madeNote, onClose, onSent }
       <Pressable disabled={busy || picked.length === 0} onPress={send}
         style={[s.sendBtn, (busy || picked.length === 0) && s.dim55]}>
         <T w="b" size={13} c="#fff" ls={0.78}>
-          {busy ? 'SENDING…' : `SEND TO ${picked.length} CLIENT${picked.length === 1 ? '' : 'S'}`}
+          {busy ? tr('SENDING…') : trn(picked.length, 'SEND TO {n} CLIENT', 'SEND TO {n} CLIENTS')}
         </T>
       </Pressable>
       {/* only a cancelled slot has a break to fall back on — the alternative to
           offering room he just made is not a break, it's nothing */}
       {!madeNote && (
         <Pressable onPress={onClose} style={s.centerBtn}>
-          <T w="sb" size={12} c={D.sub}>Take the break instead</T>
+          <T w="sb" size={12} c={D.sub}>{tr('Take the break instead')}</T>
         </Pressable>
       )}
     </Sheet>

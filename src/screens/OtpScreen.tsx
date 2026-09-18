@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { colors, font, radius, serif, shadow, sp } from '../theme';
+import { tr, trRich } from '../lib/i18n';
 
 // Phone OTP verification (design 3b). UI shell — NOT wired into the register flow yet:
 // Supabase phone OTP needs an SMS provider (Twilio) configured first. See BACKLOG.md.
@@ -35,21 +36,23 @@ export default function OtpScreen({ phone, onBack, onVerify, onResend }: {
   return (
     <View style={s.screen}>
       <View style={s.headRow}>
-        <Pressable onPress={onBack} hitSlop={8} accessibilityLabel="Go back"
+        <Pressable onPress={onBack} hitSlop={8} accessibilityLabel={tr('Go back')}
           style={({ pressed }) => [s.backBtn, pressed && s.pressed]}>
           <Ionicons name="arrow-back" size={18} color={colors.text} />
         </Pressable>
-        <Text style={s.step}>STEP 3 OF 3</Text>
+        <Text style={s.step}>{tr('STEP 3 OF 3')}</Text>
       </View>
       <View style={s.progress}>
         {[0, 1, 2].map((i) => <View key={i} style={s.progressSegOn} />)}
       </View>
 
       <View style={s.headBlock}>
-        <Text style={s.display}>Check your{'\n'}phone.</Text>
+        <Text style={s.display}>{tr('Check your\nphone.')}</Text>
         <Text style={s.sub}>
-          We sent a 4-digit code to <Text style={s.subStrong}>{phone}</Text>{' '}
-          <Text style={s.edit} onPress={onBack}>Edit</Text>
+          {trRich('We sent a 4-digit code to <b>{phone}</b>', {
+            b: (text, key) => <Text key={key} style={s.subStrong}>{text}</Text>,
+          }, { phone })}{' '}
+          <Text style={s.edit} onPress={onBack}>{tr('Edit')}</Text>
         </Text>
       </View>
 
@@ -69,14 +72,16 @@ export default function OtpScreen({ phone, onBack, onVerify, onResend }: {
         : (
           <Text style={s.resend}>
             {countdown > 0
-              ? <>Resend code in <Text style={s.subStrong}>0:{String(countdown).padStart(2, '0')}</Text></>
-              : <Text style={s.edit} onPress={() => { setCountdown(45); onResend(); }}>Resend code</Text>}
+              ? <>{trRich('Resend code in <b>0:{s}</b>', {
+                b: (text, key) => <Text key={key} style={s.subStrong}>{text}</Text>,
+              }, { s: String(countdown).padStart(2, '0') })}</>
+              : <Text style={s.edit} onPress={() => { setCountdown(45); onResend(); }}>{tr('Resend code')}</Text>}
           </Text>
         )}
 
       <Pressable onPress={verify} disabled={code.length < 4 || busy}
         style={({ pressed }) => [s.cta, (code.length < 4 || busy || pressed) && s.ctaDim]}>
-        <Text style={s.ctaText}>{busy ? '…' : 'Verify'}</Text>
+        <Text style={s.ctaText}>{busy ? '…' : tr('Verify')}</Text>
       </Pressable>
     </View>
   );

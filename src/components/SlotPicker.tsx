@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { Block, daySlots, mergeSlots, Range, sameDay, weekStartOf, Window } from '../lib/slots';
 import { colors, font, radius, shadow, sp } from '../theme';
+import { loc, tr } from '../lib/i18n';
 
 type Chair = { windows: Window[]; daysOff: string[]; blocks: Block[]; bufferMin: number; booked: Range[] };
 const EMPTY_CHAIR: Chair = { windows: [], daysOff: [], blocks: [], bufferMin: 0, booked: [] };
@@ -103,14 +104,14 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect, 
   return (
     <View>
       <View style={s.weekHead}>
-        <Text style={[s.weekLabel, !!label && s.weekEyebrow]}>{label ?? 'Select a date'}</Text>
+        <Text style={[s.weekLabel, !!label && s.weekEyebrow]}>{label ?? tr('Select a date')}</Text>
         <View style={s.weekNav}>
           <Pressable onPress={() => changeWeek('prev')} disabled={!canGoPrev} hitSlop={6}
-            accessibilityLabel="Previous week"
+            accessibilityLabel={tr('Previous week')}
             style={({ pressed }) => [s.navBtn, pressed && s.pressed, !canGoPrev && s.navDisabled]}>
             <Ionicons name="chevron-back" size={18} color={colors.text} />
           </Pressable>
-          <Pressable onPress={() => changeWeek('next')} hitSlop={6} accessibilityLabel="Next week"
+          <Pressable onPress={() => changeWeek('next')} hitSlop={6} accessibilityLabel={tr('Next week')}
             style={({ pressed }) => [s.navBtn, pressed && s.pressed]}>
             <Ionicons name="chevron-forward" size={18} color={colors.text} />
           </Pressable>
@@ -126,12 +127,12 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect, 
             <Pressable key={d.toISOString()} disabled={isPast} style={s.dayCol}
               onPress={() => setSelectedDay(d)}>
               <Text style={[s.dayDow, isPast && s.muted]}>
-                {d.toLocaleDateString('en-US', { weekday: 'short' }).slice(0, 2)}
+                {d.toLocaleDateString(loc('en-US'), { weekday: 'short' }).slice(0, 2)}
               </Text>
               <View style={[s.dayNum, isNow && !isSel && s.dayNumNow,
                 isSel && s.dayNumActive, isPast && s.dayNumPast]}>
                 <Text style={[s.dayNumText, isSel && s.dayNumTextActive, isPast && s.muted]}>{d.getDate()}</Text>
-                {isNow && <Text style={s.dayNowTag}>NOW</Text>}
+                {isNow && <Text style={s.dayNowTag}>{tr('NOW')}</Text>}
               </View>
             </Pressable>
           );
@@ -144,7 +145,7 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect, 
         ? renderFull(selectedDay)
         : (
       <View style={s.slotGrid}>
-        {slots.length === 0 && <Text style={s.empty}>Not working this day.</Text>}
+        {slots.length === 0 && <Text style={s.empty}>{tr('Not working this day.')}</Text>}
         {slots.map(({ time, status }) => {
           const isSel = selected?.getTime() === time.getTime();
           return (
@@ -161,7 +162,7 @@ export default function SlotPicker({ barberId, durationMin, selected, onSelect, 
       </View>
         )}
       {slots.some((sl) => sl.status === 'free') && slots.some((sl) => sl.status === 'full') && (
-        <Text style={s.legend}>Crossed-out times are already booked.</Text>
+        <Text style={s.legend}>{tr('Crossed-out times are already booked.')}</Text>
       )}
     </View>
   );

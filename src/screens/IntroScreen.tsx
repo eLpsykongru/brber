@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { AuthView } from './AuthScreen';
 import { colors, font, radius, serif, serifBlack, shadow, sp } from '../theme';
+import { tr, weekdayName } from '../lib/i18n';
 
 // First-run onboarding trio (design 2a → 2b → 3a). Shown once, then straight to auth.
 // ponytail: state-based slides, no paging ScrollView — swipe animation when someone misses it.
@@ -13,19 +14,19 @@ export default function IntroScreen({ onDone }: { onDone: (next: AuthView) => vo
   if (slide === 0) {
     return (
       <View style={s.dark}>
-        <Text style={s.logoDark}>Sterncut</Text>
+        <Text style={s.logoDark}>{tr('Sterncut')}</Text>
         <View style={s.bottom}>
-          <Text style={s.displayDark}>Your chair{'\n'}is waiting.</Text>
+          <Text style={s.displayDark}>{tr('Your chair\nis waiting.')}</Text>
           <Text style={s.subDark}>
-            Find the best barbers in Tangier, book a slot or take a queue ticket — no bench time.
+            {tr('Find the best barbers in Tangier, book a slot or take a queue ticket — no bench time.')}
           </Text>
           <Dots active={0} onDark />
           <Pressable onPress={next} style={({ pressed }) => [s.cta, s.ctaLight, pressed && s.pressed]}>
-            <Text style={s.ctaTextDarkOnLight}>Get started</Text>
+            <Text style={s.ctaTextDarkOnLight}>{tr('Get started')}</Text>
           </Pressable>
           <Text style={s.footerDark}>
-            Already have an account?{' '}
-            <Text style={s.footerDarkStrong} onPress={() => onDone('signin')}>Sign in</Text>
+            {tr('Already have an account?')}{' '}
+            <Text style={s.footerDarkStrong} onPress={() => onDone('signin')}>{tr('Sign in')}</Text>
           </Text>
         </View>
       </View>
@@ -35,9 +36,9 @@ export default function IntroScreen({ onDone }: { onDone: (next: AuthView) => vo
   return (
     <View style={s.light}>
       <View style={s.lightHeader}>
-        <Text style={s.logoLight}>Sterncut</Text>
+        <Text style={s.logoLight}>{tr('Sterncut')}</Text>
         <Pressable onPress={() => onDone('welcome')} hitSlop={8}>
-          <Text style={s.skip}>Skip</Text>
+          <Text style={s.skip}>{tr('Skip')}</Text>
         </Pressable>
       </View>
 
@@ -45,16 +46,16 @@ export default function IntroScreen({ onDone }: { onDone: (next: AuthView) => vo
 
       <View style={s.bottom}>
         <Text style={s.displayLight}>
-          {slide === 1 ? 'Skip the bench,\nkeep your spot.' : 'Book in three\ntaps. Pay at\nthe shop.'}
+          {slide === 1 ? tr('Skip the bench,\nkeep your spot.') : tr('Book in three\ntaps. Pay at\nthe shop.')}
         </Text>
         <Text style={s.subLight}>
           {slide === 1
-            ? "Take a virtual ticket, see exactly who's ahead, and get a ping when you're next."
-            : 'Pick a service, a specialist and a time — no card needed, cash at the counter.'}
+            ? tr('Take a virtual ticket, see exactly who\'s ahead, and get a ping when you\'re next.')
+            : tr('Pick a service, a specialist and a time — no card needed, cash at the counter.')}
         </Text>
         <Dots active={slide} />
         <Pressable onPress={next} style={({ pressed }) => [s.cta, s.ctaInk, pressed && s.pressed]}>
-          <Text style={s.ctaTextLightOnInk}>{slide === 1 ? 'Next' : 'Get started'}</Text>
+          <Text style={s.ctaTextLightOnInk}>{slide === 1 ? tr('Next') : tr('Get started')}</Text>
         </Pressable>
       </View>
     </View>
@@ -82,12 +83,12 @@ function QueueIllustration() {
         <View style={s.rowBetween}>
           <View style={s.liveRow}>
             <View style={s.liveDot} />
-            <Text style={s.liveLabel}>LIVE QUEUE</Text>
+            <Text style={s.liveLabel}>{tr('LIVE QUEUE')}</Text>
           </View>
-          <View style={s.ticketBadge}><Text style={s.ticketBadgeText}>TICKET Nº 07</Text></View>
+          <View style={s.ticketBadge}><Text style={s.ticketBadgeText}>{tr('TICKET Nº 07')}</Text></View>
         </View>
-        <Text style={s.queueBig}>3 ahead</Text>
-        <Text style={s.queueSub}>Estimated wait ~40 min</Text>
+        <Text style={s.queueBig}>{tr('3 ahead')}</Text>
+        <Text style={s.queueSub}>{tr('Estimated wait ~40 min')}</Text>
         <View style={s.progressRow}>
           {[0, 1, 2, 3].map((i) => (
             <View key={i} style={[s.progressSeg, i === 0 && s.progressSegOn]} />
@@ -97,10 +98,10 @@ function QueueIllustration() {
       <View style={s.nowCard}>
         <View style={s.nowNum}><Text style={s.nowNumText}>04</Text></View>
         <View style={s.grow}>
-          <Text style={s.nowName}>Mehdi K.</Text>
-          <Text style={s.nowMeta}>In the chair</Text>
+          <Text style={s.nowName}>{tr('Mehdi K.')}</Text>
+          <Text style={s.nowMeta}>{tr('In the chair')}</Text>
         </View>
-        <View style={s.nowBadge}><Text style={s.nowBadgeText}>NOW</Text></View>
+        <View style={s.nowBadge}><Text style={s.nowBadgeText}>{tr('NOW')}</Text></View>
       </View>
     </View>
   );
@@ -109,16 +110,16 @@ function QueueIllustration() {
 // static mock of the 3-tap booking card (3a)
 function BookingIllustration() {
   const days: [string, string, boolean][] = [
-    ['We', '22', false], ['Th', '23', true], ['Fr', '24', false], ['Sa', '25', false], ['Su', '26', false],
+    [weekdayName(3, 'short'), '22', false], [weekdayName(4, 'short'), '23', true], [weekdayName(5, 'short'), '24', false], [weekdayName(6, 'short'), '25', false], [weekdayName(0, 'short'), '26', false],
   ];
   return (
     <View style={s.illustration}>
       <View style={s.bookCard}>
         <View style={s.bookBarber}>
-          <View style={s.bookAvatar}><Text style={s.bookAvatarText}>YE</Text></View>
+          <View style={s.bookAvatar}><Text style={s.bookAvatarText}>{tr('YE')}</Text></View>
           <View style={s.grow}>
-            <Text style={s.nowName}>Youssef El Amrani</Text>
-            <Text style={s.nowMeta}>Classic Haircut · 60 DH</Text>
+            <Text style={s.nowName}>{tr('Youssef El Amrani')}</Text>
+            <Text style={s.nowMeta}>{tr('Classic Haircut · 60 DH')}</Text>
           </View>
           <Text style={s.bookRating}>4.9 ★</Text>
         </View>
@@ -142,7 +143,7 @@ function BookingIllustration() {
       </View>
       <View style={s.bookedPill}>
         <Ionicons name="checkmark" size={14} color="#4ADE80" />
-        <Text style={s.bookedPillText}>Booked — pay at the shop</Text>
+        <Text style={s.bookedPillText}>{tr('Booked — pay at the shop')}</Text>
       </View>
     </View>
   );

@@ -3,6 +3,7 @@ import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-nat
 import { Btn, Card, Eyebrow, Ico, Sheet, SheetHead, Stat, T, Toggle } from './dark';
 import { supabase } from '../lib/supabase';
 import { dark as d, radius } from '../theme';
+import { loc, tr, trn } from '../lib/i18n';
 
 // Barber turn 11a/11b of "Barber App.dc.html" — the shop pause.
 //
@@ -30,17 +31,17 @@ export type ShopStatus = {
 };
 
 const clock = (iso: string) =>
-  new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  new Date(iso).toLocaleTimeString(loc('en-US'), { hour: '2-digit', minute: '2-digit', hour12: false });
 
 /** "until tomorrow" / "until 4 Aug" / "until you reopen" — the banner's tail. */
 export function untilLabel(closed_until?: string | null) {
-  if (!closed_until) return 'until you reopen';
+  if (!closed_until) return tr('until you reopen');
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const end = new Date(`${closed_until}T00:00:00`);
   const days = Math.round((end.getTime() - today.getTime()) / 86400000);
-  if (days <= 0) return 'until tomorrow';
+  if (days <= 0) return tr('until tomorrow');
   const back = new Date(end.getTime() + 86400000);
-  return `until ${back.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`;
+  return tr('until {date}', { date: back.toLocaleDateString(loc('en-GB'), { day: 'numeric', month: 'short' }) });
 }
 
 // ---- 11a · pause the shop, and what it covers ------------------------------
@@ -57,7 +58,7 @@ export function ShopPauseSheet({ visible, onClose, onClosed }: {
     if (!visible) return;
     setP(null); setScope('today'); setTell(true);
     supabase.rpc('shop_pause_preview').then(({ data, error }) => {
-      if (error) { Alert.alert('Could not load', error.message); onClose(); return; }
+      if (error) { Alert.alert(tr('Could not load'), error.message); onClose(); return; }
       setP(data as Preview);
     });
   }, [visible, onClose]);
@@ -68,7 +69,7 @@ export function ShopPauseSheet({ visible, onClose, onClosed }: {
       // ponytail: no date picker for the third option — "pick dates" needs a
       // calendar this sheet doesn't have, and the two periods that matter are
       // here. Wire SlotPicker's month grid in if an owner asks for a range.
-      Alert.alert('Pick dates', 'Not built yet — use "Rest of today" or "Until I reopen".');
+      Alert.alert(tr('Pick dates'), tr('Not built yet — use "Rest of today" or "Until I reopen".'));
       return;
     }
     setBusy(true);
@@ -76,7 +77,7 @@ export function ShopPauseSheet({ visible, onClose, onClosed }: {
       p_scope: scope, p_until: null, p_tell_waitlist: tell,
     });
     setBusy(false);
-    if (error) { Alert.alert('Could not close the shop', error.message); return; }
+    if (error) { Alert.alert(tr('Could not close the shop'), error.message); return; }
     onClosed();
     onClose();
   }
@@ -85,12 +86,12 @@ export function ShopPauseSheet({ visible, onClose, onClosed }: {
 
   return (
     <Sheet visible={visible} onClose={onClose} deep>
-      <SheetHead title={`Close ${p?.name ?? 'the shop'}`} onClose={onClose} />
-      <T size={11} c={d.sub} style={s.headSub}>This closes the whole shop, not just you</T>
+      <SheetHead title={tr('Close {name}', { name: p?.name ?? tr('the shop') })} onClose={onClose} />
+      <T size={11} c={d.sub} style={s.headSub}>{tr('This closes the whole shop, not just you')}</T>
 
-      <Eyebrow>FOR HOW LONG</Eyebrow>
+      <Eyebrow>{tr('FOR HOW LONG')}</Eyebrow>
       <View style={s.periodRow}>
-        {([['today', 'Rest of today'], ['open', 'Until I reopen'], ['until', 'Pick dates']] as const)
+        {([['today', tr('Rest of today')], ['open', tr('Until I reopen')], ['until', tr('Pick dates')]] as const)
           .map(([k, label]) => (
             <Pressable key={k} onPress={() => setScope(k)} accessibilityLabel={label}
               accessibilityState={{ selected: scope === k }}
@@ -104,12 +105,12 @@ export function ShopPauseSheet({ visible, onClose, onClosed }: {
         <>
           {/* the whole reason the sheet exists: the switch says what it does */}
           <Card>
-            <Eyebrow>WHAT CLOSING DOES</Eyebrow>
+            <Eyebrow>{tr('WHAT CLOSING DOES')}</Eyebrow>
             <View style={s.effects}>
-              <Effect no>No new bookings for <T w="b" size={12.5}>all {p.barbers} {p.barbers === 1 ? 'barber' : 'barbers'}</T></Effect>
-              <Effect no>The walk-in QR stops working</Effect>
-              <Effect>Today's {p.booked_today} {p.booked_today === 1 ? 'booking' : 'bookings'} still stand</Effect>
-              <Effect>You can still take cash top-ups</Effect>
+              <Effect no>{tr('No new bookings for')} <T w="b" size={12.5}>{trn(p.barbers, 'your {n} barber', 'all {n} barbers')}</T></Effect>
+              <Effect no>{tr('The walk-in QR stops working')}</Effect>
+              <Effect>{trn(p.booked_today, 'Today\'s {n} booking still stands', 'Today\'s {n} bookings still stand')}</Effect>
+              <Effect>{tr('You can still take cash top-ups')}</Effect>
             </View>
           </Card>
 
@@ -118,10 +119,10 @@ export function ShopPauseSheet({ visible, onClose, onClosed }: {
               <View style={s.warnChip}><Ico name="alert-triangle" size={15} color={d.amber} /></View>
               <View style={s.grow}>
                 <T w="b" size={12.5} c={d.amber}>
-                  {working.map((w) => w.name.split(' ')[0]).join(', ')} {working.length === 1 ? 'is' : 'are'} working today
+                  {trn(working.length, '{names} is working today', '{names} are working today', { names: working.map((w) => w.name.split(' ')[0]).join(', ') })}
                 </T>
                 <T size={11} c={d.sub} style={s.warnSub}>
-                  {working.length === 1 ? "He'll" : "They'll"} be told the shop is closed
+                  {trn(working.length, 'He\'ll be told the shop is closed', 'They\'ll be told the shop is closed')}
                 </T>
               </View>
             </View>
@@ -130,19 +131,19 @@ export function ShopPauseSheet({ visible, onClose, onClosed }: {
           {p.waiting > 0 && (
             <View style={s.tellRow}>
               <View style={s.grow}>
-                <T w="b" size={12.5}>Tell the {p.waiting} {p.waiting === 1 ? 'person' : 'people'} on the waiting list</T>
+                <T w="b" size={12.5}>{trn(p.waiting, 'Tell the {n} person on the waiting list', 'Tell the {n} people on the waiting list')}</T>
                 <T size={11} c={d.sub} style={s.warnSub}>
-                  Otherwise {p.waiting === 1 ? 'he waits' : 'they wait'} for a slot that won't come
+                  {trn(p.waiting, 'Otherwise he waits for a slot that won\'t come', 'Otherwise they wait for a slot that won\'t come')}
                 </T>
               </View>
               <Toggle on={tell} onPress={() => setTell(!tell)} />
             </View>
           )}
 
-          <Btn title={busy ? 'CLOSING…' : scope === 'today'
-            ? 'CLOSE FOR THE REST OF TODAY' : 'CLOSE UNTIL I REOPEN'}
+          <Btn title={busy ? tr('CLOSING…') : scope === 'today'
+            ? tr('CLOSE FOR THE REST OF TODAY') : tr('CLOSE UNTIL I REOPEN')}
             bg={d.red} fg={d.bg} height={54} onPress={close} />
-          <T size={11} c="#6B6B72" style={s.foot}>Only you can reopen it — your barbers can't.</T>
+          <T size={11} c="#6B6B72" style={s.foot}>{tr('Only you can reopen it — your barbers can\'t.')}</T>
         </>
       )}
     </Sheet>
@@ -175,7 +176,7 @@ export function ShopClosedBanner({ st, onReopened }: {
     setBusy(true);
     const { error } = await supabase.rpc('reopen_shop');
     setBusy(false);
-    if (error) { Alert.alert('Could not reopen', error.message); return; }
+    if (error) { Alert.alert(tr('Could not reopen'), error.message); return; }
     onReopened();
   }
 
@@ -185,21 +186,20 @@ export function ShopClosedBanner({ st, onReopened }: {
       <View style={s.bannerTop}>
         <View style={s.bannerChip}><Ico name="power" size={16} color={d.red} /></View>
         <View style={s.grow}>
-          <T w="b" size={13} c={d.red}>Shop closed {untilLabel(st.closed_until)}</T>
+          <T w="b" size={13} c={d.red}>{tr('Shop closed {closed_until}', { closed_until: untilLabel(st.closed_until) })}</T>
           <T size={11} c={d.sub} style={s.warnSub}>
-            {st.closed_at ? `You closed it at ${clock(st.closed_at)} · ` : ''}
-            all {st.barbers} {st.barbers === 1 ? 'barber' : 'barbers'}
+            {(st.closed_at ? tr('You closed it at {at} · ', { at: clock(st.closed_at) }) : '')
+              + trn(st.barbers ?? 0, 'all {n} barber', 'all {n} barbers')}
           </T>
         </View>
-        <Pressable onPress={reopen} disabled={busy} accessibilityLabel="Reopen the shop"
+        <Pressable onPress={reopen} disabled={busy} accessibilityLabel={tr('Reopen the shop')}
           style={({ pressed }) => [s.reopen, pressed && s.pressed]}>
-          <T w="eb" size={11} c={d.bg} ls={0.44}>{busy ? '…' : 'REOPEN'}</T>
+          <T w="eb" size={11} c={d.bg} ls={0.44}>{busy ? '…' : tr('REOPEN')}</T>
         </Pressable>
       </View>
       {told.length > 0 && (
         <T size={12} c={d.textDim} style={s.bannerNote}>
-          {told.map((n) => n.split(' ')[0]).join(', ')} {told.length === 1 ? 'was' : 'were'} told.
-          {told.length === 1 ? ' He asked' : ' They asked'} to be pinged when you reopen.
+          {trn(told.length, '{names} was told. He asked to be pinged when you reopen.', '{names} were told. They asked to be pinged when you reopen.', { names: told.map((n) => n.split(' ')[0]).join(', ') })}
         </T>
       )}
     </View>
@@ -216,15 +216,14 @@ export function ShopClosedTiles({ st }: { st: ShopStatus }) {
   return (
     <>
       <View style={s.tiles}>
-        <Stat label="LEFT TODAY" value={String(st.left_today ?? 0)} />
-        <Stat label="WALK-IN QR" value="Off" valueColor={d.red} />
-        <Stat label="TOP-UPS" value="On" valueColor={d.green} />
+        <Stat label={tr('LEFT TODAY')} value={String(st.left_today ?? 0)} />
+        <Stat label={tr('WALK-IN QR')} value={tr('Off')} valueColor={d.red} />
+        <Stat label={tr('TOP-UPS')} value={tr('On')} valueColor={d.green} />
       </View>
       <View style={s.hint}>
         <Ico name="info" size={14} color={d.sub} />
         <T size={12} c={d.sub} style={s.hintText}>
-          Closing the shop is different from clocking yourself out. To stop only your own
-          bookings, use your own switch.
+          {tr('Closing the shop is different from clocking yourself out. To stop only your own bookings, use your own switch.')}
         </T>
       </View>
     </>

@@ -9,6 +9,7 @@ import { OAuthProvider, signInWithProvider } from '../lib/oauth';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, serifBlack, shadow, sp } from '../theme';
 import { ForgotPasswordScreen } from './AccountScreens';
+import { tr } from '../lib/i18n';
 
 export type AuthView = 'welcome' | 'signin' | 'register';
 
@@ -34,7 +35,7 @@ function useSocial() {
     try {
       await signInWithProvider(provider); // App.tsx swaps the screen on SIGNED_IN
     } catch (e) {
-      Alert.alert('Sign-in failed', e instanceof Error ? e.message : String(e));
+      Alert.alert(tr('Sign-in failed'), e instanceof Error ? e.message : String(e));
     } finally {
       setBusy(null);
     }
@@ -48,31 +49,31 @@ function Welcome({ onEmail, onRegister }: { onEmail: () => void; onRegister: () 
     <View style={s.dark}>
       <View style={s.welcomeBottom}>
         <View style={s.welcomeBrand}>
-          <Text style={s.brandBig}>Sterncut</Text>
-          <Text style={s.brandTag}>Book your barber in Tangier</Text>
+          <Text style={s.brandBig}>{tr('Sterncut')}</Text>
+          <Text style={s.brandTag}>{tr('Book your barber in Tangier')}</Text>
         </View>
         <Pressable onPress={() => go('google')} disabled={!!busy}
           style={({ pressed }) => [s.socialBtn, s.socialLight, (pressed || busy) && s.pressed]}>
           <Ionicons name="logo-google" size={18} color={colors.text} />
-          <Text style={s.socialLightText}>{busy === 'google' ? 'Opening…' : 'Continue with Google'}</Text>
+          <Text style={s.socialLightText}>{busy === 'google' ? tr('Opening…') : tr('Continue with Google')}</Text>
         </Pressable>
         <Pressable onPress={() => go('apple')} disabled={!!busy}
           style={({ pressed }) => [s.socialBtn, s.socialDark, (pressed || busy) && s.pressed]}>
           <Ionicons name="logo-apple" size={19} color={colors.onAccent} />
-          <Text style={s.socialDarkText}>{busy === 'apple' ? 'Opening…' : 'Continue with Apple'}</Text>
+          <Text style={s.socialDarkText}>{busy === 'apple' ? tr('Opening…') : tr('Continue with Apple')}</Text>
         </Pressable>
         <View style={s.orRow}>
           <View style={s.orLineDark} />
-          <Text style={s.orTextDark}>OR</Text>
+          <Text style={s.orTextDark}>{tr('OR')}</Text>
           <View style={s.orLineDark} />
         </View>
         <Pressable onPress={onEmail} style={({ pressed }) => [s.socialBtn, s.socialOutline, pressed && s.pressed]}>
           <Ionicons name="mail-outline" size={17} color={colors.onAccent} />
-          <Text style={s.socialDarkText}>Continue with email</Text>
+          <Text style={s.socialDarkText}>{tr('Continue with email')}</Text>
         </Pressable>
         <Text style={s.terms}>
-          New here?{' '}
-          <Text style={s.termsStrong} onPress={onRegister}>Create an account</Text>
+          {tr('New here?')}{' '}
+          <Text style={s.termsStrong} onPress={onRegister}>{tr('Create an account')}</Text>
         </Text>
       </View>
     </View>
@@ -95,11 +96,11 @@ function LabeledField({ label, right, ...props }: TextInputProps & { label: stri
 function PasswordField({ value, onChangeText }: { value: string; onChangeText: (v: string) => void }) {
   const [shown, setShown] = useState(false);
   return (
-    <LabeledField label="Password" secureTextEntry={!shown} autoComplete="password"
+    <LabeledField label={tr('Password')} secureTextEntry={!shown} autoComplete="password"
       value={value} onChangeText={onChangeText}
       right={
         <Pressable onPress={() => setShown(!shown)} hitSlop={8}
-          accessibilityLabel={shown ? 'Hide password' : 'Show password'}>
+          accessibilityLabel={shown ? tr('Hide password') : tr('Show password')}>
           <Ionicons name={shown ? 'eye-off-outline' : 'eye-outline'} size={18} color={colors.textTertiary} />
         </Pressable>
       } />
@@ -108,7 +109,7 @@ function PasswordField({ value, onChangeText }: { value: string; onChangeText: (
 
 function BackButton({ onPress }: { onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} hitSlop={8} accessibilityLabel="Go back"
+    <Pressable onPress={onPress} hitSlop={8} accessibilityLabel={tr('Go back')}
       style={({ pressed }) => [s.backBtn, pressed && s.pressed]}>
       <Ionicons name="arrow-back" size={18} color={colors.text} />
     </Pressable>
@@ -135,7 +136,7 @@ function SignIn({ onBack, onRegister }: { onBack: () => void; onRegister: () => 
     setBusy(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
-    if (error) Alert.alert('Sign in failed', error.message);
+    if (error) Alert.alert(tr('Sign in failed'), error.message);
   }
 
   // deeper than AuthScreen's handler, so it registers later and wins
@@ -151,34 +152,34 @@ function SignIn({ onBack, onRegister }: { onBack: () => void; onRegister: () => 
       <ScrollView contentContainerStyle={s.form} keyboardShouldPersistTaps="handled">
         <BackButton onPress={onBack} />
         <View style={s.headBlock}>
-          <Text style={s.display}>Welcome{'\n'}back.</Text>
-          <Text style={s.sub}>Sign in to your Sterncut account.</Text>
+          <Text style={s.display}>{tr('Welcome\nback.')}</Text>
+          <Text style={s.sub}>{tr('Sign in to your Sterncut account.')}</Text>
         </View>
-        <LabeledField label="Email" autoCapitalize="none" keyboardType="email-address"
+        <LabeledField label={tr('Email')} autoCapitalize="none" keyboardType="email-address"
           autoComplete="email" value={email} onChangeText={setEmail} />
         <PasswordField value={password} onChangeText={setPassword} />
-        <Text style={s.forgot} onPress={() => setForgotOpen(true)}>Forgot password?</Text>
-        <CtaButton title="Sign in" onPress={submit} busy={busy} />
+        <Text style={s.forgot} onPress={() => setForgotOpen(true)}>{tr('Forgot password?')}</Text>
+        <CtaButton title={tr('Sign in')} onPress={submit} busy={busy} />
         <View style={s.orRow}>
           <View style={s.orLineLight} />
-          <Text style={s.orTextLight}>OR</Text>
+          <Text style={s.orTextLight}>{tr('OR')}</Text>
           <View style={s.orLineLight} />
         </View>
         <View style={s.socialRow}>
           <Pressable onPress={() => social.go('google')} disabled={!!social.busy}
             style={({ pressed }) => [s.socialSmall, s.socialSmallLight, (pressed || social.busy) && s.pressed]}>
             <Ionicons name="logo-google" size={17} color={colors.text} />
-            <Text style={s.socialSmallLightText}>{social.busy === 'google' ? '…' : 'Google'}</Text>
+            <Text style={s.socialSmallLightText}>{social.busy === 'google' ? '…' : tr('Google')}</Text>
           </Pressable>
           <Pressable onPress={() => social.go('apple')} disabled={!!social.busy}
             style={({ pressed }) => [s.socialSmall, s.socialSmallDark, (pressed || social.busy) && s.pressed]}>
             <Ionicons name="logo-apple" size={18} color={colors.onAccent} />
-            <Text style={s.socialSmallDarkText}>{social.busy === 'apple' ? '…' : 'Apple'}</Text>
+            <Text style={s.socialSmallDarkText}>{social.busy === 'apple' ? '…' : tr('Apple')}</Text>
           </Pressable>
         </View>
         <Text style={s.footer}>
-          New to Sterncut?{' '}
-          <Text style={s.footerLink} onPress={onRegister}>Create an account</Text>
+          {tr('New to Sterncut?')}{' '}
+          <Text style={s.footerLink} onPress={onRegister}>{tr('Create an account')}</Text>
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -196,7 +197,7 @@ function Register({ onBack, onSignIn }: { onBack: () => void; onSignIn: () => vo
 
   async function submit() {
     if (!fullName.trim() || phone.trim().length < 6) {
-      return Alert.alert('Missing info', 'Full name and a phone number are required to sign up.');
+      return Alert.alert(tr('Missing info'), tr('Full name and a phone number are required to sign up.'));
     }
     setBusy(true);
     const { error } = await supabase.auth.signUp({
@@ -204,7 +205,7 @@ function Register({ onBack, onSignIn }: { onBack: () => void; onSignIn: () => vo
       options: { data: { full_name: fullName.trim(), phone: phone.trim(), role } },
     });
     setBusy(false);
-    if (error) Alert.alert('Sign up failed', error.message);
+    if (error) Alert.alert(tr('Sign up failed'), error.message);
   }
 
   return (
@@ -212,26 +213,26 @@ function Register({ onBack, onSignIn }: { onBack: () => void; onSignIn: () => vo
       <ScrollView contentContainerStyle={s.form} keyboardShouldPersistTaps="handled">
         <BackButton onPress={onBack} />
         <View style={s.headBlock}>
-          <Text style={s.display}>Tell us about{'\n'}yourself.</Text>
-          <Text style={s.sub}>Your phone helps the barber confirm your booking.</Text>
+          <Text style={s.display}>{tr('Tell us about\nyourself.')}</Text>
+          <Text style={s.sub}>{tr('Your phone helps the barber confirm your booking.')}</Text>
         </View>
-        <LabeledField label="Full name" value={fullName} onChangeText={setFullName} />
-        <LabeledField label="Phone" keyboardType="phone-pad" autoComplete="tel"
+        <LabeledField label={tr('Full name')} value={fullName} onChangeText={setFullName} />
+        <LabeledField label={tr('Phone')} keyboardType="phone-pad" autoComplete="tel"
           placeholder="+212 6…" value={phone} onChangeText={setPhone} />
-        <LabeledField label="Email" autoCapitalize="none" keyboardType="email-address"
+        <LabeledField label={tr('Email')} autoCapitalize="none" keyboardType="email-address"
           autoComplete="email" value={email} onChangeText={setEmail} />
         <PasswordField value={password} onChangeText={setPassword} />
-        <CtaButton title="Create account" onPress={submit} busy={busy} />
+        <CtaButton title={tr('Create account')} onPress={submit} busy={busy} />
         <Pressable onPress={() => setRole(role === 'barber' ? 'customer' : 'barber')} hitSlop={6}>
           <Text style={s.roleLink}>
             {role === 'barber'
-              ? '✓ Joining as a barber — tap to switch back to customer'
-              : 'Are you a barber? Join as a barber'}
+              ? tr('✓ Joining as a barber — tap to switch back to customer')
+              : tr('Are you a barber? Join as a barber')}
           </Text>
         </Pressable>
         <Text style={s.footer}>
-          Already have an account?{' '}
-          <Text style={s.footerLink} onPress={onSignIn}>Sign in</Text>
+          {tr('Already have an account?')}{' '}
+          <Text style={s.footerLink} onPress={onSignIn}>{tr('Sign in')}</Text>
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>

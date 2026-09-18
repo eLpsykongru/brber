@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Display } from '../components/ui';
 import { colors, font, radius, shadow, TOP_INSET } from '../theme';
+import { tr } from '../lib/i18n';
 
 // 16b — search, popular articles, topic list, contact row. 22b is the article
 // itself, opened over the top.
@@ -18,70 +19,48 @@ type Article = {
 
 const ARTICLES: Article[] = [
   {
-    id: 'deposits', topic: 'Wallet, deposits & coupons', hot: true, icon: 'lock-closed-outline',
-    title: 'How do deposits and refunds work?',
-    body: 'When your wallet has the balance, you can pay part of a booking up front — at least '
-      + '40% of the price, up to the whole thing. The rest you pay in cash at the shop.\n\n'
-      + 'The deposit leaves your wallet the moment you book, and it is what holds your slot.\n\n'
-      + 'If the barber cancels, the deposit goes straight back to your wallet. If you cancel, it '
-      + 'does not — that asymmetry is the point of a deposit, and it is what makes a barber '
-      + 'willing to hold a chair for you.\n\n'
-      + 'Moving a booking never costs anything: the deposit carries over to the new time.',
+    id: 'deposits', topic: tr('Wallet, deposits & coupons'), hot: true, icon: 'lock-closed-outline',
+    title: tr('How do deposits and refunds work?'),
+    body: tr('When your wallet has the balance, you can pay part of a booking up front — at least 40% of the price, up to the whole thing. The rest you pay in cash at the shop.\n\nThe deposit leaves your wallet the moment you book, and it is what holds your slot.\n\nIf the barber cancels, the deposit goes straight back to your wallet. If you cancel, it does not — that asymmetry is the point of a deposit, and it is what makes a barber willing to hold a chair for you.\n\nMoving a booking never costs anything: the deposit carries over to the new time.'),
   },
   {
-    id: 'queue', topic: 'Queue & walk-ins', hot: true, icon: 'time-outline',
-    title: 'Using the live queue & tickets',
-    body: 'Once a barber confirms a booking for today, you get a ticket number and a live view of '
-      + 'the chair.\n\n"3 ahead" counts the confirmed people before you who have not been served '
-      + 'yet. The estimate moves as the barber starts and finishes each cut.\n\n'
-      + 'You always get a notification when you are next, whatever your other notification '
-      + 'settings say.',
+    id: 'queue', topic: tr('Queue & walk-ins'), hot: true, icon: 'time-outline',
+    title: tr('Using the live queue & tickets'),
+    body: tr('Once a barber confirms a booking for today, you get a ticket number and a live view of the chair.\n\n"3 ahead" counts the confirmed people before you who have not been served yet. The estimate moves as the barber starts and finishes each cut.\n\nYou always get a notification when you are next, whatever your other notification settings say.'),
   },
   {
-    id: 'topup', topic: 'Wallet, deposits & coupons', hot: true, icon: 'card-outline',
-    title: 'Topping up your wallet with cash',
-    body: 'Hand cash to the salon owner and they credit your wallet on the spot — you will see the '
-      + 'balance change before you leave the shop.\n\nCard top-ups are not available yet. When they '
-      + 'arrive, Add money will do it in the app.\n\nYour balance does not expire, and it can be '
-      + 'spent as a deposit at any salon on Sterncut.',
+    id: 'topup', topic: tr('Wallet, deposits & coupons'), hot: true, icon: 'card-outline',
+    title: tr('Topping up your wallet with cash'),
+    body: tr('Hand cash to the salon owner and they credit your wallet on the spot — you will see the balance change before you leave the shop.\n\nCard top-ups are not available yet. When they arrive, Add money will do it in the app.\n\nYour balance does not expire, and it can be spent as a deposit at any salon on Sterncut.'),
   },
   {
-    id: 'reschedule', topic: 'Bookings & rescheduling', icon: 'repeat',
-    title: 'Moving or cancelling a booking',
-    body: 'Open the booking and tap RESCHEDULE to ask for a new time. Your original slot is held '
-      + 'until the barber answers, and your deposit carries over.\n\nIf he cannot do the new time '
-      + 'he declines, and your original booking stands untouched.\n\nCancelling frees the slot '
-      + 'immediately. You can cancel any time before the booking starts.',
+    id: 'reschedule', topic: tr('Bookings & rescheduling'), icon: 'repeat',
+    title: tr('Moving or cancelling a booking'),
+    body: tr('Open the booking and tap RESCHEDULE to ask for a new time. Your original slot is held until the barber answers, and your deposit carries over.\n\nIf he cannot do the new time he declines, and your original booking stands untouched.\n\nCancelling frees the slot immediately. You can cancel any time before the booking starts.'),
   },
   {
-    id: 'coupons', topic: 'Wallet, deposits & coupons', icon: 'ticket-outline',
-    title: 'Using a coupon',
-    body: 'A coupon is a code you show at the shop — it comes off what you pay at the counter, not '
-      + 'off the deposit.\n\nAdd a code with "Have a code?" on My Coupons. Once the shop rings it '
-      + 'up it moves to the Used tab with the amount you saved.',
+    id: 'coupons', topic: tr('Wallet, deposits & coupons'), icon: 'ticket-outline',
+    title: tr('Using a coupon'),
+    body: tr('A coupon is a code you show at the shop — it comes off what you pay at the counter, not off the deposit.\n\nAdd a code with "Have a code?" on My Coupons. Once the shop rings it up it moves to the Used tab with the amount you saved.'),
   },
   {
-    id: 'account', topic: 'Account & sign-in', icon: 'person-outline',
-    title: 'Changing your phone or email',
-    body: 'Your name, photo and date of birth are editable in Settings → Your profile.\n\n'
-      + 'Your phone is verified by SMS and your email is tied to how you sign in, so neither can '
-      + 'be edited in place yet — report a problem and support will move the account for you.',
+    id: 'account', topic: tr('Account & sign-in'), icon: 'person-outline',
+    title: tr('Changing your phone or email'),
+    body: tr('Your name, photo and date of birth are editable in Settings → Your profile.\n\nYour phone is verified by SMS and your email is tied to how you sign in, so neither can be edited in place yet — report a problem and support will move the account for you.'),
   },
   {
-    id: 'report', topic: 'Reviews & reporting', icon: 'flag-outline',
-    title: 'Reporting a problem with a visit',
-    body: 'Open the booking, tap the ⋯ menu and choose Report a problem — or use Report a problem '
-      + 'in your profile.\n\nPick what went wrong, add a photo or receipt if you have one, and you '
-      + 'get a case number. Support answers within 24 hours in the case thread.',
+    id: 'report', topic: tr('Reviews & reporting'), icon: 'flag-outline',
+    title: tr('Reporting a problem with a visit'),
+    body: tr('Open the booking, tap the ⋯ menu and choose Report a problem — or use Report a problem in your profile.\n\nPick what went wrong, add a photo or receipt if you have one, and you get a case number. Support answers within 24 hours in the case thread.'),
   },
 ];
 
 const TOPICS = [
-  'Bookings & rescheduling',
-  'Queue & walk-ins',
-  'Wallet, deposits & coupons',
-  'Account & sign-in',
-  'Reviews & reporting',
+  tr('Bookings & rescheduling'),
+  tr('Queue & walk-ins'),
+  tr('Wallet, deposits & coupons'),
+  tr('Account & sign-in'),
+  tr('Reviews & reporting'),
 ];
 
 export default function HelpCenterScreen({ onBack, onContact }: {
@@ -103,19 +82,19 @@ export default function HelpCenterScreen({ onBack, onContact }: {
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.header}>
           <Pressable onPress={topic ? () => setTopic(null) : onBack} hitSlop={8}
-            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel="Go back">
+            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel={tr('Go back')}>
             <Ionicons name="arrow-back" size={16} color={colors.text} />
           </Pressable>
-          <Display size={18} style={s.headerTitle}>{topic ? 'Articles' : 'Help center'}</Display>
+          <Display size={18} style={s.headerTitle}>{topic ? tr('Articles') : tr('Help center')}</Display>
           <View style={s.puckGhost} />
         </View>
 
         <View style={s.search}>
           <Ionicons name="search" size={17} color={colors.textSecondary} />
           <TextInput style={s.searchInput} value={query} onChangeText={setQuery}
-            placeholder="Search help articles…" placeholderTextColor={colors.textSecondary} />
+            placeholder={tr('Search help articles…')} placeholderTextColor={colors.textSecondary} />
           {!!q && (
-            <Pressable onPress={() => setQuery('')} hitSlop={8} accessibilityLabel="Clear search">
+            <Pressable onPress={() => setQuery('')} hitSlop={8} accessibilityLabel={tr('Clear search')}>
               <Ionicons name="close-circle" size={17} color={colors.textTertiary} />
             </Pressable>
           )}
@@ -123,24 +102,24 @@ export default function HelpCenterScreen({ onBack, onContact }: {
 
         {list ? (
           <>
-            <Text style={s.section}>{topic ? topic.toUpperCase() : `${list.length} RESULTS`}</Text>
+            <Text style={s.section}>{topic ? topic.toUpperCase() : tr('{count} RESULTS', { count: list.length })}</Text>
             <View style={s.cards}>
               {list.map((a) => <ArticleRow key={a.id} a={a} onPress={() => setArticle(a)} />)}
               {list.length === 0 && (
-                <Text style={s.empty}>Nothing matched. Try a topic below, or contact support.</Text>
+                <Text style={s.empty}>{tr('Nothing matched. Try a topic below, or contact support.')}</Text>
               )}
             </View>
           </>
         ) : (
           <>
-            <Text style={s.section}>POPULAR RIGHT NOW</Text>
+            <Text style={s.section}>{tr('POPULAR RIGHT NOW')}</Text>
             <View style={s.cards}>
               {ARTICLES.filter((a) => a.hot).map((a) => (
                 <ArticleRow key={a.id} a={a} onPress={() => setArticle(a)} />
               ))}
             </View>
 
-            <Text style={s.section}>BROWSE TOPICS</Text>
+            <Text style={s.section}>{tr('BROWSE TOPICS')}</Text>
             <View style={s.card}>
               {TOPICS.map((t, i) => (
                 <Pressable key={t} onPress={() => setTopic(t)}
@@ -159,12 +138,12 @@ export default function HelpCenterScreen({ onBack, onContact }: {
             <Ionicons name="chatbubble-ellipses-outline" size={18} color="#fff" />
           </View>
           <View style={s.grow}>
-            <Text style={s.contactTitle}>Still stuck?</Text>
-            <Text style={s.contactSub}>Chat with Sterncut support · replies in ~1 h</Text>
+            <Text style={s.contactTitle}>{tr('Still stuck?')}</Text>
+            <Text style={s.contactSub}>{tr('Chat with Sterncut support · replies in ~1 h')}</Text>
           </View>
           <Pressable onPress={onContact} disabled={!onContact}
             style={({ pressed }) => [s.contactBtn, pressed && s.pressed]}>
-            <Text style={s.contactBtnText}>CONTACT</Text>
+            <Text style={s.contactBtnText}>{tr('CONTACT')}</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -175,10 +154,10 @@ export default function HelpCenterScreen({ onBack, onContact }: {
           <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
             <View style={s.header}>
               <Pressable onPress={() => setArticle(null)} hitSlop={8}
-                style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel="Close">
+                style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel={tr('Close')}>
                 <Ionicons name="arrow-back" size={16} color={colors.text} />
               </Pressable>
-              <Display size={18} style={s.headerTitle}>Help</Display>
+              <Display size={18} style={s.headerTitle}>{tr('Help')}</Display>
               <View style={s.puckGhost} />
             </View>
             {!!article && (

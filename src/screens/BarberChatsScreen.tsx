@@ -9,6 +9,7 @@ import { dark as d, radius, sp, TOP_INSET } from '../theme';
 import { BarberCaseScreen, CaseRow } from './BarberSupportScreens';
 import { Pushed } from '../components/motion';
 import ChatScreen from './ChatScreen';
+import { loc, tr } from '../lib/i18n';
 
 // BMS-03 / BMS-04 — the barber had threads (BMS-01, BMS-02) and nowhere they
 // lived. Clients and Ops share one inbox because he checks his phone once
@@ -42,7 +43,7 @@ const isToday = (iso: string) => new Date(iso).toDateString() === new Date().toD
 function stamp(iso: string) {
   const d0 = new Date(iso);
   if (isToday(iso)) return hhmm(iso);
-  return d0.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
+  return d0.toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' }).toUpperCase();
 }
 
 // a new message belongs on the booking he still has, not on the visit they
@@ -92,7 +93,7 @@ export default function BarberChatsScreen({ barberId, onChromeHidden, onHelp }: 
     setConvos(list);
 
     const { data: cs, error } = await supabase.rpc('my_support_cases');
-    if (error) Alert.alert('Could not load cases', error.message);
+    if (error) Alert.alert(tr('Could not load cases'), error.message);
     setCases((cs ?? []) as CaseRow[]);
   }, [barberId]);
 
@@ -129,11 +130,11 @@ export default function BarberChatsScreen({ barberId, onChromeHidden, onHelp }: 
   const inbox = (
     <View style={s.screen}>
       <View style={s.head}>
-        <Serif size={20} ls={0.8}>MESSAGES</Serif>
+        <Serif size={20} ls={0.8}>{tr('MESSAGES')}</Serif>
         <View style={s.tabs}>
-          <Tab label="Clients" count={threads.length} on={tab === 'clients'}
+          <Tab label={tr('Clients')} count={threads.length} on={tab === 'clients'}
             onPress={() => setTab('clients')} />
-          <Tab label="Ops" count={opsOpen.length} on={tab === 'ops'} warn={opsUnread > 0}
+          <Tab label={tr('Ops')} count={opsOpen.length} on={tab === 'ops'} warn={opsUnread > 0}
             onPress={() => setTab('ops')} />
         </View>
       </View>
@@ -142,34 +143,34 @@ export default function BarberChatsScreen({ barberId, onChromeHidden, onHelp }: 
         {(convos === null || cases === null) && <ActivityIndicator color={d.accent} style={s.spin} />}
 
         {tab === 'clients' && convos !== null && (threads.length === 0 ? (
-          <Empty icon="chatbubble-outline" title="No client messages"
-            text="A thread opens itself once somebody books you." />
+          <Empty icon="chatbubble-outline" title={tr('No client messages')}
+            text={tr('A thread opens itself once somebody books you.')} />
         ) : (
           <>
-            {today.length > 0 && <Eyebrow>IN THE CHAIR TODAY</Eyebrow>}
+            {today.length > 0 && <Eyebrow>{tr('IN THE CHAIR TODAY')}</Eyebrow>}
             {today.map((t) => <ClientRow key={t.head.customer_id} t={t} live onPress={() => openThread(t)} />)}
-            {earlier.length > 0 && <Eyebrow style={s.gap}>EARLIER</Eyebrow>}
+            {earlier.length > 0 && <Eyebrow style={s.gap}>{tr('EARLIER')}</Eyebrow>}
             {earlier.map((t) => <ClientRow key={t.head.customer_id} t={t} onPress={() => openThread(t)} />)}
           </>
         ))}
 
         {tab === 'ops' && cases !== null && (
           <>
-            {opsOpen.length > 0 && <Eyebrow>NEEDS YOU</Eyebrow>}
+            {opsOpen.length > 0 && <Eyebrow>{tr('NEEDS YOU')}</Eyebrow>}
             {opsOpen.map((c) => <CaseCard key={c.id} c={c} onPress={() => showCase(c)} />)}
-            {opsDone.length > 0 && <Eyebrow style={opsOpen.length ? s.gap : undefined}>SETTLED</Eyebrow>}
+            {opsDone.length > 0 && <Eyebrow style={opsOpen.length ? s.gap : undefined}>{tr('SETTLED')}</Eyebrow>}
             {opsDone.map((c) => <CaseCard key={c.id} c={c} onPress={() => showCase(c)} />)}
             {cases.length === 0 && (
-              <Empty icon="shield-checkmark-outline" title="Nothing from ops"
-                text="If money or a rating is ever queried, the thread appears here." />
+              <Empty icon="shield-checkmark-outline" title={tr('Nothing from ops')}
+                text={tr('If money or a rating is ever queried, the thread appears here.')} />
             )}
             {/* BMS-04 — he cannot start one of these, and being told so beats
                 hunting for a compose button that was never going to exist */}
             <View style={s.note}>
               <Ionicons name="information-circle-outline" size={15} color={d.sub} />
               <T size={11} c={d.sub} style={s.noteText}>
-                Ops opens these threads. Need something else?{' '}
-                <T size={11} c={d.accent} w="b" onPress={onHelp}>Report a problem</T>
+                {tr('Ops opens these threads. Need something else?')}{' '}
+                <T size={11} c={d.accent} w="b" onPress={onHelp}>{tr('Report a problem')}</T>
               </T>
             </View>
           </>
@@ -179,13 +180,12 @@ export default function BarberChatsScreen({ barberId, onChromeHidden, onHelp }: 
   );
 
   if (open) {
-    const name = open.head.customer?.full_name ?? open.head.walk_in_name ?? 'Client';
+    const name = open.head.customer?.full_name ?? open.head.walk_in_name ?? tr('Client');
     return (
       <Pushed onBack={() => { openThread(null); load(); }} behind={inbox}>
         <ChatScreen dark bookingId={writeTarget(open)} threadWith={open.head.customer_id}
       myId={barberId} title={name}
-      subtitle={`${isToday(open.head.starts_at) ? 'Today' : stamp(open.head.starts_at)} `
-        + `${hhmm(open.head.starts_at)} · ${open.head.services?.name ?? 'Service'}`}
+      subtitle={tr('{day} {time} · {service}', { day: isToday(open.head.starts_at) ? tr('Today') : stamp(open.head.starts_at), time: hhmm(open.head.starts_at), service: open.head.services?.name ?? tr('Service') })}
           onBack={() => { openThread(null); load(); }} />
       </Pushed>
     );
@@ -220,12 +220,12 @@ function Tab({ label, count, on, warn, onPress }: {
 
 function ClientRow({ t, live, onPress }: { t: Thread; live?: boolean; onPress: () => void }) {
   const b = t.head;
-  const name = b.customer?.full_name ?? b.walk_in_name ?? 'Client';
+  const name = b.customer?.full_name ?? b.walk_in_name ?? tr('Client');
   // ponytail: no unread badge — `messages` has no read tracking on either
   // side (the customer's Unread tab says so too). Add when it exists.
   const preview = b.last
-    ? (b.last.image_path ? '📷 Photo' : b.last.body ?? '')
-    : `${b.services?.name ?? 'Booking'} · nothing said yet`;
+    ? (b.last.image_path ? tr('📷 Photo') : b.last.body ?? '')
+    : tr('{service} · nothing said yet', { service: b.services?.name ?? tr('Booking') });
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={name}
       style={({ pressed }) => [live ? s.liveCard : s.row, pressed && s.pressed]}>
@@ -237,7 +237,7 @@ function ClientRow({ t, live, onPress }: { t: Thread; live?: boolean; onPress: (
         {live && (
           <View style={s.slotChip}>
             <T size={10} w="b" c={d.accent}>{hhmm(b.starts_at)}</T>
-            <T size={10} c={d.sub}>{b.services?.name ?? 'Service'}</T>
+            <T size={10} c={d.sub}>{b.services?.name ?? tr('Service')}</T>
           </View>
         )}
       </View>
@@ -247,9 +247,9 @@ function ClientRow({ t, live, onPress }: { t: Thread; live?: boolean; onPress: (
 }
 
 const REASON_LABEL: Record<string, string> = {
-  no_show: 'No-show', wrong_amount: 'Wrong amount', wrong_service: 'Wrong service',
-  hygiene: 'Hygiene', payout: 'Payout', client: 'A client', booking: 'A booking',
-  other: 'Something else',
+  no_show: tr('No-show'), wrong_amount: tr('Wrong amount'), wrong_service: tr('Wrong service'),
+  hygiene: tr('Hygiene'), payout: tr('Payout'), client: tr('A client'), booking: tr('A booking'),
+  other: tr('Something else'),
 };
 
 function CaseCard({ c, onPress }: { c: CaseRow; onPress: () => void }) {
@@ -266,14 +266,14 @@ function CaseCard({ c, onPress }: { c: CaseRow; onPress: () => void }) {
           {c.case_no} · {REASON_LABEL[c.reason] ?? c.reason}
         </T>
         <T size={11.5} c={d.sub} numberOfLines={1} style={s.preview}>
-          {c.detail || (c.other ?? c.salon ?? 'Opened by ops')}
+          {c.detail || (c.other ?? c.salon ?? tr('Opened by ops'))}
         </T>
       </View>
       <View style={s.caseEnd}>
         <T size={10} c={d.sub}>{stamp(c.resolved_at ?? c.created_at)}</T>
         {c.unread > 0
           ? <View style={s.unread}><T size={10} w="b" c="#fff">{c.unread}</T></View>
-          : !open && <View style={s.closed}><T size={9.5} w="b" c={d.green}>CLOSED</T></View>}
+          : !open && <View style={s.closed}><T size={9.5} w="b" c={d.green}>{tr('CLOSED')}</T></View>}
       </View>
     </Pressable>
   );

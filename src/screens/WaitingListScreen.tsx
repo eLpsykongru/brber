@@ -9,6 +9,7 @@ import {
 } from '../lib/slots';
 import { dark as D, serif } from '../theme';
 import ChatScreen from './ChatScreen';
+import { loc, tr, trn } from '../lib/i18n';
 
 // 8h / 8i / 8j / 8k of "Barber App.dc.html" — the list itself, and what to do
 // when there is nothing to give the people on it.
@@ -44,16 +45,16 @@ const hhmm = (d: Date) => d.toTimeString().slice(0, 5);
 const hhmmOf = (m: number) =>
   `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 const askedAt = (iso: string) => new Date(iso).toTimeString().slice(0, 5);
-const minLabel = (m: number | null) => (m == null ? 'any time' : `after ${hhmmOf(m)}`);
+const minLabel = (m: number | null) => (m == null ? tr('any time') : tr('after {at}', { at: hhmmOf(m) }));
 const isoOf = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const dateOf = (iso: string) => new Date(`${iso}T00:00:00`);
 
 function dayLabel(iso: string, today: string) {
-  if (iso === today) return 'TODAY';
-  return dateOf(iso).toLocaleDateString('en-US', { weekday: 'short', day: '2-digit' }).toUpperCase();
+  if (iso === today) return tr('TODAY');
+  return dateOf(iso).toLocaleDateString(loc('en-US'), { weekday: 'short', day: '2-digit' }).toUpperCase();
 }
-const weekday = (iso: string) => dateOf(iso).toLocaleDateString('en-US', { weekday: 'long' });
+const weekday = (iso: string) => dateOf(iso).toLocaleDateString(loc('en-US'), { weekday: 'long' });
 
 export default function WaitingListScreen({ barberId, onBack, slot }: {
   barberId: string; onBack?: () => void;
@@ -70,7 +71,7 @@ export default function WaitingListScreen({ barberId, onBack, slot }: {
 
   const load = useCallback(async () => {
     const { data: j, error } = await supabase.rpc('barber_waitlist');
-    if (error) return Alert.alert('Could not load the list', error.message);
+    if (error) return Alert.alert(tr('Could not load the list'), error.message);
     const p = j as Payload;
     setData(p);
 
@@ -100,7 +101,7 @@ export default function WaitingListScreen({ barberId, onBack, slot }: {
       buffer: buf.data ? buf.data.buffer_before_min + buf.data.buffer_after_min : 0,
       booked: (bk.data ?? []) as Range[],
       slotMin: svc.data?.duration_min ?? 30,
-      svcName: svc.data?.name ?? 'Service',
+      svcName: svc.data?.name ?? tr('Service'),
       svcCents: svc.data?.price_cents ?? 0,
     });
   }, [barberId]);
@@ -140,7 +141,7 @@ export default function WaitingListScreen({ barberId, onBack, slot }: {
       slot: {
         id: slot && isoOf(new Date(slot.starts_at)) === d.day ? slot.id : undefined,
         starts_at: d.free.toISOString(),
-        service: cal?.svcName ?? 'Service',
+        service: cal?.svcName ?? tr('Service'),
         duration_min: cal?.slotMin ?? 30,
       },
       preselect: a?.customer_id,
@@ -159,26 +160,24 @@ export default function WaitingListScreen({ barberId, onBack, slot }: {
   if (data && data.asks.length === 0) {
     return (
       <Screen bottom={TAB_INSET}>
-        <TopBar title="Waiting list" onBack={onBack} />
+        <TopBar title={tr('Waiting list')} onBack={onBack} />
         <View style={s.empty}>
           <View style={s.emptyCircle}><Ico name="users" size={30} color={D.muted} /></View>
           <View>
-            <T style={s.emptyTitle}>Nobody waiting</T>
+            <T style={s.emptyTitle}>{tr('Nobody waiting')}</T>
             <T size={13} c={D.sub} style={s.emptyBody}>
-              When a client finds a day of yours full, they can ask to be told if it opens.
-              Those asks land here.
+              {tr('When a client finds a day of yours full, they can ask to be told if it opens. Those asks land here.')}
             </T>
           </View>
         </View>
         <View style={s.whyCard}>
           <T w="b" size={10} c={D.sub} ls={1.4}>
-            {data.free_today > 0 ? 'YOU HAVE ROOM TODAY' : 'NO ASKS YET'}
+            {data.free_today > 0 ? tr('YOU HAVE ROOM TODAY') : tr('NO ASKS YET')}
           </T>
           <T size={12.5} c={D.sub} style={s.whyBody}>
-            Asks only happen on days with nothing left.
-            {data.free_today > 0
-              ? ` You have ${data.free_today} booking${data.free_today === 1 ? '' : 's'} today, so there is still room.`
-              : ' Once a day fills up, the people who wanted it show up here.'}
+            {tr('Asks only happen on days with nothing left.{x}', { x: data.free_today > 0
+              ? trn(data.free_today, ' You have {n} booking today, so there is still room.', ' You have {n} bookings today, so there is still room.')
+              : tr(' Once a day fills up, the people who wanted it show up here.') })}
           </T>
         </View>
       </Screen>
@@ -187,20 +186,20 @@ export default function WaitingListScreen({ barberId, onBack, slot }: {
 
   return (
     <Screen bottom={TAB_INSET}>
-      <TopBar title="Waiting list" onBack={onBack} />
+      <TopBar title={tr('Waiting list')} onBack={onBack} />
 
       {/* day chips — the only unit he can act on is a whole day. 8j drops them:
           with nothing free anywhere, filtering to one day changes nothing. */}
       {anyFree && (
         <View style={s.chipRow}>
           <Pressable onPress={() => setPickedDay(null)} style={[s.chip, !pickedDay && s.chipOn]}>
-            <T w="b" size={11} c={!pickedDay ? '#fff' : D.sub}>All {total}</T>
+            <T w="b" size={11} c={!pickedDay ? '#fff' : D.sub}>{tr('All {total}', { total })}</T>
           </Pressable>
           {days.map((d) => (
             <Pressable key={d.day} onPress={() => setPickedDay(d.day === pickedDay ? null : d.day)}
               style={[s.chip, pickedDay === d.day && s.chipOn]}>
               <T w={pickedDay === d.day ? 'b' : 'sb'} size={11} c={pickedDay === d.day ? '#fff' : D.sub}>
-                {d.day === today ? 'Today' : dayLabel(d.day, today)} {d.asks.length}
+                {d.day === today ? tr('Today') : dayLabel(d.day, today)} {d.asks.length}
               </T>
             </Pressable>
           ))}
@@ -210,13 +209,13 @@ export default function WaitingListScreen({ barberId, onBack, slot }: {
       <View style={s.headline}>
         <View>
           <T w="b" size={10} c={D.sub} ls={1.4}>
-            {anyFree ? 'ASKING FOR TODAY' : `ASKING · ${days.length} DAY${days.length === 1 ? '' : 'S'}`}
+            {anyFree ? tr('ASKING FOR TODAY') : trn(days.length, 'ASKING · {n} DAY', 'ASKING · {n} DAYS')}
           </T>
           <T style={s.big}>{anyFree ? todayCount : total}</T>
         </View>
         <View style={s.right}>
           <T w="b" size={10} c={D.sub} ls={1.4}>
-            {slot ? 'JUST OPENED' : anyFree ? 'FREE RIGHT NOW' : 'FREE TO OFFER'}
+            {slot ? tr('JUST OPENED') : anyFree ? tr('FREE RIGHT NOW') : tr('FREE TO OFFER')}
           </T>
           {anyFree
             ? (
@@ -224,7 +223,7 @@ export default function WaitingListScreen({ barberId, onBack, slot }: {
                 {hhmm(days.find((d) => d.free)!.free!)}
               </T>
             )
-            : <T w="b" size={19} c={D.sub} style={s.mt6}>Nothing</T>}
+            : <T w="b" size={19} c={D.sub} style={s.mt6}>{tr('Nothing')}</T>}
         </View>
       </View>
 
@@ -233,8 +232,10 @@ export default function WaitingListScreen({ barberId, onBack, slot }: {
         <View key={d.day} style={s.daySection}>
           <T w="b" size={11} c={D.sub} ls={1.65}>
             {d.day === today
-              ? `TODAY · ${dateOf(d.day).toLocaleDateString('en-US', { weekday: 'short', day: '2-digit' }).toUpperCase()}`
-              : `${dayLabel(d.day, today)} · ${d.asks.length} ASKING${d.free ? '' : ' · FULLY BOOKED'}`}
+              ? tr('TODAY · {toLocaleDateString}', { toLocaleDateString: dateOf(d.day).toLocaleDateString(loc('en-US'), { weekday: 'short', day: '2-digit' }).toUpperCase() })
+              : (d.free
+                ? tr('{day} · {count} ASKING', { day: dayLabel(d.day, today), count: d.asks.length })
+                : tr('{day} · {count} ASKING · FULLY BOOKED', { day: dayLabel(d.day, today), count: d.asks.length }))}
           </T>
           <View style={s.list9}>
             {d.asks.map((a) => {
@@ -251,14 +252,14 @@ export default function WaitingListScreen({ barberId, onBack, slot }: {
                     <T w={blocked ? 'sb' : 'b'} size={13.5} c={blocked ? D.sub : D.text}>{a.name}</T>
                     <T size={11} c={blocked ? D.red : D.sub} style={s.mt2}>
                       {blocked
-                        ? `${a.no_shows} no-shows · won't be offered`
-                        : `Asked ${askedAt(a.asked_at)} · ${minLabel(a.earliest_min)} · ${a.mine_only ? 'you only' : 'any barber'}`
+                        ? tr('{no_shows} no-shows · won\'t be offered', { no_shows: a.no_shows })
+                        : tr('Asked {at} · {earliest} · {who}', { at: askedAt(a.asked_at), earliest: minLabel(a.earliest_min), who: a.mine_only ? tr('you only') : tr('any barber') })
                           + (a.service ? ` · ${a.service}` : '')}
                     </T>
                   </View>
                   {canOffer && (
                     <Pressable onPress={() => offerTo(d, a)} style={s.offerBtn}>
-                      <T w="b" size={11} c="#fff" ls={0.44}>OFFER {hhmm(d.free!)}</T>
+                      <T w="b" size={11} c="#fff" ls={0.44}>{tr('OFFER {hhmm}', { hhmm: hhmm(d.free!) })}</T>
                     </Pressable>
                   )}
                 </View>
@@ -278,14 +279,14 @@ export default function WaitingListScreen({ barberId, onBack, slot }: {
             <View style={s.fullHead}>
               <T w="b" size={11} c={D.sub} ls={1.2} style={s.grow}>
                 {d.day === today
-                  ? `TODAY · ${dateOf(d.day).toLocaleDateString('en-US', { weekday: 'short', day: '2-digit' }).toUpperCase()}`
-                  : `${dayLabel(d.day, today)} · ${d.asks.length} ASKING`}
+                  ? tr('TODAY · {toLocaleDateString}', { toLocaleDateString: dateOf(d.day).toLocaleDateString(loc('en-US'), { weekday: 'short', day: '2-digit' }).toUpperCase() })
+                  : tr('{day} · {count} ASKING', { day: dayLabel(d.day, today), count: d.asks.length })}
               </T>
               <View style={s.fullChip}>
                 <T w="b" size={10} c={D.sub} ls={0.6}>
-                  {d.close == null ? 'CLOSED'
-                    : d.day === today ? `FULL · CLOSES ${hhmmOf(d.close)}`
-                      : `FULL ${hhmmOf(d.open!)}–${hhmmOf(d.close)}`}
+                  {d.close == null ? tr('CLOSED')
+                    : d.day === today ? tr('FULL · CLOSES {close}', { close: hhmmOf(d.close) })
+                      : tr('FULL {hhmmOf}–{close}', { hhmmOf: hhmmOf(d.open!), close: hhmmOf(d.close) })}
                 </T>
               </View>
             </View>
@@ -299,8 +300,8 @@ export default function WaitingListScreen({ barberId, onBack, slot }: {
                   <T w="b" size={13.5}>{a.name}</T>
                   <T size={11} c={D.sub} style={s.mt2}>
                     {a.day === today
-                      ? `Asked ${askedAt(a.asked_at)} · ${minLabel(a.earliest_min)}`
-                      : `${minLabel(a.earliest_min)} · ${a.mine_only ? 'you only' : 'any barber'} · ${a.visits} visit${a.visits === 1 ? '' : 's'}`}
+                      ? tr('Asked {asked_at} · {earliest_min}', { asked_at: askedAt(a.asked_at), earliest_min: minLabel(a.earliest_min) })
+                      : trn(a.visits, '{earliest_min} · {x} · {n} visit', '{earliest_min} · {x} · {n} visits', { earliest_min: minLabel(a.earliest_min), x: a.mine_only ? tr('you only') : tr('any barber') })}
                   </T>
                 </View>
               </View>
@@ -311,7 +312,7 @@ export default function WaitingListScreen({ barberId, onBack, slot }: {
             {rest.length > 0 && (
               <View style={s.fullRest}>
                 <T size={11.5} c={D.sub} style={s.grow}>
-                  {rest.map((a) => `${first(a.name)} ${a.no_shows >= 2 ? 'not offered' : minLabel(a.earliest_min)}`)
+                  {rest.map((a) => `${first(a.name)} ${a.no_shows >= 2 ? tr('not offered') : minLabel(a.earliest_min)}`)
                     .join(' · ')}
                 </T>
               </View>
@@ -322,7 +323,7 @@ export default function WaitingListScreen({ barberId, onBack, slot }: {
                 <Pressable style={s.makeBtn} onPress={() => setRoomFor(d)}>
                   <Ico name="plus" size={14} color="#fff" />
                   <T w="b" size={12} c="#fff" ls={0.6}>
-                    MAKE ROOM ON {d.day === today ? 'TODAY' : weekday(d.day).toUpperCase()}
+                    {tr('MAKE ROOM ON {x}', { x: d.day === today ? tr('TODAY') : weekday(d.day).toUpperCase() })}
                   </T>
                 </Pressable>
               </View>
@@ -330,14 +331,14 @@ export default function WaitingListScreen({ barberId, onBack, slot }: {
               <View style={s.fullRest}>
                 <T size={11.5} c={D.sub} style={s.grow}>
                   {d.day === today
-                    ? 'Too late to open anything today'
-                    : 'Nothing left to open on that day'}
+                    ? tr('Too late to open anything today')
+                    : tr('Nothing left to open on that day')}
                 </T>
                 {!!reachable?.last_booking && (
                   <Pressable style={s.msgBtn}
                     onPress={() => setChat({ id: reachable.last_booking!, title: reachable.name })}>
                     <Ico name="message-square" size={13} color={D.text} />
-                    <T w="b" size={11}>MESSAGE {first(reachable.name).toUpperCase()}</T>
+                    <T w="b" size={11}>{tr('MESSAGE {name}', { name: first(reachable.name).toUpperCase() })}</T>
                   </Pressable>
                 )}
               </View>
@@ -350,8 +351,8 @@ export default function WaitingListScreen({ barberId, onBack, slot }: {
         <Ico name="info" size={15} color={D.sub} />
         <T size={12} c={D.sub} style={s.noteText}>
           {anyFree
-            ? 'Asks expire when that day is over. Nobody is holding a slot — you choose who gets offered.'
-            : 'Offers anchor to a real gap in your day. On a full day, making room is the only way to make one.'}
+            ? tr('Asks expire when that day is over. Nobody is holding a slot — you choose who gets offered.')
+            : tr('Offers anchor to a real gap in your day. On a full day, making room is the only way to make one.')}
         </T>
       </View>
 
@@ -393,8 +394,8 @@ function MakeRoomSheet({ barberId, day, cal, onClose, onMade }: {
     a.no_shows < 2 && (a.earliest_min == null || a.earliest_min <= o.startMin)).length;
 
   const noteFor = (o: RoomOption) => {
-    if (o.source === 'later') return `${weekday(day.day)} now closes at ${hhmmOf(o.endMin)}`;
-    if (o.source === 'break') return `${weekday(day.day)}'s break is ${o.sub.toLowerCase()}`;
+    if (o.source === 'later') return tr('{day} now closes at {at}', { day: weekday(day.day), at: hhmmOf(o.endMin) });
+    if (o.source === 'break') return tr("{day}'s break is {sub}", { day: weekday(day.day), sub: o.sub.toLowerCase() });
     return o.sub;
   };
 
@@ -409,7 +410,7 @@ function MakeRoomSheet({ barberId, day, cal, onClose, onMade }: {
       kind: 'open', label: 'Made room',
     });
     setBusy(false);
-    if (error) return Alert.alert('Could not open that time', error.message);
+    if (error) return Alert.alert(tr('Could not open that time'), error.message);
     onMade({
       starts_at: chosen.at.toISOString(), service: cal.svcName, duration_min: cal.slotMin,
     }, noteFor(chosen), offerIt);
@@ -419,16 +420,15 @@ function MakeRoomSheet({ barberId, day, cal, onClose, onMade }: {
     <Sheet visible={!!day} onClose={onClose} deep gap={12}>
       <View style={s.sheetHead}>
         <View style={s.grow}>
-          <T w="b" size={17}>Make room</T>
+          <T w="b" size={17}>{tr('Make room')}</T>
           <T size={11} c={D.sub} style={s.mt2}>
-            {dateOf(day.day).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })}
-            {' · '}{takers(chosen)} {takers(chosen) === 1 ? 'person' : 'people'} could take it
+            {tr('{toLocaleDateString} · {chosen} {x} could take it', { toLocaleDateString: dateOf(day.day).toLocaleDateString(loc('en-US'), { weekday: 'short', day: 'numeric', month: 'short' }), chosen: takers(chosen), x: takers(chosen) === 1 ? tr('person') : tr('people') })}
           </T>
         </View>
         <Pressable onPress={onClose} hitSlop={8} style={s.puck32}><Ico name="x" size={15} /></Pressable>
       </View>
 
-      <T w="b" size={10} c={D.sub} ls={1.4}>WHERE THE SLOT COMES FROM</T>
+      <T w="b" size={10} c={D.sub} ls={1.4}>{tr('WHERE THE SLOT COMES FROM')}</T>
       <View style={s.list8}>
         {opts.map((o, i) => (
           <Pressable key={o.source} onPress={() => setPick(i)}
@@ -443,7 +443,7 @@ function MakeRoomSheet({ barberId, day, cal, onClose, onMade }: {
             <View style={s.right}>
               <T w="eb" size={14} c={i === pick ? D.text : D.sub} style={s.num}>{hhmm(o.at)}</T>
               <T size={10} c={i === pick ? D.green : D.sub} style={s.mt2}>
-                {takers(o)} can take it
+                {tr('{o} can take it', { o: takers(o) })}
               </T>
             </View>
           </Pressable>
@@ -452,23 +452,23 @@ function MakeRoomSheet({ barberId, day, cal, onClose, onMade }: {
 
       {!!chosen && (
         <View style={s.wouldCard}>
-          <T w="b" size={10} c={D.sub} ls={1.5}>YOU'D CREATE</T>
+          <T w="b" size={10} c={D.sub} ls={1.5}>{tr('YOU\'D CREATE')}</T>
           <View style={s.wouldRow}>
             <View>
               <T style={s.wouldBig}>
-                {dateOf(day.day).toLocaleDateString('en-US', { weekday: 'short' })} {hhmm(chosen.at)}
+                {dateOf(day.day).toLocaleDateString(loc('en-US'), { weekday: 'short' })} {hhmm(chosen.at)}
               </T>
-              <T size={11} c={D.sub} style={s.mt5}>{cal.slotMin} min · one client</T>
+              <T size={11} c={D.sub} style={s.mt5}>{tr('{slotMin} min · one client', { slotMin: cal.slotMin })}</T>
             </View>
             <View style={s.right}>
-              <T w="b" size={10} c={D.sub} ls={1.2}>WORTH</T>
-              <T w="b" size={17} style={s.mt5}>{Math.round(cal.svcCents / 100)} DH</T>
+              <T w="b" size={10} c={D.sub} ls={1.2}>{tr('WORTH')}</T>
+              <T w="b" size={17} style={s.mt5}>{tr('{round} DH', { round: Math.round(cal.svcCents / 100) })}</T>
             </View>
           </View>
           <View style={s.wouldFoot}>
             <Ico name="calendar" size={13} color={D.sub} />
             <T size={11} c={D.sub}>
-              This {weekday(day.day)} only · your usual hours don't change
+              {tr('This {day} only · your usual hours don\'t change', { day: weekday(day.day) })}
             </T>
           </View>
         </View>
@@ -477,11 +477,11 @@ function MakeRoomSheet({ barberId, day, cal, onClose, onMade }: {
       <Pressable disabled={busy || !chosen} onPress={() => create(true)}
         style={[s.sendBtn, (busy || !chosen) && s.dim55]}>
         <T w="b" size={13} c="#fff" ls={0.78}>
-          {busy ? 'OPENING…' : `CREATE ${chosen ? hhmm(chosen.at) : ''} & OFFER IT`}
+          {busy ? tr('OPENING…') : tr('CREATE {x} & OFFER IT', { x: chosen ? hhmm(chosen.at) : '' })}
         </T>
       </Pressable>
       <Pressable disabled={busy || !chosen} onPress={() => create(false)} style={s.centerBtn}>
-        <T w="sb" size={12} c={D.sub}>Just create it, don't offer</T>
+        <T w="sb" size={12} c={D.sub}>{tr('Just create it, don\'t offer')}</T>
       </Pressable>
     </Sheet>
   );

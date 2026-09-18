@@ -17,6 +17,7 @@ import { colors, font, radius, serif, shadow, shadowLg, sp } from '../theme';
 import type { Specialist } from '../types';
 import { Pushed } from '../components/motion';
 import BarberDetailScreen from './BarberDetailScreen';
+import { tr, trn } from '../lib/i18n';
 
 export type SalonCard = {
   id: string;
@@ -42,10 +43,10 @@ function avgOf(reviews: { rating: number }[]): number | null {
 
 function timeAgo(iso: string) {
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
-  if (days < 1) return 'today';
-  if (days < 30) return `${days}d ago`;
+  if (days < 1) return tr('today');
+  if (days < 30) return tr('{d}d ago', { d: days });
   const m = Math.floor(days / 30);
-  return m < 12 ? `${m}mo ago` : `${Math.floor(m / 12)}y ago`;
+  return m < 12 ? tr('{m}mo ago', { m }) : tr('{y}y ago', { y: Math.floor(m / 12) });
 }
 
 export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, onBooked, initialBarberId, preview }: {
@@ -118,7 +119,7 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
   const flatServices = salon.barbers.flatMap((b) => b.services.filter((sv) => sv.is_active));
   const bundleBarbers = salon.barbers.map((b) => ({
     id: b.id,
-    name: b.profiles?.full_name ?? 'Barber',
+    name: b.profiles?.full_name ?? tr('Barber'),
     services: b.services.filter((sv) => sv.is_active),
   }));
 
@@ -133,8 +134,8 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
   const TABS: Tab[] = ['about', 'services', 'specialist', 'bundles', 'gallery', 'review'];
 
   function action(name: string, url?: string | null) {
-    if (url) Linking.openURL(url).catch(() => Alert.alert(name, 'Could not open.'));
-    else Alert.alert(name, 'Coming soon — see BACKLOG.md');
+    if (url) Linking.openURL(url).catch(() => Alert.alert(name, tr('Could not open.')));
+    else Alert.alert(name, tr('Coming soon — see BACKLOG.md'));
   }
 
   // built before the specialist page below, so it can be handed over as
@@ -148,17 +149,17 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
             ? <Image source={{ uri: hero }} style={s.heroImg} />
             : <View style={[s.heroImg, s.heroFallback]} />}
           <View style={s.heroTop}>
-            <Pressable onPress={onBack} style={s.circleBtn} hitSlop={8} accessibilityLabel="Back">
+            <Pressable onPress={onBack} style={s.circleBtn} hitSlop={8} accessibilityLabel={tr('Back')}>
               <Ionicons name="chevron-back" size={20} color={colors.text} />
             </Pressable>
             <View style={s.heroTopRight}>
-              <Pressable onPress={() => Share.share({ message: `${salon.name} on Sterncut!` })}
-                style={s.circleBtn} hitSlop={8} accessibilityLabel="Share">
+              <Pressable onPress={() => Share.share({ message: tr('{salon} on Sterncut!', { salon: salon.name }) })}
+                style={s.circleBtn} hitSlop={8} accessibilityLabel={tr('Share')}>
                 <Ionicons name="share-social-outline" size={18} color={colors.text} />
               </Pressable>
               {/* 39c — real since 0065 */}
               <Pressable onPress={toggleSaved} style={s.circleBtn} hitSlop={8}
-                accessibilityLabel={saved ? 'Remove from saved' : 'Save'}>
+                accessibilityLabel={saved ? tr('Remove from saved') : tr('Save')}>
                 <Ionicons name={saved ? 'heart' : 'heart-outline'} size={18}
                   color={saved ? colors.accent : colors.text} />
               </Pressable>
@@ -190,7 +191,7 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
             {/* TODO(backlog): promotions */}
             <View style={s.offBadge}>
               <Ionicons name="pricetag" size={12} color={colors.accent} />
-              <Text style={s.offText}>10% OFF</Text>
+              <Text style={s.offText}>{tr('10% OFF')}</Text>
             </View>
             {avg != null && <Stars rating={avg} count={allReviews.length} />}
           </View>
@@ -198,13 +199,13 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
           <Text style={s.title}>{salon.name}</Text>
           <View style={s.metaLine}>
             <Ionicons name="location-outline" size={14} color={colors.textSecondary} />
-            <Text style={s.meta}>{salon.address ?? 'Tangier, Morocco'}</Text>
+            <Text style={s.meta}>{salon.address ?? tr('Tangier, Morocco')}</Text>
           </View>
           <View style={s.metaGroup}>
             {km != null && (
               <View style={s.metaLine}>
                 <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
-                <Text style={s.meta}>{walkMin(km)} Min • {km.toFixed(1)} Km</Text>
+                <Text style={s.meta}>{tr('{km} Min • {km2} Km', { km: walkMin(km), km2: km.toFixed(1) })}</Text>
               </View>
             )}
             {priceRange && (
@@ -221,14 +222,14 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
 
           {/* actions */}
           <View style={s.actions}>
-            <Action icon="globe-outline" label="Website" onPress={() => action('Website', salon.website)} />
-            <Action icon="map-outline" label="Direction"
+            <Action icon="globe-outline" label={tr('Website')} onPress={() => action(tr('Website'), salon.website)} />
+            <Action icon="map-outline" label={tr('Direction')}
               onPress={() => (salon.lat != null && salon.lng != null
                 ? openDirections(salon.lat, salon.lng, salon.name)
-                : Alert.alert('Direction', 'This salon has not set its map location yet.'))} />
-            <Action icon="chatbubble-outline" label="Message" onPress={() => action('Message')} />
-            <Action icon="paper-plane-outline" label="Share"
-              onPress={() => Share.share({ message: `${salon.name} on Sterncut!` })} />
+                : Alert.alert(tr('Direction'), tr('This salon has not set its map location yet.')))} />
+            <Action icon="chatbubble-outline" label={tr('Message')} onPress={() => action(tr('Message'))} />
+            <Action icon="paper-plane-outline" label={tr('Share')}
+              onPress={() => Share.share({ message: tr('{salon} on Sterncut!', { salon: salon.name }) })} />
           </View>
         </View>
 
@@ -239,7 +240,7 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
               {TABS.map((t) => (
                 <Pressable key={t} onPress={() => setTab(t)} style={s.tabBtn}>
                   <Text style={[s.tabText, tab === t && s.tabTextActive]}>
-                    {t === 'review' ? 'Review' : t[0].toUpperCase() + t.slice(1)}
+                    {t === 'review' ? tr('Review') : t[0].toUpperCase() + t.slice(1)}
                   </Text>
                   {tab === t && <View style={s.tabUnderline} />}
                 </Pressable>
@@ -253,22 +254,22 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
           {tab === 'about' && (
             salon.bio ? (
               <Pressable onPress={() => setBioExpanded(!bioExpanded)}>
-                <Text style={s.section}>About</Text>
+                <Text style={s.section}>{tr('About')}</Text>
                 <Text style={s.body} numberOfLines={bioExpanded ? undefined : 4}>{salon.bio}</Text>
-                {salon.bio.length > 120 && <Text style={s.readMore}>{bioExpanded ? 'Read less' : 'Read more'}</Text>}
+                {salon.bio.length > 120 && <Text style={s.readMore}>{bioExpanded ? tr('Read less') : tr('Read more')}</Text>}
               </Pressable>
-            ) : <Empty text="No description yet." />
+            ) : <Empty text={tr('No description yet.')} />
           )}
 
           {tab === 'services' && (
             <>
-              <Text style={s.section}>Services <Text style={s.count}>({serviceCount})</Text></Text>
-              {cats.size === 0 && <Empty text="No services yet." />}
+              <Text style={s.section}>{tr('Services')} <Text style={s.count}>({serviceCount})</Text></Text>
+              {cats.size === 0 && <Empty text={tr('No services yet.')} />}
               {[...cats.entries()].map(([cat, names]) => (
                 <Pressable key={cat} onPress={() => setSheetOpen(true)}
                   style={({ pressed }) => [s.row, pressed && s.pressed]}>
                   <Text style={s.rowName}>{cat}</Text>
-                  <Text style={s.rowMeta}>{names.size} Type{names.size > 1 ? 's' : ''}</Text>
+                  <Text style={s.rowMeta}>{trn(names.size, '{n} Type', '{n} Types')}</Text>
                   <Ionicons name="chevron-forward" size={18} color={colors.textTertiary} />
                 </Pressable>
               ))}
@@ -277,7 +278,7 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
 
           {tab === 'specialist' && (
             <>
-              <Text style={s.section}>Specialist <Text style={s.count}>({salon.barbers.length})</Text></Text>
+              <Text style={s.section}>{tr('Specialist')} <Text style={s.count}>({salon.barbers.length})</Text></Text>
               <View style={s.specialistGrid}>
                 {salon.barbers.map((b) => {
                   const a = avgOf(b.reviews);
@@ -290,8 +291,8 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
                               {(b.profiles?.full_name ?? 'B').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
                             </Text>
                           </View>}
-                      <Text style={s.specialistName} numberOfLines={1}>{b.profiles?.full_name ?? 'Barber'}</Text>
-                      <Text style={s.rowMeta} numberOfLines={1}>{b.specialty ?? 'Barber'}</Text>
+                      <Text style={s.specialistName} numberOfLines={1}>{b.profiles?.full_name ?? tr('Barber')}</Text>
+                      <Text style={s.rowMeta} numberOfLines={1}>{b.specialty ?? tr('Barber')}</Text>
                       {a != null && <Stars rating={a} />}
                       {/* EXPL-29 — the shop already had a heart; the people in
                           it did not, which is the wrong way round */}
@@ -312,8 +313,8 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
 
           {tab === 'gallery' && (
             <>
-              <Text style={s.section}>Gallery <Text style={s.count}>({photos.length})</Text></Text>
-              {photos.length === 0 && <Empty text="No photos yet." />}
+              <Text style={s.section}>{tr('Gallery')} <Text style={s.count}>({photos.length})</Text></Text>
+              {photos.length === 0 && <Empty text={tr('No photos yet.')} />}
               <View style={s.galleryGrid}>
                 {photos.map((p) => <Image key={p.name} source={{ uri: p.url }} style={s.galleryPhoto} />)}
               </View>
@@ -322,15 +323,15 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
 
           {tab === 'review' && (
             <>
-              <Text style={s.section}>Reviews <Text style={s.count}>({reviews.length})</Text></Text>
+              <Text style={s.section}>{tr('Reviews')} <Text style={s.count}>({reviews.length})</Text></Text>
               {reviews.length > 3 && (
-                <Field placeholder="Search in reviews" value={reviewQuery} onChangeText={setReviewQuery} />
+                <Field placeholder={tr('Search in reviews')} value={reviewQuery} onChangeText={setReviewQuery} />
               )}
-              {filteredReviews.length === 0 && <Empty text="No reviews yet." />}
+              {filteredReviews.length === 0 && <Empty text={tr('No reviews yet.')} />}
               {filteredReviews.map((r) => (
                 <View key={r.id} style={s.reviewCard}>
                   <View style={s.reviewTop}>
-                    <Text style={s.rowName}>{r.customer?.full_name ?? 'Customer'}</Text>
+                    <Text style={s.rowName}>{r.customer?.full_name ?? tr('Customer')}</Text>
                     <Text style={s.rowMeta}>{timeAgo(r.created_at)}</Text>
                   </View>
                   {!!r.comment && <Text style={s.body}>{r.comment}</Text>}
@@ -348,7 +349,7 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
           {prices.length > 0 && (
             <Text style={s.ctaPrice}>
               {(Math.min(...prices) / 100).toFixed(0)} DH
-              <Text style={s.ctaPriceUnit}> / from</Text>
+              <Text style={s.ctaPriceUnit}>{' '}{tr('/ from')}</Text>
             </Text>
           )}
         </View>
@@ -356,7 +357,7 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
             while the shop is shut; the card above carries the way forward. */}
         <Pressable onPress={() => setSheetOpen(true)} disabled={shut}
           style={({ pressed }) => [s.bookBtn, shut && s.bookBtnOff, pressed && s.pressed]}>
-          <Text style={s.bookText}>{shut ? 'Closed' : 'Book'}</Text>
+          <Text style={s.bookText}>{shut ? tr('Closed') : tr('Book')}</Text>
         </Pressable>
       </View>
 

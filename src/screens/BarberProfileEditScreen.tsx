@@ -12,6 +12,7 @@ import {
 import { supabase } from '../lib/supabase';
 import { dark as D, inter, serif } from '../theme';
 import type { Barber, Profile } from '../types';
+import { loc, tr, trn, trRich } from '../lib/i18n';
 
 // T4 of "Barber - Profile.dc.html" — BPR-06, and BPR-08 as the sheet behind a
 // name change. BPR-07 is PreviewPage in preview mode, reached from here.
@@ -45,7 +46,7 @@ const draftOf = (l: Loaded): Draft => ({
   about: l.bio ?? '',
 });
 
-const longDate = (d: Date) => d.toLocaleDateString('en-GB', {
+const longDate = (d: Date) => d.toLocaleDateString(loc('en-GB'), {
   day: 'numeric', month: 'long', ...(d.getFullYear() !== new Date().getFullYear() ? { year: 'numeric' } : {}),
 });
 const initials = (n: string) => n.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
@@ -82,7 +83,7 @@ export default function BarberProfileEditScreen({
         : Promise.resolve({ data: null }),
     ]);
     const err = pr.error ?? br.error;
-    if (err) { Alert.alert('Could not load your profile', err.message); return; }
+    if (err) { Alert.alert(tr('Could not load your profile'), err.message); return; }
     const next = { ...(pr.data as object), ...(br.data as object) } as Loaded;
     setLoaded(next);
     setDraft(draftOf(next));
@@ -102,12 +103,12 @@ export default function BarberProfileEditScreen({
       <Screen gap={14}>
         <View style={s.topRow}>
           {back
-            ? <Pressable onPress={back} hitSlop={8} style={s.puck} accessibilityLabel="Go back"><Ico name="arrow-left" /></Pressable>
+            ? <Pressable onPress={back} hitSlop={8} style={s.puck} accessibilityLabel={tr('Go back')}><Ico name="arrow-left" /></Pressable>
             : <View style={s.puckGhost} />}
-          <Serif size={17} style={s.topTitle}>Your profile</Serif>
+          <Serif size={17} style={s.topTitle}>{tr('Your profile')}</Serif>
           <View style={s.saveSlot} />
         </View>
-        <ActivityIndicator color={D.accent} accessibilityLabel="Loading your profile" />
+        <ActivityIndicator color={D.accent} accessibilityLabel={tr('Loading your profile')} />
       </Screen>
     );
   }
@@ -120,27 +121,27 @@ export default function BarberProfileEditScreen({
   const dirty = nameChanged || draft.headline.trim() !== base.headline || draft.since.trim() !== base.since
     || draft.about.trim() !== base.about
     || [...draft.languages].sort().join() !== [...base.languages].sort().join();
-  const oldName = loaded.full_name ?? 'your current name';
+  const oldName = loaded.full_name ?? tr('your current name');
   const newLock = new Date(now + 60 * 86_400_000);
   const set = (patch: Partial<Draft>) => setDraft((d) => (d ? { ...d, ...patch } : d));
 
   async function save(nameConfirmed = false) {
     if (!loaded || !draft) return;
     if (!draft.name.trim()) {
-      Alert.alert('Your name cannot be empty', 'Customers need something to find you by.');
+      Alert.alert(tr('Your name cannot be empty'), tr('Customers need something to find you by.'));
       return;
     }
     const thisYear = new Date().getFullYear();
     const year = draft.since.trim() ? Number(draft.since.trim()) : null;
     const years = year == null ? null : yearsFrom(year, new Date());
     if (year != null && years == null) {
-      Alert.alert('Check the year', `Cutting since has to be a year between ${thisYear - 80} and ${thisYear}.`);
+      Alert.alert(tr('Check the year'), tr('Cutting since has to be a year between {x} and {thisYear}.', { x: thisYear - 80, thisYear }));
       return;
     }
     // BPR-08 — a live page's name is rationed; the sheet says what the change costs
     if (nameChanged && live && !nameConfirmed) {
       if (lockedUntil) {
-        Alert.alert('Your name is locked', `It can change again on ${longDate(lockedUntil)}.`);
+        Alert.alert(tr('Your name is locked'), tr('It can change again on {lockedUntil}.', { lockedUntil: longDate(lockedUntil) }));
         return;
       }
       setSheetOpen(true);
@@ -152,7 +153,7 @@ export default function BarberProfileEditScreen({
       const { error } = await supabase.from('profiles').update({ full_name: draft.name.trim() }).eq('id', profile.id);
       if (error) {
         setBusy(false);
-        Alert.alert('Could not change your name', error.message);
+        Alert.alert(tr('Could not change your name'), error.message);
         return;
       }
     }
@@ -163,24 +164,25 @@ export default function BarberProfileEditScreen({
       bio: draft.about.trim() || null,
     }).eq('id', barber.id);
     setBusy(false);
-    if (error) { Alert.alert('Could not save', error.message); return; }
+    if (error) { Alert.alert(tr('Could not save'), error.message); return; }
     setSheetOpen(false);
     onSaved();
   }
 
   function explainLock() {
     const was = loaded ? formerlyName(loaded.previous_name, loaded.name_changed_at, now) : null;
-    Alert.alert('Why your name is locked',
-      `${clients ? `${clients} people know` : 'Customers know'} you by the name on your page, so it changes `
-      + 'at most once every sixty days.'
-      + (was ? ` For thirty days after a change your page also reads “formerly ${was}”.` : ''));
+    Alert.alert(tr('Why your name is locked'),
+      (clients
+        ? tr('{clients} people know you by the name on your page, so it changes at most once every sixty days.', { clients })
+        : tr('Customers know you by the name on your page, so it changes at most once every sixty days.'))
+      + (was ? ` ${tr('For thirty days after a change your page also reads “formerly {was}”.', { was })}` : ''));
   }
 
   async function savePin(c: LatLng) {
     setPickerOpen(false);
     if (!salon) return;
     const { error } = await supabase.from('salons').update({ lat: c.latitude, lng: c.longitude }).eq('id', salon.id);
-    if (error) Alert.alert('Could not save location', error.message);
+    if (error) Alert.alert(tr('Could not save location'), error.message);
     else setSalon({ ...salon, lat: c.latitude, lng: c.longitude });
   }
 
@@ -192,12 +194,12 @@ export default function BarberProfileEditScreen({
       <Screen gap={10}>
         <View style={s.topRow}>
           {back
-            ? <Pressable onPress={back} hitSlop={8} style={s.puck} accessibilityLabel="Go back"><Ico name="arrow-left" /></Pressable>
+            ? <Pressable onPress={back} hitSlop={8} style={s.puck} accessibilityLabel={tr('Go back')}><Ico name="arrow-left" /></Pressable>
             : <View style={s.puckGhost} />}
-          <Serif size={17} style={s.topTitle}>Your profile</Serif>
+          <Serif size={17} style={s.topTitle}>{tr('Your profile')}</Serif>
           <Pressable onPress={() => save()} disabled={!dirty || busy} hitSlop={8} style={s.saveSlot}
-            accessibilityRole="button" accessibilityLabel="Save" accessibilityState={{ disabled: !dirty || busy }}>
-            <T w="b" size={12} c={dirty && !busy ? D.accent : D.muted}>{busy ? '…' : 'SAVE'}</T>
+            accessibilityRole="button" accessibilityLabel={tr('Save')} accessibilityState={{ disabled: !dirty || busy }}>
+            <T w="b" size={12} c={dirty && !busy ? D.accent : D.muted}>{busy ? '…' : tr('SAVE')}</T>
           </Pressable>
         </View>
 
@@ -208,54 +210,55 @@ export default function BarberProfileEditScreen({
               : <T w="b" size={16} c={D.sub}>{initials(draft.name || '?')}</T>}
           </View>
           <View style={s.grow}>
-            <T w="b" size={12.5}>Your photograph</T>
-            <T size={11} c={D.sub} style={s.lh16}>Your face, not your work — your work has its own page.</T>
+            <T w="b" size={12.5}>{tr('Your photograph')}</T>
+            <T size={11} c={D.sub} style={s.lh16}>{tr('Your face, not your work — your work has its own page.')}</T>
           </View>
           <Pressable onPress={onAvatar} disabled={avatarBusy} hitSlop={8} accessibilityRole="button">
-            <T w="sb" size={12} c={D.accent}>{avatarBusy ? 'Uploading…' : 'Replace'}</T>
+            <T w="sb" size={12} c={D.accent}>{avatarBusy ? tr('Uploading…') : tr('Replace')}</T>
           </Pressable>
         </View>
 
         <View style={s.sectionRow}>
-          <Eyebrow ls={1.65}>WHAT CUSTOMERS SEE</Eyebrow>
+          <Eyebrow ls={1.65}>{tr('WHAT CUSTOMERS SEE')}</Eyebrow>
           {!!barber.salon_id && (
             <Pressable onPress={onPreview} hitSlop={8} accessibilityRole="button">
-              <T w="sb" size={12} c={D.accent}>Preview</T>
+              <T w="sb" size={12} c={D.accent}>{tr('Preview')}</T>
             </Pressable>
           )}
         </View>
 
-        <Field label="NAME ON YOUR PAGE" focused={focus === 'name'}>
+        <Field label={tr('NAME ON YOUR PAGE')} focused={focus === 'name'}>
           <TextInput value={draft.name} onChangeText={(v) => set({ name: v })} editable={!lockedUntil}
-            onFocus={() => setFocus('name')} onBlur={() => setFocus(null)} placeholder="Your name"
-            placeholderTextColor={D.faint} selectionColor={D.accent} accessibilityLabel="Name on your page"
+            onFocus={() => setFocus('name')} onBlur={() => setFocus(null)} placeholder={tr('Your name')}
+            placeholderTextColor={D.faint} selectionColor={D.accent} accessibilityLabel={tr('Name on your page')}
             style={[s.input, !!lockedUntil && { color: D.sub }]} />
         </Field>
         {!!lockedUntil && (
           <View style={s.ration}>
             <Ico name="clock" size={12} color={D.amber} />
             <T size={11} c={D.sub} style={[s.grow, s.lh16]}>
-              Changed once already. Next change {longDate(lockedUntil)} —{' '}
-              <T w="sb" size={11} c={D.accent} onPress={explainLock}>why</T>
+              {trRich('Changed once already. Next change {date} — <a>why</a>', {
+                a: (text, key) => <T key={key} w="sb" size={11} c={D.accent} onPress={explainLock}>{text}</T>,
+              }, { date: longDate(lockedUntil) })}
             </T>
           </View>
         )}
 
         <View style={s.pair}>
-          <Field label="HEADLINE" focused={focus === 'headline'} style={s.grow}>
+          <Field label={tr('HEADLINE')} focused={focus === 'headline'} style={s.grow}>
             <TextInput value={draft.headline} onChangeText={(v) => set({ headline: v })} maxLength={40}
-              onFocus={() => setFocus('headline')} onBlur={() => setFocus(null)} placeholder="Fade specialist"
-              placeholderTextColor={D.faint} selectionColor={D.accent} style={s.input} accessibilityLabel="Headline" />
+              onFocus={() => setFocus('headline')} onBlur={() => setFocus(null)} placeholder={tr('Fade specialist')}
+              placeholderTextColor={D.faint} selectionColor={D.accent} style={s.input} accessibilityLabel={tr('Headline')} />
           </Field>
-          <Field label="CUTTING SINCE" focused={focus === 'since'} style={s.since}>
+          <Field label={tr('CUTTING SINCE')} focused={focus === 'since'} style={s.since}>
             <TextInput value={draft.since} onChangeText={(v) => set({ since: v.replace(/[^0-9]/g, '') })}
               keyboardType="number-pad" maxLength={4} onFocus={() => setFocus('since')} onBlur={() => setFocus(null)}
               placeholder="2016" placeholderTextColor={D.faint} selectionColor={D.accent}
-              style={[s.input, s.tnum]} accessibilityLabel="Cutting since" />
+              style={[s.input, s.tnum]} accessibilityLabel={tr('Cutting since')} />
           </Field>
         </View>
 
-        <Field label="LANGUAGES IN THE CHAIR">
+        <Field label={tr('LANGUAGES IN THE CHAIR')}>
           <View style={s.chips}>
             {LANGUAGES.map((l) => {
               const on = draft.languages.includes(l.key);
@@ -271,43 +274,43 @@ export default function BarberProfileEditScreen({
           </View>
         </Field>
 
-        <Field label="ABOUT YOU" focused={focus === 'about'}
+        <Field label={tr('ABOUT YOU')} focused={focus === 'about'}
           right={<T w="sb" size={10} c={D.faint} style={s.tnum}>{draft.about.length} / {ABOUT_MAX}</T>}>
           <TextInput value={draft.about} onChangeText={(v) => set({ about: v })} multiline maxLength={ABOUT_MAX}
             onFocus={() => setFocus('about')} onBlur={() => setFocus(null)}
-            placeholder="What you are good at, in a sentence or two" placeholderTextColor={D.faint}
-            selectionColor={D.accent} style={[s.input, s.about]} accessibilityLabel="About you" />
-          <T size={10.5} c={D.faint} style={s.aboutRule}>No prices here — those belong to your services.</T>
+            placeholder={tr('What you are good at, in a sentence or two')} placeholderTextColor={D.faint}
+            selectionColor={D.accent} style={[s.input, s.about]} accessibilityLabel={tr('About you')} />
+          <T size={10.5} c={D.faint} style={s.aboutRule}>{tr('No prices here — those belong to your services.')}</T>
         </Field>
 
-        <Eyebrow ls={1.65} style={s.mt2}>WHAT ONLY STERNCUT SEES</Eyebrow>
+        <Eyebrow ls={1.65} style={s.mt2}>{tr('WHAT ONLY STERNCUT SEES')}</Eyebrow>
         <View style={s.private}>
-          <PrivateRow icon="lock" tint={D.faint} label="Phone" value={loaded.phone ?? 'None on file'}
+          <PrivateRow icon="lock" tint={D.faint} label={tr('Phone')} value={loaded.phone ?? tr('None on file')}
             last={!licence} />
           {licence && (
             <PrivateRow icon={licenceGone ? 'alert-triangle' : 'check'} tint={licenceGone ? D.amber : D.green}
-              label={licenceGone ? 'Licence · ran out' : 'Licence · valid to'} last
-              value={licence.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })} />
+              label={licenceGone ? tr('Licence · ran out') : tr('Licence · valid to')} last
+              value={licence.toLocaleDateString(loc('en-GB'), { month: 'long', year: 'numeric' })} />
           )}
           <View style={s.privateFoot}>
             <T size={10.5} c={D.faint} style={s.lh15}>
-              To change one of these,{' '}
-              <T w="sb" size={10.5} c={D.accent} onPress={onHelp}>send us the document</T>. Your page stays
-              live and bookable while we read it.
+              {trRich('To change one of these, <a>send us the document</a>. Your page stays live and bookable while we read it.', {
+                a: (text, key) => <T key={key} w="sb" size={10.5} c={D.accent} onPress={onHelp}>{text}</T>,
+              })}
             </T>
           </View>
         </View>
 
         {salon && (
           <>
-            <Eyebrow ls={1.65} style={s.mt2}>YOUR SHOP</Eyebrow>
+            <Eyebrow ls={1.65} style={s.mt2}>{tr('YOUR SHOP')}</Eyebrow>
             <Pressable onPress={() => setPickerOpen(true)} accessibilityRole="button"
               style={({ pressed }) => [s.pinRow, pressed && s.pressed]}>
               <Ico name="map-pin" size={15} color={salon.lat != null ? D.green : D.accent} />
               <View style={s.grow}>
-                <T w="sb" size={13}>{salon.name} on the map</T>
+                <T w="sb" size={13}>{tr('{name} on the map', { name: salon.name })}</T>
                 <T size={11} c={D.sub} style={s.mt2}>
-                  {salon.lat != null ? 'Set — tap to move the pin' : 'Not set — customers cannot find it on the map'}
+                  {salon.lat != null ? tr('Set — tap to move the pin') : tr('Not set — customers cannot find it on the map')}
                 </T>
               </View>
               <Ico name="chevron-right" size={14} color={D.muted} />
@@ -318,56 +321,59 @@ export default function BarberProfileEditScreen({
         <View style={s.note}>
           <Ico name="info" size={13} color={D.sub} />
           <T size={11.5} c={D.sub} style={[s.grow, s.lh17]}>
-            Your {rating.avg != null ? rating.avg.toFixed(1) : 'rating'}, your reviews and your cancellations are not
-            here — they are not yours to edit. They sit on{' '}
-            <T w="sb" size={11.5} c={D.accent} onPress={onReviews}>your reviews</T> and{' '}
-            <T w="sb" size={11.5} c={D.accent} onPress={onCancellations}>your cancellations</T>, with how each was
-            counted.
+            {trRich('Your {rating}, your reviews and your cancellations are not here — they are not yours to edit. They sit on <a>your reviews</a> and <b>your cancellations</b>, with how each was counted.', {
+              a: (text, key) => <T key={key} w="sb" size={11.5} c={D.accent} onPress={onReviews}>{text}</T>,
+              b: (text, key) => <T key={key} w="sb" size={11.5} c={D.accent} onPress={onCancellations}>{text}</T>,
+            }, { rating: rating.avg != null ? rating.avg.toFixed(1) : tr('rating') })}
           </T>
         </View>
       </Screen>
 
       {/* BPR-08 — what a name change costs, said before it happens */}
       <Sheet visible={sheetOpen} onClose={() => setSheetOpen(false)} deep gap={13}>
-        <Eyebrow ls={1.5}>CHANGE THE NAME ON YOUR PAGE</Eyebrow>
+        <Eyebrow ls={1.5}>{tr('CHANGE THE NAME ON YOUR PAGE')}</Eyebrow>
         <T style={s.stake}>
           {clients
-            ? `${clients} people know you by the name you are about to delete.`
-            : 'Customers find you by the name you are about to change.'}
+            ? tr('{clients} people know you by the name you are about to delete.', { clients })
+            : tr('Customers find you by the name you are about to change.')}
         </T>
         <View style={s.nowNew}>
           <View style={s.grow}>
-            <Eyebrow c={D.faint} ls={1.2}>NOW</Eyebrow>
+            <Eyebrow c={D.faint} ls={1.2}>{tr('NOW')}</Eyebrow>
             <T w="sb" size={13.5} style={s.mt2}>{oldName}</T>
           </View>
           <Ico name="arrow-right" size={15} color={D.muted} />
           <View style={s.grow}>
-            <Eyebrow c={D.faint} ls={1.2}>NEW</Eyebrow>
+            <Eyebrow c={D.faint} ls={1.2}>{tr('NEW')}</Eyebrow>
             <T w="sb" size={13.5} c={D.accent} style={s.mt2}>{draft.name.trim()}</T>
           </View>
         </View>
         <View style={s.consequences}>
           <Consequence tone="good">
-            Your {rating.count ? `${rating.count} ` : ''}review{rating.count === 1 ? '' : 's'}, your photographs and your
-            regulars all follow the change
+            {rating.count
+              ? trn(rating.count, 'Your {n} review, your photographs and your regulars all follow the change', 'Your {n} reviews, your photographs and your regulars all follow the change')
+              : tr('Your reviews, your photographs and your regulars all follow the change')}
           </Consequence>
           <Consequence tone="warn">
-            For thirty days your page reads <T w="sb" size={11.5} c={D.text}>formerly {oldName}</T>, so{' '}
-            {clients ? `the ${clients}` : 'your clients'} can still find you
+            {trRich('For thirty days your page reads <b>formerly {oldName}</b>, so {who} can still find you', {
+              b: (text, key) => <T key={key} w="sb" size={11.5} c={D.text}>{text}</T>,
+            }, { oldName, who: clients ? trn(clients, 'your {n} client', 'your {n} clients') : tr('your clients') })}
           </Consequence>
           <Consequence tone="warn">
-            Once done, it locks for sixty days — until <T w="b" size={11.5} c={D.text}>{longDate(newLock)}</T>
+            {trRich('Once done, it locks for sixty days — until <b>{date}</b>', {
+              b: (text, key) => <T key={key} w="b" size={11.5} c={D.text}>{text}</T>,
+            }, { date: longDate(newLock) })}
           </Consequence>
         </View>
         <Pressable onPress={() => save(true)} disabled={busy} accessibilityRole="button"
           style={({ pressed }) => [s.whiteBtn, pressed && s.pressed]}>
-          <T w="eb" size={12.5} c="#111" ls={0.5}>{busy ? 'CHANGING…' : 'CHANGE IT'}</T>
-          <T w="sb" size={10.5} c="#5C5C58">Live on your page straight away</T>
+          <T w="eb" size={12.5} c="#111" ls={0.5}>{busy ? tr('CHANGING…') : tr('CHANGE IT')}</T>
+          <T w="sb" size={10.5} c="#5C5C58">{tr('Live on your page straight away')}</T>
         </Pressable>
         <Pressable accessibilityRole="button"
           onPress={() => { set({ name: loaded.full_name ?? '' }); setSheetOpen(false); }}
           style={({ pressed }) => [s.keepBtn, pressed && s.pressed]}>
-          <T w="b" size={12.5} c={D.textDim}>Keep {oldName}</T>
+          <T w="b" size={12.5} c={D.textDim}>{tr('Keep {oldName}', { oldName })}</T>
         </Pressable>
       </Sheet>
 

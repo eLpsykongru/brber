@@ -10,6 +10,7 @@ import { checkIn } from '../lib/lineCalls';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
 import OfferDayScreen, { OfferFor } from './OfferDayScreen';
+import { tr, trn } from '../lib/i18n';
 
 // 1l — Live queue, barber control. Per 0029 the queue is not a separate rail: it is
 // today's confirmed book, run through the lifecycle the barber already has.
@@ -62,9 +63,9 @@ const TICK_MS = 15_000;
 const askedCalls = new Set<string>();
 
 const CHANNEL: Record<LinkSend['channel'], { label: string; icon: IconName }> = {
-  whatsapp: { label: 'WhatsApp', icon: 'message-circle' },
-  sms: { label: 'SMS', icon: 'mail' },
-  copy: { label: 'Copied', icon: 'copy' },
+  whatsapp: { label: tr('WhatsApp'), icon: 'message-circle' },
+  sms: { label: tr('SMS'), icon: 'mail' },
+  copy: { label: tr('Copied'), icon: 'copy' },
 };
 
 const hhmm = (iso: string | number) => new Date(iso).toTimeString().slice(0, 5);
@@ -76,31 +77,31 @@ const pad = (n: number) => String(n).padStart(2, '0');
 function shortName(r: Row, barberId: string, guest?: GuestRow) {
   if (guest) return guest.first_name;
   if (r.walk_in_name) return r.walk_in_name;
-  if (r.customer_id === barberId) return 'Walk-in';
-  const parts = (r.customer?.full_name ?? 'Client').split(' ');
+  if (r.customer_id === barberId) return tr('Walk-in');
+  const parts = (r.customer?.full_name ?? tr('Client')).split(' ');
   return parts[1] ? `${parts[0]} ${parts[1][0]}.` : parts[0];
 }
 
 // What the row says under the name — BTD-14's wording: where the place came from,
 // or what is happening to it now.
 function rowSub(r: Row, barberId: string, now: number, guest?: GuestRow) {
-  const service = r.services?.name ?? 'Service';
+  const service = r.services?.name ?? tr('Service');
   if (guest && !guest.confirmed) {
     return r.checked_in_at
-      ? `Called ${hhmm(r.checked_in_at)} anyway · hasn't tapped`
-      : `Texted ${minsFrom(guest.joined_at, now)} min ago · hasn't tapped`;
+      ? tr("Called {at} anyway · hasn't tapped", { at: hhmm(r.checked_in_at) })
+      : tr("Texted {m} min ago · hasn't tapped", { m: minsFrom(guest.joined_at, now) });
   }
   if (r.checked_in_at) {
     const until = heldUntil(r.checked_in_at);
     return until > now
-      ? `${service} · called ${hhmm(r.checked_in_at)} · holds till ${hhmm(until)}`
-      : `${service} · called ${hhmm(r.checked_in_at)} · he isn't here`;
+      ? tr('{service} · called {at} · holds till {until}', { service, at: hhmm(r.checked_in_at), until: hhmm(until) })
+      : tr("{service} · called {at} · he isn't here", { service, at: hhmm(r.checked_in_at) });
   }
-  if (r.dropped_at) return `${service} · didn't come · at the end since ${hhmm(r.dropped_at)}`;
-  if (guest) return `${service} · ${guest.source === 'link' ? 'took your link' : 'put his name in from the web'}`;
-  if (r.customer_id === barberId) return `${service} · you wrote him down`;
-  if (r.joined_line) return 'Held his own place in the app';
-  return `${hhmm(r.starts_at)} booking · ${service}`;
+  if (r.dropped_at) return tr("{service} · didn't come · at the end since {at}", { service, at: hhmm(r.dropped_at) });
+  if (guest) return guest.source === 'link' ? tr('{service} · took your link', { service }) : tr('{service} · put his name in from the web', { service });
+  if (r.customer_id === barberId) return tr('{service} · you wrote him down', { service });
+  if (r.joined_line) return tr('Held his own place in the app');
+  return tr('{at} booking · {service}', { at: hhmm(r.starts_at), service });
 }
 
 export default function BarberQueueScreen({ barberId, onBack }: {
@@ -133,7 +134,7 @@ export default function BarberQueueScreen({ barberId, onBack }: {
       supabase.rpc('barber_link_today'),
     ]);
     if (book.error) {
-      if (!quiet) Alert.alert('Could not load the queue', book.error.message);
+      if (!quiet) Alert.alert(tr('Could not load the queue'), book.error.message);
       return;
     }
     setRows(book.data as unknown as Row[]);
@@ -184,12 +185,12 @@ export default function BarberQueueScreen({ barberId, onBack }: {
     setOpen(next); // optimistic — the toggle is the whole point of the screen
     const { error } = await supabase.from('barbers')
       .update({ accepting_bookings: next }).eq('id', barberId);
-    if (error) { setOpen(!next); Alert.alert('Could not update the queue', error.message); }
+    if (error) { setOpen(!next); Alert.alert(tr('Could not update the queue'), error.message); }
   }
 
   async function callRow(r: Row) {
     const error = await checkIn(r.id, r.customer_id !== barberId);
-    if (error) return Alert.alert('Could not call', error);
+    if (error) return Alert.alert(tr('Could not call'), error);
     load();
   }
 
@@ -208,7 +209,7 @@ export default function BarberQueueScreen({ barberId, onBack }: {
     setCalledAsk(null);
     const next = nextToCall(active, r.id);
     const { error } = await supabase.rpc('queue_drop_to_end', { p_booking: r.id });
-    if (error) return Alert.alert('Could not move him to the end', error.message);
+    if (error) return Alert.alert(tr('Could not move him to the end'), error.message);
     if (next && unconfirmed(next)) {
       await load();
       // a sheet opening as another closes can be swallowed with it
@@ -222,23 +223,23 @@ export default function BarberQueueScreen({ barberId, onBack }: {
   async function sitDown(r: Row) {
     setCalledAsk(null);
     const { error } = await supabase.rpc('advance_booking', { p_booking: r.id, p_stage: 'start' });
-    if (error) Alert.alert('Could not start', error.message);
+    if (error) Alert.alert(tr('Could not start'), error.message);
     load();
   }
 
   async function takeOff(r: Row) {
     setCalledAsk(null); setFrontAsk(null);
     const { error } = await supabase.rpc('queue_take_off', { p_booking: r.id });
-    if (error) Alert.alert('Could not take him off', error.message);
+    if (error) Alert.alert(tr('Could not take him off'), error.message);
     load();
   }
 
   function confirmTakeOff(r: Row) {
     const walkIn = r.customer_id === barberId;
-    Alert.alert(`Take ${shortName(r, barberId, guests[r.id])} off the line?`,
-      walkIn ? 'He leaves today\'s line. Nothing is recorded against a walk-in.' : 'Marks him a no-show and frees the slot.', [
-        { text: 'Keep', style: 'cancel' },
-        { text: 'Take off', style: 'destructive', onPress: () => takeOff(r) },
+    Alert.alert(tr('Take {r} off the line?', { r: shortName(r, barberId, guests[r.id]) }),
+      walkIn ? tr('He leaves today\'s line. Nothing is recorded against a walk-in.') : tr('Marks him a no-show and frees the slot.'), [
+        { text: tr('Keep'), style: 'cancel' },
+        { text: tr('Take off'), style: 'destructive', onPress: () => takeOff(r) },
       ]);
   }
 
@@ -258,13 +259,13 @@ export default function BarberQueueScreen({ barberId, onBack }: {
   const calledNext = calledRow ? nextToCall(active, calledRow.id) : null;
   const frontRow = frontAsk ? active.find((r) => r.id === frontAsk) ?? null : null;
   const asked = (r: Row | null) => r && {
-    no: noOf(r), name: shortName(r, barberId, guests[r.id]), service: r.services?.name ?? 'Service',
+    no: noOf(r), name: shortName(r, barberId, guests[r.id]), service: r.services?.name ?? tr('Service'),
     phone: guests[r.id]?.phone ?? r.walk_in_phone,
   };
 
   return (
     <Screen gap={13}>
-      <TopBar title="Live queue" onBack={onBack} right="grid" onRight={() => setShare(true)} />
+      <TopBar title={tr('Live queue')} onBack={onBack} right="grid" onRight={() => setShare(true)} />
 
       {sent && (
         <View style={s.sent}>
@@ -272,10 +273,10 @@ export default function BarberQueueScreen({ barberId, onBack }: {
             <View style={s.sentIco}><Ico name={CHANNEL[sent.channel].icon} size={16} color={D.green} /></View>
             <View style={s.grow}>
               <T w="b" size={13} c={D.green}>
-                {sent.channel === 'copy' ? 'Link copied' : `Link sent${sent.to_name ? ` to ${sent.to_name}` : ''}`}
+                {sent.channel === 'copy' ? tr('Link copied') : (sent.to_name ? tr('Link sent to {name}', { name: sent.to_name }) : tr('Link sent'))}
               </T>
               <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-                {CHANNEL[sent.channel].label} · {hhmm(sent.sent_at)} · {sent.points_at === 'chair' ? 'your chair' : 'the whole shop'}
+                {CHANNEL[sent.channel].label} · {hhmm(sent.sent_at)} · {sent.points_at === 'chair' ? tr('your chair') : tr('the whole shop')}
               </T>
             </View>
           </View>
@@ -283,13 +284,13 @@ export default function BarberQueueScreen({ barberId, onBack }: {
             <View style={s.sentStatus}>
               {sent.taken ? (
                 <>
-                  <T w="b" size={12} c={D.green}>{takenNo ? `Took Nº ${pad(takenNo)}` : 'Took a ticket'}</T>
+                  <T w="b" size={12} c={D.green}>{takenNo ? tr('Took Nº {takenNo}', { takenNo: pad(takenNo) }) : tr('Took a ticket')}</T>
                   <T size={10} c={D.sub}>{hhmm(sent.taken.at)}</T>
                 </>
               ) : (
                 <>
-                  <T w="b" size={12} c={D.amber}>No ticket yet</T>
-                  <T size={10} c={D.sub}>{minsFrom(sent.sent_at, now)} min ago</T>
+                  <T w="b" size={12} c={D.amber}>{tr('No ticket yet')}</T>
+                  <T size={10} c={D.sub}>{tr('{sent_at} min ago', { sent_at: minsFrom(sent.sent_at, now) })}</T>
                 </>
               )}
             </View>
@@ -298,8 +299,7 @@ export default function BarberQueueScreen({ barberId, onBack }: {
       )}
       {sent && !sent.taken && (
         <Note>
-          Nothing is reserved for him. Nº {nextNo} is still open to the room — this line exists so
-          you don't tell two people the same number.
+          {tr('Nothing is reserved for him. Nº {nextNo} is still open to the room — this line exists so you don\'t tell two people the same number.', { nextNo })}
         </Note>
       )}
 
@@ -307,38 +307,38 @@ export default function BarberQueueScreen({ barberId, onBack }: {
         <View style={s.controlTop}>
           <View style={s.statusRow}>
             <View style={[s.statusDot, { backgroundColor: open ? D.green : D.muted }]} />
-            <Eyebrow ls={1.6}>{open ? 'QUEUE OPEN' : 'QUEUE PAUSED'}</Eyebrow>
+            <Eyebrow ls={1.6}>{open ? tr('QUEUE OPEN') : tr('QUEUE PAUSED')}</Eyebrow>
           </View>
           <Toggle on={open} onPress={() => setOpenState(!open)} />
         </View>
         <View style={s.numbers}>
           <View>
-            <Eyebrow ls={1.4}>WAITING</Eyebrow>
+            <Eyebrow ls={1.4}>{tr('WAITING')}</Eyebrow>
             <Serif size={38} ls={0} style={{ marginTop: 4 }}>{String(order.length)}</Serif>
             {notConfirmed.length > 0 && (
-              <T size={10.5} c={D.faint} style={{ marginTop: 3 }}>{notConfirmed.length} not confirmed</T>
+              <T size={10.5} c={D.faint} style={{ marginTop: 3 }}>{tr('{count} not confirmed', { count: notConfirmed.length })}</T>
             )}
           </View>
           <View style={{ alignItems: 'flex-end' }}>
-            <Eyebrow ls={1.4}>LAST TICKET</Eyebrow>
+            <Eyebrow ls={1.4}>{tr('LAST TICKET')}</Eyebrow>
             <T w="eb" size={20} style={[s.tnum, { marginTop: 6 }]}>Nº {lastTicket}</T>
           </View>
         </View>
         <View style={s.controlBtns}>
           <Pressable onPress={() => setOpenState(!open)} accessibilityRole="button"
             style={({ pressed }) => [s.pauseBtn, pressed && s.pressed]}>
-            <T w="b" size={12} c={D.sub} ls={0.6}>{open ? 'PAUSE QUEUE' : 'REOPEN QUEUE'}</T>
+            <T w="b" size={12} c={D.sub} ls={0.6}>{open ? tr('PAUSE QUEUE') : tr('REOPEN QUEUE')}</T>
           </Pressable>
           <Pressable disabled={!order.length} accessibilityRole="button" onPress={callNext}
             style={({ pressed }) => [s.callBtn, !order.length && s.off, pressed && s.pressed]}>
-            <T w="b" size={12} c="#fff" ls={0.6}>CALL NEXT</T>
+            <T w="b" size={12} c="#fff" ls={0.6}>{tr('CALL NEXT')}</T>
           </Pressable>
         </View>
       </View>
 
-      <Eyebrow ls={1.65}>IN THE LINE</Eyebrow>
+      <Eyebrow ls={1.65}>{tr('IN THE LINE')}</Eyebrow>
       {rows !== null && active.length === 0 && !sent && (
-        <T size={13} c={D.sub}>Nobody in the line right now.</T>
+        <T size={13} c={D.sub}>{tr('Nobody in the line right now.')}</T>
       )}
       <View style={{ gap: 8 }}>
         {inChair && (
@@ -349,10 +349,10 @@ export default function BarberQueueScreen({ barberId, onBack }: {
             <View style={s.grow}>
               <T w="b" size={14}>{shortName(inChair, barberId, guests[inChair.id])}</T>
               <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-                {inChair.services?.name ?? 'Service'} · started {hhmm(inChair.started_at!)}
+                {tr('{name} · started {hhmm}', { name: inChair.services?.name ?? tr('Service'), hhmm: hhmm(inChair.started_at!) })}
               </T>
             </View>
-            <View style={s.chairChip}><T w="b" size={10} c={D.bg} ls={0.8}>IN CHAIR</T></View>
+            <View style={s.chairChip}><T w="b" size={10} c={D.bg} ls={0.8}>{tr('IN CHAIR')}</T></View>
           </View>
         )}
         {order.map((r, i) => {
@@ -374,28 +374,28 @@ export default function BarberQueueScreen({ barberId, onBack }: {
                 <T w="b" size={14} c={grey || r.dropped_at ? D.sub : D.text}>{name}</T>
                 <T size={11} c={grey ? D.amber : D.sub} style={{ marginTop: 2 }}>
                   {rowSub(r, barberId, now, guest)}
-                  {misses ? <T size={11} c={D.red}> · {misses} past no-show{misses > 1 ? 's' : ''}</T> : null}
+                  {misses ? <T size={11} c={D.red}>{' '}{trn(misses, '· {n} past no-show', '· {n} past no-shows')}</T> : null}
                 </T>
               </View>
               {grey ? (
-                <View style={s.amberChip}><T w="b" size={10} c={D.amber} ls={0.6}>UNCONFIRMED</T></View>
+                <View style={s.amberChip}><T w="b" size={10} c={D.amber} ls={0.6}>{tr('UNCONFIRMED')}</T></View>
               ) : front ? (
                 <View style={s.rowBtns}>
                   <Pressable onPress={() => confirmTakeOff(r)} hitSlop={4} accessibilityRole="button"
-                    accessibilityLabel={`Take ${name} off the line`}
+                    accessibilityLabel={tr('Take {name} off the line', { name })}
                     style={({ pressed }) => [s.rowPuck, pressed && s.pressed]}>
                     <Ico name="x" size={14} color={D.red} />
                   </Pressable>
                   <Pressable onPress={callNext} hitSlop={4} accessibilityRole="button"
-                    accessibilityLabel={`Call ${name}`}
+                    accessibilityLabel={tr('Call {name}', { name })}
                     style={({ pressed }) => [s.rowPuck, pressed && s.pressed]}>
                     <Ico name="arrow-up" size={14} />
                   </Pressable>
                 </View>
               ) : r.checked_in_at ? (
-                <View style={s.calledChip}><T w="b" size={10} c={D.accent} ls={0.6}>CALLED</T></View>
+                <View style={s.calledChip}><T w="b" size={10} c={D.accent} ls={0.6}>{tr('CALLED')}</T></View>
               ) : r.dropped_at ? null : (
-                <T size={11} c={D.sub}>~{minsTo(r.starts_at)} min</T>
+                <T size={11} c={D.sub}>{tr('~{starts_at} min', { starts_at: minsTo(r.starts_at) })}</T>
               )}
             </Pressable>
           );
@@ -404,30 +404,29 @@ export default function BarberQueueScreen({ barberId, onBack }: {
           <View style={[s.row, s.openRow]}>
             <View style={[s.ticket, s.openTicket]}><T w="b" size={11} c={D.faint}>{nextNo}</T></View>
             <View style={s.grow}>
-              <T w="sb" size={13} c={D.sub}>Open · next to take it</T>
+              <T w="sb" size={13} c={D.sub}>{tr('Open · next to take it')}</T>
               <T size={11} c={D.faint} style={{ marginTop: 2 }}>
-                {sent.to_name ? `${sent.to_name} has the link · so does the poster` : 'The link is out · so is the poster'}
+                {sent.to_name ? tr('{to_name} has the link · so does the poster', { to_name: sent.to_name }) : tr('The link is out · so is the poster')}
               </T>
             </View>
           </View>
         )}
       </View>
 
-      {sent && <GhostBtn title="SEND TO SOMEONE ELSE" height={48} onPress={() => setShare(true)} />}
+      {sent && <GhostBtn title={tr('SEND TO SOMEONE ELSE')} height={48} onPress={() => setShare(true)} />}
 
       {notConfirmed.length > 0 && (
         <View style={s.amberNote}>
           <Ico name="info" size={14} color={D.amber} />
           <T size={11.5} c={D.sub} style={[s.grow, { lineHeight: 17 }]}>
-            Nº {pad(noOf(notConfirmed[0]))}{notConfirmed.length > 1 ? ` and ${notConfirmed.length - 1} more` : ''} put
-            {notConfirmed.length > 1 ? ' their names' : ' his name'} in from the web and never tapped the text. Call
-            past freely — we'll ask you once when {notConfirmed.length > 1 ? 'each reaches' : 'he reaches'} the front.
+            {notConfirmed.length > 1
+              ? tr('Nº {no} and {more} more put their names in from the web and never tapped the text. Call past freely — we\'ll ask you once when each reaches the front.', { no: pad(noOf(notConfirmed[0])), more: notConfirmed.length - 1 })
+              : tr('Nº {no} put his name in from the web and never tapped the text. Call past freely — we\'ll ask you once when he reaches the front.', { no: pad(noOf(notConfirmed[0])) })}
           </T>
         </View>
       )}
       <Note>
-        Call next pings an app client in chat. A called chair is held eight minutes, then you decide what
-        happens. Pausing stops anyone new taking a place.
+        {tr('Call next pings an app client in chat. A called chair is held eight minutes, then you decide what happens. Pausing stops anyone new taking a place.')}
       </Note>
 
       <ShareLinkSheet visible={share} barberId={barberId} onClose={() => setShare(false)}
@@ -437,21 +436,21 @@ export default function BarberQueueScreen({ barberId, onBack }: {
           firstName: shortName(sheetRow, barberId, sheetGuest), phone: sheetPhone,
           source: sheetGuest ? sheetGuest.source : 'hand',
           joinedAt: sheetGuest?.joined_at ?? sheetRow.created_at, confirmed: sheetGuest ? sheetGuest.confirmed : true,
-          no: noOf(sheetRow), service: sheetRow.services?.name ?? 'Service',
+          no: noOf(sheetRow), service: sheetRow.services?.name ?? tr('Service'),
           durationMin: sheetRow.services?.duration_min ?? null, priceCents: sheetRow.price_cents,
           startsAt: sheetRow.starts_at, after: before ? shortName(before, barberId, guests[before.id]) : null,
         } : null}
         onCallUp={() => { const r = sheetRow; setSheetFor(null); if (r) callRow(r); }}
         // the take-off asks first, and an Alert over a closing sheet can vanish with it
         onTakeOff={() => { const r = sheetRow; setSheetFor(null); if (r) setTimeout(() => confirmTakeOff(r), 350); }}
-        anotherDay={!sheetPhone ? "Needs his number — you'll only have his name"
-          : !smsSends() ? 'Waits until Sterncut can send texts'
+        anotherDay={!sheetPhone ? tr("Needs his number — you'll only have his name")
+          : !smsSends() ? tr('Waits until Sterncut can send texts')
             : () => {
               const r = sheetRow!;
               setSheetFor(null);
               setOfferFor({
                 bookingId: r.id, no: noOf(r), name: shortName(r, barberId, sheetGuest),
-                service: r.services?.name ?? 'Service', durationMin: r.services?.duration_min ?? 30,
+                service: r.services?.name ?? tr('Service'), durationMin: r.services?.duration_min ?? 30,
                 startsAt: r.starts_at, waitingSince: sheetGuest?.joined_at ?? r.created_at,
               });
             }} />

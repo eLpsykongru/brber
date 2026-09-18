@@ -12,6 +12,7 @@ import { qrSvg, queueUrl } from '../lib/qr';
 import { supabase } from '../lib/supabase';
 import { dark as D, inter, serif } from '../theme';
 import type { Member, ShopMeta } from './OwnerScreens';
+import { loc, tr, trn } from '../lib/i18n';
 
 // Turn 2, money & reputation: 2e shop report, 2f reviews inbox, 2g shop listing,
 // 2h/2i the walk-in QR poster, 2j the wall display.
@@ -29,7 +30,7 @@ type ReportRow = {
 type Period = 'week' | 'month' | 'year';
 
 const PERIODS: { key: Period; label: string }[] = [
-  { key: 'week', label: 'Week' }, { key: 'month', label: 'Month' }, { key: 'year', label: 'Year' },
+  { key: 'week', label: tr('Week') }, { key: 'month', label: tr('Month') }, { key: 'year', label: tr('Year') },
 ];
 
 function rangeFor(p: Period, back = 0): { from: Date; to: Date; label: string } {
@@ -38,12 +39,12 @@ function rangeFor(p: Period, back = 0): { from: Date; to: Date; label: string } 
     const to = new Date(now); to.setHours(0, 0, 0, 0);
     to.setDate(to.getDate() - ((to.getDay() + 6) % 7) - back * 7 + 7);
     const from = new Date(to); from.setDate(from.getDate() - 7);
-    return { from, to, label: `Week of ${from.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` };
+    return { from, to, label: tr('Week of {toLocaleDateString}', { toLocaleDateString: from.toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' }) }) };
   }
   if (p === 'month') {
     const from = new Date(now.getFullYear(), now.getMonth() - back, 1);
     const to = new Date(now.getFullYear(), now.getMonth() - back + 1, 1);
-    return { from, to, label: from.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) };
+    return { from, to, label: from.toLocaleDateString(loc('en-US'), { month: 'long', year: 'numeric' }) };
   }
   const from = new Date(now.getFullYear() - back, 0, 1);
   const to = new Date(now.getFullYear() - back + 1, 0, 1);
@@ -120,24 +121,24 @@ export function ShopReportScreen({ onBack }: { onBack: () => void }) {
         p_barber: r.barber_id, p_amount_cents: r.commission_cents,
         p_from: from.toISOString(), p_to: new Date().toISOString(),
       });
-      if (error) { setBusy(false); return Alert.alert('Could not settle', error.message); }
+      if (error) { setBusy(false); return Alert.alert(tr('Could not settle'), error.message); }
     }
     setBusy(false);
-    Alert.alert('Settled', `${dh(totalDue)} recorded as collected in cash.`);
+    Alert.alert(tr('Settled'), tr('{totalDue} recorded as collected in cash.', { totalDue: dh(totalDue) }));
     load();
   }
 
   return (
     <Screen gap={14}>
-      <TopBar title="Shop report" onBack={onBack} plain right="filter"
-        onRight={() => Alert.alert('Export', 'Coming soon — see BACKLOG.md')} />
+      <TopBar title={tr('Shop report')} onBack={onBack} plain right="filter"
+        onRight={() => Alert.alert(tr('Export'), tr('Coming soon — see BACKLOG.md'))} />
 
       <Segmented track={D.card} height={38} active={period}
         items={PERIODS.map((p) => ({ key: p.key, label: p.label }))}
         onChange={(k) => setPeriod(k as Period)} />
 
       <View>
-        <Eyebrow ls={1.6}>{cur.label.toUpperCase()} · SHOP TAKE</Eyebrow>
+        <Eyebrow ls={1.6}>{tr('{label} · SHOP TAKE', { label: cur.label.toUpperCase() })}</Eyebrow>
         <Serif size={40} ls={0} style={s.hero}>{dh(take)}</Serif>
         <View style={s.deltaRow}>
           {delta != null && (
@@ -148,26 +149,26 @@ export function ShopReportScreen({ onBack }: { onBack: () => void }) {
             </View>
           )}
           <T size={12} c={D.sub}>
-            {delta != null ? 'vs previous · ' : ''}{bookings} booking{bookings === 1 ? '' : 's'}
+            {trn(bookings, '{x}{n} booking', '{x}{n} bookings', { x: delta != null ? tr('vs previous · ') : '' })}
           </T>
         </View>
       </View>
 
-      {rows === null && <ActivityIndicator color={D.accent} accessibilityLabel="Loading the report" />}
+      {rows === null && <ActivityIndicator color={D.accent} accessibilityLabel={tr('Loading the report')} />}
 
       {!!list.length && (
         <View style={s.card}>
-          <Eyebrow ls={1.4}>BY BARBER</Eyebrow>
+          <Eyebrow ls={1.4}>{tr('BY BARBER')}</Eyebrow>
           <View style={{ gap: 11 }}>
             {list.map((r, i) => (
               <View key={r.barber_id} style={{ gap: 6 }}>
                 <View style={s.byRow}>
                   <T w="b" size={13}>
                     {first(r.name)}
-                    {r.is_owner ? <T size={11} c={D.sub}> · you</T> : null}
+                    {r.is_owner ? <T size={11} c={D.sub}>{' '}{tr('· you')}</T> : null}
                   </T>
                   <T w="b" size={13} style={s.tnum}>
-                    {r.booked_cents == null ? 'rent' : dh(r.booked_cents)}
+                    {r.booked_cents == null ? tr('rent') : dh(r.booked_cents)}
                   </T>
                 </View>
                 <View style={s.track}>
@@ -183,14 +184,14 @@ export function ShopReportScreen({ onBack }: { onBack: () => void }) {
       )}
 
       <View style={s.tiles}>
-        <Tile label="COMMISSION" value={dh(commission)} />
-        <Tile label="TOP-UPS" value={dh(topUps)} />
-        <Tile label="NO-SHOWS" value={String(noShows)} color={noShows ? D.red : undefined} />
+        <Tile label={tr('COMMISSION')} value={dh(commission)} />
+        <Tile label={tr('TOP-UPS')} value={dh(topUps)} />
+        <Tile label={tr('NO-SHOWS')} value={String(noShows)} color={noShows ? D.red : undefined} />
       </View>
 
       {due.length > 0 && (
         <>
-          <Eyebrow ls={1.65}>SETTLEMENT · OWED NOW</Eyebrow>
+          <Eyebrow ls={1.65}>{tr('SETTLEMENT · OWED NOW')}</Eyebrow>
           <View style={s.listCard}>
             {due.map((r) => (
               <View key={r.barber_id} style={[s.listRow, s.listLine]}>
@@ -199,12 +200,12 @@ export function ShopReportScreen({ onBack }: { onBack: () => void }) {
               </View>
             ))}
             <View style={s.listRow}>
-              <T w="b" size={13} style={s.grow}>Total to collect</T>
+              <T w="b" size={13} style={s.grow}>{tr('Total to collect')}</T>
               <T w="eb" size={15} style={s.tnum}>{dh(totalDue)}</T>
             </View>
           </View>
           {/* ponytail: bookkeeping only — records cash handed over, moves nothing */}
-          <Btn title="MARK SETTLED IN CASH" height={52} onPress={settleAll}
+          <Btn title={tr('MARK SETTLED IN CASH')} height={52} onPress={settleAll}
             style={busy ? { opacity: 0.6 } : undefined} />
         </>
       )}
@@ -244,7 +245,7 @@ export function ReviewsInboxScreen({ salon, team, onBack }: {
     const { data, error } = await supabase.from('reviews')
       .select('id, rating, comment, created_at, reply, replied_at, flagged_at, barber_id, barbers!reviews_barber_id_fkey(profiles!barbers_id_fkey(full_name)), customer:profiles!customer_id(full_name)')
       .in('barber_id', ids).order('created_at', { ascending: false }).limit(100);
-    if (error) return Alert.alert('Could not load reviews', error.message);
+    if (error) return Alert.alert(tr('Could not load reviews'), error.message);
     setRows((data as unknown as ReviewRow[]) ?? []);
   }, [ids.join(',')]);
 
@@ -253,18 +254,18 @@ export function ReviewsInboxScreen({ salon, team, onBack }: {
   async function sendReply() {
     if (!replyTo) return;
     const { error } = await supabase.rpc('review_reply', { p_review: replyTo.id, p_reply: draft });
-    if (error) return Alert.alert('Could not reply', error.message);
+    if (error) return Alert.alert(tr('Could not reply'), error.message);
     setReplyTo(null); setDraft(''); load();
   }
 
   async function flag(r: ReviewRow) {
-    Alert.alert('Flag this review?', 'It stays public, but we take a look at it.', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(tr('Flag this review?'), tr('It stays public, but we take a look at it.'), [
+      { text: tr('Cancel'), style: 'cancel' },
       {
-        text: 'Flag',
+        text: tr('Flag'),
         onPress: async () => {
           const { error } = await supabase.rpc('review_flag', { p_review: r.id });
-          if (error) Alert.alert('Could not flag', error.message);
+          if (error) Alert.alert(tr('Could not flag'), error.message);
           else load();
         },
       },
@@ -281,13 +282,13 @@ export function ReviewsInboxScreen({ salon, team, onBack }: {
 
   return (
     <Screen gap={13}>
-      <TopBar title="Reviews" onBack={onBack} plain />
+      <TopBar title={tr('Reviews')} onBack={onBack} plain />
 
       <View style={s.summaryCard}>
         <View style={s.summaryLeft}>
           <Serif size={34} ls={0}>{avg ? avg.toFixed(1) : '—'}</Serif>
           <View style={{ marginTop: 3 }}><Stars n={Math.round(avg)} size={11} /></View>
-          <T size={10} c={D.sub} style={{ marginTop: 4 }}>{all.length} reviews</T>
+          <T size={10} c={D.sub} style={{ marginTop: 4 }}>{tr('{count} reviews', { count: all.length })}</T>
         </View>
         <View style={s.summaryBars}>
           {dist.map((d) => (
@@ -302,7 +303,7 @@ export function ReviewsInboxScreen({ salon, team, onBack }: {
       </View>
 
       <View style={s.chipRow}>
-        {([['needs', `Needs reply · ${needs.length}`], ['all', 'All'], ['low', 'Low']] as const).map(([k, label]) => (
+        {([['needs', tr('Needs reply · {n}', { n: needs.length })], ['all', tr('All')], ['low', tr('Low')]] as const).map(([k, label]) => (
           <Pressable key={k} onPress={() => setFilter(k)} accessibilityRole="button"
             accessibilityState={{ selected: filter === k }}
             style={({ pressed }) => [s.chip, filter === k && s.chipOn, pressed && s.pressed]}>
@@ -311,15 +312,15 @@ export function ReviewsInboxScreen({ salon, team, onBack }: {
         ))}
       </View>
 
-      {rows === null && <ActivityIndicator color={D.accent} accessibilityLabel="Loading reviews" />}
+      {rows === null && <ActivityIndicator color={D.accent} accessibilityLabel={tr('Loading reviews')} />}
       {rows !== null && shown.length === 0 && (
-        <T size={13} c={D.sub}>Nothing here — {filter === 'needs' ? 'every review is answered.' : 'no reviews yet.'}</T>
+        <T size={13} c={D.sub}>{tr('Nothing here — {x}', { x: filter === 'needs' ? tr('every review is answered.') : tr('no reviews yet.') })}</T>
       )}
 
       <View style={{ gap: 10 }}>
         {shown.map((r) => {
-          const who = r.customer?.full_name ?? 'Client';
-          const barber = r.barbers?.profiles?.full_name ?? 'the shop';
+          const who = r.customer?.full_name ?? tr('Client');
+          const barber = r.barbers?.profiles?.full_name ?? tr('the shop');
           return (
             <View key={r.id} style={s.reviewCard}>
               <View style={s.reviewHead}>
@@ -327,7 +328,7 @@ export function ReviewsInboxScreen({ salon, team, onBack }: {
                 <View style={s.grow}>
                   <T w="b" size={13}>{who}</T>
                   <T size={11} c={D.sub} style={{ marginTop: 2 }}>
-                    {first(barber)} · {new Date(r.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {first(barber)} · {new Date(r.created_at).toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' })}
                   </T>
                 </View>
                 <Stars n={r.rating} size={11} />
@@ -339,21 +340,21 @@ export function ReviewsInboxScreen({ salon, team, onBack }: {
                     <T w="b" size={9} c={D.accent}>{initials(salon.name)}</T>
                   </View>
                   <View style={s.grow}>
-                    <T w="b" size={11} c={D.sub}>{salon.name} replied</T>
+                    <T w="b" size={11} c={D.sub}>{tr('{name} replied', { name: salon.name })}</T>
                     <T size={12} c={D.textDim} style={s.replyText}>{r.reply}</T>
                   </View>
                 </View>
               ) : (
                 <View style={s.reviewBtns}>
                   <Pressable onPress={() => { setReplyTo(r); setDraft(''); }} accessibilityRole="button"
-                    accessibilityLabel={`Reply to ${who}`}
+                    accessibilityLabel={tr('Reply to {who}', { who })}
                     style={({ pressed }) => [s.replyBtn, pressed && s.pressed]}>
-                    <T w="b" size={12} c="#fff" ls={0.6}>REPLY</T>
+                    <T w="b" size={12} c="#fff" ls={0.6}>{tr('REPLY')}</T>
                   </Pressable>
-                  <Pressable onPress={() => flag(r)} accessibilityRole="button" accessibilityLabel="Flag review"
+                  <Pressable onPress={() => flag(r)} accessibilityRole="button" accessibilityLabel={tr('Flag review')}
                     style={({ pressed }) => [s.flagBtn, pressed && s.pressed]}>
                     <T w="b" size={12} c={r.flagged_at ? D.amber : D.sub}>
-                      {r.flagged_at ? 'Flagged' : 'Flag'}
+                      {r.flagged_at ? tr('Flagged') : tr('Flag')}
                     </T>
                   </Pressable>
                 </View>
@@ -364,14 +365,14 @@ export function ReviewsInboxScreen({ salon, team, onBack }: {
       </View>
 
       <Sheet visible={!!replyTo} onClose={() => setReplyTo(null)}>
-        <SheetHead title="Reply publicly" onClose={() => setReplyTo(null)} left />
+        <SheetHead title={tr('Reply publicly')} onClose={() => setReplyTo(null)} left />
         <T size={12} c={D.sub}>
-          Everyone browsing {salon.name} sees this under the review.
+          {tr('Everyone browsing {name} sees this under the review.', { name: salon.name })}
         </T>
         <TextInput value={draft} onChangeText={setDraft} multiline
-          placeholder="Shukran — see you next time." placeholderTextColor={D.sub}
-          accessibilityLabel="Your reply" style={s.replyInput} />
-        <Btn title="POST REPLY" height={52} onPress={sendReply}
+          placeholder={tr('Shukran — see you next time.')} placeholderTextColor={D.sub}
+          accessibilityLabel={tr('Your reply')} style={s.replyInput} />
+        <Btn title={tr('POST REPLY')} height={52} onPress={sendReply}
           style={draft.trim() ? undefined : { opacity: 0.5 }} />
       </Sheet>
     </Screen>
@@ -423,15 +424,15 @@ export function ShopListingScreen({ salon, onBack, onMovePin, onSaved }: {
       if (error) throw error;
       await loadPhotos();
     } catch (e: any) {
-      Alert.alert('Could not upload', e.message ?? String(e));
+      Alert.alert(tr('Could not upload'), e.message ?? String(e));
     } finally { setBusy(false); }
   }
 
   function removePhoto(path: string) {
-    Alert.alert('Remove photo?', '', [
-      { text: 'Keep', style: 'cancel' },
+    Alert.alert(tr('Remove photo?'), '', [
+      { text: tr('Keep'), style: 'cancel' },
       {
-        text: 'Remove', style: 'destructive',
+        text: tr('Remove'), style: 'destructive',
         onPress: async () => {
           await supabase.storage.from('salon-photos').remove([path]);
           loadPhotos();
@@ -441,14 +442,14 @@ export function ShopListingScreen({ salon, onBack, onMovePin, onSaved }: {
   }
 
   async function save() {
-    if (!name.trim()) return Alert.alert('Missing name', 'The shop needs a name.');
+    if (!name.trim()) return Alert.alert(tr('Missing name'), tr('The shop needs a name.'));
     setBusy(true);
     const { error } = await supabase.from('salons').update({
       name: name.trim(), bio: tagline.trim() || null,
       address: address.trim() || null, accepting_bookings: walkIns,
     }).eq('id', salon.id);
     setBusy(false);
-    if (error) return Alert.alert('Could not save', error.message);
+    if (error) return Alert.alert(tr('Could not save'), error.message);
     onSaved();
   }
 
@@ -458,79 +459,79 @@ export function ShopListingScreen({ salon, onBack, onMovePin, onSaved }: {
   return (
     <Screen gap={13}>
       <View style={s.listingHead}>
-        <Pressable onPress={onBack} hitSlop={8} accessibilityRole="button" accessibilityLabel="Back"
+        <Pressable onPress={onBack} hitSlop={8} accessibilityRole="button" accessibilityLabel={tr('Back')}
           style={({ pressed }) => [s.puck38, pressed && s.pressed]}>
           <Ico name="arrow-left" size={16} />
         </Pressable>
-        <T w="b" size={17} style={s.listingTitle}>Shop listing</T>
-        <Pressable onPress={save} accessibilityRole="button" accessibilityLabel="Save listing"
+        <T w="b" size={17} style={s.listingTitle}>{tr('Shop listing')}</T>
+        <Pressable onPress={save} accessibilityRole="button" accessibilityLabel={tr('Save listing')}
           style={({ pressed }) => [s.savePill, busy && { opacity: 0.6 }, pressed && s.pressed]}>
-          <T w="b" size={11} c="#fff">SAVE</T>
+          <T w="b" size={11} c="#fff">{tr('SAVE')}</T>
         </Pressable>
       </View>
 
       <View style={s.liveStrip}>
         <Ico name="check" size={14} color={D.green} />
-        <T w="sb" size={12} c={D.green} style={s.grow}>Live — this is what customers see</T>
+        <T w="sb" size={12} c={D.green} style={s.grow}>{tr('Live — this is what customers see')}</T>
       </View>
 
-      <Pressable onPress={addPhoto} accessibilityRole="button" accessibilityLabel="Change cover photo"
+      <Pressable onPress={addPhoto} accessibilityRole="button" accessibilityLabel={tr('Change cover photo')}
         style={({ pressed }) => [s.cover, pressed && s.pressed]}>
         {cover
           ? <Image source={{ uri: cover.url }} style={s.coverImg} />
-          : <View style={s.coverEmpty}><T size={12} c={D.sub}>Add a cover photo</T></View>}
+          : <View style={s.coverEmpty}><T size={12} c={D.sub}>{tr('Add a cover photo')}</T></View>}
         <View style={s.coverBadge}>
           <Ico name="edit-2" size={12} />
-          <T w="b" size={11}>Change</T>
+          <T w="b" size={11}>{tr('Change')}</T>
         </View>
       </Pressable>
 
       <View style={s.gallery}>
         {rest.slice(0, 3).map((p) => (
           <Pressable key={p.name} onLongPress={() => removePhoto(p.name)}
-            accessibilityRole="imagebutton" accessibilityLabel="Gallery photo, long-press to remove">
+            accessibilityRole="imagebutton" accessibilityLabel={tr('Gallery photo, long-press to remove')}>
             <Image source={{ uri: p.url }} style={s.thumb} />
           </Pressable>
         ))}
-        <Pressable onPress={addPhoto} accessibilityRole="button" accessibilityLabel="Add photo"
+        <Pressable onPress={addPhoto} accessibilityRole="button" accessibilityLabel={tr('Add photo')}
           style={({ pressed }) => [s.thumbAdd, pressed && s.pressed]}>
           <Ico name="plus" size={18} color={D.sub} />
         </Pressable>
       </View>
 
       <View style={s.fieldCard}>
-        <Field label="SHOP NAME" value={name} onChange={setName} bold />
-        <Field label="TAGLINE" value={tagline} onChange={setTagline}
-          placeholder="Skin fades & hot towel shaves" />
-        <Field label="ADDRESS" value={address} onChange={setAddress} placeholder="Street, city" />
+        <Field label={tr('SHOP NAME')} value={name} onChange={setName} bold />
+        <Field label={tr('TAGLINE')} value={tagline} onChange={setTagline}
+          placeholder={tr('Skin fades & hot towel shaves')} />
+        <Field label={tr('ADDRESS')} value={address} onChange={setAddress} placeholder={tr('Street, city')} />
         <View style={s.pinRow}>
           <View style={s.grow}>
-            <Eyebrow ls={1.2}>MAP PIN</Eyebrow>
+            <Eyebrow ls={1.2}>{tr('MAP PIN')}</Eyebrow>
             <T w="sb" size={14} style={{ marginTop: 3 }}>
               {(salon as any).lat != null
                 ? `${(salon as any).lat.toFixed(4)}, ${(salon as any).lng.toFixed(4)}`
-                : 'Not set'}
+                : tr('Not set')}
             </T>
           </View>
-          <Pressable onPress={onMovePin} accessibilityRole="button" accessibilityLabel="Move map pin"
+          <Pressable onPress={onMovePin} accessibilityRole="button" accessibilityLabel={tr('Move map pin')}
             style={({ pressed }) => [s.movePill, pressed && s.pressed]}>
-            <T w="b" size={12}>Move</T>
+            <T w="b" size={12}>{tr('Move')}</T>
           </Pressable>
         </View>
       </View>
 
-      <Eyebrow ls={1.65}>WHAT THE SHOP OFFERS</Eyebrow>
+      <Eyebrow ls={1.65}>{tr('WHAT THE SHOP OFFERS')}</Eyebrow>
       <View style={s.tagRow}>
         {tags.map((t) => (
           <View key={t} style={s.tag}><T w="sb" size={12}>{t}</T></View>
         ))}
-        {tags.length === 0 && <T size={12} c={D.sub}>Add services and they show up here.</T>}
+        {tags.length === 0 && <T size={12} c={D.sub}>{tr('Add services and they show up here.')}</T>}
       </View>
 
       <View style={s.walkInRow}>
         <View style={s.grow}>
-          <T w="b" size={13}>Accept walk-ins</T>
-          <T size={11} c={D.sub} style={{ marginTop: 2 }}>Shows the queue and QR on your page</T>
+          <T w="b" size={13}>{tr('Accept walk-ins')}</T>
+          <T size={11} c={D.sub} style={{ marginTop: 2 }}>{tr('Shows the queue and QR on your page')}</T>
         </View>
         <Toggle on={walkIns} onPress={() => setWalkIns(!walkIns)} />
       </View>
@@ -627,7 +628,7 @@ export function WalkInPosterScreen({ salon, onBack }: { salon: ShopMeta; onBack:
     try { await Print.printAsync({ html: posterHtml() }); }
     catch (e: any) {
       const msg = String(e?.message ?? e);
-      if (!/didn'?t complete|cancel/i.test(msg)) Alert.alert('Could not print', msg);
+      if (!/didn'?t complete|cancel/i.test(msg)) Alert.alert(tr('Could not print'), msg);
     } finally { setBusy(false); }
   }
 
@@ -635,28 +636,28 @@ export function WalkInPosterScreen({ salon, onBack }: { salon: ShopMeta; onBack:
     setBusy(true);
     try {
       const { uri } = await Print.printToFileAsync({ html: posterHtml() });
-      await Share.share({ url: uri, message: `${salon.name} — walk-in poster` });
+      await Share.share({ url: uri, message: tr('{salon} — walk-in poster', { salon: salon.name }) });
     } catch (e: any) {
-      Alert.alert('Could not save', e.message ?? String(e));
+      Alert.alert(tr('Could not save'), e.message ?? String(e));
     } finally { setBusy(false); }
   }
 
   return (
     <Screen gap={13}>
-      <TopBar title="Walk-in poster" onBack={onBack} plain right="send"
-        onRight={() => Share.share({ message: `See the wait at ${salon.name}: ${url}` })} />
+      <TopBar title={tr('Walk-in poster')} onBack={onBack} plain right="send"
+        onRight={() => Share.share({ message: tr('See the wait at {salon}: {url}', { salon: salon.name, url }) })} />
 
       {/* OSH-05 under ADDENDUM-app-first: the page is read-only, so the poster
           promises what it does — see the wait — and never a join. */}
       <T size={13} c={D.sub} style={s.lede}>
-        Stick it by the mirror. Scanning shows today's line, read-only — they hold a place in the app, or you add them by name.
+        {tr('Stick it by the mirror. Scanning shows today\'s line, read-only — they hold a place in the app, or you add them by name.')}
       </T>
 
       <View style={s.poster}>
-        <T style={s.posterBrand}>STERNCUT</T>
+        <T style={s.posterBrand}>{tr('STERNCUT')}</T>
         <View style={{ alignItems: 'center' }}>
-          <T style={s.posterTitle}>SEE THE WAIT</T>
-          <T size={11} style={s.posterSub}>Scan · get the app to hold a place</T>
+          <T style={s.posterTitle}>{tr('SEE THE WAIT')}</T>
+          <T size={11} style={s.posterSub}>{tr('Scan · get the app to hold a place')}</T>
         </View>
         <View style={s.qrBox}><SvgXml xml={svg} width={104} height={104} /></View>
         {!!code && <T w="b" size={13} c="#111" ls={3} style={s.tnum}>{code}</T>}
@@ -671,26 +672,26 @@ export function WalkInPosterScreen({ salon, onBack }: { salon: ShopMeta; onBack:
           <Pressable key={k} onPress={() => setSize(k)} accessibilityRole="button"
             accessibilityState={{ selected: size === k }}
             style={({ pressed }) => [s.sizeBtn, size === k && s.sizeBtnOn, pressed && s.pressed]}>
-            <T w={size === k ? 'b' : 'sb'} size={12} c={size === k ? '#fff' : D.sub}>{k}</T>
+            <T w={size === k ? 'b' : 'sb'} size={12} c={size === k ? '#fff' : D.sub}>{tr(k)}</T>
           </Pressable>
         ))}
       </View>
 
       <View style={s.listCard}>
         <View style={[s.listRow, s.listLine]}>
-          <T w="sb" size={13} style={s.grow}>Show live wait time</T>
+          <T w="sb" size={13} style={s.grow}>{tr('Show live wait time')}</T>
           <Toggle small on={showWait} color={D.accent} onPress={() => setShowWait(!showWait)} />
         </View>
         <View style={s.listRow}>
-          <T w="sb" size={13} style={s.grow}>Points at</T>
-          <T size={12} c={D.sub}>Whole shop</T>
+          <T w="sb" size={13} style={s.grow}>{tr('Points at')}</T>
+          <T size={12} c={D.sub}>{tr('Whole shop')}</T>
         </View>
       </View>
 
       <View style={s.posterBtns}>
-        <GhostBtn title="DOWNLOAD" height={50} color={D.text} border={D.border}
+        <GhostBtn title={tr('DOWNLOAD')} height={50} color={D.text} border={D.border}
           style={s.grow} onPress={download} />
-        <Btn title="PRINT" height={50} icon="printer" style={s.growWide} onPress={print} />
+        <Btn title={tr('PRINT')} height={50} icon="printer" style={s.growWide} onPress={print} />
       </View>
       {busy && <ActivityIndicator color={D.accent} />}
     </Screen>
@@ -747,15 +748,15 @@ export function WallDisplayScreen({ salon, team, onBack }: {
   const label = (r: QueueRow) => r.walk_in_name
     ?? (r.customer?.full_name
       ? `${first(r.customer.full_name)} ${(r.customer.full_name.split(' ')[1] ?? '')[0] ?? ''}.`.trim()
-      : 'Walk-in');
-  const barberOf = (r: QueueRow) => first(team.find((m) => m.id === r.barber_id)?.name ?? 'the shop');
+      : tr('Walk-in'));
+  const barberOf = (r: QueueRow) => first(team.find((m) => m.id === r.barber_id)?.name ?? tr('the shop'));
   const ticket = (r: QueueRow) => String(rows.indexOf(r) + 1).padStart(2, '0');
   const waitFor = (r: QueueRow) =>
     Math.max(0, Math.round((new Date(r.starts_at).getTime() - now.getTime()) / 60_000));
 
   return (
     <View style={s.wall}>
-      <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel="Close the wall display"
+      <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel={tr('Close the wall display')}
         style={s.wallClose} hitSlop={12}>
         <Ico name="x" size={18} color={D.sub} />
       </Pressable>
@@ -763,7 +764,7 @@ export function WallDisplayScreen({ salon, team, onBack }: {
       <View style={s.wallMain}>
         <View style={s.wallHead}>
           <View>
-            <Serif size={f(30)} ls={0.24}>Sterncut</Serif>
+            <Serif size={f(30)} ls={0.24}>{tr('Sterncut')}</Serif>
             <T size={f(16)} c={D.sub} style={{ marginTop: f(9) }}>
               {salon.name}{salon.address ? ` · ${salon.address}` : ''}
             </T>
@@ -771,26 +772,26 @@ export function WallDisplayScreen({ salon, team, onBack }: {
           <View style={{ alignItems: 'flex-end' }}>
             <Serif size={f(44)} ls={0} style={s.tnum}>{now.toTimeString().slice(0, 5)}</Serif>
             <T size={f(14)} c={D.sub} style={{ marginTop: f(8) }}>
-              {now.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' })}
+              {now.toLocaleDateString(loc('en-US'), { weekday: 'long', day: 'numeric', month: 'long' })}
             </T>
           </View>
         </View>
 
         <View style={[s.nowCard, { padding: f(30), gap: f(34) }]}>
           <View style={[s.nowRing, { width: f(132), height: f(132) }]}>
-            <T w="b" size={f(13)} c={D.green} ls={f(13) * 0.16}>NOW</T>
+            <T w="b" size={f(13)} c={D.green} ls={f(13) * 0.16}>{tr('NOW')}</T>
             <Serif size={f(54)} ls={0} style={s.tnum}>{inChair ? ticket(inChair) : '—'}</Serif>
           </View>
           <View style={s.grow}>
-            <Serif size={f(46)} ls={0.02}>{inChair ? label(inChair) : 'Chair free'}</Serif>
+            <Serif size={f(46)} ls={0.02}>{inChair ? label(inChair) : tr('Chair free')}</Serif>
             <T size={f(20)} c={D.sub} style={{ marginTop: f(11) }}>
-              {inChair ? `${inChair.services?.name ?? 'Service'} · with ${barberOf(inChair)}` : 'Walk straight in'}
+              {inChair ? tr('{name} · with {inChair}', { name: inChair.services?.name ?? tr('Service'), inChair: barberOf(inChair) }) : tr('Walk straight in')}
             </T>
             {inChair && (
               <View style={[s.nowSince, { marginTop: f(13) }]}>
                 <View style={[s.greenDot, { width: f(11), height: f(11) }]} />
                 <T w="b" size={f(16)} c={D.green}>
-                  In the chair since {inChair.started_at!.slice(11, 16)}
+                  {tr('In the chair since {started_at}', { started_at: inChair.started_at!.slice(11, 16) })}
                 </T>
               </View>
             )}
@@ -798,8 +799,8 @@ export function WallDisplayScreen({ salon, team, onBack }: {
         </View>
 
         <View style={{ gap: f(13) }}>
-          <T w="b" size={f(14)} c={D.sub} ls={f(14) * 0.2}>UP NEXT</T>
-          {upNext.length === 0 && <T size={f(18)} c={D.sub}>Nobody waiting — take a seat.</T>}
+          <T w="b" size={f(14)} c={D.sub} ls={f(14) * 0.2}>{tr('UP NEXT')}</T>
+          {upNext.length === 0 && <T size={f(18)} c={D.sub}>{tr('Nobody waiting — take a seat.')}</T>}
           {upNext.map((r, i) => (
             <View key={r.id} style={[
               i === 0 ? s.nextCard : s.nextCardDim,
@@ -816,18 +817,18 @@ export function WallDisplayScreen({ salon, team, onBack }: {
               <View style={s.grow}>
                 <T w="b" size={f(i === 0 ? 30 : 26)}>{label(r)}</T>
                 <T size={f(i === 0 ? 17 : 16)} c={D.sub} style={{ marginTop: f(4) }}>
-                  {r.services?.name ?? 'Service'} · with {barberOf(r)}
+                  {tr('{name} · with {r}', { name: r.services?.name ?? tr('Service'), r: barberOf(r) })}
                 </T>
               </View>
               {i === 0 ? (
                 <View style={{ alignItems: 'flex-end' }}>
-                  <T w="b" size={f(14)} c={D.sub} ls={f(14) * 0.1}>READY IN</T>
+                  <T w="b" size={f(14)} c={D.sub} ls={f(14) * 0.1}>{tr('READY IN')}</T>
                   <T w="eb" size={f(28)} c={D.accent} style={[s.tnum, { marginTop: f(4) }]}>
-                    ~{waitFor(r)} min
+                    {tr('~{r} min', { r: waitFor(r) })}
                   </T>
                 </View>
               ) : (
-                <T w="b" size={f(22)} c={D.sub} style={s.tnum}>~{waitFor(r)} min</T>
+                <T w="b" size={f(22)} c={D.sub} style={s.tnum}>{tr('~{r} min', { r: waitFor(r) })}</T>
               )}
             </View>
           ))}
@@ -836,7 +837,7 @@ export function WallDisplayScreen({ salon, team, onBack }: {
 
       <View style={[s.wallSide, { padding: f(38), gap: f(24) }]}>
         <View style={{ gap: f(12) }}>
-          <T w="b" size={f(14)} c={D.sub} ls={f(14) * 0.2}>THE CHAIRS</T>
+          <T w="b" size={f(14)} c={D.sub} ls={f(14) * 0.2}>{tr('THE CHAIRS')}</T>
           {team.filter((m) => m.status === 'approved').map((m) => {
             const busy = active.some((r) => r.barber_id === m.id && r.started_at);
             const has = active.some((r) => r.barber_id === m.id);
@@ -849,7 +850,7 @@ export function WallDisplayScreen({ salon, team, onBack }: {
                 <View style={s.grow}>
                   <T w="b" size={f(18)}>{first(m.name)}</T>
                   <T size={f(14)} c={busy ? D.green : D.sub} style={{ marginTop: 2 }}>
-                    {busy ? 'Cutting' : has ? 'Free' : 'Day off'}
+                    {busy ? tr('Cutting') : has ? tr('Free') : tr('Day off')}
                   </T>
                 </View>
               </View>
@@ -861,8 +862,8 @@ export function WallDisplayScreen({ salon, team, onBack }: {
 
         <View style={[s.ticketCard, { padding: f(22), gap: f(14) }]}>
           <View style={{ alignItems: 'center' }}>
-            <T style={[s.ticketTitle, { fontSize: f(24) }]}>SEE THE WAIT</T>
-            <T size={f(14)} style={s.ticketSub}>Scan · hold a place in the app</T>
+            <T style={[s.ticketTitle, { fontSize: f(24) }]}>{tr('SEE THE WAIT')}</T>
+            <T size={f(14)} style={s.ticketSub}>{tr('Scan · hold a place in the app')}</T>
           </View>
           <View style={[s.ticketQr, { width: f(158), height: f(158), padding: f(11) }]}>
             <SvgXml xml={qrSvg(queueUrl(salon.short_code ?? salon.id), f(136))} width={f(136)} height={f(136)} />
@@ -874,14 +875,14 @@ export function WallDisplayScreen({ salon, team, onBack }: {
 
         <View style={[s.waitCard, { padding: f(17), paddingHorizontal: f(22), gap: f(16) }]}>
           <View style={s.grow}>
-            <T w="b" size={f(13)} c={D.sub} ls={f(13) * 0.16}>WAITING</T>
+            <T w="b" size={f(13)} c={D.sub} ls={f(13) * 0.16}>{tr('WAITING')}</T>
             <Serif size={f(34)} ls={0} style={{ marginTop: f(5) }}>{String(waiting.length)}</Serif>
           </View>
           <View style={s.waitDivider} />
           <View style={[s.grow, { alignItems: 'flex-end' }]}>
-            <T w="b" size={f(13)} c={D.sub} ls={f(13) * 0.16}>TYPICAL WAIT</T>
+            <T w="b" size={f(13)} c={D.sub} ls={f(13) * 0.16}>{tr('TYPICAL WAIT')}</T>
             <Serif size={f(34)} ls={0} c={D.accent} style={{ marginTop: f(5) }}>
-              {upNext.length ? `${waitFor(upNext[upNext.length - 1])} min` : '0 min'}
+              {upNext.length ? tr('{waitFor} min', { waitFor: waitFor(upNext[upNext.length - 1]) }) : tr('0 min')}
             </Serif>
           </View>
         </View>

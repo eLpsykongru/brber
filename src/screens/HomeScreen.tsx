@@ -22,34 +22,35 @@ import ExploreScreen from './ExploreScreen';
 import BarberChatsScreen from './BarberChatsScreen';
 import MyBookingsScreen from './MyBookingsScreen';
 import ProfileScreen from './ProfileScreen';
+import { tr } from '../lib/i18n';
 
 const CUSTOMER_TABS: TabItem[] = [
-  { key: 'home', label: 'Home', icon: 'home', iconOutline: 'home-outline' },
-  { key: 'explore', label: 'Explore', icon: 'compass', iconOutline: 'compass-outline' },
+  { key: 'home', label: tr('Home'), icon: 'home', iconOutline: 'home-outline' },
+  { key: 'explore', label: tr('Explore'), icon: 'compass', iconOutline: 'compass-outline' },
   // EXPL-24 — third, between Explore and Bookings. A shortlist you chose, which
   // is not what Profile's record of who cut you is for.
-  { key: 'saved', label: 'Saved', icon: 'heart', iconOutline: 'heart-outline' },
-  { key: 'bookings', label: 'Bookings', icon: 'calendar', iconOutline: 'calendar-outline' },
-  { key: 'chats', label: 'Chat', icon: 'chatbubble-ellipses', iconOutline: 'chatbubble-ellipses-outline' },
-  { key: 'profile', label: 'Profile', icon: 'person', iconOutline: 'person-outline' },
+  { key: 'saved', label: tr('Saved'), icon: 'heart', iconOutline: 'heart-outline' },
+  { key: 'bookings', label: tr('Bookings'), icon: 'calendar', iconOutline: 'calendar-outline' },
+  { key: 'chats', label: tr('Chat'), icon: 'chatbubble-ellipses', iconOutline: 'chatbubble-ellipses-outline' },
+  { key: 'profile', label: tr('Profile'), icon: 'person', iconOutline: 'person-outline' },
 ];
 
 // services / portfolio and the rest live in the Profile menu; Profile itself is
 // a tab now — it used to hide behind the greeting on the dashboard, which is not
 // somewhere anyone looks for their own account.
 const BARBER_TABS: TabItem[] = [
-  { key: 'home', label: 'Home', icon: 'home', iconOutline: 'home-outline' },
-  { key: 'calendar', label: 'Calendar', icon: 'calendar', iconOutline: 'calendar-outline' },
-  { key: 'clients', label: 'Clients', icon: 'people', iconOutline: 'people-outline' },
+  { key: 'home', label: tr('Home'), icon: 'home', iconOutline: 'home-outline' },
+  { key: 'calendar', label: tr('Calendar'), icon: 'calendar', iconOutline: 'calendar-outline' },
+  { key: 'clients', label: tr('Clients'), icon: 'people', iconOutline: 'people-outline' },
   // BMS-03 - client threads and ops cases had nowhere to live; he checks his
   // phone once between cuts, so both share one tab
-  { key: 'chat', label: 'Chat', icon: 'chatbubble', iconOutline: 'chatbubble-outline' },
+  { key: 'chat', label: tr('Chat'), icon: 'chatbubble', iconOutline: 'chatbubble-outline' },
 ];
 // last, the way it is on the customer side
-const BARBER_PROFILE_TAB: TabItem = { key: 'profile', label: 'Profile', icon: 'person', iconOutline: 'person-outline' };
+const BARBER_PROFILE_TAB: TabItem = { key: 'profile', label: tr('Profile'), icon: 'person', iconOutline: 'person-outline' };
 // the salon agent till — only the owner (cash agent) gets a Wallet tab; co-barbers don't.
 // Salon management lives in Profile → Salon management, not a tab (keeps Clients in the bar).
-const WALLET_TAB: TabItem = { key: 'wallet', label: 'Wallet', icon: 'wallet', iconOutline: 'wallet-outline' };
+const WALLET_TAB: TabItem = { key: 'wallet', label: tr('Wallet'), icon: 'wallet', iconOutline: 'wallet-outline' };
 
 type DayOpts = {
   autoAddNow?: boolean; prefillName?: string; prefillServiceId?: string; preferMin?: number;
@@ -110,7 +111,7 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged, q
     const { data, error } = await supabase.from('bookings').select('starts_at')
       .eq('id', bookingId).maybeSingle();
     if (error || !data) {
-      Alert.alert('Could not open that cancellation', error?.message ?? 'The booking is no longer there.');
+      Alert.alert(tr('Could not open that cancellation'), error?.message ?? tr('The booking is no longer there.'));
       return;
     }
     setTab('home');
@@ -194,7 +195,7 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged, q
       )}
       {!chromeHidden && (
         <TabBar items={tabs} active={tab} dark={!!barber}
-          center={barber ? { label: 'Quick add', onPress: () => setQuickOpen(true) } : undefined}
+          center={barber ? { label: tr('Quick add'), onPress: () => setQuickOpen(true) } : undefined}
           onChange={(k) => { setChromeHidden(false); setTab(k); }} />
       )}
     </View>

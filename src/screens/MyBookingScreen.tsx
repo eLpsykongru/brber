@@ -14,6 +14,7 @@ import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, shadowLg, sp, TOP_INSET } from '../theme';
 import ChatScreen from './ChatScreen';
 import { DayQueueRow, minutesUntil } from './QueueScreen';
+import { en, loc, tr, trn, trRich } from '../lib/i18n';
 
 // Turn 9-13 of "Customer App.dc.html" — one booking in full.
 //   9a  My booking (confirmed, with the live ticket)
@@ -76,7 +77,7 @@ function shortId(id: string) {
 }
 function dayLine(iso: string) {
   const d = new Date(iso);
-  return `${d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}`;
+  return `${d.toLocaleDateString(loc('en-US'), { weekday: 'short', month: 'short', day: 'numeric' })}`;
 }
 function hhmm(iso: string | Date) {
   const d = iso instanceof Date ? iso : new Date(iso);
@@ -87,14 +88,14 @@ function whenLine(iso: string) {
 }
 function stamp(iso: string) {
   const d = new Date(iso);
-  return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}, `
-    + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  return `${d.toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' })}, `
+    + d.toLocaleTimeString(loc('en-US'), { hour: 'numeric', minute: '2-digit' });
 }
 function ago(iso: string) {
   const m = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60_000));
-  if (m < 60) return `${m} min ago`;
-  if (m < 1440) return `${Math.round(m / 60)} h ago`;
-  return `${Math.round(m / 1440)} d ago`;
+  if (m < 60) return tr('{m} min ago', { m });
+  if (m < 1440) return tr('{h} h ago', { h: Math.round(m / 60) });
+  return tr('{d} d ago', { d: Math.round(m / 1440) });
 }
 function isToday(iso: string) {
   return new Date(iso).toDateString() === new Date().toDateString();
@@ -110,7 +111,7 @@ function useBooking(bookingId: string) {
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.from('bookings').select(SELECT).eq('id', bookingId).single();
-    if (error) { Alert.alert('Could not load the booking', error.message); return; }
+    if (error) { Alert.alert(tr('Could not load the booking'), error.message); return; }
     const d = data as unknown as Detail;
     setDetail(d);
 
@@ -168,9 +169,9 @@ function freeAt(t: Date) {
   const midnight = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
   const days = Math.round((midnight(t) - midnight(new Date())) / 86_400_000);
   const hhmm = t.toTimeString().slice(0, 5);
-  return days === 0 ? `${hhmm} today`
-    : days === 1 ? `${hhmm} tomorrow`
-      : `${hhmm} on ${t.toLocaleDateString('en-GB', { weekday: 'long' })}`;
+  return days === 0 ? tr('{at} today', { at: hhmm })
+    : days === 1 ? tr('{at} tomorrow', { at: hhmm })
+      : tr('{at} on {day}', { at: hhmm, day: t.toLocaleDateString(loc('en-GB'), { weekday: 'long' }) });
 }
 
 // PAYMENT card — 9a / 10b / 10c. Mock shape, real numbers.
@@ -195,18 +196,18 @@ function Payment({ d, compact }: { d: Detail; compact?: boolean }) {
 
   return (
     <View style={[s.card, compact && s.cardTight, { gap: compact ? sp(2.25) : sp(2.5) }]}>
-      {!compact && <Eyebrow>PAYMENT</Eyebrow>}
+      {!compact && <Eyebrow>{tr('PAYMENT')}</Eyebrow>}
       {pending ? (
-        <Row label={dep > 0 ? `Deposit (${pct}%)` : 'Deposit'}
-          value={dep > 0 ? 'Taken once confirmed' : 'Not taken'} valueMuted />
+        <Row label={dep > 0 ? tr('Deposit ({pct}%)', { pct }) : tr('Deposit')}
+          value={dep > 0 ? tr('Taken once confirmed') : tr('Not taken')} valueMuted />
       ) : (
-        <Row label={dep > 0 ? `Deposit paid (${pct}%)` : 'Paid up front'} value={`${dep.toFixed(0)} DH`} />
+        <Row label={dep > 0 ? tr('Deposit paid ({pct}%)', { pct }) : tr('Paid up front')} value={tr('{dep} DH', { dep: dep.toFixed(0) })} />
       )}
-      {!pending && <Row label="Due at the shop" value={`${(total - dep).toFixed(0)} DH`} />}
+      {!pending && <Row label={tr('Due at the shop')} value={tr('{x} DH', { x: (total - dep).toFixed(0) })} />}
       {!pending && <View style={s.hr} />}
       <View style={s.rowBase}>
-        <Text style={s.totalKey}>Total</Text>
-        <Text style={s.totalVal}>{total.toFixed(0)} DH</Text>
+        <Text style={s.totalKey}>{tr('Total')}</Text>
+        <Text style={s.totalVal}>{tr('{total} DH', { total: total.toFixed(0) })}</Text>
       </View>
       {/* 10c drops the footnote — the sheet has no room for it */}
       <View style={[s.lockLine, compact && s.hidden]}>
@@ -214,13 +215,13 @@ function Payment({ d, compact }: { d: Detail; compact?: boolean }) {
         <Text style={s.lockText}>
           {dep > 0
             ? (pending
-              ? 'Nothing leaves your wallet until the barber accepts'
+              ? tr('Nothing leaves your wallet until the barber accepts')
               : freeUntil
                 ? (stillFree
-                  ? `Free to cancel until ${freeAt(freeUntil)} — until then the ${dep.toFixed(0)} DH comes straight back to your wallet.`
-                  : `Free cancellation ended at ${freeAt(freeUntil)}. Cancelling now leaves the deposit with the shop.`)
-                : 'Deposit refunded to your wallet if the shop cancels')
-            : 'No deposit is taken — you pay the full price at the shop'}
+                  ? tr('Free to cancel until {freeUntil} — until then the {dep} DH comes straight back to your wallet.', { freeUntil: freeAt(freeUntil), dep: dep.toFixed(0) })
+                  : tr('Free cancellation ended at {freeUntil}. Cancelling now leaves the deposit with the shop.', { freeUntil: freeAt(freeUntil) }))
+                : tr('Deposit refunded to your wallet if the shop cancels'))
+            : tr('No deposit is taken — you pay the full price at the shop')}
         </Text>
       </View>
 
@@ -232,10 +233,9 @@ function Payment({ d, compact }: { d: Detail; compact?: boolean }) {
             <Ionicons name="time-outline" size={14} color={colors.textSecondary} />
           </View>
           <View style={s.grow}>
-            <Text style={s.mindTitle}>{hoursLeft(freeUntil)} left on that</Text>
+            <Text style={s.mindTitle}>{tr('{freeUntil} left on that', { freeUntil: hoursLeft(freeUntil) })}</Text>
             <Text style={s.mindBody}>
-              After {freeAt(freeUntil).replace(/ .*$/, '')} you can still cancel — the slot goes back to his
-              queue either way. The {dep.toFixed(0)} DH is what changes.
+              {tr('After {replace} you can still cancel — the slot goes back to his queue either way. The {dep} DH is what changes.', { replace: freeAt(freeUntil).replace(/ .*$/, ''), dep: dep.toFixed(0) })}
             </Text>
           </View>
         </View>
@@ -249,9 +249,9 @@ function Payment({ d, compact }: { d: Detail; compact?: boolean }) {
 function hoursLeft(t: Date) {
   const min = Math.floor((t.getTime() - Date.now()) / 60_000);
   if (min < 1) return null;
-  if (min < 60) return `${min} min`;
+  if (min < 60) return tr('{m} min', { m: min });
   const h = Math.floor(min / 60);
-  return `${h} hour${h === 1 ? '' : 's'}`;
+  return trn(h, '{n} hour', '{n} hours');
 }
 
 function Row({ label, value, valueMuted, accent }: {
@@ -270,8 +270,8 @@ function SalonCard({ d, photo, rating, statusChip, photoSize, onChat, compact }:
   d: Detail; photo: string | null; rating: number | null; statusChip: string;
   photoSize: number; onChat?: () => void; compact?: boolean;
 }) {
-  const name = d.barbers?.profiles?.full_name ?? 'Your barber';
-  const address = d.barbers?.salon?.address ?? 'Tangier';
+  const name = d.barbers?.profiles?.full_name ?? tr('Your barber');
+  const address = d.barbers?.salon?.address ?? tr('Tangier');
   const pending = d.status === 'pending';
 
   function openMap() {
@@ -295,7 +295,7 @@ function SalonCard({ d, photo, rating, statusChip, photoSize, onChat, compact }:
         <Photo url={photo} size={photoSize} />
         <View style={s.grow}>
           <Text style={[s.salonName, compact && s.salonNameSm]} numberOfLines={1}>
-            {d.barbers?.salon?.name ?? 'Salon'}
+            {d.barbers?.salon?.name ?? tr('Salon')}
           </Text>
           <View style={s.metaLine}>
             <Ionicons name="location-outline" size={12} color={colors.textSecondary} />
@@ -304,7 +304,9 @@ function SalonCard({ d, photo, rating, statusChip, photoSize, onChat, compact }:
           <View style={s.metaLine}>
             <Ionicons name="time-outline" size={12} color={colors.textSecondary} />
             <Text style={s.meta}>
-              {pending ? 'Requested ' : ''}{whenLine(d.starts_at)} · {d.services?.duration_min ?? 0} Mins
+              {pending
+                ? tr('Requested {when} · {mins} Mins', { when: whenLine(d.starts_at), mins: d.services?.duration_min ?? 0 })
+                : tr('{when} · {mins} Mins', { when: whenLine(d.starts_at), mins: d.services?.duration_min ?? 0 })}
             </Text>
           </View>
         </View>
@@ -315,16 +317,16 @@ function SalonCard({ d, photo, rating, statusChip, photoSize, onChat, compact }:
         <View style={s.grow}>
           <Text style={s.barberName}>{name}</Text>
           <Text style={s.meta}>
-            {d.barbers?.specialty ?? 'Barber'}{rating != null ? ` · ${rating.toFixed(1)} ★` : ''}
+            {d.barbers?.specialty ?? tr('Barber')}{rating != null ? ` · ${rating.toFixed(1)} ★` : ''}
           </Text>
         </View>
         <View style={s.puckRow}>
           <Pressable onPress={onChat} style={({ pressed }) => [s.puck, pressed && s.pressed]}
-            accessibilityLabel="Message the barber">
+            accessibilityLabel={tr('Message the barber')}>
             <Ionicons name="chatbubble-ellipses-outline" size={16} color={colors.text} />
           </Pressable>
           <Pressable onPress={openMap} style={({ pressed }) => [s.puck, pressed && s.pressed]}
-            accessibilityLabel="Open in maps">
+            accessibilityLabel={tr('Open in maps')}>
             <Ionicons name="location-outline" size={16} color={colors.text} />
           </Pressable>
         </View>
@@ -359,7 +361,7 @@ function DetailBody({ d, request, photo, rating, queue, sheet, onQueue, onChat, 
         <Pressable onPress={onQueue} disabled={!onQueue}
           style={({ pressed }) => [s.ticket, pressed && onQueue && s.pressed]}>
           <View style={s.ticketNoCol}>
-            <Text style={s.ticketLabel}>TICKET</Text>
+            <Text style={s.ticketLabel}>{tr('TICKET')}</Text>
             <Text style={[s.ticketNo, sheet && s.ticketNoSm]}>Nº {String(ticketNo).padStart(2, '0')}</Text>
           </View>
           <View style={s.ticketDivider} />
@@ -367,10 +369,10 @@ function DetailBody({ d, request, photo, rating, queue, sheet, onQueue, onChat, 
             <View style={s.ticketHead}>
               <View style={s.dot} />
               <Text style={s.ticketBig}>
-                {mine.stage === 'in_chair' ? "You're up" : `${ahead} ahead`} · ~{minutesUntil(mine.starts_at)} min
+                {tr('{x} · ~{starts_at} min', { x: mine.stage === 'in_chair' ? tr('You\'re up') : tr('{ahead} ahead', { ahead }), starts_at: minutesUntil(mine.starts_at) })}
               </Text>
             </View>
-            <Text style={s.ticketSub}>We'll notify you when you're next</Text>
+            <Text style={s.ticketSub}>{tr('We\'ll notify you when you\'re next')}</Text>
           </View>
           <View style={[s.ticketChev, sheet && s.ticketChevSm]}>
             <Ionicons name="chevron-forward" size={sheet ? 13 : 14} color={colors.accent} />
@@ -386,9 +388,9 @@ function DetailBody({ d, request, photo, rating, queue, sheet, onQueue, onChat, 
           </View>
           <View style={s.grow}>
             <Text style={s.waitTitle}>
-              Waiting for {(d.barbers?.profiles?.full_name ?? 'the barber').split(' ')[0]} to confirm
+              {tr('Waiting for {name} to confirm', { name: (d.barbers?.profiles?.full_name ?? tr('the barber')).split(' ')[0] })}
             </Text>
-            <Text style={s.waitSub}>Usually within an hour · you'll get a ticket once confirmed</Text>
+            <Text style={s.waitSub}>{tr('Usually within an hour · you\'ll get a ticket once confirmed')}</Text>
           </View>
         </View>
       )}
@@ -400,8 +402,8 @@ function DetailBody({ d, request, photo, rating, queue, sheet, onQueue, onChat, 
             <Ionicons name="swap-horizontal" size={17} color={colors.accent} />
           </View>
           <View style={s.grow}>
-            <Text style={s.waitTitle}>Reschedule requested</Text>
-            <Text style={s.waitSub}>{whenLine(request.requested_start)} · waiting for an answer</Text>
+            <Text style={s.waitTitle}>{tr('Reschedule requested')}</Text>
+            <Text style={s.waitSub}>{tr('{requested_start} · waiting for an answer', { requested_start: whenLine(request.requested_start) })}</Text>
           </View>
         </View>
       )}
@@ -413,13 +415,13 @@ function DetailBody({ d, request, photo, rating, queue, sheet, onQueue, onChat, 
 
       <SalonCard d={d} photo={photo} rating={rating} compact={sheet}
         photoSize={sheet ? 68 : 74} onChat={onChat}
-        statusChip={pending ? 'PENDING' : declined ? 'STILL CONFIRMED' : 'CONFIRMED'} />
+        statusChip={pending ? tr('PENDING') : declined ? tr('STILL CONFIRMED') : tr('CONFIRMED')} />
 
       {/* 38f — the shop is hidden from search, and that is the one thing this
           card must not let him confuse with his booking being gone. */}
       {d.barbers?.salon?.status && d.barbers.salon.status !== 'live'
         && d.status !== 'cancelled' && d.status !== 'completed' && (
-        <UnderReviewStrip barberName={d.barbers?.profiles?.full_name ?? 'your barber'}
+        <UnderReviewStrip barberName={d.barbers?.profiles?.full_name ?? tr('your barber')}
           onMessage={onChat} onCancel={onCancel} />
       )}
 
@@ -428,11 +430,11 @@ function DetailBody({ d, request, photo, rating, queue, sheet, onQueue, onChat, 
       {!sheet && (
         <View style={s.idCard}>
           <View>
-            <Text style={s.idLabel}>{pending ? 'REQUEST ID' : 'BOOKING ID'}</Text>
+            <Text style={s.idLabel}>{pending ? tr('REQUEST ID') : tr('BOOKING ID')}</Text>
             <Text style={s.idValue}>{shortId(d.id)}</Text>
           </View>
           <View style={s.right}>
-            <Text style={s.idLabel}>{pending ? 'SENT' : 'BOOKED'}</Text>
+            <Text style={s.idLabel}>{pending ? tr('SENT') : tr('BOOKED')}</Text>
             <Text style={s.idValue}>{stamp(d.created_at)}</Text>
           </View>
         </View>
@@ -441,14 +443,14 @@ function DetailBody({ d, request, photo, rating, queue, sheet, onQueue, onChat, 
       {/* the two CTAs sit in the caller's absolute footer, but the sheet keeps them inline */}
       {sheet && (
         <View style={s.footerInline}>
-          <Pill title="CANCEL" onPress={onCancel} />
-          <Pill title="RESCHEDULE" dark wide onPress={onReschedule} />
+          <Pill title={tr('CANCEL')} onPress={onCancel} />
+          <Pill title={tr('RESCHEDULE')} dark wide onPress={onReschedule} />
         </View>
       )}
       {!sheet && declined && (
         <View style={s.footerInline}>
-          <Pill title="PICK ANOTHER TIME" onPress={onPickAnother} />
-          <Pill title={`KEEP ${dayLine(d.starts_at).split(',')[0].toUpperCase()}`} dark
+          <Pill title={tr('PICK ANOTHER TIME')} onPress={onPickAnother} />
+          <Pill title={tr('KEEP {starts_at}', { starts_at: dayLine(d.starts_at).split(',')[0].toUpperCase() })} dark
             onPress={() => setKeptOriginal(true)} />
         </View>
       )}
@@ -464,7 +466,7 @@ function DeclinedCard({ d, request, onAcceptOffer }: {
   const [fallback, setFallback] = useState<string[]>([]);
   const offered = request.alt_starts ?? [];
   const barberId = d.barbers?.id;
-  const name = d.barbers?.profiles?.full_name ?? 'Your barber';
+  const name = d.barbers?.profiles?.full_name ?? tr('Your barber');
 
   useEffect(() => {
     if (offered.length || !barberId) return;
@@ -481,10 +483,10 @@ function DeclinedCard({ d, request, onAcceptOffer }: {
           <Ionicons name="close" size={17} color={colors.accent} />
         </View>
         <View style={s.grow}>
-          <Text style={s.declinedTitle}>Reschedule declined</Text>
+          <Text style={s.declinedTitle}>{tr('Reschedule declined')}</Text>
           <Text style={s.waitSub}>
             {whenLine(request.requested_start)}
-            {request.decided_at ? ` · declined ${ago(request.decided_at)}` : ''}
+            {request.decided_at ? tr(' · declined {decided_at}', { decided_at: ago(request.decided_at) }) : ''}
           </Text>
         </View>
       </View>
@@ -500,19 +502,19 @@ function DeclinedCard({ d, request, onAcceptOffer }: {
         <>
           <Eyebrow style={s.suggestLabel}>
             {offered.length
-              ? `${name.split(' ')[0].toUpperCase()} SUGGESTS`
-              : `NEXT FREE WITH ${name.split(' ')[0].toUpperCase()}`}
+              ? tr('{name} SUGGESTS', { name: name.split(' ')[0].toUpperCase() })
+              : tr('NEXT FREE WITH {name}', { name: name.split(' ')[0].toUpperCase() })}
           </Eyebrow>
           <View style={s.offerList}>
             {rows.map((iso) => (
               <View key={iso} style={s.offer}>
                 <View style={s.grow}>
                   <Text style={s.offerWhen}>{whenLine(iso)}</Text>
-                  <Text style={s.waitSub}>Same service · {d.services?.duration_min ?? 30} min</Text>
+                  <Text style={s.waitSub}>{tr('Same service · {duration_min} min', { duration_min: d.services?.duration_min ?? 30 })}</Text>
                 </View>
                 <Pressable onPress={() => onAcceptOffer(iso)}
                   style={({ pressed }) => [s.offerBtn, pressed && s.pressed]}>
-                  <Text style={s.offerBtnText}>{offered.length ? 'ACCEPT' : 'ASK'}</Text>
+                  <Text style={s.offerBtnText}>{offered.length ? tr('ACCEPT') : tr('ASK')}</Text>
                 </Pressable>
               </View>
             ))}
@@ -521,9 +523,7 @@ function DeclinedCard({ d, request, onAcceptOffer }: {
               aren't. A scanned slot dressed as an offer is a broken promise. */}
           {!offered.length && (
             <Text style={s.scanNote}>
-              {rows.length === 1 ? 'This is the soonest gap' : `These ${rows.length} are the soonest gaps`}
-              {' '}on his real calendar, not times he has offered. ASK sends a fresh request — he still
-              has to accept.
+              {tr('{x} on his real calendar, not times he has offered. ASK sends a fresh request — he still has to accept.', { x: rows.length === 1 ? tr('This is the soonest gap') : tr('These {count} are the soonest gaps', { count: rows.length }) })}
             </Text>
           )}
         </>
@@ -560,7 +560,8 @@ async function nextFreeSlots(barberId: string, durationMin: number, from: Date, 
 }
 
 // ---- 10a · cancel confirm -------------------------------------------------
-const REASONS = ['Something came up', 'Wrong time', 'Too far', 'Other'];
+// kept in English: the reason goes to the barber as it is, and is shown translated
+const REASONS = [en('Something came up'), en('Wrong time'), en('Too far'), en('Other')];
 
 const OTHER_MAX = 140;
 
@@ -581,7 +582,7 @@ function CancelSheet({ d, pending, visible, onClose, onReschedule, onDone }: {
   const dep = d.deposit_cents / 100;
   const stillFree = !!freeUntil && freeUntil.getTime() > Date.now();
   const lapsed = !pending && dep > 0 && !!freeUntil && !stillFree;
-  const first = (d.barbers?.profiles?.full_name ?? 'your barber').split(' ')[0];
+  const first = (d.barbers?.profiles?.full_name ?? tr('your barber')).split(' ')[0];
   const isOther = reason === 'Other';
   // "Other" without words says nothing the chip didn't; send the words instead.
   const sent = isOther ? (other.trim() || null) : reason;
@@ -604,7 +605,7 @@ function CancelSheet({ d, pending, visible, onClose, onReschedule, onDone }: {
     setBusy(true);
     const { error } = await supabase.rpc('cancel_booking', { p_booking: d.id, p_reason: sent });
     setBusy(false);
-    if (error) return Alert.alert(pending ? 'Could not withdraw' : 'Could not cancel', error.message);
+    if (error) return Alert.alert(pending ? tr('Could not withdraw') : tr('Could not cancel'), error.message);
     onDone(sent);
   }
 
@@ -619,12 +620,12 @@ function CancelSheet({ d, pending, visible, onClose, onReschedule, onDone }: {
               color={pending ? colors.textSecondary : colors.accent} />
           </View>
           <Display size={24} style={s.sheetTitle}>
-            {pending ? 'Withdraw request?' : 'Cancel booking?'}
+            {pending ? tr('Withdraw request?') : tr('Cancel booking?')}
           </Display>
           <Text style={s.sheetSub}>
             {pending
-              ? `${first} hasn't answered yet, so there's nothing to cancel — the request just disappears.`
-              : `${d.services?.name ?? 'Your service'} with ${first}, ${whenLine(d.starts_at)}. The slot goes back to the queue.`}
+              ? tr('{first} hasn\'t answered yet, so there\'s nothing to cancel — the request just disappears.', { first })
+              : tr('{name} with {first}, {starts_at}. The slot goes back to the queue.', { name: d.services?.name ?? tr('Your service'), first, starts_at: whenLine(d.starts_at) })}
           </Text>
         </View>
 
@@ -635,32 +636,36 @@ function CancelSheet({ d, pending, visible, onClose, onReschedule, onDone }: {
               : <Ionicons name="lock-closed-outline" size={15} color={colors.accent} style={s.lockIcon} />}
             <Text style={s.lockBody}>
               {pending
-                ? <><Text style={s.lockStrong}>Nothing was charged</Text> — your wallet is untouched and no
-                  deposit was held.</>
+                ? trRich('<b>Nothing was charged</b> — your wallet is untouched and no deposit was held.', {
+                  b: (text, key) => <Text key={key} style={s.lockStrong}>{text}</Text>,
+                })
                 : dep > 0
                   ? (lapsed
-                    ? <><Text style={s.lockStrong}>Free cancellation ended at {freeAt(freeUntil!)}.</Text>{' '}
-                      Cancelling now leaves the {dep.toFixed(0)} DH with the shop — he has been holding the
-                      chair for you since then.</>
+                    ? trRich('<b>Free cancellation ended at {freeAt}.</b> Cancelling now leaves the {dep} DH with the shop — he has been holding the chair for you since then.', {
+                      b: (text, key) => <Text key={key} style={s.lockStrong}>{text}</Text>,
+                    }, { freeAt: freeAt(freeUntil!), dep: dep.toFixed(0) })
                     : stillFree
-                      ? <><Text style={s.lockStrong}>Free until {freeAt(freeUntil!)}</Text> — cancel before then
-                        and the {dep.toFixed(0)} DH goes straight back to your wallet.</>
-                      : <><Text style={s.lockStrong}>Your {dep.toFixed(0)} DH deposit is not refunded</Text> when you
-                        cancel — it is only returned to your wallet if the barber cancels.</>)
-                  : <><Text style={s.lockStrong}>Nothing was charged for this booking</Text> — you pay at the
-                    shop, so cancelling costs you nothing.</>}
+                      ? trRich('<b>Free until {freeAt}</b> — cancel before then and the {dep} DH goes straight back to your wallet.', {
+                        b: (text, key) => <Text key={key} style={s.lockStrong}>{text}</Text>,
+                      }, { freeAt: freeAt(freeUntil!), dep: dep.toFixed(0) })
+                      : trRich('<b>Your {dep} DH deposit is not refunded</b> when you cancel — it is only returned to your wallet if the barber cancels.', {
+                        b: (text, key) => <Text key={key} style={s.lockStrong}>{text}</Text>,
+                      }, { dep: dep.toFixed(0) }))
+                  : trRich('<b>Nothing was charged for this booking</b> — you pay at the shop, so cancelling costs you nothing.', {
+                    b: (text, key) => <Text key={key} style={s.lockStrong}>{text}</Text>,
+                  })}
             </Text>
           </View>
           <View style={s.hr} />
           {pending ? (
             <>
-              <Row label="Wallet before" value={`${((walletCents ?? 0) / 100).toFixed(0)} DH`} />
-              <Row label="Wallet after" value={`${((walletCents ?? 0) / 100).toFixed(0)} DH`} />
+              <Row label={tr('Wallet before')} value={tr('{x} DH', { x: ((walletCents ?? 0) / 100).toFixed(0) })} />
+              <Row label={tr('Wallet after')} value={tr('{x} DH', { x: ((walletCents ?? 0) / 100).toFixed(0) })} />
             </>
           ) : (
             <>
-              <Row label="Paid up front" value={`${dep.toFixed(0)} DH`} />
-              <Row label="Refund to wallet" value={stillFree ? `${dep.toFixed(0)} DH` : '0 DH'}
+              <Row label={tr('Paid up front')} value={tr('{dep} DH', { dep: dep.toFixed(0) })} />
+              <Row label={tr('Refund to wallet')} value={stillFree ? tr('{dep} DH', { dep: dep.toFixed(0) }) : tr('0 DH')}
                 accent={!stillFree} />
             </>
           )}
@@ -672,24 +677,23 @@ function CancelSheet({ d, pending, visible, onClose, onReschedule, onDone }: {
               <Ionicons name="swap-horizontal-outline" size={14} color={colors.textSecondary} />
             </View>
             <View style={s.grow}>
-              <Text style={s.mindTitle}>Moving it keeps the {dep.toFixed(0)} DH.</Text>
+              <Text style={s.mindTitle}>{tr('Moving it keeps the {dep} DH.', { dep: dep.toFixed(0) })}</Text>
               <Text style={s.mindBody}>
-                A reschedule carries the deposit over — if {whenLine(d.starts_at).split(' · ')[0]} just
-                doesn't work, that's the cheaper door.
+                {tr('A reschedule carries the deposit over — if {starts_at} just doesn\'t work, that\'s the cheaper door.', { starts_at: whenLine(d.starts_at).split(' · ')[0] })}
               </Text>
             </View>
           </View>
         )}
 
         <View style={s.reasonBlock}>
-          <Eyebrow>REASON (OPTIONAL)</Eyebrow>
+          <Eyebrow>{tr('REASON (OPTIONAL)')}</Eyebrow>
           <View style={s.reasonRow}>
             {REASONS.map((r) => {
               const on = reason === r;
               return (
                 <Pressable key={r} onPress={() => setReason(on ? null : r)}
                   style={({ pressed }) => [s.reason, on && s.reasonOn, pressed && s.pressed]}>
-                  <Text style={[s.reasonText, on && s.reasonTextOn]}>{r}</Text>
+                  <Text style={[s.reasonText, on && s.reasonTextOn]}>{tr(r)}</Text>
                 </Pressable>
               );
             })}
@@ -699,14 +703,14 @@ function CancelSheet({ d, pending, visible, onClose, onReschedule, onDone }: {
           {isOther && (
             <>
               <TextInput value={other} onChangeText={(t) => setOther(t.slice(0, OTHER_MAX))}
-                multiline placeholder="What happened?" placeholderTextColor={colors.textTertiary}
+                multiline placeholder={tr('What happened?')} placeholderTextColor={colors.textTertiary}
                 style={s.otherInput} />
               <View style={s.otherFoot}>
                 <Text style={s.otherCount}>
-                  {first} sees this · {other.length} / {OTHER_MAX}
+                  {tr('{first} sees this · {count} / {OTHER_MAX}', { first, count: other.length, OTHER_MAX })}
                 </Text>
                 <Pressable onPress={() => setReason(null)} hitSlop={8}>
-                  <Text style={s.skip}>Skip</Text>
+                  <Text style={s.skip}>{tr('Skip')}</Text>
                 </Pressable>
               </View>
             </>
@@ -717,14 +721,14 @@ function CancelSheet({ d, pending, visible, onClose, onReschedule, onDone }: {
           <Pressable onPress={confirm} disabled={busy}
             style={({ pressed }) => [pending ? s.inkBtn : s.dangerBtn, (pressed || busy) && s.pressed]}>
             <Text style={pending ? s.inkText : s.dangerText}>
-              {pending ? 'WITHDRAW REQUEST'
-                : lapsed ? `CANCEL AND LOSE ${dep.toFixed(0)} DH` : 'CANCEL BOOKING'}
+              {pending ? tr('WITHDRAW REQUEST')
+                : lapsed ? tr('CANCEL AND LOSE {dep} DH', { dep: dep.toFixed(0) }) : tr('CANCEL BOOKING')}
             </Text>
           </Pressable>
           <Pressable onPress={pending ? onClose : onReschedule}
             style={({ pressed }) => [s.keepBtn, pressed && s.pressed]}>
             <Text style={s.keepText}>
-              {pending ? 'KEEP WAITING' : 'KEEP IT — RESCHEDULE INSTEAD'}
+              {pending ? tr('KEEP WAITING') : tr('KEEP IT — RESCHEDULE INSTEAD')}
             </Text>
           </Pressable>
         </View>
@@ -746,7 +750,7 @@ function CancelledScreen({ d, ticketNo, reason, withdrawn, refunded, onMessage, 
   refunded: boolean;
   onMessage: () => void; onBookAgain: () => void; onBack: () => void;
 }) {
-  const first = (d.barbers?.profiles?.full_name ?? 'Your barber').split(' ')[0];
+  const first = (d.barbers?.profiles?.full_name ?? tr('Your barber')).split(' ')[0];
   const dep = d.deposit_cents / 100;
   const at = new Date(d.starts_at).toTimeString().slice(0, 5);
 
@@ -775,37 +779,39 @@ function CancelledScreen({ d, ticketNo, reason, withdrawn, refunded, onMessage, 
           <Ionicons name={withdrawn ? 'close' : 'calendar-clear-outline'} size={26}
             color={colors.textSecondary} />
         </View>
-        <Display size={24} style={s.outcomeTitle}>{withdrawn ? 'Withdrawn' : 'Cancelled'}</Display>
+        <Display size={24} style={s.outcomeTitle}>{withdrawn ? tr('Withdrawn') : tr('Cancelled')}</Display>
         <Text style={s.receiptSub}>
           {withdrawn
-            ? `Your request is gone. ${first} never saw it, and nothing was charged.`
-            : `${first} has been told.${ticketNo != null ? ` Your ticket Nº ${String(ticketNo).padStart(2, '0')} is released and` : ''} ${at} is back in his queue.`}
+            ? tr('Your request is gone. {first} never saw it, and nothing was charged.', { first })
+            : ticketNo != null
+              ? tr('{first} has been told. Your ticket Nº {no} is released and {at} is back in his queue.', { first, no: String(ticketNo).padStart(2, '0'), at })
+              : tr('{first} has been told. {at} is back in his queue.', { first, at })}
         </Text>
       </View>
 
       <View style={s.receiptCard}>
-        <Row label={withdrawn ? 'You asked for' : 'Was'} value={whenLine(d.starts_at)} />
-        <Row label="Service"
-          value={`${d.services?.name ?? 'Service'} · ${(d.price_cents / 100).toFixed(0)} DH`} />
-        {!!reason && !withdrawn && <Row label="You said" value={reason} />}
+        <Row label={withdrawn ? tr('You asked for') : tr('Was')} value={whenLine(d.starts_at)} />
+        <Row label={tr('Service')}
+          value={tr('{name} · {x} DH', { name: d.services?.name ?? tr('Service'), x: (d.price_cents / 100).toFixed(0) })} />
+        {!!reason && !withdrawn && <Row label={tr('You said')} value={tr(reason)} />}
         <View style={s.hr} />
         {withdrawn ? (
           <>
-            <Row label="Wallet before" value={wallet} />
-            <Row label="Wallet after" value={wallet} />
-            <Text style={s.receiptNote}>Nothing was ever held — a request is not a deposit</Text>
+            <Row label={tr('Wallet before')} value={wallet} />
+            <Row label={tr('Wallet after')} value={wallet} />
+            <Text style={s.receiptNote}>{tr('Nothing was ever held — a request is not a deposit')}</Text>
           </>
         ) : (
           <>
-            <Row label="Deposit paid" value={`${dep.toFixed(0)} DH`} />
+            <Row label={tr('Deposit paid')} value={tr('{dep} DH', { dep: dep.toFixed(0) })} />
             <View style={s.rowBase}>
-              <Text style={s.refundK}>Refunded to wallet</Text>
+              <Text style={s.refundK}>{tr('Refunded to wallet')}</Text>
               <Text style={[s.refundV, refunded && s.refundBack]}>
-                {refunded ? `${dep.toFixed(0)} DH` : '0 DH'}
+                {refunded ? tr('{dep} DH', { dep: dep.toFixed(0) }) : tr('0 DH')}
               </Text>
             </View>
             {dep > 0 && refunded && (
-              <Text style={s.receiptNote}>In your wallet already · you cancelled inside the free window</Text>
+              <Text style={s.receiptNote}>{tr('In your wallet already · you cancelled inside the free window')}</Text>
             )}
           </>
         )}
@@ -818,8 +824,7 @@ function CancelledScreen({ d, ticketNo, reason, withdrawn, refunded, onMessage, 
           <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary}
             style={s.lockIcon} />
           <Text style={s.mindBody}>
-            Nothing to undo and nobody to tell. If you want that time after all, ask again — {at} is
-            still open on his day.
+            {tr('Nothing to undo and nobody to tell. If you want that time after all, ask again — {at} is still open on his day.', { at })}
           </Text>
         </View>
       )}
@@ -830,11 +835,9 @@ function CancelledScreen({ d, ticketNo, reason, withdrawn, refunded, onMessage, 
             <Ionicons name="refresh-outline" size={15} color={colors.textSecondary} />
           </View>
           <View style={s.grow}>
-            <Text style={s.mindTitle}>Changed your mind?</Text>
+            <Text style={s.mindTitle}>{tr('Changed your mind?')}</Text>
             <Text style={s.mindBody}>
-              {at} is free again for now.
-              {dep > 0 && !refunded ? ` Rebooking it doesn't bring the ${dep.toFixed(0)} DH back.` : ''}
-              {dep > 0 && refunded ? ` Your ${dep.toFixed(0)} DH is back in your wallet to spend on it.` : ''}
+              {tr('{at} is free again for now.{x}{x2}', { at, x: dep > 0 && !refunded ? tr(' Rebooking it doesn\'t bring the {dep} DH back.', { dep: dep.toFixed(0) }) : '', x2: dep > 0 && refunded ? tr(' Your {dep} DH is back in your wallet to spend on it.', { dep: dep.toFixed(0) }) : '' })}
             </Text>
           </View>
         </View>
@@ -842,10 +845,10 @@ function CancelledScreen({ d, ticketNo, reason, withdrawn, refunded, onMessage, 
 
       <View style={s.receiptCtas}>
         <Pressable onPress={onMessage} style={({ pressed }) => [s.msgBtn, pressed && s.pressed]}>
-          <Text style={s.msgText}>MESSAGE {first.toUpperCase()}</Text>
+          <Text style={s.msgText}>{tr('MESSAGE {first}', { first: first.toUpperCase() })}</Text>
         </Pressable>
         <Pressable onPress={onBookAgain} style={({ pressed }) => [s.againBtn, pressed && s.pressed]}>
-          <Text style={s.againText}>BOOK AGAIN</Text>
+          <Text style={s.againText}>{tr('BOOK AGAIN')}</Text>
         </Pressable>
       </View>
     </View>
@@ -868,7 +871,7 @@ function RescheduleSheet({ d, visible, onClose, onSent }: {
     const { error } = await supabase.rpc('request_reschedule',
       { p_booking: d.id, p_new_start: pick.toISOString() });
     setBusy(false);
-    if (error) return Alert.alert('Could not send the request', error.message);
+    if (error) return Alert.alert(tr('Could not send the request'), error.message);
     onSent();
   }
 
@@ -881,7 +884,7 @@ function RescheduleSheet({ d, visible, onClose, onSent }: {
           <Pressable onPress={onClose} hitSlop={8} style={s.headSlot}>
             <Ionicons name="chevron-back" size={16} color={colors.text} />
           </Pressable>
-          <Display size={18} style={s.headTitle}>Reschedule</Display>
+          <Display size={18} style={s.headTitle}>{tr('Reschedule')}</Display>
           <Pressable onPress={onClose} hitSlop={8} style={[s.headSlot, s.headSlotEnd]}>
             <Ionicons name="close" size={16} color={colors.text} />
           </Pressable>
@@ -892,26 +895,25 @@ function RescheduleSheet({ d, visible, onClose, onSent }: {
             <Text style={s.avatarText}>{initials(d.barbers?.profiles?.full_name ?? 'B')}</Text>
           </View>
           <View style={s.grow}>
-            <Text style={s.currentTitle}>{d.services?.name ?? 'Service'} · {first}</Text>
-            <Text style={s.waitSub}>Currently {whenLine(d.starts_at)}</Text>
+            <Text style={s.currentTitle}>{d.services?.name ?? tr('Service')} · {first}</Text>
+            <Text style={s.waitSub}>{tr('Currently {starts_at}', { starts_at: whenLine(d.starts_at) })}</Text>
           </View>
           <View style={s.minChip}>
-            <Text style={s.minChipText}>{d.services?.duration_min ?? 30} MIN</Text>
+            <Text style={s.minChipText}>{tr('{duration_min} MIN', { duration_min: d.services?.duration_min ?? 30 })}</Text>
           </View>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.pickerScroll}>
           {d.barbers?.id && (
             <SlotPicker barberId={d.barbers.id} durationMin={d.services?.duration_min ?? 30}
-              selected={pick} onSelect={setPick} label="NEW DATE" markDay={current} />
+              selected={pick} onSelect={setPick} label={tr('NEW DATE')} markDay={current} />
           )}
           <View style={s.noteCard}>
             <Ionicons name="lock-closed-outline" size={14} color={colors.textSecondary} style={s.lockIcon} />
             <Text style={s.noteText}>
-              {dep > 0
-                ? `Your ${dep.toFixed(0)} DH deposit carries over — nothing new is charged. `
-                : 'Nothing is charged for a move. '}
-              {first} confirms the new time.
+              {tr('{x}{first} confirms the new time.', { x: dep > 0
+                ? tr('Your {dep} DH deposit carries over — nothing new is charged. ', { dep: dep.toFixed(0) })
+                : tr('Nothing is charged for a move. '), first })}
             </Text>
           </View>
         </ScrollView>
@@ -920,7 +922,7 @@ function RescheduleSheet({ d, visible, onClose, onSent }: {
           <Pressable onPress={send} disabled={!pick || busy}
             style={({ pressed }) => [s.moveBtn, (pressed || !pick || busy) && s.pressedHard]}>
             <Text style={s.moveText}>
-              {pick ? `MOVE TO ${dayLine(pick.toISOString()).toUpperCase()} · ${hhmm(pick)}` : 'PICK A NEW TIME'}
+              {pick ? tr('MOVE TO {dayLine} · {pick}', { dayLine: dayLine(pick.toISOString()).toUpperCase(), pick: hhmm(pick) }) : tr('PICK A NEW TIME')}
             </Text>
           </Pressable>
         </View>
@@ -933,7 +935,7 @@ function RescheduleSheet({ d, visible, onClose, onSent }: {
 function RequestedScreen({ d, request, onBack, onChat }: {
   d: Detail; request: Request; onBack: () => void; onChat: () => void;
 }) {
-  const name = d.barbers?.profiles?.full_name ?? 'Your barber';
+  const name = d.barbers?.profiles?.full_name ?? tr('Your barber');
   const dep = d.deposit_cents / 100;
   return (
     <View style={s.outcome}>
@@ -941,23 +943,23 @@ function RequestedScreen({ d, request, onBack, onChat }: {
         <Ionicons name="time-outline" size={30} color={colors.accent} />
       </View>
       <View>
-        <Display size={28} style={s.outcomeTitle}>Request sent</Display>
+        <Display size={28} style={s.outcomeTitle}>{tr('Request sent')}</Display>
         <Text style={s.outcomeSub}>
-          {name.split(' ')[0]} has to accept the new time. Your original slot is held until he answers.
+          {tr('{name} has to accept the new time. Your original slot is held until he answers.', { name: name.split(' ')[0] })}
         </Text>
       </View>
 
       <View style={s.outcomeCard}>
         <View style={s.swapRow}>
           <View style={s.grow}>
-            <Text style={s.swapLabel}>CURRENT</Text>
+            <Text style={s.swapLabel}>{tr('CURRENT')}</Text>
             <Text style={s.swapWas}>{whenLine(request.from_start)}</Text>
           </View>
           <View style={s.swapArrow}>
             <Ionicons name="arrow-forward" size={14} color={colors.text} />
           </View>
           <View style={[s.grow, s.right]}>
-            <Text style={[s.swapLabel, s.swapLabelNew]}>REQUESTED</Text>
+            <Text style={[s.swapLabel, s.swapLabelNew]}>{tr('REQUESTED')}</Text>
             <Text style={s.swapNew}>{whenLine(request.requested_start)}</Text>
           </View>
         </View>
@@ -967,22 +969,22 @@ function RequestedScreen({ d, request, onBack, onChat }: {
           <View style={s.grow}>
             <Text style={s.barberName}>{name}</Text>
             <Text style={s.meta}>
-              {d.services?.name ?? 'Service'} · {d.barbers?.salon?.name ?? 'Salon'}
+              {d.services?.name ?? tr('Service')} · {d.barbers?.salon?.name ?? tr('Salon')}
             </Text>
           </View>
-          <View style={s.chipNeutral}><Text style={s.chipMutedText}>PENDING</Text></View>
+          <View style={s.chipNeutral}><Text style={s.chipMutedText}>{tr('PENDING')}</Text></View>
         </View>
         <View style={s.sunkRow}>
           <Ionicons name="lock-closed-outline" size={14} color={colors.textSecondary} />
-          <Text style={s.sunkLabel}>{dep > 0 ? 'Deposit unchanged' : 'Nothing charged'}</Text>
-          <Text style={s.sunkValue}>{dep.toFixed(0)} DH</Text>
+          <Text style={s.sunkLabel}>{dep > 0 ? tr('Deposit unchanged') : tr('Nothing charged')}</Text>
+          <Text style={s.sunkValue}>{tr('{dep} DH', { dep: dep.toFixed(0) })}</Text>
         </View>
       </View>
 
       <Pressable onPress={onBack} style={({ pressed }) => [s.wideDark, pressed && s.pressed]}>
-        <Text style={s.wideDarkText}>BACK TO MY BOOKING</Text>
+        <Text style={s.wideDarkText}>{tr('BACK TO MY BOOKING')}</Text>
       </Pressable>
-      <Text style={s.linkAccent} onPress={onChat}>Message {name.split(' ')[0]}</Text>
+      <Text style={s.linkAccent} onPress={onChat}>{tr('Message {name}', { name: name.split(' ')[0] })}</Text>
     </View>
   );
 }
@@ -991,7 +993,7 @@ function RequestedScreen({ d, request, onBack, onChat }: {
 function MovedScreen({ d, request, ticketNo, onDone }: {
   d: Detail; request: Request; ticketNo: number | null; onDone: () => void;
 }) {
-  const name = d.barbers?.profiles?.full_name ?? 'Your barber';
+  const name = d.barbers?.profiles?.full_name ?? tr('Your barber');
   const dep = d.deposit_cents / 100;
   const total = d.price_cents / 100;
   return (
@@ -1000,37 +1002,37 @@ function MovedScreen({ d, request, ticketNo, onDone }: {
         <Ionicons name="checkmark" size={30} color="#16A34A" />
       </View>
       <View>
-        <Display size={28} style={s.outcomeTitle}>Moved</Display>
+        <Display size={28} style={s.outcomeTitle}>{tr('Moved')}</Display>
         <Text style={s.outcomeSub}>
-          {name.split(' ')[0]} accepted your new time. Same service, same price — nothing else to pay up front.
+          {tr('{name} accepted your new time. Same service, same price — nothing else to pay up front.', { name: name.split(' ')[0] })}
         </Text>
       </View>
 
       <View style={s.movedCard}>
         <View style={s.swapRow}>
           <View style={s.grow}>
-            <Text style={s.movedLabel}>WAS</Text>
+            <Text style={s.movedLabel}>{tr('WAS')}</Text>
             <Text style={s.movedWas}>{whenLine(request.from_start)}</Text>
           </View>
           <View style={s.movedArrow}>
             <Ionicons name="arrow-forward" size={14} color="#fff" />
           </View>
           <View style={[s.grow, s.right]}>
-            <Text style={[s.movedLabel, s.swapLabelNew]}>NOW</Text>
+            <Text style={[s.movedLabel, s.swapLabelNew]}>{tr('NOW')}</Text>
             <Text style={s.movedNow}>{whenLine(d.starts_at)}</Text>
           </View>
         </View>
         <View style={s.hrDark} />
         <View style={s.rowBase}>
           <View>
-            <Text style={s.movedLabel}>{ticketNo != null ? 'NEW TICKET' : 'SERVICE'}</Text>
+            <Text style={s.movedLabel}>{ticketNo != null ? tr('NEW TICKET') : tr('SERVICE')}</Text>
             <Text style={s.movedTicket}>
-              {ticketNo != null ? `Nº ${String(ticketNo).padStart(2, '0')}` : (d.services?.name ?? 'Service')}
+              {ticketNo != null ? `Nº ${String(ticketNo).padStart(2, '0')}` : (d.services?.name ?? tr('Service'))}
             </Text>
           </View>
           <View style={s.right}>
-            <Text style={s.movedLabel}>{dep > 0 ? 'DEPOSIT CARRIED' : 'DUE AT THE SHOP'}</Text>
-            <Text style={s.movedAmount}>{(dep > 0 ? dep : total).toFixed(0)} DH</Text>
+            <Text style={s.movedLabel}>{dep > 0 ? tr('DEPOSIT CARRIED') : tr('DUE AT THE SHOP')}</Text>
+            <Text style={s.movedAmount}>{tr('{x} DH', { x: (dep > 0 ? dep : total).toFixed(0) })}</Text>
           </View>
         </View>
       </View>
@@ -1040,14 +1042,14 @@ function MovedScreen({ d, request, ticketNo, onDone }: {
         <View style={s.grow}>
           <Text style={s.barberName}>{name}</Text>
           <Text style={s.meta}>
-            {d.services?.name ?? 'Service'} · {(total - dep).toFixed(0)} DH at the shop
+            {tr('{name} · {x} DH at the shop', { name: d.services?.name ?? tr('Service'), x: (total - dep).toFixed(0) })}
           </Text>
         </View>
-        <View style={s.chipGreen}><Text style={s.chipGreenText}>CONFIRMED</Text></View>
+        <View style={s.chipGreen}><Text style={s.chipGreenText}>{tr('CONFIRMED')}</Text></View>
       </View>
 
       <Pressable onPress={onDone} style={({ pressed }) => [s.wideDark, pressed && s.pressed]}>
-        <Text style={s.wideDarkText}>VIEW MY BOOKING</Text>
+        <Text style={s.wideDarkText}>{tr('VIEW MY BOOKING')}</Text>
       </Pressable>
     </View>
   );
@@ -1088,7 +1090,7 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
 
   if (!detail) return <View style={s.screen} />;
   const d = detail;
-  const name = d.barbers?.profiles?.full_name ?? 'Your barber';
+  const name = d.barbers?.profiles?.full_name ?? tr('Your barber');
   const pending = d.status === 'pending';
   const declined = request?.status === 'declined';
   const mine = queue?.find((r) => r.booking_id === d.id) ?? null;
@@ -1118,7 +1120,7 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
       ? supabase.rpc('accept_reschedule_offer', { p_request: request.id, p_start: iso })
       : supabase.rpc('request_reschedule', { p_booking: d.id, p_new_start: iso });
     const { error } = await rpc;
-    if (error) return Alert.alert('Could not do that', error.message);
+    if (error) return Alert.alert(tr('Could not do that'), error.message);
     await reload();
     setOverlay(declined && request?.alt_starts?.length ? 'moved' : 'requested');
   }
@@ -1128,18 +1130,18 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.header}>
           <Pressable onPress={onBack} hitSlop={8}
-            style={({ pressed }) => [s.headPuck, pressed && s.pressed]} accessibilityLabel="Go back">
+            style={({ pressed }) => [s.headPuck, pressed && s.pressed]} accessibilityLabel={tr('Go back')}>
             <Ionicons name="arrow-back" size={16} color={colors.text} />
           </Pressable>
-          <Display size={18} style={s.headTitle}>My booking</Display>
+          <Display size={18} style={s.headTitle}>{tr('My booking')}</Display>
           {declined ? <View style={s.headSpacer} /> : (
-            <Pressable onPress={() => Alert.alert('This booking', undefined, [
-              { text: 'Message the barber', onPress: () => setOverlay('chat') },
+            <Pressable onPress={() => Alert.alert(tr('This booking'), undefined, [
+              { text: tr('Message the barber'), onPress: () => setOverlay('chat') },
               // 17a is reached from here as well as from Help Center
-              { text: 'Report a problem', onPress: () => onReport?.(d.id) },
-              { text: 'Close', style: 'cancel' },
+              { text: tr('Report a problem'), onPress: () => onReport?.(d.id) },
+              { text: tr('Close'), style: 'cancel' },
             ])} hitSlop={8}
-              style={({ pressed }) => [s.headPuck, pressed && s.pressed]} accessibilityLabel="More">
+              style={({ pressed }) => [s.headPuck, pressed && s.pressed]} accessibilityLabel={tr('More')}>
               <Ionicons name="ellipsis-vertical" size={16} color={colors.text} />
             </Pressable>
           )}
@@ -1153,8 +1155,8 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
 
       {!declined && (
         <View style={s.footer}>
-          <Pill title={pending ? 'WITHDRAW' : 'CANCEL'} onPress={() => setOverlay('cancel')} />
-          <Pill title={pending ? `MESSAGE ${name.split(' ')[0].toUpperCase()}` : 'RESCHEDULE'} dark wide
+          <Pill title={pending ? tr('WITHDRAW') : tr('CANCEL')} onPress={() => setOverlay('cancel')} />
+          <Pill title={pending ? tr('MESSAGE {name}', { name: name.split(' ')[0].toUpperCase() }) : tr('RESCHEDULE')} dark wide
             onPress={() => setOverlay(pending ? 'chat' : 'reschedule')} />
         </View>
       )}
@@ -1192,15 +1194,15 @@ export function BookingDetailSheet({ bookingId, myId, visible, initial, onClose,
           {/* BKG-42 - the same menu the full screen has. Without it, reporting
               a problem is unreachable from the list, which is the main door. */}
           {onReport ? (
-            <Pressable onPress={() => Alert.alert('This booking', undefined, [
-              { text: 'Report a problem', onPress: () => onReport(bookingId) },
-              { text: 'Close', style: 'cancel' },
+            <Pressable onPress={() => Alert.alert(tr('This booking'), undefined, [
+              { text: tr('Report a problem'), onPress: () => onReport(bookingId) },
+              { text: tr('Close'), style: 'cancel' },
             ])} hitSlop={8} style={({ pressed }) => [s.headSlot, pressed && s.pressed]}
-              accessibilityLabel="More">
+              accessibilityLabel={tr('More')}>
               <Ionicons name="ellipsis-vertical" size={16} color={colors.text} />
             </Pressable>
           ) : <View style={s.headSlot} />}
-          <Display size={18} style={s.headTitle}>My booking</Display>
+          <Display size={18} style={s.headTitle}>{tr('My booking')}</Display>
           <Pressable onPress={onClose} hitSlop={8} style={[s.headSlot, s.headSlotEnd]}>
             <Ionicons name="close" size={16} color={colors.text} />
           </Pressable>
@@ -1224,7 +1226,7 @@ function SheetBody({ bookingId, myId, initial, onClose, onQueue }: {
   const d = detail;
 
   if (overlay === 'chat') {
-    return <ChatScreen bookingId={d.id} myId={myId} title={d.barbers?.profiles?.full_name ?? 'Barber'}
+    return <ChatScreen bookingId={d.id} myId={myId} title={d.barbers?.profiles?.full_name ?? tr('Barber')}
       subtitle={d.barbers?.salon?.name ?? undefined} onBack={() => setOverlay(null)} />;
   }
 
@@ -1237,7 +1239,7 @@ function SheetBody({ bookingId, myId, initial, onClose, onQueue }: {
           onAcceptOffer={async (iso) => {
             const { error } = await supabase.rpc('request_reschedule',
               { p_booking: d.id, p_new_start: iso });
-            if (error) return Alert.alert('Could not do that', error.message);
+            if (error) return Alert.alert(tr('Could not do that'), error.message);
             reload();
           }}
           onPickAnother={() => setOverlay('reschedule')} />

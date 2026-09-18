@@ -1,6 +1,7 @@
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
 import { dark as D } from '../theme';
 import { Avatar, Btn, Ico, IconName, Note, Sheet, T } from './dark';
+import { tr } from '../lib/i18n';
 
 // BTD-13 — somebody in the line with no account: a guest from the web page, or a
 // walk-in the barber wrote down himself. With no account there is no chat thread
@@ -37,10 +38,12 @@ export default function GuestSheet({ visible, guest, onClose, onCallUp, onTakeOf
   const g = guest;
   // ADDENDUM-app-first: a web name is unconfirmed until he taps the link in his text
   const joined = g.source === 'hand'
-    ? `You wrote him down at ${hhmm(g.joinedAt)} · no account`
+    ? tr('You wrote him down at {at} · no account', { at: hhmm(g.joinedAt) })
     : g.confirmed
-      ? `Joined ${g.source === 'link' ? 'from your link ' : ''}at ${hhmm(g.joinedAt)} · no account`
-      : `Put on from the web at ${hhmm(g.joinedAt)} · hasn't tapped his text`;
+      ? g.source === 'link'
+        ? tr('Joined from your link at {at} · no account', { at: hhmm(g.joinedAt) })
+        : tr('Joined at {at} · no account', { at: hhmm(g.joinedAt) })
+      : tr('Put on from the web at {at} · hasn\'t tapped his text', { at: hhmm(g.joinedAt) });
 
   return (
     <Sheet visible={visible} onClose={onClose} gap={13}>
@@ -51,55 +54,55 @@ export default function GuestSheet({ visible, guest, onClose, onCallUp, onTakeOf
           <T size={11.5} c={D.sub} style={{ marginTop: 3 }}>{joined}</T>
         </View>
         {g.source === 'link' && (
-          <View style={s.badge}><T w="eb" size={9} c={D.green} ls={0.7}>BY LINK</T></View>
+          <View style={s.badge}><T w="eb" size={9} c={D.green} ls={0.7}>{tr('BY LINK')}</T></View>
         )}
       </View>
 
       <View style={s.stats}>
-        <Stat label="SERVICE" value={g.service} sub={g.durationMin ? `${g.durationMin} min` : ' '} />
-        <Stat label="IN CASH" value={`${Math.round(g.priceCents / 100)} DH`} sub="no deposit" subColor={D.amber} />
-        <Stat label="DUE UP" value={hhmm(g.startsAt)} sub={g.after ? `after ${g.after}` : ' '} />
+        <Stat label={tr('SERVICE')} value={g.service} sub={g.durationMin ? tr('{durationMin} min', { durationMin: g.durationMin }) : ' '} />
+        <Stat label={tr('IN CASH')} value={tr('{round} DH', { round: Math.round(g.priceCents / 100) })} sub={tr('no deposit')} subColor={D.amber} />
+        <Stat label={tr('DUE UP')} value={hhmm(g.startsAt)} sub={g.after ? tr('after {after}', { after: g.after }) : ' '} />
       </View>
 
       <View style={s.list}>
         {g.phone
           ? <Line icon="phone" iconColor={D.green} title={local(g.phone)}
-              sub={g.source === 'hand' ? "You typed it · one text when he's next" : "He gave it to get the you're-next text"}
-              action={{ label: 'Call', onPress: () => Linking.openURL(`tel:${g.phone}`) }} />
-          : <Line icon="phone" title="No number" sub="You'll call his name" dim />}
-        <Line icon="message-circle" title="No chat with a guest"
-          sub="There's no account to message. Use the phone." dim rule />
-        <Line icon="star" title="Nothing to rate him on"
-          sub="Reliability starts when he makes an account" dim rule />
+              sub={g.source === 'hand' ? tr('You typed it · one text when he\'s next') : tr('He gave it to get the you\'re-next text')}
+              action={{ label: tr('Call'), onPress: () => Linking.openURL(`tel:${g.phone}`) }} />
+          : <Line icon="phone" title={tr('No number')} sub={tr('You\'ll call his name')} dim />}
+        <Line icon="message-circle" title={tr('No chat with a guest')}
+          sub={tr('There\'s no account to message. Use the phone.')} dim rule />
+        <Line icon="star" title={tr('Nothing to rate him on')}
+          sub={tr('Reliability starts when he makes an account')} dim rule />
       </View>
 
       <Note>
         {g.confirmed
-          ? 'He is a named walk-in in your day, the same as anyone off the street.'
-          : 'Until he taps the link in his text his number is greyed, and you may call past it.'}
+          ? tr('He is a named walk-in in your day, the same as anyone off the street.')
+          : tr('Until he taps the link in his text his number is greyed, and you may call past it.')}
       </Note>
 
-      <Btn title="CALL HIM UP NEXT" height={54} onPress={onCallUp} />
+      <Btn title={tr('CALL HIM UP NEXT')} height={54} onPress={onCallUp} />
       {typeof anotherDay === 'function'
         ? (
           <Pressable onPress={anotherDay} accessibilityRole="button"
             style={({ pressed }) => [s.another, pressed && s.pressed]}>
             <Ico name="calendar" size={15} color={D.textDim} />
-            <T w="b" size={12.5} c={D.textDim}>Give him another day</T>
+            <T w="b" size={12.5} c={D.textDim}>{tr('Give him another day')}</T>
           </Pressable>
         )
         : (
           <View style={[s.another, s.dim]} accessible
-            accessibilityLabel={`Give him another day, not available: ${anotherDay}`}>
+            accessibilityLabel={tr('Give him another day, not available: {anotherDay}', { anotherDay })}>
             <Ico name="calendar" size={15} color={D.sub} />
             <View style={{ alignItems: 'center' }}>
-              <T w="b" size={12.5} c={D.sub}>Give him another day</T>
+              <T w="b" size={12.5} c={D.sub}>{tr('Give him another day')}</T>
               <T size={10.5} c={D.faint}>{anotherDay}</T>
             </View>
           </View>
         )}
       <Pressable onPress={onTakeOff} hitSlop={8} accessibilityRole="button" style={s.takeOff}>
-        <T w="sb" size={12} c={D.sub}>Take him off the line</T>
+        <T w="sb" size={12} c={D.sub}>{tr('Take him off the line')}</T>
       </Pressable>
     </Sheet>
   );

@@ -8,6 +8,7 @@ import {
 import { useBack } from '../components/motion';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, inter, radius, shadow, sp, TOP_INSET } from '../theme';
+import { loc, tr } from '../lib/i18n';
 
 type Msg = {
   id: string;
@@ -34,19 +35,19 @@ type Props = {
 };
 
 // the three taps a barber actually makes mid-cut (1m)
-const QUICK = ['Running 10 min late', "You're next", 'See you soon'];
+const QUICK = [tr('Running 10 min late'), tr("You're next"), tr('See you soon')];
 
 function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }).toLowerCase();
+  return new Date(iso).toLocaleTimeString(loc('en-US'), { hour: '2-digit', minute: '2-digit' }).toLowerCase();
 }
 
 function dayLabel(iso: string) {
   const d = new Date(iso);
   const today = new Date();
   const yst = new Date(); yst.setDate(today.getDate() - 1);
-  if (d.toDateString() === today.toDateString()) return 'TODAY';
-  if (d.toDateString() === yst.toDateString()) return 'YESTERDAY';
-  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' }).toUpperCase();
+  if (d.toDateString() === today.toDateString()) return tr('TODAY');
+  if (d.toDateString() === yst.toDateString()) return tr('YESTERDAY');
+  return d.toLocaleDateString(loc('en-US'), { month: 'long', day: 'numeric' }).toUpperCase();
 }
 
 function initialsOf(name: string) {
@@ -94,7 +95,7 @@ export default function ChatScreen({ bookingId, threadWith, myId, title, subtitl
       .in('booking_id', ids)
       .order('created_at', { ascending: true }).limit(200)
       .then(({ data, error }) => {
-        if (error) Alert.alert('Could not load chat', error.message);
+        if (error) Alert.alert(tr('Could not load chat'), error.message);
         else setMsgs(data);
       });
 
@@ -130,7 +131,7 @@ export default function ChatScreen({ bookingId, threadWith, myId, title, subtitl
     if (!override) setText('');
     const { error } = await supabase.from('messages')
       .insert({ booking_id: bookingId, sender_id: myId, body });
-    if (error) Alert.alert('Could not send', error.message);
+    if (error) Alert.alert(tr('Could not send'), error.message);
   }
 
   async function sendPhoto() {
@@ -146,7 +147,7 @@ export default function ChatScreen({ bookingId, threadWith, myId, title, subtitl
         .insert({ booking_id: bookingId, sender_id: myId, image_path: path });
       if (error) throw error;
     } catch (e: any) {
-      Alert.alert('Could not send photo', e.message ?? String(e));
+      Alert.alert(tr('Could not send photo'), e.message ?? String(e));
     } finally {
       setBusy(false);
     }
@@ -157,7 +158,7 @@ export default function ChatScreen({ bookingId, threadWith, myId, title, subtitl
   return (
     <KeyboardAvoidingView style={k.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={k.header}>
-        <Pressable onPress={back} hitSlop={8} accessibilityLabel="Back" style={st.backBtn}>
+        <Pressable onPress={back} hitSlop={8} accessibilityLabel={tr('Back')} style={st.backBtn}>
           <Ionicons name="arrow-back" size={dark ? 17 : 20} color={colors.onAccent} />
         </Pressable>
         {avatarUrl
@@ -167,10 +168,10 @@ export default function ChatScreen({ bookingId, threadWith, myId, title, subtitl
             </View>}
         <View style={st.headerText}>
           <Text style={k.headerName} numberOfLines={1}>{title}</Text>
-          <Text style={k.headerStatus} numberOfLines={1}>{subtitle ?? 'Booking chat'}</Text>
+          <Text style={k.headerStatus} numberOfLines={1}>{subtitle ?? tr('Booking chat')}</Text>
         </View>
-        <Pressable onPress={() => Alert.alert('Options', 'Coming soon — see BACKLOG.md')} hitSlop={8}
-          accessibilityLabel="More options" style={dark ? d.headerPuck : st.backBtn}>
+        <Pressable onPress={() => Alert.alert(tr('Options'), tr('Coming soon — see BACKLOG.md'))} hitSlop={8}
+          accessibilityLabel={tr('More options')} style={dark ? d.headerPuck : st.backBtn}>
           <Ionicons name={dark ? 'call-outline' : 'ellipsis-vertical'} size={dark ? 15 : 18}
             color={colors.onAccent} />
         </Pressable>
@@ -205,7 +206,7 @@ export default function ChatScreen({ bookingId, threadWith, myId, title, subtitl
                 {item.image_path && (
                   imageUrls[item.image_path]
                     ? <Image source={{ uri: imageUrls[item.image_path] }} style={st.photo} />
-                    : <Text style={k.loading}>Loading photo…</Text>
+                    : <Text style={k.loading}>{tr('Loading photo…')}</Text>
                 )}
                 {!!item.body && <Text style={mine ? k.mineText : k.theirsText}>{item.body}</Text>}
               </View>
@@ -213,7 +214,7 @@ export default function ChatScreen({ bookingId, threadWith, myId, title, subtitl
                 {!mine && !dark && (
                   <View style={st.metaAvatar}><Text style={st.metaAvatarText}>{initialsOf(title)}</Text></View>
                 )}
-                <Text style={k.metaText}>{mine ? 'You' : title.split(' ')[0]} · {fmtTime(item.created_at)}</Text>
+                <Text style={k.metaText}>{mine ? tr('You') : title.split(' ')[0]} · {fmtTime(item.created_at)}</Text>
               </View>
             </>
           );
@@ -222,21 +223,21 @@ export default function ChatScreen({ bookingId, threadWith, myId, title, subtitl
 
       <View style={k.inputRow}>
         {!dark && (
-          <Pressable hitSlop={6} accessibilityLabel="Emoji"
-            onPress={() => Alert.alert('Emoji', 'Use your keyboard’s emoji key — picker coming soon')}>
+          <Pressable hitSlop={6} accessibilityLabel={tr('Emoji')}
+            onPress={() => Alert.alert(tr('Emoji'), tr('Use your keyboard’s emoji key — picker coming soon'))}>
             <Ionicons name="happy-outline" size={22} color={colors.textSecondary} />
           </Pressable>
         )}
         <TextInput style={k.input}
-          placeholder={dark ? `Message ${title.split(' ')[0]}…` : 'Type a message here…'}
+          placeholder={dark ? tr('Message {title}…', { title: title.split(' ')[0] }) : tr('Type a message here…')}
           placeholderTextColor={dark ? D.sub : colors.textTertiary}
           value={text} onChangeText={setText} onSubmitEditing={() => send()} returnKeyType="send" multiline />
-        <Pressable onPress={sendPhoto} disabled={busy} hitSlop={6} accessibilityLabel="Attach photo"
+        <Pressable onPress={sendPhoto} disabled={busy} hitSlop={6} accessibilityLabel={tr('Attach photo')}
           style={({ pressed }) => pressed && st.pressed}>
           <Ionicons name="attach" size={dark ? 20 : 24} color={dark ? D.sub : colors.textSecondary} />
         </Pressable>
-        <Pressable onPress={() => text.trim() ? send() : Alert.alert('Voice notes', 'Coming soon — see BACKLOG.md')}
-          hitSlop={6} accessibilityLabel={text.trim() ? 'Send' : 'Record voice note'}
+        <Pressable onPress={() => text.trim() ? send() : Alert.alert(tr('Voice notes'), tr('Coming soon — see BACKLOG.md'))}
+          hitSlop={6} accessibilityLabel={text.trim() ? tr('Send') : tr('Record voice note')}
           style={({ pressed }) => [k.sendBtn, pressed && st.pressed]}>
           <Ionicons name={text.trim() ? 'arrow-up' : 'mic'} size={dark ? 17 : 20} color={colors.onAccent} />
         </Pressable>

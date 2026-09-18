@@ -6,6 +6,7 @@ import { shareMessage, smsLength } from '../lib/shareText';
 import { supabase } from '../lib/supabase';
 import { dark as D, inter } from '../theme';
 import { Btn, Eyebrow, Ico, IconName, Sheet, T } from './dark';
+import { tr } from '../lib/i18n';
 
 // BTD-11 — send the line link. It replaces the Alert that sent a barber with a
 // client on the phone off to find the poster.
@@ -32,9 +33,9 @@ export type LinkSend = {
 };
 
 const CHANNELS: { key: LinkSend['channel']; label: string; icon: IconName; cost: string; costColor: string }[] = [
-  { key: 'whatsapp', label: 'WhatsApp', icon: 'message-circle', cost: 'Free', costColor: D.green },
-  { key: 'sms', label: 'SMS', icon: 'mail', cost: 'Metered', costColor: D.amber },
-  { key: 'copy', label: 'Copy', icon: 'copy', cost: 'Paste it', costColor: D.faint },
+  { key: 'whatsapp', label: tr('WhatsApp'), icon: 'message-circle', cost: tr('Free'), costColor: D.green },
+  { key: 'sms', label: tr('SMS'), icon: 'mail', cost: tr('Metered'), costColor: D.amber },
+  { key: 'copy', label: tr('Copy'), icon: 'copy', cost: tr('Paste it'), costColor: D.faint },
 ];
 
 const waitOf = (c: Chair) => Math.min(...c.services.map((v) => v.wait_min ?? Infinity));
@@ -84,9 +85,11 @@ export default function ShareLinkSheet({ visible, barberId, onClose, onSent }: {
   const length = smsLength(message);
   const no = points === 'chair' ? mine?.next_no : soonest?.next_no;
 
-  const who = name.trim() ? ` TO ${firstName(name.trim()).toUpperCase()}` : '';
-  const cta = channel === 'copy' ? 'COPY THE MESSAGE'
-    : `SEND${who} ${channel === 'whatsapp' ? 'ON WHATSAPP' : 'BY SMS'}`;
+  const to = name.trim() ? firstName(name.trim()).toUpperCase() : '';
+  const cta = channel === 'copy' ? tr('COPY THE MESSAGE')
+    : channel === 'whatsapp'
+      ? (to ? tr('SEND TO {to} ON WHATSAPP', { to }) : tr('SEND ON WHATSAPP'))
+      : (to ? tr('SEND TO {to} BY SMS', { to }) : tr('SEND BY SMS'));
 
   async function send() {
     if (!message || busy) return;
@@ -96,7 +99,7 @@ export default function ShareLinkSheet({ visible, barberId, onClose, onSent }: {
       p_to_name: name.trim() || null, p_to_phone: phone.trim() || null,
     });
     setBusy(false);
-    if (error) return Alert.alert('Could not send the link', error.message);
+    if (error) return Alert.alert(tr('Could not send the link'), error.message);
 
     const text = encodeURIComponent(message);
     const nine = phone.replace(/\D/g, '').slice(-9);
@@ -107,7 +110,7 @@ export default function ShareLinkSheet({ visible, barberId, onClose, onSent }: {
         ? (nine.length === 9 ? `https://wa.me/212${nine}?text=${text}` : `https://wa.me/?text=${text}`)
         : `sms:${phone.trim()}${Platform.OS === 'ios' ? '&' : '?'}body=${text}`;
       await Linking.openURL(target).catch(() =>
-        Alert.alert('Could not open it', channel === 'sms' ? 'This phone has no messages app.' : 'WhatsApp did not open.'));
+        Alert.alert(tr('Could not open it'), channel === 'sms' ? tr('This phone has no messages app.') : tr('WhatsApp did not open.')));
     }
     const sent = data as { id: string; sent_at: string };
     onSent({
@@ -120,45 +123,45 @@ export default function ShareLinkSheet({ visible, barberId, onClose, onSent }: {
   }
 
   const chairSub = !q ? ' '
-    : mineTaking ? `Your chair · ${mine!.waiting} waiting · ~${waitOf(mine!)} min`
-      : 'Your chair · not taking anyone right now';
+    : mineTaking ? tr('Your chair · {waiting} waiting · ~{wait} min', { waiting: mine!.waiting, wait: waitOf(mine!) })
+      : tr('Your chair · not taking anyone right now');
 
   return (
     <Sheet visible={visible} onClose={onClose} gap={12}>
       <View style={s.head}>
         <View style={s.grow}>
-          <T w="b" size={17}>Send the line link</T>
+          <T w="b" size={17}>{tr('Send the line link')}</T>
           <T size={11} c={D.sub} style={{ marginTop: 2 }}>{chairSub}</T>
         </View>
-        <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel="Close"
+        <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel={tr('Close')}
           style={({ pressed }) => [s.close, pressed && s.pressed]}>
           <Ico name="x" size={16} />
         </Pressable>
       </View>
 
-      <Eyebrow ls={1.4}>WHERE IT POINTS</Eyebrow>
+      <Eyebrow ls={1.4}>{tr('WHERE IT POINTS')}</Eyebrow>
       <View style={{ gap: 8 }}>
-        <Option on={points === 'chair'} onPress={() => setPoints('chair')} title="My chair"
+        <Option on={points === 'chair'} onPress={() => setPoints('chair')} title={tr('My chair')}
           mono={codes ? `/q/${codes.shop}?b=${codes.barber}` : ' '}
           right={mine ? `Nº ${pad(mine.next_no)}` : null} />
-        <Option on={points === 'shop'} onPress={() => setPoints('shop')} title="The whole shop"
-          sub={soonest ? `They pick a chair · ${firstName(soonest.name)} is free in ~${waitOf(soonest)} min` : 'They pick a chair'} />
+        <Option on={points === 'shop'} onPress={() => setPoints('shop')} title={tr('The whole shop')}
+          sub={soonest ? tr('They pick a chair · {name} is free in ~{soonest} min', { name: firstName(soonest.name), soonest: waitOf(soonest) }) : tr('They pick a chair')} />
       </View>
 
-      <Eyebrow ls={1.4}>WHAT THEY GET</Eyebrow>
+      <Eyebrow ls={1.4}>{tr('WHAT THEY GET')}</Eyebrow>
       <View style={s.message}>
         <View style={s.bubble}>
           <T size={12.5} style={{ lineHeight: 19 }}>{message || ' '}</T>
         </View>
         <View style={s.countRow}>
-          <T size={10.5} c={D.faint} style={s.grow}>The wait is written into the text, not only the preview card</T>
+          <T size={10.5} c={D.faint} style={s.grow}>{tr('The wait is written into the text, not only the preview card')}</T>
           <T w="b" size={10.5} c={length.sends === 1 ? D.green : D.amber} style={s.tnum}>
-            {length.chars}/{length.limit}{length.sends > 1 ? ` · ${length.sends} sends` : ''}
+            {length.chars}/{length.limit}{length.sends > 1 ? tr(' · {sends} sends', { sends: length.sends }) : ''}
           </T>
         </View>
       </View>
 
-      <Eyebrow ls={1.4}>SEND IT BY</Eyebrow>
+      <Eyebrow ls={1.4}>{tr('SEND IT BY')}</Eyebrow>
       <View style={s.channels}>
         {CHANNELS.map((c) => {
           const on = channel === c.key;
@@ -175,10 +178,10 @@ export default function ShareLinkSheet({ visible, barberId, onClose, onSent }: {
       </View>
 
       <View style={s.recipient}>
-        <TextInput value={name} onChangeText={setName} placeholder="Their name"
+        <TextInput value={name} onChangeText={setName} placeholder={tr('Their name')}
           placeholderTextColor={D.faint} style={s.input} maxLength={40} autoCapitalize="words" />
         <View style={s.inputRule} />
-        <TextInput value={phone} onChangeText={setPhone} placeholder="Their phone"
+        <TextInput value={phone} onChangeText={setPhone} placeholder={tr('Their phone')}
           placeholderTextColor={D.faint} style={s.input} keyboardType="phone-pad" autoComplete="tel" />
       </View>
 
@@ -186,12 +189,12 @@ export default function ShareLinkSheet({ visible, barberId, onClose, onSent }: {
         <Ico name="info" size={14} color={D.sub} />
         <T size={11.5} c={D.sub} style={[s.grow, { lineHeight: 17 }]}>
           {no != null
-            ? `A link is not a held place. Whoever takes a ticket first gets Nº ${pad(no)} — including someone who walks in off the street.`
-            : 'A link is not a held place.'}
+            ? tr('A link is not a held place. Whoever takes a ticket first gets Nº {no} — including someone who walks in off the street.', { no: pad(no) })
+            : tr('A link is not a held place.')}
         </T>
       </View>
 
-      <Btn title={busy ? 'SENDING…' : cta} height={54} onPress={message && !busy ? send : undefined} />
+      <Btn title={busy ? tr('SENDING…') : cta} height={54} onPress={message && !busy ? send : undefined} />
     </Sheet>
   );
 }

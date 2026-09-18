@@ -14,6 +14,7 @@ import LinesScreen from './LinesScreen';
 import { AllChairsScreen, OwnerBarberScreen, OwnerDashboard } from './OwnerScreens';
 import { ReviewsInboxScreen, ShopListingScreen, ShopReportScreen, WalkInPosterScreen, WallDisplayScreen } from './ShopScreens';
 import DepositScreen from './DepositScreen';
+import { loc, tr, trn } from '../lib/i18n';
 
 // Owner-only Salon screen — TEAM / SERVICES / SETTINGS. Real backend (0025):
 // salon_team()/salon_stats() RPCs (owner-only, privacy rule baked in — a rent
@@ -23,7 +24,7 @@ import DepositScreen from './DepositScreen';
 // Payouts/Reports/Permissions. Presence is derived from today's bookings.
 
 const dh = (c: number) => `${Math.round(c / 100).toLocaleString('en-US')} DH`;
-const soon = () => Alert.alert('Coming soon', 'See BACKLOG.md — Owner: salon management.');
+const soon = () => Alert.alert(tr('Coming soon'), tr('See BACKLOG.md — Owner: salon management.'));
 
 type PayModel = 'commission' | 'rent';
 type SalonMeta = {
@@ -56,17 +57,17 @@ type Chair = {
 };
 
 const AVAIL: Record<Availability, { c: string; t: string }> = {
-  open: { c: '#3BD07A', t: 'Open' },
-  busy: { c: colors.accent, t: 'In service' },
-  off: { c: colors.star, t: 'Off' },
-  empty: { c: D.sub, t: 'Empty' },
+  open: { c: '#3BD07A', t: tr('Open') },
+  busy: { c: colors.accent, t: tr('In service') },
+  off: { c: colors.star, t: tr('Off') },
+  empty: { c: D.sub, t: tr('Empty') },
 };
 
 const initials = (n: string) => n.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 const statusColor = (m: Member) =>
   m.status === 'pending' ? colors.star : m.inService ? colors.accent : '#3BD07A';
 const statusLabel = (m: Member) =>
-  m.status === 'pending' ? 'PENDING' : m.inService ? 'IN SERVICE' : 'FREE';
+  m.status === 'pending' ? tr('PENDING') : m.inService ? tr('IN SERVICE') : tr('FREE');
 
 export default function SalonScreen({ barberId, onBack, onManageServices, onEditSalon }: {
   barberId: string; onBack?: () => void;
@@ -135,14 +136,14 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
   async function reopenShop() {
     if (!salon) return;
     const { error } = await supabase.rpc('reopen_shop');
-    if (error) { Alert.alert('Could not reopen', error.message); return; }
+    if (error) { Alert.alert(tr('Could not reopen'), error.message); return; }
     setSalon({ ...salon, accepting_bookings: true });
   }
 
   async function toggleService(svc: Svc) {
     setServices((cur) => cur?.map((x) => x.id === svc.id ? { ...x, is_active: !x.is_active } : x) ?? null);
     const { error } = await supabase.from('services').update({ is_active: !svc.is_active }).eq('id', svc.id);
-    if (error) { load(); Alert.alert('Could not update', error.message); }
+    if (error) { load(); Alert.alert(tr('Could not update'), error.message); }
   }
 
   // the same order the early returns below run in: the two member screens sit
@@ -178,7 +179,7 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
   }
   if (view === 'allChairs') {
     return <AllChairsScreen salon={salon} team={team} onBack={() => setView('hub')}
-      onAdd={() => Alert.alert('Add a booking', 'Use the + on your own day, or the chair’s own schedule.')} />;
+      onAdd={() => Alert.alert(tr('Add a booking'), tr('Use the + on your own day, or the chair’s own schedule.'))} />;
   }
   if (view === 'lines') return <LinesScreen onBack={() => setView('hub')} />;
   if (view === 'report') return <ShopReportScreen onBack={() => setView('hub')} />;
@@ -204,20 +205,20 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
     : null;
 
   const shopRows: { icon: IconName; label: string; value?: string; accent?: boolean; onPress: () => void }[] = [
-    { icon: 'clock', label: 'Opening hours', value: `${hhmm(salon.open_min)} – ${hhmm(salon.close_min)}`, onPress: () => setHoursOpen(true) },
+    { icon: 'clock', label: tr('Opening hours'), value: `${hhmm(salon.open_min)} – ${hhmm(salon.close_min)}`, onPress: () => setHoursOpen(true) },
     // OSH-11 — the shop's own deposit (0076). Sits with the shop's other terms,
     // not under Settings, because it is the number customers meet at checkout.
-    { icon: 'lock', label: 'Deposit', value: depositPct == null ? '—' : depositPct === 0 ? 'None' : `${depositPct}%`, onPress: () => setView('deposit') },
-    { icon: 'map-pin', label: 'Address & map pin', value: salon.address ?? 'Not set', onPress: () => setView('listing') },
-    { icon: 'eye', label: 'Shop listing', onPress: () => setView('listing') },
-    { icon: 'grid', label: 'Walk-in QR poster', value: 'Print', accent: true, onPress: () => setView('poster') },
-    { icon: 'monitor', label: 'Wall display', onPress: () => setView('wall') },
-    { icon: 'calendar', label: 'All chairs', onPress: () => setView('allChairs') },
-    { icon: 'list', label: 'The lines, live', onPress: () => setView('lines') },
-    { icon: 'star', label: 'Reviews', onPress: () => setView('reviews') },
-    { icon: 'trending-up', label: 'Reports & payouts', onPress: () => setView('report') },
-    { icon: 'percent', label: 'Default commission', value: `${100 - salon.default_commission}%`, onPress: () => setDefCommOpen(true) },
-    { icon: 'sliders', label: 'Chairs, services & settings', onPress: () => setTabs(true) },
+    { icon: 'lock', label: tr('Deposit'), value: depositPct == null ? '—' : depositPct === 0 ? tr('None') : `${depositPct}%`, onPress: () => setView('deposit') },
+    { icon: 'map-pin', label: tr('Address & map pin'), value: salon.address ?? tr('Not set'), onPress: () => setView('listing') },
+    { icon: 'eye', label: tr('Shop listing'), onPress: () => setView('listing') },
+    { icon: 'grid', label: tr('Walk-in QR poster'), value: tr('Print'), accent: true, onPress: () => setView('poster') },
+    { icon: 'monitor', label: tr('Wall display'), onPress: () => setView('wall') },
+    { icon: 'calendar', label: tr('All chairs'), onPress: () => setView('allChairs') },
+    { icon: 'list', label: tr('The lines, live'), onPress: () => setView('lines') },
+    { icon: 'star', label: tr('Reviews'), onPress: () => setView('reviews') },
+    { icon: 'trending-up', label: tr('Reports & payouts'), onPress: () => setView('report') },
+    { icon: 'percent', label: tr('Default commission'), value: `${100 - salon.default_commission}%`, onPress: () => setDefCommOpen(true) },
+    { icon: 'sliders', label: tr('Chairs, services & settings'), onPress: () => setTabs(true) },
   ];
 
   return (
@@ -226,14 +227,14 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
         {/* 1p header */}
         <View style={s.hubHead}>
           {onBack
-            ? <Pressable onPress={onBack} hitSlop={8} accessibilityRole="button" accessibilityLabel="Go back"
+            ? <Pressable onPress={onBack} hitSlop={8} accessibilityRole="button" accessibilityLabel={tr('Go back')}
                 style={({ pressed }) => [s.puck38, pressed && s.pressed]}>
                 <Ico name="arrow-left" size={16} />
               </Pressable>
             : <View style={s.puck38Ghost} />}
           <T w="b" size={17} style={s.hubTitle} numberOfLines={1}>{salon.name}</T>
           <Pressable onPress={() => setView('listing')} hitSlop={8} accessibilityRole="button"
-            accessibilityLabel="Edit the shop listing"
+            accessibilityLabel={tr('Edit the shop listing')}
             style={({ pressed }) => [s.puck38, pressed && s.pressed]}>
             <Ico name="edit-2" size={16} />
           </Pressable>
@@ -241,13 +242,13 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
 
         {/* today, at a glance — tap through to the owner dashboard */}
         <Pressable onPress={() => setView('dashboard')} accessibilityRole="button"
-          accessibilityLabel="Owner dashboard" style={({ pressed }) => [s.hubTiles, pressed && s.pressed]}>
-          <HubTile label="BOOKINGS" value={String(stats.bookings)} />
-          <HubTile label="REVENUE" value={String(Math.round(stats.revenue / 100))} unit="DH" />
-          <HubTile label="RATING" value={rating ? rating.toFixed(1) : '—'} unit={rating ? '★' : undefined} />
+          accessibilityLabel={tr('Owner dashboard')} style={({ pressed }) => [s.hubTiles, pressed && s.pressed]}>
+          <HubTile label={tr('BOOKINGS')} value={String(stats.bookings)} />
+          <HubTile label={tr('REVENUE')} value={String(Math.round(stats.revenue / 100))} unit={tr('DH')} />
+          <HubTile label={tr('RATING')} value={rating ? rating.toFixed(1) : '—'} unit={rating ? '★' : undefined} />
         </Pressable>
 
-        <Eyebrow ls={1.65}>THE TEAM · TODAY</Eyebrow>
+        <Eyebrow ls={1.65}>{tr('THE TEAM · TODAY')}</Eyebrow>
         <View style={{ gap: 9 }}>
           {roster.map((m) => (
             <Pressable key={m.id} onPress={() => setSelected(m)} accessibilityRole="button"
@@ -261,13 +262,13 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
                 <View style={s.rowCenter}>
                   <T w="b" size={14}>{m.name}</T>
                   {m.role === 'owner' && (
-                    <View style={s.ownerChip}><T w="b" size={9} c={colors.accent} ls={0.7}>OWNER</T></View>
+                    <View style={s.ownerChip}><T w="b" size={9} c={colors.accent} ls={0.7}>{tr('OWNER')}</T></View>
                   )}
                 </View>
                 <T size={11} c={D.sub} style={{ marginTop: 3 }}>
                   {m.todayBookings
-                    ? `In the shop · ${m.todayBookings} today${m.todayRevenue != null ? ` · ${dh(m.todayRevenue)}` : ''}`
-                    : m.pay === 'rent' ? 'Rent chair' : 'Nothing booked today'}
+                    ? tr('In the shop · {todayBookings} today{x}', { todayBookings: m.todayBookings, x: m.todayRevenue != null ? ` · ${dh(m.todayRevenue)}` : '' })
+                    : m.pay === 'rent' ? tr('Rent chair') : tr('Nothing booked today')}
                 </T>
               </View>
               <Ico name="chevron-right" size={14} color={D.muted} />
@@ -275,25 +276,25 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
           ))}
           {pending.map((m) => (
             <Pressable key={m.id} onPress={() => setSelected(m)} accessibilityRole="button"
-              accessibilityLabel={`${m.name}, join request`}
+              accessibilityLabel={tr('{name}, join request', { name: m.name })}
               style={({ pressed }) => [s.teamRow, s.teamRowPending, pressed && s.pressed]}>
               <View style={s.teamAvatar}><Text style={s.avatarText}>{initials(m.name)}</Text></View>
               <View style={s.grow}>
                 <T w="b" size={14}>{m.name}</T>
-                <T size={11} c={colors.star} style={{ marginTop: 3 }}>Wants to join — tap to review</T>
+                <T size={11} c={colors.star} style={{ marginTop: 3 }}>{tr('Wants to join — tap to review')}</T>
               </View>
               <Ico name="chevron-right" size={14} color={D.muted} />
             </Pressable>
           ))}
           <Pressable onPress={() => setInvite(true)} accessibilityRole="button"
-            accessibilityLabel="Invite a barber to the shop"
+            accessibilityLabel={tr('Invite a barber to the shop')}
             style={({ pressed }) => [s.inviteRow, pressed && s.pressed]}>
             <View style={s.invitePuck}><Ico name="plus" size={16} color={D.sub} /></View>
-            <T w="sb" size={13} c={D.sub} style={s.grow}>Invite a barber to the shop</T>
+            <T w="sb" size={13} c={D.sub} style={s.grow}>{tr('Invite a barber to the shop')}</T>
           </Pressable>
         </View>
 
-        <Eyebrow ls={1.65}>SHOP</Eyebrow>
+        <Eyebrow ls={1.65}>{tr('SHOP')}</Eyebrow>
         <View style={s.shopList}>
           {shopRows.map((r, i) => (
             <Pressable key={r.label} onPress={r.onPress} accessibilityRole="button"
@@ -312,7 +313,7 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
         <View style={s.hubNote}>
           <Ico name="info" size={14} color={D.sub} />
           <T size={12} c={D.sub} style={s.hubNoteText}>
-            Money is paid at the shop today. Settlements are recorded here, not moved.
+            {tr('Money is paid at the shop today. Settlements are recorded here, not moved.')}
           </T>
         </View>
       </ScrollView>
@@ -323,11 +324,11 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
           <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
             <View style={s.topRow}>
               <Pressable onPress={() => setTabs(false)} hitSlop={8} accessibilityRole="button"
-                accessibilityLabel="Close" style={({ pressed }) => [s.iconBtn, pressed && s.pressed]}>
+                accessibilityLabel={tr('Close')} style={({ pressed }) => [s.iconBtn, pressed && s.pressed]}>
                 <Ionicons name="arrow-back" size={18} color={D.text} />
               </Pressable>
               <View style={s.grow}>
-                <Text style={s.overline}>SALON</Text>
+                <Text style={s.overline}>{tr('SALON')}</Text>
                 <Text style={s.title} numberOfLines={1}>{salon.name}</Text>
               </View>
             </View>
@@ -406,12 +407,12 @@ function ShopHeader({ salon, stats, onPower }: {
     <View style={s.shopCard}>
       <View style={s.rowCenter}>
         <View style={[s.dot, { backgroundColor: open ? '#3BD07A' : D.sub }]} />
-        <Text style={s.shopStatus}>{open ? 'SHOP OPEN' : 'SHOP CLOSED'}</Text>
+        <Text style={s.shopStatus}>{open ? tr('SHOP OPEN') : tr('SHOP CLOSED')}</Text>
         <View style={s.grow} />
         {/* 11a — closing opens the sheet that spells out what it covers; there
             is nothing to confirm on the way back in, so reopening is one tap. */}
         <Pressable onPress={onPower}
-          accessibilityLabel={open ? 'Close shop' : 'Open shop'}
+          accessibilityLabel={open ? tr('Close shop') : tr('Open shop')}
           style={({ pressed }) => [s.powerBtn, !open && s.powerBtnOff, pressed && s.pressed]}>
           <Ionicons name="power" size={18} color={open ? colors.onAccent : D.text} />
         </Pressable>
@@ -423,10 +424,10 @@ function ShopHeader({ salon, stats, onPower }: {
         </View>
       )}
       <View style={s.statRow}>
-        <Stat label="ON FLOOR" value={`${stats.onFloor}/${stats.chairs}`} />
-        <Stat label="BOOKINGS" value={String(stats.bookings)} />
-        <Stat label="REVENUE" value={dh(stats.revenue)} accent />
-        <Stat label="SHOP CUT" value={dh(stats.shopCut)} />
+        <Stat label={tr('ON FLOOR')} value={`${stats.onFloor}/${stats.chairs}`} />
+        <Stat label={tr('BOOKINGS')} value={String(stats.bookings)} />
+        <Stat label={tr('REVENUE')} value={dh(stats.revenue)} accent />
+        <Stat label={tr('SHOP CUT')} value={dh(stats.shopCut)} />
       </View>
     </View>
   );
@@ -447,10 +448,10 @@ function TeamTab({ team, onOpen, onInvite }: {
   const pending = team.filter((m) => m.status === 'pending').length;
   return (
     <>
-      <SectionHead label={`TEAM · ${team.length} ${team.length === 1 ? 'CHAIR' : 'CHAIRS'}`}
-        action="Invite" onAction={onInvite} />
+      <SectionHead label={trn(team.length, 'TEAM · {n} CHAIR', 'TEAM · {n} CHAIRS')}
+        action={tr('Invite')} onAction={onInvite} />
       {pending > 0 && (
-        <Text style={s.pendingHint}>{pending} join request{pending > 1 ? 's' : ''} — tap to review</Text>
+        <Text style={s.pendingHint}>{trn(pending, '{n} join request — tap to review', '{n} join requests — tap to review')}</Text>
       )}
       {team.map((m) => (
         <Pressable key={m.id} onPress={() => onOpen(m)} accessibilityLabel={m.name}
@@ -470,7 +471,7 @@ function TeamTab({ team, onOpen, onInvite }: {
           </View>
           <View style={s.memberRight}>
             <Text style={[s.statusPill, { color: statusColor(m) }]}>● {statusLabel(m)}</Text>
-            <Text style={s.memberSplit}>{m.pay === 'rent' ? 'Rent' : `${m.split}% split`}</Text>
+            <Text style={s.memberSplit}>{m.pay === 'rent' ? tr('Rent') : tr('{split}% split', { split: m.split })}</Text>
           </View>
         </Pressable>
       ))}
@@ -484,7 +485,7 @@ function ChairsTab({ chairs, onOpen, onAdd }: {
   const count = (a: Availability) => chairs.filter((c) => c.availability === a).length;
   return (
     <>
-      <SectionHead label={`CHAIRS · ${chairs.length}`} action="Add" onAction={onAdd} />
+      <SectionHead label={tr('CHAIRS · {count}', { count: chairs.length })} action={tr('Add')} onAction={onAdd} />
       {chairs.length > 0 && (
         <View style={s.chairSummary}>
           {(['open', 'busy', 'off', 'empty'] as const).filter((a) => count(a) > 0).map((a) => (
@@ -495,7 +496,7 @@ function ChairsTab({ chairs, onOpen, onAdd }: {
           ))}
         </View>
       )}
-      {chairs.length === 0 && <Text style={s.emptyHint}>No chairs yet — tap Add to set up your floor.</Text>}
+      {chairs.length === 0 && <Text style={s.emptyHint}>{tr('No chairs yet — tap Add to set up your floor.')}</Text>}
       <View style={s.chairGrid}>
         {chairs.map((c) => (
           <Pressable key={c.id} onPress={() => onOpen(c)} accessibilityLabel={`${c.label}, ${AVAIL[c.availability].t}`}
@@ -512,7 +513,7 @@ function ChairsTab({ chairs, onOpen, onAdd }: {
                 <Text style={s.chairOccupant} numberOfLines={1}>{c.barberName}</Text>
               </View>
             ) : (
-              <Text style={s.chairEmpty}>Empty — tap to assign</Text>
+              <Text style={s.chairEmpty}>{tr('Empty — tap to assign')}</Text>
             )}
             <Text style={[s.chairAvail, { color: AVAIL[c.availability].c }]}>{AVAIL[c.availability].t}</Text>
           </Pressable>
@@ -533,7 +534,7 @@ function ChairSheet({ chair, team, onClose, onChanged }: {
     setBusy(true);
     const { error } = await supabase.rpc(fn, args);
     setBusy(false);
-    if (error) return Alert.alert('Could not update', error.message);
+    if (error) return Alert.alert(tr('Could not update'), error.message);
     onChanged();
   }
 
@@ -541,13 +542,13 @@ function ChairSheet({ chair, team, onClose, onChanged }: {
   if (!chair) {
     return (
       <Sheet onClose={onClose}>
-        <Text style={s.sheetTitle}>Add chair</Text>
-        <Text style={s.fieldLabel}>LABEL</Text>
-        <TextInput value={label} onChangeText={setLabel} placeholder="Chair 01"
+        <Text style={s.sheetTitle}>{tr('Add chair')}</Text>
+        <Text style={s.fieldLabel}>{tr('LABEL')}</Text>
+        <TextInput value={label} onChangeText={setLabel} placeholder={tr('Chair 01')}
           placeholderTextColor={D.sub} style={s.input} autoFocus />
         <Pressable disabled={busy} onPress={() => label.trim() && call('salon_add_chair', { p_label: label.trim() })}
           style={({ pressed }) => [s.cta, pressed && s.pressed]}>
-          {busy ? <ActivityIndicator color={colors.onAccent} /> : <Text style={s.ctaText}>Add chair</Text>}
+          {busy ? <ActivityIndicator color={colors.onAccent} /> : <Text style={s.ctaText}>{tr('Add chair')}</Text>}
         </Pressable>
       </Sheet>
     );
@@ -558,25 +559,25 @@ function ChairSheet({ chair, team, onClose, onChanged }: {
     <Sheet onClose={onClose}>
       <View style={s.rowCenter}>
         <TextInput value={label} onChangeText={setLabel} style={s.chairNameInput} />
-        <Pressable disabled={busy || label.trim() === chair.label} accessibilityLabel="Rename chair"
+        <Pressable disabled={busy || label.trim() === chair.label} accessibilityLabel={tr('Rename chair')}
           onPress={() => call('salon_rename_chair', { p_chair: chair.id, p_label: label.trim() })}
           style={({ pressed }) => [s.iconBtn, (label.trim() === chair.label) && s.dimBtn, pressed && s.pressed]}>
           <Ionicons name="checkmark" size={18} color={colors.accent} />
         </Pressable>
-        <Pressable disabled={busy} accessibilityLabel="Delete chair"
-          onPress={() => Alert.alert('Delete chair?', `${chair.label} will be removed.`,
-            [{ text: 'Cancel', style: 'cancel' },
-             { text: 'Delete', style: 'destructive', onPress: () => call('salon_delete_chair', { p_chair: chair.id }) }])}
+        <Pressable disabled={busy} accessibilityLabel={tr('Delete chair')}
+          onPress={() => Alert.alert(tr('Delete chair?'), tr('{label} will be removed.', { label: chair.label }),
+            [{ text: tr('Cancel'), style: 'cancel' },
+             { text: tr('Delete'), style: 'destructive', onPress: () => call('salon_delete_chair', { p_chair: chair.id }) }])}
           style={({ pressed }) => [s.iconBtn, pressed && s.pressed]}>
           <Ionicons name="trash-outline" size={16} color={colors.danger} />
         </Pressable>
       </View>
 
-      <Text style={s.fieldLabel}>ASSIGN A BARBER</Text>
+      <Text style={s.fieldLabel}>{tr('ASSIGN A BARBER')}</Text>
       <Pressable disabled={busy} onPress={() => call('salon_assign_chair', { p_chair: chair.id, p_barber: null })}
         style={({ pressed }) => [s.assignRow, !chair.barberId && s.assignRowOn, pressed && s.pressed]}>
         <View style={[s.chairAvatar, s.emptySlot]}><Ionicons name="remove" size={16} color={D.sub} /></View>
-        <Text style={s.assignName}>Leave empty</Text>
+        <Text style={s.assignName}>{tr('Leave empty')}</Text>
         {!chair.barberId && <Ionicons name="checkmark-circle" size={20} color={colors.accent} />}
       </Pressable>
       {members.map((m) => {
@@ -601,8 +602,8 @@ function ServicesTab({ services, onToggle, onManage }: {
   const live = services.filter((x) => x.is_active).length;
   return (
     <>
-      <SectionHead label={`MENU · ${live} LIVE`} action="Manage" onAction={onManage ?? soon} />
-      {services.length === 0 && <Text style={s.emptyHint}>No services yet — tap Manage to add your first.</Text>}
+      <SectionHead label={tr('MENU · {live} LIVE', { live })} action={tr('Manage')} onAction={onManage ?? soon} />
+      {services.length === 0 && <Text style={s.emptyHint}>{tr('No services yet — tap Manage to add your first.')}</Text>}
       {services.map((x) => (
         <View key={x.id} style={s.menuRow}>
           <View style={s.menuIcon}><Ionicons name="cut" size={18} color={colors.accent} /></View>
@@ -615,22 +616,22 @@ function ServicesTab({ services, onToggle, onManage }: {
         </View>
       ))}
       {/* MOCK — packages need the packages/package_items tables + booking mapping (BACKLOG) */}
-      <SectionHead label="PACKAGES · MOCK" action="Add" onAction={soon} />
-      <Text style={s.emptyHint}>Bundles land once the booking-mapping decision is made — see BACKLOG.</Text>
+      <SectionHead label={tr('PACKAGES · MOCK')} action={tr('Add')} onAction={soon} />
+      <Text style={s.emptyHint}>{tr('Bundles land once the booking-mapping decision is made — see BACKLOG.')}</Text>
     </>
   );
 }
 
 const SET_ROWS = (salon: SalonMeta, members: number) => ([
-  { icon: 'business-outline', title: 'Salon profile', sub: 'Name, address, photos', key: 'profile' },
-  { icon: 'time-outline', title: 'Opening hours',
+  { icon: 'business-outline', title: tr('Salon profile'), sub: tr('Name, address, photos'), key: 'profile' },
+  { icon: 'time-outline', title: tr('Opening hours'),
     sub: salon.open_min === 0 && salon.close_min === 1440
-      ? 'All day — tap to set a window'
-      : `${hhmm(salon.open_min)} – ${hhmm(salon.close_min)} · barbers set theirs within`, key: 'hours' },
-  { icon: 'pricetag-outline', title: 'Default commission', sub: `${salon.default_commission}% to barber`, key: 'commission' },
-  { icon: 'shield-outline', title: 'Roles & permissions', sub: `${members} members`, key: 'soon' },
-  { icon: 'cash-outline', title: 'Payouts & taxes', sub: 'Needs the wallet rail', key: 'soon' },
-  { icon: 'bar-chart-outline', title: 'Reports', sub: 'Revenue, retention', key: 'soon' },
+      ? tr('All day — tap to set a window')
+      : tr('{open_min} – {close_min} · barbers set theirs within', { open_min: hhmm(salon.open_min), close_min: hhmm(salon.close_min) }), key: 'hours' },
+  { icon: 'pricetag-outline', title: tr('Default commission'), sub: tr('{default_commission}% to barber', { default_commission: salon.default_commission }), key: 'commission' },
+  { icon: 'shield-outline', title: tr('Roles & permissions'), sub: tr('{members} members', { members }), key: 'soon' },
+  { icon: 'cash-outline', title: tr('Payouts & taxes'), sub: tr('Needs the wallet rail'), key: 'soon' },
+  { icon: 'bar-chart-outline', title: tr('Reports'), sub: tr('Revenue, retention'), key: 'soon' },
 ] as { icon: keyof typeof Ionicons.glyphMap; title: string; sub: string; key: string }[]);
 
 function SettingsTab({ salon, members, onEditSalon, onSalonHours, onDefaultCommission }: {
@@ -687,8 +688,8 @@ function MemberSheet({ m, onClose, onChanged, onEarnings }: {
     setBusy(true);
     const { error } = await supabase.rpc(fn, args);
     setBusy(false);
-    if (error) return Alert.alert('Could not update', error.message);
-    if (ok) Alert.alert('Done', ok);
+    if (error) return Alert.alert(tr('Could not update'), error.message);
+    if (ok) Alert.alert(tr('Done'), ok);
     onChanged();
   }
 
@@ -716,50 +717,49 @@ function MemberSheet({ m, onClose, onChanged, onEarnings }: {
 
       {m.status === 'pending' ? (
         <>
-          <Text style={s.pendingBody}>This barber asked to join your salon. Approve to add them to the
-            floor and your public page, or decline to remove the request.</Text>
+          <Text style={s.pendingBody}>{tr('This barber asked to join your salon. Approve to add them to the floor and your public page, or decline to remove the request.')}</Text>
           <View style={s.actionGrid}>
             <Pressable disabled={busy} onPress={() => call('salon_approve_member', { p_barber: m.id }, `${m.name} added to the team.`)}
               style={({ pressed }) => [s.approveBtn, pressed && s.pressed]}>
               <Ionicons name="checkmark" size={16} color={colors.onAccent} />
-              <Text style={s.approveText}>Approve</Text>
+              <Text style={s.approveText}>{tr('Approve')}</Text>
             </Pressable>
             <Pressable disabled={busy} onPress={() => call('salon_remove_member', { p_barber: m.id })}
               style={({ pressed }) => [s.declineBtn, pressed && s.pressed]}>
               <Ionicons name="close" size={16} color={colors.danger} />
-              <Text style={s.declineText}>Decline</Text>
+              <Text style={s.declineText}>{tr('Decline')}</Text>
             </Pressable>
           </View>
         </>
       ) : (
         <>
           <View style={s.sheetStats}>
-            <Stat label="BOOKINGS" value={String(m.todayBookings)} />
-            {showMoney && <Stat label="REVENUE" value={dh(m.todayRevenue ?? 0)} />}
+            <Stat label={tr('BOOKINGS')} value={String(m.todayBookings)} />
+            {showMoney && <Stat label={tr('REVENUE')} value={dh(m.todayRevenue ?? 0)} />}
             <View style={[s.statTile, s.statTileAccent]}>
-              <Text style={s.statLabel}>RATING</Text>
-              <Text style={s.statValue}>{m.rating > 0 ? `★ ${m.rating.toFixed(1)}` : 'New'}</Text>
+              <Text style={s.statLabel}>{tr('RATING')}</Text>
+              <Text style={s.statValue}>{m.rating > 0 ? `★ ${m.rating.toFixed(1)}` : tr('New')}</Text>
             </View>
           </View>
 
-          <Text style={s.fieldLabel}>PAY MODEL</Text>
-          <Segmented options={['Commission', 'Rent']}
-            value={pay === 'commission' ? 'Commission' : 'Rent'}
-            onChange={(v) => setPay(v === 'Commission' ? 'commission' : 'rent')} />
+          <Text style={s.fieldLabel}>{tr('PAY MODEL')}</Text>
+          <Segmented options={[tr('Commission'), tr('Rent')]}
+            value={pay === 'commission' ? tr('Commission') : tr('Rent')}
+            onChange={(v) => setPay(v === tr('Commission') ? 'commission' : 'rent')} />
 
           {pay === 'commission' ? (
             <>
               <View style={s.rowCenter}>
-                <Text style={s.fieldLabel}>COMMISSION SPLIT</Text>
+                <Text style={s.fieldLabel}>{tr('COMMISSION SPLIT')}</Text>
                 <View style={s.grow} />
-                <Text style={s.splitValue}>{split}% <Text style={s.splitMuted}>/ {100 - split}% shop</Text></Text>
+                <Text style={s.splitValue}>{split}% <Text style={s.splitMuted}>{tr('/ {x}% shop', { x: 100 - split })}</Text></Text>
               </View>
               <Split value={split} onChange={setSplit} editable />
             </>
           ) : (
             <View style={s.rentRow}>
               <Ionicons name="home-outline" size={16} color={D.sub} />
-              <Text style={s.rentText}>Rents the chair — keeps 100%, revenue stays private.</Text>
+              <Text style={s.rentText}>{tr('Rents the chair — keeps 100%, revenue stays private.')}</Text>
             </View>
           )}
 
@@ -767,7 +767,7 @@ function MemberSheet({ m, onClose, onChanged, onEarnings }: {
             <Pressable disabled={busy} onPress={saveTerms}
               style={({ pressed }) => [s.cta, pressed && s.pressed]}>
               {busy ? <ActivityIndicator color={colors.onAccent} />
-                : <Text style={s.ctaText}>Save pay terms</Text>}
+                : <Text style={s.ctaText}>{tr('Save pay terms')}</Text>}
             </Pressable>
           )}
 
@@ -775,33 +775,33 @@ function MemberSheet({ m, onClose, onChanged, onEarnings }: {
             <Pressable disabled={busy} onPress={() => call('salon_set_cash_agent', { p_barber: m.id }, `${m.name} is now the cash agent.`)}
               style={({ pressed }) => [s.agentBtn, pressed && s.pressed]}>
               <Text style={s.crown}>👑</Text>
-              <Text style={s.agentText}>Make cash agent</Text>
+              <Text style={s.agentText}>{tr('Make cash agent')}</Text>
             </Pressable>
           )}
 
-          <Pressable onPress={onEarnings} accessibilityLabel="Earnings and payouts"
+          <Pressable onPress={onEarnings} accessibilityLabel={tr('Earnings and payouts')}
             style={({ pressed }) => [s.earningsRow, pressed && s.pressed]}>
             <View style={s.setIcon}><Ionicons name="cash-outline" size={18} color={colors.accent} /></View>
             <View style={s.grow}>
-              <Text style={s.setTitle}>Earnings & payouts</Text>
-              <Text style={s.setSub}>{m.pay === 'commission' ? 'Weekly commission statement' : 'Chair rent'}</Text>
+              <Text style={s.setTitle}>{tr('Earnings & payouts')}</Text>
+              <Text style={s.setSub}>{m.pay === 'commission' ? tr('Weekly commission statement') : tr('Chair rent')}</Text>
             </View>
             <Ionicons name="chevron-forward" size={18} color={D.sub} />
           </Pressable>
 
           <View style={s.actionGrid}>
-            <ActionBtn icon="chatbubble-outline" label="Message" onPress={soon} />
-            <ActionBtn icon="calendar-outline" label="Schedule" onPress={soon} />
+            <ActionBtn icon="chatbubble-outline" label={tr('Message')} onPress={soon} />
+            <ActionBtn icon="calendar-outline" label={tr('Schedule')} onPress={soon} />
           </View>
 
           {m.role !== 'owner' && (
-            <Pressable disabled={busy} onPress={() => Alert.alert('Remove from salon?',
-              `${m.name} loses this chair and is unlinked from the salon.`,
-              [{ text: 'Cancel', style: 'cancel' },
-               { text: 'Remove', style: 'destructive', onPress: () => call('salon_remove_member', { p_barber: m.id }) }])}
+            <Pressable disabled={busy} onPress={() => Alert.alert(tr('Remove from salon?'),
+              tr('{name} loses this chair and is unlinked from the salon.', { name: m.name }),
+              [{ text: tr('Cancel'), style: 'cancel' },
+               { text: tr('Remove'), style: 'destructive', onPress: () => call('salon_remove_member', { p_barber: m.id }) }])}
               style={({ pressed }) => [s.removeBtn, pressed && s.pressed]}>
               <Ionicons name="trash-outline" size={16} color={colors.danger} />
-              <Text style={s.removeText}>Remove from salon</Text>
+              <Text style={s.removeText}>{tr('Remove from salon')}</Text>
             </Pressable>
           )}
         </>
@@ -829,21 +829,21 @@ function DefaultCommissionSheet({ salon, onClose, onSaved }: {
     setBusy(true);
     const { error } = await supabase.from('salons').update({ default_commission: pct }).eq('id', salon.id);
     setBusy(false);
-    if (error) return Alert.alert('Could not save', error.message);
+    if (error) return Alert.alert(tr('Could not save'), error.message);
     onSaved();
   }
   return (
     <Sheet onClose={onClose}>
-      <Text style={s.sheetTitle}>Default commission</Text>
-      <Text style={s.memberMeta}>Applied to new commission barbers as their starting split.</Text>
+      <Text style={s.sheetTitle}>{tr('Default commission')}</Text>
+      <Text style={s.memberMeta}>{tr('Applied to new commission barbers as their starting split.')}</Text>
       <View style={s.rowCenter}>
-        <Text style={s.fieldLabel}>TO BARBER</Text>
+        <Text style={s.fieldLabel}>{tr('TO BARBER')}</Text>
         <View style={s.grow} />
-        <Text style={s.splitValue}>{pct}% <Text style={s.splitMuted}>/ {100 - pct}% shop</Text></Text>
+        <Text style={s.splitValue}>{pct}% <Text style={s.splitMuted}>{tr('/ {x}% shop', { x: 100 - pct })}</Text></Text>
       </View>
       <Split value={pct} onChange={setPct} editable />
       <Pressable disabled={busy} onPress={save} style={({ pressed }) => [s.cta, pressed && s.pressed]}>
-        {busy ? <ActivityIndicator color={colors.onAccent} /> : <Text style={s.ctaText}>Save</Text>}
+        {busy ? <ActivityIndicator color={colors.onAccent} /> : <Text style={s.ctaText}>{tr('Save')}</Text>}
       </Pressable>
     </Sheet>
   );
@@ -857,25 +857,25 @@ function SalonHoursSheet({ salon, onClose, onSaved }: {
   const [close, setClose] = useState(salon.close_min);
   const [busy, setBusy] = useState(false);
   async function save() {
-    if (close <= open) return Alert.alert('Invalid hours', 'Closing must be after opening.');
+    if (close <= open) return Alert.alert(tr('Invalid hours'), tr('Closing must be after opening.'));
     setBusy(true);
     const { error } = await supabase.from('salons')
       .update({ open_min: open, close_min: close }).eq('id', salon.id);
     setBusy(false);
-    if (error) return Alert.alert('Could not save', error.message);
+    if (error) return Alert.alert(tr('Could not save'), error.message);
     onSaved();
   }
   return (
     <Sheet onClose={onClose}>
-      <Text style={s.sheetTitle}>Opening hours</Text>
-      <Text style={s.memberMeta}>Barbers can only set their own hours inside this window.</Text>
-      <HourStepper label="Opens" value={open} min={0} max={close - 30} onChange={setOpen} />
-      <HourStepper label="Closes" value={close} min={open + 30} max={1440} onChange={setClose} />
+      <Text style={s.sheetTitle}>{tr('Opening hours')}</Text>
+      <Text style={s.memberMeta}>{tr('Barbers can only set their own hours inside this window.')}</Text>
+      <HourStepper label={tr('Opens')} value={open} min={0} max={close - 30} onChange={setOpen} />
+      <HourStepper label={tr('Closes')} value={close} min={open + 30} max={1440} onChange={setClose} />
       {open === 0 && close === 1440 && (
-        <Text style={s.emptyHint}>Currently all-day — no limit on barber hours until you narrow it.</Text>
+        <Text style={s.emptyHint}>{tr('Currently all-day — no limit on barber hours until you narrow it.')}</Text>
       )}
       <Pressable disabled={busy} onPress={save} style={({ pressed }) => [s.cta, pressed && s.pressed]}>
-        {busy ? <ActivityIndicator color={colors.onAccent} /> : <Text style={s.ctaText}>Save hours</Text>}
+        {busy ? <ActivityIndicator color={colors.onAccent} /> : <Text style={s.ctaText}>{tr('Save hours')}</Text>}
       </Pressable>
     </Sheet>
   );
@@ -889,12 +889,12 @@ function HourStepper({ label, value, min, max, onChange }: {
     <View style={s.hoursRow}>
       <Text style={s.hoursLabel}>{label}</Text>
       <View style={s.grow} />
-      <Pressable onPress={() => step(-30)} hitSlop={6} accessibilityLabel={`${label} earlier`}
+      <Pressable onPress={() => step(-30)} hitSlop={6} accessibilityLabel={tr('{label} earlier', { label })}
         style={({ pressed }) => [s.stepBtn, pressed && s.pressed]}>
         <Ionicons name="remove" size={16} color={D.text} />
       </Pressable>
       <Text style={s.hoursValue}>{hhmm(value)}</Text>
-      <Pressable onPress={() => step(30)} hitSlop={6} accessibilityLabel={`${label} later`}
+      <Pressable onPress={() => step(30)} hitSlop={6} accessibilityLabel={tr('{label} later', { label })}
         style={({ pressed }) => [s.stepBtn, pressed && s.pressed]}>
         <Ionicons name="add" size={16} color={D.text} />
       </Pressable>
@@ -909,7 +909,7 @@ function HourStepper({ label, value, min, max, onChange }: {
 // stable and shareable today; onboarding still works by picking the salon, so
 // SEND INVITE says what actually happens rather than pretending.
 function shopCode(salon: SalonMeta) {
-  const word = salon.name.replace(/[^a-z]/gi, '').slice(0, 4).toUpperCase() || 'SHOP';
+  const word = salon.name.replace(/[^a-z]/gi, '').slice(0, 4).toUpperCase() || tr('SHOP');
   const n = salon.id.replace(/\D/g, '').slice(-2) || '01';
   return `${word}·${n}`;
 }
@@ -929,48 +929,47 @@ function InviteSheet({ salon, pending, onClose, onChanged }: {
     const { error } = await supabase.from('salons')
       .update({ default_commission: 100 - next }).eq('id', salon.id);
     setBusy(false);
-    if (error) Alert.alert('Could not save', error.message);
+    if (error) Alert.alert(tr('Could not save'), error.message);
     else onChanged();
   }
 
   return (
     <Sheet onClose={onClose}>
       <View style={s.rowCenter}>
-        <Text style={[s.sheetTitle, s.grow]}>Invite a barber</Text>
-        <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel="Close"
+        <Text style={[s.sheetTitle, s.grow]}>{tr('Invite a barber')}</Text>
+        <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button" accessibilityLabel={tr('Close')}
           style={({ pressed }) => [s.iconBtn, pressed && s.pressed]}>
           <Ionicons name="close" size={18} color={D.text} />
         </Pressable>
       </View>
 
       <T size={13} c={D.sub} style={{ lineHeight: 20 }}>
-        He installs Sterncut, picks {salon.name} with this code, and his chair appears here as a
-        request to approve. You keep control of hours and commission.
+        {tr('He installs Sterncut, picks {name} with this code, and his chair appears here as a request to approve. You keep control of hours and commission.', { name: salon.name })}
       </T>
 
       <View style={s.codeCard}>
-        <Eyebrow ls={1.8}>SHOP CODE</Eyebrow>
+        <Eyebrow ls={1.8}>{tr('SHOP CODE')}</Eyebrow>
         <Text style={s.codeValue}>{code}</Text>
         <View style={s.codeBtns}>
-          <Pressable onPress={() => Alert.alert('Shop code', code)} accessibilityRole="button"
-            accessibilityLabel="Show the shop code"
+          <Pressable onPress={() => Alert.alert(tr('Shop code'), code)} accessibilityRole="button"
+            accessibilityLabel={tr('Show the shop code')}
             style={({ pressed }) => [s.codeBtn, pressed && s.pressed]}>
             <Ico name="copy" size={14} />
-            <T w="b" size={12}>Copy</T>
+            <T w="b" size={12}>{tr('Copy')}</T>
           </Pressable>
           <Pressable onPress={() => Share.share({
-            message: `Join ${salon.name} on Sterncut — shop code ${code}`,
-          })} accessibilityRole="button" accessibilityLabel="Share the shop code"
+            message: tr('Join {salon} on Sterncut — shop code {code}', { salon: salon.name, code }),
+          })} accessibilityRole="button" accessibilityLabel={tr('Share the shop code')}
             style={({ pressed }) => [s.codeBtn, pressed && s.pressed]}>
             <Ico name="send" size={14} />
-            <T w="b" size={12}>Share</T>
+            <T w="b" size={12}>{tr('Share')}</T>
           </Pressable>
         </View>
       </View>
 
       <View style={s.orRow}>
         <View style={s.orLine} />
-        <T w="b" size={11} c={D.sub} ls={1.4}>OR BY PHONE</T>
+        <T w="b" size={11} c={D.sub} ls={1.4}>{tr('OR BY PHONE')}</T>
         <View style={s.orLine} />
       </View>
 
@@ -978,11 +977,11 @@ function InviteSheet({ salon, pending, onClose, onChanged }: {
         <Ico name="phone" size={16} color={D.sub} />
         <TextInput value={phone} onChangeText={setPhone} keyboardType="phone-pad"
           placeholder="+212 6•• ••• •••" placeholderTextColor={D.sub}
-          accessibilityLabel="Barber's phone number" style={s.phoneInput} />
+          accessibilityLabel={tr('Barber\'s phone number')} style={s.phoneInput} />
       </View>
 
       <View style={{ gap: 9 }}>
-        <Eyebrow ls={1.4}>STARTING COMMISSION</Eyebrow>
+        <Eyebrow ls={1.4}>{tr('STARTING COMMISSION')}</Eyebrow>
         <View style={s.commRow}>
           {[15, 20, 25].map((v) => (
             <Pressable key={v} onPress={() => saveDefault(v)} accessibilityRole="button"
@@ -991,17 +990,17 @@ function InviteSheet({ salon, pending, onClose, onChanged }: {
               <T w={pct === v ? 'b' : 'sb'} size={13} c={pct === v ? '#fff' : D.sub}>{v}%</T>
             </Pressable>
           ))}
-          <Pressable onPress={() => Alert.alert('Custom split',
-            'Set it per barber once they join — open them from the team list.')}
-            accessibilityRole="button" accessibilityLabel="Custom commission"
+          <Pressable onPress={() => Alert.alert(tr('Custom split'),
+            tr('Set it per barber once they join — open them from the team list.'))}
+            accessibilityRole="button" accessibilityLabel={tr('Custom commission')}
             style={({ pressed }) => [s.commBtn, pressed && s.pressed]}>
-            <T w="sb" size={13} c={D.sub}>Custom</T>
+            <T w="sb" size={13} c={D.sub}>{tr('Custom')}</T>
           </Pressable>
         </View>
       </View>
 
       <Pressable onPress={() => {
-        const msg = `Join ${salon.name} on Sterncut — shop code ${code}`;
+        const msg = tr('Join {salon} on Sterncut — shop code {code}', { salon: salon.name, code });
         if (phone.trim()) {
           const sep = Platform.OS === 'ios' ? '&' : '?';
           Linking.openURL(`sms:${phone.trim()}${sep}body=${encodeURIComponent(msg)}`)
@@ -1009,10 +1008,10 @@ function InviteSheet({ salon, pending, onClose, onChanged }: {
         } else {
           Share.share({ message: msg });
         }
-      }} accessibilityRole="button" accessibilityLabel="Send invite"
+      }} accessibilityRole="button" accessibilityLabel={tr('Send invite')}
         style={({ pressed }) => [s.cta, pressed && s.pressed]}>
         <Ionicons name="paper-plane" size={16} color={colors.onAccent} />
-        <Text style={s.ctaText}>Send invite</Text>
+        <Text style={s.ctaText}>{tr('Send invite')}</Text>
       </Pressable>
 
       {pending.map((m) => (
@@ -1020,9 +1019,9 @@ function InviteSheet({ salon, pending, onClose, onChanged }: {
           <View style={s.pendingPuck}><T w="b" size={11} c={D.sub}>{initials(m.name)}</T></View>
           <View style={s.grow}>
             <T w="b" size={13}>{m.name}</T>
-            <T size={11} c={colors.star} style={{ marginTop: 2 }}>Waiting for you to approve</T>
+            <T size={11} c={colors.star} style={{ marginTop: 2 }}>{tr('Waiting for you to approve')}</T>
           </View>
-          <T w="b" size={11} c={D.sub}>Review</T>
+          <T w="b" size={11} c={D.sub}>{tr('Review')}</T>
         </View>
       ))}
     </Sheet>
@@ -1039,7 +1038,8 @@ function weekLabel(iso: string) {
   const now = new Date();
   const thisWeek = new Date(now); thisWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7));
   const same = d.toISOString().slice(0, 10) === thisWeek.toISOString().slice(0, 10);
-  return (same ? 'This week · ' : 'Week of ') + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const date = d.toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' });
+  return same ? tr('This week · {date}', { date }) : tr('Week of {date}', { date });
 }
 
 function BarberEarnings({ member, onBack }: { member: Member; onBack: () => void }) {
@@ -1048,7 +1048,7 @@ function BarberEarnings({ member, onBack }: { member: Member; onBack: () => void
   useEffect(() => {
     if (member.pay !== 'commission') { setRows([]); return; }
     supabase.rpc('salon_barber_earnings', { p_barber: member.id }).then(({ data, error }) => {
-      if (error) { Alert.alert('Could not load payouts', error.message); onBack(); return; }
+      if (error) { Alert.alert(tr('Could not load payouts'), error.message); onBack(); return; }
       setRows((data as any[]).map((r) => ({
         start: r.period_start, bookings: r.bookings, gross: r.gross_cents,
         barber: r.barber_cents, shop: r.shop_cents,
@@ -1062,12 +1062,12 @@ function BarberEarnings({ member, onBack }: { member: Member; onBack: () => void
     <View style={s.screen}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.topRow}>
-          <Pressable onPress={onBack} hitSlop={8} accessibilityLabel="Go back"
+          <Pressable onPress={onBack} hitSlop={8} accessibilityLabel={tr('Go back')}
             style={({ pressed }) => [s.iconBtn, pressed && s.pressed]}>
             <Ionicons name="arrow-back" size={18} color={D.text} />
           </Pressable>
           <View style={s.grow}>
-            <Text style={s.overline}>EARNINGS</Text>
+            <Text style={s.overline}>{tr('EARNINGS')}</Text>
             <Text style={s.title} numberOfLines={1}>{member.name}</Text>
           </View>
           <View style={s.spacer} />
@@ -1078,40 +1078,38 @@ function BarberEarnings({ member, onBack }: { member: Member; onBack: () => void
         {member.pay === 'rent' && rows !== null && (
           <>
             <View style={s.payoutHero}>
-              <Text style={s.heroLabel}>CHAIR RENT DUE</Text>
-              <Text style={s.heroValue}>{dh(member.rent)}<Text style={s.heroPer}> / mo</Text></Text>
-              <Text style={s.heroNote}>Rent barber — keeps 100% of takings, so revenue stays private.</Text>
+              <Text style={s.heroLabel}>{tr('CHAIR RENT DUE')}</Text>
+              <Text style={s.heroValue}>{dh(member.rent)}<Text style={s.heroPer}>{' '}{tr('/ mo')}</Text></Text>
+              <Text style={s.heroNote}>{tr('Rent barber — keeps 100% of takings, so revenue stays private.')}</Text>
             </View>
-            <Text style={s.emptyHint}>Rent collection + receipts arrive with the payout rail (BACKLOG).</Text>
+            <Text style={s.emptyHint}>{tr('Rent collection + receipts arrive with the payout rail (BACKLOG).')}</Text>
           </>
         )}
 
         {member.pay === 'commission' && rows !== null && (
           <>
             <View style={s.payoutHero}>
-              <Text style={s.heroLabel}>OUTSTANDING · UNSETTLED</Text>
+              <Text style={s.heroLabel}>{tr('OUTSTANDING · UNSETTLED')}</Text>
               <Text style={s.heroValue}>{dh(outstanding)}</Text>
-              <Text style={s.heroNote}>Owed to {member.name.split(' ')[0]} at {member.split}% — accrued from bookings.
-                Nothing is settled in-app yet (pay at shop).</Text>
+              <Text style={s.heroNote}>{tr('Owed to {name} at {split}% — accrued from bookings. Nothing is settled in-app yet (pay at shop).', { name: member.name.split(' ')[0], split: member.split })}</Text>
             </View>
 
-            <Text style={s.sectionLabel}>BY WEEK</Text>
-            {rows.length === 0 && <Text style={s.emptyHint}>No bookings in the last 8 weeks.</Text>}
+            <Text style={s.sectionLabel}>{tr('BY WEEK')}</Text>
+            {rows.length === 0 && <Text style={s.emptyHint}>{tr('No bookings in the last 8 weeks.')}</Text>}
             {rows.map((r) => (
               <View key={r.start} style={s.weekRow}>
                 <View style={s.grow}>
                   <Text style={s.weekLabel}>{weekLabel(r.start)}</Text>
-                  <Text style={s.weekMeta}>{r.bookings} booking{r.bookings === 1 ? '' : 's'} · {dh(r.gross)} gross · {dh(r.shop)} shop</Text>
+                  <Text style={s.weekMeta}>{trn(r.bookings, '{n} booking · {gross} gross · {shop} shop', '{n} bookings · {gross} gross · {shop} shop', { gross: dh(r.gross), shop: dh(r.shop) })}</Text>
                 </View>
                 <Text style={s.weekAmt}>{dh(r.barber)}</Text>
               </View>
             ))}
 
-            <Text style={s.sectionLabel}>SETTLEMENTS & INVOICES</Text>
+            <Text style={s.sectionLabel}>{tr('SETTLEMENTS & INVOICES')}</Text>
             <View style={s.blockedCard}>
               <Ionicons name="time-outline" size={18} color={D.sub} />
-              <Text style={s.blockedText}>Money is paid at the shop today. In-app settlements, invoices and
-                marking a payout "paid" arrive with the Phase 2 payout rail — see BACKLOG.</Text>
+              <Text style={s.blockedText}>{tr('Money is paid at the shop today. In-app settlements, invoices and marking a payout "paid" arrive with the Phase 2 payout rail — see BACKLOG.')}</Text>
             </View>
           </>
         )}
@@ -1158,7 +1156,7 @@ function Sheet({ children, onClose }: { children: React.ReactNode; onClose: () =
   return (
     <Modal transparent animationType="slide" visible onRequestClose={onClose}>
       <KeyboardAvoidingView style={s.backdropWrap} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <Pressable style={s.backdrop} onPress={onClose} accessibilityLabel="Close" />
+        <Pressable style={s.backdrop} onPress={onClose} accessibilityLabel={tr('Close')} />
         <View style={s.sheet}>
           <View style={s.handle} />
           {children}

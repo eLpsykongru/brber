@@ -6,6 +6,7 @@ import {
 import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
+import { loc, tr, trn } from '../lib/i18n';
 
 // Turn 7 of "Customer App 1.dc.html" — 7a My Wallet, 7b the add-money alert,
 // 7c the empty and loading states.
@@ -28,20 +29,20 @@ type Tx = {
 };
 
 const LABEL: Record<Kind, string> = {
-  cash_topup: 'Cash top-up',
-  deposit: 'Deposit',
-  deposit_refund: 'Deposit refunded',
-  referral: 'Referral reward',
+  cash_topup: tr('Cash top-up'),
+  deposit: tr('Deposit'),
+  deposit_refund: tr('Deposit refunded'),
+  referral: tr('Referral reward'),
 };
 
 const when = (iso: string) => {
   const d = new Date(iso);
-  return `${d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · `
-    + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  return `${d.toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' })} · `
+    + d.toLocaleTimeString(loc('en-US'), { hour: 'numeric', minute: '2-digit' });
 };
 
 const dayOf = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  new Date(iso).toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' });
 
 export default function WalletScreen({ customerId, onBack }: {
   customerId: string; onBack: () => void;
@@ -53,7 +54,7 @@ export default function WalletScreen({ customerId, onBack }: {
       .select('id, kind, amount_cents, created_at, booking_id, salon:salons!salon_id(name),'
         + ' booking:bookings!booking_id(price_cents, starts_at)')
       .eq('user_id', customerId).order('created_at', { ascending: false });
-    if (error) Alert.alert('Could not load wallet', error.message);
+    if (error) Alert.alert(tr('Could not load wallet'), error.message);
     else setTxs(data as unknown as Tx[]);
   }, [customerId]);
 
@@ -74,13 +75,13 @@ export default function WalletScreen({ customerId, onBack }: {
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.header}>
           <Pressable onPress={onBack} hitSlop={8}
-            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel="Go back">
+            style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel={tr('Go back')}>
             <Ionicons name="arrow-back" size={16} color={colors.text} />
           </Pressable>
-          <Display size={18} style={s.headerTitle}>My wallet</Display>
-          <Pressable hitSlop={8} accessibilityLabel="How the wallet works"
-            onPress={() => Alert.alert('How the wallet works',
-              'Top up with cash at your barber. Use the balance as a deposit — 40% minimum — and pay the rest at the shop.')}
+          <Display size={18} style={s.headerTitle}>{tr('My wallet')}</Display>
+          <Pressable hitSlop={8} accessibilityLabel={tr('How the wallet works')}
+            onPress={() => Alert.alert(tr('How the wallet works'),
+              tr('Top up with cash at your barber. Use the balance as a deposit — 40% minimum — and pay the rest at the shop.'))}
             style={({ pressed }) => [s.puck, pressed && s.pressed]}>
             <Ionicons name="information-circle-outline" size={16} color={colors.text} />
           </Pressable>
@@ -88,12 +89,12 @@ export default function WalletScreen({ customerId, onBack }: {
 
         <View style={s.balanceCard}>
           <View>
-            <Text style={s.balanceLabel}>Wallet Balance</Text>
+            <Text style={s.balanceLabel}>{tr('Wallet Balance')}</Text>
             <Text style={s.balance}>
-              {balance.toLocaleString('en-US')}<Text style={s.balanceUnit}> DH</Text>
+              {balance.toLocaleString('en-US')}<Text style={s.balanceUnit}>{' '}{tr('DH')}</Text>
             </Text>
             {heldTotal > 0 && (
-              <Text style={s.balanceNote}>{heldTotal} DH paid toward an upcoming booking</Text>
+              <Text style={s.balanceNote}>{tr('{heldTotal} DH paid toward an upcoming booking', { heldTotal })}</Text>
             )}
           </View>
           {/* Slice 2 §1/§8: there is no card processor and there is not going to
@@ -102,10 +103,10 @@ export default function WalletScreen({ customerId, onBack }: {
               TODO(backlog): this button's real destination is G1 ("Pay at a
               Sterncut shop" — where, and how), which is still being designed. */}
           <Pressable accessibilityRole="button"
-            onPress={() => Alert.alert('Add money',
-              'Hand cash to your barber and he adds it to your balance on the spot.')}
+            onPress={() => Alert.alert(tr('Add money'),
+              tr('Hand cash to your barber and he adds it to your balance on the spot.'))}
             style={({ pressed }) => [s.addBtn, pressed && s.pressed]}>
-            <Text style={s.addText}>ADD MONEY</Text>
+            <Text style={s.addText}>{tr('ADD MONEY')}</Text>
           </Pressable>
         </View>
 
@@ -116,11 +117,10 @@ export default function WalletScreen({ customerId, onBack }: {
             </View>
             <View style={s.grow}>
               <Text style={s.heldTitle}>
-                {heldTotal} DH paid on {held.length} booking{held.length > 1 ? 's' : ''}
+                {trn(held.length, '{heldTotal} DH paid on {n} booking', '{heldTotal} DH paid on {n} bookings', { heldTotal })}
               </Text>
               <Text style={s.heldSub}>
-                Deposit{latestHeld?.salon ? ` · ${latestHeld.salon.name}` : ''}
-                {latestHeld?.booking ? `, ${dayOf(latestHeld.booking.starts_at)}` : ''}
+                {tr('Deposit{x}{x2}', { x: latestHeld?.salon ? ` · ${latestHeld.salon.name}` : '', x2: latestHeld?.booking ? `, ${dayOf(latestHeld.booking.starts_at)}` : '' })}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={15} color={colors.textTertiary} />
@@ -131,23 +131,22 @@ export default function WalletScreen({ customerId, onBack }: {
           <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary}
             style={s.noteIcon} />
           <Text style={s.noteText}>
-            Top up with cash at your barber. Use the balance as a deposit — 40% minimum — and pay
-            the rest at the shop.
+            {tr('Top up with cash at your barber. Use the balance as a deposit — 40% minimum — and pay the rest at the shop.')}
           </Text>
         </View>
 
-        <Text style={s.section}>Transactions</Text>
+        <Text style={s.section}>{tr('Transactions')}</Text>
 
         {txs === null && <ActivityIndicator style={s.spinner} color={colors.textSecondary} />}
         {txs?.length === 0 && (
-          <Text style={s.empty}>No transactions yet. Top up with cash at your barber.</Text>
+          <Text style={s.empty}>{tr('No transactions yet. Top up with cash at your barber.')}</Text>
         )}
 
         <View style={s.txList}>
           {rows.map((t) => {
             const credit = t.amount_cents > 0;
             const pct = t.kind === 'deposit' && t.booking
-              ? ` · ${Math.round((-t.amount_cents / t.booking.price_cents) * 100)}% of ${t.booking.price_cents / 100} DH`
+              ? ` · ${tr('{pct}% of {price} DH', { pct: Math.round((-t.amount_cents / t.booking.price_cents) * 100), price: t.booking.price_cents / 100 })}`
               : '';
             return (
               <View key={t.id} style={s.tx}>
@@ -157,12 +156,12 @@ export default function WalletScreen({ customerId, onBack }: {
                   </Text>
                   <Text style={s.txWhen}>
                     {when(t.created_at)}
-                    {pct || (t.kind === 'deposit_refund' ? ' · barber cancelled'
-                      : t.kind === 'referral' ? ' · first visit completed' : '')}
+                    {pct || (t.kind === 'deposit_refund' ? tr(' · barber cancelled')
+                      : t.kind === 'referral' ? tr(' · first visit completed') : '')}
                   </Text>
                 </View>
                 <Text style={[s.txDelta, credit && s.txCredit]}>
-                  {credit ? '+' : '−'} {Math.abs(t.amount_cents) / 100} DH
+                  {tr('{x} {x2} DH', { x: credit ? '+' : '−', x2: Math.abs(t.amount_cents) / 100 })}
                 </Text>
               </View>
             );

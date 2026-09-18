@@ -8,6 +8,7 @@ import { TopUpAttempt, TopUpFailedSheet } from '../components/Trouble';
 import { OPS_PHONE } from './BarberSupportScreens';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, inter, radius, sp, TOP_INSET } from '../theme';
+import { loc, tr, lang } from '../lib/i18n';
 
 // REAL since 0022: float + activity read wallet_transactions; Top-up calls the
 // agent_cash_topup RPC (owner-only, phone lookup, no commission — decided 2026-07-19).
@@ -19,40 +20,40 @@ type Tx = { id: string; name: string; phone: string | null; amount_cents: number
 
 const dh = (n: number) => `${n.toLocaleString('en-US')} DH`;
 const mask = (p: string | null) => {
-  if (!p) return 'No phone';
+  if (!p) return tr('No phone');
   const t = p.trim();
   return t.length > 6 ? `${t.slice(0, t.length - 6)}••• ${t.slice(-3)}` : t;
 };
 const when = (iso: string) => {
   const d = new Date(iso);
   return d.toDateString() === new Date().toDateString()
-    ? d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-    : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    ? d.toLocaleTimeString(loc('en-US'), { hour: 'numeric', minute: '2-digit' })
+    : d.toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' });
 };
 
 // Opens the OS print dialog (also offers Save-as-PDF → share to WhatsApp).
 async function printReceipt(t: Tx) {
   const d = new Date(t.created_at);
   const html = `<html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-    <body style="font-family:-apple-system,Roboto,sans-serif;color:#17181C;padding:24px">
+    <body dir="${lang() === 'ar' ? 'rtl' : 'ltr'}" style="font-family:-apple-system,Roboto,sans-serif;color:#17181C;padding:24px">
       <div style="max-width:360px;margin:0 auto">
         <div style="text-align:center;border-bottom:2px solid #E8474F;padding-bottom:12px">
           <div style="font-size:26px;font-weight:800;color:#E8474F;letter-spacing:1px">brber</div>
-          <div style="font-size:13px;color:#6E7076;margin-top:2px">Cash Top-up Receipt</div>
+          <div style="font-size:13px;color:#6E7076;margin-top:2px">${tr('Cash Top-up Receipt')}</div>
         </div>
         <table style="width:100%;font-size:14px;margin-top:16px;border-collapse:collapse">
-          <tr><td style="color:#6E7076;padding:4px 0">Reference</td><td style="text-align:right;font-weight:600">${t.id.slice(0, 8).toUpperCase()}</td></tr>
-          <tr><td style="color:#6E7076;padding:4px 0">Date</td><td style="text-align:right">${d.toLocaleDateString('en-GB')} · ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</td></tr>
-          <tr><td style="color:#6E7076;padding:4px 0">Customer</td><td style="text-align:right">${t.name}</td></tr>
-          ${t.phone ? `<tr><td style="color:#6E7076;padding:4px 0">Contact</td><td style="text-align:right">${mask(t.phone)}</td></tr>` : ''}
-          <tr><td style="color:#6E7076;padding:4px 0">Method</td><td style="text-align:right">Cash</td></tr>
+          <tr><td style="color:#6E7076;padding:4px 0">${tr('Reference')}</td><td style="text-align:right;font-weight:600">${t.id.slice(0, 8).toUpperCase()}</td></tr>
+          <tr><td style="color:#6E7076;padding:4px 0">${tr('Date')}</td><td style="text-align:right">${d.toLocaleDateString(loc('en-GB'))} · ${d.toLocaleTimeString(loc('en-US'), { hour: 'numeric', minute: '2-digit' })}</td></tr>
+          <tr><td style="color:#6E7076;padding:4px 0">${tr('Customer')}</td><td style="text-align:right">${t.name}</td></tr>
+          ${t.phone ? `<tr><td style="color:#6E7076;padding:4px 0">${tr('Contact')}</td><td style="text-align:right">${mask(t.phone)}</td></tr>` : ''}
+          <tr><td style="color:#6E7076;padding:4px 0">${tr('Method')}</td><td style="text-align:right">${tr('Cash')}</td></tr>
         </table>
         <div style="background:#FDE7E8;border-radius:12px;text-align:center;padding:16px;margin-top:16px">
-          <div style="font-size:12px;color:#6E7076;letter-spacing:1px">AMOUNT TOPPED UP</div>
+          <div style="font-size:12px;color:#6E7076;letter-spacing:1px">${tr('AMOUNT TOPPED UP')}</div>
           <div style="font-size:30px;font-weight:800">${t.amount_cents / 100} DH</div>
         </div>
         <div style="text-align:center;font-size:12px;color:#A0A2A8;margin-top:16px">
-          Funds are available immediately in your brber wallet.<br/>Thank you.
+          ${tr('Funds are available immediately in your brber wallet.')}<br/>${tr('Thank you.')}
         </div>
       </div>
     </body></html>`;
@@ -60,7 +61,7 @@ async function printReceipt(t: Tx) {
     await Print.printAsync({ html });
   } catch (e: any) {
     const msg = String(e?.message ?? e);
-    if (!/didn'?t complete|cancel/i.test(msg)) Alert.alert('Could not print receipt', msg);
+    if (!/didn'?t complete|cancel/i.test(msg)) Alert.alert(tr('Could not print receipt'), msg);
   }
 }
 
@@ -91,10 +92,10 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
     const { data, error } = await supabase.from('wallet_transactions')
       .select('id, amount_cents, created_at, user:profiles!user_id(full_name, phone)')
       .eq('created_by', barberId).order('created_at', { ascending: false });
-    if (error) { Alert.alert('Could not load wallet', error.message); return; }
+    if (error) { Alert.alert(tr('Could not load wallet'), error.message); return; }
     setTxs((data as any[]).map((r) => ({
       id: r.id, amount_cents: r.amount_cents, created_at: r.created_at,
-      name: r.user?.full_name ?? 'Client', phone: r.user?.phone ?? null,
+      name: r.user?.full_name ?? tr('Client'), phone: r.user?.phone ?? null,
     })));
   }, [barberId]);
 
@@ -123,7 +124,7 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
         return;
       }
       setFailed({
-        customer: { id: '', name: 'That client', phone },
+        customer: { id: '', name: tr('That client'), phone },
         cents: amountDh * 100, balance_cents: null,
         float_cents: Math.round(float_ * 100), salon: salon ?? '',
       });
@@ -134,12 +135,12 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
     await load();
     const row = Array.isArray(data) ? data[0] : data;
     const tx: Tx = {
-      id: row?.tx_id ?? '', name: row?.customer_name ?? 'Client', phone,
+      id: row?.tx_id ?? '', name: row?.customer_name ?? tr('Client'), phone,
       amount_cents: amountDh * 100, created_at: new Date().toISOString(),
     };
-    Alert.alert('Top-up confirmed', `${amountDh} DH credited to ${tx.name}.`, [
-      { text: 'Print receipt', onPress: () => printReceipt(tx) },
-      { text: 'OK' },
+    Alert.alert(tr('Top-up confirmed'), tr('{amountDh} DH credited to {name}.', { amountDh, name: tx.name }), [
+      { text: tr('Print receipt'), onPress: () => printReceipt(tx) },
+      { text: tr('OK') },
     ]);
   }
 
@@ -147,18 +148,18 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
     <View style={s.screen}>
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <View style={s.headText}>
-          <Text style={s.overline}>AGENT · {(salon ?? 'SALON').toUpperCase()}</Text>
-          <Text style={s.headTitle}>Wallet</Text>
+          <Text style={s.overline}>{tr('AGENT · {salon}', { salon: (salon ?? tr('SALON')).toUpperCase() })}</Text>
+          <Text style={s.headTitle}>{tr('Wallet')}</Text>
         </View>
 
         {/* float balance */}
         <View style={s.floatCard}>
           <View style={s.rowCenter}>
             <View style={s.redChip}><Ionicons name="wallet" size={18} color={colors.accent} /></View>
-            <Text style={s.floatLabel}>FLOAT BALANCE</Text>
+            <Text style={s.floatLabel}>{tr('FLOAT BALANCE')}</Text>
             <View style={s.grow} />
             <Pressable onPress={() => setHidden(!hidden)} hitSlop={8}
-              accessibilityLabel={hidden ? 'Show balance' : 'Hide balance'}
+              accessibilityLabel={hidden ? tr('Show balance') : tr('Hide balance')}
               style={({ pressed }) => [s.eyeBtn, pressed && s.pressed]}>
               <Ionicons name={hidden ? 'eye-off-outline' : 'eye-outline'} size={18} color={D.sub} />
             </Pressable>
@@ -167,27 +168,27 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
           {/* 11c — the limit, while there is still room to act on it */}
           <FloatCapMeter st={float$} onAsk={askCollection} />
           {(float$?.pct ?? 0) < 70 && (
-            <Text style={s.floatSub}>Cash collected for customer top-ups</Text>
+            <Text style={s.floatSub}>{tr('Cash collected for customer top-ups')}</Text>
           )}
-          <Pressable onPress={() => setSheet(true)} accessibilityLabel="Top-up"
+          <Pressable onPress={() => setSheet(true)} accessibilityLabel={tr('Top-up')}
             style={({ pressed }) => [s.topupBtn, pressed && s.pressed]}>
             <Ionicons name="arrow-down" size={18} color={colors.onAccent} />
-            <Text style={s.topupText}>Top-up</Text>
+            <Text style={s.topupText}>{tr('Top-up')}</Text>
           </Pressable>
         </View>
 
         {/* activity */}
         <View style={s.rowCenter}>
-          <Text style={s.section}>Activity</Text>
+          <Text style={s.section}>{tr('Activity')}</Text>
           <View style={s.grow} />
-          <Pressable onPress={() => Alert.alert('Export', 'Coming soon — see BACKLOG.md')} accessibilityLabel="Export"
+          <Pressable onPress={() => Alert.alert(tr('Export'), tr('Coming soon — see BACKLOG.md'))} accessibilityLabel={tr('Export')}
             style={({ pressed }) => [s.rowCenter, pressed && s.pressed]}>
             <Ionicons name="funnel-outline" size={14} color={D.sub} />
-            <Text style={s.exportText}>Export</Text>
+            <Text style={s.exportText}>{tr('Export')}</Text>
           </Pressable>
         </View>
         {txs === null && <ActivityIndicator style={s.spinner} />}
-        {txs?.length === 0 && <Text style={s.empty}>No top-ups yet — take the first one.</Text>}
+        {txs?.length === 0 && <Text style={s.empty}>{tr('No top-ups yet — take the first one.')}</Text>}
         {txs?.map((t) => (
           <View key={t.id} style={s.txRow}>
             <View style={s.txIcon}>
@@ -202,13 +203,13 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
               <Text style={s.txTime}>{when(t.created_at)}</Text>
             </View>
             <Pressable onPress={() => printReceipt(t)} hitSlop={8}
-              accessibilityLabel={`Print receipt for ${t.name}`}
+              accessibilityLabel={tr('Print receipt for {name}', { name: t.name })}
               style={({ pressed }) => [s.receiptBtn, pressed && s.pressed]}>
               <Ionicons name="print-outline" size={16} color={D.sub} />
             </Pressable>
           </View>
         ))}
-        <Note>The float only grows until settlement — no commission is taken on top-ups.</Note>
+        <Note>{tr('The float only grows until settlement — no commission is taken on top-ups.')}</Note>
       </ScrollView>
 
       {sheet && <TopupSheet onClose={() => setSheet(false)} onConfirm={topup} />}
@@ -241,7 +242,7 @@ function TopupSheet({ onClose, onConfirm }: {
 
   async function confirm() {
     if (mode === 'qr') {
-      Alert.alert('Scan QR', 'Coming soon — see BACKLOG.md');
+      Alert.alert(tr('Scan QR'), tr('Coming soon — see BACKLOG.md'));
       return;
     }
     if (!valid || busy) return;
@@ -253,13 +254,13 @@ function TopupSheet({ onClose, onConfirm }: {
     <Modal transparent animationType="slide" visible onRequestClose={onClose}>
       <KeyboardAvoidingView style={s.backdropWrap}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <Pressable style={s.backdrop} onPress={onClose} accessibilityLabel="Close" />
+        <Pressable style={s.backdrop} onPress={onClose} accessibilityLabel={tr('Close')} />
         <View style={s.sheet}>
           <View style={s.handle} />
           <View style={s.rowCenter}>
-            <Text style={s.sheetTitle}>Cash top-up</Text>
+            <Text style={s.sheetTitle}>{tr('Cash top-up')}</Text>
             <View style={s.grow} />
-            <Pressable onPress={onClose} hitSlop={8} accessibilityLabel="Close"
+            <Pressable onPress={onClose} hitSlop={8} accessibilityLabel={tr('Close')}
               style={({ pressed }) => [s.closeBtn, pressed && s.pressed]}>
               <Ionicons name="close" size={18} color={D.text} />
             </Pressable>
@@ -269,40 +270,40 @@ function TopupSheet({ onClose, onConfirm }: {
             <Pressable onPress={() => setMode('phone')} accessibilityState={{ selected: mode === 'phone' }}
               style={[s.segItem, mode === 'phone' && s.segItemOn]}>
               <Ionicons name="call-outline" size={15} color={mode === 'phone' ? colors.onAccent : D.sub} />
-              <Text style={[s.segText, mode === 'phone' && s.segTextOn]}>Phone</Text>
+              <Text style={[s.segText, mode === 'phone' && s.segTextOn]}>{tr('Phone')}</Text>
             </Pressable>
             <Pressable onPress={() => setMode('qr')} accessibilityState={{ selected: mode === 'qr' }}
               style={[s.segItem, mode === 'qr' && s.segItemOn]}>
               <Ionicons name="scan-outline" size={15} color={mode === 'qr' ? colors.onAccent : D.sub} />
-              <Text style={[s.segText, mode === 'qr' && s.segTextOn]}>Scan QR</Text>
+              <Text style={[s.segText, mode === 'qr' && s.segTextOn]}>{tr('Scan QR')}</Text>
             </Pressable>
           </View>
 
           {mode === 'phone' ? (
             <>
-              <Text style={s.fieldLabel}>CUSTOMER PHONE</Text>
+              <Text style={s.fieldLabel}>{tr('CUSTOMER PHONE')}</Text>
               <View style={s.inputRow}>
                 <Ionicons name="search" size={16} color={D.sub} />
                 <TextInput value={phone} onChangeText={setPhone} keyboardType="phone-pad"
                   placeholder="+212 6•• ••• •••" placeholderTextColor={D.sub}
-                  style={s.input} accessibilityLabel="Customer phone" />
+                  style={s.input} accessibilityLabel={tr('Customer phone')} />
               </View>
             </>
           ) : (
             // TODO(backlog): no customer QR exists yet; needs expo-camera + a QR payload when real
             <View style={s.qrBox}>
               <Ionicons name="qr-code" size={72} color={D.sub} />
-              <Text style={s.qrText}>Point camera at customer's brber QR</Text>
+              <Text style={s.qrText}>{tr('Point camera at customer\'s brber QR')}</Text>
             </View>
           )}
 
-          <Text style={s.fieldLabel}>AMOUNT (DH)</Text>
+          <Text style={s.fieldLabel}>{tr('AMOUNT (DH)')}</Text>
           <TextInput value={amount} onChangeText={setAmount} keyboardType="number-pad"
             placeholder="0" placeholderTextColor={D.sub} style={s.amountInput}
-            accessibilityLabel="Amount in dirhams" />
+            accessibilityLabel={tr('Amount in dirhams')} />
           <View style={s.quickRow}>
             {[50, 100, 200, 500].map((q) => (
-              <Pressable key={q} onPress={() => setAmount(String(n + q))} accessibilityLabel={`Add ${q} dirhams`}
+              <Pressable key={q} onPress={() => setAmount(String(n + q))} accessibilityLabel={tr('Add {q} dirhams', { q })}
                 style={({ pressed }) => [s.quickChip, pressed && s.pressed]}>
                 <Text style={s.quickText}>+{q}</Text>
               </Pressable>
@@ -310,19 +311,19 @@ function TopupSheet({ onClose, onConfirm }: {
           </View>
 
           <View style={s.afterRow}>
-            <Text style={s.afterLabel}>Amount to credit</Text>
-            <Text style={s.afterValue}>{n} DH</Text>
+            <Text style={s.afterLabel}>{tr('Amount to credit')}</Text>
+            <Text style={s.afterValue}>{tr('{n} DH', { n })}</Text>
           </View>
 
           <Pressable disabled={busy || (mode === 'phone' && !valid)} onPress={confirm}
-            accessibilityLabel="Confirm cash received"
+            accessibilityLabel={tr('Confirm cash received')}
             style={({ pressed }) => [s.cta, (busy || (mode === 'phone' && !valid)) && s.ctaDisabled, pressed && s.pressed]}>
             {busy ? <ActivityIndicator color={colors.onAccent} />
-              : <Text style={[s.ctaText, mode === 'phone' && !valid && s.ctaTextDisabled]}>Confirm cash received</Text>}
+              : <Text style={[s.ctaText, mode === 'phone' && !valid && s.ctaTextDisabled]}>{tr('Confirm cash received')}</Text>}
           </Pressable>
           <View style={s.footNote}>
             <Ionicons name="information-circle-outline" size={13} color={D.sub} />
-            <Text style={s.footText}>Credited to the customer's wallet instantly</Text>
+            <Text style={s.footText}>{tr('Credited to the customer\'s wallet instantly')}</Text>
           </View>
         </View>
       </KeyboardAvoidingView>

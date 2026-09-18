@@ -12,6 +12,7 @@ import { AskBlock, AskedSheet, type AskRecord } from './AskSheet';
 import BookingNoteSheet from './BookingNote';
 import { PillButton, Stars } from './ui';
 import SlotPicker from './SlotPicker';
+import { loc, tr, trn } from '../lib/i18n';
 
 type SalonLike = { id: string; name: string; address: string | null; barbers: Specialist[] };
 type Step = 'service' | 'barber' | 'time' | 'summary';
@@ -33,10 +34,10 @@ const hhmm = (d: Date) => d.toTimeString().slice(0, 5);
 function freeLabel(t: Date): string {
   const midnight = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
   const days = Math.round((midnight(t) - midnight(new Date())) / 86_400_000);
-  const when = days === 0 ? 'today'
-    : days === 1 ? 'tomorrow'
-      : t.toLocaleDateString('en-US', { weekday: 'short' });
-  return `Free at ${hhmm(t)} ${when}`;
+  const at = hhmm(t);
+  return days === 0 ? tr('Free at {at} today', { at })
+    : days === 1 ? tr('Free at {at} tomorrow', { at })
+      : tr('Free at {at} {day}', { at, day: t.toLocaleDateString(loc('en-US'), { weekday: 'short' }) });
 }
 
 // distinct active service names across the salon, with price range
@@ -309,7 +310,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
       if (m.includes('wallet') || m.includes('deposit')) return setFailed('deposit');
       if (m.includes('another booking') || m.includes('outside working')
         || m.includes('unavailable') || m.includes('future')) return setFailed('slot');
-      return Alert.alert('Could not book', error.message);
+      return Alert.alert(tr('Could not book'), error.message);
     }
     setDone({ id: row!.id, deposit: row!.deposit_cents }); // 8c
     onBooked();
@@ -324,7 +325,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
     : [];
 
   const STEP_TITLE: Record<Step, string> = {
-    service: 'Choose a service', barber: 'Who cuts', time: 'Pick a time', summary: 'Overview',
+    service: tr('Choose a service'), barber: tr('Who cuts'), time: tr('Pick a time'), summary: tr('Overview'),
   };
   const stepIndex = ['service', 'barber', 'time', 'summary'].indexOf(step);
 
@@ -365,9 +366,9 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
                   that chip was promising — a toggle between one live mode and
                   one lie is not a choice. Priced bundles stay on the salon
                   page's Bundles tab, where a real saving can be shown. */}
-              <Text style={s.pickHint}>Pick one, or several for a single sitting.</Text>
+              <Text style={s.pickHint}>{tr('Pick one, or several for a single sitting.')}</Text>
               {menu.length === 0 ? (
-                <Text style={s.note}>No services listed yet.</Text>
+                <Text style={s.note}>{tr('No services listed yet.')}</Text>
               ) : menu.map((m) => {
                 const on = serviceNames.includes(m.name);
                 // ticking is the whole interaction now — no row navigates on its
@@ -391,7 +392,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
                       <Text style={s.optMeta}>{m.category}</Text>
                     </View>
                     <Text style={s.optPrice}>
-                      {m.min === m.max ? `${(m.min / 100).toFixed(0)}` : `${(m.min / 100).toFixed(0)}–${(m.max / 100).toFixed(0)}`} DH
+                      {tr('{x} DH', { x: m.min === m.max ? `${(m.min / 100).toFixed(0)}` : `${(m.min / 100).toFixed(0)}–${(m.max / 100).toFixed(0)}` })}
                     </Text>
                   </Pressable>
                 );
@@ -400,8 +401,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
                   can be one nobody in the shop does in a single sitting */}
               {serviceNames.length > 1 && offeringBarbers.length === 0 && (
                 <Text style={s.note}>
-                  Nobody here does all {serviceNames.length} in one sitting. Untick one, or book
-                  them separately.
+                  {tr('Nobody here does all {count} in one sitting. Untick one, or book them separately.', { count: serviceNames.length })}
                 </Text>
               )}
             </>
@@ -419,9 +419,9 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
                   <Ionicons name="people-outline" size={19} color={colors.onAccent} />
                 </View>
                 <View style={s.grow}>
-                  <Text style={s.anyName}>Anyone free</Text>
+                  <Text style={s.anyName}>{tr('Anyone free')}</Text>
                   <Text style={s.anyMeta}>
-                    More times to choose from{fromPrice > 0 ? ` · from ${dh(fromPrice)} DH` : ''}
+                    {tr('More times to choose from{x}', { x: fromPrice > 0 ? tr(' · from {fromPrice} DH', { fromPrice: dh(fromPrice) }) : '' })}
                   </Text>
                 </View>
                 {anyBarber && !barber
@@ -429,7 +429,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
                   : <View style={s.radio} />}
               </Pressable>
 
-              <Text style={s.pickEyebrow}>Or pick someone</Text>
+              <Text style={s.pickEyebrow}>{tr('Or pick someone')}</Text>
               {offeringBarbers.map((b) => {
                 const a = b.reviews.length ? b.reviews.reduce((n, r) => n + r.rating, 0) / b.reviews.length : null;
                 const { price } = sittingAt(b);
@@ -445,15 +445,15 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
                       </Text>
                     </View>
                     <View style={s.grow}>
-                      <Text style={s.optName}>{b.profiles?.full_name ?? 'Barber'}</Text>
+                      <Text style={s.optName}>{b.profiles?.full_name ?? tr('Barber')}</Text>
                       <Text style={s.optMeta}>
-                        {[a != null ? `${a.toFixed(1)} ★` : 'New', b.specialty,
+                        {[a != null ? `${a.toFixed(1)} ★` : tr('New'), b.specialty,
                           price > 0 ? `${dh(price)} DH` : null].filter(Boolean).join(' · ')}
                       </Text>
                       {/* undefined = still loading, null = nothing in 7 days.
                           Neither prints a time we don't have. */}
                       {nextFreeBy[b.id] && <Text style={s.freeAt}>{freeLabel(nextFreeBy[b.id]!)}</Text>}
-                      {nextFreeBy[b.id] === null && <Text style={s.freeNone}>Nothing free this week</Text>}
+                      {nextFreeBy[b.id] === null && <Text style={s.freeNone}>{tr('Nothing free this week')}</Text>}
                     </View>
                     {on
                       ? <View style={s.radioOn}><Ionicons name="checkmark" size={12} color={colors.onAccent} /></View>
@@ -481,7 +481,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
                 <AskBlock
                   salonId={(salon as any).id ?? null}
                   barberId={refBarber.id}
-                  barberName={refBarber.profiles?.full_name ?? 'your barber'}
+                  barberName={refBarber.profiles?.full_name ?? tr('your barber')}
                   salonName={salon.name}
                   serviceId={svc.id}
                   serviceName={serviceLabel}
@@ -489,7 +489,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
                   day={day}
                   coBarbers={salon.barbers
                     .filter((b) => b.id !== refBarber.id)
-                    .map((b) => (b.profiles?.full_name ?? 'A barber').split(' ')[0])}
+                    .map((b) => (b.profiles?.full_name ?? tr('A barber')).split(' ')[0])}
                   closesMin={(salon as any).close_min ?? null}
                   onAsked={setAsked} />
               )} />
@@ -498,27 +498,27 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
           {/* STEP 4 — summary */}
           {step === 'summary' && (
             <>
-              <SummaryCard label="Salon">
+              <SummaryCard label={tr('Salon')}>
                 <Text style={s.sumTitle}>{salon.name}</Text>
                 <Text style={s.optMeta}>{salon.address}</Text>
               </SummaryCard>
-              <SummaryCard label="Service" onEdit={() => setStep('service')}>
+              <SummaryCard label={tr('Service')} onEdit={() => setStep('service')}>
                 <View style={s.sumLine}>
                   <Text style={s.sumText}>{serviceLabel}</Text>
-                  <Text style={s.sumText}>{svc ? `${(total / 100).toFixed(0)} DH` : ''}</Text>
+                  <Text style={s.sumText}>{svc ? tr('{x} DH', { x: (total / 100).toFixed(0) }) : ''}</Text>
                 </View>
-                <Text style={s.optMeta}>{svc?.duration_min} min · paid at the shop</Text>
+                <Text style={s.optMeta}>{tr('{duration_min} min · paid at the shop', { duration_min: svc?.duration_min })}</Text>
               </SummaryCard>
-              <SummaryCard label="Specialist" onEdit={() => setStep('barber')}>
+              <SummaryCard label={tr('Specialist')} onEdit={() => setStep('barber')}>
                 <Text style={s.sumText}>{barber?.profiles?.full_name}</Text>
-                <Text style={s.optMeta}>{barber?.specialty ?? 'Barber'}</Text>
+                <Text style={s.optMeta}>{barber?.specialty ?? tr('Barber')}</Text>
               </SummaryCard>
-              <SummaryCard label="When" onEdit={() => setStep('time')}>
+              <SummaryCard label={tr('When')} onEdit={() => setStep('time')}>
                 <Text style={s.sumText}>
                   {time?.toDateString()} · {time?.toTimeString().slice(0, 5)}
                 </Text>
               </SummaryCard>
-              <SummaryCard label="Your details">
+              <SummaryCard label={tr('Your details')}>
                 <Text style={s.sumText}>{me?.name ?? '—'}</Text>
                 <Text style={s.optMeta}>{me?.phone ?? ''}{me?.email ? `  ·  ${me.email}` : ''}</Text>
               </SummaryCard>
@@ -531,11 +531,11 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
                         <Ionicons name="wallet-outline" size={16} color="#fff" />
                       </View>
                       <View style={s.grow}>
-                        <Text style={s.payTitle}>Pay in full at the shop</Text>
+                        <Text style={s.payTitle}>{tr('Pay in full at the shop')}</Text>
                         <Text style={s.paySub}>
                           {walletCents != null
-                            ? `Wallet ${(walletCents / 100).toFixed(0)} DH · not spendable yet`
-                            : 'Wallet balance unavailable'}
+                            ? tr('Wallet {x} DH · not spendable yet', { x: (walletCents / 100).toFixed(0) })
+                            : tr('Wallet balance unavailable')}
                         </Text>
                       </View>
                       {/* locked: 100% is the barber's condition, not a choice */}
@@ -544,12 +544,12 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
                     <View style={s.paySplit}>
                       <View style={s.paySplitRow}>
                         <View>
-                          <Text style={s.payLabel}>DUE UP FRONT</Text>
-                          <Text style={s.payBig}>{(total / 100).toFixed(0)} DH</Text>
+                          <Text style={s.payLabel}>{tr('DUE UP FRONT')}</Text>
+                          <Text style={s.payBig}>{tr('{x} DH', { x: (total / 100).toFixed(0) })}</Text>
                         </View>
                         <View style={{ alignItems: 'flex-end' }}>
-                          <Text style={s.payLabel}>SPLIT LATER</Text>
-                          <Text style={s.paySmall}>0 DH</Text>
+                          <Text style={s.payLabel}>{tr('SPLIT LATER')}</Text>
+                          <Text style={s.paySmall}>{tr('0 DH')}</Text>
                         </View>
                       </View>
                       <View style={s.payTrack}>
@@ -559,10 +559,10 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
                       <View style={s.payFoot}>
                         <View style={s.payLockRow}>
                           <Ionicons name="lock-closed" size={10} color="rgba(255,255,255,0.45)" />
-                          <Text style={s.payLock}>LOCKED AT 100%</Text>
+                          <Text style={s.payLock}>{tr('LOCKED AT 100%')}</Text>
                         </View>
                         <Text style={s.payOf}>
-                          {(total / 100).toFixed(0)} DH of {(total / 100).toFixed(0)} DH
+                          {tr('{x} DH of {x} DH', { x: (total / 100).toFixed(0) })}
                         </Text>
                       </View>
                     </View>
@@ -573,9 +573,9 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
                       <Ionicons name="information-circle-outline" size={14} color={colors.accent} />
                     </View>
                     <View style={s.grow}>
-                      <Text style={s.warnTitle}>This barber asks you to pay up front</Text>
+                      <Text style={s.warnTitle}>{tr('This barber asks you to pay up front')}</Text>
                       <Text style={s.warnBody}>
-                        Missed visits are why. Turn up to your next three and part-payment comes back.
+                        {tr('Missed visits are why. Turn up to your next three and part-payment comes back.')}
                       </Text>
                     </View>
                   </View>
@@ -602,16 +602,16 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
                   a short wallet just books the ordinary pay-at-the-shop way. */}
               {!upFront && svc && canDeposit && (
                 <>
-                  <Text style={s.payEyebrow}>PAYMENT</Text>
+                  <Text style={s.payEyebrow}>{tr('PAYMENT')}</Text>
                   <View style={s.depCard}>
                     <View style={s.payTop}>
                       <View style={s.payIcon}>
                         <Ionicons name="card-outline" size={16} color="#fff" />
                       </View>
                       <View style={s.grow}>
-                        <Text style={s.payTitle}>Pay part now from wallet</Text>
+                        <Text style={s.payTitle}>{tr('Pay part now from wallet')}</Text>
                         <Text style={s.paySub}>
-                          Balance {dh(walletCents!)} DH · enough to cover it
+                          {tr('Balance {dh} DH · enough to cover it', { dh: dh(walletCents!) })}
                         </Text>
                       </View>
                       <Pressable onPress={() => setDepositOn((v) => !v)} hitSlop={6}
@@ -623,30 +623,30 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
 
                     {depositOn && (
                       <Pressable onPress={() => setAdjustOpen(true)} style={s.depSplit}
-                        accessibilityLabel="Adjust the deposit">
+                        accessibilityLabel={tr('Adjust the deposit')}>
                         {/* 37b's breakdown. The coupon is a line, not a smaller
                             headline number — he should see what came off. */}
                         {discount > 0 && (
                           <View style={s.breakdown}>
                             <View style={s.cpnRow}>
                               <Text style={s.cpnLabel}>{serviceLabel}</Text>
-                              <Text style={s.cpnValue}>{dh(total)} DH</Text>
+                              <Text style={s.cpnValue}>{tr('{total} DH', { total: dh(total) })}</Text>
                             </View>
                             <View style={s.cpnRow}>
-                              <Text style={s.cpnLabel}>Coupon</Text>
-                              <Text style={s.cpnOff}>− {dh(discount)} DH</Text>
+                              <Text style={s.cpnLabel}>{tr('Coupon')}</Text>
+                              <Text style={s.cpnOff}>{tr('− {discount} DH', { discount: dh(discount) })}</Text>
                             </View>
                             <View style={s.cpnRule} />
                           </View>
                         )}
                         <View style={s.paySplitRow}>
                           <View>
-                            <Text style={s.payLabel}>DEPOSIT NOW</Text>
-                            <Text style={s.payBig}>{dh(deposit)} DH</Text>
+                            <Text style={s.payLabel}>{tr('DEPOSIT NOW')}</Text>
+                            <Text style={s.payBig}>{tr('{deposit} DH', { deposit: dh(deposit) })}</Text>
                           </View>
                           <View style={s.rightAlign}>
-                            <Text style={s.payLabel}>AT THE SHOP</Text>
-                            <Text style={s.depDue}>{dh(payable - deposit)} DH</Text>
+                            <Text style={s.payLabel}>{tr('AT THE SHOP')}</Text>
+                            <Text style={s.depDue}>{tr('{dh} DH', { dh: dh(payable - deposit) })}</Text>
                           </View>
                         </View>
                         <View style={s.depTrack}>
@@ -656,10 +656,10 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
                         <View style={s.payFoot}>
                           <View style={s.payLockRow}>
                             <Ionicons name="lock-closed" size={10} color="rgba(255,255,255,0.45)" />
-                            <Text style={s.payLock}>MIN {minPct}%</Text>
+                            <Text style={s.payLock}>{tr('MIN {minPct}%', { minPct })}</Text>
                           </View>
                           <Text style={s.payOf}>
-                            {Math.round((deposit / payable) * 100)}% of {dh(payable)} DH
+                            {tr('{round}% of {payable} DH', { round: Math.round((deposit / payable) * 100), payable: dh(payable) })}
                           </Text>
                           <Text style={s.payLock}>100%</Text>
                         </View>
@@ -671,7 +671,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
                               <Pressable key={p} onPress={() => setDepositCents(cents)}
                                 style={[s.quick, on && s.quickOn]}>
                                 <Text style={[s.quickText, on && s.quickTextOn]}>
-                                  {p === 100 ? 'Full' : `${p}%`}
+                                  {p === 100 ? tr('Full') : `${p}%`}
                                 </Text>
                               </Pressable>
                             );
@@ -689,17 +689,16 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
                         <Ionicons name="checkmark" size={13} color="#16A34A" />
                       </View>
                       <Text style={s.fullPriceText}>
-                        {barber?.profiles?.full_name?.split(' ')[0] ?? 'Your barber'} is still paid{' '}
-                        {dh(total)} DH. Sterncut covers the {dh(discount)}.
+                        {tr('{name} is still paid {total} DH. Sterncut covers the {discount}.', { name: barber?.profiles?.full_name?.split(' ')[0] ?? tr('Your barber'), total: dh(total), discount: dh(discount) })}
                       </Text>
                     </View>
                   )}
 
                   <View style={s.breakCard}>
-                    <BreakRow k="Wallet deposit" v={`${dh(deposit)} DH`} />
-                    <BreakRow k="Cash at the shop" v={`${dh(total - deposit)} DH`} />
+                    <BreakRow k={tr('Wallet deposit')} v={tr('{deposit} DH', { deposit: dh(deposit) })} />
+                    <BreakRow k={tr('Cash at the shop')} v={tr('{dh} DH', { dh: dh(total - deposit) })} />
                     <View style={s.breakHr} />
-                    <BreakRow k="Wallet after booking" v={`${dh(walletCents! - deposit)} DH`} />
+                    <BreakRow k={tr('Wallet after booking')} v={tr('{dh} DH', { dh: dh(walletCents! - deposit) })} />
                   </View>
                 </>
               )}
@@ -714,10 +713,10 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
               disabled={serviceNames.length === 0 || offeringBarbers.length === 0}
               onPress={() => setStep('barber')}
               title={serviceNames.length === 0
-                ? 'Pick a service'
+                ? tr('Pick a service')
                 : serviceNames.length === 1
-                  ? 'Continue'
-                  : `Continue · ${serviceNames.length} services`} />
+                  ? tr('Continue')
+                  : tr('Continue · {count} services', { count: serviceNames.length })} />
           </View>
         )}
         {step === 'barber' && (
@@ -726,14 +725,14 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
               disabled={!barber && !anyBarber}
               onPress={() => { setTime(null); setStep('time'); }}
               title={barber
-                ? `Continue with ${(barber.profiles?.full_name ?? 'them').split(' ')[0]}`
-                : 'Continue · anyone free'} />
+                ? tr('Continue with {name}', { name: (barber.profiles?.full_name ?? tr('them')).split(' ')[0] })
+                : tr('Continue · anyone free')} />
           </View>
         )}
         {step === 'time' && (
           <View style={s.footer}>
             {/* BOOK-02's CTA carries the time, so the button says what it books */}
-            <PillButton title={time ? `Review booking · ${hhmm(time)}` : 'Select a time'}
+            <PillButton title={time ? tr('Review booking · {time}', { time: hhmm(time) }) : tr('Select a time')}
               disabled={!time} onPress={() => setStep('summary')} />
           </View>
         )}
@@ -742,10 +741,10 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
             {/* 39d — one stop between deciding and booking, and it is skippable */}
             <PillButton loading={busy} onPress={() => setNoteOpen(true)}
               title={deposit > 0
-                ? `Pay ${dh(deposit)} DH & confirm`
+                ? tr('Pay {deposit} DH & confirm', { deposit: dh(deposit) })
                 : upFront && svc
-                  ? `Request · ${dh(total)} DH up front`
-                  : 'Confirm booking'} />
+                  ? tr('Request · {total} DH up front', { total: dh(total) })
+                  : tr('Confirm booking')} />
           </View>
         )}
 
@@ -756,43 +755,42 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
               <Ionicons name="checkmark" size={30} color={colors.accent} />
             </View>
             <View>
-              <Text style={s.doneTitle}>{done.deposit > 0 ? 'Slot held' : 'Request sent'}</Text>
+              <Text style={s.doneTitle}>{done.deposit > 0 ? tr('Slot held') : tr('Request sent')}</Text>
               <Text style={s.doneSub}>
                 {done.deposit > 0
-                  ? `Your ${dh(done.deposit)} DH deposit is paid from your wallet. Pay the remaining `
-                    + `${dh(total - done.deposit)} DH in cash at the shop.`
-                  : 'The barber will confirm your booking shortly. Pay at the shop.'}
+                  ? tr('Your {deposit} DH deposit is paid from your wallet. Pay the remaining {rest} DH in cash at the shop.', { deposit: dh(done.deposit), rest: dh(total - done.deposit) })
+                  : tr('The barber will confirm your booking shortly. Pay at the shop.')}
               </Text>
             </View>
             {done.deposit > 0 && (
               <View style={s.doneSplit}>
                 <View>
-                  <Text style={s.payLabel}>PAID FROM WALLET</Text>
-                  <Text style={s.payBig}>{dh(done.deposit)} DH</Text>
+                  <Text style={s.payLabel}>{tr('PAID FROM WALLET')}</Text>
+                  <Text style={s.payBig}>{tr('{deposit} DH', { deposit: dh(done.deposit) })}</Text>
                 </View>
                 <View style={s.rightAlign}>
-                  <Text style={s.payLabel}>DUE AT THE SHOP</Text>
-                  <Text style={s.doneDue}>{dh(total - done.deposit)} DH</Text>
+                  <Text style={s.payLabel}>{tr('DUE AT THE SHOP')}</Text>
+                  <Text style={s.doneDue}>{tr('{dh} DH', { dh: dh(total - done.deposit) })}</Text>
                 </View>
               </View>
             )}
             <View style={s.doneCard}>
-              <BreakRow k="Booking ID" v={`#${done.id.replace(/-/g, '').slice(0, 8).toUpperCase()}`} light />
-              <BreakRow k="Salon" v={salon.name} light />
-              <BreakRow k="Specialist" v={barber?.profiles?.full_name ?? '—'} light />
-              <BreakRow k="Service" v={`${serviceLabel} · ${mins} min`} light />
-              <BreakRow k="When" v={`${time?.toDateString()} · ${time?.toTimeString().slice(0, 5)}`} light />
+              <BreakRow k={tr('Booking ID')} v={`#${done.id.replace(/-/g, '').slice(0, 8).toUpperCase()}`} light />
+              <BreakRow k={tr('Salon')} v={salon.name} light />
+              <BreakRow k={tr('Specialist')} v={barber?.profiles?.full_name ?? '—'} light />
+              <BreakRow k={tr('Service')} v={tr('{serviceLabel} · {mins} min', { serviceLabel, mins })} light />
+              <BreakRow k={tr('When')} v={`${time?.toDateString()} · ${time?.toTimeString().slice(0, 5)}`} light />
               {done.deposit > 0 && (
                 <>
                   <View style={s.breakHr} />
-                  <BreakRow k={`Deposit (${Math.round((done.deposit / total) * 100)}%)`}
-                    v={`${dh(done.deposit)} DH paid`} />
-                  <BreakRow k="Wallet balance" v={`${dh((walletCents ?? 0) - done.deposit)} DH`} />
+                  <BreakRow k={tr('Deposit ({round}%)', { round: Math.round((done.deposit / total) * 100) })}
+                    v={tr('{deposit} DH paid', { deposit: dh(done.deposit) })} />
+                  <BreakRow k={tr('Wallet balance')} v={tr('{dh} DH', { dh: dh((walletCents ?? 0) - done.deposit) })} />
                 </>
               )}
             </View>
             <Pressable onPress={close} style={({ pressed }) => [s.doneBtn, pressed && s.pressed]}>
-              <Text style={s.doneBtnText}>DONE</Text>
+              <Text style={s.doneBtnText}>{tr('DONE')}</Text>
             </Pressable>
           </View>
         )}
@@ -805,38 +803,35 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
             <Ionicons name="warning-outline" size={30} color={colors.accent} />
           </View>
           <View>
-            <Text style={s.failTitle}>That slot just{'\n'}went</Text>
+            <Text style={s.failTitle}>{tr('That slot just\nwent')}</Text>
             <Text style={s.failSub}>
-              Someone booked {time?.toDateString().slice(0, 10)}{' '}
-              {time?.toTimeString().slice(0, 5)} with {barber?.profiles?.full_name?.split(' ')[0]}
-              {' '}a moment before you. Nothing was charged.
+              {tr('Someone booked {time} {time2} with {name} a moment before you. Nothing was charged.', { time: time?.toDateString().slice(0, 10), time2: time?.toTimeString().slice(0, 5), name: barber?.profiles?.full_name?.split(' ')[0] })}
             </Text>
           </View>
           <View style={s.failOk}>
             <View style={s.failTick}><Ionicons name="checkmark" size={11} color="#16A34A" /></View>
-            <Text style={s.failOkText}>Your wallet is untouched</Text>
-            <Text style={s.failOkAmount}>{dh(walletCents ?? 0)} DH</Text>
+            <Text style={s.failOkText}>{tr('Your wallet is untouched')}</Text>
+            <Text style={s.failOkAmount}>{tr('{dh} DH', { dh: dh(walletCents ?? 0) })}</Text>
           </View>
 
           {alternatives.length > 0 && (
             <>
-              <Text style={s.failEyebrow}>CLOSEST OPENINGS</Text>
+              <Text style={s.failEyebrow}>{tr('CLOSEST OPENINGS')}</Text>
               <View style={s.failList}>
                 {alternatives.map((sl) => (
                   <View key={sl.time.getTime()} style={s.failRow}>
                     <View style={s.grow}>
                       <Text style={s.failWhen}>
-                        {sl.time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                        {sl.time.toLocaleDateString(loc('en-US'), { weekday: 'short', month: 'short', day: 'numeric' })}
                         {' · '}{sl.time.toTimeString().slice(0, 5)}
                       </Text>
                       <Text style={s.optMeta}>
-                        {barber?.profiles?.full_name?.split(' ')[0]} ·{' '}
-                        {Math.round((sl.time.getTime() - (time?.getTime() ?? 0)) / 60000)} min later
+                        {tr('{name} · {round} min later', { name: barber?.profiles?.full_name?.split(' ')[0], round: Math.round((sl.time.getTime() - (time?.getTime() ?? 0)) / 60000) })}
                       </Text>
                     </View>
                     <Pressable onPress={() => { setTime(sl.time); setFailed(null); }}
                       style={({ pressed }) => [s.failBook, pressed && s.pressed]}>
-                      <Text style={s.failBookText}>BOOK</Text>
+                      <Text style={s.failBookText}>{tr('BOOK')}</Text>
                     </Pressable>
                   </View>
                 ))}
@@ -844,7 +839,7 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
             </>
           )}
           <Text style={s.failLink}
-            onPress={() => { setFailed(null); setStep('time'); }}>Pick another time</Text>
+            onPress={() => { setFailed(null); setStep('time'); }}>{tr('Pick another time')}</Text>
         </View>
       )}
 
@@ -858,32 +853,31 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
               <View style={s.failIconSm}>
                 <Ionicons name="close-circle-outline" size={26} color={colors.accent} />
               </View>
-              <Text style={s.failTitleSm}>Booking not confirmed</Text>
+              <Text style={s.failTitleSm}>{tr('Booking not confirmed')}</Text>
               <Text style={s.failSubSm}>
-                We couldn't take the deposit, so the slot wasn't held. Nothing left your wallet.
+                {tr('We couldn\'t take the deposit, so the slot wasn\'t held. Nothing left your wallet.')}
               </Text>
             </View>
             <View style={s.breakCard}>
-              <BreakRow k="Service" v={`${serviceLabel} · ${dh(total)} DH`} light />
-              <BreakRow k="Slot" v={`${time?.toDateString().slice(0, 10)} · ${time?.toTimeString().slice(0, 5)}`} light />
-              <BreakRow k="Deposit attempted" v={`${dh(deposit)} DH`} light />
+              <BreakRow k={tr('Service')} v={tr('{serviceLabel} · {total} DH', { serviceLabel, total: dh(total) })} light />
+              <BreakRow k={tr('Slot')} v={`${time?.toDateString().slice(0, 10)} · ${time?.toTimeString().slice(0, 5)}`} light />
+              <BreakRow k={tr('Deposit attempted')} v={tr('{deposit} DH', { deposit: dh(deposit) })} light />
               <View style={s.breakHr} />
-              <BreakRow k="Wallet balance" v={`${dh(walletCents ?? 0)} DH · unchanged`} />
+              <BreakRow k={tr('Wallet balance')} v={tr('{dh} DH · unchanged', { dh: dh(walletCents ?? 0) })} />
             </View>
             <View style={s.adjustNote}>
               <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary} />
               <Text style={s.adjustNoteText}>
-                The slot is still free — try again now, or book with cash only and pay it all at
-                the shop.
+                {tr('The slot is still free — try again now, or book with cash only and pay it all at the shop.')}
               </Text>
             </View>
             <Pressable onPress={() => { setFailed(null); confirm(); }}
               style={({ pressed }) => [s.doneBtn, pressed && s.pressed]}>
-              <Text style={s.doneBtnText}>TRY AGAIN · {dh(deposit)} DH</Text>
+              <Text style={s.doneBtnText}>{tr('TRY AGAIN · {deposit} DH', { deposit: dh(deposit) })}</Text>
             </Pressable>
             <Pressable onPress={() => { setFailed(null); setDepositOn(false); }}
               style={({ pressed }) => [s.keepBtn, pressed && s.pressed]}>
-              <Text style={s.keepText}>BOOK WITHOUT DEPOSIT</Text>
+              <Text style={s.keepText}>{tr('BOOK WITHOUT DEPOSIT')}</Text>
             </Pressable>
           </View>
         </>
@@ -904,12 +898,12 @@ export default function BookingSheet({ visible, salon, onClose, onBooked, onFini
       {/* 39d — "anything he should know?", the last step before the insert */}
       {barber && svc && time && (
         <BookingNoteSheet visible={noteOpen} onClose={() => setNoteOpen(false)}
-          who={barber.profiles?.full_name ?? 'Your barber'}
-          when={time.toLocaleString('en-US', {
+          who={barber.profiles?.full_name ?? tr('Your barber')}
+          when={time.toLocaleString(loc('en-US'), {
             weekday: 'short', month: 'short', day: 'numeric',
             hour: '2-digit', minute: '2-digit', hour12: false,
           })}
-          service={`${svc.name} · ${mins} min`}
+          service={tr('{service} · {mins} min', { service: svc.name, mins })}
           onSend={(note) => { setLastNote(note); confirm(note); }} />
       )}
     </Modal>
@@ -963,16 +957,16 @@ function AdjustSheet({ visible, price, floor, value, minPct, onClose, onPick }: 
         <View style={s.handle} />
         <View style={s.headRow}>
           <View style={s.headBtn} />
-          <Text style={s.headTitle}>Deposit amount</Text>
+          <Text style={s.headTitle}>{tr('Deposit amount')}</Text>
           <Pressable onPress={onClose} hitSlop={8} style={s.headBtn}>
             <Ionicons name="close" size={16} color={colors.text} />
           </Pressable>
         </View>
 
         <View style={s.adjustHead}>
-          <Text style={s.adjustBig}>{dh(draft)}<Text style={s.adjustUnit}> DH</Text></Text>
+          <Text style={s.adjustBig}>{dh(draft)}<Text style={s.adjustUnit}>{' '}{tr('DH')}</Text></Text>
           <Text style={s.adjustSub}>
-            {pct}% of {dh(price)} DH · {dh(price - draft)} DH cash at the shop
+            {tr('{pct}% of {price} DH · {dh} DH cash at the shop', { pct, price: dh(price), dh: dh(price - draft) })}
           </Text>
         </View>
 
@@ -989,9 +983,9 @@ function AdjustSheet({ visible, price, floor, value, minPct, onClose, onPick }: 
         <View style={s.adjustFoot}>
           <View style={s.payLockRow}>
             <Ionicons name="lock-closed" size={11} color={colors.textTertiary} />
-            <Text style={s.adjustFootText}>{minPct}% minimum</Text>
+            <Text style={s.adjustFootText}>{tr('{minPct}% minimum', { minPct })}</Text>
           </View>
-          <Text style={s.adjustFootText}>100% · {dh(price)} DH</Text>
+          <Text style={s.adjustFootText}>{tr('100% · {price} DH', { price: dh(price) })}</Text>
         </View>
 
         <View style={s.adjustChips}>
@@ -1002,7 +996,7 @@ function AdjustSheet({ visible, price, floor, value, minPct, onClose, onPick }: 
               <Pressable key={p} onPress={() => setDraft(cents)}
                 style={[s.adjustChip, on && s.adjustChipOn]}>
                 <Text style={[s.adjustChipText, on && s.adjustChipTextOn]}>
-                  {p === 100 ? 'Full' : `${p}%`}
+                  {p === 100 ? tr('Full') : `${p}%`}
                 </Text>
               </Pressable>
             );
@@ -1012,14 +1006,13 @@ function AdjustSheet({ visible, price, floor, value, minPct, onClose, onPick }: 
         <View style={s.adjustNote}>
           <Ionicons name="information-circle-outline" size={14} color={colors.textSecondary} />
           <Text style={s.adjustNoteText}>
-            A deposit of at least {minPct}% holds your slot. Refunded to your wallet if the barber
-            cancels.
+            {tr('A deposit of at least {minPct}% holds your slot. Refunded to your wallet if the barber cancels.', { minPct })}
           </Text>
         </View>
 
         <Pressable onPress={() => onPick(draft)}
           style={({ pressed }) => [s.doneBtn, pressed && s.pressed]}>
-          <Text style={s.doneBtnText}>USE {dh(draft)} DH DEPOSIT</Text>
+          <Text style={s.doneBtnText}>{tr('USE {draft} DH DEPOSIT', { draft: dh(draft) })}</Text>
         </Pressable>
       </View>
     </Modal>
@@ -1031,7 +1024,7 @@ function SummaryCard({ label, onEdit, children }: { label: string; onEdit?: () =
     <View style={s.sumCard}>
       <View style={s.sumHead}>
         <Text style={s.sumLabel}>{label}</Text>
-        {onEdit && <Pressable onPress={onEdit} hitSlop={6}><Text style={s.sumEdit}>Edit</Text></Pressable>}
+        {onEdit && <Pressable onPress={onEdit} hitSlop={6}><Text style={s.sumEdit}>{tr('Edit')}</Text></Pressable>}
       </View>
       {children}
     </View>
@@ -1070,14 +1063,13 @@ function CouponRow({ salonId, priceCents, coupon, onPick }: {
           <Ionicons name="pricetag-outline" size={16} color={colors.accent} />
         </View>
         <View style={s.grow}>
-          <Text style={s.couponTitle}>{coupon.code} applied</Text>
+          <Text style={s.couponTitle}>{tr('{code} applied', { code: coupon.code })}</Text>
           <Text style={s.couponSub}>
-            {dh(coupon.worth_cents ?? 0)} DH off
-            {coupon.min_spend_cents ? ' · min spend met' : ''}
+            {tr('{dh} DH off{x}', { dh: dh(coupon.worth_cents ?? 0), x: coupon.min_spend_cents ? tr(' · min spend met') : '' })}
           </Text>
         </View>
         <Pressable onPress={() => onPick(null)} hitSlop={8}>
-          <Text style={s.couponRemove}>Remove</Text>
+          <Text style={s.couponRemove}>{tr('Remove')}</Text>
         </Pressable>
       </View>
     );
@@ -1091,9 +1083,9 @@ function CouponRow({ salonId, priceCents, coupon, onPick }: {
         </View>
         <View style={s.grow}>
           <Text style={s.couponTitle}>
-            {usable.length} coupon{usable.length === 1 ? '' : 's'} you can use here
+            {trn(usable.length, '{n} coupon you can use here', '{n} coupons you can use here')}
           </Text>
-          <Text style={s.couponSub}>Comes off what you pay, not off the barber</Text>
+          <Text style={s.couponSub}>{tr('Comes off what you pay, not off the barber')}</Text>
         </View>
         <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={16}
           color={colors.textTertiary} />
@@ -1102,7 +1094,7 @@ function CouponRow({ salonId, priceCents, coupon, onPick }: {
         <Pressable key={c.id} onPress={() => { onPick(c); setOpen(false); }} style={s.couponPick}>
           <Text style={s.couponCode}>{c.code}</Text>
           <View style={s.grow} />
-          <Text style={s.couponWorth}>− {dh(c.worth_cents ?? 0)} DH</Text>
+          <Text style={s.couponWorth}>{tr('− {dh} DH', { dh: dh(c.worth_cents ?? 0) })}</Text>
         </Pressable>
       ))}
     </>

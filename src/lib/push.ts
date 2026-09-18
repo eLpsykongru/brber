@@ -5,6 +5,7 @@ import type { NotificationResponse } from 'expo-notifications';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { supabase } from './supabase';
+import { tr } from './i18n';
 
 // 4a — what a barber sees while his hands are busy. The banner itself is drawn
 // by the OS; our job is the payload, the Accept/Decline actions on it, and the
@@ -62,19 +63,19 @@ async function registerCategory() {
   await Notifications.setNotificationCategoryAsync(BOOKING_CATEGORY, [
     {
       identifier: 'DECLINE',
-      buttonTitle: 'Decline',
+      buttonTitle: tr('Decline'),
       options: { opensAppToForeground: false, isDestructive: true },
     },
     {
       identifier: 'ACCEPT',
-      buttonTitle: 'Accept',
+      buttonTitle: tr('Accept'),
       options: { opensAppToForeground: false },
     },
   ]);
 
   await Notifications.setNotificationCategoryAsync(CANCELLED_CATEGORY, [
-    { identifier: 'REPLY', buttonTitle: 'Reply', options: { opensAppToForeground: true } },
-    { identifier: 'OFFER', buttonTitle: 'Offer the slot', options: { opensAppToForeground: true } },
+    { identifier: 'REPLY', buttonTitle: tr('Reply'), options: { opensAppToForeground: true } },
+    { identifier: 'OFFER', buttonTitle: tr('Offer the slot'), options: { opensAppToForeground: true } },
   ]);
 }
 

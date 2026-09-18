@@ -5,6 +5,7 @@ import MapView, { Marker } from 'react-native-maps';
 import { Ico, Screen, Serif, T, TAB_INSET, TopBar } from '../components/dark';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D } from '../theme';
+import { loc, tr, trn } from '../lib/i18n';
 
 // 9c / 9d of "Barber App.dc.html" — the applying shop's own status screen, the
 // other side of admin 1f.
@@ -34,7 +35,7 @@ const CITY = { latitude: 35.7595, longitude: -5.834, latitudeDelta: 0.06, longit
 
 const initials = (n: string) => n.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 const dayMonth = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  new Date(iso).toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' });
 const hhmm = (m: number) =>
   `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 
@@ -49,7 +50,7 @@ export default function ApplicationScreen({ onBack, onGo }: {
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.rpc('my_salon_application');
-    if (error) return Alert.alert('Could not load your application', error.message);
+    if (error) return Alert.alert(tr('Could not load your application'), error.message);
     const a = data as App;
     setApp(a);
     if (a.lat != null && a.lng != null) setPin({ latitude: a.lat, longitude: a.lng });
@@ -59,8 +60,8 @@ export default function ApplicationScreen({ onBack, onGo }: {
   async function useMyLocation() {
     const perm = await Location.requestForegroundPermissionsAsync();
     if (!perm.granted) {
-      return Alert.alert('Location is off',
-        'Turn it on, or drag the pin to your door by hand.');
+      return Alert.alert(tr('Location is off'),
+        tr('Turn it on, or drag the pin to your door by hand.'));
     }
     const at = await Location.getCurrentPositionAsync({});
     setPin({ latitude: at.coords.latitude, longitude: at.coords.longitude });
@@ -72,16 +73,16 @@ export default function ApplicationScreen({ onBack, onGo }: {
     const { error } = await supabase.rpc('set_salon_pin',
       { p_lat: pin.latitude, p_lng: pin.longitude });
     setBusy(false);
-    if (error) return Alert.alert('Could not save the pin', error.message);
+    if (error) return Alert.alert(tr('Could not save the pin'), error.message);
     load();
   }
 
-  if (!app) return <Screen bottom={TAB_INSET}><TopBar title="Your shop" onBack={onBack} /></Screen>;
+  if (!app) return <Screen bottom={TAB_INSET}><TopBar title={tr('Your shop')} onBack={onBack} /></Screen>;
   if (!app.salon) {
     return (
       <Screen bottom={TAB_INSET}>
-        <TopBar title="Your shop" onBack={onBack} />
-        <T size={13} c={D.sub}>You don't own a shop yet.</T>
+        <TopBar title={tr('Your shop')} onBack={onBack} />
+        <T size={13} c={D.sub}>{tr('You don\'t own a shop yet.')}</T>
       </Screen>
     );
   }
@@ -95,30 +96,30 @@ export default function ApplicationScreen({ onBack, onGo }: {
 
   return (
     <Screen bottom={TAB_INSET}>
-      <TopBar title="Your shop" onBack={onBack} />
+      <TopBar title={tr('Your shop')} onBack={onBack} />
 
       <View style={s.shopHead}>
         <View style={s.shopAvatar}><T w="b" size={11} c={D.sub}>{initials(app.name)}</T></View>
         <View style={s.grow}>
           <T w="b" size={14}>{app.name}</T>
           <T size={11} c={D.sub} style={s.mt2}>
-            {app.submitted_at ? `Applied ${dayMonth(app.submitted_at)}` : 'Not submitted'}
-            {rejected ? ' · not accepted' : ' · not live yet'}
+            {app.submitted_at ? tr('Applied {submitted_at}', { submitted_at: dayMonth(app.submitted_at) }) : tr('Not submitted')}
+            {rejected ? tr(' · not accepted') : tr(' · not live yet')}
           </T>
         </View>
         {left > 0 && !rejected && (
           <View style={s.todoChip}>
-            <T w="b" size={10} c="#0D0D0F" ls={0.8}>{left} TO DO</T>
+            <T w="b" size={10} c="#0D0D0F" ls={0.8}>{tr('{left} TO DO', { left })}</T>
           </View>
         )}
       </View>
 
       <View style={s.progress}>
-        <T w="b" size={10} c={D.sub} ls={1.4}>{done} OF {app.checklist.length} DONE</T>
+        <T w="b" size={10} c={D.sub} ls={1.4}>{tr('{done} OF {count} DONE', { done, count: app.checklist.length })}</T>
         <Serif size={22} style={s.progressTitle}>
-          {rejected ? 'Not accepted'
-            : left === 0 ? 'With ops now'
-              : left === 1 ? 'One thing left' : `${left} things left`}
+          {rejected ? tr('Not accepted')
+            : left === 0 ? tr('With ops now')
+              : left === 1 ? tr('One thing left') : tr('{left} things left', { left })}
         </Serif>
         <View style={s.bars}>
           {app.checklist.map((c) => (
@@ -143,7 +144,7 @@ export default function ApplicationScreen({ onBack, onGo }: {
               : <View style={s.checkPip} />}
           </View>
           <T w="sb" size={12.5} c={c.ok ? D.sub : D.text} style={s.grow}>{c.label}</T>
-          {!c.ok && <T size={10.5} c={D.muted}>still needed</T>}
+          {!c.ok && <T size={10.5} c={D.muted}>{tr('still needed')}</T>}
         </View>
       ))}
 
@@ -156,9 +157,9 @@ export default function ApplicationScreen({ onBack, onGo }: {
               : <View style={s.checkPipHot} />}
           </View>
           <View style={s.grow}>
-            <T w="b" size={13}>Drop a pin on your door</T>
+            <T w="b" size={13}>{tr('Drop a pin on your door')}</T>
             <T size={11} c={D.sub} style={s.mt3}>
-              We can't list a shop we can't put on the map
+              {tr('We can\'t list a shop we can\'t put on the map')}
             </T>
           </View>
         </View>
@@ -174,7 +175,7 @@ export default function ApplicationScreen({ onBack, onGo }: {
           </MapView>
           {!pin && (
             <View pointerEvents="none" style={s.mapHint}>
-              <T w="b" size={10} c={D.sub} ls={0.8}>TAP YOUR DOOR</T>
+              <T w="b" size={10} c={D.sub} ls={0.8}>{tr('TAP YOUR DOOR')}</T>
             </View>
           )}
         </View>
@@ -182,11 +183,11 @@ export default function ApplicationScreen({ onBack, onGo }: {
         <View style={s.pinBtns}>
           <Pressable onPress={useMyLocation} style={s.ghostBtn}>
             <Ico name="crosshair" size={14} color={D.text} />
-            <T w="b" size={11.5}>I'M AT THE SHOP</T>
+            <T w="b" size={11.5}>{tr('I\'M AT THE SHOP')}</T>
           </Pressable>
           <Pressable disabled={!pin || busy} onPress={savePin}
             style={[s.saveBtn, (!pin || busy) && s.dim55]}>
-            <T w="b" size={11.5} c="#fff" ls={0.5}>{busy ? 'SAVING…' : 'SAVE THE PIN'}</T>
+            <T w="b" size={11.5} c="#fff" ls={0.5}>{busy ? tr('SAVING…') : tr('SAVE THE PIN')}</T>
           </Pressable>
         </View>
       </View>
@@ -195,8 +196,8 @@ export default function ApplicationScreen({ onBack, onGo }: {
         <Ico name="info" size={15} color={D.sub} />
         <T size={12} c={D.sub} style={s.noteText}>
           {left === 0
-            ? 'Everything is in. Ops looks at new shops within two working days.'
-            : 'Ops can only look at your shop once all of these are in.'}
+            ? tr('Everything is in. Ops looks at new shops within two working days.')
+            : tr('Ops can only look at your shop once all of these are in.')}
         </T>
       </View>
     </Screen>
@@ -215,50 +216,48 @@ function LiveScreen({ app, onBack, onGo }: {
   const h = app.preview.hours;
   return (
     <Screen bottom={TAB_INSET}>
-      <TopBar title="Your shop" onBack={onBack} />
+      <TopBar title={tr('Your shop')} onBack={onBack} />
 
       <View style={s.hero}>
         <View style={s.heroCircle}><Ico name="check" size={29} color={D.green} /></View>
-        <Serif size={25} style={s.heroTitle}>{app.name}{'\n'}is live</Serif>
+        <Serif size={25} style={s.heroTitle}>{tr('{name}\nis live', { name: app.name })}</Serif>
         <T size={12.5} c={D.sub} style={s.heroBody}>
-          {app.reviewer ? `Approved by ${app.reviewer}` : 'Approved'}{at ? ` at ${at}` : ''}.
-          {' '}People searching can find you from now.
+          {tr('{x}{x2}. People searching can find you from now.', { x: app.reviewer ? tr('Approved by {reviewer}', { reviewer: app.reviewer }) : tr('Approved'), x2: at ? tr(' at {at}', { at }) : '' })}
         </T>
       </View>
 
       <View style={s.exploreCard}>
-        <T w="b" size={10} c={D.sub} ls={1.4}>HOW YOU LOOK IN EXPLORE</T>
+        <T w="b" size={10} c={D.sub} ls={1.4}>{tr('HOW YOU LOOK IN EXPLORE')}</T>
         <View style={s.preview}>
           <View style={s.previewImg} />
           <View style={s.grow}>
             <View style={s.row6}>
               <T w="b" size={13.5} c="#111" style={s.grow}>{app.name}</T>
-              <T w="b" size={11} c="#8A8A85">{app.preview.reviews >= 3 ? 'Rated' : 'New'}</T>
+              <T w="b" size={11} c="#8A8A85">{app.preview.reviews >= 3 ? tr('Rated') : tr('New')}</T>
             </View>
             {!!app.address && <T size={11} c="#8A8A85" style={s.mt5}>{app.address}</T>}
             <T size={11} c="#8A8A85" style={s.mt3}>
-              {app.preview.from_cents != null
-                ? `From ${Math.round(app.preview.from_cents / 100)} DH · `
-                : ''}
-              {app.preview.services} service{app.preview.services === 1 ? '' : 's'}
+              {trn(app.preview.services, '{x}{n} service', '{x}{n} services', { x: app.preview.from_cents != null
+                ? tr('From {round} DH · ', { round: Math.round(app.preview.from_cents / 100) })
+                : '' })}
             </T>
           </View>
         </View>
         <T size={11} c={D.muted} style={s.previewNote}>
-          New shops show a "New" badge instead of a rating until the first 3 reviews land.
+          {tr('New shops show a "New" badge instead of a rating until the first 3 reviews land.')}
         </T>
       </View>
 
-      <T w="b" size={11} c={D.sub} ls={1.65} style={s.mt2}>FIRST THINGS</T>
-      <FirstThing icon="grid" ring title="Print your walk-in QR"
-        sub="Stick it outside the door" onPress={() => onGo?.('qr')} />
-      <FirstThing icon="calendar" title="Check your opening hours"
+      <T w="b" size={11} c={D.sub} ls={1.65} style={s.mt2}>{tr('FIRST THINGS')}</T>
+      <FirstThing icon="grid" ring title={tr('Print your walk-in QR')}
+        sub={tr('Stick it outside the door')} onPress={() => onGo?.('qr')} />
+      <FirstThing icon="calendar" title={tr('Check your opening hours')}
         sub={h.from != null
-          ? `${hhmm(h.from)} – ${hhmm(h.to!)}, ${h.days} day${h.days === 1 ? '' : 's'} a week`
-          : 'Not set yet'}
+          ? trn(h.days, '{from} – {hhmm}, {n} day a week', '{from} – {hhmm}, {n} days a week', { from: hhmm(h.from), hhmm: hhmm(h.to!) })
+          : tr('Not set yet')}
         onPress={() => onGo?.('hours')} />
-      <FirstThing icon="credit-card" title="Take cash top-ups"
-        sub="Your float starts at 0 DH" onPress={() => onGo?.('wallet')} />
+      <FirstThing icon="credit-card" title={tr('Take cash top-ups')}
+        sub={tr('Your float starts at 0 DH')} onPress={() => onGo?.('wallet')} />
     </Screen>
   );
 }

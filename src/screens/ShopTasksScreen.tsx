@@ -5,6 +5,7 @@ import { Alert, Image, Pressable, StyleSheet, View } from 'react-native';
 import { Ico, Screen, Serif, T, TAB_INSET, TopBar } from '../components/dark';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
+import { loc, tr, trn } from '../lib/i18n';
 
 // 9a / 9b of "Barber App.dc.html" — the task inbox, and what happens after he
 // answers one.
@@ -30,15 +31,15 @@ type Payload = {
 };
 
 const dayMonth = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  new Date(iso).toLocaleDateString(loc('en-US'), { weekday: 'short', month: 'short', day: 'numeric' });
 const clock = (iso: string) => new Date(iso).toTimeString().slice(0, 5);
 
 /** 9a's chip. Overdue is its own word — "due in -2 days" is not a sentence. */
 function dueLabel(t: Task) {
-  if (t.days_left == null) return 'NO DEADLINE';
-  if (t.days_left < 0) return `${-t.days_left} DAY${t.days_left === -1 ? '' : 'S'} OVERDUE`;
-  if (t.days_left === 0) return 'DUE TODAY';
-  return `DUE IN ${t.days_left} DAY${t.days_left === 1 ? '' : 'S'}`;
+  if (t.days_left == null) return tr('NO DEADLINE');
+  if (t.days_left < 0) return trn(-t.days_left, '{n} DAY OVERDUE', '{n} DAYS OVERDUE');
+  if (t.days_left === 0) return tr('DUE TODAY');
+  return trn(t.days_left, 'DUE IN {n} DAY', 'DUE IN {n} DAYS');
 }
 
 export default function ShopTasksScreen({ onBack, onChat }: {
@@ -52,7 +53,7 @@ export default function ShopTasksScreen({ onBack, onChat }: {
 
   const load = useCallback(async () => {
     const { data: j, error } = await supabase.rpc('my_shop_tasks');
-    if (error) return Alert.alert('Could not load your tasks', error.message);
+    if (error) return Alert.alert(tr('Could not load your tasks'), error.message);
     const p = j as Payload;
     setData(p);
     // keep the open task in step with the server after a proof lands
@@ -63,8 +64,8 @@ export default function ShopTasksScreen({ onBack, onChat }: {
   async function sendPhoto(t: Task) {
     const perm = await ImagePicker.requestCameraPermissionsAsync();
     if (!perm.granted) {
-      return Alert.alert('Camera is off',
-        'Sterncut needs the camera to send ops a photo of the poster.');
+      return Alert.alert(tr('Camera is off'),
+        tr('Sterncut needs the camera to send ops a photo of the poster.'));
     }
     const shot = await ImagePicker.launchCameraAsync({ quality: 0.6 });
     if (shot.canceled || !shot.assets[0]) return;
@@ -88,12 +89,12 @@ export default function ShopTasksScreen({ onBack, onChat }: {
     const body = await (await fetch(asset.uri)).arrayBuffer();
     const up = await supabase.storage.from('task-proof')
       .upload(path, body, { contentType: 'image/jpeg', upsert: true });
-    if (up.error) { setBusy(false); return Alert.alert('Could not send it', up.error.message); }
+    if (up.error) { setBusy(false); return Alert.alert(tr('Could not send it'), up.error.message); }
 
     const { error } = await supabase.rpc('submit_task_proof',
       { p_task: t.id, p_path: path, p_lat: lat, p_lng: lng });
     setBusy(false);
-    if (error) return Alert.alert('Could not send it', error.message);
+    if (error) return Alert.alert(tr('Could not send it'), error.message);
     load();
   }
 
@@ -107,7 +108,7 @@ export default function ShopTasksScreen({ onBack, onChat }: {
 
   return (
     <Screen bottom={TAB_INSET}>
-      <TopBar title="To do" onBack={onBack} />
+      <TopBar title={tr('To do')} onBack={onBack} />
 
       {!!data?.salon && (
         <View style={s.standing}>
@@ -118,19 +119,18 @@ export default function ShopTasksScreen({ onBack, onChat }: {
           <View style={s.grow}>
             <T w="b" size={13}>
               {good
-                ? `${data.name} is in good standing`
-                : `${data.standing.overdue} thing${data.standing.overdue === 1 ? '' : 's'} overdue`}
+                ? tr('{name} is in good standing', { name: data.name })
+                : trn(data.standing.overdue, '{n} thing overdue', '{n} things overdue')}
             </T>
             <T size={11} c={D.sub} style={s.mt2}>
-              {good ? 'Nothing overdue' : 'Ops is waiting on you'}
-              {' · '}{data.standing.done_on_time} task{data.standing.done_on_time === 1 ? '' : 's'} done on time
+              {trn(data.standing.done_on_time, '{x} · {n} task done on time', '{x} · {n} tasks done on time', { x: good ? tr('Nothing overdue') : tr('Ops is waiting on you') })}
             </T>
           </View>
         </View>
       )}
 
       {(data?.open.length ?? 0) > 0 && (
-        <T w="b" size={11} c={D.sub} ls={1.65} style={s.mt2}>OPEN · {data!.open.length}</T>
+        <T w="b" size={11} c={D.sub} ls={1.65} style={s.mt2}>{tr('OPEN · {count}', { count: data!.open.length })}</T>
       )}
 
       {data?.open.map((t) => {
@@ -141,7 +141,7 @@ export default function ShopTasksScreen({ onBack, onChat }: {
             <View style={s.row10}>
               <View style={[s.dueChip, urgent && !sent && s.dueChipHot]}>
                 <T w="b" size={10} ls={0.8} c={urgent && !sent ? '#0D0D0F' : D.sub}>
-                  {sent ? 'WITH OPS' : dueLabel(t)}
+                  {sent ? tr('WITH OPS') : dueLabel(t)}
                 </T>
               </View>
               <View style={s.grow} />
@@ -157,7 +157,7 @@ export default function ShopTasksScreen({ onBack, onChat }: {
               <View style={s.dueRow}>
                 <Ico name="clock" size={14} color={D.sub} />
                 <T size={11.5} c={D.sub} style={s.grow}>
-                  {dayMonth(t.due_at)} · nothing happens to your page before then
+                  {tr('{due_at} · nothing happens to your page before then', { due_at: dayMonth(t.due_at) })}
                 </T>
               </View>
             )}
@@ -168,7 +168,7 @@ export default function ShopTasksScreen({ onBack, onChat }: {
                   style={[s.primary, busy && s.dim55]}>
                   <Ico name={sent ? 'clock' : 'camera'} size={15} color="#fff" />
                   <T w="b" size={12} c="#fff" ls={0.6}>
-                    {busy ? 'SENDING…' : sent ? 'SEE WHAT YOU SENT' : 'SEND A PHOTO'}
+                    {busy ? tr('SENDING…') : sent ? tr('SEE WHAT YOU SENT') : tr('SEND A PHOTO')}
                   </T>
                 </Pressable>
                 <Pressable onPress={onChat} style={s.puck46}>
@@ -178,12 +178,12 @@ export default function ShopTasksScreen({ onBack, onChat }: {
             )}
             {t.action === 'invite' && (
               <Pressable style={s.secondary} onPress={onChat}>
-                <T w="b" size={12} ls={0.6}>INVITE HIM</T>
+                <T w="b" size={12} ls={0.6}>{tr('INVITE HIM')}</T>
               </Pressable>
             )}
             {t.action === 'settle' && (
               <Pressable style={s.secondary} onPress={onChat}>
-                <T w="b" size={12} ls={0.6}>SETTLE UP</T>
+                <T w="b" size={12} ls={0.6}>{tr('SETTLE UP')}</T>
               </Pressable>
             )}
           </View>
@@ -191,7 +191,7 @@ export default function ShopTasksScreen({ onBack, onChat }: {
       })}
 
       {(data?.done.length ?? 0) > 0 && (
-        <T w="b" size={11} c={D.sub} ls={1.65} style={s.mt2}>DONE</T>
+        <T w="b" size={11} c={D.sub} ls={1.65} style={s.mt2}>{tr('DONE')}</T>
       )}
       {data?.done.map((t) => (
         <View key={t.id} style={s.doneRow}>
@@ -199,8 +199,8 @@ export default function ShopTasksScreen({ onBack, onChat }: {
           <View style={s.grow}>
             <T w="sb" size={12.5}>{t.title}</T>
             <T size={10.5} c={D.muted} style={s.mt2}>
-              {new Date(t.resolved_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-              {t.resolution ? ` · ${t.resolution}` : ''} · {t.on_time ? 'on time' : 'late'}
+              {new Date(t.resolved_at).toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' })}
+              {t.resolution ? ` · ${t.resolution}` : ''} · {t.on_time ? tr('on time') : tr('late')}
             </T>
           </View>
         </View>
@@ -209,17 +209,16 @@ export default function ShopTasksScreen({ onBack, onChat }: {
       {data && data.open.length === 0 && data.done.length === 0 && (
         <View style={s.empty}>
           <View style={s.emptyCircle}><Ico name="check" size={28} color={D.muted} /></View>
-          <Serif size={20} style={s.center}>Nothing to do</Serif>
+          <Serif size={20} style={s.center}>{tr('Nothing to do')}</Serif>
           <T size={13} c={D.sub} style={s.emptyBody}>
-            When Sterncut needs something from the shop it lands here, with a date and
-            what happens if it passes.
+            {tr('When Sterncut needs something from the shop it lands here, with a date and what happens if it passes.')}
           </T>
         </View>
       )}
 
       {data && !data.salon && (
         <View style={s.empty}>
-          <T size={13} c={D.sub} style={s.center}>Only a shop owner has tasks.</T>
+          <T size={13} c={D.sub} style={s.center}>{tr('Only a shop owner has tasks.')}</T>
         </View>
       )}
     </Screen>
@@ -249,13 +248,13 @@ function ProofSent({ task, onBack, onReplace, busy }: {
 
   return (
     <Screen bottom={TAB_INSET}>
-      <TopBar title={`TASK · ${task.ref}`} onBack={onBack} plain />
+      <TopBar title={tr('TASK · {ref}', { ref: task.ref })} onBack={onBack} plain />
 
       <View style={s.hero}>
         <View style={s.heroCircle}><Ico name="clock" size={26} color={D.amber} /></View>
-        <Serif size={22} style={s.center}>Sent for checking</Serif>
+        <Serif size={22} style={s.center}>{tr('Sent for checking')}</Serif>
         <T size={12.5} c={D.sub} style={s.heroBody}>
-          Ops looks at it within a day. You don't need to do anything else.
+          {tr('Ops looks at it within a day. You don\'t need to do anything else.')}
         </T>
       </View>
 
@@ -266,30 +265,29 @@ function ProofSent({ task, onBack, onReplace, busy }: {
         <View style={s.row9}>
           <T size={11.5} c={D.sub} style={s.grow}>
             {task.proof_at
-              ? `Sent ${dayMonth(task.proof_at)}, ${clock(task.proof_at)}`
-              : 'Sent'}
-            {" · with your shop's location"}
+              ? tr('Sent {proof_at}, {proof_at2}', { proof_at: dayMonth(task.proof_at), proof_at2: clock(task.proof_at) })
+              : tr('Sent')}
+            {tr(' · with your shop\'s location')}
           </T>
           <Pressable disabled={busy} onPress={onReplace} hitSlop={8}>
-            <T w="b" size={11.5} c={D.accent}>{busy ? 'Sending…' : 'Replace'}</T>
+            <T w="b" size={11.5} c={D.accent}>{busy ? tr('Sending…') : tr('Replace')}</T>
           </Pressable>
         </View>
       </View>
 
       <View style={s.timeline}>
-        <Node done label="Task issued"
+        <Node done label={tr('Task issued')}
           sub={`${dayMonth(task.created_at)}${task.issued_because ? ` · ${task.issued_because}` : ''}`} />
-        <Node now label="You sent a photo"
-          sub={`${task.proof_at ? `${dayMonth(task.proof_at)} ${clock(task.proof_at)}` : 'Just now'}`
-            + (early != null && early > 0 ? ` · ${early} days before it was due` : '')} />
-        <Node last label="Ops confirms it" sub={`By ${dayMonth(by.toISOString())}`} />
+        <Node now label={tr('You sent a photo')}
+          sub={(task.proof_at ? `${dayMonth(task.proof_at)} ${clock(task.proof_at)}` : tr('Just now'))
+            + (early != null && early > 0 ? ` · ${trn(early, '{n} day before it was due', '{n} days before it was due')}` : '')} />
+        <Node last label={tr('Ops confirms it')} sub={tr('By {dayMonth}', { dayMonth: dayMonth(by.toISOString()) })} />
       </View>
 
       <View style={s.shieldNote}>
         <Ico name="shield" size={14} color={D.green} />
         <T size={12} c={D.sub} style={s.shieldNoteText}>
-          Once it's outside, scan times count as arrival times again — so a late client
-          can't blame the shop.
+          {tr('Once it\'s outside, scan times count as arrival times again — so a late client can\'t blame the shop.')}
         </T>
       </View>
     </Screen>
@@ -312,7 +310,7 @@ function Node({ label, sub, done, now, last }: {
       <View style={[s.grow, !last && s.nodePad]}>
         <View style={s.row6}>
           <T w={now ? 'b' : 'sb'} size={12.5} c={now ? D.text : last ? D.muted : D.sub}>{label}</T>
-          {now && <View style={s.nowChip}><T w="b" size={9.5} c={D.amber} ls={0.8}>NOW</T></View>}
+          {now && <View style={s.nowChip}><T w="b" size={9.5} c={D.amber} ls={0.8}>{tr('NOW')}</T></View>}
         </View>
         <T size={10.5} c={D.muted} style={s.mt2}>{sub}</T>
       </View>

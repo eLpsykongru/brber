@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { colors, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
 import { useBack } from './motion';
+import { tr } from '../lib/i18n';
 
 // Shared primitives — every screen builds from these so the app reads as one system.
 
@@ -26,7 +27,7 @@ export function ScreenHeader({ title, onBack, right }: {
   return (
     <View style={s.header}>
       {back ? (
-        <Pressable onPress={back} hitSlop={8} accessibilityLabel="Go back"
+        <Pressable onPress={back} hitSlop={8} accessibilityLabel={tr('Go back')}
           style={({ pressed }) => [s.backBtn, pressed && s.pressed]}>
           <Ionicons name="arrow-back" size={20} color={colors.text} />
         </Pressable>
@@ -114,7 +115,7 @@ export function Empty({ text, title, icon }: {
 // loading one — don't animate each block.
 export function HomeSkeleton() {
   return (
-    <View style={s.skWrap} accessibilityLabel="Loading" accessibilityRole="progressbar">
+    <View style={s.skWrap} accessibilityLabel={tr('Loading')} accessibilityRole="progressbar">
       <View style={s.skHead}>
         <View style={s.skGap8}>
           <View style={[s.sk, { width: 56, height: 8, borderRadius: 4 }]} />

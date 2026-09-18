@@ -7,6 +7,7 @@ import {
 } from '../lib/inboxRules';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
+import { loc, tr, trn, trRich } from '../lib/i18n';
 
 // G1 of "Notification Routing.dc.html" — BDY-14 and BDY-15 of "Barber - My Day".
 //
@@ -57,37 +58,37 @@ function dayWord(iso: string) {
   tomorrow.setDate(today.getDate() + 1);
   if (d.toDateString() === today.toDateString()) return 'today';
   if (d.toDateString() === tomorrow.toDateString()) return 'tomorrow';
-  return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+  return d.toLocaleDateString(loc('en-GB'), { weekday: 'short', day: 'numeric', month: 'short' });
 }
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const when = (iso: string) => `${cap(dayWord(iso))} ${hh(iso)}`;
 function dayTitle(iso: string) {
   const word = dayWord(iso);
-  const weekday = new Date(iso).toLocaleDateString('en-GB', { weekday: 'long' });
+  const weekday = new Date(iso).toLocaleDateString(loc('en-GB'), { weekday: 'long' });
   return word === 'today' || word === 'tomorrow' ? `${cap(word)} · ${weekday}` : word;
 }
 
 function moneyLine(b: Row) {
   const paid = b.deposit_cents ?? 0;
-  if (paid > 0 && paid >= b.price_cents) return `${dh(b.price_cents)}, already paid`;
-  if (paid > 0) return `${dh(b.price_cents)} · ${dh(paid)} already paid`;
-  return `${dh(b.price_cents)} at the shop`;
+  if (paid > 0 && paid >= b.price_cents) return tr('{price}, already paid', { price: dh(b.price_cents) });
+  if (paid > 0) return tr('{price} · {paid} already paid', { price: dh(b.price_cents), paid: dh(paid) });
+  return tr('{price} at the shop', { price: dh(b.price_cents) });
 }
 
 function fitLine(fit: Fit, at: string): { tone: Tone; text: string } {
   const t = hh(at);
-  if (fit.ok) return { tone: 'good', text: `${t} is free — no cut, no buffer in the way` };
+  if (fit.ok) return { tone: 'good', text: tr('{t} is free — no cut, no buffer in the way', { t }) };
   switch (fit.why) {
     case 'booked':
-      return { tone: 'bad', text: `${t} runs into ${fit.with.who}'s ${hh(fit.with.starts_at)} — a yes would not go through` };
+      return { tone: 'bad', text: tr('{t} runs into {who}\'s {starts_at} — a yes would not go through', { t, who: fit.with.who, starts_at: hh(fit.with.starts_at) }) };
     case 'buffer':
-      return { tone: 'warn', text: `${t} eats into your buffer around ${fit.with.who}'s ${hh(fit.with.starts_at)}` };
+      return { tone: 'warn', text: tr('{t} eats into your buffer around {who}\'s {starts_at}', { t, who: fit.with.who, starts_at: hh(fit.with.starts_at) }) };
     case 'break':
-      return { tone: 'warn', text: `${t} falls inside a break you set` };
+      return { tone: 'warn', text: tr('{t} falls inside a break you set', { t }) };
     case 'closed':
-      return { tone: 'warn', text: `${t} is outside your working hours` };
+      return { tone: 'warn', text: tr('{t} is outside your working hours', { t }) };
     default:
-      return { tone: 'bad', text: `You are off ${dayWord(at)}` };
+      return { tone: 'bad', text: tr('You are off {at}', { at: dayWord(at) }) };
   }
 }
 
@@ -115,7 +116,7 @@ export default function RescheduleAskScreen({ barberId, bookingId, onBack }: {
       supabase.from('bookings').select(ROW_COLS).eq('id', bookingId).maybeSingle(),
     ]);
     const err = rq.error ?? bk.error;
-    if (err) { Alert.alert('Could not load the ask', err.message); return; }
+    if (err) { Alert.alert(tr('Could not load the ask'), err.message); return; }
     if (!rq.data || !bk.data) { setGone(true); return; }
     const req = rq.data as Req;
     const booking = bk.data as unknown as Row;
@@ -159,28 +160,28 @@ export default function RescheduleAskScreen({ barberId, bookingId, onBack }: {
     setBusy(true);
     const { error } = await supabase.rpc('respond_reschedule', { p_request: ctx.req.id, p_accept: accept });
     setBusy(false);
-    if (error) { Alert.alert(accept ? 'Could not move the booking' : 'Could not answer', error.message); return; }
+    if (error) { Alert.alert(accept ? tr('Could not move the booking') : tr('Could not answer'), error.message); return; }
     load();
   }
 
   if (gone || !ctx) {
     return (
       <Screen gap={14}>
-        <TopBar title="Reschedule ask" onBack={onBack} />
+        <TopBar title={tr('Reschedule ask')} onBack={onBack} />
         {gone
-          ? <Note>This ask is no longer here — the booking behind it was removed.</Note>
-          : <ActivityIndicator color={D.accent} accessibilityLabel="Loading the ask" />}
+          ? <Note>{tr('This ask is no longer here — the booking behind it was removed.')}</Note>
+          : <ActivityIndicator color={D.accent} accessibilityLabel={tr('Loading the ask')} />}
       </Screen>
     );
   }
 
   const { req, booking } = ctx;
   const nameOf = (b: Row) =>
-    b.walk_in_name ?? (b.customer_id === barberId ? 'Walk-in' : b.customer?.full_name ?? 'Client');
+    b.walk_in_name ?? (b.customer_id === barberId ? tr('Walk-in') : b.customer?.full_name ?? tr('Client'));
   const name = nameOf(booking);
   const first = name.split(' ')[0];
   const now = Date.now();
-  const service = booking.services?.name ?? 'Service';
+  const service = booking.services?.name ?? tr('Service');
   const dur = Math.round((Date.parse(booking.ends_at) - Date.parse(booking.starts_at)) / 60_000);
   const from = req.from_start;
   const fromDay = localDay(new Date(from));
@@ -200,29 +201,29 @@ export default function RescheduleAskScreen({ barberId, bookingId, onBack }: {
       <View style={[s.slot, s.movedSlot]}>
         <View style={s.rowBase}>
           <T w="sb" size={13} style={s.grow}>{name}</T>
-          <T w="b" size={10.5} c={D.green} ls={0.5}>MOVED</T>
+          <T w="b" size={10.5} c={D.green} ls={0.5}>{tr('MOVED')}</T>
         </View>
-        <T size={11} c={D.sub} style={s.mt2}>{service} · {dh(booking.price_cents)} · was {hh(from)}</T>
+        <T size={11} c={D.sub} style={s.mt2}>{tr('{service} · {price_cents} · was {from}', { service, price_cents: dh(booking.price_cents), from: hh(from) })}</T>
       </View>
     );
     const gap = (
       <View style={s.gapCard}>
         <View style={s.rowBase}>
-          <T w="b" size={13} c={D.accent} style={s.grow}>Open — {dur} minutes</T>
-          <T w="b" size={10.5} c={D.faint} ls={0.8}>{spanLabel(noticeGiven).toUpperCase()} NOTICE</T>
+          <T w="b" size={13} c={D.accent} style={s.grow}>{tr('Open — {dur} minutes', { dur })}</T>
+          <T w="b" size={10.5} c={D.faint} ls={0.8}>{tr('{noticeGiven} NOTICE', { noticeGiven: spanLabel(noticeGiven).toUpperCase() })}</T>
         </View>
         <T size={11.5} c={D.sub} style={s.lh17}>
           {askedHere > 0
-            ? `${askedHere} on the waitlist asked for ${dayWord(from)}.`
-            : `Nobody on the waitlist asked for ${dayWord(from)} — your regulars can still be offered it.`}
+            ? tr('{askedHere} on the waitlist asked for {from}.', { askedHere, from: dayWord(from) })
+            : tr('Nobody on the waitlist asked for {from} — your regulars can still be offered it.', { from: dayWord(from) })}
         </T>
         {future && !offered && (
           <Pressable onPress={() => setOffer({ starts_at: from, service, duration_min: dur })}
             accessibilityRole="button" style={({ pressed }) => [s.redCta, pressed && s.pressed]}>
-            <T w="eb" size={11.5} c="#fff" ls={0.5}>OFFER IT TO THE WAITLIST</T>
+            <T w="eb" size={11.5} c="#fff" ls={0.5}>{tr('OFFER IT TO THE WAITLIST')}</T>
           </Pressable>
         )}
-        {offered && <T w="sb" size={11.5} c={D.green}>Offered — the first to tap it gets it.</T>}
+        {offered && <T w="sb" size={11.5} c={D.green}>{tr('Offered — the first to tap it gets it.')}</T>}
       </View>
     );
     const items: { at: string; key: string; tint: string; node: ReactNode }[] = [
@@ -240,8 +241,9 @@ export default function RescheduleAskScreen({ barberId, bookingId, onBack }: {
           <View style={s.greenStrip}>
             <Ico name="check" size={15} color={D.green} />
             <T size={12} c={D.textDim} style={[s.grow, s.lh17]}>
-              {name} is on <T w="b" size={12}>{sameDay ? hh(booking.starts_at) : when(booking.starts_at)}</T> and
-              has been told.
+              {trRich('{name} is on <b>{at}</b> and has been told.', {
+                b: (text, key) => <T key={key} w="b" size={12}>{text}</T>,
+              }, { name, at: sameDay ? hh(booking.starts_at) : when(booking.starts_at) })}
             </T>
           </View>
           <View style={s.timeline}>
@@ -253,7 +255,7 @@ export default function RescheduleAskScreen({ barberId, bookingId, onBack }: {
               <View style={s.timeline}><Line at={booking.starts_at} tint={D.text}>{moved}</Line></View>
             </>
           )}
-          <Note>A move you accept does not touch {first}&apos;s record.</Note>
+          <Note>{tr('A move you accept does not touch {first}\'s record.', { first })}</Note>
         </Screen>
         {sheet}
       </>
@@ -275,15 +277,15 @@ export default function RescheduleAskScreen({ barberId, bookingId, onBack }: {
   const open = req.status === 'pending' && active;
   const paid = booking.deposit_cents ?? 0;
 
-  const pill = req.status === 'declined' ? { label: 'KEPT', color: D.sub, bg: D.card2 }
-    : !active ? { label: 'CLOSED', color: D.sub, bg: D.card2 }
-      : passed ? { label: 'TIME PASSED', color: D.sub, bg: D.card2 }
-        : { label: 'WAITING', color: D.amber, bg: D.amberSoft };
+  const pill = req.status === 'declined' ? { label: tr('KEPT'), color: D.sub, bg: D.card2 }
+    : !active ? { label: tr('CLOSED'), color: D.sub, bg: D.card2 }
+      : passed ? { label: tr('TIME PASSED'), color: D.sub, bg: D.card2 }
+        : { label: tr('WAITING'), color: D.amber, bg: D.amberSoft };
 
   return (
     <>
       <Screen gap={11}>
-        <TopBar title="Reschedule ask" onBack={onBack} />
+        <TopBar title={tr('Reschedule ask')} onBack={onBack} />
 
         <View style={s.card}>
           <View style={s.row12}>
@@ -291,7 +293,7 @@ export default function RescheduleAskScreen({ barberId, bookingId, onBack }: {
             <View style={s.grow}>
               <T w="b" size={14}>{name}</T>
               <T size={11} c={D.sub} style={s.mt2}>
-                {ordinal(ctx.visits + 1)} visit · asked {agoLabel(now - Date.parse(req.created_at))}
+                {tr('{ordinal} visit · asked {agoLabel}', { ordinal: ordinal(ctx.visits + 1), agoLabel: agoLabel(now - Date.parse(req.created_at)) })}
               </T>
             </View>
             <View style={[s.pill, { backgroundColor: pill.bg }]}>
@@ -301,12 +303,12 @@ export default function RescheduleAskScreen({ barberId, bookingId, onBack }: {
 
           <View style={s.strip}>
             <View style={s.grow}>
-              <Eyebrow c={D.faint} ls={1.2}>BOOKED</Eyebrow>
+              <Eyebrow c={D.faint} ls={1.2}>{tr('BOOKED')}</Eyebrow>
               <T w="b" size={15} style={s.stripTime}>{when(from)}</T>
             </View>
             <Ico name="arrow-right" size={16} color={D.muted} />
             <View style={s.grow}>
-              <Eyebrow c={D.faint} ls={1.2}>ASKS FOR</Eyebrow>
+              <Eyebrow c={D.faint} ls={1.2}>{tr('ASKS FOR')}</Eyebrow>
               <T w="b" size={15} c={D.accent} style={s.stripTime}>{when(req.requested_start)}</T>
             </View>
           </View>
@@ -318,43 +320,44 @@ export default function RescheduleAskScreen({ barberId, bookingId, onBack }: {
 
         {open && !passed && (
           <>
-            <Eyebrow ls={1.65} style={s.mt2}>WHAT IT DOES TO YOUR DAY</Eyebrow>
+            <Eyebrow ls={1.65} style={s.mt2}>{tr('WHAT IT DOES TO YOUR DAY')}</Eyebrow>
             <View style={s.list}>
               <Impact tone={fl.tone}>{fl.text}</Impact>
               {askedThere > 0 && (
                 <Impact tone="warn">
-                  <T w="b" size={12}>{askedThere} on your waitlist asked for {dayWord(req.requested_start)}</T>
-                  {` — giving ${first} ${hh(req.requested_start)} is one less slot to offer them`}
+                  <T w="b" size={12}>{tr('{askedThere} on your waitlist asked for {requested_start}', { askedThere, requested_start: dayWord(req.requested_start) })}</T>
+                  {tr(' — giving {first} {requested_start} is one less slot to offer them', { first, requested_start: hh(req.requested_start) })}
                 </Impact>
               )}
               <Impact tone={notice <= 0 ? 'bad' : notice < 24 * 3_600_000 ? 'warn' : 'info'} last>
                 {notice > 0
-                  ? <>{hh(from)} goes empty with <T w="b" size={12}>{spanLabel(notice)} notice</T></>
-                  : <>{hh(from)} has already started</>}
+                  ? <>{trRich('{from} goes empty with <b>{notice} notice</b>', {
+                    b: (text, key) => <T key={key} w="b" size={12}>{text}</T>,
+                  }, { from: hh(from), notice: spanLabel(notice) })}</>
+                  : <>{tr('{from} has already started', { from: hh(from) })}</>}
                 {askedHere > 0
-                  ? ` — the waitlist has ${askedHere} ${askedHere === 1 ? 'name' : 'names'} for ${dayWord(from)}`
-                  : ` — nobody on the waitlist asked for ${dayWord(from)}`}
+                  ? trn(askedHere, ' — the waitlist has {n} name for {from}', ' — the waitlist has {n} names for {from}', { from: dayWord(from) })
+                  : tr(' — nobody on the waitlist asked for {from}', { from: dayWord(from) })}
               </Impact>
             </View>
 
             <View style={s.actions}>
               <Pressable onPress={() => answer(true)} disabled={busy || blocked} accessibilityRole="button"
-                accessibilityLabel={`Give ${name} ${hh(req.requested_start)}`}
+                accessibilityLabel={tr('Give {name} {requested_start}', { name, requested_start: hh(req.requested_start) })}
                 style={({ pressed }) => [s.primary, (busy || blocked) && s.dim, pressed && s.pressed]}>
-                <T w="eb" size={12.5} c="#111" ls={0.5}>GIVE {first.toUpperCase()} {hh(req.requested_start)}</T>
+                <T w="eb" size={12.5} c="#111" ls={0.5}>{tr('GIVE {first} {requested_start}', { first: first.toUpperCase(), requested_start: hh(req.requested_start) })}</T>
                 <T w="sb" size={10.5} c="#5C5C58">
                   {paid > 0
-                    ? `The ${dh(paid)} moves with the booking — nothing to refund`
-                    : 'Same booking, new time — nothing to refund'}
+                    ? tr('The {paid} moves with the booking — nothing to refund', { paid: dh(paid) })
+                    : tr('Same booking, new time — nothing to refund')}
                 </T>
               </Pressable>
               <Pressable onPress={() => answer(false)} disabled={busy} accessibilityRole="button"
                 style={({ pressed }) => [s.secondary, pressed && s.pressed]}>
-                <T w="b" size={12.5} c={D.textDim}>Keep {hh(from)} · say no</T>
+                <T w="b" size={12.5} c={D.textDim}>{tr('Keep {from} · say no', { from: hh(from) })}</T>
               </Pressable>
               <T size={10.5} c={D.faint} style={s.foot}>
-                Saying no keeps the booking exactly as it is. It is not a cancellation, and it does not
-                touch the money.
+                {tr('Saying no keeps the booking exactly as it is. It is not a cancellation, and it does not touch the money.')}
               </T>
             </View>
           </>
@@ -363,21 +366,20 @@ export default function RescheduleAskScreen({ barberId, bookingId, onBack }: {
         {open && passed && (
           <>
             <Note>
-              {hh(req.requested_start)} has already gone, so it can no longer be given. The booking stays
-              at {when(from)} either way — saying no just lets {first} know.
+              {tr('{requested_start} has already gone, so it can no longer be given. The booking stays at {from} either way — saying no just lets {first} know.', { requested_start: hh(req.requested_start), from: when(from), first })}
             </Note>
             <Pressable onPress={() => answer(false)} disabled={busy} accessibilityRole="button"
               style={({ pressed }) => [s.secondary, pressed && s.pressed]}>
-              <T w="b" size={12.5} c={D.textDim}>Keep {hh(from)} · say no</T>
+              <T w="b" size={12.5} c={D.textDim}>{tr('Keep {from} · say no', { from: hh(from) })}</T>
             </Pressable>
           </>
         )}
 
         {req.status === 'declined' && (
-          <Note>You kept {when(from)}. {first} has been told the original time still stands.</Note>
+          <Note>{tr('You kept {from}. {first} has been told the original time still stands.', { from: when(from), first })}</Note>
         )}
         {req.status === 'pending' && !active && (
-          <Note>This booking is no longer active, so there is nothing left to move.</Note>
+          <Note>{tr('This booking is no longer active, so there is nothing left to move.')}</Note>
         )}
       </Screen>
       {sheet}
@@ -413,7 +415,7 @@ function Plain({ b, name }: { b: Row; name: string }) {
     <View style={s.slot}>
       <T w="sb" size={13}>{name}</T>
       <T size={11} c={D.sub} style={s.mt2}>
-        {b.services?.name ?? 'Service'} · {b.completed_at ? 'done' : b.status === 'pending' ? 'request' : dh(b.price_cents)}
+        {b.services?.name ?? tr('Service')} · {b.completed_at ? tr('done') : b.status === 'pending' ? tr('request') : dh(b.price_cents)}
       </T>
     </View>
   );

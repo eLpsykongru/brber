@@ -1,4 +1,4 @@
-// Local preview of the queue page — no framework, nothing to install:
+// Local preview of the queue page and the website — no framework, nothing to install:
 //
 //   npm run queue-web                → the real database, from .env (0110 … 0118 applied)
 //   npm run queue-web -- --fixture   → the drawn Le Fade day and a make-believe
@@ -75,4 +75,5 @@ createServer(async (req, res) => {
 }).listen(port, () => {
   console.log(`Queue page on http://localhost:${port}/q/${useFixture ? 'LF7K2M' : '<shop code>'}`);
   if (useFixture) console.log('  one chair: /q/LF7K2M?b=Y4SF    closed: /q/LF5T8W    line paused: /q/LF9P3C');
+  console.log(`Website on http://localhost:${port}/  ·  /pour-les-salons  /ar/salons  /tarifs  /tarifs/qui-compte  /tarifs/exemple  /nouveau-mot-de-passe`);
 });

@@ -122,7 +122,7 @@ ok('…nor out of the form', !(await get('/q/LF7K2M/name?b=Y4SF', hostile)).body
 ok('an unknown code is a 404', (await get('/q/ZZZZZZ')).status === 404);
 ok('junk is a 404 without a lookup', (await get('/q/hello', refuse)).status === 404);
 ok('an ambiguous character never reaches the database', (await get('/q/LF0K2M', refuse)).status === 404);
-ok('anything outside /q/ and /c/ is a 404', (await get('/', refuse)).status === 404);
+ok('an address that is not a page, a shop or a link is a 404 without a lookup', (await get('/nope', refuse)).status === 404);
 ok('the app-link files are 404 until the host knows the app', (await get('/.well-known/assetlinks.json', refuse)).status === 404);
 let asked = null;
 await get('/q/0F8FAD5B-D9CB-469F-A165-70867728950E', { rpc: async (_name, a) => { asked = a.p_shop; return { found: false }; } });

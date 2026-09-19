@@ -142,6 +142,14 @@ export function fixtureRpc({ print = (line) => console.log(line) } = {}) {
       },
     };
 
+    // 0126: what the website prints — counted from the drawn shops, 0123's list price
+    calls.site_numbers = () => ({
+      salons: Object.keys(shops).length,
+      barbers: Object.values(shops).reduce((n, s) => n + s.chairs.length, 0),
+      reply_days: 1.4,
+      monthly_cents: 5500, yearly_cents: 4000, cap: 4, sms_included: 200, sms_unit_cents: null,
+    });
+
     // for the checks: move a ticket along as the barber would, or age its link
     calls.fixture_set = ({ ticket, ...change }) => Object.assign(tickets.get(ticket), change);
     calls.fixture_confirm_token = ({ ticket }) => tickets.get(ticket)?.confirm ?? null;

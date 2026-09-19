@@ -3,7 +3,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Ico, Screen, T, TAB_INSET, TopBar } from '../components/dark';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
-import { loc, tr, trRich, weekdayName } from '../lib/i18n';
+import { loc, tr, trn, trRich, weekdayName } from '../lib/i18n';
 
 // OSH-16 / OSH-17 of "Owner - Shop.dc.html" — the week, and which way it points.
 //
@@ -40,12 +40,15 @@ const day = (iso: string | null) => {
 };
 
 type Item = { label: string; ref: string; at: string; cents: number; kind?: string; source_week?: string };
+// 0123: the month's subscription, netted off the deposits this week earned
+type BillItem = Item & { invoice_kind: 'month' | 'year' | 'year_extra'; period_start: string; seats: number };
 type Stmt = {
   line: string; salon: string; week: string; ref: string;
   covers_from: string; covers_to: string; released_at: string | null;
   direction: 'collect' | 'pay_out' | 'nil';
   total_cents: number; hold_cents: number; earned_cents: number;
   carried_cents: number; subtotal_cents: number;
+  subscription_cents?: number; subscription_lines?: BillItem[];
   visit: string; collected_cents: number | null; open_cents: number;
   settled_at: string | null; receipt_ref: string | null; agent: string | null;
   float_lines: Item[]; earned_lines: Item[]; carried_lines: Item[];
@@ -233,7 +236,9 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
           <View style={s2.notBill}>
             <T w="b" size={12.5} c={D.text}>{tr('This is not a bill')}</T>
             <T size={11.5} c={D.sub} style={s2.notBillBody}>
-              {tr('The {hold_cents} DH your barbers took over the counter is customers’ wallet money — ours, sitting in your till. Sterncut charges you nothing and takes no fee from either side.', { hold_cents: dh(s.hold_cents) })}
+              {(s.subscription_lines ?? []).length
+                ? tr('The {hold_cents} DH your barbers took over the counter is customers’ wallet money — ours, sitting in your till. The only charge on this week is your subscription, and it came off the deposits you earned.', { hold_cents: dh(s.hold_cents) })
+                : tr('The {hold_cents} DH your barbers took over the counter is customers’ wallet money — ours, sitting in your till. Sterncut charges you nothing and takes no fee from either side.', { hold_cents: dh(s.hold_cents) })}
             </T>
           </View>
         )}
@@ -249,6 +254,7 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
               {s.earned_lines.map((x) => (
                 <Row key={x.ref + x.at} it={x} sign={x.kind === 'refund' ? '−' : '+'} />
               ))}
+              <Bill s={s} sign="−" />
               <Group label={tr('Our cash your barbers took')} total={-s.hold_cents} />
               {s.float_lines.map((x) => <Row key={x.ref} it={x} sign="−" />)}
             </>
@@ -260,6 +266,7 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
               {s.earned_lines.map((x) => (
                 <Row key={x.ref + x.at} it={x} sign={x.kind === 'refund' ? '+' : '−'} />
               ))}
+              <Bill s={s} sign="+" />
             </>
           )}
 
@@ -299,7 +306,9 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
         </View>
 
         <T size={11} c={D.muted} style={s2.fine}>
-          {tr('Sterncut takes no fee from either side. Every line above carries its reference and the minute it happened, so you can check any one of them against your own day.')}
+          {(s.subscription_lines ?? []).length
+            ? tr('Sterncut takes no commission and no fee on cash. The subscription is the only charge and it has its own line. Every line above carries its reference and the minute it happened, so you can check any one of them against your own day.')
+            : tr('Sterncut takes no fee from either side. Every line above carries its reference and the minute it happened, so you can check any one of them against your own day.')}
         </T>
         {/* §6's footer, on every statement: it is what makes the phrase mean
             something on the statements that do carry it. */}
@@ -345,14 +354,34 @@ function Group({ label, total, colour }: { label: string; total: number; colour?
   );
 }
 
-function Row({ it, sign }: { it: Item; sign: string }) {
+// OSB-03 on the statement: the bill, by the month and the chairs it was issued
+// for. Taken only off the deposits earned, so it never adds to our float.
+function Bill({ s, sign }: { s: Stmt; sign: '+' | '−' }) {
+  const lines = s.subscription_lines ?? [];
+  if (!lines.length) return null;
+  const month = (iso: string) => new Date(`${iso.slice(0, 10)}T12:00:00`)
+    .toLocaleDateString(loc('en-GB'), { month: 'long', year: 'numeric' });
+  return (
+    <>
+      <Group label={tr('Your subscription')} total={sign === '−' ? -(s.subscription_cents ?? 0) : (s.subscription_cents ?? 0)} colour="#FF7A66" />
+      {lines.map((x) => (
+        <Row key={x.ref + x.at} sign={sign} colour="#FF7A66" it={{ ...x,
+          label: x.invoice_kind === 'year' ? tr('The year from {date}', { date: day(x.period_start) })
+            : x.invoice_kind === 'year_extra' ? tr('{month} · chairs added', { month: month(x.period_start) })
+              : trn(x.seats, '{month} · {n} chair', '{month} · {n} chairs', { month: month(x.period_start) }) }} />
+      ))}
+    </>
+  );
+}
+
+function Row({ it, sign, colour }: { it: Item; sign: string; colour?: string }) {
   return (
     <View style={s2.line}>
       <View style={s2.grow}>
         <T size={12} c={D.sub}>{it.label}</T>
         <T size={10.5} c={D.muted} style={s2.gap2}>{it.ref} · {when(it.at)}</T>
       </View>
-      <T w="b" size={12.5} c={sign === '+' ? D.green : D.text} style={s2.num}>
+      <T w="b" size={12.5} c={colour ?? (sign === '+' ? D.green : D.text)} style={s2.num}>
         {tr('{sign} {cents} DH', { sign, cents: dh(it.cents) })}
       </T>
     </View>

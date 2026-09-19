@@ -83,6 +83,9 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
   useEffect(() => {
     supabase.from('salons')
       .select('id, name, address, district, lat, lng, bio, website, barbers!salon_id(id, bio, status, salon_status, specialty, years_experience, languages, profiles!barbers_id_fkey(full_name, avatar_url, phone, previous_name, name_changed_at), reviews!reviews_barber_id_fkey(rating), services(id, name, price_cents, duration_min, is_active, category))')
+      // 0124: a shop hidden from search over an unpaid bill (only after ops has
+      // called) — its own link, QR and preview still open it
+      .eq('in_search', true)
       .order('name')
       .then(({ data, error }) => {
         if (error) return Alert.alert(tr('Could not load salons'), error.message);

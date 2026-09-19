@@ -6809,6 +6809,7 @@ function drawRun() {
   const head = '<div style="display:flex;align-items:center;height:34px;padding:0 16px;background:#141416;border-bottom:1px solid #1E1E22;font-size:9.5px;letter-spacing:.13em;font-weight:700;color:#6B6B72">'
     + '<span style="width:190px">SHOP</span><span style="width:100px;text-align:right">THEY HOLD</span>'
     + '<span style="width:100px;text-align:right">THEY EARNED</span><span style="width:78px;text-align:right">CARRIED</span>'
+    + '<span style="width:78px;text-align:right">BILL</span>'
     + '<span style="width:115px;text-align:right">ONE NUMBER</span><span style="flex:1;padding-left:16px">VISIT</span></div>';
 
   $('fn-table').innerHTML = head + (d.lines.length ? d.lines.map((l) => {
@@ -6821,6 +6822,9 @@ function drawRun() {
       + '<span style="width:100px;text-align:right;font-size:11.5px;color:#9A9CA3">' + DH(l.earned_cents) + '</span>'
       + '<span style="width:78px;text-align:right;font-size:11.5px;color:' + (l.carried_cents ? '#E8A100' : '#3A3A40') + '">'
       + (l.carried_cents ? DH(l.carried_cents) : '\u2014') + '</span>'
+      // 0123: the month's subscription, netted off the deposits this week earned
+      + '<span style="width:78px;text-align:right;font-size:11.5px;color:' + (l.subscription_cents ? '#FF7A66' : '#3A3A40') + '">'
+      + (l.subscription_cents ? DH(l.subscription_cents) : '\u2014') + '</span>'
       + '<span style="width:115px;text-align:right;font-size:12.5px;font-weight:700;color:' + colour + '">'
       + DH(Math.abs(l.amount_cents)) + '</span>'
       + '<span style="flex:1;padding-left:16px;display:flex;align-items:center;gap:8px">'
@@ -7068,12 +7072,19 @@ function drawStatement() {
     + '</span></div>';
 
   const fl = d.float_lines || [], el = d.earned_lines || [], cl = d.carried_lines || [];
+  const sl = d.subscription_lines || [];
   let body = smHead(collect ? 'OUR FLOAT SITTING IN THEIR TILL' : 'OUR FLOAT IN THEIR TILL',
                     DH(d.hold_cents), '#fff')
     + fl.map((x) => smRow(x.label, x.ref, x.at, x.cents)).join('')
     + smHead('DEPOSITS THE SHOP EARNED', '\u2212 ' + DH(d.earned_cents), '#fff')
     + el.map((x) => smRow(x.label, x.ref, x.at, x.cents,
         x.kind === 'refund' ? { colour: '#4ADE80', sign: '+ ' } : { sign: '\u2212 ' })).join('');
+
+  // 0123 — OSB-03: the subscription comes off the deposits above, never off the float
+  if (sl.length) {
+    body += smHead('SUBSCRIPTION, NETTED OFF THOSE DEPOSITS', '+ ' + DH(d.subscription_cents), '#FF7A66')
+      + sl.map((x) => smRow(x.label, x.ref, x.at, x.cents, { colour: '#FF7A66', sign: '+ ' })).join('');
+  }
 
   // §2.4: the subtotal is named, and it is only on the page because a carried
   // line follows it. No carry, no subtotal — one number with its lines under it.

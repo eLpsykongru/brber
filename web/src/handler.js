@@ -15,6 +15,14 @@
 //                                or the booking a barber offered for another day (BTD-16)
 //   GET  /.well-known/…          the app-link files
 //
+// and, since the billing rail (2026-09-19), sterncut.ma itself — site.js:
+//
+//   GET  /  /pour-les-salons  /ar/salons  /tarifs  /tarifs/qui-compte  /tarifs/exemple
+//   GET  /nouveau-mot-de-passe   WEB-11, where a password-reset e-mail can land
+//   GET  /app                    the store, for the site's buttons
+//   anything else                the site's own 404 (WEB-12's frame)
+//   MAINTENANCE=1                WEB-13 on every address, 503
+//
 // Every step re-reads the database: a quote is never trusted across a step.
 
 import { renderConfirmed, renderEnded, renderGone, renderName, renderOffer, renderUnconfirmed } from './guest.js';
@@ -22,6 +30,9 @@ import {
   clock, renderDown, renderLinkPreview, renderMissing, renderNoStore, renderQueue, renderUnknownLink,
   signature, taking, waitOf,
 } from './render.js';
+import {
+  READS_NUMBERS, renderGetApp, renderMaintenance, renderSiteMissing, siteContext, siteKey, sitePage,
+} from './site.js';
 
 // 0110's alphabet — no I, O, 0 or 1 — six characters for a shop, four for a
 // barber. A uuid still opens a shop's page: every poster printed before 0110
@@ -58,6 +69,8 @@ const ROUTES = {
 export async function handle(request, env = {}, deps = {}) {
   const url = new URL(request.url);
   if (url.pathname.startsWith('/.well-known/')) return appLinks(url.pathname, env);
+  // WEB-13: everything answers "maintenance" — the queue page too, its database being the thing down
+  if (flag(env.MAINTENANCE)) return page(renderMaintenance(env), 503, { 'retry-after': '120' });
   const call = deps.rpc ?? ((name, args) => rpc(env, name, args));
   const report = deps.onError ?? console.error;
   const method = request.method === 'HEAD' ? 'GET' : request.method;
@@ -73,6 +86,8 @@ export async function handle(request, env = {}, deps = {}) {
       return page(renderDown(), 503);
     }
   }
+
+  if (parts[0] !== 'q') return site({ request, url, env, call, report, method });
 
   const [root, shopRaw, ...rest] = parts;
   if (root !== 'q' || !shopRaw || !SHOP.test(shopRaw)) return page(renderMissing(), 404);
@@ -111,7 +126,8 @@ const barberParam = (url) => {
 const sourceOf = (value) => (value === 'link' ? 'link' : 'code');
 const lineOf = (shop, barber) => `/q/${shop}${barber ? `?b=${barber}` : ''}`;
 /** QL-23 is offered only once its confirm text can really be sent (see handle's note). */
-const remoteOn = (env) => ['1', 'true', 'on'].includes(String(env.SMS_SENDS ?? '').toLowerCase());
+const flag = (value) => ['1', 'true', 'on'].includes(String(value ?? '').toLowerCase());
+const remoteOn = (env) => flag(env.SMS_SENDS);
 
 // ---- QL-18 / QL-26 / QL-09 ---------------------------------------------------------
 async function shopPage({ url, env, call, shop }) {
@@ -250,6 +266,43 @@ async function confirm({ request, env, call, token }) {
   return page(renderUnknownLink(), 404);
 }
 
+// ---- sterncut.ma · the site's pages --------------------------------------------------
+async function site({ request, url, env, call, report, method }) {
+  const key = siteKey(url.pathname);
+  const render = sitePage(url.pathname);
+  if (key !== 'app' && !render) return page(renderSiteMissing(siteContext(env, null)), 404);
+  if (method !== 'GET') return new Response('Method not allowed', { status: 405 });
+  if (key === 'app') return getApp(request, env);
+  const numbers = READS_NUMBERS.has(key) ? await siteNumbers(call, report) : null;
+  // WEB-11 carries a session in its address: never kept anywhere
+  return page(render(siteContext(env, numbers)), 200,
+    key === 'nouveau-mot-de-passe' ? {} : { 'cache-control': 'public, max-age=300' });
+}
+
+// 0126, or nothing: a page about prices still prints 0123's list price when the
+// database is slow or down, and leaves the counts out
+async function siteNumbers(call, report) {
+  let timer;
+  const slow = new Promise((_, fail) => { timer = setTimeout(() => fail(new Error('no answer in 2.5 s')), 2500); });
+  try {
+    return await Promise.race([call('site_numbers', {}), slow]);
+  } catch (err) {
+    report(`website: site_numbers: ${err?.message ?? err}`);
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// the site's "open the app": no shop to carry, so no referrer
+function getApp(request, env) {
+  const ctx = siteContext(env, null);
+  const ua = request.headers.get('user-agent') ?? '';
+  if (/iPhone|iPad|iPod/i.test(ua)) return ctx.appStore ? redirect(ctx.appStore, 302) : page(renderGetApp(ctx, { ios: true }), 200);
+  if (/Android/i.test(ua)) return redirect(ctx.playStore, 302);
+  return page(renderGetApp(ctx), 200);
+}
+
 // ---- the app-link files: a shop's link opens the app when it is installed -----------
 // The same shapes app.config.js claims: the landing, a pre-0110 poster's uuid, and
 // the store hand-off (so an installed app opens instead of the store). Everything
@@ -277,7 +330,7 @@ function appLinks(pathname, env) {
 }
 
 // ---- plumbing ------------------------------------------------------------------------
-function page(html, status) {
+function page(html, status, extra = {}) {
   return new Response(html, {
     status,
     headers: {
@@ -287,6 +340,7 @@ function page(html, status) {
       'x-content-type-options': 'nosniff',
       // a confirm address must not travel to the font host in a Referer
       'referrer-policy': 'no-referrer',
+      ...extra,
     },
   });
 }

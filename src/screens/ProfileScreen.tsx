@@ -42,6 +42,8 @@ import ApplicationScreen from './ApplicationScreen';
 import SettleFloatScreen, { CollectionRoundScreen } from './SettleFloatScreen';
 import StatementScreen from './StatementScreen';
 import AgentRoundScreen from './AgentRoundScreen';
+import AccountScreen from './AccountScreen';
+import SubscriptionScreen from './SubscriptionScreen';
 import ServicesScreen from './ServicesScreen';
 import WalletScreen from './WalletScreen';
 import { tr, trn, lang } from '../lib/i18n';
@@ -61,7 +63,9 @@ type ProfileView =
   // turn 39 — two things the app already half-had
   | 'standing'
   // turn 9 — where admin actions land in the shop
-  | 'tasks' | 'application' | 'float' | 'round' | 'statement' | 'agent';
+  | 'tasks' | 'application' | 'float' | 'round' | 'statement' | 'agent'
+  // the billing rail — the owner's bill, and every barber's two-sided account
+  | 'subscription' | 'account';
 
 export default function ProfileScreen({ profile, barber, phone, onProfileChanged, onChromeHidden, onBack, onExplore }: {
   profile: Profile; barber: Barber | null; phone: string | null;
@@ -311,6 +315,12 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     if (view === 'agent') return <AgentRoundScreen onBack={back} />;
     // OSH-16/17 — the week that closed, and which way it points
     if (view === 'statement' && barber) return <StatementScreen onBack={back} />;
+    // OSB-01…05 — what the shop pays, and how. The owner's only.
+    if (view === 'subscription' && barber && ownsSalon) return <SubscriptionScreen onBack={back} />;
+    // BAC-01…08 — what he holds of ours, what we hold of his, and the one number
+    if (view === 'account' && barber) {
+      return <AccountScreen onBack={back} onStatement={ownsSalon ? () => go('statement') : undefined} />;
+    }
     return null;
   }
 
@@ -474,6 +484,16 @@ function BarberProfile({
     { icon: 'scissors', label: tr('My services'), value: String(stats.services), onPress: () => go('services') },
     { icon: 'image', label: tr('My work'), value: trn(stats.photos, '{n} photo', '{n} photos'), onPress: () => go('work') },
     ...(ownsSalon ? [{ icon: 'edit-2' as IconName, label: tr('Salon management'), onPress: () => go('salon') }] : []),
+    // BAC-01: every barber in a shop has an account with Sterncut, owner or not
+    ...(barber.salon_id ? [{ icon: 'repeat' as IconName, label: tr('You & Sterncut'), onPress: () => go('account') }] : []),
+    // the owner's money rows. "Weekly statement" and "Settle up" lived only in the
+    // customer-side list, which a barber never sees — so the agent's four-digit
+    // code on the statement had no way in.
+    ...(ownsSalon ? [
+      { icon: 'file-text' as IconName, label: tr('Weekly statement'), onPress: () => go('statement') },
+      { icon: 'dollar-sign' as IconName, label: tr('Settle up'), onPress: () => go('float') },
+      { icon: 'credit-card' as IconName, label: tr('Subscription'), onPress: () => go('subscription') },
+    ] : []),
     { icon: 'trending-up', label: tr('Earnings'), onPress: () => go('earnings') },
     { icon: 'help-circle', label: tr('Help Center'), onPress: () => go('help') },
     { icon: 'globe', label: tr('Language'), value: LANGUAGE_ROWS.find((l) => l.key === lang())?.native, onPress: () => setLangOpen(true) },

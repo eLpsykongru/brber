@@ -1195,6 +1195,9 @@ Still open:
     live — cash top-up works end to end (agent till + customer balance), no
     commission (decided: 0%). Still missing: settlement/netting, card rail,
     spending the balance. See "Agent wallet (salon till)".*
+    *TRIGGER REACHED 2026-09-19: the billing-rail handoff (§9) appoints a barber as
+    the shop's cash agent who pays his colleagues. Built up to the read-only account;
+    the agent itself waits on this bet — see "Billing rail" at the end.*
   **Trigger:** once wallets have balance, **deposits** and **coupons** finally have
   something to attach to — that unblocks 4 items above.
 - **Phase 3: direct m-wallets** (Orange Money, inwi money, Cash Plus API) only when
@@ -2947,3 +2950,154 @@ Still open:
 - **Nobody has read the Arabic on a screen.** It is grammatical MSA with Western digits
   and prices left in DH ("Numbers stay LTR inside Arabic lines", slice 1's rule), but
   line lengths in the dark kit's tight rows are unproven.
+
+
+## Billing rail — the shop's bill and the barber's account (0122–0125, 2026-09-19)
+`design_handoff_billing_rail/` (README + ADDENDUM). README §7 steps 1–5 and 10 are
+built; steps 6–9 (the cash agent) are not — see the trigger at the end.
+Screens: `SubscriptionScreen.tsx` (OSB-01…05, owner, Profile → Subscription) and
+`AccountScreen.tsx` (BAC-01…05, 07, 08, every barber in a shop, Profile → You & Sterncut).
+Pure arithmetic in `lib/billing.ts`, held to the designs by `billing.check.ts`.
+
+**Nobody is billed yet.** No subscription row exists until ops runs
+`admin_start_billing(null, '2026-11-01')` (null = every live shop; the date is the
+first 1st billed). Starting to charge real shops is the owner's call, not a migration's.
+A daily pg_cron job (`sterncut-subscriptions`, 00:05 UTC) issues invoices; every day
+but the 1st is a no-op. `admin_run_billing()` runs it by hand.
+
+**Apply 0122–0125 before shipping the build.** Explore and Discover now filter on
+`in_search` (0124); an app without the migration shows no shops.
+
+Decisions, and where the handoff was overruled by the repo:
+- **The seat rule is the shop page's, not §3's view.** §3 counted
+  `salon_status = 'approved' and accepting_bookings`. The page (Explore, Discover,
+  preview) keeps a barber on `status = 'approved' and salon_status = 'approved'` —
+  `status` is ops' verification. The drawn view would have billed a barber ops had not
+  verified while his own page hid him. `on_shop_page()` is the page's rule in SQL, and
+  billable = on the page AND accepting bookings (a paused barber shows and is not billed —
+  the safe direction). The three client filters still repeat the rule in TypeScript;
+  pointing them at `on_shop_page` is a small refactor not done here.
+- **Netting is a line on the Friday statement, not a change to `admin_settle_float`.**
+  The run decides a week now, not that function. The bill is a `subscription` statement
+  item, taken only off the deposits the shop earned that week — it can shrink a pay-out
+  to nothing or raise a collection by what we owed him, never ask an agent for more than
+  our float in the till, so every check in `admin_settle_float` stays true untouched.
+  Applied at release (`subscription_applications`), and `salon_owed_cents` subtracts it.
+- **Invoices are issued in advance on the 1st** (OSB-01 "DUE 1 OCTOBER", OSB-04 netted on
+  7 August). So an invoice carries the SMS of the month BEFORE — OSB-04 draws August's SMS
+  on August's invoice, which cannot be known on the 7th. Labelled with its month.
+- **A month nobody booked is voided on the next 1st** (WEB-05/06). What was already paid
+  on it becomes credit. Monthly only — a year is prepaid.
+- **Credit is a ledger** (`subscription_credits`, + issued, − spent), never cash, spent
+  first on the next invoice. Yearly→monthly credits unused whole months × paid chairs ×
+  the yearly price; monthly→yearly voids this month's bill (paid part → credit).
+- **Collection mode is derived** from the shop's deposit %, not stored (§2): a column
+  would go stale the day an owner moves to 0% on OSH-11. A 0% shop pays the agent in cash
+  and ops records it (`admin_record_subscription_cash`).
+- **The unpaid ladder never moves before a person has called** (0124). §6 says day 15
+  off search, day 30 no new appointments; §5 and OSB-03 promise "four Fridays short and
+  we call you before anything changes on your page" — day 15 is only two Fridays. Both
+  hold only if the call gates the ladder: ops records it with `admin_log_billing_call`.
+  Day 30 refuses NEW customer appointments only (queue joins and the barber's own
+  walk-ins still go in); nothing touches an existing booking, a settlement line or a
+  shop row.
+- **BAC-06 "cuts paid from wallet" is a 100% deposit.** The booking sheet lets a client
+  take the deposit up to "Full", so a finished cut whose deposit covered the whole price
+  (price − discount) is a wallet cut; the rest are BAC-07 deposits with "+ X cash". Same
+  rows and money, split by what was left for the chair (`barber_ledger.kind = wallet_cut`).
+- **The barber's account is windowed from the shop's last settled week**, and the
+  owner's number is the shop's own net — tested equal to `salon_net_cents` before and
+  after a settlement. His columns: top-ups he took (the owner only, today) against the
+  deposits on his own cuts, plus his colleagues' share and the shop's bill as their own
+  lines. Pending deposits are filtered in SQL, never in a screen.
+
+Found by testing against a real Postgres (all 120 shipped migrations applied in PGlite):
+- **`admin_cut_run` has never run.** Its CASE of bare literals is text and the column is
+  an enum — "column direction is of type settlement_direction but expression is of type
+  text", every time (0084 and 0088). Fixed with a cast in 0123's re-emit. So no weekly
+  statement has ever been cut in production, and nothing downstream had run either.
+- **`admin_run` would have failed the moment one had**: `row_number()` inside `json_agg`.
+  Fixed in 0123. After both fixes, 23 Friday-flow functions (run, statement, open lines,
+  corrections, plan, agent round, owner's statement, visit code…) were called once each
+  after a real cut, release and plan: all run.
+- **The owner could not reach "Weekly statement" or "Settle up"** — the rows lived only
+  in the customer-side list. So the agent's four-digit code had no way in. Both rows are
+  now in the barber Profile for the owner.
+
+Stated absences, on purpose (README §8 — do not invent):
+- **No invoice number and no PDF.** OSB-04 says why on screen. Finance: sequence + ICE.
+- **No SMS charge.** `sub_sms_unit_cents` is null until the Twilio MA rate is confirmed;
+  usage is counted (sent rows in `sms_outbox`, which is zero until the SMS rail exists).
+- **No ops screen for the subscription ledger** (§8.5, undrawn). `admin_subscription_ledger()`
+  is the read it will sit on, with `needs_call` for the four-Fridays rule.
+- **No ops view of a disputed line** (§8.6). BAC-05 files a support case and says so.
+- **WEB-04…06** are built on the website (next section), priced from the same row.
+- `nearby_open_shop` (the queue page's "someone else nearby") does not yet skip a shop
+  hidden over an unpaid bill.
+
+**Trigger — the cash agent (README §7 steps 6–9: OBR-07…09, BAC-09/10, FIN-18).**
+This lands on the "barber-as-agent" bet (Payments, Phase 2: "one cash agent per salon,
+default = owner"). Today `salons.cash_agent_id` is a flag only: top-ups, the Friday code
+and the float screens are all owner-only, so changing it moves no cash. Building the
+payee's code, payouts and the gated handover means letting an appointed barber hold the
+till — `agent_cash_topup`, `my_float`, `my_visit_code` all move from owner to agent.
+Also blocking FIN-18 (§8.1): a barber-level shortfall has no ledger to live in.
+
+## The website — sterncut.ma (0126, 2026-09-19)
+
+Built from the Claude Design "Public - Website" and "Public - List Your Shop" files,
+**app-first** (decided with the owner): the site explains, prices, and sends people to
+the app. `web/src/site.js`, served by the same handler as the queue page.
+
+| Address | Design | Notes |
+|---|---|---|
+| `/` | WEB-01 | counts from `site_numbers`, store buttons, no search box |
+| `/pour-les-salons` | PUB-01 (desktop), WEB-02 (phone) | "dès 40 DH"; INSCRIRE MON SALON → `/app` |
+| `/ar/salons` | WEB-03 | Arabic, right to left |
+| `/tarifs` | WEB-04 | the stepper runs the billing rail's arithmetic (cap included) |
+| `/tarifs/qui-compte` | WEB-05 | the shop page's rule, eight cases |
+| `/tarifs/exemple` | WEB-06 | labelled an example; fixed as below |
+| `/nouveau-mot-de-passe` | WEB-11 | finishes a reset link in the browser, then signs out everywhere |
+| `/app` | — | Android → Google Play, iPhone → App Store (or "not yet"), computer → both badges |
+| anything else | WEB-12's frame | the site's 404; `/q/…` keeps the queue page's own |
+| `MAINTENANCE=1` | WEB-13 | 503 on every address, refreshes every minute |
+
+- **`site_numbers()` (0126)** is the site's only read: live salons, barbers on a live
+  shop's page, the median application→decision time over 180 days (null under five
+  decisions, and then not printed), and today's list price from `platform_settings`.
+  Granted to anon on purpose — aggregates only, like `public_queue`. Tested in PGlite
+  (counts on the fixture, median 3.0 of 1/2/3/4/10 days, null under five).
+- **A price change reaches the site by itself**: every figure (55, 40, "trois mois
+  offerts", the cap, the stepper, the example bill) is computed from those four numbers.
+  With the database down or slower than 2.5 s, the pages print 0123's price and leave
+  the counts out. Pages cache 5 minutes; the new-password page is never cached.
+- **Corrections to the designs** (each is a check in `web/site.check.mjs`):
+  fixture counts gone ("42 SALONS · 168 COIFFEURS", "1,4 j"); "40 DH par coiffeur" →
+  "dès 40 DH"; PUB-04's "8% à partir de demain" dropped (there is no commission);
+  no SMS price while `sub_sms_unit_cents` is null; WEB-06 no longer says "Ce n'est pas
+  une simulation" over invented numbers, no longer says the subscription is
+  "prélevé à part, jamais sur votre caisse" (it is netted off the Friday deposits,
+  OSB-03), and its footnote says 165 DH (3 × 55), not 120; WEB-13 keeps the general
+  "your appointment holds" and drops the per-customer card (it needs the database that
+  is down). No owners' names or faces, no live "libres maintenant" card.
+- **Not built, on purpose:** PUB-02…05 (the shop application is the app's own flow),
+  WEB-07…10 (web sign-in: nothing on the web needs an account). The nav's "SE CONNECTER"
+  is "OUVRIR L'APP".
+
+Owner to do before it goes live:
+- **Hosting:** Cloudflare Pages, build output directory `web/public` (holds
+  `_routes.json`), functions in `web/functions`. Env: `SUPABASE_URL`,
+  `SUPABASE_ANON_KEY`; optional `SUPPORT_PHONE` (shows "PARLER À QUELQU'UN"),
+  `IOS_APP_STORE_ID`, `ANDROID_PACKAGE`; for maintenance `MAINTENANCE=1`,
+  `MAINTENANCE_UNTIL=14:30`, `MAINTENANCE_AT=<ISO time>`.
+- **Photos:** `web/public/img/clients.jpg` and `salons.jpg`. Until then a plain box.
+- **Password reset:** the app sends `redirectTo: 'brber://reset'`, which only works on
+  the phone. To let a reset opened on a computer work, point it at
+  `https://sterncut.ma/nouveau-mot-de-passe` (and add that URL to Supabase Auth →
+  Redirect URLs). Until then WEB-11 is reachable only by that URL.
+- **Legal pages** (CGU, confidentialité, mentions légales): no text exists; the footer
+  links were left out rather than pointing at empty pages.
+
+**Trigger — web sign-in (WEB-07…10) and the web shop application (PUB-02…05).**
+Raise when a shop asks to apply from a computer, or when anything on the web needs an
+account. Until then they would duplicate app flows that already exist.

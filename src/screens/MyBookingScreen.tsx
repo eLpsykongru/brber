@@ -15,6 +15,7 @@ import { colors, font, radius, serif, shadow, shadowLg, sp, TOP_INSET } from '..
 import ChatScreen from './ChatScreen';
 import { DayQueueRow, minutesUntil } from './QueueScreen';
 import { en, loc, tr, trn, trRich } from '../lib/i18n';
+import { useHideTabBar } from '../components/TabBar';
 
 // Turn 9-13 of "Customer App.dc.html" — one booking in full.
 //   9a  My booking (confirmed, with the live ticket)
@@ -100,6 +101,20 @@ function ago(iso: string) {
 function isToday(iso: string) {
   return new Date(iso).toDateString() === new Date().toDateString();
 }
+// A notification can open any booking, not only the upcoming ones the list
+// sends here. Only a live one gets cancel / reschedule / ask strips. Same
+// lines as My bookings' tabs: a confirmed booking whose time ran out is done.
+type BookingState = 'live' | 'done' | 'cancelled' | 'no_show' | 'expired';
+function stateOf(d: Pick<Detail, 'status' | 'completed_at' | 'ends_at'>): BookingState {
+  if (d.status === 'cancelled') return 'cancelled';
+  if (d.status === 'no_show') return 'no_show';
+  if (d.completed_at || d.status === 'completed') return 'done';
+  if (new Date(d.ends_at).getTime() < Date.now()) return d.status === 'pending' ? 'expired' : 'done';
+  return 'live';
+}
+const STATE_CHIP: Record<Exclude<BookingState, 'live'>, string> = {
+  done: tr('COMPLETED'), cancelled: tr('CANCELLED'), no_show: tr('NO-SHOW'), expired: tr('EXPIRED'),
+};
 
 // ---- data -----------------------------------------------------------------
 function useBooking(bookingId: string) {
@@ -175,7 +190,7 @@ function freeAt(t: Date) {
 }
 
 // PAYMENT card — 9a / 10b / 10c. Mock shape, real numbers.
-function Payment({ d, compact }: { d: Detail; compact?: boolean }) {
+function Payment({ d, compact, live }: { d: Detail; compact?: boolean; live: boolean }) {
   const total = d.price_cents / 100;
   const dep = d.deposit_cents / 100;
   const pct = dep > 0 ? Math.round((d.deposit_cents / d.price_cents) * 100) : 0;
@@ -186,12 +201,12 @@ function Payment({ d, compact }: { d: Detail; compact?: boolean }) {
   // `cancel_booking` can never disagree about whether it has passed.
   const [freeUntil, setFreeUntil] = useState<Date | null>(null);
   useEffect(() => {
-    if (dep <= 0) return;
+    if (dep <= 0 || !live) return;
     let alive = true;
     supabase.rpc('booking_free_until', { p_booking: d.id })
       .then(({ data }) => { if (alive && data) setFreeUntil(new Date(data as string)); });
     return () => { alive = false; };
-  }, [d.id, dep]);
+  }, [d.id, dep, live]);
   const stillFree = !!freeUntil && freeUntil.getTime() > Date.now();
 
   return (
@@ -199,18 +214,19 @@ function Payment({ d, compact }: { d: Detail; compact?: boolean }) {
       {!compact && <Eyebrow>{tr('PAYMENT')}</Eyebrow>}
       {pending ? (
         <Row label={dep > 0 ? tr('Deposit ({pct}%)', { pct }) : tr('Deposit')}
-          value={dep > 0 ? tr('Taken once confirmed') : tr('Not taken')} valueMuted />
+          value={dep > 0 && live ? tr('Taken once confirmed') : tr('Not taken')} valueMuted />
       ) : (
         <Row label={dep > 0 ? tr('Deposit paid ({pct}%)', { pct }) : tr('Paid up front')} value={tr('{dep} DH', { dep: dep.toFixed(0) })} />
       )}
-      {!pending && <Row label={tr('Due at the shop')} value={tr('{x} DH', { x: (total - dep).toFixed(0) })} />}
-      {!pending && <View style={s.hr} />}
+      {!pending && live && <Row label={tr('Due at the shop')} value={tr('{x} DH', { x: (total - dep).toFixed(0) })} />}
+      {!pending && live && <View style={s.hr} />}
       <View style={s.rowBase}>
         <Text style={s.totalKey}>{tr('Total')}</Text>
         <Text style={s.totalVal}>{tr('{total} DH', { total: total.toFixed(0) })}</Text>
       </View>
-      {/* 10c drops the footnote — the sheet has no room for it */}
-      <View style={[s.lockLine, compact && s.hidden]}>
+      {/* 10c drops the footnote — the sheet has no room for it. It is all about
+          cancelling and confirming, so a booking that is over drops it too. */}
+      <View style={[s.lockLine, (compact || !live) && s.hidden]}>
         <Ionicons name="lock-closed-outline" size={12} color={colors.textTertiary} />
         <Text style={s.lockText}>
           {dep > 0
@@ -343,9 +359,13 @@ function DetailBody({ d, request, photo, rating, queue, sheet, onQueue, onChat, 
   onAcceptOffer: (iso: string) => void; onPickAnother: () => void;
 }) {
   const [keptOriginal, setKeptOriginal] = useState(false);
-  const pending = d.status === 'pending';
-  const declined = !keptOriginal && request?.status === 'declined';
-  const asked = request?.status === 'pending';
+  const state = stateOf(d);
+  const live = state === 'live';
+  const pending = live && d.status === 'pending';
+  // an ask left open on a booking that has since been cancelled or has passed
+  // is history, not something to wait on
+  const declined = live && !keptOriginal && request?.status === 'declined';
+  const asked = live && request?.status === 'pending';
 
   const mine = queue?.find((r) => r.booking_id === d.id) ?? null;
   const ticketNo = queue && mine ? queue.findIndex((r) => r.booking_id === d.id) + 1 : null;
@@ -415,17 +435,17 @@ function DetailBody({ d, request, photo, rating, queue, sheet, onQueue, onChat, 
 
       <SalonCard d={d} photo={photo} rating={rating} compact={sheet}
         photoSize={sheet ? 68 : 74} onChat={onChat}
-        statusChip={pending ? tr('PENDING') : declined ? tr('STILL CONFIRMED') : tr('CONFIRMED')} />
+        statusChip={state !== 'live' ? STATE_CHIP[state]
+          : pending ? tr('PENDING') : declined ? tr('STILL CONFIRMED') : tr('CONFIRMED')} />
 
       {/* 38f — the shop is hidden from search, and that is the one thing this
           card must not let him confuse with his booking being gone. */}
-      {d.barbers?.salon?.status && d.barbers.salon.status !== 'live'
-        && d.status !== 'cancelled' && d.status !== 'completed' && (
+      {d.barbers?.salon?.status && d.barbers.salon.status !== 'live' && live && (
         <UnderReviewStrip barberName={d.barbers?.profiles?.full_name ?? tr('your barber')}
           onMessage={onChat} onCancel={onCancel} />
       )}
 
-      <Payment d={d} compact={sheet} />
+      <Payment d={d} compact={sheet} live={live} />
 
       {!sheet && (
         <View style={s.idCard}>
@@ -441,7 +461,7 @@ function DetailBody({ d, request, photo, rating, queue, sheet, onQueue, onChat, 
       )}
 
       {/* the two CTAs sit in the caller's absolute footer, but the sheet keeps them inline */}
-      {sheet && (
+      {sheet && live && (
         <View style={s.footerInline}>
           <Pill title={tr('CANCEL')} onPress={onCancel} />
           <Pill title={tr('RESCHEDULE')} dark wide onPress={onReschedule} />
@@ -1062,6 +1082,7 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
   bookingId: string; myId: string; onBack: () => void;
   onQueue?: () => void; onReport?: (bookingId: string) => void;
 }) {
+  useHideTabBar();
   const { detail, request, rating, photo, queue, reload } = useBooking(bookingId);
   const [overlay, setOverlay] = useState<Overlay>(null);
   // 35c — held after cancelling so the receipt can be shown instead of popping back
@@ -1069,12 +1090,14 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
 
   // 13a fires once per acceptance — the barber answers while the app is closed,
   // so the celebration is owed on the next open, not on the tap that caused it.
+  // A booking cancelled or past since then is owed nothing.
+  const isLive = !!detail && stateOf(detail) === 'live';
   useEffect(() => {
-    if (request?.status !== 'accepted' || !request.decided_at) return;
+    if (!isLive || request?.status !== 'accepted' || !request.decided_at) return;
     AsyncStorage.getItem(SEEN_KEY(request.id)).then((seen) => {
       if (!seen) setOverlay('moved');
     });
-  }, [request?.id, request?.status, request?.decided_at]);
+  }, [isLive, request?.id, request?.status, request?.decided_at]);
 
   async function dismissMoved() {
     if (request) await AsyncStorage.setItem(SEEN_KEY(request.id), '1');
@@ -1092,7 +1115,7 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
   const d = detail;
   const name = d.barbers?.profiles?.full_name ?? tr('Your barber');
   const pending = d.status === 'pending';
-  const declined = request?.status === 'declined';
+  const declined = isLive && request?.status === 'declined';
   const mine = queue?.find((r) => r.booking_id === d.id) ?? null;
   const ticketNo = queue && mine ? queue.findIndex((r) => r.booking_id === d.id) + 1 : null;
 
@@ -1153,7 +1176,7 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
           onAcceptOffer={askFor} onPickAnother={() => setOverlay('reschedule')} />
       </ScrollView>
 
-      {!declined && (
+      {isLive && !declined && (
         <View style={s.footer}>
           <Pill title={pending ? tr('WITHDRAW') : tr('CANCEL')} onPress={() => setOverlay('cancel')} />
           <Pill title={pending ? tr('MESSAGE {name}', { name: name.split(' ')[0].toUpperCase() }) : tr('RESCHEDULE')} dark wide

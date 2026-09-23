@@ -9,6 +9,7 @@ import { useBack } from '../components/motion';
 import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, inter, radius, shadow, sp, TOP_INSET } from '../theme';
 import { loc, tr } from '../lib/i18n';
+import { useHideTabBar } from '../components/TabBar';
 
 type Msg = {
   id: string;
@@ -55,6 +56,7 @@ function initialsOf(name: string) {
 }
 
 export default function ChatScreen({ bookingId, threadWith, myId, title, subtitle, avatarUrl, onBack, dark }: Props) {
+  useHideTabBar();
   const [msgs, setMsgs] = useState<Msg[]>([]); // ascending (oldest → newest)
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);

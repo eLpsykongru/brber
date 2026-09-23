@@ -744,11 +744,14 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
               {tr('Move {reschedule} · {x} min', { reschedule: nameOf(reschedule, barberId), x: (new Date(reschedule.ends_at).getTime() - new Date(reschedule.starts_at).getTime()) / 60_000 })}
             </Text>
             {/* ponytail: SlotPicker is light-themed; lives on a light sheet until a dark variant matters */}
-            <SlotPicker barberId={barberId}
-              durationMin={(new Date(reschedule.ends_at).getTime() - new Date(reschedule.starts_at).getTime()) / 60_000}
-              selected={rescheduleAt} onSelect={setRescheduleAt} />
+            <ScrollView style={{ flexGrow: 0 }}>
+              <SlotPicker barberId={barberId}
+                durationMin={(new Date(reschedule.ends_at).getTime() - new Date(reschedule.starts_at).getTime()) / 60_000}
+                selected={rescheduleAt} onSelect={setRescheduleAt} />
+            </ScrollView>
             <PillButton title={rescheduleAt ? tr('Move to {rescheduleAt}', { rescheduleAt: rescheduleAt.toTimeString().slice(0, 5) }) : tr('Pick a new time')}
               disabled={!rescheduleAt} onPress={confirmReschedule} />
+            <PillButton variant="secondary" title={tr('Keep the time he has')} onPress={() => setReschedule(null)} />
           </View>
         )}
       </Modal>
@@ -818,7 +821,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
             b.customer_id !== barberId && new Date(b.starts_at).getTime() === c.at.getTime());
           if (theirs) {
             const { error } = await supabase.rpc('reschedule_booking',
-              { p_booking: theirs.id, p_starts_at: c.freeAt.toISOString() });
+              { p_booking: theirs.id, p_new_start: c.freeAt.toISOString() });
             if (error) Alert.alert(tr('Could not move it'), error.message);
           }
           await drop(c.job.id);
@@ -951,7 +954,8 @@ const s = StyleSheet.create({
     backgroundColor: D.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg,
     padding: sp(5), paddingBottom: sp(10), gap: sp(2.5),
   },
-  sheetLight: { backgroundColor: colors.bg },
+  // capped so a long day's slot grid scrolls instead of pushing the backdrop and buttons off screen
+  sheetLight: { backgroundColor: colors.bg, maxHeight: '88%' },
   sheetTitle: { fontSize: font.h2, fontWeight: '700', color: D.text },
   sheetTitleLight: { fontSize: font.h2, fontWeight: '700', color: colors.text },
   sheetLabel: { fontSize: font.small, fontWeight: '600', color: D.sub, marginTop: sp(1) },

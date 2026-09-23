@@ -10,6 +10,8 @@ import { pushDeniedSince, pushPermission } from '../lib/push';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, shadow, TOP_INSET } from '../theme';
 import { loc, tr, trn } from '../lib/i18n';
+import ChatScreen from './ChatScreen';
+import { useHideTabBar } from '../components/TabBar';
 
 // Turns 14 and 15, customer side — 14a the inbox behind the Home bell, 14b its
 // settings, 15a the reminder-timing picker, 15b the empty inbox.
@@ -88,8 +90,12 @@ export default function CustomerNotificationsScreen({ userId, onBack, onOpenBook
   /** NTF-10 — a refund that could not reach the phone is still in the wallet */
   onOpenWallet?: () => void;
 }) {
+  useHideTabBar();
   const [rows, setRows] = useState<Notif[] | null>(null);
   const [settings, setSettings] = useState(false);
+  const [chat, setChat] = useState<{
+    bookingId: string; barberId?: string; title: string; subtitle?: string; avatarUrl?: string;
+  } | null>(null);
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.from('notifications')
@@ -113,6 +119,33 @@ export default function CustomerNotificationsScreen({ userId, onBack, onOpenBook
     await supabase.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', n.id);
   }
 
+  // each kind goes where it is about: a message to the chat, a review ask to the
+  // rating, money to the wallet. Only the rest open the booking.
+  async function open(n: Notif) {
+    markRead(n);
+    const id = n.booking_id;
+    if (!id) return;
+    if (n.kind === 'message') {
+      const { data, error } = await supabase.from('bookings')
+        .select('barbers(id, profiles!barbers_id_fkey(full_name, avatar_url), salon:salons!salon_id(name))')
+        .eq('id', id).single();
+      if (error) return Alert.alert(tr('Could not open the chat'), error.message);
+      const b = (data as any)?.barbers;
+      return setChat({
+        bookingId: id, barberId: b?.id, title: b?.profiles?.full_name ?? tr('Chat'),
+        subtitle: b?.salon?.name ?? undefined, avatarUrl: b?.profiles?.avatar_url ?? undefined,
+      });
+    }
+    if (n.kind === 'review_ask' && onRate) return onRate(id);
+    if (n.kind === 'wallet' && onOpenWallet) return onOpenWallet();
+    onOpenBooking?.(id);
+  }
+
+  if (chat) {
+    return <ChatScreen bookingId={chat.bookingId} threadWith={chat.barberId} myId={userId}
+      title={chat.title} subtitle={chat.subtitle} avatarUrl={chat.avatarUrl}
+      onBack={() => setChat(null)} />;
+  }
   if (settings) {
     return <NotificationSettings userId={userId} onBack={() => setSettings(false)}
       onOpenBooking={onOpenBooking} onOpenWallet={onOpenWallet} />;
@@ -181,7 +214,7 @@ export default function CustomerNotificationsScreen({ userId, onBack, onOpenBook
                 const askingForReview = n.kind === 'review_ask' && !!n.booking_id;
                 return (
                   <Pressable key={n.id}
-                    onPress={() => { markRead(n); if (n.booking_id) onOpenBooking?.(n.booking_id); }}
+                    onPress={() => { open(n); }}
                     accessibilityRole="button" accessibilityLabel={`${n.title}. ${n.body ?? ''}`}
                     style={({ pressed }) => [s.row, !n.read_at && s.rowUnread, pressed && s.pressed]}>
                     <View style={[s.icon, { backgroundColor: look.bg }]}>

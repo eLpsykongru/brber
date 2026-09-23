@@ -9,6 +9,7 @@ import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, shadowLg, TOP_INSET } from '../theme';
 import { loc, tr } from '../lib/i18n';
+import { useHideTabBar } from '../components/TabBar';
 
 // Turn 17 (17a report, 17b filed), 18b (the case thread) and 30a (support home).
 //
@@ -62,6 +63,7 @@ const stamp = (iso: string) => {
 export default function ReportProblemScreen({ bookingId, onBack, onOpenCase }: {
   bookingId?: string; onBack: () => void; onOpenCase: (c: CaseRow) => void;
 }) {
+  useHideTabBar();
   const [visits, setVisits] = useState<Visit[]>([]);
   const [visitId, setVisitId] = useState<string | undefined>(bookingId);
   const [picking, setPicking] = useState(false);
@@ -306,6 +308,7 @@ type Msg = {
 export function SupportCaseScreen({ caseRow, myId, onBack }: {
   caseRow: CaseRow; myId: string; onBack: () => void;
 }) {
+  useHideTabBar();
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [text, setText] = useState('');
   const [balance, setBalance] = useState<number | null>(null);

@@ -30,6 +30,8 @@ type Row = {
   cancelled_by: string | null;
   cancel_reason: string | null;
   duration_min: number | null;
+  // one-to-one on booking_id (0075); PostgREST may still hand back a list
+  deposit_holds?: { state: string } | { state: string }[] | null;
   services: { name: string; duration_min: number } | null;
   // 34e — a booking holds 1–n services now (0047). One service still lands here
   // as a single row, so the card has exactly one shape to render.
@@ -188,12 +190,14 @@ function Btn({ title, dark, accent, icon, onPress }: {
 
 // `onBack` is only passed when this is opened from Profile → My Bookings. As a
 // bottom tab there is nowhere to go back to, so the header stays as drawn.
-export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook, onBack, openBookingId }: {
+export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook, onBack, openBookingId, rateOnOpen }: {
   customerId: string; onChromeHidden?: (hidden: boolean) => void; onRebook?: () => void;
   onBack?: () => void;
   // a notification names one booking. Landing on the list and making him find
   // it again is the same dead end as not navigating at all.
   openBookingId?: string;
+  /** "How was the cut?" — land on the rating, not on the booking */
+  rateOnOpen?: boolean;
 }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [rated, setRated] = useState<Map<string, number>>(new Map());
@@ -208,7 +212,10 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
   const [reportId, setReportId] = useState<string | null>(null);
   const [openCase, setOpenCase] = useState<CaseRow | null>(null);
   const [detail, setDetail] = useState<{ id: string; initial?: 'cancel' | 'reschedule' } | null>(
-    openBookingId ? { id: openBookingId } : null);
+    openBookingId && !rateOnOpen ? { id: openBookingId } : null);
+  // the rating needs the row, so it waits for the first load (see below)
+  const [rateAsked, setRateAsked] = useState(!!(openBookingId && rateOnOpen));
+  const [loaded, setLoaded] = useState(false);
 
   const load = useCallback(async () => {
     const [bk, rv] = await Promise.all([
@@ -217,6 +224,7 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
           + ' cancelled_by, cancel_reason, duration_min, services(name, duration_min),'
           + ' bundle:bundles!bundle_id(name),'
           + ' booking_services(service_id, price_cents, duration_min, sort, done_at, services(name)),'
+          + ' deposit_holds(state),'
           + ' barbers(id, profiles!barbers_id_fkey(full_name), salon:salons!salon_id(name, address))')
         .eq('customer_id', customerId)
         .order('starts_at', { ascending: false })
@@ -226,6 +234,7 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
     if (bk.error) Alert.alert(tr('Could not load bookings'), bk.error.message);
     else setRows(bk.data as unknown as Row[]);
     if (rv.data) setRated(new Map(rv.data.map((r) => [r.booking_id, r.rating])));
+    setLoaded(true);
     // 36c — asks live alongside bookings because that's where you look for
     // "am I getting a cut this week", and an ask is the answer "maybe"
     const asks = await supabase.rpc('my_waitlist_asks');
@@ -238,6 +247,15 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
   const isDone = (r: Row) =>
     r.status === 'confirmed' && (!!r.completed_at || new Date(r.ends_at).getTime() < now);
   const isLive = (r: Row) => ['pending', 'confirmed'].includes(r.status);
+
+  useEffect(() => {
+    if (!rateAsked || !loaded) return;
+    setRateAsked(false);
+    const r = rows.find((x) => x.id === openBookingId);
+    // already rated, or not a finished visit: the booking itself is the answer
+    if (r && isDone(r) && !rated.has(r.id)) setReview(r);
+    else setDetail({ id: openBookingId! });
+  }, [rateAsked, loaded]);
 
   // the live-queue hero on 6a: a confirmed booking today, still to come
   const ticketRow = rows.find((r) => r.status === 'confirmed' && !isDone(r)
@@ -270,7 +288,9 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
   const filtered = rows.filter((r) => {
     if (filter === 'upcoming') return isLive(r) && !isDone(r) && new Date(r.ends_at).getTime() >= now;
     if (filter === 'completed') return isDone(r);
-    return !isLive(r);
+    // a request nobody answered before its time stays 'pending' (0015), and fell
+    // through every tab — it belongs with the bookings that did not happen
+    return !isLive(r) || (r.status === 'pending' && new Date(r.ends_at).getTime() < now);
   });
 
   const awaitingReview = rows.filter((r) => isDone(r) && !rated.has(r.id)).length;
@@ -567,11 +587,17 @@ function CancelledCard({ row, customerId, onRebook, onReport }: {
 }) {
   const byBarber = !!row.cancelled_by && row.cancelled_by !== customerId;
   const noShow = row.status === 'no_show';
+  const expired = row.status === 'pending'; // only an unanswered, past request lands here
   const dep = row.deposit_cents;
+  // the hold records where the deposit went — a customer cancelling inside the
+  // free window gets it back (0078). Bookings older than the ledger (0075) have
+  // none, and fall back to who cancelled.
+  const hold = Array.isArray(row.deposit_holds) ? row.deposit_holds[0] : row.deposit_holds;
+  const refunded = hold ? hold.state === 'to_customer' : byBarber;
   return (
     <View style={s.card}>
       <View style={s.chipRow}>
-        <Chip text={noShow ? tr('NO-SHOW') : byBarber ? tr('CANCELLED BY BARBER') : tr('YOU CANCELLED')}
+        <Chip text={noShow ? tr('NO-SHOW') : expired ? tr('EXPIRED') : byBarber ? tr('CANCELLED BY BARBER') : tr('YOU CANCELLED')}
           tone={noShow ? 'review' : byBarber ? 'red' : 'muted'} />
       </View>
       <View style={s.bodyRow}>
@@ -605,17 +631,18 @@ function CancelledCard({ row, customerId, onRebook, onReport }: {
         </View>
       )}
 
-      {dep > 0 && (noShow ? (
-        <View style={s.keptBox}>
-          <Ionicons name="lock-closed-outline" size={14} color={colors.textSecondary} />
-          <Text style={s.keptText}>{tr('Deposit kept by the shop')}</Text>
-          <Text style={s.keptAmount}>{tr('{dep} DH', { dep: dh(dep) })}</Text>
-        </View>
-      ) : byBarber ? (
+      {/* an expired request never took the deposit: nothing to say about it */}
+      {dep > 0 && !expired && (refunded ? (
         <View style={s.refundBox}>
           <Ionicons name="checkmark" size={14} color="#16A34A" />
           <Text style={s.refundText}>{tr('Deposit refunded to your wallet')}</Text>
           <Text style={s.refundAmount}>{tr('+{dep} DH', { dep: dh(dep) })}</Text>
+        </View>
+      ) : noShow || byBarber ? (
+        <View style={s.keptBox}>
+          <Ionicons name="lock-closed-outline" size={14} color={colors.textSecondary} />
+          <Text style={s.keptText}>{tr('Deposit kept by the shop')}</Text>
+          <Text style={s.keptAmount}>{tr('{dep} DH', { dep: dh(dep) })}</Text>
         </View>
       ) : (
         <View style={s.keptBox}>

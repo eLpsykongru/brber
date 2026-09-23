@@ -1,8 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import * as WebBrowser from 'expo-web-browser';
 import { useCallback, useEffect, useState } from 'react';
 import {
-  Alert, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View,
+  Alert, FlatList, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
 import { Display, HomeSkeleton, Stars, TAB_BAR_INSET } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
@@ -104,7 +103,7 @@ export default function DiscoverScreen({
   name, customerId, onChromeHidden, onExplore, onBookings, onHome, queueLink, onQueueLinkUsed,
 }: {
   name?: string | null; customerId?: string;
-  onChromeHidden?: (hidden: boolean) => void; onExplore?: () => void; onBookings?: () => void;
+  onChromeHidden?: (hidden: boolean) => void; onExplore?: () => void; onBookings?: (openBookingId?: string, rate?: boolean) => void;
   onHome?: () => void;
   /** option (b): a shop's queue link opened the app — straight to that shop's check-in */
   queueLink?: QueueLink | null; onQueueLinkUsed?: () => void;
@@ -261,7 +260,7 @@ export default function DiscoverScreen({
     const link = linkOpen;
     return <QueueLinkOpen link={link}
       onJoined={(id) => { setLinkOpen(null); setWalkIn(id); }}
-      onBrowser={() => { WebBrowser.openBrowserAsync(link.url).catch(() => {}); }}
+      onBrowser={() => { Linking.openURL(link.url).catch(() => {}); }}
       onDismiss={() => { setLinkOpen(null); onChromeHidden?.(false); }} />;
   }
   if (checkIn && customerId) {
@@ -285,8 +284,8 @@ export default function DiscoverScreen({
   if (inboxOpen && customerId) {
     return <CustomerNotificationsScreen userId={customerId}
       onBack={() => { setInboxOpen(false); onChromeHidden?.(false); loadUnread(); }}
-      onOpenBooking={() => { setInboxOpen(false); setDetailOpen(true); }}
-      onRate={() => { setInboxOpen(false); onChromeHidden?.(false); onBookings?.(); }} />;
+      onOpenBooking={(id) => { setInboxOpen(false); onBookings?.(id); }}
+      onRate={(id) => { setInboxOpen(false); onBookings?.(id, true); }} />;
   }
   // §9 - the ⋯ sheet's 'Report a problem' called onReport?.() into nothing, so
   // this door has never opened. It is also the ONLY route to 17a for a booking

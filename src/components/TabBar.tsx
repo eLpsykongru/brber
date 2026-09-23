@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { createContext, useContext, useLayoutEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, dark as d, font, inter, radius, sp } from '../theme';
 
@@ -8,6 +9,17 @@ export type TabItem = {
   icon: keyof typeof Ionicons.glyphMap;       // filled variant, used when active
   iconOutline: keyof typeof Ionicons.glyphMap; // outline variant, used when inactive
 };
+
+// A full screen over a tab needs the whole height — its pinned buttons sit where
+// the bar would. It says so itself instead of trusting every door that opens it
+// to remember (Saved opened the salon page with the bar still on, Home did not).
+// Counted, so a screen pushed over another one composes; a stray "show the bar"
+// from a child can no longer bring it back while any such screen is mounted.
+export const TabBarHiders = createContext<(delta: 1 | -1) => void>(() => {});
+export function useHideTabBar() {
+  const bump = useContext(TabBarHiders);
+  useLayoutEffect(() => { bump(1); return () => bump(-1); }, [bump]);
+}
 
 // Floating pill tab bar. Rendered as an overlay; screens add TAB_BAR_INSET bottom
 // padding so content never hides behind it. `center` renders the accent FAB in the

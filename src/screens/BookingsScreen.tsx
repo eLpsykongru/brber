@@ -919,11 +919,14 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
               {tr('Move {resched} · {x} min', { resched: nameOf(resched, barberId), x: (new Date(resched.ends_at).getTime() - new Date(resched.starts_at).getTime()) / 60_000 })}
             </Text>
             {/* ponytail: SlotPicker is light-themed; lives on a light sheet until a dark variant matters */}
-            <SlotPicker barberId={barberId}
-              durationMin={(new Date(resched.ends_at).getTime() - new Date(resched.starts_at).getTime()) / 60_000}
-              selected={reschedAt} onSelect={setReschedAt} />
+            <ScrollView style={{ flexGrow: 0 }}>
+              <SlotPicker barberId={barberId}
+                durationMin={(new Date(resched.ends_at).getTime() - new Date(resched.starts_at).getTime()) / 60_000}
+                selected={reschedAt} onSelect={setReschedAt} />
+            </ScrollView>
             <PillButton title={reschedAt ? tr('Move to {reschedAt}', { reschedAt: reschedAt.toTimeString().slice(0, 5) }) : tr('Pick a new time')}
               disabled={!reschedAt} onPress={confirmReschedule} />
+            <PillButton variant="secondary" title={tr('Keep the time he has')} onPress={() => setResched(null)} />
           </View>
         )}
       </Modal>
@@ -1151,6 +1154,7 @@ const s = StyleSheet.create({
     backgroundColor: D.sheet, borderTopLeftRadius: 26, borderTopRightRadius: 26,
     padding: sp(5), paddingBottom: sp(10), gap: sp(3),
   },
-  sheetLight: { backgroundColor: colors.bg },
+  // capped so a long day's slot grid scrolls instead of pushing the backdrop and buttons off screen
+  sheetLight: { backgroundColor: colors.bg, maxHeight: '88%' },
   sheetTitleLight: { fontFamily: inter.b, fontSize: 18, color: colors.text },
 });

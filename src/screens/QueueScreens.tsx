@@ -9,6 +9,7 @@ import { isUuid, parseShopCode } from '../lib/shopCode';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow } from '../theme';
 import { tr } from '../lib/i18n';
+import { useHideTabBar } from '../components/TabBar';
 
 // Turn 27 (walk-in check-in) and turn 28 (the full-screen "You're next").
 //
@@ -28,6 +29,7 @@ const dh = (c: number) => (c / 100).toFixed(0);
 export default function CheckInScreen({ onClose, onJoined }: {
   onClose: () => void; onJoined: (bookingId: string) => void;
 }) {
+  useHideTabBar();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState<{ salon: string; barber?: string } | null>(null);
   const [manual, setManual] = useState(false);
@@ -288,6 +290,7 @@ export function WalkInTicketScreen({ ticketNo, ahead, waitMin, barberName, salon
   ticketNo: number; ahead: number; waitMin: number; barberName: string; salonName: string;
   priceCents: number; onQueue: () => void; onLeave: () => void;
 }) {
+  useHideTabBar();
   return (
     <View style={s.centreScreen}>
       <View style={s.okCircle}>
@@ -341,6 +344,7 @@ export function YoureNextScreen({ phase, ticketNo, barberName, salonName, addres
   depositCents: number; priceCents: number;
   onAck: () => void; onMessage: () => void;
 }) {
+  useHideTabBar();
   const first = barberName.split(' ')[0];
   const chair = phase === 'chair';
   const initials = barberName.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();

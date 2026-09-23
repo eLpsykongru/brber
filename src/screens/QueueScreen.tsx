@@ -4,6 +4,7 @@ import { ScreenHeader } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, shadowLg, sp, TOP_INSET } from '../theme';
 import { tr } from '../lib/i18n';
+import { useHideTabBar } from '../components/TabBar';
 
 // One row of barber_day_queue(): today's confirmed bookings, names pre-trimmed server-side.
 export type DayQueueRow = {
@@ -29,6 +30,7 @@ export default function QueueScreen({ barberId, myBookingId, barberLine, onBack,
   barberId: string; myBookingId: string; barberLine: string;
   onBack: () => void; onBookings?: () => void;
 }) {
+  useHideTabBar();
   const [rows, setRows] = useState<DayQueueRow[] | null>(null);
 
   const load = useCallback(async () => {

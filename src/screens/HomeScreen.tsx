@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, StyleSheet, View } from 'react-native';
 import QuickAddSheet, { QuickPick } from '../components/QuickAddSheet';
-import TabBar, { TabItem } from '../components/TabBar';
+import TabBar, { TabBarHiders, TabItem } from '../components/TabBar';
 import { useAndroidBack } from '../lib/back';
 import { onBannerOpen } from '../lib/push';
 import { supabase } from '../lib/supabase';
@@ -73,6 +73,11 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged, q
     : CUSTOMER_TABS;
   const [tab, setTab] = useState(tabs[0].key);
   const [chromeHidden, setChromeHidden] = useState(false);
+  // full screens mounted over the tab right now (useHideTabBar)
+  const [hiders, setHiders] = useState(0);
+  const bumpHiders = useCallback((d: 1 | -1) => setHiders((n) => n + d), []);
+  // a notification tapped on Home lands on its booking in the Bookings tab
+  const [openBooking, setOpenBooking] = useState<{ id: string; rate?: boolean } | undefined>();
   // a saved row opens the shop (or the barber inside it) over the Saved tab
   const [preview, setPreview] = useState<{ salonId?: string; barberId?: string } | null>(null);
 
@@ -160,7 +165,7 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged, q
   } else {
     if (tab === 'home') content = <DiscoverScreen name={profile.full_name} customerId={profile.id}
       onChromeHidden={setChromeHidden} onExplore={() => setTab('explore')}
-      onBookings={() => { setChromeHidden(false); setTab('bookings'); }}
+      onBookings={(id, rate) => { setChromeHidden(false); setOpenBooking(id ? { id, rate } : undefined); setTab('bookings'); }}
       onHome={() => { setChromeHidden(false); setTab('home'); }}
       queueLink={queueLink} onQueueLinkUsed={onQueueLinkUsed} />;
     else if (tab === 'explore') content = <ExploreScreen onChromeHidden={setChromeHidden}
@@ -182,22 +187,23 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged, q
         : saved;
     }
     else if (tab === 'bookings') content = <MyBookingsScreen customerId={profile.id}
-      onChromeHidden={setChromeHidden} onRebook={() => setTab('explore')} />;
+      onChromeHidden={setChromeHidden} onRebook={() => setTab('explore')}
+      openBookingId={openBooking?.id} rateOnOpen={openBooking?.rate} />;
     else if (tab === 'chats') content = <ChatsScreen customerId={profile.id} onChromeHidden={setChromeHidden} />;
     else content = <ProfileScreen profile={profile} barber={null} phone={phone} onProfileChanged={onProfileChanged} onChromeHidden={setChromeHidden} onExplore={() => setTab('explore')} />;
   }
 
   return (
     <View style={s.screen}>
-      {content}
+      <TabBarHiders.Provider value={bumpHiders}>{content}</TabBarHiders.Provider>
       {barber && (
         <QuickAddSheet visible={quickOpen} barberId={barber.id}
           onClose={() => setQuickOpen(false)} onPick={onQuickPick} />
       )}
-      {!chromeHidden && (
+      {!chromeHidden && hiders === 0 && (
         <TabBar items={tabs} active={tab} dark={!!barber}
           center={barber ? { label: tr('Quick add'), onPress: () => setQuickOpen(true) } : undefined}
-          onChange={(k) => { setChromeHidden(false); setTab(k); }} />
+          onChange={(k) => { setChromeHidden(false); setOpenBooking(undefined); setTab(k); }} />
       )}
     </View>
   );

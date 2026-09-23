@@ -6,6 +6,7 @@ import { Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
 import { tr } from '../lib/i18n';
+import ChatScreen from './ChatScreen';
 
 // Turn 4 — 4b the inbox, 4c the settings behind its gear. What buzzes is decided
 // server-side by notif_should_push() (0032); this screen owns the toggles it reads.
@@ -99,6 +100,7 @@ export default function NotificationsScreen({ barberId, onBack, onOpenBooking, o
   onOpenGap?: (bookingId: string) => void;
 }) {
   const [settings, setSettings] = useState(false);
+  const [chat, setChat] = useState<{ bookingId: string; customerId: string; title: string } | null>(null);
   const [rows, setRows] = useState<Notif[] | null>(null);
   const [filter, setFilter] = useState<'all' | 'bookings' | 'money' | 'reviews'>('all');
   const [live, setLive] = useState<Record<string, Live>>({});
@@ -169,14 +171,27 @@ export default function NotificationsScreen({ barberId, onBack, onOpenBooking, o
 
   // the routing audit's first rule: a tap lands on the one thing the row is about,
   // never on a tab. Everything else that names a booking still opens the booking.
-  function open(n: Notif) {
+  async function open(n: Notif) {
     if (!n.booking_id) return;
+    if (n.kind === 'message') {
+      const { data, error } = await supabase.from('bookings')
+        .select('customer_id, walk_in_name, customer:profiles!customer_id(full_name)')
+        .eq('id', n.booking_id).single();
+      if (error) return Alert.alert(tr('Could not open the chat'), error.message);
+      const b = data as any;
+      return setChat({ bookingId: n.booking_id, customerId: b.customer_id,
+        title: b.customer?.full_name ?? b.walk_in_name ?? tr('Chat') });
+    }
     if (n.kind === 'reschedule' && onOpenAsk) return onOpenAsk(n.booking_id);
     if (n.kind === 'review' && onOpenReview) return onOpenReview(n.booking_id);
     if (n.kind === 'cancellation' && onOpenGap) return onOpenGap(n.booking_id);
     onOpenBooking?.(n.booking_id);
   }
 
+  if (chat) {
+    return <ChatScreen dark bookingId={chat.bookingId} threadWith={chat.customerId} myId={barberId}
+      title={chat.title} onBack={() => setChat(null)} />;
+  }
   if (settings) {
     return <NotificationSettings barberId={barberId} onBack={() => setSettings(false)} />;
   }

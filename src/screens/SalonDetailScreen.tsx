@@ -18,6 +18,7 @@ import type { Specialist } from '../types';
 import { Pushed } from '../components/motion';
 import BarberDetailScreen from './BarberDetailScreen';
 import { tr, trn } from '../lib/i18n';
+import { useHideTabBar } from '../components/TabBar';
 
 export type SalonCard = {
   id: string;
@@ -58,6 +59,7 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
   /** BPR-07 — a barber previewing their own page: back from it ends the preview */
   preview?: boolean;
 }) {
+  useHideTabBar();
   const [tab, setTab] = useState<Tab>('about');
   const [photos, setPhotos] = useState<{ name: string; url: string }[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);

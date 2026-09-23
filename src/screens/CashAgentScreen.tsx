@@ -27,7 +27,7 @@ type State = {
     id: string; ref: string; state: 'pending' | 'mismatch'; to: string; to_name: string; from_name: string;
     started_cents: number; declared_cents: number | null; counted_cents: number | null; at: string;
   } | null;
-  gaps: { barber: string; name: string; cents: number; at: string; owes_cents: number }[];
+  gaps: { id: string; barber: string; name: string; cents: number; at: string; owes_cents: number }[];
 };
 
 const initials = (n: string) => n.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
@@ -139,7 +139,7 @@ export default function CashAgentScreen({ onBack }: { onBack?: () => void }) {
       )}
 
       {s.gaps.map((g) => (
-        <View key={g.at} style={st.amber}>
+        <View key={g.id} style={st.amber}>
           <Ico name="alert-circle" size={15} color={D.amber} />
           <T size={11.5} c={D.sub} style={[st.grow, st.lh]}>
             {tr('The handover on {date} came up {amount} short. It stays on {name} until he puts it back in the drawer.',

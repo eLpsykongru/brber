@@ -6,6 +6,7 @@ import type { QueueLink } from '../lib/queueLink';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, TOP_INSET } from '../theme';
 import { tr } from '../lib/i18n';
+import { useHideTabBar } from '../components/TabBar';
 
 // A shop's queue link opened the app — ADDENDUM-app-first (turn Q3). The web page
 // is for anonymous eyes; places are held here.
@@ -109,6 +110,7 @@ export function QueueLinkOpen({ link, onJoined, onBrowser, onDismiss }: {
   onBrowser: () => void;
   onDismiss: () => void;
 }) {
+  useHideTabBar();
   const q = useQueue(link);
   const [pick, setPick] = useState<Pick | null>(null);
   const [folded, setFolded] = useState(true);

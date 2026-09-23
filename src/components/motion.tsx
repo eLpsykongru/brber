@@ -4,6 +4,7 @@ import {
   PanResponder, Pressable, PressableProps, StyleSheet, View, ViewStyle,
 } from 'react-native';
 import { shouldDismiss } from '../lib/swipe';
+import { useHideTabBar } from './TabBar';
 
 // Movement, with no new dependencies.
 //
@@ -60,6 +61,7 @@ export function Pushed({ children, onBack, disabled, behind }: {
    */
   behind?: ReactNode;
 }) {
+  useHideTabBar(); // anything pushed is a full screen
   const x = useRef(new Animated.Value(W)).current;
   const [reduced, setReduced] = useState(false);
   // read in a ref as well: the pan responder closes over its handlers once

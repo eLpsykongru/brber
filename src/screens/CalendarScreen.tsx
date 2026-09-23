@@ -63,6 +63,8 @@ const gridStartFor = (d: Date) => {
 };
 const isoOf = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+// calendar days, not 24h steps: a 25h DST day would repeat a date (and its key)
+const addDays = (d: Date, n: number) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 const sameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString();
 const ampm = (iso: string) =>
   new Date(iso).toLocaleTimeString(loc('en-US'), { hour: 'numeric', minute: '2-digit' });
@@ -174,7 +176,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
   const load = useCallback(async () => {
     setBookings(null);
     const weekStart = gridStart;
-    const to = new Date(gridStart.getTime() + GRID_DAYS * DAY_MS);
+    const to = addDays(gridStart, GRID_DAYS);
     const [bk, blk, av, off, sv] = await Promise.all([
       supabase.from('bookings')
         .select('id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, services(name), customer:profiles!customer_id(full_name, phone, avatar_url)')
@@ -240,11 +242,11 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
   });
 
   function shiftGrid(deltaWeeks: number) {
-    const gs = new Date(gridStart.getTime() + deltaWeeks * 7 * DAY_MS);
+    const gs = addDays(gridStart, deltaWeeks * 7);
     setGridStart(gs);
     // keep the same weekday+row under the cursor so the selection doesn't jump about
     const offset = Math.round((selected.getTime() - gridStart.getTime()) / DAY_MS);
-    setSelected(new Date(gs.getTime() + offset * DAY_MS));
+    setSelected(addDays(gs, offset));
   }
 
   function goToday() {
@@ -353,7 +355,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
   }
 
   // ---- derive ----
-  const grid = Array.from({ length: GRID_DAYS }, (_, i) => new Date(gridStart.getTime() + i * DAY_MS));
+  const grid = Array.from({ length: GRID_DAYS }, (_, i) => addDays(gridStart, i));
   const rows = bookings ?? [];
   const ofDay = (d: Date) => rows.filter((b) => sameDay(new Date(b.starts_at), d));
   const dayAll = ofDay(selected);
@@ -754,13 +756,16 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
               {tr('Move {resched} · {resched2} min', { resched: nameOf(resched, barberId), resched2: durMin(resched) })}
             </Text>
             {/* ponytail: SlotPicker is light-themed; lives on a light sheet until a dark variant matters */}
-            <SlotPicker barberId={barberId} durationMin={durMin(resched)}
-              selected={reschedAt} onSelect={setReschedAt} />
-            <Text style={s.reasonLabelLight}>{tr('Reason (optional) — tap any')}</Text>
-            <ReasonChips light options={MOVE_REASONS} selected={moveReasons}
-              onToggle={(r) => setMoveReasons((xs) => toggleReason(xs, r))} />
+            <ScrollView style={{ flexGrow: 0 }}>
+              <SlotPicker barberId={barberId} durationMin={durMin(resched)}
+                selected={reschedAt} onSelect={setReschedAt} />
+              <Text style={s.reasonLabelLight}>{tr('Reason (optional) — tap any')}</Text>
+              <ReasonChips light options={MOVE_REASONS} selected={moveReasons}
+                onToggle={(r) => setMoveReasons((xs) => toggleReason(xs, r))} />
+            </ScrollView>
             <PillButton title={reschedAt ? tr('Move to {reschedAt}', { reschedAt: reschedAt.toTimeString().slice(0, 5) }) : tr('Pick a new time')}
               disabled={!reschedAt} onPress={confirmReschedule} />
+            <PillButton variant="secondary" title={tr('Keep the time he has')} onPress={() => setResched(null)} />
           </View>
         )}
       </Modal>
@@ -930,7 +935,8 @@ const s = StyleSheet.create({
     backgroundColor: D.card, borderTopLeftRadius: radius.lg, borderTopRightRadius: radius.lg,
     padding: sp(5), paddingBottom: sp(10), gap: sp(3),
   },
-  sheetLight: { backgroundColor: colors.bg },
+  // capped so a long day's slot grid scrolls instead of pushing the backdrop and buttons off screen
+  sheetLight: { backgroundColor: colors.bg, maxHeight: '88%' },
   sheetTitleLight: { fontSize: font.h2, fontWeight: '700', color: colors.text },
   handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: D.border },
   sheetHead: { flexDirection: 'row', gap: sp(3) },

@@ -7,7 +7,6 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Session } from '@supabase/supabase-js';
 import { StatusBar } from 'expo-status-bar';
-import * as WebBrowser from 'expo-web-browser';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, AppState, Linking, StyleSheet, View } from 'react-native';
 import { Suspended } from './src/components/Failures';
@@ -85,7 +84,7 @@ export default function App() {
   // to the app, so "carry on in the browser" cannot bounce straight back here.
   const openInBrowser = useCallback((link: QueueLink) => {
     spendQueueLink();
-    WebBrowser.openBrowserAsync(link.url).catch(() => {});
+    Linking.openURL(link.url).catch(() => {});
   }, [spendQueueLink]);
   // a barber's app has no check-in: his own link shows him the page
   const isBarber = !!user?.barber;

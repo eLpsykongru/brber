@@ -12,6 +12,7 @@ import { supabase } from '../lib/supabase';
 import { colors, font, radius, shadow, sp, TOP_INSET } from '../theme';
 import type { SalonCard } from './SalonDetailScreen';
 import { en, tr, trn } from '../lib/i18n';
+import { useHideTabBar } from '../components/TabBar';
 
 const RECENT_KEY = 'search:recent';
 const RECENT_MAX = 6;
@@ -68,6 +69,7 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
   onPick: (s: SalonCard) => void;
   onClose: () => void;
 }) {
+  useHideTabBar();
   const [query, setQuery] = useState('');
   const [recent, setRecent] = useState<string[]>([]);
   // the logged miss for the query on screen — 0074 returns it so NOTIFY ME can

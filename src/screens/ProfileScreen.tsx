@@ -130,7 +130,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   // tap on a saved barber/salon. `from` is where BACK goes, since they differ.
   const [preview, setPreview] = useState<{ salonId?: string; barberId?: string; from: ProfileView } | null>(null);
   // a notification names one booking; MyBookings opens straight onto it
-  const [openBookingId, setOpenBookingId] = useState<string | undefined>();
+  const [openBooking, setOpenBooking] = useState<{ id: string; rate?: boolean } | undefined>();
 
   function go(next: ProfileView) {
     setView((cur) => {
@@ -224,9 +224,9 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     }
     if (view === 'notifications') {
       return <CustomerNotificationsScreen userId={profile.id} onBack={back}
-        onOpenBooking={(id) => { setOpenBookingId(id); go('bookings'); }}
+        onOpenBooking={(id) => { setOpenBooking({ id }); go('bookings'); }}
         onOpenWallet={() => go('wallet')}
-        onRate={(id) => { setOpenBookingId(id); go('bookings'); }} />;
+        onRate={(id) => { setOpenBooking({ id, rate: true }); go('bookings'); }} />;
     }
     if (view === 'linked') {
       return <LinkedAccountsScreen onBack={back} onSetPassword={() => go('password')} />;
@@ -237,8 +237,8 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     }
     if (view === 'bookings') {
       return <MyBookingsScreen customerId={profile.id} onChromeHidden={onChromeHidden}
-        openBookingId={openBookingId}
-        onBack={() => { setOpenBookingId(undefined); go('menu'); }} onRebook={onExplore} />;
+        openBookingId={openBooking?.id} rateOnOpen={openBooking?.rate}
+        onBack={() => { setOpenBooking(undefined); go('menu'); }} onRebook={onExplore} />;
     }
     if (view === 'wallet') return <WalletScreen customerId={profile.id} onBack={back} />;
     if (view === 'coupons') return <CouponsScreen onBack={back} />;

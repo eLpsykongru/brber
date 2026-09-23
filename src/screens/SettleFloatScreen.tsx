@@ -17,7 +17,7 @@ import { tr, trn } from '../lib/i18n';
 // record a handover alone. That is also why 9e says "don't hand anything over
 // without it" — the code is the receipt, not the app.
 
-const dh = (c: number) => Math.round(c / 100).toLocaleString('en-US').replace(/,/g, ' ');
+const dh = (c: number) => Math.round(c / 100).toLocaleString('en-US').replace(/,/g, '\u00a0');
 const initials = (n: string) => n.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
 type Float = {

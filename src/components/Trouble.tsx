@@ -13,7 +13,7 @@ import { loc, tr, trn, trRich } from '../lib/i18n';
 // about money and can be dismissed, and every one of them says what is still
 // working before it says what isn't.
 
-const dh = (c: number) => Math.round(c / 100).toLocaleString('en-US').replace(/,/g, ' ');
+const dh = (c: number) => Math.round(c / 100).toLocaleString('en-US').replace(/,/g, '\u00a0');
 const clock = (d: Date) => d.toTimeString().slice(0, 5);
 const initials = (n: string) => n.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 

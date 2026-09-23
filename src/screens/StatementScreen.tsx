@@ -21,7 +21,7 @@ import { loc, tr, trn, trRich, weekdayName } from '../lib/i18n';
 // top-ups. Getting that wrong turns a bookkeeping event into a fee he never
 // agreed to.
 
-const dh = (c: number) => Math.round(Math.abs(c) / 100).toLocaleString('en-US').replace(/,/g, ' ');
+const dh = (c: number) => Math.round(Math.abs(c) / 100).toLocaleString('en-US').replace(/,/g, '\u00a0');
 
 const DAYS = [0, 1, 2, 3, 4, 5, 6].map((i) => weekdayName(i, 'short'));
 const MONTHS = Array.from({ length: 12 }, (_, m) => new Date(2023, m, 1).toLocaleDateString(loc('en-GB'), { month: 'short' }));
@@ -279,7 +279,26 @@ export default function StatementScreen({ onBack }: { onBack?: () => void }) {
                 <T w="sb" size={12.5} style={s2.grow}>{tr('This week')}</T>
                 <T w="b" size={13} style={s2.num}>{tr('{subtotal_cents} DH', { subtotal_cents: dh(s.subtotal_cents) })}</T>
               </View>
-              {s.carried_lines.map((x) => (
+              {/* 0128 · a drawer handover that came up short, and what became of it:
+                  on the barber (the shop hands over less), paid back, or written off
+                  with the shop bearing it. Not a refund, so not the refund screen. */}
+              {s.carried_lines.filter((x) => /^(TRF|WO)-/.test(x.ref)).map((x) => (
+                <View key={`${x.ref}-${x.at}`} style={[s2.line, s2.carried]}>
+                  <View style={s2.grow}>
+                    <T size={12} c={D.amber}>
+                      {x.ref.startsWith('WO-')
+                        ? (x.cents >= 0 ? tr('Write-off {ref} · the shop bears it', { ref: x.ref }) : tr('Write-off {ref} reversed', { ref: x.ref }))
+                        : (x.cents < 0 ? tr('Handover {ref} came up short · on the barber, not the shop', { ref: x.ref })
+                          : tr('Handover {ref} · the shortfall was paid back into the drawer', { ref: x.ref }))}
+                    </T>
+                    <T size={10.5} c={D.muted} style={s2.gap2}>{when(x.at)}</T>
+                  </View>
+                  <T w="b" size={12.5} c={D.amber} style={s2.num}>
+                    {tr('{x} {cents} DH', { x: x.cents >= 0 ? '+' : '−', cents: dh(x.cents) })}
+                  </T>
+                </View>
+              ))}
+              {s.carried_lines.filter((x) => !/^(TRF|WO)-/.test(x.ref)).map((x) => (
                 <Pressable key={x.ref} onPress={() => setOpen(x)} style={[s2.line, s2.carried]}>
                   <View style={s2.grow}>
                     <T size={12} c={D.amber}>{tr('From week {source_week} · a refund', { source_week: x.source_week?.slice(-2) })}</T>

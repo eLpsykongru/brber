@@ -18,7 +18,7 @@ import { loc, tr, trn } from '../lib/i18n';
 // 2h/2i the walk-in QR poster, 2j the wall display.
 
 const BARBER_TINTS = ['#E8442E', '#5B8DEF', '#4ADE80', '#E8A100', '#A78BFA'];
-const dh = (c: number) => `${Math.round(c / 100).toLocaleString('en-US').replace(/,/g, ' ')} DH`;
+const dh = (c: number) => `${Math.round(c / 100).toLocaleString('en-US').replace(/,/g, '\u00a0')} DH`;
 const initials = (n: string) => n.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 const first = (n: string) => n.split(' ')[0];
 

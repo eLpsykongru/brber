@@ -33,7 +33,7 @@ type LiveBooking = {
 
 type BlockRow = { id: string; barber_id: string; label: string | null; day: string | null; start_min: number; end_min: number };
 
-const dh = (c: number) => `${Math.round(c / 100).toLocaleString('en-US').replace(/,/g, ' ')} DH`;
+const dh = (c: number) => `${Math.round(c / 100).toLocaleString('en-US').replace(/,/g, '\u00a0')} DH`;
 const hhmm = (iso: string) => new Date(iso).toTimeString().slice(0, 5);
 const minToHHMM = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 const isoDay = (d: Date) =>

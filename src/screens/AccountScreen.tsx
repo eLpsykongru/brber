@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Linking, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Btn, Card, Eyebrow, Ico, type IconName, RadioRow, Screen, Serif, Sheet, SheetHead, T, TAB_INSET, TopBar } from '../components/dark';
 import { awkwardNet, dh, netWay } from '../lib/billing';
 import { loc, tr, trn } from '../lib/i18n';
@@ -36,7 +36,16 @@ type Account = {
   cap: { cap_cents: number; net_cents: number; room_cents: number } | null;
   agent: { name: string; is_me: boolean } | null;
   handover: Handover | null;
+  old_shops?: OldShop[];
+  shortfalls?: Shortfall[];
 };
+// BAC-11: a shop he has left that still owes him — keyed on (him, that shop), forever
+type OldShop = {
+  salon_id: string; salon: string; cents: number; wallet_cuts: number; deposits: number;
+  left_at: string | null; agent: { name: string; phone: string | null; area: string | null; is_me: boolean };
+};
+// §10: a handover that came up short while he held the drawer — owed to Sterncut, not the shop
+type Shortfall = { id: string; salon: string; cents: number; at: string; ref: string; handover_at: string; agent: string };
 type Handover = {
   id: string; ref: string; state: 'pending' | 'mismatch'; role: 'incoming' | 'outgoing';
   from_name: string; to_name: string; drawer_cents: number;
@@ -46,11 +55,14 @@ type Handover = {
 type Drawer = {
   salon: string | null; me: string; drawer_cents: number; sterncut_cents: number; to_pay_cents: number;
   my_due_cents: number; chairs: Chair[]; transfer: { ref: string; state: string; to_name: string } | null;
+  shortfalls?: OwedBack[];
 };
 type Chair = {
   barber: string; name: string; chair: string | null; due_cents: number;
   last_paid: { cents: number; at: string } | null;
+  left_at?: string | null; wallet_cuts?: number; deposits?: number;
 };
+type OwedBack = { id: string; name: string; cents: number; at: string; ref: string };
 type Bucket = { cents: number; count: number };
 type Row = {
   booking: string; ref: string; kind: 'wallet_cut' | 'deposit' | 'no_show' | 'late_cancel' | 'refund' | 'pending';
@@ -69,7 +81,7 @@ const dayMonth = (iso: string) => new Date(iso).toLocaleDateString(loc('en-GB'),
 const initials = (n: string) => n.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
 
 type View_ = 'home' | 'his' | 'ours' | 'settle' | 'wallet' | 'deposits' | 'awkward' | 'pending'
-  | 'drawer' | 'takeover';
+  | 'drawer' | 'takeover' | 'old';
 
 export default function AccountScreen({ onBack, onStatement }: { onBack?: () => void; onStatement?: () => void }) {
   const [a, setA] = useState<Account | null>(null);
@@ -77,6 +89,7 @@ export default function AccountScreen({ onBack, onStatement }: { onBack?: () => 
   const [tick, setTick] = useState(0);
   const [dispute, setDispute] = useState<Row | null>(null);
   const [picking, setPicking] = useState(false);
+  const [oldShop, setOldShop] = useState<OldShop | null>(null);
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.rpc('my_account');
@@ -87,6 +100,10 @@ export default function AccountScreen({ onBack, onStatement }: { onBack?: () => 
 
   if (!a) return <Screen bottom={TAB_INSET}><TopBar title={tr('You & Sterncut')} onBack={onBack} plain /></Screen>;
   if (!a.salon) {
+    // BAC-11: no shop, still owed — leaving ended his membership, never his balance
+    if (a.old_shops?.length || a.shortfalls?.length) {
+      return <LeaverView a={a} onBack={onBack} onChanged={() => setTick((n) => n + 1)} />;
+    }
     return (
       <Screen bottom={TAB_INSET}>
         <TopBar title={tr('You & Sterncut')} onBack={onBack} plain />
@@ -120,16 +137,25 @@ export default function AccountScreen({ onBack, onStatement }: { onBack?: () => 
     body = <PendingView onBack={() => setView('his')} />;
   } else if (view === 'drawer' && a.till) {
     body = <DrawerView onBack={home} onPaid={() => setTick((n) => n + 1)} />;
+  } else if (view === 'old' && oldShop) {
+    body = (
+      <Screen bottom={TAB_INSET} gap={12}>
+        <TopBar title={oldShop.salon} onBack={home} plain />
+        <OwedByShop shop={oldShop} onReported={() => setTick((n) => n + 1)} />
+      </Screen>
+    );
   } else if (view === 'takeover' && a.handover?.role === 'incoming' && a.handover.state === 'pending') {
     body = <TakeoverView h={a.handover} onBack={home} onDone={() => { setView('home'); setTick((n) => n + 1); }} />;
   } else {
-    body = <HomeView a={a} go={setView} onBack={onBack} />;
+    body = <HomeView a={a} go={setView} onBack={onBack} onOldShop={(o) => { setOldShop(o); setView('old'); }} />;
   }
   return <>{body}{sheet}</>;
 }
 
 // ---- BAC-01 · one number, both directions --------------------------------------
-function HomeView({ a, go, onBack }: { a: Account; go: (v: View_) => void; onBack?: () => void }) {
+function HomeView({ a, go, onBack, onOldShop }: {
+  a: Account; go: (v: View_) => void; onBack?: () => void; onOldShop: (o: OldShop) => void;
+}) {
   const way = netWay(a.net_cents);
   const owed = way === 'you_are_owed';
   const heldOfHis = a.mine.cents;
@@ -185,6 +211,21 @@ function HomeView({ a, go, onBack }: { a: Account; go: (v: View_) => void; onBac
       )}
 
       {!a.till && a.agent && <PayeeCard a={a} />}
+
+      {(a.shortfalls ?? []).map((sf) => <ShortfallCard key={sf.id} sf={sf} />)}
+
+      {/* "If he later joins another shop … this card moves into it as a separate row. It never merges." */}
+      {(a.old_shops ?? []).map((o) => (
+        <Card key={o.salon_id} style={st.nav} onPress={() => onOldShop(o)}>
+          <View style={[st.navIcon, { backgroundColor: 'rgba(74,222,128,0.14)' }]}><Ico name="clock" size={15} color={D.green} /></View>
+          <View style={st.grow}>
+            <T w="b" size={12.5}>{tr('{salon} still owes you', { salon: o.salon })}</T>
+            <T size={11} c={D.sub} style={st.mt2}>{tr('A shop you left · this does not expire')}</T>
+          </View>
+          <T w="b" size={13} c={D.green} style={st.num}>{dh(o.cents)}</T>
+          <Ico name="chevron-right" size={16} color={D.sub} />
+        </Card>
+      ))}
 
       {a.pending.count > 0 && (
         <View style={st.amber}>
@@ -340,6 +381,16 @@ function DrawerView({ onBack, onPaid }: { onBack: () => void; onPaid: () => void
   useEffect(() => { load(); }, [load]);
   if (!d) return <Screen bottom={TAB_INSET}><TopBar title={tr("The shop's cash")} onBack={onBack} plain /></Screen>;
   const owed = d.chairs.filter((c) => c.due_cents > 0);
+  // he hands the shortfall back into the drawer; the man holding it records it
+  const takeBack = (sf: OwedBack) => Alert.alert(
+    tr('Take {amount} from {name}?', { amount: dh(sf.cents), name: sf.name.split(' ')[0] }),
+    tr("Only once the cash is in your hand. It goes into the drawer and on to Sterncut with Friday's collection, and he is told he is square."),
+    [{ text: tr('Not now'), style: 'cancel' },
+      { text: tr('I have taken it'), onPress: async () => {
+        const { error } = await supabase.rpc('agent_take_shortfall', { p_shortfall: sf.id });
+        if (error) return Alert.alert(tr('Could not record it'), error.message);
+        load(); onPaid();
+      } }]);
   const owing = d.chairs.filter((c) => c.due_cents < 0);
   const paid = d.chairs.filter((c) => c.due_cents === 0 && c.last_paid);
   return (
@@ -371,7 +422,7 @@ function DrawerView({ onBack, onPaid }: { onBack: () => void; onPaid: () => void
             <View style={st.avatar}><T w="b" size={10} c={D.sub}>{initials(c.name)}</T></View>
             <View style={st.grow}>
               <T w="b" size={12.5}>{c.name}</T>
-              {!!c.chair && <T size={10.5} c={D.sub} style={st.mt2}>{c.chair}</T>}
+              <ChairLine c={c} />
             </View>
             <T w="b" size={13} c={D.green} style={st.num}>{dh(c.due_cents)}</T>
             <Ico name="chevron-right" size={15} color={D.muted} />
@@ -386,6 +437,19 @@ function DrawerView({ onBack, onPaid }: { onBack: () => void; onPaid: () => void
               <T size={10.5} c={D.amber} style={st.mt2}>{tr('owes the drawer')}</T>
             </View>
             <T w="b" size={13} c={D.amber} style={st.num}>{dh(c.due_cents)}</T>
+            <Ico name="chevron-right" size={15} color={D.muted} />
+          </Card>
+        ))}
+
+        {!!d.shortfalls?.length && <Eyebrow ls={1.4}>{tr('OWED BACK TO THE DRAWER')}</Eyebrow>}
+        {(d.shortfalls ?? []).map((sf) => (
+          <Card key={sf.id} style={st.line} onPress={() => takeBack(sf)}>
+            <View style={[st.avatar, { backgroundColor: 'rgba(232,161,0,0.14)' }]}><T w="b" size={10} c={D.amber}>{initials(sf.name)}</T></View>
+            <View style={st.grow}>
+              <T w="b" size={12.5}>{sf.name}</T>
+              <T size={10.5} c={D.amber} style={st.mt2}>{tr('Handover {ref} came up short · owed to Sterncut', { ref: sf.ref })}</T>
+            </View>
+            <T w="b" size={13} c={D.amber} style={st.num}>{dh(sf.cents)}</T>
             <Ico name="chevron-right" size={15} color={D.muted} />
           </Card>
         ))}
@@ -489,7 +553,9 @@ function PaySheet({ chair, self, me, onClose, onDone }: {
           <Eyebrow ls={1.4}>{tr('HIS CODE')}</Eyebrow>
           <CodeBoxes code={code} onChange={setCode} />
           <T size={11} c={D.faint} style={st.lh}>
-            {tr('He reads it out once the cash is in his hand. You cannot record a payment without it.')}
+            {chair.left_at
+              ? tr("He comes in to collect. Same code, same drawer. His row stays until it's paid.")
+              : tr('He reads it out once the cash is in his hand. You cannot record a payment without it.')}
           </T>
         </>
       )}
@@ -500,6 +566,24 @@ function PaySheet({ chair, self, me, onClose, onDone }: {
         onPress={ready && !busy ? send : undefined} bg={ready && !busy ? D.accent : D.card2} />
     </Sheet>
   );
+}
+
+// BAC-10b: a man who has left keeps his row — the chair is replaced by the day he left
+function ChairLine({ c }: { c: Chair }) {
+  const counts = [
+    c.wallet_cuts ? trn(c.wallet_cuts, '{n} wallet cut', '{n} wallet cuts') : null,
+    c.deposits ? trn(c.deposits, '{n} deposit', '{n} deposits') : null,
+  ].filter(Boolean).join(', ');
+  if (c.left_at) {
+    return (
+      <View style={[st.row, st.mt2, { gap: 6 }]}>
+        <View style={st.leftPill}><T w="b" size={9.5} c={D.amber} ls={0.6}>{tr('LEFT · {date}', { date: dayMonth(c.left_at) }).toUpperCase()}</T></View>
+        {!!counts && <T size={10.5} c={D.sub}>{counts}</T>}
+      </View>
+    );
+  }
+  const line = [c.chair, counts].filter(Boolean).join(' · ');
+  return line ? <T size={10.5} c={D.sub} style={st.mt2}>{line}</T> : null;
 }
 
 function CodeBoxes({ code, onChange }: { code: string; onChange: (v: string) => void }) {
@@ -578,6 +662,125 @@ function TakeoverView({ h, onBack, onDone }: { h: Handover; onBack: () => void; 
         {tr('A different number tells Sterncut instead, and neither of you is the agent until it is sorted out.')}
       </T>
     </Screen>
+  );
+}
+
+// ---- BAC-11 · no shop, still owed ----------------------------------------------------
+function LeaverView({ a, onBack, onChanged }: { a: Account; onBack?: () => void; onChanged: () => void }) {
+  return (
+    <Screen bottom={TAB_INSET} gap={12}>
+      <TopBar title={tr('You & Sterncut')} onBack={onBack} plain />
+      <Eyebrow ls={1.8}>{tr('{name} · NO SHOP', { name: a.me.split(' ')[0] }).toUpperCase()}</Eyebrow>
+      {(a.shortfalls ?? []).map((sf) => <ShortfallCard key={sf.id} sf={sf} />)}
+      {(a.old_shops ?? []).map((o) => <OwedByShop key={o.salon_id} shop={o} onReported={onChanged} />)}
+    </Screen>
+  );
+}
+
+function OwedByShop({ shop, onReported }: { shop: OldShop; onReported: () => void }) {
+  const [code, setCode] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    supabase.rpc('my_payout_code', { p_salon: shop.salon_id })
+      .then(({ data }) => setCode((data as { code: string | null } | null)?.code ?? null));
+  }, [shop.salon_id, shop.cents]);
+  const left = shop.left_at ? dayMonth(shop.left_at) : null;
+  const why = shop.deposits > 0
+    ? (left
+      ? trn(shop.wallet_cuts + shop.deposits, 'One cut or deposit before you left on {date}. You earned it; leaving doesn\'t change that.',
+        '{n} cuts and deposits before you left on {date}. You earned it; leaving doesn\'t change that.', { date: left })
+      : trn(shop.wallet_cuts + shop.deposits, 'One cut or deposit. You earned it; leaving doesn\'t change that.',
+        '{n} cuts and deposits. You earned it; leaving doesn\'t change that.'))
+    : (left
+      ? trn(shop.wallet_cuts, 'One cut paid from wallet before you left on {date}. You earned it; leaving doesn\'t change that.',
+        '{n} cuts paid from wallet before you left on {date}. You earned it; leaving doesn\'t change that.', { date: left })
+      : trn(shop.wallet_cuts, 'One cut paid from wallet. You earned it; leaving doesn\'t change that.',
+        '{n} cuts paid from wallet. You earned it; leaving doesn\'t change that.'));
+
+  async function tell() {
+    setBusy(true);
+    const { data, error } = await supabase.rpc('report_unpaid_leaver', { p_salon: shop.salon_id });
+    setBusy(false);
+    if (error) return Alert.alert(tr('Could not send that'), error.message);
+    const r = data as { case_no: string; existing: boolean };
+    Alert.alert(r.existing ? tr('Already with us') : tr('Sent'),
+      r.existing
+        ? tr('Case {ref} is open about this. One of us is on it — you will hear from us there.', { ref: r.case_no })
+        : tr('Case {ref}. We will take it up with {salon}. Sterncut still does not pay you directly — the shop does.',
+          { ref: r.case_no, salon: shop.salon }));
+    onReported();
+  }
+
+  return (
+    <>
+      <View style={[st.hero, st.heroOwed]}>
+        <Eyebrow c="#7FC79B" ls={1.5}>{tr('STILL OWED TO YOU')}</Eyebrow>
+        <T w="b" size={15} style={st.lh}>{tr('{salon} still owes you', { salon: shop.salon })}</T>
+        <Serif size={42} ls={0} c={D.green} style={st.num}>{dh(shop.cents)}</Serif>
+        <T size={11.5} c={D.sub} style={[st.lh, st.heroWhy, st.heroWhyOwed]}>{why}</T>
+      </View>
+
+      <Card style={st.who}>
+        <Eyebrow ls={1.4}>{tr('WHO TO ASK')}</Eyebrow>
+        <View style={st.row}>
+          <View style={st.avatar}><T w="b" size={11} c={D.sub}>{initials(shop.agent.name)}</T></View>
+          <View style={st.grow}>
+            <T w="b" size={13}>{shop.agent.name}</T>
+            <T size={11} c={D.sub} style={st.mt2}>
+              {[tr("Holds {salon}'s cash", { salon: shop.salon }), shop.agent.area].filter(Boolean).join(' · ')}
+            </T>
+          </View>
+          {!!shop.agent.phone && (
+            <Pressable onPress={() => Linking.openURL(`tel:${shop.agent.phone}`)} style={st.callBtn} accessibilityRole="button">
+              <T w="b" size={11}>{tr('Call')}</T>
+            </Pressable>
+          )}
+        </View>
+        <T size={11.5} c={D.sub} style={[st.lh, st.whyLine]}>
+          {tr('Go to the shop. He pays you from the drawer, in cash, like before.')}
+        </T>
+      </Card>
+
+      {!!code && (
+        <View style={st.codeCard}>
+          <Eyebrow ls={1.5}>{tr('YOUR CODE')}</Eyebrow>
+          <Serif size={36} ls={0.22}>{code.split('').join(' ')}</Serif>
+          <T size={11} c={D.faint} style={[st.lh, st.center]}>
+            {tr("Only say it once he's counted {amount} into your hand.", { amount: dh(shop.cents) })}
+          </T>
+        </View>
+      )}
+
+      <View style={st.row}>
+        <Ico name="clock" size={15} color={D.green} />
+        <T size={11.5} style={[st.grow, st.lh]}>
+          {tr("This doesn't expire. It stays owed until you're paid — even if you join another shop.")}
+        </T>
+      </View>
+
+      <Pressable onPress={busy ? undefined : tell} style={st.outlinePill} accessibilityRole="button">
+        <T w="b" size={12} c={D.sub}>{tr("They won't pay — tell us")}</T>
+      </Pressable>
+    </>
+  );
+}
+
+// §10: a shortfall is on the man who handed over — shown as an open line until
+// he pays it back into the drawer or Sterncut writes it off
+function ShortfallCard({ sf }: { sf: Shortfall }) {
+  return (
+    <View style={st.amber}>
+      <Ico name="alert-circle" size={15} color={D.amber} />
+      <View style={st.grow}>
+        <T w="b" size={12.5}>
+          {tr('You owe Sterncut {amount} from the drawer handover on {date}', { amount: dh(sf.cents), date: dayMonth(sf.handover_at) })}
+        </T>
+        <T size={11.5} c={D.sub} style={[st.lh, st.mt2]}>
+          {tr('{ref} · {salon}. Hand it to {agent}, who holds the drawer — he records it. It stays here until then, or until Sterncut writes it off. Nobody takes it from your pay.',
+            { ref: sf.ref, salon: sf.salon, agent: sf.agent })}
+        </T>
+      </View>
+    </View>
   );
 }
 
@@ -1156,4 +1359,7 @@ const st = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center' },
   boxOn: { borderColor: D.accent },
   hidden: { position: 'absolute', opacity: 0, height: 1, width: 1 },
+  callBtn: { height: 30, borderRadius: 999, backgroundColor: D.card2, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12 },
+  outlinePill: { height: 48, borderRadius: 999, borderWidth: 1, borderColor: D.border, alignItems: 'center', justifyContent: 'center' },
+  leftPill: { backgroundColor: 'rgba(232,161,0,0.14)', borderRadius: 5, paddingHorizontal: 6, paddingVertical: 2 },
 });

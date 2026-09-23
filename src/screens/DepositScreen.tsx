@@ -25,8 +25,8 @@ type State = {
 };
 
 const dh = (cents: number) => Math.round(cents / 100);
-/** §6.9 — space as the thousands separator, never a comma. */
-const money = (cents: number) => dh(cents).toLocaleString('fr-FR').replace(/ | /g, ' ');
+/** §6.9 — space as the thousands separator, never a comma; a no-break one, so Arabic keeps it whole. */
+const money = (cents: number) => dh(cents).toLocaleString('fr-FR').replace(/[\u202f\u00a0]/g, '\u00a0');
 
 function whenSet(iso: string | null) {
   if (!iso) return null;

@@ -492,8 +492,9 @@ function BarberProfile({
     { icon: 'scissors', label: tr('My services'), value: String(stats.services), onPress: () => go('services') },
     { icon: 'image', label: tr('My work'), value: trn(stats.photos, '{n} photo', '{n} photos'), onPress: () => go('work') },
     ...(ownsSalon ? [{ icon: 'edit-2' as IconName, label: tr('Salon management'), onPress: () => go('salon') }] : []),
-    // BAC-01: every barber in a shop has an account with Sterncut, owner or not
-    ...(barber.salon_id ? [{ icon: 'repeat' as IconName, label: tr('You & Sterncut'), onPress: () => go('account') }] : []),
+    // BAC-01: every barber has an account with Sterncut, owner or not — and BAC-11:
+    // one who has left a shop that still owes him has it with no shop at all
+    { icon: 'repeat' as IconName, label: tr('You & Sterncut'), onPress: () => go('account') },
     // the owner's money rows. "Weekly statement" and "Settle up" lived only in the
     // customer-side list, which a barber never sees — so the agent's four-digit
     // code on the statement had no way in.

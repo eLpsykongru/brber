@@ -3082,6 +3082,7 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
       <span data-go="finance/corrections" style="cursor:pointer;height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:500;color:#9A9CA3">Corrections</span>
       <span data-go="finance/calls" style="cursor:pointer;height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:500;color:#9A9CA3">Ops calls</span>
       <span data-go="finance/handovers" style="cursor:pointer;height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:500;color:#9A9CA3">Handovers</span>
+      <span data-go="finance/float" style="cursor:pointer;height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:500;color:#9A9CA3">Cash in shops</span>
       <span id="fn-sub" style="margin-left:12px;font-size:11.5px;color:#6B6B72"></span>
     </div>
 
@@ -3319,10 +3320,43 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
           <span style="font-size:11px;line-height:1.5;color:#9A9CA3">The outgoing agent stays liable and stays the one who pays the chairs. No barber&rsquo;s wages are held, and bookings, the queue and the shop page are untouched. A cash dispute must never become a suspension.</span>
         </div>
         <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:9px">
-          <span style="font-size:12.5px;font-weight:700">Writing it off is not built</span>
-          <span style="font-size:11px;line-height:1.5;color:#9A9CA3">Recording a figure names the new agent and leaves the difference on the man who handed over, as cash he owes the shop&rsquo;s drawer. Sterncut absorbing it instead needs a finance decision first &mdash; README &sect;8.1.</span>
+          <span style="font-size:12.5px;font-weight:700">Writing it off is a signature</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3">Recording a figure names the new agent and leaves the difference on the man who handed over, as a shortfall he owes Sterncut &mdash; not the shop. Writing it off takes a finance signer, a reason of 20 characters or more, and a choice of who loses it: Sterncut, or the shop on its next Friday. Never a barber. Every write-off lands in <span data-go="finance/float" style="color:#fff;text-decoration:underline">Cash in shops</span>.</span>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+</div>
+<!-- FIN-19 · cash in the shops, and what was written off this month beside it.
+     The panel is always there, even at 0 DH, and nothing in it can be filtered
+     or hidden: the list is the real control on write-offs (§10). -->
+<div class="scr" id="s14f">
+<div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px"></div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">OP</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Ops</span><span style="display:block;font-size:10px;color:#9A9CA3">Sterncut</span></span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="flex:none;padding:22px 26px 16px;border-bottom:1px solid #1E1E22;display:flex;align-items:flex-end;gap:18px">
+      <span style="flex:1;min-width:0">
+        <span style="display:flex;align-items:center;gap:10px"><span data-go="finance" style="cursor:pointer;font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72">FINANCE</span><span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72">· FLOAT</span><span data-go="finance/handovers" style="cursor:pointer;font-size:10.5px;font-weight:600;color:#9A9CA3;margin-left:10px">Handovers</span></span>
+        <span id="fl-title" style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:22px;margin-top:8px"></span>
+      </span>
+      <span style="flex:none;text-align:right"><span style="display:block;font-size:10px;letter-spacing:.14em;font-weight:700;color:#6B6B72">HELD FOR US, ALL SHOPS</span><span id="fl-held" style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:26px;margin-top:4px;font-variant-numeric:tabular-nums"></span></span>
+    </div>
+    <div style="flex:1;min-height:0;display:flex;overflow:hidden">
+      <div id="fl-table" style="flex:1;min-width:0;padding:18px 26px;display:flex;flex-direction:column;overflow:auto"></div>
+      <div id="fl-wo" style="flex:none;width:400px;border-left:1px solid #1E1E22;padding:18px 20px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box;overflow:auto"></div>
     </div>
   </div>
 </div>
@@ -3355,6 +3389,8 @@ const ROUTES = {
   'finance/calls': '14d',
   // FIN-18 — the one state that pages a human: a drawer two men count differently
   'finance/handovers': '14e',
+  // FIN-19 — the cash in the shops, with this month's write-offs beside it
+  'finance/float': '14f',
 };
 // ponytail: the one check this wiring leaves behind. The screens are the design's
 // own markup and the renderers find their slots by id — nothing errors when an id
@@ -3390,7 +3426,7 @@ const SLOTS = ('oc-queue dc-title dc-sub dc-panel dc-steps oc-sub oc-table fn-pr
   + 'db-changes db-changes-n db-change db-dlg db-dlg-sub db-dials db-impact '
   + 'db-reason-label db-reason db-notify db-notify-row db-notify-title db-log-line db-save '
   + 'hc-ref hc-who hc-banner hc-cust hc-shop hc-stake hc-said hc-locked '
-  + 'hv-sub hv-list hv-body').split(' ');
+  + 'hv-sub hv-list hv-body fl-title fl-held fl-table fl-wo').split(' ');
 for (const id of Object.values(ROUTES)) if (!document.getElementById('s' + id)) console.error('admin: no screen', id);
 for (const id of SLOTS) if (!document.getElementById(id)) console.error('admin: markup is missing', id);
 
@@ -3746,6 +3782,15 @@ async function loadOverview() {
     x.name + ' has not settled in ' + x.days + ' days',
     DH(x.net_cents) + ' outstanding · one cycle is 7', null, 'wallets')));
 
+  // 0129: write-offs past the monthly alert. Below a missing drawer, above the rest.
+  try {
+    const c = await rpc('admin_cash_in_shops', {});
+    if (c.alert_cents != null && c.month_cents > c.alert_cents) rows.unshift(needRow('red', 'card',
+      'Write-offs are over the monthly alert',
+      DH(c.month_cents) + ' written off this month against a ' + DH(c.alert_cents) + ' alert',
+      null, 'finance/float'));
+  } catch (e) { console.error('admin: write-offs', e); }
+
   // FIN-18: cash that exists with no account pointed at it goes above everything
   // else on this list, because it is the only state that must page a human.
   try {
@@ -3978,6 +4023,7 @@ async function loadWallets() {
 const REASON = {
   no_show: 'Barber never showed', wrong_amount: 'Wrong amount credited',
   wrong_service: 'Not the service booked', hygiene: 'Hygiene complaint', other: 'Something else',
+  unpaid_leaver: 'Left a shop that still owes him',
 };
 
 // The status chips were the design's own markup and nothing ever rendered them,
@@ -6748,171 +6794,452 @@ document.addEventListener('click', (e) => {
   loadRefunds().catch(fail);
 });
 
-// ------------------------------------------ FIN-18 · drawer handovers (0127) --
-// A transfer the two men could not agree on. Ops does not adjudicate here: it
-// rings them, and records what the call settled. Whatever figure is recorded,
-// the difference stays on the man who handed over as cash he owes the drawer —
-// nothing is written off, because writing off is finance's call (README §8.1).
-let handovers = [];
-let handoverId = null;
-
-const HV_PILL = {
-  mismatch: () => pill('UNACCOUNTED', '#F87171', 'rgba(248,113,113,.12)'),
-  pending: () => pill('COUNTING', '#E8A100', 'rgba(232,161,0,.12)'),
-  resolved: () => pill('SETTLED', '#4ADE80', 'rgba(74,222,128,.12)'),
-};
-
-async function loadHandovers() {
-  handovers = (await rpc('admin_drawer_transfers')) || [];
-  const open = handovers.filter((t) => t.state === 'mismatch');
-  set($('hv-sub'), open.length
-    ? open.length + ' with cash nobody is holding'
-    : handovers.length ? 'Nothing unaccounted' : '');
-  if (!handovers.length) {
-    fill('hv-list', '');
-    fill('hv-body', empty('No drawer has changed hands yet.'));
-    return;
-  }
-  if (!handovers.some((t) => t.id === handoverId)) handoverId = (open[0] || handovers[0]).id;
-  fill('hv-list', handovers.map((t) => {
-    const on = t.id === handoverId;
-    return `<div data-hv="${t.id}" style="cursor:pointer;display:flex;align-items:center;gap:12px;background:#17171A;border:1px solid ${on ? '#3A3A40' : '#1E1E22'};border-radius:12px;padding:12px 14px">
-      <span style="font:700 11px ui-monospace,monospace;color:#6B6B72">${esc(t.ref)}</span>
-      <span style="flex:1;min-width:0;font-size:12.5px;font-weight:600">${esc(t.salon)}<span style="color:#9A9CA3;font-weight:400"> · ${esc(t.from_name)} → ${esc(t.to_name)}</span></span>
-      ${t.gap_cents ? `<span style="font-size:12px;font-weight:700;color:#F87171;font-variant-numeric:tabular-nums">${DH(Math.abs(t.gap_cents))}</span>` : ''}
-      <span style="font-size:11px;color:#6B6B72">${ago(t.counted_at || t.at)}</span>
-      ${(HV_PILL[t.state] || HV_PILL.pending)()}</div>`;
-  }).join(''));
-  $('hv-list').querySelectorAll('[data-hv]').forEach((el) => {
-    el.onclick = () => { handoverId = el.dataset.hv; loadHandovers().catch(fail); };
-  });
-  await drawHandover();
-}
-
-async function drawHandover() {
-  const d = await rpc('admin_drawer_transfer', { p_id: handoverId });
-  const card = (inner, pad = 17) => `<div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:${pad}px;display:flex;flex-direction:column;gap:11px">${inner}</div>`;
-  const head = (t) => `<span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">${t}</span>`;
-  const line = (label, value, colour) => `<div style="display:flex;align-items:baseline;gap:12px">
-    <span style="flex:1;font-size:12px;color:#9A9CA3">${label}</span>
-    <span style="font-size:12.5px;font-weight:700;color:${colour || '#fff'};font-variant-numeric:tabular-nums">${value}</span></div>`;
-  const man = (p, amount, note) => `<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">
-    ${head(note)}
-    <div style="display:flex;align-items:center;gap:10px">
-      <span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">${esc(initials(p.name))}</span>
-      <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">${esc(p.name)}</span>
-      <span style="display:block;font-size:10.5px;color:#6B6B72">${esc(p.sub)}</span></span>
-    </div>
-    <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:26px;font-variant-numeric:tabular-nums">${DH(amount)}</span></div>`;
-
-  const from = {
-    name: d.from.name,
-    sub: [d.from.is_owner ? 'Owner' : (d.from.chair || 'Barber'),
-      d.from.agent_since ? 'agent since ' + day(d.from.agent_since) : null,
-      d.from.collections + ' clean collection' + (d.from.collections === 1 ? '' : 's'),
-      d.from.failed ? d.from.failed + ' that did not verify' : null].filter(Boolean).join(' · '),
-  };
-  const to = {
-    name: d.to.name,
-    sub: [d.to.chair || 'Barber', d.to.held_before ? 'has held the drawer before' : 'never held the drawer before']
-      .filter(Boolean).join(' · '),
-  };
-  const gap = d.gap_cents;
-  const steps = [
-    ['Owner picked ' + d.to.name + ' as agent', d.at],
-    [d.from.name + ' handed over ' + DH(d.declared_cents) + ' — matches our books', d.counted_at],
-    [d.to.name + ' counted ' + DH(d.counted_cents) + ' · transfer refused · both told', d.counted_at],
-    d.count_requested_at ? ['Collection agent asked to count the drawer' + (d.count_requested_by ? ' by ' + d.count_requested_by : ''), d.count_requested_at] : null,
-    d.resolved_at ? ['Settled at ' + DH(d.agreed_cents) + ' by ' + (d.resolved_by || 'ops'), d.resolved_at] : null,
-    d.state === 'mismatch' ? ['Cash nobody is holding, for ' + ago(d.counted_at), null] : null,
-  ].filter(Boolean);
-
-  fill('hv-body', `
-    ${card(`<div style="display:flex;align-items:flex-start;gap:12px">
-      <span style="flex:1;min-width:0">
-        <span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:19px">${esc(d.salon.name)} — ${esc(d.from.name)} → ${esc(d.to.name)}</span>
-        <span style="display:block;font-size:11.5px;color:#6B6B72;margin-top:4px">${esc(d.ref)} · started ${dayw(d.at)} ${day(d.at)} ${hhmm(d.at)} · ${esc(d.salon.address || '')} · ${num(d.salon.chairs)} chairs</span>
-      </span>${(HV_PILL[d.state] || HV_PILL.pending)()}</div>`)}
-
-    ${card(`<div style="display:flex;align-items:center;gap:18px">
-      ${man(from, d.declared_cents, 'HANDED OVER, HE SAYS')}
-      <span style="flex:none;text-align:center">
-        <span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:22px;color:#F87171">${DH(Math.abs(gap))}</span>
-        <span style="display:block;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">GAP</span></span>
-      ${man(to, d.counted_cents, 'COUNTED, HE SAYS')}
-    </div>`)}
-
-    ${card(head('WHAT THE FLOAT SAYS IT SHOULD BE')
-      + line(num(d.books.topups) + ' top-ups recorded' + (d.books.since ? ' since ' + day(d.books.since) : ''), DH(d.books.topups_cents))
-      + line('Of those, entered by ' + esc(d.from.name), num(d.books.topups_by_him))
-      + line('Paid out to chairs, confirmed by code', DH(d.books.paid_out_cents))
-      + line('Owed to Sterncut on the next collection', DH(d.books.sterncut_cents))
-      + line('<strong style="color:#fff">Our books, right now</strong>', DH(d.books.drawer_cents))
-      + `<span style="font-size:11px;line-height:1.5;color:#9A9CA3;border-top:1px solid #1E1E22;padding-top:10px">Our number matches ${esc(d.from.name)}&rsquo;s exactly &mdash; which is <strong style="color:#D8D8DC">not evidence</strong>. Every top-up on it was entered by him. It tells you the records are internally consistent, nothing more.</span>`)}
-
-    ${card(head('OWED TO CHAIRS, RIGHT NOW')
-      + (d.dues.length ? d.dues.map((x) => line(esc(x.name), DH(x.cents), x.cents < 0 ? '#E8A100' : '#4ADE80')).join('')
-        : '<span style="font-size:11.5px;color:#6B6B72">Nobody is owed anything today.</span>')
-      + '<span style="font-size:11px;line-height:1.5;color:#9A9CA3">' + esc(d.from.name) + ' goes on paying these while this is open. No barber&rsquo;s wages wait on it.</span>')}
-
-    ${card(head('WHAT HAPPENED, IN ORDER')
-      + steps.map(([t, at]) => `<div style="display:flex;gap:10px;align-items:baseline">
-          <span style="width:6px;height:6px;border-radius:999px;background:#3A3A40;flex:none;transform:translateY(-2px)"></span>
-          <span style="flex:1;font-size:12px">${esc(t)}</span>
-          <span style="font-size:11px;color:#6B6B72">${at ? dayw(at) + ' ' + hhmm(at) : ''}</span></div>`).join(''))}
-
-    ${d.state === 'mismatch' ? card(head('RECORD WHAT WAS AGREED ON THE CALL')
-      + `<div style="display:flex;gap:8px;flex-wrap:wrap">
-          <span data-hv-set="${d.counted_cents}" style="cursor:pointer;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:600">${esc(d.to.name.split(' ')[0])}&rsquo;s ${DH(d.counted_cents)} stands</span>
-          <span data-hv-set="${d.books.drawer_cents}" style="cursor:pointer;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:600">${esc(d.from.name.split(' ')[0])}&rsquo;s ${DH(d.books.drawer_cents)} stands</span>
-        </div>
-        <div style="display:flex;gap:9px;align-items:center">
-          <input id="hv-amount" type="number" inputmode="numeric" value="${Math.round((d.counted_cents || 0) / 100)}" style="width:120px;height:36px;border-radius:9px;background:#0D0D0F;border:1px solid #26262B;color:#fff;padding:0 11px;font-size:13px;font-family:inherit">
-          <span style="font-size:11.5px;color:#6B6B72">DH counted into ${esc(d.to.name.split(' ')[0])}&rsquo;s hands</span>
-        </div>
-        <input id="hv-note" placeholder="What the call settled — logged against your name" style="height:36px;border-radius:9px;background:#0D0D0F;border:1px solid #26262B;color:#fff;padding:0 11px;font-size:12.5px;font-family:inherit">
-        <span style="font-size:11px;line-height:1.5;color:#9A9CA3">Whichever number is recorded, the difference stays on ${esc(d.from.name)}&rsquo;s account as cash he owes the drawer, until he puts it back. Recording a figure names the new agent; it never makes money disappear.</span>
-        <div style="display:flex;gap:9px;flex-wrap:wrap">
-          <span id="hv-save" style="cursor:pointer;height:34px;border-radius:9px;background:#E8442E;display:flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:800;letter-spacing:.05em">RECORD &amp; NAME ${esc(d.to.name.split(' ')[0].toUpperCase())} AGENT</span>
-          <span id="hv-count" style="cursor:pointer;height:34px;border-radius:9px;background:#212125;display:flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:700">${d.count_requested_at ? 'COLLECTION AGENT ASKED · ' + ago(d.count_requested_at) : 'SEND THE COLLECTION AGENT TO COUNT IT'}</span>
-          <span title="Not built: a barber-level write-off has no accounting behind it yet (README §8.1)" style="height:34px;border-radius:9px;background:#141416;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:600;color:#3A3A40">WRITE IT OFF</span>
-        </div>`)
-      : d.state === 'resolved' ? card(head('SETTLED')
-        + line('Agreed on the call', DH(d.agreed_cents))
-        + line('Left on ' + esc(d.from.name) + '&rsquo;s account', DH(d.declared_cents - d.agreed_cents), '#E8A100')
-        + `<span style="font-size:11.5px;color:#9A9CA3">${esc(d.resolution_note || '')} — ${esc(d.resolved_by || 'ops')}, ${day(d.resolved_at)}</span>`)
-        : card('<span style="font-size:11.5px;color:#9A9CA3">' + esc(d.to.name) + ' has not counted it yet. Nothing for ops to do until he does.</span>')}
-  `);
-
-  const amount = $('hv-amount');
-  document.querySelectorAll('[data-hv-set]').forEach((el) => {
-    el.onclick = () => { if (amount) amount.value = Math.round(Number(el.dataset.hvSet) / 100); };
-  });
-  const save = $('hv-save');
-  if (save) {
-    save.onclick = async () => {
-      const note = ($('hv-note').value || '').trim();
-      if (!note) return toast('Say what the call settled — it is logged against your name.');
-      try {
-        const r = await rpc('admin_resolve_drawer_transfer', {
-          p_id: d.id, p_agreed_cents: Math.round(Number(amount.value || 0) * 100), p_note: note,
-        });
-        toast(r.gap_cents ? DH(Math.abs(r.gap_cents)) + ' stays on ' + d.from.name + '. ' + d.to.name + ' is the agent.'
-          : d.to.name + ' is the agent, with nothing missing.');
-      } catch (e) { return fail(e); }
-      loadHandovers().catch(fail);
-    };
-  }
-  const count = $('hv-count');
-  if (count) {
-    count.onclick = async () => {
-      try { await rpc('admin_request_drawer_count', { p_id: d.id }); } catch (e) { return fail(e); }
-      toast('Logged. Send her on the next round — a third number is the only one that is not a claim.');
-      loadHandovers().catch(fail);
-    };
-  }
-}
-
+// ------------------------------------------ FIN-18 · drawer handovers (0127) --
+// A transfer the two men could not agree on. Ops does not adjudicate here: it
+// rings them, and records what the call settled. §10 (0128): the difference is a
+// shortfall on the man who handed over, owed to Sterncut and not the shop's, until
+// he pays it back into the drawer or a finance signer writes it off (FIN-18b).
+let handovers = [];
+let handoverId = null;
+
+const HV_PILL = {
+  mismatch: () => pill('UNACCOUNTED', '#F87171', 'rgba(248,113,113,.12)'),
+  pending: () => pill('COUNTING', '#E8A100', 'rgba(232,161,0,.12)'),
+  resolved: () => pill('SETTLED', '#4ADE80', 'rgba(74,222,128,.12)'),
+};
+const SF_PILL = {
+  open: () => pill('SHORTFALL OPEN', '#E8A100', 'rgba(232,161,0,.12)'),
+  paid: () => pill('PAID BACK', '#4ADE80', 'rgba(74,222,128,.12)'),
+  written_off: () => pill('WRITTEN OFF', '#9A9CA3', '#212125'),
+};
+
+async function loadHandovers() {
+  woClose();
+  handovers = (await rpc('admin_drawer_transfers')) || [];
+  const open = handovers.filter((t) => t.state === 'mismatch');
+  const owing = handovers.filter((t) => t.shortfall_status === 'open');
+  set($('hv-sub'), open.length
+    ? open.length + ' with cash nobody is holding'
+    : owing.length ? owing.length + ' shortfall' + (owing.length > 1 ? 's' : '') + ' still open'
+      : handovers.length ? 'Nothing unaccounted' : '');
+  if (!handovers.length) {
+    fill('hv-list', '');
+    fill('hv-body', empty('No drawer has changed hands yet.'));
+    return;
+  }
+  if (!handovers.some((t) => t.id === handoverId)) handoverId = (open[0] || owing[0] || handovers[0]).id;
+  fill('hv-list', handovers.map((t) => {
+    const on = t.id === handoverId;
+    return `<div data-hv="${t.id}" style="cursor:pointer;display:flex;align-items:center;gap:12px;background:#17171A;border:1px solid ${on ? '#3A3A40' : '#1E1E22'};border-radius:12px;padding:12px 14px">
+      <span style="font:700 11px ui-monospace,monospace;color:#6B6B72">${esc(t.ref)}</span>
+      <span style="flex:1;min-width:0;font-size:12.5px;font-weight:600">${esc(t.salon)}<span style="color:#9A9CA3;font-weight:400"> · ${esc(t.from_name)} → ${esc(t.to_name)}</span></span>
+      ${t.gap_cents ? `<span style="font-size:12px;font-weight:700;color:#F87171;font-variant-numeric:tabular-nums">${DH(Math.abs(t.gap_cents))}</span>` : ''}
+      <span style="font-size:11px;color:#6B6B72">${ago(t.counted_at || t.at)}</span>
+      ${t.shortfall_status ? SF_PILL[t.shortfall_status]() : (HV_PILL[t.state] || HV_PILL.pending)()}</div>`;
+  }).join(''));
+  $('hv-list').querySelectorAll('[data-hv]').forEach((el) => {
+    el.onclick = () => { handoverId = el.dataset.hv; loadHandovers().catch(fail); };
+  });
+  await drawHandover();
+}
+
+const hvCard = (inner, pad = 17) => `<div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:${pad}px;display:flex;flex-direction:column;gap:11px">${inner}</div>`;
+const hvHead = (t, colour) => `<span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:${colour || '#6B6B72'}">${t}</span>`;
+const hvLine = (label, value, colour) => `<div style="display:flex;align-items:baseline;gap:12px">
+    <span style="flex:1;font-size:12px;color:#9A9CA3">${label}</span>
+    <span style="font-size:12.5px;font-weight:700;color:${colour || '#fff'};font-variant-numeric:tabular-nums">${value}</span></div>`;
+const hvBtn = (id, label, primary, disabled, title) => `<span id="${id}"${title ? ` title="${esc(title)}"` : ''} style="${disabled ? '' : 'cursor:pointer;'}height:34px;border-radius:9px;${primary ? 'background:#E8442E' : 'background:#212125'};display:flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:${primary ? 800 : 700};letter-spacing:.05em;${disabled ? 'opacity:.4' : ''}">${label}</span>`;
+
+async function drawHandover() {
+  const d = await rpc('admin_drawer_transfer', { p_id: handoverId });
+  const man = (p, amount, note) => `<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">
+    ${hvHead(note)}
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">${esc(initials(p.name))}</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">${esc(p.name)}</span>
+      <span style="display:block;font-size:10.5px;color:#6B6B72">${esc(p.sub)}</span></span>
+    </div>
+    <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:26px;font-variant-numeric:tabular-nums">${DH(amount)}</span></div>`;
+
+  const from = {
+    name: d.from.name,
+    sub: [d.from.is_owner ? 'Owner' : (d.from.chair || 'Barber'),
+      d.from.agent_since ? 'agent since ' + day(d.from.agent_since) : null,
+      d.from.collections + ' clean collection' + (d.from.collections === 1 ? '' : 's'),
+      d.from.failed ? d.from.failed + ' that did not verify' : null].filter(Boolean).join(' · '),
+  };
+  const to = {
+    name: d.to.name,
+    sub: [d.to.chair || 'Barber', d.to.held_before ? 'has held the drawer before' : 'never held the drawer before']
+      .filter(Boolean).join(' · '),
+  };
+  const gap = d.gap_cents;
+  const sf = d.shortfall;
+  const first = (n) => esc(n.split(' ')[0]);
+  const steps = [
+    ['Owner picked ' + d.to.name + ' as agent', d.at],
+    [d.from.name + ' handed over ' + DH(d.declared_cents) + ' — matches our books', d.counted_at],
+    [d.to.name + ' counted ' + DH(d.counted_cents) + ' · transfer refused · both told', d.counted_at],
+    d.count_requested_at ? ['Collection agent asked to count the drawer' + (d.count_requested_by ? ' by ' + d.count_requested_by : ''), d.count_requested_at] : null,
+    d.resolved_at ? ['Settled at ' + DH(d.agreed_cents) + ' by ' + (d.resolved_by || 'ops'), d.resolved_at] : null,
+    sf && sf.status === 'paid' ? [sf.barber + ' paid the ' + DH(sf.cents) + ' back into the drawer', sf.closed_at] : null,
+    sf && sf.writeoff ? ['Written off ' + sf.writeoff.ref + ' by ' + sf.writeoff.signer, sf.writeoff.at] : null,
+    d.state === 'mismatch' ? ['Cash nobody is holding, for ' + ago(d.counted_at), null] : null,
+  ].filter(Boolean);
+
+  let action = '';
+  if (d.state === 'mismatch') {
+    action = hvCard(hvHead('RECORD WHAT WAS AGREED ON THE CALL')
+      + `<div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span data-hv-set="${d.counted_cents}" style="cursor:pointer;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:600">${first(d.to.name)}&rsquo;s ${DH(d.counted_cents)} stands</span>
+          <span data-hv-set="${d.declared_cents}" style="cursor:pointer;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:600">${first(d.from.name)}&rsquo;s ${DH(d.declared_cents)} stands</span>
+        </div>
+        <div style="display:flex;gap:9px;align-items:center">
+          <input id="hv-amount" type="number" inputmode="numeric" value="${Math.round((d.counted_cents || 0) / 100)}" style="width:120px;height:36px;border-radius:9px;background:#0D0D0F;border:1px solid #26262B;color:#fff;padding:0 11px;font-size:13px;font-family:inherit">
+          <span style="font-size:11.5px;color:#6B6B72">DH in the drawer when it was counted</span>
+        </div>
+        <input id="hv-note" placeholder="What the call settled — logged against your name" style="height:36px;border-radius:9px;background:#0D0D0F;border:1px solid #26262B;color:#fff;padding:0 11px;font-size:12.5px;font-family:inherit">
+        <span style="font-size:11px;line-height:1.5;color:#9A9CA3">Whichever number is recorded, the difference becomes a <strong style="color:#fff">shortfall on ${esc(d.from.name)}&rsquo;s account</strong>, owed to Sterncut and not to the shop, until he pays it back into the drawer or a finance signer writes it off. Recording a figure names the new agent; it never makes money disappear.</span>
+        <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center">
+          ${hvBtn('hv-save', 'RECORD &amp; NAME ' + esc(d.to.name.split(' ')[0].toUpperCase()) + ' AGENT', true)}
+          ${hvBtn('hv-count', d.count_requested_at ? 'COLLECTION AGENT ASKED · ' + ago(d.count_requested_at) : 'SEND THE COLLECTION AGENT TO COUNT IT')}
+          ${gap > 0 ? hvBtn('hv-wo', 'WRITE OFF ' + DH(gap), false, !d.can_sign, d.can_sign ? '' : 'Finance signers only') : ''}
+          ${gap > 0 && !d.can_sign ? '<span style="font-size:10.5px;color:#6B6B72">Finance signers only · logged against the signer&rsquo;s name</span>' : ''}
+        </div>`);
+  } else if (d.state === 'resolved') {
+    action = hvCard(hvHead('SETTLED')
+      + hvLine('Agreed on the call', DH(d.agreed_cents))
+      + (sf ? hvLine('The difference, on ' + esc(sf.barber) + '&rsquo;s account', DH(sf.cents), '#E8A100') : '')
+      + `<span style="font-size:11.5px;color:#9A9CA3">${esc(d.resolution_note || '')} — ${esc(d.resolved_by || 'ops')}, ${day(d.resolved_at)}</span>`);
+    if (sf) {
+      action += hvCard(hvHead('THE SHORTFALL', '#E8A100')
+        + `<div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:12.5px;font-weight:700">${DH(sf.cents)} on ${esc(sf.barber)}</span>${SF_PILL[sf.status]()}</div>`
+        + (sf.status === 'open'
+          ? `<span style="font-size:11px;line-height:1.5;color:#9A9CA3">It is his to settle, not the shop&rsquo;s: the shop&rsquo;s Friday figure already came down by it. He pays it back by handing it to whoever holds the drawer, who records it — or a finance signer writes it off.</span>
+             <div style="display:flex;gap:9px;align-items:center">${hvBtn('hv-sf-wo', 'WRITE OFF ' + DH(sf.cents), false, !d.can_sign, d.can_sign ? '' : 'Finance signers only')}
+             ${d.can_sign ? '' : '<span style="font-size:10.5px;color:#6B6B72">Finance signers only</span>'}</div>`
+          : sf.status === 'paid'
+            ? `<span style="font-size:11px;color:#9A9CA3">Paid back into the drawer ${day(sf.closed_at)}. It goes to Sterncut with the shop&rsquo;s Friday collection.</span>`
+            : `<span data-wo-read="${sf.writeoff ? sf.writeoff.id : ''}" style="cursor:pointer;font-size:11px;color:#9A9CA3">Written off <strong style="color:#fff">${esc(sf.writeoff ? sf.writeoff.ref : '')}</strong> · ${sf.writeoff && sf.writeoff.bearer === 'salon' ? 'the shop bears it' : 'Sterncut bears it'} · signed ${esc(sf.writeoff ? sf.writeoff.signer : '')} · open it</span>`));
+    }
+  } else {
+    action = hvCard('<span style="font-size:11.5px;color:#9A9CA3">' + esc(d.to.name) + ' has not counted it yet. Nothing for ops to do until he does.</span>');
+  }
+
+  fill('hv-body', `
+    ${hvCard(`<div style="display:flex;align-items:flex-start;gap:12px">
+      <span style="flex:1;min-width:0">
+        <span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:19px">${esc(d.salon.name)} — ${esc(d.from.name)} → ${esc(d.to.name)}</span>
+        <span style="display:block;font-size:11.5px;color:#6B6B72;margin-top:4px">${esc(d.ref)} · started ${dayw(d.at)} ${day(d.at)} ${hhmm(d.at)} · ${esc(d.salon.address || '')} · ${num(d.salon.chairs)} chairs</span>
+      </span>${(HV_PILL[d.state] || HV_PILL.pending)()}</div>`)}
+
+    ${hvCard(`<div style="display:flex;align-items:center;gap:18px">
+      ${man(from, d.declared_cents, 'HANDED OVER, HE SAYS')}
+      <span style="flex:none;text-align:center">
+        <span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:22px;color:#F87171">${DH(Math.abs(gap))}</span>
+        <span style="display:block;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">GAP</span></span>
+      ${man(to, d.counted_cents, 'COUNTED, HE SAYS')}
+    </div>`)}
+
+    ${hvCard(hvHead('WHAT THE FLOAT SAYS IT SHOULD BE')
+      + hvLine(num(d.books.topups) + ' top-ups recorded' + (d.books.since ? ' since ' + day(d.books.since) : ''), DH(d.books.topups_cents))
+      + hvLine('Of those, entered by ' + esc(d.from.name), num(d.books.topups_by_him))
+      + hvLine('Paid out to chairs, confirmed by code', DH(d.books.paid_out_cents))
+      + hvLine('Owed to Sterncut on the next collection', DH(d.books.sterncut_cents))
+      + hvLine('<strong style="color:#fff">Our books, right now</strong>', DH(d.books.drawer_cents))
+      + `<span style="font-size:11px;line-height:1.5;color:#9A9CA3;border-top:1px solid #1E1E22;padding-top:10px">Our number matches ${esc(d.from.name)}&rsquo;s exactly &mdash; which is <strong style="color:#D8D8DC">not evidence</strong>. Every top-up on it was entered by him. It tells you the records are internally consistent, nothing more.</span>`)}
+
+    ${hvCard(hvHead('OWED TO CHAIRS, RIGHT NOW')
+      + (d.dues.length ? d.dues.map((x) => hvLine(esc(x.name), DH(x.cents), x.cents < 0 ? '#E8A100' : '#4ADE80')).join('')
+        : '<span style="font-size:11.5px;color:#6B6B72">Nobody is owed anything today.</span>')
+      + '<span style="font-size:11px;line-height:1.5;color:#9A9CA3">' + esc(d.from.name) + ' goes on paying these while this is open. No barber&rsquo;s wages wait on it.</span>')}
+
+    ${hvCard(hvHead('WHAT HAPPENED, IN ORDER')
+      + steps.map(([t, at]) => `<div style="display:flex;gap:10px;align-items:baseline">
+          <span style="width:6px;height:6px;border-radius:999px;background:#3A3A40;flex:none;transform:translateY(-2px)"></span>
+          <span style="flex:1;font-size:12px">${esc(t)}</span>
+          <span style="font-size:11px;color:#6B6B72">${at ? dayw(at) + ' ' + hhmm(at) : ''}</span></div>`).join(''))}
+
+    ${action}
+  `);
+
+  const amount = $('hv-amount');
+  document.querySelectorAll('[data-hv-set]').forEach((el) => {
+    el.onclick = () => { if (amount) amount.value = Math.round(Number(el.dataset.hvSet) / 100); };
+  });
+  const save = $('hv-save');
+  if (save) {
+    save.onclick = async () => {
+      const note = ($('hv-note').value || '').trim();
+      if (!note) return toast('Say what the call settled — it is logged against your name.');
+      try {
+        const r = await rpc('admin_resolve_drawer_transfer', {
+          p_id: d.id, p_agreed_cents: Math.round(Number(amount.value || 0) * 100), p_note: note,
+        });
+        toast(r.gap_cents > 0 ? DH(r.gap_cents) + ' is now a shortfall on ' + d.from.name + '. ' + d.to.name + ' is the agent.'
+          : d.to.name + ' is the agent' + (r.gap_cents < 0 ? ', and the drawer owes ' + d.from.name + ' ' + DH(-r.gap_cents) + '.' : ', with nothing missing.'));
+      } catch (e) { return fail(e); }
+      loadHandovers().catch(fail);
+    };
+  }
+  const count = $('hv-count');
+  if (count) {
+    count.onclick = async () => {
+      try { await rpc('admin_request_drawer_count', { p_id: d.id }); } catch (e) { return fail(e); }
+      toast('Logged. Send her on the next round — a third number is the only one that is not a claim.');
+      loadHandovers().catch(fail);
+    };
+  }
+  const woBtn = $('hv-wo');
+  if (woBtn && d.can_sign) woBtn.onclick = () => woOpen({ transfer: d.id, after: loadHandovers }).catch(fail);
+  const sfBtn = $('hv-sf-wo');
+  if (sfBtn && d.can_sign) sfBtn.onclick = () => woOpen({ shortfall: sf.id, after: loadHandovers }).catch(fail);
+  document.querySelectorAll('#hv-body [data-wo-read]').forEach((el) => {
+    if (el.dataset.woRead) el.onclick = () => woOpenRead(el.dataset.woRead, loadHandovers).catch(fail);
+  });
+}
+
+// ------------------------------------------ FIN-18b · write off (0128, §10) --
+// A decision about who loses money, so the box asks exactly that and will not
+// close without a person's reason. No bearer is preselected. The messages are
+// the ones the database will send, rendered from its own template, in each
+// man's language; the signer is the session, never a picker.
+let wo = null;
+function woEnsure() {
+  if ($('wo-dlg')) return;
+  document.body.insertAdjacentHTML('beforeend',
+    '<div id="wo-dlg" style="position:fixed;inset:0;background:rgba(0,0,0,.66);display:none;align-items:center;justify-content:center;z-index:60;padding:24px;box-sizing:border-box">'
+    + '<div id="wo-box" style="width:600px;max-height:100%;overflow:auto;background:#151517;border:1px solid #26262B;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;color:#fff;font-family:Inter,sans-serif"></div></div>');
+  $('wo-dlg').addEventListener('click', (e) => { if (e.target.id === 'wo-dlg') woClose(); });
+}
+function woClose() { const el = $('wo-dlg'); if (el) el.style.display = 'none'; wo = null; }
+async function woOpen(target) {
+  woEnsure();
+  wo = { ...target, bearer: null, note: '', error: null };
+  await woRender();
+  $('wo-dlg').style.display = 'flex';
+}
+
+const woLabel = (t, colour) => `<span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;color:${colour || '#6B6B72'}">${t}</span>`;
+const woBubble = (m) => `<div dir="auto" style="background:#212125;border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.5;color:#fff">${esc(m.body)}</div>`;
+const woClose32 = '<span data-wo-close style="cursor:pointer;width:32px;height:32px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>';
+function woBearers(chosen, salon, readOnly) {
+  const opt = (key, title, text) => {
+    const on = chosen === key;
+    return `<div ${readOnly ? '' : `data-wo-bearer="${key}"`} style="${readOnly ? '' : 'cursor:pointer;'}flex:1;border:${on ? '1.5px solid #E8442E' : '1px solid #26262B'};border-radius:10px;padding:12px 13px;display:flex;flex-direction:column;gap:4px">
+      <span style="font-size:12.5px;font-weight:700;color:${on || !chosen ? '#fff' : '#9A9CA3'}">${title}</span>
+      <span style="font-size:11px;line-height:1.45;color:${on || !chosen ? '#9A9CA3' : '#6B6B72'}">${text}</span></div>`;
+  };
+  return `<div style="display:flex;gap:10px">${opt('sterncut', 'Sterncut', 'A loss on our books. Nobody at the shop owes it.')}${opt('salon', 'The shop', 'Taken from ' + esc(salon) + '&rsquo;s Friday settlement, shown on the owner&rsquo;s statement.')}</div>`;
+}
+function woMessages(msgs) {
+  if (!msgs || !msgs.length) return '<span style="font-size:11px;color:#6B6B72">Pick who loses it to see the messages.</span>';
+  const [lead, ...rest] = msgs;
+  return woLabel('WHAT ' + esc(lead.name.split(' ')[0].toUpperCase()) + ' WILL BE SENT' + (lead.lang !== 'en' ? ' · ' + lead.lang.toUpperCase() : ''))
+    + woBubble(lead)
+    + rest.map((m) => `<span style="font-size:11px;line-height:1.5;color:#6B6B72">${esc(m.name.split(' ')[0])} gets${m.lang !== 'en' ? ' (' + m.lang.toUpperCase() + ')' : ''}: &ldquo;<bdi>${esc(m.body)}</bdi>&rdquo;</span>`).join('');
+}
+
+async function woRender() {
+  const noteEl = $('wo-note');
+  if (noteEl) wo.note = noteEl.value;
+  const p = await rpc('admin_writeoff_preview', {
+    p_transfer: wo.transfer || null, p_shortfall: wo.shortfall || null, p_bearer: wo.bearer,
+  });
+  const ready = !!wo.bearer && wo.note.trim().length >= 20 && p.can_sign;
+  // 0129: the monthly alert warns before the signature, and never refuses it
+  const after = p.month_cents + p.gap_cents;
+  const over = p.alert_cents != null && after > p.alert_cents;
+  $('wo-box').innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:12px">
+      <span style="flex:1;min-width:0">
+        <span style="display:block">${woLabel('WRITE OFF · ' + esc(p.ref), '#F87171')}</span>
+        <span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:34px;line-height:1.1;margin-top:6px;font-variant-numeric:tabular-nums">${DH(p.gap_cents)}</span>
+        <span style="display:block;font-size:12px;color:#9A9CA3;margin-top:4px">The gap between ${esc(p.from_name.split(' ')[0])}&rsquo;s ${dh(p.declared_cents)} and ${esc(p.to_name.split(' ')[0])}&rsquo;s ${dh(p.counted_cents)} &middot; ${esc(p.salon)}</span>
+      </span>${woClose32}
+    </div>
+    ${over ? `<div style="border:1px solid rgba(232,161,0,.35);background:rgba(232,161,0,.08);border-radius:10px;padding:10px 12px;font-size:11.5px;line-height:1.45;color:#E8A100">This takes the month&rsquo;s write-offs to <strong>${DH(after)}</strong> &mdash; over the ${DH(p.alert_cents)} monthly alert. You can still sign it; it will show red on Cash in shops and on the overview.</div>` : ''}
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${woLabel('WHO LOSES THE ' + DH(p.gap_cents))}
+      ${woBearers(wo.bearer, p.salon, false)}
+      <span style="font-size:11px;color:#6B6B72">Never an individual barber. A barber&rsquo;s shortfall stays on his account until paid &mdash; writing off is the only way it leaves.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${woLabel('WHY · REQUIRED')}
+      <textarea id="wo-note" style="min-height:72px;background:#0D0D0F;border:1px solid #3A3A40;border-radius:10px;padding:11px 13px;font:12px/1.5 Inter,sans-serif;color:#fff;resize:vertical">${esc(wo.note)}</textarea>
+      <span id="wo-count" style="font-size:10.5px;color:#6B6B72">${wo.note.trim().length < 20 ? (20 - wo.note.trim().length) + ' more characters' : ''}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">${woMessages(p.messages)}</div>
+    ${wo.error ? `<span style="font-size:11.5px;color:#F87171">${esc(wo.error)}</span>` : ''}
+    <div style="display:flex;align-items:center;gap:10px;border-top:1px solid #26262B;padding-top:16px">
+      <span style="flex:1;min-width:0;display:flex;align-items:center;gap:9px">
+        <span style="width:26px;height:26px;border-radius:999px;background:rgba(232,68,46,.16);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:#E8442E;flex:none">${esc(initials(p.signer))}</span>
+        <span style="font-size:11.5px;line-height:1.4;color:#9A9CA3">Logged against your name &middot; <strong style="color:#fff">${esc(p.signer)}</strong></span></span>
+      <span data-wo-close style="cursor:pointer;height:38px;border-radius:8px;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:700;color:#9A9CA3">Cancel</span>
+      <span id="wo-go" style="${ready ? 'cursor:pointer;' : 'opacity:.45;'}height:38px;border-radius:8px;background:#E8442E;display:flex;align-items:center;padding:0 15px;font-size:11.5px;font-weight:700;color:#fff">Write off &amp; send</span>
+    </div>`;
+
+  $('wo-box').querySelectorAll('[data-wo-close]').forEach((el) => { el.onclick = woClose; });
+  $('wo-box').querySelectorAll('[data-wo-bearer]').forEach((el) => {
+    el.onclick = () => { wo.bearer = el.dataset.woBearer; wo.error = null; woRender().catch(fail); };
+  });
+  const note = $('wo-note');
+  note.oninput = () => {
+    wo.note = note.value;
+    const left = 20 - note.value.trim().length;
+    set($('wo-count'), left > 0 ? left + ' more characters' : '');
+    const ok = !!wo.bearer && left <= 0 && p.can_sign;
+    const go = $('wo-go');
+    go.style.opacity = ok ? '1' : '.45';
+    go.style.cursor = ok ? 'pointer' : 'default';
+  };
+  $('wo-go').onclick = async () => {
+    wo.note = note.value;
+    if (!wo.bearer || wo.note.trim().length < 20 || !p.can_sign) return;
+    try {
+      const r = wo.transfer
+        ? await rpc('admin_write_off_transfer', { p_transfer: wo.transfer, p_bearer: wo.bearer, p_note: wo.note })
+        : await rpc('admin_write_off_shortfall', { p_shortfall: wo.shortfall, p_bearer: wo.bearer, p_note: wo.note });
+      const after = wo.after;
+      toast(r.ref + ' signed. ' + (wo.bearer === 'salon' ? 'It goes on the shop’s Friday statement.' : 'A loss on our books.') + ' Both men have been told.');
+      woClose();
+      if (after) after().catch(fail);
+    } catch (e) {
+      // the box stays open with the note intact
+      wo.error = (e && e.message) || String(e);
+      woRender().catch(fail);
+    }
+  };
+}
+
+// FIN-19's rows open the same box, read-only: what was signed, why, and what was sent.
+// A signer can reverse it from here (0129) — a new line, never an edit.
+async function woOpenRead(id, after) {
+  woEnsure();
+  wo = { read: true };
+  const x = await rpc('admin_writeoff', { p_id: id });
+  const reversal = !!x.reverses_ref;
+  $('wo-box').innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:12px">
+      <span style="flex:1;min-width:0">
+        <span style="display:block">${woLabel((reversal ? 'REVERSAL · ' : 'WRITE OFF · ') + esc(x.ref) + ' · ' + esc(x.transfer_ref), '#F87171')}</span>
+        <span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:34px;line-height:1.1;margin-top:6px;font-variant-numeric:tabular-nums">${x.amount_cents < 0 ? '− ' : ''}${DH(Math.abs(x.amount_cents))}</span>
+        <span style="display:block;font-size:12px;color:#9A9CA3;margin-top:4px">${reversal ? 'Reverses ' + esc(x.reverses_ref) : 'The gap between ' + esc(x.from_name.split(' ')[0]) + '&rsquo;s ' + dh(x.declared_cents) + ' and ' + esc(x.to_name.split(' ')[0]) + '&rsquo;s ' + dh(x.counted_cents)} &middot; ${esc(x.salon)} &middot; on ${esc(x.barber)}</span>
+      </span>${woClose32}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">${woLabel('WHO LOSES IT')}${woBearers(x.bearer, x.salon, true)}</div>
+    <div style="display:flex;flex-direction:column;gap:8px">${woLabel('WHY')}
+      <div style="background:#0D0D0F;border:1px solid #26262B;border-radius:10px;padding:11px 13px;font-size:12px;line-height:1.5">${esc(x.note)}</div></div>
+    ${x.messages ? `<div style="display:flex;flex-direction:column;gap:8px">${woMessages(x.messages).replace('WILL BE SENT', 'WAS SENT')}</div>` : ''}
+    <div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid #26262B;padding-top:14px">
+      <span style="font-size:11.5px;color:#9A9CA3">Signed by <strong style="color:#fff">${esc(x.signer)}</strong> &middot; ${dayw(x.signed_at)} ${day(x.signed_at)} ${hhmm(x.signed_at)}</span>
+      ${x.reversed_by ? `<span style="font-size:11.5px;color:#E8A100">Reversed by ${esc(x.reversed_by.ref)} &middot; ${esc(x.reversed_by.signer)}, ${day(x.reversed_by.at)}${x.reversed_by.note ? ' &middot; &ldquo;' + esc(x.reversed_by.note) + '&rdquo;' : ''}</span>` : ''}
+      <span style="font-size:10.5px;color:#6B6B72">Rows can&rsquo;t be edited or deleted &mdash; a mistaken write-off is reversed with a new line.</span>
+    </div>
+    ${x.can_reverse ? `<div style="display:flex;flex-direction:column;gap:8px">
+      <span id="wo-rev-open" style="cursor:pointer;align-self:flex-start;height:34px;border-radius:8px;border:1px solid #3A3A40;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:700;color:#fff">Reverse this write-off</span>
+      <div id="wo-rev-form" style="display:none;flex-direction:column;gap:8px">
+        ${woLabel('WHY REVERSE IT · REQUIRED')}
+        <textarea id="wo-rev-note" style="min-height:64px;background:#0D0D0F;border:1px solid #3A3A40;border-radius:10px;padding:11px 13px;font:12px/1.5 Inter,sans-serif;color:#fff;resize:vertical"></textarea>
+        <span id="wo-rev-count" style="font-size:10.5px;color:#6B6B72">20 more characters</span>
+        <span style="font-size:11px;line-height:1.45;color:#9A9CA3">A new line of &minus; ${DH(x.amount_cents)}. The shortfall goes back on ${esc(x.barber)}&rsquo;s account and he is told${x.bearer === 'salon' ? '; so is the owner, because it comes off the shop&rsquo;s next Friday' : ''}.</span>
+        <span id="wo-rev-err" style="font-size:11.5px;color:#F87171"></span>
+        <div style="display:flex;justify-content:flex-end;gap:10px">
+          <span data-wo-close style="cursor:pointer;height:38px;border-radius:8px;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:700;color:#9A9CA3">Cancel</span>
+          <span id="wo-rev-go" style="opacity:.45;height:38px;border-radius:8px;background:#E8442E;display:flex;align-items:center;padding:0 15px;font-size:11.5px;font-weight:700;color:#fff">Reverse &amp; send</span>
+        </div>
+      </div></div>` : ''}`;
+  $('wo-box').querySelectorAll('[data-wo-close]').forEach((el) => { el.onclick = woClose; });
+  if (x.can_reverse) {
+    const note = $('wo-rev-note'), go = $('wo-rev-go');
+    $('wo-rev-open').onclick = () => { $('wo-rev-open').style.display = 'none'; $('wo-rev-form').style.display = 'flex'; note.focus(); };
+    note.oninput = () => {
+      const left = 20 - note.value.trim().length;
+      set($('wo-rev-count'), left > 0 ? left + ' more characters' : '');
+      go.style.opacity = left <= 0 ? '1' : '.45';
+      go.style.cursor = left <= 0 ? 'pointer' : 'default';
+    };
+    go.onclick = async () => {
+      if (note.value.trim().length < 20) return;
+      try {
+        const r = await rpc('admin_reverse_writeoff', { p_writeoff: id, p_note: note.value });
+        toast(r.ref + ' reverses ' + r.reverses + '. The shortfall is open again, and he has been told.');
+        woClose();
+        if (after) after().catch(fail);
+      } catch (e) {
+        set($('wo-rev-err'), (e && e.message) || String(e));
+      }
+    };
+  }
+  $('wo-dlg').style.display = 'flex';
+}
+
+// ------------------------------------------ FIN-19 · written off this month --
+// Always beside the float, never a separate page, never filtered: a single
+// write-off is reasonable; twenty small ones nobody sees is a leak.
+async function loadCashInShops() {
+  woClose();
+  const c = await rpc('admin_cash_in_shops', {});
+  const month = new Date(c.month + 'T12:00:00').toLocaleDateString('en-GB', { month: 'long' });
+  const lastMonth = new Date(new Date(c.month + 'T12:00:00').setMonth(new Date(c.month + 'T12:00:00').getMonth() - 1))
+    .toLocaleDateString('en-GB', { month: 'long' });
+  set($('fl-title'), 'Cash in the shops — ' + month);
+  set($('fl-held'), DH(c.held_cents));
+  const cols = (a, b, cc, dd, head) => `<div style="display:flex;gap:10px;align-items:center;padding:${head ? '0 14px 9px' : '12px 14px'};${head ? 'font-size:9.5px;letter-spacing:.12em;font-weight:700;color:#6B6B72' : 'font-size:12px'};border-bottom:1px solid #1E1E22">
+    <span style="flex:1;min-width:0;${head ? '' : 'font-weight:700'}">${a}</span><span style="width:150px;${head ? '' : 'color:#9A9CA3'}">${b}</span>
+    <span style="width:110px;text-align:right;${head ? '' : 'font-weight:700;font-variant-numeric:tabular-nums'}">${cc}</span>
+    <span style="width:110px;text-align:right;${head ? '' : 'color:#9A9CA3;font-variant-numeric:tabular-nums'}">${dd}</span></div>`;
+  const shown = c.shops.slice(0, 14);
+  fill('fl-table', cols('SHOP', 'AGENT', 'IN DRAWER', 'OWED TO CHAIRS', true)
+    + (shown.length ? shown.map((s) => cols(esc(s.name), esc(s.agent), DH(s.drawer_cents), DH(s.owed_cents))).join('') : empty('No shop is live yet.'))
+    + (c.shops.length > shown.length ? `<div style="padding:12px 14px;font-size:11.5px;color:#6B6B72">+ ${num(c.shops.length - shown.length)} more shops</div>` : ''));
+
+  const rows = c.writeoffs;
+  const newest = rows.length ? rows[rows.length - 1] : null;
+  const over = c.alert_cents != null && c.month_cents > c.alert_cents;
+  fill('fl-wo', `
+    <div style="display:flex;align-items:baseline;justify-content:space-between">${woLabel('WRITTEN OFF · ' + esc(month.toUpperCase()), '#F87171')}<span style="font-size:10.5px;color:#6B6B72">${esc(lastMonth)}: ${DH(c.last_month_cents)}</span></div>
+    ${rows.length ? `<div style="display:flex;flex-direction:column;background:#141416;border:1px solid #1E1E22;border-radius:12px;overflow:hidden">
+      ${rows.map((w, i) => `<div data-wo-read="${w.id}" style="cursor:pointer;display:flex;gap:10px;align-items:flex-start;padding:12px 14px;${i < rows.length - 1 ? 'border-bottom:1px solid #1E1E22;' : ''}${w === newest && Date.now() - new Date(w.at) < 864e5 ? 'background:rgba(232,68,46,.06)' : ''}">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:700">${esc(w.salon)}</span>
+        <span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">${esc(w.barber)} &middot; ${day(w.at)} &middot; signed ${esc(w.signer.split(' ')[0])}${w.bearer === 'salon' ? ' &middot; <span style="color:#E8A100">shop bears it</span>' : ''}${w.reversal ? ' &middot; reversal' : ''}</span></span>
+        <span style="flex:none;text-align:right"><span style="display:block;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums">${w.amount_cents < 0 ? '− ' : ''}${DH(Math.abs(w.amount_cents))}</span>
+        <span style="display:block;font-size:10px;color:#6B6B72;margin-top:2px;font-variant-numeric:tabular-nums">${dh(w.running_cents)}</span></span></div>`).join('')}
+    </div>` : `<span style="font-size:12px;color:#6B6B72">Nothing written off in ${esc(month)}.</span>`}
+    <div style="display:flex;align-items:baseline;justify-content:space-between;padding:4px 2px 0"><span style="font-size:12.5px;font-weight:700">Running total</span><span style="font-family:'Playfair Display',serif;font-weight:700;font-size:22px;font-variant-numeric:tabular-nums${over ? ';color:#F87171' : ''}">${DH(c.month_cents)}</span></div>
+    <div style="display:flex;align-items:baseline;justify-content:space-between;padding:0 2px"><span style="font-size:11px;color:#9A9CA3">Borne by Sterncut / by shops</span><span style="font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums;color:#9A9CA3">${dh(c.sterncut_cents)} / ${DH(c.salon_cents)}</span></div>
+    ${over ? `<div style="border:1px solid rgba(248,113,113,.35);background:rgba(232,68,46,.08);border-radius:10px;padding:10px 12px;font-size:11.5px;line-height:1.45;color:#F87171">Over the monthly alert by <strong>${DH(c.month_cents - c.alert_cents)}</strong>. Nothing is refused &mdash; this is the flag that someone should look.</div>` : ''}
+    <div style="display:flex;flex-direction:column;gap:6px;padding:0 2px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:11px;color:#9A9CA3">Monthly alert</span>
+        <span style="font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums;color:#9A9CA3">${c.alert_cents == null ? 'Off' : 'Above ' + DH(c.alert_cents)}${c.can_set_alert ? ' &middot; <span id="fl-alert-edit" style="cursor:pointer;color:#E8442E">Change</span>' : ''}</span></div>
+      ${c.alert_set ? `<span style="font-size:10.5px;color:#6B6B72">Set by ${esc(c.alert_set.by)}, ${day(c.alert_set.at)}${c.alert_set.note ? ' &middot; &ldquo;' + esc(c.alert_set.note) + '&rdquo;' : ''}</span>` : '<span style="font-size:10.5px;color:#6B6B72">The starting figure &mdash; finance has not set one yet.</span>'}
+      <div id="fl-alert-form" style="display:none;flex-direction:column;gap:8px;margin-top:4px">
+        <div style="display:flex;gap:8px;align-items:center"><input id="fl-alert-dh" inputmode="numeric" placeholder="1000" value="${c.alert_cents == null ? '' : Math.round(c.alert_cents / 100)}" style="width:110px;height:34px;background:#0D0D0F;border:1px solid #3A3A40;border-radius:8px;padding:0 10px;font:12px Inter,sans-serif;color:#fff"><span style="font-size:11px;color:#9A9CA3">DH a month &middot; empty turns it off</span></div>
+        <input id="fl-alert-why" placeholder="Why — logged against your name" style="height:34px;background:#0D0D0F;border:1px solid #3A3A40;border-radius:8px;padding:0 10px;font:12px Inter,sans-serif;color:#fff">
+        <span id="fl-alert-err" style="font-size:11px;color:#F87171"></span>
+        <span id="fl-alert-save" style="cursor:pointer;align-self:flex-end;height:34px;border-radius:8px;background:#E8442E;display:flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:700;color:#fff">Save</span>
+      </div>
+      <span style="font-size:10.5px;line-height:1.45;color:#6B6B72">Only a full-access admin moves it, never a signer on their own limit.</span>
+    </div>
+    <span style="font-size:11px;line-height:1.5;color:#6B6B72;border-top:1px solid #1E1E22;padding-top:12px">Every row opens its note and its transfer. Rows can&rsquo;t be edited or deleted &mdash; a mistaken write-off is reversed with a new line, and that shows here too.</span>`);
+  $('fl-wo').querySelectorAll('[data-wo-read]').forEach((el) => { el.onclick = () => woOpenRead(el.dataset.woRead, loadCashInShops).catch(fail); });
+  const edit = $('fl-alert-edit');
+  if (edit) {
+    edit.onclick = () => { $('fl-alert-form').style.display = 'flex'; $('fl-alert-dh').focus(); };
+    $('fl-alert-save').onclick = async () => {
+      const raw = $('fl-alert-dh').value.replace(/\s/g, '');
+      if (raw && !/^\d+$/.test(raw)) { set($('fl-alert-err'), 'Whole dirhams, or empty for off.'); return; }
+      try {
+        await rpc('admin_set_writeoff_alert', { p_cents: raw ? Number(raw) * 100 : null, p_reason: $('fl-alert-why').value });
+        toast(raw ? 'The alert is now ' + DH(Number(raw) * 100) + ' a month.' : 'The alert is off.');
+        loadCashInShops().catch(fail);
+      } catch (e) {
+        set($('fl-alert-err'), (e && e.message) || String(e));
+      }
+    };
+  }
+}
+
 const LOAD = {
   overview: loadOverview, salons: loadSalons, bookings: loadBookings, wallets: loadWallets,
   support: loadSupport, 'salons/pending': loadApprovals,
@@ -6930,6 +7257,7 @@ const LOAD = {
   'finance/corrections': loadCorrections,
   'finance/calls': loadOpsCalls,
   'finance/handovers': loadHandovers,
+  'finance/float': loadCashInShops,
 };
 
 // ------------------------------------------------ FIN-14/15 · the run (slice 2) --

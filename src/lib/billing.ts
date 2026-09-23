@@ -4,9 +4,10 @@
 // Every figure a screen shows is a field from the server or one line of
 // arithmetic here on two of them — never a number that exists only on screen.
 
-/** 192000 → "1 920 DH". Thin spaces are what the designs print. */
+/** 192000 → "1 920 DH". The space inside the number is a no-break one: a plain space
+ * splits "1 920" in two, and an Arabic sentence then prints it as "920 1". */
 export function dh(cents: number): string {
-  return `${Math.round(Math.abs(cents) / 100).toLocaleString('en-US').replace(/,/g, ' ')} DH`;
+  return `${Math.round(Math.abs(cents) / 100).toLocaleString('en-US').replace(/,/g, '\u00a0')} DH`;
 }
 
 /** 103 → "1,03 DH" — OSB-04's per-booking figure, with the French decimal comma. */

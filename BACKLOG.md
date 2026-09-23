@@ -3159,7 +3159,8 @@ outgoing agent's due (against the books as they stand at the call, not as they s
 he counted — he goes on paying chairs meanwhile), the new agent is answerable only for
 what he counted, and the man who handed over pays it back into the drawer through
 `agent_receive`. **Write-off is still not built**: Sterncut absorbing it is finance's
-decision, and the button in FIN-18 is inert with that reason on it.
+decision, and the button in FIN-18 is inert with that reason on it. *(Superseded by §10 of
+the handoff: the gap is now owed to Sterncut, and write-off is built — 0128, below.)*
 
 Tested in PGlite (0122–0127 over all 121 shipped migrations, twice-applied): the drawer
 identity, the blocked appointment, a wrong code then the right one, five wrong tries, a
@@ -3174,3 +3175,94 @@ Not built, on purpose:
   logged on the transfer; dispatching her is still the round's own planning.
 - **A barber who leaves while the drawer owes him** is refused removal rather than paid
   out by ops. If a shop hits it, the owner pays him first — or it needs an ops path.
+  *(Built in 0128: leaving no longer waits on the balance.)*
+
+## Shortfalls, write-offs and leavers (0128, 2026-09-23)
+
+ADDENDUM §10 of the billing handoff, with the designs for FIN-18b, FIN-19, BAC-10b and
+BAC-11. It corrects 0127's answer to §8.1: **a handover shortfall is owed by the barber who
+handed over, to Sterncut — not by the shop.** The shop's net with us drops by the gap until
+it is paid back or written off; our Friday statement shows that as its own line.
+
+    drawer = salon_net_cents + Σ what the drawer owes each barber   (still asserted everywhere)
+
+- **`barber_shortfalls`** — one row per short handover, opened by `resolve_drawer_transfer`
+  at `declared − agreed` (the count basis: payouts made during the dispute no longer move
+  it). A drawer that came up *over* is still a `handover_gap` on the outgoing agent's due,
+  as in 0127. Any 0127 gap already on the books is moved across when this applies.
+  States: open → paid, open → written off, written off → open (a reversal). No deletes.
+- **Paid back** — `agent_take_shortfall`: whoever holds the drawer now takes the cash from
+  him (the account screen lists it as "Owed back to the drawer"). It goes to Sterncut with
+  Friday's collection. He is told he is square.
+- **Write-off** (FIN-18b, ops console → Finance → Handovers → Write off). The **bearer** is
+  Sterncut or the shop, never a barber, and nothing is preselected. The **note** has to be
+  20+ characters. The row is signed by whoever is signed in. `cash_writeoffs` is
+  append-only: a mistake is undone with a new row that reverses it
+  (`admin_reverse_writeoff`), never with an edit. If the shop bears it, the amount comes
+  off the owner's share of the drawer and shows on the shop's Friday statement. The
+  barber, the new agent and the owner each get the message the preview showed, in their
+  own language (FR/AR/EN).
+- **Who can sign** — the new capability **`finance_signer`**. Full-access admins (`*`)
+  have it already. There is no screen to grant capabilities; in the SQL editor:
+  `update public.profiles set admin_caps = admin_caps || '{finance_signer}' where id = '<admin id>';`
+- **FIN-19** (Finance → Cash in shops): the cash every shop holds for us, and every
+  write-off this month beside it, with a running total, the Sterncut/shop split and last
+  month's total. It is always shown and cannot be filtered.
+- **Leavers** (BAC-10b, BAC-11). Leaving ends the membership, never the balance.
+  `salon_remove_member` no longer refuses a barber the drawer owes. His row stays in the
+  agent's list with a "LEFT · date" pill until he is paid, with the same code and the same
+  drawer. His app shows one card per shop that still owes him: who holds that shop's cash
+  (with a Call button), his code for that shop (payout codes are now per barber *and*
+  shop), and that it does not expire. It still shows after he joins another shop.
+  "They won't pay — tell us" opens a support case of type `unpaid_leaver` (asking twice
+  returns the case already open). The handover gate still counts what is owed to people
+  who have left.
+
+Tested in PGlite (0122–0128 over every shipped migration, twice-applied; every earlier
+suite unchanged): signer required, bearer and note checks, the FR/AR previews, a shop-borne
+write-off (drawer unchanged, the owner's due down, a statement line) and its reversal,
+append-only and no-delete guards, a shortfall paid back through the drawer, a one-step
+write-off straight from a disputed handover, the FIN-19 totals, and a leaver removed with
+money owed and then paid with his per-shop code. After a real Friday cut, the handover and
+write-off lines add up to the right amount.
+
+Not built, on purpose — all four built in 0129 (below):
+- **A ceiling or alert on write-offs.** §10 leaves the threshold to finance; FIN-19 shows
+  last month's total beside this month's instead of inventing one.
+  **Trigger:** finance names a figure.
+- **A button to reverse a write-off.** `admin_reverse_writeoff` exists and is tested; the
+  designs draw no control for it, and a reversal shows in FIN-18b and FIN-19 once made.
+  **Trigger:** the first write-off signed in error.
+- **Other server messages in the user's language.** Only the write-off texts are FR/AR.
+  The rest (handover settled, shortfall paid back, paid in the shop) are English, like
+  every server notification before 0128.
+- **Arabic amounts in the app.** `dh()` in `src/lib/billing.ts` groups thousands with a
+  plain space. Inside an Arabic sentence that prints "3 240 DH" as "240 3 DH". 0128's
+  server texts use no-break spaces, which fixes it for them. The app-wide fix is the same
+  one-character change, but it touches every screen and the billing checks.
+  **Trigger:** the next i18n pass.
+
+## Write-off alert, undo, and messages in each language (0129, 2026-09-23)
+
+The four things 0128 left open, built after the owner said to.
+
+- **Monthly alert** (`platform_settings.writeoff_alert_cents`). Starts at **1 000 DH a
+  month**; finance never named a figure, so treat it as a placeholder. It warns and never
+  refuses: FIN-18b says so before signing a write-off that crosses it, FIN-19 turns red,
+  and the overview lists it under "needs a human". Changed on FIN-19 (Change, with a
+  reason) by a full-access admin only — a finance signer can't raise their own limit.
+  Every change is logged in `settings_changes`. Empty turns it off.
+- **Reverse a write-off** from its read-only box (a FIN-19 row, or Handovers). Signer only,
+  a reason of 20+ characters. The barber is told the shortfall is his again; if the shop
+  bore it, the owner is told too, since it moves his Friday.
+- **Cash-drawer messages in the reader's language** (FR/AR/EN from `profiles.language`):
+  who holds the cash, the handover (started, done, mismatch, settled), paid in the shop,
+  code typed wrong five times, put in the drawer, shortfall paid back, write-off reversed.
+  One catalogue (`cash_words`) and one sender (`tell_in_lang`): a new message is a row
+  there. Other server notifications (bookings, reviews, billing) are still English.
+- **Arabic amounts in the app**: every thousands separator is now a no-break space, so
+  "3 240" stays whole inside an Arabic sentence.
+
+Tested in PGlite: 0129 applied on top of 0128's test data (and twice), and every earlier
+suite with 0129 applied first. Every message has the same placeholders in all three
+languages, and none goes out with a `{placeholder}` left in it.

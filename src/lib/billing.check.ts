@@ -23,9 +23,9 @@ function eq(label: string, actual: unknown, expected: unknown) {
 }
 
 // money on screen
-eq('1 920 DH', dh(192000), '1 920 DH');
+eq('1 920 DH', dh(192000), '1\u00a0920 DH');
 eq('55 DH', dh(5500), '55 DH');
-eq('a negative prints unsigned — the word carries the direction', dh(-112000), '1 120 DH');
+eq('a negative prints unsigned — the word carries the direction', dh(-112000), '1\u00a0120 DH');
 eq('1,03 DH', dhFine(103), '1,03 DH');
 
 // OSB-02, the arithmetic in full, four chairs

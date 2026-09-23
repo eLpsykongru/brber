@@ -27,7 +27,7 @@ import { loc, tr, trn, trRich } from '../lib/i18n';
 //                the money reaching him is. No code is asked for.
 
 const dh = (c: number) =>
-  Math.round(Math.abs(c ?? 0) / 100).toLocaleString('en-US').replace(/,/g, ' ');
+  Math.round(Math.abs(c ?? 0) / 100).toLocaleString('en-US').replace(/,/g, '\u00a0');
 const hhmm = (iso?: string | null) => {
   const d = iso ? new Date(iso) : new Date();
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -260,7 +260,7 @@ function DropSheet({ visible, bag, onClose, onDrop }: {
 
       <View style={[s.amount, over && { borderColor: '#F87171' }]}>
         <T style={s.amountText}>
-          {typed ? Number(typed).toLocaleString('en-US').replace(/,/g, ' ') : '0'}
+          {typed ? Number(typed).toLocaleString('en-US').replace(/,/g, '\u00a0') : '0'}
         </T>
         <View style={s.grow} />
         <T size={14} c={D.sub}>{tr('DH')}</T>
@@ -424,7 +424,7 @@ function CollectScreen({ v, bag, q, online, onBack, onDone }: {
           {tr('COUNT IT WITH HIM, THEN TYPE WHAT YOU HAVE')}
         </T>
         <View style={[s.amount, over && { borderColor: '#F87171' }]}>
-          <T style={s.amountText}>{typed ? Number(typed).toLocaleString('en-US').replace(/,/g, ' ') : '0'}</T>
+          <T style={s.amountText}>{typed ? Number(typed).toLocaleString('en-US').replace(/,/g, '\u00a0') : '0'}</T>
           <T style={s.caret}>|</T>
           <View style={s.grow} />
           <T size={14} c={D.sub}>{tr('DH')}</T>

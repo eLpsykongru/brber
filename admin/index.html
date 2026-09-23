@@ -3081,6 +3081,7 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
       <span style="height:28px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:700">Settlement runs</span>
       <span data-go="finance/corrections" style="cursor:pointer;height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:500;color:#9A9CA3">Corrections</span>
       <span data-go="finance/calls" style="cursor:pointer;height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:500;color:#9A9CA3">Ops calls</span>
+      <span data-go="finance/handovers" style="cursor:pointer;height:28px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:500;color:#9A9CA3">Handovers</span>
       <span id="fn-sub" style="margin-left:12px;font-size:11.5px;color:#6B6B72"></span>
     </div>
 
@@ -3271,6 +3272,61 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
 </div>
 </div>
 
+<!-- FIN-18 · a handover that doesn't add up. The only state in the product where
+     real cash exists and no account is pointed at it, so the screen is built to
+     support a phone call: both figures, what our books say (and why that is not
+     evidence), who is owed right now, and the clock. Ops records what the call
+     settled; it never picks a winner from here. -->
+<div class="scr" id="s14e">
+<div style="display:flex;width:100%;height:852px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px;box-sizing:border-box;gap:22px">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">ADMIN</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:2px"></div>
+    <div style="flex:1"></div>
+    <div style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A">
+      <span style="width:30px;height:30px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">OP</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Ops</span><span style="display:block;font-size:10px;color:#9A9CA3">Sterncut</span></span>
+    </div>
+  </div>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span data-go="finance" style="cursor:pointer;font-size:12px;color:#6B6B72">Settlement runs</span>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg>
+      <span style="font-size:15px;font-weight:700">Drawer handovers</span>
+      <span id="hv-sub" style="font-size:12px;color:#6B6B72"></span>
+    </div>
+
+    <div style="flex:1;min-height:0;padding:22px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:auto">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div id="hv-list" style="display:flex;flex-direction:column;gap:9px"></div>
+        <div id="hv-body" style="display:flex;flex-direction:column;gap:14px"></div>
+      </div>
+      <div style="width:308px;flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:12.5px;font-weight:700">Ops cannot pick a winner from a screen</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3">The drawer is physical and both men work in the same room. Everything here exists to support a phone call &mdash; both statements, the float history, each man&rsquo;s collection record, and the clock.</span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:12.5px;font-weight:700">Our books are not evidence</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3">They agree with the outgoing agent because he entered every top-up on them. That tells you the records are internally consistent, nothing more. Sending the collection agent to count the drawer is the only way to get a number that isn&rsquo;t a claim.</span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:12.5px;font-weight:700">The shop keeps working</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3">The outgoing agent stays liable and stays the one who pays the chairs. No barber&rsquo;s wages are held, and bookings, the queue and the shop page are untouched. A cash dispute must never become a suspension.</span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:12.5px;font-weight:700">Writing it off is not built</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3">Recording a figure names the new agent and leaves the difference on the man who handed over, as cash he owes the shop&rsquo;s drawer. Sterncut absorbing it instead needs a finance decision first &mdash; README &sect;8.1.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
 <script>
 // ---------------------------------------------------------------- routing --
 // Route → screen id. Barbers, Customers and Coupons are in the sidebar but have
@@ -3297,6 +3353,8 @@ const ROUTES = {
   // so this is a route AND a rail entry.
   'finance': '14a', 'finance/statement': '14b', 'finance/corrections': '14c',
   'finance/calls': '14d',
+  // FIN-18 — the one state that pages a human: a drawer two men count differently
+  'finance/handovers': '14e',
 };
 // ponytail: the one check this wiring leaves behind. The screens are the design's
 // own markup and the renderers find their slots by id — nothing errors when an id
@@ -3331,7 +3389,8 @@ const SLOTS = ('oc-queue dc-title dc-sub dc-panel dc-steps oc-sub oc-table fn-pr
   + 'db-floor db-ceil db-floor-sub db-ceil-sub db-band db-total db-hist db-stats '
   + 'db-changes db-changes-n db-change db-dlg db-dlg-sub db-dials db-impact '
   + 'db-reason-label db-reason db-notify db-notify-row db-notify-title db-log-line db-save '
-  + 'hc-ref hc-who hc-banner hc-cust hc-shop hc-stake hc-said hc-locked').split(' ');
+  + 'hc-ref hc-who hc-banner hc-cust hc-shop hc-stake hc-said hc-locked '
+  + 'hv-sub hv-list hv-body').split(' ');
 for (const id of Object.values(ROUTES)) if (!document.getElementById('s' + id)) console.error('admin: no screen', id);
 for (const id of SLOTS) if (!document.getElementById(id)) console.error('admin: markup is missing', id);
 
@@ -3686,6 +3745,15 @@ async function loadOverview() {
   (alerts.stale || []).forEach((x) => rows.push(needRow('amber', 'card',
     x.name + ' has not settled in ' + x.days + ' days',
     DH(x.net_cents) + ' outstanding · one cycle is 7', null, 'wallets')));
+
+  // FIN-18: cash that exists with no account pointed at it goes above everything
+  // else on this list, because it is the only state that must page a human.
+  try {
+    ((await rpc('admin_drawer_transfers')) || []).filter((t) => t.state === 'mismatch').forEach((t) => rows.unshift(
+      needRow('red', 'card', DH(Math.abs(t.gap_cents)) + ' nobody is holding at ' + t.salon,
+        t.from_name + ' → ' + t.to_name + ' · the drawer was counted twice and the two numbers differ',
+        t.counted_at, 'finance/handovers')));
+  } catch (e) { console.error('admin: handovers', e); }
 
   fill('a-needs', rows.join('') || '<span style="font-size:12px;color:#6B6B72">Nothing needs a human right now.</span>');
 
@@ -6680,6 +6748,171 @@ document.addEventListener('click', (e) => {
   loadRefunds().catch(fail);
 });
 
+// ------------------------------------------ FIN-18 · drawer handovers (0127) --
+// A transfer the two men could not agree on. Ops does not adjudicate here: it
+// rings them, and records what the call settled. Whatever figure is recorded,
+// the difference stays on the man who handed over as cash he owes the drawer —
+// nothing is written off, because writing off is finance's call (README §8.1).
+let handovers = [];
+let handoverId = null;
+
+const HV_PILL = {
+  mismatch: () => pill('UNACCOUNTED', '#F87171', 'rgba(248,113,113,.12)'),
+  pending: () => pill('COUNTING', '#E8A100', 'rgba(232,161,0,.12)'),
+  resolved: () => pill('SETTLED', '#4ADE80', 'rgba(74,222,128,.12)'),
+};
+
+async function loadHandovers() {
+  handovers = (await rpc('admin_drawer_transfers')) || [];
+  const open = handovers.filter((t) => t.state === 'mismatch');
+  set($('hv-sub'), open.length
+    ? open.length + ' with cash nobody is holding'
+    : handovers.length ? 'Nothing unaccounted' : '');
+  if (!handovers.length) {
+    fill('hv-list', '');
+    fill('hv-body', empty('No drawer has changed hands yet.'));
+    return;
+  }
+  if (!handovers.some((t) => t.id === handoverId)) handoverId = (open[0] || handovers[0]).id;
+  fill('hv-list', handovers.map((t) => {
+    const on = t.id === handoverId;
+    return `<div data-hv="${t.id}" style="cursor:pointer;display:flex;align-items:center;gap:12px;background:#17171A;border:1px solid ${on ? '#3A3A40' : '#1E1E22'};border-radius:12px;padding:12px 14px">
+      <span style="font:700 11px ui-monospace,monospace;color:#6B6B72">${esc(t.ref)}</span>
+      <span style="flex:1;min-width:0;font-size:12.5px;font-weight:600">${esc(t.salon)}<span style="color:#9A9CA3;font-weight:400"> · ${esc(t.from_name)} → ${esc(t.to_name)}</span></span>
+      ${t.gap_cents ? `<span style="font-size:12px;font-weight:700;color:#F87171;font-variant-numeric:tabular-nums">${DH(Math.abs(t.gap_cents))}</span>` : ''}
+      <span style="font-size:11px;color:#6B6B72">${ago(t.counted_at || t.at)}</span>
+      ${(HV_PILL[t.state] || HV_PILL.pending)()}</div>`;
+  }).join(''));
+  $('hv-list').querySelectorAll('[data-hv]').forEach((el) => {
+    el.onclick = () => { handoverId = el.dataset.hv; loadHandovers().catch(fail); };
+  });
+  await drawHandover();
+}
+
+async function drawHandover() {
+  const d = await rpc('admin_drawer_transfer', { p_id: handoverId });
+  const card = (inner, pad = 17) => `<div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:${pad}px;display:flex;flex-direction:column;gap:11px">${inner}</div>`;
+  const head = (t) => `<span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">${t}</span>`;
+  const line = (label, value, colour) => `<div style="display:flex;align-items:baseline;gap:12px">
+    <span style="flex:1;font-size:12px;color:#9A9CA3">${label}</span>
+    <span style="font-size:12.5px;font-weight:700;color:${colour || '#fff'};font-variant-numeric:tabular-nums">${value}</span></div>`;
+  const man = (p, amount, note) => `<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">
+    ${head(note)}
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">${esc(initials(p.name))}</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">${esc(p.name)}</span>
+      <span style="display:block;font-size:10.5px;color:#6B6B72">${esc(p.sub)}</span></span>
+    </div>
+    <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:26px;font-variant-numeric:tabular-nums">${DH(amount)}</span></div>`;
+
+  const from = {
+    name: d.from.name,
+    sub: [d.from.is_owner ? 'Owner' : (d.from.chair || 'Barber'),
+      d.from.agent_since ? 'agent since ' + day(d.from.agent_since) : null,
+      d.from.collections + ' clean collection' + (d.from.collections === 1 ? '' : 's'),
+      d.from.failed ? d.from.failed + ' that did not verify' : null].filter(Boolean).join(' · '),
+  };
+  const to = {
+    name: d.to.name,
+    sub: [d.to.chair || 'Barber', d.to.held_before ? 'has held the drawer before' : 'never held the drawer before']
+      .filter(Boolean).join(' · '),
+  };
+  const gap = d.gap_cents;
+  const steps = [
+    ['Owner picked ' + d.to.name + ' as agent', d.at],
+    [d.from.name + ' handed over ' + DH(d.declared_cents) + ' — matches our books', d.counted_at],
+    [d.to.name + ' counted ' + DH(d.counted_cents) + ' · transfer refused · both told', d.counted_at],
+    d.count_requested_at ? ['Collection agent asked to count the drawer' + (d.count_requested_by ? ' by ' + d.count_requested_by : ''), d.count_requested_at] : null,
+    d.resolved_at ? ['Settled at ' + DH(d.agreed_cents) + ' by ' + (d.resolved_by || 'ops'), d.resolved_at] : null,
+    d.state === 'mismatch' ? ['Cash nobody is holding, for ' + ago(d.counted_at), null] : null,
+  ].filter(Boolean);
+
+  fill('hv-body', `
+    ${card(`<div style="display:flex;align-items:flex-start;gap:12px">
+      <span style="flex:1;min-width:0">
+        <span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:19px">${esc(d.salon.name)} — ${esc(d.from.name)} → ${esc(d.to.name)}</span>
+        <span style="display:block;font-size:11.5px;color:#6B6B72;margin-top:4px">${esc(d.ref)} · started ${dayw(d.at)} ${day(d.at)} ${hhmm(d.at)} · ${esc(d.salon.address || '')} · ${num(d.salon.chairs)} chairs</span>
+      </span>${(HV_PILL[d.state] || HV_PILL.pending)()}</div>`)}
+
+    ${card(`<div style="display:flex;align-items:center;gap:18px">
+      ${man(from, d.declared_cents, 'HANDED OVER, HE SAYS')}
+      <span style="flex:none;text-align:center">
+        <span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:22px;color:#F87171">${DH(Math.abs(gap))}</span>
+        <span style="display:block;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">GAP</span></span>
+      ${man(to, d.counted_cents, 'COUNTED, HE SAYS')}
+    </div>`)}
+
+    ${card(head('WHAT THE FLOAT SAYS IT SHOULD BE')
+      + line(num(d.books.topups) + ' top-ups recorded' + (d.books.since ? ' since ' + day(d.books.since) : ''), DH(d.books.topups_cents))
+      + line('Of those, entered by ' + esc(d.from.name), num(d.books.topups_by_him))
+      + line('Paid out to chairs, confirmed by code', DH(d.books.paid_out_cents))
+      + line('Owed to Sterncut on the next collection', DH(d.books.sterncut_cents))
+      + line('<strong style="color:#fff">Our books, right now</strong>', DH(d.books.drawer_cents))
+      + `<span style="font-size:11px;line-height:1.5;color:#9A9CA3;border-top:1px solid #1E1E22;padding-top:10px">Our number matches ${esc(d.from.name)}&rsquo;s exactly &mdash; which is <strong style="color:#D8D8DC">not evidence</strong>. Every top-up on it was entered by him. It tells you the records are internally consistent, nothing more.</span>`)}
+
+    ${card(head('OWED TO CHAIRS, RIGHT NOW')
+      + (d.dues.length ? d.dues.map((x) => line(esc(x.name), DH(x.cents), x.cents < 0 ? '#E8A100' : '#4ADE80')).join('')
+        : '<span style="font-size:11.5px;color:#6B6B72">Nobody is owed anything today.</span>')
+      + '<span style="font-size:11px;line-height:1.5;color:#9A9CA3">' + esc(d.from.name) + ' goes on paying these while this is open. No barber&rsquo;s wages wait on it.</span>')}
+
+    ${card(head('WHAT HAPPENED, IN ORDER')
+      + steps.map(([t, at]) => `<div style="display:flex;gap:10px;align-items:baseline">
+          <span style="width:6px;height:6px;border-radius:999px;background:#3A3A40;flex:none;transform:translateY(-2px)"></span>
+          <span style="flex:1;font-size:12px">${esc(t)}</span>
+          <span style="font-size:11px;color:#6B6B72">${at ? dayw(at) + ' ' + hhmm(at) : ''}</span></div>`).join(''))}
+
+    ${d.state === 'mismatch' ? card(head('RECORD WHAT WAS AGREED ON THE CALL')
+      + `<div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span data-hv-set="${d.counted_cents}" style="cursor:pointer;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:600">${esc(d.to.name.split(' ')[0])}&rsquo;s ${DH(d.counted_cents)} stands</span>
+          <span data-hv-set="${d.books.drawer_cents}" style="cursor:pointer;height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 12px;font-size:11.5px;font-weight:600">${esc(d.from.name.split(' ')[0])}&rsquo;s ${DH(d.books.drawer_cents)} stands</span>
+        </div>
+        <div style="display:flex;gap:9px;align-items:center">
+          <input id="hv-amount" type="number" inputmode="numeric" value="${Math.round((d.counted_cents || 0) / 100)}" style="width:120px;height:36px;border-radius:9px;background:#0D0D0F;border:1px solid #26262B;color:#fff;padding:0 11px;font-size:13px;font-family:inherit">
+          <span style="font-size:11.5px;color:#6B6B72">DH counted into ${esc(d.to.name.split(' ')[0])}&rsquo;s hands</span>
+        </div>
+        <input id="hv-note" placeholder="What the call settled — logged against your name" style="height:36px;border-radius:9px;background:#0D0D0F;border:1px solid #26262B;color:#fff;padding:0 11px;font-size:12.5px;font-family:inherit">
+        <span style="font-size:11px;line-height:1.5;color:#9A9CA3">Whichever number is recorded, the difference stays on ${esc(d.from.name)}&rsquo;s account as cash he owes the drawer, until he puts it back. Recording a figure names the new agent; it never makes money disappear.</span>
+        <div style="display:flex;gap:9px;flex-wrap:wrap">
+          <span id="hv-save" style="cursor:pointer;height:34px;border-radius:9px;background:#E8442E;display:flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:800;letter-spacing:.05em">RECORD &amp; NAME ${esc(d.to.name.split(' ')[0].toUpperCase())} AGENT</span>
+          <span id="hv-count" style="cursor:pointer;height:34px;border-radius:9px;background:#212125;display:flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:700">${d.count_requested_at ? 'COLLECTION AGENT ASKED · ' + ago(d.count_requested_at) : 'SEND THE COLLECTION AGENT TO COUNT IT'}</span>
+          <span title="Not built: a barber-level write-off has no accounting behind it yet (README §8.1)" style="height:34px;border-radius:9px;background:#141416;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:600;color:#3A3A40">WRITE IT OFF</span>
+        </div>`)
+      : d.state === 'resolved' ? card(head('SETTLED')
+        + line('Agreed on the call', DH(d.agreed_cents))
+        + line('Left on ' + esc(d.from.name) + '&rsquo;s account', DH(d.declared_cents - d.agreed_cents), '#E8A100')
+        + `<span style="font-size:11.5px;color:#9A9CA3">${esc(d.resolution_note || '')} — ${esc(d.resolved_by || 'ops')}, ${day(d.resolved_at)}</span>`)
+        : card('<span style="font-size:11.5px;color:#9A9CA3">' + esc(d.to.name) + ' has not counted it yet. Nothing for ops to do until he does.</span>')}
+  `);
+
+  const amount = $('hv-amount');
+  document.querySelectorAll('[data-hv-set]').forEach((el) => {
+    el.onclick = () => { if (amount) amount.value = Math.round(Number(el.dataset.hvSet) / 100); };
+  });
+  const save = $('hv-save');
+  if (save) {
+    save.onclick = async () => {
+      const note = ($('hv-note').value || '').trim();
+      if (!note) return toast('Say what the call settled — it is logged against your name.');
+      try {
+        const r = await rpc('admin_resolve_drawer_transfer', {
+          p_id: d.id, p_agreed_cents: Math.round(Number(amount.value || 0) * 100), p_note: note,
+        });
+        toast(r.gap_cents ? DH(Math.abs(r.gap_cents)) + ' stays on ' + d.from.name + '. ' + d.to.name + ' is the agent.'
+          : d.to.name + ' is the agent, with nothing missing.');
+      } catch (e) { return fail(e); }
+      loadHandovers().catch(fail);
+    };
+  }
+  const count = $('hv-count');
+  if (count) {
+    count.onclick = async () => {
+      try { await rpc('admin_request_drawer_count', { p_id: d.id }); } catch (e) { return fail(e); }
+      toast('Logged. Send her on the next round — a third number is the only one that is not a claim.');
+      loadHandovers().catch(fail);
+    };
+  }
+}
+
 const LOAD = {
   overview: loadOverview, salons: loadSalons, bookings: loadBookings, wallets: loadWallets,
   support: loadSupport, 'salons/pending': loadApprovals,
@@ -6696,6 +6929,7 @@ const LOAD = {
   'finance/statement': loadStatement,
   'finance/corrections': loadCorrections,
   'finance/calls': loadOpsCalls,
+  'finance/handovers': loadHandovers,
 };
 
 // ------------------------------------------------ FIN-14/15 · the run (slice 2) --

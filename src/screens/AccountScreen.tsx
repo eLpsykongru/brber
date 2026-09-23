@@ -1,25 +1,30 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { Btn, Card, Eyebrow, Ico, type IconName, RadioRow, Screen, Serif, Sheet, SheetHead, T, TAB_INSET, TopBar } from '../components/dark';
 import { awkwardNet, dh, netWay } from '../lib/billing';
 import { loc, tr, trn } from '../lib/i18n';
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
 
-// "Barber - Account.dc.html" BAC-01 … BAC-08 — read-only, over 0125.
+// "Barber - Account.dc.html" BAC-01 … BAC-10, over 0125 and 0127.
 //
 // The one thing this screen is for: a barber can answer "what do I owe you, and
 // what do you owe me", and walk both numbers back to the names of the men who sat
 // in his chair. So every total here opens its rows, and every row is a booking.
 //
+// BAC-09 is the flip — the shop owes him, and the shop's cash agent pays him out
+// of the drawer. He reads out four digits once the cash is in his hand, and that
+// is the only thing that records a payout. BAC-10 is the other hat: the agent's
+// own screen, where each colleague is a name, a chair and a figure and nothing
+// else, and where his own share is a row he taps like any other.
+//
 // What is NOT here, on purpose:
 //   · cash taken in the chair — it never left his pocket and is never counted.
 //     BAC-07 prints it beside a deposit as what the chair was due, never in a sum.
-//   · the payee's code (BAC-09) and the agent's payout queue (BAC-10) — who pays a
-//     barber inside the shop is the cash-agent slice, built after this one.
+//   · anything about the shop's subscription for a barber who is not the owner.
 
 type Account = {
-  me: string; salon: string | null; till: boolean; since: string | null;
+  me: string; salon: string | null; till: boolean; is_owner: boolean; since: string | null;
   last_visit: { agent: string; at: string } | null;
   ours: { cents: number; count: number };
   mine: { cents: number; wallet_cuts: Bucket; deposits: Bucket; no_shows: Bucket; refunds: Bucket };
@@ -27,8 +32,24 @@ type Account = {
   colleagues: { cents: number; barbers: number };
   bill_cents: number;
   net_cents: number;
+  due: { cents: number; paid_cents: number; bill_cents: number; carried_cents: number };
   cap: { cap_cents: number; net_cents: number; room_cents: number } | null;
   agent: { name: string; is_me: boolean } | null;
+  handover: Handover | null;
+};
+type Handover = {
+  id: string; ref: string; state: 'pending' | 'mismatch'; role: 'incoming' | 'outgoing';
+  from_name: string; to_name: string; drawer_cents: number;
+  declared_cents: number | null; counted_cents: number | null;
+  dues: { name: string; cents: number; is_me: boolean }[]; at: string;
+};
+type Drawer = {
+  salon: string | null; me: string; drawer_cents: number; sterncut_cents: number; to_pay_cents: number;
+  my_due_cents: number; chairs: Chair[]; transfer: { ref: string; state: string; to_name: string } | null;
+};
+type Chair = {
+  barber: string; name: string; chair: string | null; due_cents: number;
+  last_paid: { cents: number; at: string } | null;
 };
 type Bucket = { cents: number; count: number };
 type Row = {
@@ -47,7 +68,8 @@ const when = (iso: string) => {
 const dayMonth = (iso: string) => new Date(iso).toLocaleDateString(loc('en-GB'), { day: 'numeric', month: 'short' });
 const initials = (n: string) => n.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
 
-type View_ = 'home' | 'his' | 'ours' | 'settle' | 'wallet' | 'deposits' | 'awkward' | 'pending';
+type View_ = 'home' | 'his' | 'ours' | 'settle' | 'wallet' | 'deposits' | 'awkward' | 'pending'
+  | 'drawer' | 'takeover';
 
 export default function AccountScreen({ onBack, onStatement }: { onBack?: () => void; onStatement?: () => void }) {
   const [a, setA] = useState<Account | null>(null);
@@ -96,6 +118,10 @@ export default function AccountScreen({ onBack, onStatement }: { onBack?: () => 
     body = <AwkwardView a={a} onBack={() => setView('his')} onWrong={setDispute} />;
   } else if (view === 'pending') {
     body = <PendingView onBack={() => setView('his')} />;
+  } else if (view === 'drawer' && a.till) {
+    body = <DrawerView onBack={home} onPaid={() => setTick((n) => n + 1)} />;
+  } else if (view === 'takeover' && a.handover?.role === 'incoming' && a.handover.state === 'pending') {
+    body = <TakeoverView h={a.handover} onBack={home} onDone={() => { setView('home'); setTick((n) => n + 1); }} />;
   } else {
     body = <HomeView a={a} go={setView} onBack={onBack} />;
   }
@@ -148,26 +174,17 @@ function HomeView({ a, go, onBack }: { a: Account; go: (v: View_) => void; onBac
         </View>
       </View>
 
+      {a.handover && <HandoverCard h={a.handover} go={go} />}
+
       <Nav icon="arrow-up" tint={D.green} title={tr('What we hold for you')} sub={tr('Every cut and deposit, line by line')} onPress={() => go('his')} />
       {a.till && (
-        <Nav icon="arrow-down" tint={D.accent} title={tr('What you hold for us')} sub={tr('The float — and how close to the cap')} onPress={() => go('ours')} />
+        <>
+          <Nav icon="arrow-down" tint={D.accent} title={tr('What you hold for us')} sub={tr('The float — and how close to the cap')} onPress={() => go('ours')} />
+          <Nav icon="users" tint={D.accent} title={tr("The shop's cash")} sub={tr('The drawer, and what each chair is owed')} onPress={() => go('drawer')} />
+        </>
       )}
 
-      {!a.till && a.agent && (
-        <Card style={st.who}>
-          <Eyebrow ls={1.4}>{tr('WHO PAYS YOU')}</Eyebrow>
-          <View style={st.row}>
-            <View style={[st.avatar, st.avatarWarm]}><T w="b" size={11} c={D.accent}>{initials(a.agent.name)}</T></View>
-            <View style={st.grow}>
-              <T w="b" size={13}>{a.agent.name}</T>
-              <T size={11} c={D.sub} style={st.mt2}>{tr("The shop's cash agent")}</T>
-            </View>
-          </View>
-          <T size={11.5} c={D.sub} style={[st.lh, st.whyLine]}>
-            {tr("He pays you out of the shop's cash — the deposits Sterncut settles with the shop on Friday. It isn't his money and it isn't a favour.")}
-          </T>
-        </Card>
-      )}
+      {!a.till && a.agent && <PayeeCard a={a} />}
 
       {a.pending.count > 0 && (
         <View style={st.amber}>
@@ -200,6 +217,367 @@ function Nav({ icon, tint, title, sub, onPress }: { icon: IconName; tint: string
       </View>
       <Ico name="chevron-right" size={16} color={D.sub} />
     </Card>
+  );
+}
+
+// ---- BAC-09 · who pays him, and the four digits that prove he was paid -----------
+function PayeeCard({ a }: { a: Account }) {
+  const [code, setCode] = useState<string | null>(null);
+  const due = a.due.cents;
+  useEffect(() => {
+    if (due <= 0) return;
+    supabase.rpc('my_payout_code').then(({ data }) => setCode((data as { code: string | null } | null)?.code ?? null));
+  }, [due]);
+  const agent = a.agent;
+  if (!agent) return null;
+  const parts = [
+    a.mine.cents !== 0 ? [since(a), a.mine.cents] as const : null,
+    a.due.carried_cents !== 0 ? [tr('From earlier weeks, still unpaid'), a.due.carried_cents] as const : null,
+    a.due.paid_cents !== 0 ? [tr('Paid to you in the shop'), -a.due.paid_cents] as const : null,
+    a.is_owner && a.due.bill_cents !== 0 ? [tr("The shop's subscription, netted on Friday"), -a.due.bill_cents] as const : null,
+  ].filter(Boolean) as (readonly [string, number])[];
+
+  return (
+    <Card style={st.who}>
+      <Eyebrow ls={1.4}>{tr('WHO PAYS YOU')}</Eyebrow>
+      <View style={st.row}>
+        <View style={[st.avatar, st.avatarWarm]}><T w="b" size={11} c={D.accent}>{initials(agent.name)}</T></View>
+        <View style={st.grow}>
+          <T w="b" size={13}>{agent.name}</T>
+          <T size={11} c={D.sub} style={st.mt2}>{tr("The shop's cash agent")}</T>
+        </View>
+      </View>
+      <T size={11.5} c={D.sub} style={[st.lh, st.whyLine]}>
+        {tr("He pays you out of the shop's cash — the deposits Sterncut settles with the shop on Friday. It isn't his money and it isn't a favour.")}
+      </T>
+
+      {parts.length > 1 && (
+        <View style={st.whyLine}>
+          {parts.map(([label, cents]) => (
+            <Row2 key={label} label={label} value={`${cents < 0 ? '− ' : ''}${dh(cents)}`} color={cents < 0 ? D.red : undefined} />
+          ))}
+        </View>
+      )}
+
+      {due > 0 && !!code && (
+        <View style={st.codeInner}>
+          <Eyebrow ls={1.5}>{tr('GIVE HIM THIS CODE')}</Eyebrow>
+          <Serif size={34} ls={0.22}>{code.split('').join(' ')}</Serif>
+          <T size={11} c={D.faint} style={[st.lh, st.center]}>
+            {tr('Only say it once he has counted {amount} into your hand. The code is what proves he paid.', { amount: dh(due) })}
+          </T>
+        </View>
+      )}
+      {due > 0 && (
+        <T size={11} c={D.faint} style={st.lh}>
+          {tr("If the drawer is short today he can pay part of it. The rest stays on your column — it doesn't disappear and nobody renegotiates it.")}
+        </T>
+      )}
+      {due < 0 && (
+        <T size={11.5} c={D.amber} style={st.lh}>
+          {tr('You owe the drawer {amount}. Hand it to {agent} and he records it.', { amount: dh(due), agent: agent.name.split(' ')[0] })}
+        </T>
+      )}
+    </Card>
+  );
+}
+
+// ---- OBR-08/09 from the two men's side ---------------------------------------------
+function HandoverCard({ h, go }: { h: Handover; go: (v: View_) => void }) {
+  const incoming = h.role === 'incoming';
+  if (h.state === 'mismatch') {
+    return (
+      <View style={st.amber}>
+        <Ico name="alert-triangle" size={15} color={D.amber} />
+        <View style={st.grow}>
+          <T w="b" size={12.5}>{tr('The two counts did not match')}</T>
+          <T size={11.5} c={D.sub} style={[st.lh, st.mt2]}>
+            {tr('{from} handed over {declared} by our books; {to} counted {counted}. Sterncut will call you both. Until then {from} still holds the drawer and still pays the chairs — nobody\'s pay waits on this.',
+              { from: h.from_name.split(' ')[0], to: h.to_name.split(' ')[0],
+                declared: dh(h.declared_cents ?? 0), counted: dh(h.counted_cents ?? 0) })}
+          </T>
+        </View>
+      </View>
+    );
+  }
+  if (!incoming) {
+    return (
+      <View style={st.amber}>
+        <Ico name="package" size={15} color={D.amber} />
+        <View style={st.grow}>
+          <T w="b" size={12.5}>{tr('You are handing the drawer to {name}', { name: h.to_name.split(' ')[0] })}</T>
+          <T size={11.5} c={D.sub} style={[st.lh, st.mt2]}>
+            {tr('Count {amount} into his hands. He confirms it on his own phone — until he does, you still hold it and you still pay the chairs.',
+              { amount: dh(h.drawer_cents) })}
+          </T>
+        </View>
+      </View>
+    );
+  }
+  return (
+    <Card style={st.who} onPress={() => go('takeover')}>
+      <View style={st.row}>
+        <View style={[st.avatar, st.avatarWarm]}><Ico name="package" size={15} color={D.accent} /></View>
+        <View style={st.grow}>
+          <T w="b" size={13}>{tr('You are taking the drawer')}</T>
+          <T size={11} c={D.sub} style={st.mt2}>
+            {tr('{name} says he is counting {amount} into your hands', { name: h.from_name.split(' ')[0], amount: dh(h.drawer_cents) })}
+          </T>
+        </View>
+        <Ico name="chevron-right" size={16} color={D.sub} />
+      </View>
+    </Card>
+  );
+}
+
+// ---- BAC-10 · the agent's other hat ---------------------------------------------------
+function DrawerView({ onBack, onPaid }: { onBack: () => void; onPaid: () => void }) {
+  const [d, setD] = useState<Drawer | null>(null);
+  const [pay, setPay] = useState<Chair | null>(null);
+  const load = useCallback(() => {
+    supabase.rpc('my_drawer').then(({ data }) => setD(data as Drawer));
+  }, []);
+  useEffect(() => { load(); }, [load]);
+  if (!d) return <Screen bottom={TAB_INSET}><TopBar title={tr("The shop's cash")} onBack={onBack} plain /></Screen>;
+  const owed = d.chairs.filter((c) => c.due_cents > 0);
+  const owing = d.chairs.filter((c) => c.due_cents < 0);
+  const paid = d.chairs.filter((c) => c.due_cents === 0 && c.last_paid);
+  return (
+    <>
+      <Screen bottom={TAB_INSET} gap={12}>
+        <TopBar title={tr("The shop's cash")} onBack={onBack} plain />
+        <T size={12} c={D.sub} style={st.lh}>{tr('You hold it · you are the agent')}</T>
+
+        <View style={st.tiles}>
+          <View style={st.tile}>
+            <Eyebrow ls={1.2}>{tr('IN THE DRAWER')}</Eyebrow>
+            <T w="eb" size={21} style={st.num}>{dh(d.drawer_cents)}</T>
+            <T size={10.5} c={D.faint}>
+              {d.sterncut_cents >= 0
+                ? tr('{amount} of it goes to Sterncut on Friday', { amount: dh(d.sterncut_cents) })
+                : tr('Sterncut brings the shop {amount} on Friday', { amount: dh(d.sterncut_cents) })}
+            </T>
+          </View>
+          <View style={st.tile}>
+            <Eyebrow ls={1.2}>{tr('TO PAY OUT')}</Eyebrow>
+            <T w="eb" size={21} c={D.green} style={st.num}>{dh(d.to_pay_cents)}</T>
+            <T size={10.5} c={D.faint}>{trn(owed.length, 'to one chair', 'to {n} chairs')}</T>
+          </View>
+        </View>
+
+        {!!owed.length && <Eyebrow ls={1.4}>{tr('WHO YOU OWE, IN THE SHOP')}</Eyebrow>}
+        {owed.map((c) => (
+          <Card key={c.barber} style={st.line} onPress={() => setPay(c)}>
+            <View style={st.avatar}><T w="b" size={10} c={D.sub}>{initials(c.name)}</T></View>
+            <View style={st.grow}>
+              <T w="b" size={12.5}>{c.name}</T>
+              {!!c.chair && <T size={10.5} c={D.sub} style={st.mt2}>{c.chair}</T>}
+            </View>
+            <T w="b" size={13} c={D.green} style={st.num}>{dh(c.due_cents)}</T>
+            <Ico name="chevron-right" size={15} color={D.muted} />
+          </Card>
+        ))}
+
+        {owing.map((c) => (
+          <Card key={c.barber} style={st.line} onPress={() => setPay(c)}>
+            <View style={[st.avatar, { backgroundColor: 'rgba(232,161,0,0.14)' }]}><T w="b" size={10} c={D.amber}>{initials(c.name)}</T></View>
+            <View style={st.grow}>
+              <T w="b" size={12.5}>{c.name}</T>
+              <T size={10.5} c={D.amber} style={st.mt2}>{tr('owes the drawer')}</T>
+            </View>
+            <T w="b" size={13} c={D.amber} style={st.num}>{dh(c.due_cents)}</T>
+            <Ico name="chevron-right" size={15} color={D.muted} />
+          </Card>
+        ))}
+
+        {paid.map((c) => (
+          <View key={c.barber} style={[st.line, st.lineDim]}>
+            <View style={st.grow}>
+              <T w="sb" size={12.5} c={D.sub}>{c.name}</T>
+              <T size={10.5} c={D.faint} style={st.mt2}>
+                {tr('Paid {amount} · {when}', { amount: dh(c.last_paid?.cents ?? 0), when: when(c.last_paid?.at ?? '') })}
+              </T>
+            </View>
+            <Ico name="check" size={14} color={D.green} />
+          </View>
+        ))}
+
+        <View style={st.ruleDim} />
+        <Card style={st.line} onPress={d.my_due_cents > 0 ? () => setPay({ barber: d.me, name: tr('My own account'), chair: null, due_cents: d.my_due_cents, last_paid: null }) : undefined}>
+          <View style={[st.avatar, st.avatarWarm]}><Ico name="user" size={14} color={D.accent} /></View>
+          <View style={st.grow}>
+            <T w="b" size={12.5}>{tr('My own account')}</T>
+            <T size={10.5} c={D.sub} style={st.mt2}>
+              {d.my_due_cents > 0 ? tr('Kept separate — take it out of the drawer') : tr('Kept separate — nothing owed to you today')}
+            </T>
+          </View>
+          <T w="b" size={13} c={d.my_due_cents > 0 ? D.green : D.sub} style={st.num}>{dh(d.my_due_cents)}</T>
+        </Card>
+
+        <T size={10.5} c={D.faint} style={st.foot}>
+          {tr('You see what each man is owed. You never see his clients, his prices or his takings.')}
+        </T>
+      </Screen>
+      <PaySheet chair={pay} self={pay?.barber === d.me} onClose={() => setPay(null)}
+        onDone={() => { setPay(null); load(); onPaid(); }} me={d.me} />
+    </>
+  );
+}
+
+// the payout itself: his figure, his code, and no way to edit either
+function PaySheet({ chair, self, me, onClose, onDone }: {
+  chair: Chair | null; self: boolean; me: string; onClose: () => void; onDone: () => void;
+}) {
+  const [amount, setAmount] = useState('');
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const idem = useRef(`pay-${Date.now()}`);
+  const owing = (chair?.due_cents ?? 0) < 0;
+  useEffect(() => {
+    if (!chair) return;
+    setAmount(String(Math.round(Math.abs(chair.due_cents) / 100)));
+    setCode('');
+    setErr(null);
+    idem.current = `pay-${chair.barber}-${Date.now()}`;
+  }, [chair?.barber]);
+  if (!chair) return null;
+  const cents = Math.round(Number(amount.replace(',', '.')) * 100) || 0;
+  const ready = cents > 0 && cents <= Math.abs(chair.due_cents) && (owing || self || code.length === 4);
+
+  async function send() {
+    setBusy(true);
+    setErr(null);
+    const { data, error } = owing
+      ? await supabase.rpc('agent_receive', { p_barber: chair!.barber, p_cents: cents })
+      : await supabase.rpc('agent_pay', {
+        p_barber: self ? me : chair!.barber, p_cents: cents,
+        p_code: self ? null : code, p_idem: idem.current,
+      });
+    setBusy(false);
+    if (error) return setErr(error.message);
+    const r = data as { ok: boolean; reason?: string; left?: number };
+    if (!r?.ok) {
+      return setErr(r?.reason === 'code'
+        ? trn(r.left ?? 0, 'Those four digits are wrong. One more try before the code stops working.',
+          'Those four digits are wrong. {n} tries left before the code stops working.')
+        : r?.reason === 'spent' ? tr('That code has been typed wrong too many times. Ask him to open his account for a new one.')
+          : tr('He has no live code. Ask him to open "You & Sterncut" on his phone.'));
+    }
+    onDone();
+  }
+
+  return (
+    <Sheet visible={!!chair} onClose={onClose} deep>
+      <SheetHead title={owing ? tr('He puts cash in') : self ? tr('Take your own share') : tr('Pay {name}', { name: chair.name.split(' ')[0] })} onClose={onClose} left />
+      <Card style={st.sum}>
+        <Eyebrow ls={1.4}>{owing ? tr('HE OWES THE DRAWER') : tr('THE SHOP OWES HIM')}</Eyebrow>
+        <Serif size={30} ls={0} c={owing ? D.amber : D.green} style={st.num}>{dh(chair.due_cents)}</Serif>
+        <T size={11.5} c={D.sub} style={st.lh}>
+          {owing ? tr('Count it into the drawer and record it here. He is told what you recorded.')
+            : self ? tr('Your own money out of the drawer. The figure is not yours to change either.')
+              : tr("You can't change the figure. If you're short, pay part and it stays on his column.")}
+        </T>
+      </Card>
+
+      <Eyebrow ls={1.4}>{tr('HOW MUCH, IN DIRHAMS')}</Eyebrow>
+      <TextInput value={amount} onChangeText={(v) => setAmount(v.replace(/[^\d.,]/g, ''))}
+        keyboardType="number-pad" style={st.input} placeholderTextColor={D.muted} />
+
+      {!owing && !self && (
+        <>
+          <Eyebrow ls={1.4}>{tr('HIS CODE')}</Eyebrow>
+          <CodeBoxes code={code} onChange={setCode} />
+          <T size={11} c={D.faint} style={st.lh}>
+            {tr('He reads it out once the cash is in his hand. You cannot record a payment without it.')}
+          </T>
+        </>
+      )}
+
+      {!!err && <T size={11.5} c={D.red} style={st.lh}>{err}</T>}
+      <Btn title={owing ? tr('I HAVE TAKEN {amount}', { amount: dh(cents) })
+        : tr("I'VE PAID HIM {amount}", { amount: dh(cents) })}
+        onPress={ready && !busy ? send : undefined} bg={ready && !busy ? D.accent : D.card2} />
+    </Sheet>
+  );
+}
+
+function CodeBoxes({ code, onChange }: { code: string; onChange: (v: string) => void }) {
+  const input = useRef<TextInput>(null);
+  return (
+    <Pressable style={st.boxRow} onPress={() => input.current?.focus()}>
+      {[0, 1, 2, 3].map((i) => (
+        <View key={i} style={[st.box, i === code.length && st.boxOn]}>
+          <Serif size={22}>{code[i] ?? ''}</Serif>
+        </View>
+      ))}
+      <TextInput ref={input} value={code} style={st.hidden} keyboardType="number-pad" maxLength={4}
+        onChangeText={(v) => onChange(v.replace(/\D/g, ''))} />
+    </Pressable>
+  );
+}
+
+// ---- OBR-09 · counting it in, on his own phone ---------------------------------------
+function TakeoverView({ h, onBack, onDone }: { h: Handover; onBack: () => void; onDone: () => void }) {
+  const [amount, setAmount] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const cents = Math.round(Number(amount.replace(',', '.')) * 100) || 0;
+
+  async function confirm() {
+    setBusy(true);
+    setErr(null);
+    const { data, error } = await supabase.rpc('confirm_drawer_transfer', {
+      p_transfer: h.id, p_counted: cents, p_expected: h.drawer_cents,
+    });
+    setBusy(false);
+    if (error) return setErr(error.message);
+    const r = data as { state: string; declared_cents?: number };
+    if (r.state === 'mismatch') {
+      Alert.alert(tr('That is not the same number'),
+        tr('You counted {counted}; the books say {declared}. Neither of you takes the drawer until Sterncut has spoken to you both. Nobody\'s pay waits on it.',
+          { counted: dh(cents), declared: dh(r.declared_cents ?? h.drawer_cents) }));
+    }
+    onDone();
+  }
+
+  async function notNow() {
+    const { error } = await supabase.rpc('cancel_drawer_transfer');
+    if (error) return Alert.alert(tr('Could not do that'), error.message);
+    onDone();
+  }
+
+  return (
+    <Screen bottom={TAB_INSET} gap={12}>
+      <TopBar title={tr("You're taking the drawer")} onBack={onBack} plain />
+      <T size={12.5} c={D.sub} style={st.lh}>
+        {tr('{name} says he is counting {amount} into your hands. Count it yourself before you confirm.',
+          { name: h.from_name, amount: dh(h.drawer_cents) })}
+      </T>
+
+      <Card style={st.sum}>
+        <Row2 label={tr('Cash you are taking on')} value={dh(h.drawer_cents)} />
+        {h.dues.map((d) => (
+          <Row2 key={d.name} color={D.green}
+            label={d.is_me ? tr('Owed to you — pay yourself') : tr('Owed to {name} — now yours to pay', { name: d.name.split(' ')[0] })}
+            value={dh(d.cents)} />
+        ))}
+        <T size={11} c={D.faint} style={[st.lh, st.whyLine]}>
+          {tr("From the moment you confirm, this is on you until the collection agent comes. Don't confirm a number you haven't counted.")}
+        </T>
+      </Card>
+
+      <Eyebrow ls={1.4}>{tr('TYPE WHAT YOU COUNTED')}</Eyebrow>
+      <TextInput value={amount} onChangeText={(v) => setAmount(v.replace(/[^\d.,]/g, ''))}
+        keyboardType="number-pad" placeholder="0" placeholderTextColor={D.muted} style={st.input} />
+      {!!err && <T size={11.5} c={D.red} style={st.lh}>{err}</T>}
+      <Btn title={tr("I'VE COUNTED IT · I'M THE AGENT NOW")} bg={amount && !busy ? D.accent : D.card2}
+        onPress={amount && !busy ? confirm : undefined} />
+      <Pressable onPress={notNow} hitSlop={8}><T size={11.5} c={D.sub} style={st.center}>{tr('Not now')}</T></Pressable>
+      <T size={10.5} c={D.faint} style={st.foot}>
+        {tr('A different number tells Sterncut instead, and neither of you is the agent until it is sorted out.')}
+      </T>
+    </Screen>
   );
 }
 
@@ -769,4 +1147,13 @@ const st = StyleSheet.create({
   disputeLink: { flexDirection: 'row', alignItems: 'center', gap: 8, borderTopWidth: 1, borderTopColor: D.border, paddingTop: 10 },
   netBox: { backgroundColor: '#101010', borderWidth: 1, borderColor: D.border, borderRadius: 16, padding: 13, gap: 4 },
   safe: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: D.card2, borderRadius: 14, padding: 12 },
+  codeInner: { alignItems: 'center', gap: 8, backgroundColor: '#101010', borderWidth: 1, borderColor: D.border,
+    borderRadius: 16, padding: 14 },
+  input: { height: 52, borderRadius: 14, backgroundColor: D.card, borderWidth: 1, borderColor: D.border,
+    paddingHorizontal: 15, color: D.text, fontSize: 17, fontVariant: ['tabular-nums'] },
+  boxRow: { flexDirection: 'row', gap: 9 },
+  box: { flex: 1, height: 58, borderRadius: 14, backgroundColor: D.card, borderWidth: 1, borderColor: D.border,
+    alignItems: 'center', justifyContent: 'center' },
+  boxOn: { borderColor: D.accent },
+  hidden: { position: 'absolute', opacity: 0, height: 1, width: 1 },
 });

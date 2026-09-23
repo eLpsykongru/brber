@@ -3035,7 +3035,8 @@ Stated absences, on purpose (README §8 — do not invent):
 - `nearby_open_shop` (the queue page's "someone else nearby") does not yet skip a shop
   hidden over an unpaid bill.
 
-**Trigger — the cash agent (README §7 steps 6–9: OBR-07…09, BAC-09/10, FIN-18).**
+**Trigger — the cash agent (README §7 steps 6–9: OBR-07…09, BAC-09/10, FIN-18). Built
+2026-09-22, see "The shop's cash agent" below.**
 This lands on the "barber-as-agent" bet (Payments, Phase 2: "one cash agent per salon,
 default = owner"). Today `salons.cash_agent_id` is a flag only: top-ups, the Friday code
 and the float screens are all owner-only, so changing it moves no cash. Building the
@@ -3101,3 +3102,75 @@ Owner to do before it goes live:
 **Trigger — web sign-in (WEB-07…10) and the web shop application (PUB-02…05).**
 Raise when a shop asks to apply from a computer, or when anything on the web needs an
 account. Until then they would duplicate app flows that already exist.
+
+## The shop's cash agent — who pays a barber who is owed (0127, 2026-09-22)
+
+README §7 steps 6–9 of the billing handoff: OBR-07…09, BAC-09/10, FIN-18. This is the
+**"barber-as-agent" bet** in Payments, Phase 2 — raised before building, deferred on
+2026-09-19, and built after the owner said to continue. Sterncut still settles with the
+**shop**; the shop settles with its barbers, in the shop, in cash, from one drawer.
+
+**The drawer is arithmetic, not a counter.** What it should hold follows from rows that
+already existed:
+
+    drawer = what the shop owes Sterncut (salon_net_cents) + what it owes each barber
+
+A top-up raises the first term and puts cash in; a cleared deposit moves money from the
+first term to the second and no cash moves; a Friday collection and a payout each take
+cash out of one term. Every figure any of these screens shows is one of those two terms,
+so nothing can drift from the weekly statement. It is asserted for every shop at apply
+time and at the end of the test run.
+
+- **`salons.cash_agent_id` was a flag that moved no cash** (0025). Now it decides who
+  takes top-ups (`agent_cash_topup`), who sees the drawer and the Friday code (`my_float`,
+  `my_visit_code`, `float_handover_code`, `request_float_collection`), and who pays the
+  chairs. The owner keeps his own reads; the app's Wallet tab and "Settle up" follow the
+  role, not ownership.
+- **A barber's due** = his cleared column since `salons.payouts_from` (set to each shop's
+  last settled week when this was applied), less `drawer_entries`, less — for the owner
+  only — the subscription netted off the Friday. The bill comes out of the deposits in
+  the drawer and it is the owner's bill, so it comes off his share and never a barber's.
+- **The payee's code, not the payer's** (§9 rule 1). `my_payout_code` mints four digits on
+  the receiving barber's phone; `agent_pay` takes them, spends them on use, and returns
+  `{ok:false}` rather than raising on a wrong one so the count of tries survives. Five
+  wrong tries spend the code and tell him. Paying himself is his own row, no code: a code
+  proves the cash reached somebody else's hand, and there is nothing to prove otherwise.
+- **The agent cannot edit the figure** (rule 2): never more than the due, never more than
+  the drawer. Less is "pay part", and the rest stays on the man's column.
+- **Least privilege** (rule 4): `my_drawer` returns a name, a chair and a figure per
+  colleague — checked in the test that it carries no booking and no price.
+- **Revocation is a handover** (rule 5). `set_cash_agent` moves the role only when the
+  drawer is empty and nobody is owed; otherwise it answers "blocked" with what is attached
+  (OBR-08). Route 2 is `start_drawer_transfer` → the successor counts it on his own phone
+  (`confirm_drawer_transfer`, OBR-09). Top-ups stop while a drawer is changing hands.
+  `salon_remove_member`, which used to hand the role back to the owner as a flag flip,
+  now refuses to remove the agent, anyone mid-handover, or a barber the drawer owes.
+- **A count that disagrees pages a human** (FIN-18, ops console → Finance → Handovers, and
+  the overview's "needs a human" list). The role does not move, top-ups stop, and the
+  outgoing agent stays liable and goes on paying the chairs — a cash dispute is never a
+  suspension. Ops records what the call settled; it cannot adjudicate from the screen, and
+  the screen says our own books are not evidence because he entered every top-up on them.
+
+**§8.1's open question, answered only as far as the rows allow.** "A barber-level shortfall
+has no home" is true of *Sterncut's* books — and it does not need one there: our figure
+with the shop never changes when cash goes missing inside it. So the gap is a debt to the
+**shop's drawer**: `admin_resolve_drawer_transfer` writes a `handover_gap` entry on the
+outgoing agent's due (against the books as they stand at the call, not as they stood when
+he counted — he goes on paying chairs meanwhile), the new agent is answerable only for
+what he counted, and the man who handed over pays it back into the drawer through
+`agent_receive`. **Write-off is still not built**: Sterncut absorbing it is finance's
+decision, and the button in FIN-18 is inert with that reason on it.
+
+Tested in PGlite (0122–0127 over all 121 shipped migrations, twice-applied): the drawer
+identity, the blocked appointment, a wrong code then the right one, five wrong tries, a
+non-agent refused, a top-up refused mid-handover, a stale figure as a recount rather than
+a mismatch, the mismatch itself, the ops resolution and its gap entry, the new agent's
+two hats, a refund turning a due negative and being paid back in, and removals refused.
+The four earlier suites still pass unchanged.
+
+Not built, on purpose:
+- **A payout rail to an individual.** There is none in this slice and none is needed.
+- **An ops screen for `count_requested_at`.** "Send the collection agent to count it" is
+  logged on the transfer; dispatching her is still the round's own planning.
+- **A barber who leaves while the drawer owes him** is refused removal rather than paid
+  out by ops. If a shop hits it, the owner pays him first — or it needs an ops path.

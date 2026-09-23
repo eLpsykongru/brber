@@ -65,10 +65,11 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged, q
   /** option (b): a shop's queue link opened the app — Home's check-in takes it */
   queueLink?: QueueLink | null; onQueueLinkUsed?: () => void;
 }) {
-  // salon owner = the cash agent (v1 decision) → only they get the Wallet tab
-  const [ownsSalon, setOwnsSalon] = useState(false);
+  // one till per shop: whoever holds the drawer (0127's cash agent, the owner by
+  // default) gets the Wallet tab, because he is the one who can take a top-up
+  const [holdsCash, setHoldsCash] = useState(false);
   const tabs = barber
-    ? [...BARBER_TABS, ...(ownsSalon ? [WALLET_TAB] : []), BARBER_PROFILE_TAB]
+    ? [...BARBER_TABS, ...(holdsCash ? [WALLET_TAB] : []), BARBER_PROFILE_TAB]
     : CUSTOMER_TABS;
   const [tab, setTab] = useState(tabs[0].key);
   const [chromeHidden, setChromeHidden] = useState(false);
@@ -89,9 +90,9 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged, q
 
   useEffect(() => {
     if (!barber?.salon_id) return;
-    supabase.from('salons').select('id')
-      .eq('id', barber.salon_id).eq('owner_id', barber.id).maybeSingle()
-      .then(({ data }) => setOwnsSalon(!!data));
+    supabase.from('salons').select('id, owner_id, cash_agent_id')
+      .eq('id', barber.salon_id).maybeSingle()
+      .then(({ data }) => setHoldsCash(!!data && (data.cash_agent_id ?? data.owner_id) === barber.id));
   }, [barber?.salon_id, barber?.id]);
   // the day timeline (walk-ins) is a full-screen overlay: FAB quick-add + dashboard open it
   const [dayOpen, setDayOpen] = useState(false);
@@ -155,7 +156,7 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged, q
       onChromeHidden={setChromeHidden} onHelp={() => setTab('home')} />;
     else if (tab === 'profile') content = <ProfileScreen profile={profile} barber={barber} phone={phone}
       onProfileChanged={onProfileChanged} onChromeHidden={setChromeHidden} />;
-    else content = <AgentWalletScreen barberId={barber.id} />; // wallet tab exists for owners only
+    else content = <AgentWalletScreen barberId={barber.id} />; // the wallet tab is the cash agent's
   } else {
     if (tab === 'home') content = <DiscoverScreen name={profile.full_name} customerId={profile.id}
       onChromeHidden={setChromeHidden} onExplore={() => setTab('explore')}

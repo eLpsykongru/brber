@@ -39,6 +39,7 @@ import CancellationsScreen from './CancellationsScreen';
 import WaitingListScreen from './WaitingListScreen';
 import ShopTasksScreen from './ShopTasksScreen';
 import ApplicationScreen from './ApplicationScreen';
+import CashAgentScreen from './CashAgentScreen';
 import SettleFloatScreen, { CollectionRoundScreen } from './SettleFloatScreen';
 import StatementScreen from './StatementScreen';
 import AgentRoundScreen from './AgentRoundScreen';
@@ -65,7 +66,7 @@ type ProfileView =
   // turn 9 — where admin actions land in the shop
   | 'tasks' | 'application' | 'float' | 'round' | 'statement' | 'agent'
   // the billing rail — the owner's bill, and every barber's two-sided account
-  | 'subscription' | 'account';
+  | 'subscription' | 'account' | 'cashagent';
 
 export default function ProfileScreen({ profile, barber, phone, onProfileChanged, onChromeHidden, onBack, onExplore }: {
   profile: Profile; barber: Barber | null; phone: string | null;
@@ -81,6 +82,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   const [avatarBusy, setAvatarBusy] = useState(false);
   // owner (not just any barber in a salon) gets the Salon management row
   const [ownsSalon, setOwnsSalon] = useState(false);
+  const [holdsCash, setHoldsCash] = useState(false);
   const [openCase, setOpenCase] = useState<CaseRow | null>(null); // 18b
   // 31 — a review of yours that ops took down, and the appeal on it if any
   const { rows: takedowns, reload: reloadTakedowns } = useRemovedReviews();
@@ -107,9 +109,13 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
 
   useEffect(() => {
     if (!barber?.salon_id) return;
-    supabase.from('salons').select('id')
-      .eq('id', barber.salon_id).eq('owner_id', barber.id).maybeSingle()
-      .then(({ data }) => setOwnsSalon(!!data));
+    supabase.from('salons').select('id, owner_id, cash_agent_id')
+      .eq('id', barber.salon_id).maybeSingle()
+      .then(({ data }) => {
+        setOwnsSalon(!!data && data.owner_id === barber.id);
+        // 0127: a barber the owner appointed holds the drawer, so Settle up is his too
+        setHoldsCash(!!data && (data.cash_agent_id ?? data.owner_id) === barber.id);
+      });
   }, [barber?.salon_id, barber?.id]);
 
   const initials = (profile.full_name ?? '?')
@@ -317,6 +323,8 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     if (view === 'statement' && barber) return <StatementScreen onBack={back} />;
     // OSB-01…05 — what the shop pays, and how. The owner's only.
     if (view === 'subscription' && barber && ownsSalon) return <SubscriptionScreen onBack={back} />;
+    // OBR-07/08 — who holds the shop's cash, and what it takes to change him
+    if (view === 'cashagent' && barber && ownsSalon) return <CashAgentScreen onBack={back} />;
     // BAC-01…08 — what he holds of ours, what we hold of his, and the one number
     if (view === 'account' && barber) {
       return <AccountScreen onBack={back} onStatement={ownsSalon ? () => go('statement') : undefined} />;
@@ -379,7 +387,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
 
   const menu = barber ? (
     <BarberProfile profile={profile} barber={barber} avatarUrl={avatarUrl}
-      avatarBusy={avatarBusy} initials={initials} ownsSalon={ownsSalon}
+      avatarBusy={avatarBusy} initials={initials} ownsSalon={ownsSalon} holdsCash={holdsCash}
       onAvatar={changeAvatar} onSignOut={signOut} go={go} onBack={onBack}
       onPreview={() => openOwnPage('menu')} />
   ) : (
@@ -429,10 +437,10 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
 // 1q — the barber's profile. Same rows, dark canvas, with the numbers that
 // tell him whether his page is actually working.
 function BarberProfile({
-  profile, barber, avatarUrl, avatarBusy, initials, ownsSalon, onAvatar, onSignOut, go, onBack, onPreview,
+  profile, barber, avatarUrl, avatarBusy, initials, ownsSalon, holdsCash, onAvatar, onSignOut, go, onBack, onPreview,
 }: {
   profile: Profile; barber: Barber; avatarUrl: string | null; avatarBusy: boolean;
-  initials: string; ownsSalon: boolean;
+  initials: string; ownsSalon: boolean; holdsCash: boolean;
   onAvatar: () => void; onSignOut: () => void; go: (v: ProfileView) => void;
   onBack?: () => void; onPreview: () => void;
 }) {
@@ -489,10 +497,13 @@ function BarberProfile({
     // the owner's money rows. "Weekly statement" and "Settle up" lived only in the
     // customer-side list, which a barber never sees — so the agent's four-digit
     // code on the statement had no way in.
+    // the drawer is the cash agent's, owner or not
+    ...(holdsCash && !ownsSalon ? [{ icon: 'dollar-sign' as IconName, label: tr('Settle up'), onPress: () => go('float') }] : []),
     ...(ownsSalon ? [
       { icon: 'file-text' as IconName, label: tr('Weekly statement'), onPress: () => go('statement') },
       { icon: 'dollar-sign' as IconName, label: tr('Settle up'), onPress: () => go('float') },
       { icon: 'credit-card' as IconName, label: tr('Subscription'), onPress: () => go('subscription') },
+      { icon: 'key' as IconName, label: tr('Who holds the cash'), onPress: () => go('cashagent') },
     ] : []),
     { icon: 'trending-up', label: tr('Earnings'), onPress: () => go('earnings') },
     { icon: 'help-circle', label: tr('Help Center'), onPress: () => go('help') },

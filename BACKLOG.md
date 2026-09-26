@@ -265,6 +265,7 @@ with social sign-in, email sign-in, register. Email/password and OAuth are both 
     never a number, so the profile lands with `phone` null and the barber has
     nothing to call. Trigger: the first booking made by an OAuth account — ask
     for a phone after first sign-in, or block booking until there is one.
+    DONE 2026-09-26: asked after sign-in, before Home (`AddPhoneScreen`).
   - **Apple is the web flow, not native.** Acceptable for App Store review, but
     iOS gets a browser sheet instead of the Face ID sheet. Trigger: shipping to
     the App Store — `expo-apple-authentication` + `signInWithIdToken`, dev build
@@ -2374,7 +2375,8 @@ Still open:
   launches the app from closed — now lands on BDY-06, the day timeline on that
   booking's day. Every other kind still opens the app wherever it was.
   `onBannerOpen` (push.ts) is the bus: a screen that owns a destination subscribes.
-  **Trigger:** the first build that delivers push to barbers.
+  **Trigger:** the first build that delivers push to barbers. DONE 2026-09-26: every
+  kind routes now, on both sides (see "Leaving, and whose phone it is").
 - **Requests expire in 2 h** (the handoff's contract) instead of at start time.
   **Trigger:** a product decision — it changes what customers wait on.
 - **Waitlist asks for a time**, which would let BDY-14 say "asked for 16:00" and
@@ -3323,19 +3325,17 @@ API.
 **0130 is NOT APPLIED — apply it before this build reaches a phone.** The app now
 registers push through `claim_push_token`; without it, new phones get no token.
 
-Still open from the same scan:
-- **"Open it to everyone" on an expired offer does nothing** (`CancelledGap.tsx`
-  writes `slot_offers`, which has no update policy). Needs an RPC.
-- **A notification's booking can reopen later.** HomeScreen's `openBooking` is only
-  cleared on a tab-bar tap.
-- **Two local-day slips at UTC+1.** SalonScreen `weekLabel` compares through UTC, so
-  "This week" only shows from 00:00 to 01:00, and `SalonClosed` "tomorrow" is off by
-  a day in that same hour.
-- **Trigger reached: push-tap deep links.** Push has been live since 2026-09-07, and only
-  a barber's cancellation banner lands anywhere (`onBannerOpen`). Every customer
-  banner opens the app where it was.
-- **Trigger reached: OAuth users have no phone.** Google/Apple are live, nothing asks
-  for a number, and booking does not require one.
+From the same scan, fixed 2026-09-26 (0132 and the app):
+- ~~"Open it to everyone" did nothing~~ — `open_offer_to_all` (0132) does it, checked:
+  his own offer, unclaimed, not withdrawn, slot still ahead. PGlite: 7 checks.
+- ~~A notification's booking reopened later~~ — cleared whenever Bookings is left.
+- ~~Two local-day slips at UTC+1~~ — both compare the phone's own calendar now.
+- ~~Push-tap deep links~~ — every banner lands where the inbox sends the same row:
+  barber → the ask, the review, the request or booking sheet (else that day's
+  timeline), the chat thread; customer → the booking or its rating, the wallet,
+  the chat thread. A cold start's tap waits in push.ts until Home listens.
+- ~~OAuth users have no phone~~ — a customer without one is asked right after
+  sign-in, before Home (`AddPhoneScreen`), with a way to log out instead.
 - **Store blockers:** no privacy policy or terms page anywhere, and no Android Google
   Maps key. (The support/ops numbers, the iOS permission strings and the help articles
   were taken by a parallel session the same day — see its entry.)

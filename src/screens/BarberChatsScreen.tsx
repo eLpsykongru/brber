@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Avatar, Eyebrow, Serif, T, TAB_INSET } from '../components/dark';
 import { useAndroidBack } from '../lib/back';
@@ -55,8 +55,10 @@ function writeTarget(t: Thread) {
   return upcoming[0]?.id ?? t.head.id;
 }
 
-export default function BarberChatsScreen({ barberId, onChromeHidden, onHelp, onOpenBooking }: {
+export default function BarberChatsScreen({ barberId, onChromeHidden, onHelp, onOpenBooking, openBookingId }: {
   barberId: string;
+  /** a message banner: open the thread that booking belongs to */
+  openBookingId?: string;
   /** MSG-03's Open the booking: the day timeline, on that booking */
   onOpenBooking?: (bookingId: string) => void;
   onChromeHidden?: (hidden: boolean) => void;
@@ -131,6 +133,13 @@ export default function BarberChatsScreen({ barberId, onChromeHidden, onHelp, on
   }
 
   useAndroidBack(open ? () => openThread(null) : openCase ? () => showCase(null) : null);
+
+  const opened = useRef(false);
+  useEffect(() => {
+    if (!openBookingId || opened.current) return;
+    const t = threads.find((x) => x.rows.some((r) => r.id === openBookingId));
+    if (t) { opened.current = true; openThread(t); }
+  }, [openBookingId, threads]);
 
   // built before the pushed screens below, so each can hand it over as
   // `behind` - the inbox then stays on stage and trails as you swipe back

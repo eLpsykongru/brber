@@ -95,8 +95,16 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged, q
   // full screens mounted over the tab right now (useHideTabBar)
   const [hiders, setHiders] = useState(0);
   const bumpHiders = useCallback((d: 1 | -1) => setHiders((n) => n + d), []);
+  // a tapped banner (Notification Routing): the barber dashboard's inbox routes, a
+  // thread to open, or — customer — the Profile view to open on
+  const [banner, setBanner] = useState<{ kind: string; bookingId: string; at: number } | undefined>();
+  const [chatFor, setChatFor] = useState<string | undefined>();
+  const [profileOn, setProfileOn] = useState<'wallet' | undefined>();
   // a notification tapped on Home lands on its booking in the Bookings tab
   const [openBooking, setOpenBooking] = useState<{ id: string; rate?: boolean } | undefined>();
+  // spent the moment Bookings is left, by whatever door — or a later visit to the
+  // tab (Explore → book → Bookings) reopened an old notification's booking
+  useEffect(() => { if (tab !== 'bookings') setOpenBooking(undefined); }, [tab]);
   // a saved row opens the shop (or the barber inside it) over the Saved tab
   const [preview, setPreview] = useState<{ salonId?: string; barberId?: string } | null>(null);
 
@@ -143,10 +151,21 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged, q
     openDay(true, { day: data.starts_at as string });
   }
 
-  useEffect(() => {
-    if (!barber) return;
-    return onBannerOpen((t) => { if (t.kind === 'cancellation') openGap(t.bookingId); });
-  }, [barber?.id]);
+  // every banner lands where the inbox would send the same row. A cold start's tap
+  // waits in push.ts until this listens.
+  useEffect(() => onBannerOpen((t) => {
+    setChromeHidden(false);
+    if (t.kind === 'message') { setChatFor(t.bookingId); setTab(barber ? 'chat' : 'chats'); return; }
+    if (barber) {
+      if (t.kind === 'cancellation') { openGap(t.bookingId); return; }
+      setBanner({ ...t, at: Date.now() }); setTab('home'); return;
+    }
+    if (t.kind === 'wallet') { setProfileOn('wallet'); setTab('profile'); return; }
+    setOpenBooking({ id: t.bookingId, rate: t.kind === 'review_ask' });
+    setTab('bookings');
+  }), [barber?.id]);
+  // a thread or a Profile view is asked for once, on arrival
+  useEffect(() => { if (tab !== 'chat' && tab !== 'chats') setChatFor(undefined); if (tab !== 'profile') setProfileOn(undefined); }, [tab]);
 
   // 1c adds the walk-in itself; 'now' just means "show me the day it landed in"
   function onQuickPick({ mode, name, serviceId, preferMin }: QuickPick) {
@@ -170,13 +189,13 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged, q
       prefillServiceId={dayOpts.prefillServiceId} preferMin={dayOpts.preferMin} />;
   } else if (barber) {
     if (tab === 'home') {
-      content = <BookingsScreen barber={barber} profile={profile} phone={phone}
+      content = <BookingsScreen barber={barber} profile={profile} phone={phone} banner={banner}
         onProfileChanged={onProfileChanged} onChromeHidden={setChromeHidden}
         goSchedule={() => openDay(true)} onOpenGap={openGap} />;
     }
     else if (tab === 'calendar') content = <CalendarScreen barberId={barber.id} onChromeHidden={setChromeHidden} />;
     else if (tab === 'clients') content = <ClientsScreen barberId={barber.id} onChromeHidden={setChromeHidden} />;
-    else if (tab === 'chat') content = <BarberChatsScreen barberId={barber.id}
+    else if (tab === 'chat') content = <BarberChatsScreen key={chatFor ?? 'inbox'} barberId={barber.id} openBookingId={chatFor}
       onChromeHidden={setChromeHidden} onHelp={() => setTab('home')} onOpenBooking={openGap} />;
     else if (tab === 'profile') content = <ProfileScreen profile={profile} barber={barber} phone={phone}
       onProfileChanged={onProfileChanged} onChromeHidden={setChromeHidden}
@@ -207,11 +226,11 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged, q
         )
         : saved;
     }
-    else if (tab === 'bookings') content = <MyBookingsScreen customerId={profile.id}
+    else if (tab === 'bookings') content = <MyBookingsScreen key={openBooking?.id ?? 'list'} customerId={profile.id}
       onChromeHidden={setChromeHidden} onRebook={() => setTab('explore')}
       openBookingId={openBooking?.id} rateOnOpen={openBooking?.rate} />;
-    else if (tab === 'chats') content = <ChatsScreen customerId={profile.id} onChromeHidden={setChromeHidden} />;
-    else content = <ProfileScreen profile={profile} barber={null} phone={phone} onProfileChanged={onProfileChanged} onChromeHidden={setChromeHidden} onExplore={() => setTab('explore')} />;
+    else if (tab === 'chats') content = <ChatsScreen key={chatFor ?? 'chats'} customerId={profile.id} openBookingId={chatFor} onChromeHidden={setChromeHidden} />;
+    else content = <ProfileScreen key={profileOn ?? 'menu'} profile={profile} barber={null} phone={phone} onProfileChanged={onProfileChanged} onChromeHidden={setChromeHidden} onExplore={() => setTab('explore')} initialView={profileOn} />;
   }
 
   return (

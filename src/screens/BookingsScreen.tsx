@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import {
   ActivityIndicator, Alert, Image, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native';
@@ -116,7 +116,7 @@ function Badge({ b, barberId, no, tone, size = 40 }: {
   );
 }
 
-export default function BookingsScreen({ barber, profile, phone, onProfileChanged, onChromeHidden, goSchedule, onOpenGap }: {
+export default function BookingsScreen({ barber, profile, phone, onProfileChanged, onChromeHidden, goSchedule, onOpenGap, banner }: {
   barber: Barber;
   profile: Profile;
   phone: string | null;
@@ -125,6 +125,8 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   goSchedule: () => void;
   /** BDY-06 — a cancellation opens the day it left a hole in; HomeScreen owns the day */
   onOpenGap: (bookingId: string) => void;
+  /** a tapped push banner, routed the way the inbox routes the same row */
+  banner?: { kind: string; bookingId: string; at: number };
 }) {
   const barberId = barber.id;
   const [bookings, setBookings] = useState<BookingRow[] | null>(null); // null = first load in flight
@@ -158,6 +160,20 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   const [showQueue, setShowQueue] = useState(false);
   const [panel, setPanel] = useState<BookingRow | null>(null);      // BTD-21
   const [request, setRequest] = useState<BookingRow | null>(null);  // 3d
+  // once per banner, and only when the day's rows are in — a request opens its sheet
+  const routed = useRef<number | null>(null);
+  useEffect(() => {
+    if (!banner || routed.current === banner.at) return;
+    const id = banner.bookingId;
+    if (banner.kind === 'reschedule') { routed.current = banner.at; setAskFor(id); onChromeHidden?.(true); return; }
+    if (banner.kind === 'review') { routed.current = banner.at; setReviewFor(id); onChromeHidden?.(true); return; }
+    if (bookings === null) return;
+    routed.current = banner.at;
+    const row = bookings.find((x) => x.id === id);
+    // outside the loaded window: the day timeline on that booking's day still shows it
+    if (row) (row.status === 'pending' ? setRequest : setPanel)(row);
+    else onOpenGap(id);
+  }, [banner, bookings]);
   // BTD-20 — the line's switch rides on the money card; a web name carries whether he tapped
   const [lineOpen, setLineOpen] = useState(true);
   const [guests, setGuests] = useState<Record<string, Guest>>({});

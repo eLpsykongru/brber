@@ -20,7 +20,7 @@ import { AccountDeletedScreen } from './src/screens/DeleteAccountScreens';
 import { useAndroidBack } from './src/lib/back';
 import { dropQueueLink, heldQueueLink, holdQueueLink, QueueLink, takeInstallLink } from './src/lib/queueLink';
 import { supabase } from './src/lib/supabase';
-import { SessionExpiredSheet, SetPasswordScreen } from './src/screens/AccountScreens';
+import { AddPhoneScreen, SessionExpiredSheet, SetPasswordScreen } from './src/screens/AccountScreens';
 import AuthScreen, { AuthView } from './src/screens/AuthScreen';
 import ClaimShopScreen, { Invite } from './src/screens/ClaimShopScreen';
 import { biometricLockOn, LockScreen } from './src/screens/LinkedAccountsScreen';
@@ -206,6 +206,9 @@ export default function App() {
       onDone={() => { setInvite(null); loadUser(session!); }} />;
   } else if (user.barber && !user.barber.id_document_path) {
     content = <OnboardingScreen barber={user.barber} onDone={() => loadUser(session)} />;
+  } else if (!user.barber && user.profile.role === 'customer' && !user.profile.phone) {
+    // Google/Apple give no phone; the barber has to be able to call (AccountScreens)
+    content = <AddPhoneScreen userId={user.profile.id} onDone={() => loadUser(session!)} />;
   } else if (account?.suspended) {
     // 38h — booking is paused, everything he already has still stands, and the
     // reason is printed because 0056 refuses to record a suspension without one.

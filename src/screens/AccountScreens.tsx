@@ -4,6 +4,7 @@ import {
   Alert, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { Display } from '../components/ui';
+import { logOut } from '../lib/push';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, shadow, TOP_INSET } from '../theme';
 import { tr, trRich } from '../lib/i18n';
@@ -153,6 +154,44 @@ export function SetPasswordScreen({ mode, email, onBack, onDone }: {
             {mode === 'reset' ? tr('RESET & SIGN IN') : tr('SAVE PASSWORD')}
           </Text>
         </Pressable>
+      </ScrollView>
+    </View>
+  );
+}
+
+// Google and Apple hand over a name and an email, never a number (BACKLOG "Provider
+// users have no phone" — reached once social sign-in went live). A barber has to be
+// able to call a client, so a customer without one is asked, once, before Home.
+export function AddPhoneScreen({ userId, onDone }: { userId: string; onDone: () => void }) {
+  const [phone, setPhone] = useState('');
+  const [busy, setBusy] = useState(false);
+  const armed = phone.replace(/\D/g, '').length >= 9 && !busy;
+
+  async function save() {
+    setBusy(true);
+    const { error } = await supabase.from('profiles').update({ phone: phone.trim() }).eq('id', userId);
+    setBusy(false);
+    if (error) return Alert.alert(tr('Could not save'), error.message);
+    onDone();
+  }
+
+  return (
+    <View style={s.screen}>
+      <ScrollView contentContainerStyle={s.authContent} keyboardShouldPersistTaps="handled">
+        <View style={s.head}>
+          <Display size={30} style={s.headTitle}>{tr('One last\nthing.')}</Display>
+          <Text style={s.headSub}>{tr('Your phone helps the barber confirm your booking.')}</Text>
+        </View>
+        <View style={[s.field, s.fieldFocus]}>
+          <Text style={s.fieldLabel}>{tr('PHONE')}</Text>
+          <TextInput style={s.fieldInput} value={phone} onChangeText={setPhone} keyboardType="phone-pad"
+            autoComplete="tel" placeholder="+212 6…" placeholderTextColor={colors.textTertiary} autoFocus />
+        </View>
+        <Pressable onPress={save} disabled={!armed}
+          style={({ pressed }) => [s.wideDark, !armed && s.disabled, pressed && s.pressed]}>
+          <Text style={s.wideDarkText}>{tr('CONTINUE')}</Text>
+        </Pressable>
+        <Text style={[s.headSub, { textAlign: 'center' }]} onPress={() => logOut()}>{tr('Log out')}</Text>
       </ScrollView>
     </View>
   );

@@ -78,8 +78,8 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   onBack?: () => void;
   /** DEL-01's bookings row: the barber's Calendar tab */
   onCalendar?: () => void;
-  /** BST-02: a language restart lands back on Settings */
-  initialView?: 'settings';
+  /** BST-02: a language restart lands back on Settings; a refund banner, on the wallet */
+  initialView?: 'settings' | 'wallet';
   // My Bookings is reachable from here as well as from the tab bar, and its
   // rebook buttons need somewhere to go. Without this they rendered and did
   // nothing, because `onRebook?.()` on a missing prop is silent.
@@ -88,6 +88,8 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   const [view, setView] = useState<ProfileView>(initialView ?? 'menu');
   // an ops thread opened from somewhere with its first line written (DEL-01, HLP-01)
   const [opsLine, setOpsLine] = useState<string | undefined>();
+  // opened straight onto a view (a banner, a language restart): the bar goes, as go() would
+  useEffect(() => { if (initialView) onChromeHidden?.(true); }, []);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatar_url ?? null);
   const [avatarBusy, setAvatarBusy] = useState(false);
   // owner (not just any barber in a salon) gets the Salon management row

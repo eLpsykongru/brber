@@ -1020,7 +1020,9 @@ function weekLabel(iso: string) {
   const d = new Date(iso + 'T00:00:00');
   const now = new Date();
   const thisWeek = new Date(now); thisWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-  const same = d.toISOString().slice(0, 10) === thisWeek.toISOString().slice(0, 10);
+  // local days: through UTC, a Casablanca midnight is the previous date and
+  // "This week" only ever showed between 00:00 and 01:00
+  const same = d.toDateString() === thisWeek.toDateString();
   const date = d.toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' });
   return same ? tr('This week · {date}', { date }) : tr('Week of {date}', { date });
 }

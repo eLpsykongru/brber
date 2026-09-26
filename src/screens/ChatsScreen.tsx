@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import {
   FlatList, Image, Pressable, StyleSheet, Text, TextInput, View,
 } from 'react-native';
@@ -73,8 +73,10 @@ function writeTarget(t: Thread) {
   return upcoming[0]?.id ?? t.head.id;
 }
 
-export default function ChatsScreen({ customerId, onChromeHidden }: {
+export default function ChatsScreen({ customerId, onChromeHidden, openBookingId }: {
   customerId: string; onChromeHidden: (hidden: boolean) => void;
+  /** a message banner: open the thread that booking belongs to */
+  openBookingId?: string;
 }) {
   // CHT-04 - help is a second class of thread, kept above the barbers so a
   // payment problem is never buried under a haircut. Support you can start
@@ -152,6 +154,13 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
     // leaving a thread marks it read (ChatScreen); the list follows
     if (!t) { refreshUnread(); load(); }
   }
+
+  const opened = useRef(false);
+  useEffect(() => {
+    if (!openBookingId || opened.current) return;
+    const t = threads.find((x) => x.rows.some((r) => r.id === openBookingId));
+    if (t) { opened.current = true; openChat(t); }
+  }, [openBookingId, threads]);
 
   // Chats is a tab root; a thread, a case or the report form sit above it
   const closeHelp = () => {

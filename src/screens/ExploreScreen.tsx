@@ -262,11 +262,8 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
                 style={[styles.card, selectedId === item.id && styles.cardSelected]}
                 onPress={() => open(item)} activeOpacity={0.9}>
                 <View style={styles.cardTopRow}>
-                  {/* TODO(backlog): real promotions */}
-                  <View style={styles.offBadge}>
-                    <Ionicons name="pricetag" size={11} color={colors.accent} />
-                    <Text style={styles.offText}>{tr('5% OFF')}</Text>
-                  </View>
+                  {/* no promo badge: "5% OFF" was printed on every card and applied to
+                      nothing. It comes back with a promotions table (BACKLOG). */}
                   {/* 39c — real since 0065 */}
                   <SaveHeart kind="salon" id={item.id} style={styles.heart} />
                 </View>
@@ -411,13 +408,8 @@ const styles = StyleSheet.create({
   cardSelected: { borderColor: colors.accent, borderWidth: 2 },
   cardTopRow: {
     position: 'absolute', top: sp(5), left: sp(5), right: sp(5), zIndex: 2,
-    flexDirection: 'row', justifyContent: 'space-between',
+    flexDirection: 'row', justifyContent: 'flex-end',
   },
-  offBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 3, backgroundColor: colors.bg,
-    borderRadius: radius.sm, paddingVertical: 3, paddingHorizontal: sp(2),
-  },
-  offText: { fontSize: font.tiny, fontWeight: '700', color: colors.accent },
   heart: {
     width: 30, height: 30, borderRadius: radius.pill, backgroundColor: colors.bg,
     alignItems: 'center', justifyContent: 'center',

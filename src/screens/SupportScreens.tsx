@@ -10,6 +10,7 @@ import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, shadowLg, TOP_INSET } from '../theme';
 import { loc, tr } from '../lib/i18n';
 import { useHideTabBar } from '../components/TabBar';
+import { Article, ArticleModal, ARTICLES } from './HelpCenterScreen';
 
 // Turn 17 (17a report, 17b filed), 18b (the case thread) and 30a (support home).
 //
@@ -444,21 +445,19 @@ const CASE_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   app: 'alert-circle-outline',
 };
 
-const HELP = [
-  'How deposits & refunds work',
-  'Topping up with cash at your barber',
-  'Cancelling or rescheduling',
-  'Why am I asked to pay up front?',
-  'Joining a queue by QR',
-];
+// the Help center's own articles, so a question opens its answer instead of an
+// untranslated title over "coming soon"
+const HELP = ['deposits', 'topup', 'reschedule', 'upfront', 'qr']
+  .map((id) => ARTICLES.find((a) => a.id === id)!);
 
-export const SUPPORT_PHONE = '+212522000000';   // TODO(backlog): a real support line
+export const SUPPORT_PHONE = '+212659941507';   // the owner's own line until support has one
 
 export function SupportHomeScreen({ onBack, onOpenCase, onNewCase }: {
   onBack: () => void; onOpenCase: (c: CaseListRow) => void; onNewCase: () => void;
 }) {
   const [cases, setCases] = useState<CaseListRow[]>([]);
   const [q, setQ] = useState('');
+  const [article, setArticle] = useState<Article | null>(null);
 
   useEffect(() => {
     supabase.rpc('my_support_cases').then(({ data }) => setCases((data ?? []) as CaseListRow[]));
@@ -469,7 +468,7 @@ export function SupportHomeScreen({ onBack, onOpenCase, onNewCase }: {
     ? cases.filter((c) => REASON_LABEL[c.reason]?.toLowerCase().includes(q.toLowerCase())
         || c.case_no.toLowerCase().includes(q.toLowerCase()))
     : cases.filter((c) => c.status === 'open');
-  const articles = q ? HELP.filter((h) => h.toLowerCase().includes(q.toLowerCase())) : HELP;
+  const articles = q ? HELP.filter((h) => h.title.toLowerCase().includes(q.toLowerCase())) : HELP;
 
   return (
     <View style={s.screen}>
@@ -489,13 +488,7 @@ export function SupportHomeScreen({ onBack, onOpenCase, onNewCase }: {
             placeholderTextColor={colors.textSecondary} style={s.searchInput} />
         </View>
 
-        <View style={s.onlineCard}>
-          <View style={s.onlineDot}><View style={s.onlineDotInner} /></View>
-          <View style={s.grow}>
-            <Text style={s.onlineTitle}>{tr('We\'re online')}</Text>
-            <Text style={s.onlineSub}>{tr('Replies in about an hour · العربية, Français, English')}</Text>
-          </View>
-        </View>
+        {/* no "We're online · replies in about an hour": nothing measures either (MSG) */}
 
         <View style={s.sectionHead}>
           <Text style={s.eyebrow}>{tr('YOUR CASES')}</Text>
@@ -543,9 +536,9 @@ export function SupportHomeScreen({ onBack, onOpenCase, onNewCase }: {
         <Text style={[s.eyebrow, { marginTop: 2 }]}>{tr('COMMON QUESTIONS')}</Text>
         <View style={s.faq}>
           {articles.map((h, i) => (
-            <Pressable key={h} onPress={() => Alert.alert(h, tr('Help article coming soon.'))}
+            <Pressable key={h.id} onPress={() => setArticle(h)}
               style={[s.faqRow, i < articles.length - 1 && s.faqLine]}>
-              <Text style={s.faqText}>{h}</Text>
+              <Text style={s.faqText}>{h.title}</Text>
               <Ionicons name="chevron-forward" size={14} color={colors.textTertiary} />
             </Pressable>
           ))}
@@ -564,6 +557,7 @@ export function SupportHomeScreen({ onBack, onOpenCase, onNewCase }: {
           </Pressable>
         </View>
       </ScrollView>
+      <ArticleModal article={article} onClose={() => setArticle(null)} />
     </View>
   );
 }

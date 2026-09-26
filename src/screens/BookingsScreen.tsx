@@ -43,6 +43,7 @@ import RescheduleAskScreen from './RescheduleAskScreen';
 import OfferDayScreen, { OfferFor } from './OfferDayScreen';
 import { countWord } from '../lib/inboxRules';
 import { loc, tr } from '../lib/i18n';
+import { nameOrFormer } from '../lib/deletion';
 
 // ADDENDUM-app-first, turn B11: Home is THE CHAIR (BTD-20). NEXT UP and the live queue
 // were the same list shown twice with two sets of verbs; now bookings and walk-ins are
@@ -93,7 +94,7 @@ const isoDay = (d: Date) =>
 const HELD_SEEN_KEY = 'held_seen_cut';
 
 const nameOf = (b: BookingRow, barberId: string) =>
-  b.walk_in_name ?? (b.customer_id === barberId ? tr('Walk-in') : b.customer?.full_name ?? tr('Client'));
+  b.walk_in_name ?? (b.customer_id === barberId ? tr('Walk-in') : nameOrFormer(b.customer, tr('Client'), 'customer'));
 const initialsOf = (name: string) =>
   name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
@@ -175,7 +176,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     const to = new Date(from); to.setDate(to.getDate() + 14);
     const [book, me, guestRows] = await Promise.all([
       supabase.from('bookings')
-        .select('id, starts_at, ends_at, created_at, status, price_cents, deposit_cents, walk_in_name, walk_in_phone, customer_id, checked_in_at, started_at, completed_at, dropped_at, joined_line, notes, services(name, duration_min), customer:profiles!customer_id(full_name, avatar_url, phone)')
+        .select('id, starts_at, ends_at, created_at, status, price_cents, deposit_cents, walk_in_name, walk_in_phone, customer_id, checked_in_at, started_at, completed_at, dropped_at, joined_line, notes, services(name, duration_min), customer:profiles!customer_id(full_name, deleted_at, avatar_url, phone)')
         .eq('barber_id', barberId)
         .gte('starts_at', from.toISOString()).lt('starts_at', to.toISOString())
         .in('status', ['pending', 'confirmed'])

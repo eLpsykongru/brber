@@ -67,6 +67,10 @@ export function trRich<N>(en: string, tags: Record<string, (text: string, key: n
 /** Marks English that is kept as data and translated where it shows: tr(tag). */
 export const en = (text: string) => text;
 
+/** An amount, time, phone or Latin name inside an Arabic line, as an LTR isolate,
+ *  so "1 420 DH" can't come out as "DH 420 1". A no-op in French and English. */
+export const ltr = (s: string) => (current === 'ar' ? `⁦${s}⁩` : s);
+
 /**
  * A sentence that changes with a count, keyed on its two English forms ("one|other"). French
  * takes one|other (0 and 1 are singular); Arabic one|two|few|many, where few is

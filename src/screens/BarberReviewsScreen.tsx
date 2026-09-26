@@ -8,6 +8,7 @@ import { supabase } from '../lib/supabase';
 import { dark as D, serif } from '../theme';
 import { PublicReplyScreen, Restored, ReviewRestoredScreen } from './BarberSupportScreens';
 import { loc, tr, trn } from '../lib/i18n';
+import { nameOrFormer } from '../lib/deletion';
 
 // G2 of "Notification Routing.dc.html" — BRV-08 and BRV-09 of "Barber - Reviews".
 //
@@ -33,10 +34,10 @@ type Row = ReviewRow & {
 };
 
 const COLS = 'id, booking_id, rating, comment, created_at, reply, replied_at, state, flagged_at, moderated_at,'
-  + ' customer_id, customer:profiles!customer_id(full_name, avatar_url),'
+  + ' customer_id, customer:profiles!customer_id(full_name, deleted_at, avatar_url),'
   + ' booking:bookings(starts_at, price_cents, completed_at, services(name))';
 
-const who = (r: Row) => r.customer?.full_name ?? tr('A client');
+const who = (r: Row) => nameOrFormer(r.customer, tr('A client'), 'customer');
 const shortDay = (iso: string) => new Date(iso).toLocaleDateString(loc('en-GB'), { day: 'numeric', month: 'short' });
 const visitWhen = (iso: string) => {
   const d = new Date(iso);

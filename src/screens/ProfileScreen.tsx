@@ -2,8 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Eyebrow, Ico, IconName, RadioRow, Screen, Serif, Sheet, SheetHead, T, TAB_INSET, TopBar } from '../components/dark';
-import { chooseLanguage, LANGUAGE_ROWS } from '../lib/language';
+import { Eyebrow, Ico, IconName, Screen, Serif, T, TAB_INSET, TopBar } from '../components/dark';
+import { logOut } from '../lib/push';
 import { Chip, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
 import { listPortfolio } from '../lib/portfolio';
 import { useAndroidBack } from '../lib/back';
@@ -21,6 +21,9 @@ import CustomerNotificationsScreen from './CustomerNotificationsScreen';
 import InviteScreen from './InviteScreen';
 import LinkedAccountsScreen from './LinkedAccountsScreen';
 import SettingsScreen, { EditProfileScreen } from './SettingsScreen';
+import BarberSettingsScreen, { BarberDeleteScreen, LogOutSheet, SignInSecurityScreen } from './BarberSettingsScreens';
+import DeleteAccountScreen from './DeleteAccountScreens';
+import { NotificationSettings } from './NotificationsScreen';
 import BarberSupportScreen, { BarberCaseScreen, PublicReplyScreen } from './BarberSupportScreens';
 import ReviewTakedownScreen, { AppealScreen, useRemovedReviews } from './ReviewAppealScreens';
 import ReportProblemScreen, {
@@ -47,8 +50,7 @@ import AccountScreen from './AccountScreen';
 import SubscriptionScreen from './SubscriptionScreen';
 import ServicesScreen from './ServicesScreen';
 import WalletScreen from './WalletScreen';
-import { tr, trn, lang } from '../lib/i18n';
-import type { Lang } from '../lib/i18n';
+import { tr, trn } from '../lib/i18n';
 
 const STATUS_LABEL: Record<string, string> = {
   pending: tr('Under review'), approved: tr('Live'), rejected: tr('Not approved'),
@@ -66,18 +68,26 @@ type ProfileView =
   // turn 9 — where admin actions land in the shop
   | 'tasks' | 'application' | 'float' | 'round' | 'statement' | 'agent'
   // the billing rail — the owner's bill, and every barber's two-sided account
-  | 'subscription' | 'account' | 'cashagent';
+  | 'subscription' | 'account' | 'cashagent'
+  // the launch handoff — BST-01…06 (barber settings) and DEL (both sides)
+  | 'notifs' | 'security' | 'delete';
 
-export default function ProfileScreen({ profile, barber, phone, onProfileChanged, onChromeHidden, onBack, onExplore }: {
+export default function ProfileScreen({ profile, barber, phone, onProfileChanged, onChromeHidden, onBack, onExplore, onCalendar, initialView }: {
   profile: Profile; barber: Barber | null; phone: string | null;
   onProfileChanged: () => void; onChromeHidden?: (hidden: boolean) => void;
   onBack?: () => void;
+  /** DEL-01's bookings row: the barber's Calendar tab */
+  onCalendar?: () => void;
+  /** BST-02: a language restart lands back on Settings */
+  initialView?: 'settings';
   // My Bookings is reachable from here as well as from the tab bar, and its
   // rebook buttons need somewhere to go. Without this they rendered and did
   // nothing, because `onRebook?.()` on a missing prop is silent.
   onExplore?: () => void;
 }) {
-  const [view, setView] = useState<ProfileView>('menu');
+  const [view, setView] = useState<ProfileView>(initialView ?? 'menu');
+  // an ops thread opened from somewhere with its first line written (DEL-01, HLP-01)
+  const [opsLine, setOpsLine] = useState<string | undefined>();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatar_url ?? null);
   const [avatarBusy, setAvatarBusy] = useState(false);
   // owner (not just any barber in a salon) gets the Salon management row
@@ -168,10 +178,6 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     go('preview');
   }
 
-  function soon(feature: string) {
-    Alert.alert(feature, tr('Coming soon — see BACKLOG.md'));
-  }
-
   async function changeAvatar() {
     const res = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'], quality: 0.6, allowsEditing: true, aspect: [1, 1],
@@ -198,7 +204,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   function signOut() {
     Alert.alert(tr('Logout'), tr('Are you sure you want to log out?'), [
       { text: tr('Cancel'), style: 'cancel' },
-      { text: tr('Yes, Logout'), style: 'destructive', onPress: () => supabase.auth.signOut() },
+      { text: tr('Yes, Logout'), style: 'destructive', onPress: () => logOut() },
     ]);
   }
 
@@ -219,8 +225,23 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
             onDone={() => { onProfileChanged(); go('menu'); }} />;
     }
     if (view === 'settings') {
-      return <SettingsScreen profile={profile} onBack={back}
-        onProfileChanged={onProfileChanged} go={go} />;
+      return barber
+        ? <BarberSettingsScreen userId={profile.id} email={profile.email ?? null} onBack={back}
+            onNotifications={() => go('notifs')} onSecurity={() => go('security')} onDelete={() => go('delete')} />
+        : <SettingsScreen profile={profile} onBack={back}
+            onProfileChanged={onProfileChanged} go={go} />;
+    }
+    // BNT-03, opened from Settings rather than redrawn
+    if (view === 'notifs' && barber) return <NotificationSettings barberId={barber.id} onBack={back} />;
+    if (view === 'security' && barber) return <SignInSecurityScreen onBack={back} />;
+    if (view === 'delete') {
+      return barber
+        ? <BarberDeleteScreen userId={profile.id} onBack={back}
+            onCalendar={() => onCalendar?.()} onAccount={() => go('account')}
+            onSettle={() => go('float')} onCashAgent={() => go('cashagent')}
+            onTalkToUs={(line) => { setOpsLine(line); go('help'); }} />
+        : <DeleteAccountScreen userId={profile.id} onBack={back}
+            onOpenBooking={(id) => { setOpenBooking({ id }); go('bookings'); }} onExplore={onExplore} />;
     }
     if (view === 'notifications') {
       return <CustomerNotificationsScreen userId={profile.id} onBack={back}
@@ -247,7 +268,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     // sits on is the old screen, one tap deeper.
     if (view === 'help') {
       return barber
-        ? <BarberSupportScreen onBack={back} onOpenCase={setOpenCase} />
+        ? <BarberSupportScreen onBack={() => { setOpsLine(undefined); back(); }} onOpenCase={setOpenCase} prefill={opsLine} />
         : <SupportHomeScreen onBack={back} onOpenCase={setOpenCase}
             onNewCase={() => go('support')} />;
     }
@@ -332,7 +353,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     return null;
   }
 
-  // TODO(backlog): Payment Methods / My Coupons / My Wallet — no payment rail yet
+  // Payment Methods waits on a card rail (BACKLOG) — no row until there is one
   const items: MenuItem[] = [
     { icon: 'person-outline', label: tr('Your profile'), onPress: () => go('edit') },
     ...(barber ? [
@@ -362,7 +383,6 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
       { icon: 'storefront-outline', label: tr('Salon management'), onPress: () => go('salon') },
     ] as MenuItem[] : []),
     ...(barber ? [] : [
-      { icon: 'card-outline', label: tr('Payment Methods'), onPress: () => soon(tr('Payment Methods')) },
       { icon: 'calendar-outline', label: tr('My Bookings'), onPress: () => go('bookings') },
       // Saved is a tab now (EXPL-24). One door, or the two rot apart.
       { icon: 'shield-checkmark-outline', label: tr('Your standing'), onPress: () => go('standing') },
@@ -370,8 +390,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
       { icon: 'wallet-outline', label: tr('My Wallet'), onPress: () => go('wallet') },
       { icon: 'gift-outline', label: tr('Invite friends'), onPress: () => go('invite') },
     ] as MenuItem[]),
-    { icon: 'settings-outline', label: tr('Settings'),
-      onPress: () => barber ? soon(tr('Settings')) : go('settings') },
+    { icon: 'settings-outline', label: tr('Settings'), onPress: () => go('settings') },
     { icon: 'help-circle-outline', label: tr('Help & support'), onPress: () => go('help') },
     ...(barber ? [] : [
       { icon: 'flag-outline', label: tr('Report a problem'), onPress: () => go('support') },
@@ -388,7 +407,7 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
   const menu = barber ? (
     <BarberProfile profile={profile} barber={barber} avatarUrl={avatarUrl}
       avatarBusy={avatarBusy} initials={initials} ownsSalon={ownsSalon} holdsCash={holdsCash}
-      onAvatar={changeAvatar} onSignOut={signOut} go={go} onBack={onBack}
+      onAvatar={changeAvatar} go={go} onBack={onBack}
       onPreview={() => openOwnPage('menu')} />
   ) : (
     <ScrollView style={s.screen} contentContainerStyle={s.content}>
@@ -437,11 +456,11 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
 // 1q — the barber's profile. Same rows, dark canvas, with the numbers that
 // tell him whether his page is actually working.
 function BarberProfile({
-  profile, barber, avatarUrl, avatarBusy, initials, ownsSalon, holdsCash, onAvatar, onSignOut, go, onBack, onPreview,
+  profile, barber, avatarUrl, avatarBusy, initials, ownsSalon, holdsCash, onAvatar, go, onBack, onPreview,
 }: {
   profile: Profile; barber: Barber; avatarUrl: string | null; avatarBusy: boolean;
   initials: string; ownsSalon: boolean; holdsCash: boolean;
-  onAvatar: () => void; onSignOut: () => void; go: (v: ProfileView) => void;
+  onAvatar: () => void; go: (v: ProfileView) => void;
   onBack?: () => void; onPreview: () => void;
 }) {
   const [stats, setStats] = useState<{
@@ -474,16 +493,8 @@ function BarberProfile({
   }, [barber.id, barber.salon_id]);
 
   const live = barber.status === 'approved';
-  const [langOpen, setLangOpen] = useState(false);
-
-  // the barber's 20b: his Settings row is still a placeholder, so the language
-  // sits in the menu itself. Same rule as the customer's — the phone's pick wins.
-  async function pickLanguage(next: Lang) {
-    setLangOpen(false);
-    if (next === lang()) return;
-    await supabase.from('profiles').update({ language: next }).eq('id', profile.id);
-    await chooseLanguage(next);
-  }
+  // BST-05 — the same sheet Settings › Log out opens
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const rows: { icon: IconName; label: string; value?: string; onPress: () => void }[] = [
     { icon: 'user', label: tr('Your profile'), onPress: () => go('edit') },
@@ -508,7 +519,8 @@ function BarberProfile({
     ] : []),
     { icon: 'trending-up', label: tr('Earnings'), onPress: () => go('earnings') },
     { icon: 'help-circle', label: tr('Help Center'), onPress: () => go('help') },
-    { icon: 'globe', label: tr('Language'), value: LANGUAGE_ROWS.find((l) => l.key === lang())?.native, onPress: () => setLangOpen(true) },
+    // BST-00 — Language, sign-in and the way out all live in Settings now
+    { icon: 'settings', label: tr('Settings'), onPress: () => go('settings') },
   ];
 
   return (
@@ -573,7 +585,7 @@ function BarberProfile({
             <Ico name="chevron-right" size={14} color={D.muted} />
           </Pressable>
         ))}
-        <Pressable onPress={onSignOut} accessibilityRole="button" accessibilityLabel={tr('Logout')}
+        <Pressable onPress={() => setLogoutOpen(true)} accessibilityRole="button" accessibilityLabel={tr('Logout')}
           style={({ pressed }) => [d.row, d.rowLine, pressed && s.pressed]}>
           <View style={[d.rowIcon, { backgroundColor: D.accentSoft }]}>
             <Ico name="log-out" size={15} color={D.accent} />
@@ -581,16 +593,7 @@ function BarberProfile({
           <T w="sb" size={14} c={D.accent} style={s.grow}>{tr('Logout')}</T>
         </Pressable>
       </View>
-
-      <Sheet visible={langOpen} onClose={() => setLangOpen(false)}>
-        <SheetHead title={tr('Language')} onClose={() => setLangOpen(false)} />
-        <View style={{ gap: 8 }}>
-          {LANGUAGE_ROWS.map((l) => (
-            <RadioRow key={l.key} label={l.native} on={lang() === l.key} onPress={() => pickLanguage(l.key)} />
-          ))}
-        </View>
-        <T size={11} c={D.sub}>{tr('Arabic turns the app right-to-left. Prices stay in DH. The app restarts to switch.')}</T>
-      </Sheet>
+      <LogOutSheet visible={logoutOpen} onClose={() => setLogoutOpen(false)} />
     </Screen>
   );
 }

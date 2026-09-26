@@ -19,6 +19,7 @@ import ChatScreen from './ChatScreen';
 import WaitingListScreen from './WaitingListScreen';
 import OutboxScreen from './OutboxScreen';
 import { tr, trn, weekdayDate } from '../lib/i18n';
+import { nameOrFormer } from '../lib/deletion';
 
 const STEP = 30;
 
@@ -56,7 +57,7 @@ function upcomingDays(n: number) {
 }
 
 const nameOf = (b: DayBooking, barberId: string) =>
-  b.walk_in_name ?? (b.customer_id === barberId ? tr('Walk-in') : b.customer?.full_name ?? tr('Client'));
+  b.walk_in_name ?? (b.customer_id === barberId ? tr('Walk-in') : nameOrFormer(b.customer, tr('Client'), 'customer'));
 
 const initialsOf = (name: string) =>
   name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
@@ -172,7 +173,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
     }
     const [bk, av, off, blk, sv, buf, lo] = await Promise.all([
       supabase.from('bookings')
-        .select('id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, services(name), customer:profiles!customer_id(full_name, avatar_url, phone)')
+        .select('id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, services(name), customer:profiles!customer_id(full_name, deleted_at, avatar_url, phone)')
         .eq('barber_id', barberId)
         .gte('starts_at', from.toISOString()).lt('starts_at', to.toISOString())
         .in('status', ['pending', 'confirmed', 'no_show'])

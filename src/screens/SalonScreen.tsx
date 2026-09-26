@@ -24,7 +24,6 @@ import { loc, tr, trn } from '../lib/i18n';
 // Payouts/Reports/Permissions. Presence is derived from today's bookings.
 
 const dh = (c: number) => `${Math.round(c / 100).toLocaleString('en-US')} DH`;
-const soon = () => Alert.alert(tr('Coming soon'), tr('See BACKLOG.md — Owner: salon management.'));
 
 type PayModel = 'commission' | 'rent';
 type SalonMeta = {
@@ -353,7 +352,7 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
               <ServicesTab services={services} onToggle={toggleService} onManage={onManageServices} />
             )}
             {seg === 'settings' && (
-              <SettingsTab salon={salon} members={team.length}
+              <SettingsTab salon={salon}
                 onEditSalon={onEditSalon} onSalonHours={() => setHoursOpen(true)}
                 onDefaultCommission={() => setDefCommOpen(true)} />
             )}
@@ -602,7 +601,7 @@ function ServicesTab({ services, onToggle, onManage }: {
   const live = services.filter((x) => x.is_active).length;
   return (
     <>
-      <SectionHead label={tr('MENU · {live} LIVE', { live })} action={tr('Manage')} onAction={onManage ?? soon} />
+      <SectionHead label={tr('MENU · {live} LIVE', { live })} action={tr('Manage')} onAction={onManage} />
       {services.length === 0 && <Text style={s.emptyHint}>{tr('No services yet — tap Manage to add your first.')}</Text>}
       {services.map((x) => (
         <View key={x.id} style={s.menuRow}>
@@ -615,35 +614,31 @@ function ServicesTab({ services, onToggle, onManage }: {
             trackColor={{ true: colors.accent, false: D.card2 }} thumbColor="#fff" />
         </View>
       ))}
-      {/* MOCK — packages need the packages/package_items tables + booking mapping (BACKLOG) */}
-      <SectionHead label={tr('PACKAGES · MOCK')} action={tr('Add')} onAction={soon} />
-      <Text style={s.emptyHint}>{tr('Bundles land once the booking-mapping decision is made — see BACKLOG.')}</Text>
+      {/* bundles are real (0047) and live in Profile → My Bundles; the mock that sat here went */}
     </>
   );
 }
 
-const SET_ROWS = (salon: SalonMeta, members: number) => ([
+const SET_ROWS = (salon: SalonMeta) => ([
   { icon: 'business-outline', title: tr('Salon profile'), sub: tr('Name, address, photos'), key: 'profile' },
   { icon: 'time-outline', title: tr('Opening hours'),
     sub: salon.open_min === 0 && salon.close_min === 1440
       ? tr('All day — tap to set a window')
       : tr('{open_min} – {close_min} · barbers set theirs within', { open_min: hhmm(salon.open_min), close_min: hhmm(salon.close_min) }), key: 'hours' },
   { icon: 'pricetag-outline', title: tr('Default commission'), sub: tr('{default_commission}% to barber', { default_commission: salon.default_commission }), key: 'commission' },
-  { icon: 'shield-outline', title: tr('Roles & permissions'), sub: tr('{members} members', { members }), key: 'soon' },
-  { icon: 'cash-outline', title: tr('Payouts & taxes'), sub: tr('Needs the wallet rail'), key: 'soon' },
-  { icon: 'bar-chart-outline', title: tr('Reports'), sub: tr('Revenue, retention'), key: 'soon' },
+  // Roles & permissions, Payouts & taxes and Reports opened a "coming soon" — no
+  // rows until the owner pages build them (BACKLOG, Owner: salon management)
 ] as { icon: keyof typeof Ionicons.glyphMap; title: string; sub: string; key: string }[]);
 
-function SettingsTab({ salon, members, onEditSalon, onSalonHours, onDefaultCommission }: {
-  salon: SalonMeta; members: number;
+function SettingsTab({ salon, onEditSalon, onSalonHours, onDefaultCommission }: {
+  salon: SalonMeta;
   onEditSalon?: () => void; onSalonHours: () => void; onDefaultCommission: () => void;
 }) {
-  const press = (key: string) => key === 'profile' ? (onEditSalon ?? soon)()
-    : key === 'hours' ? onSalonHours()
-    : key === 'commission' ? onDefaultCommission() : soon();
+  const press = (key: string) => key === 'profile' ? onEditSalon?.()
+    : key === 'hours' ? onSalonHours() : onDefaultCommission();
   return (
     <View style={s.settingsCard}>
-      {SET_ROWS(salon, members).map((r, i) => (
+      {SET_ROWS(salon).map((r, i) => (
         <Pressable key={r.title} onPress={() => press(r.key)} accessibilityLabel={r.title}
           style={({ pressed }) => [s.setRow, i > 0 && s.setRowBorder, pressed && s.pressed]}>
           <View style={s.setIcon}><Ionicons name={r.icon} size={18} color={colors.accent} /></View>
@@ -658,16 +653,18 @@ function SettingsTab({ salon, members, onEditSalon, onSalonHours, onDefaultCommi
   );
 }
 
-function SectionHead({ label, action, onAction }: { label: string; action: string; onAction: () => void }) {
+function SectionHead({ label, action, onAction }: { label: string; action: string; onAction?: () => void }) {
   return (
     <View style={s.sectionHead}>
       <Text style={s.sectionLabel}>{label}</Text>
       <View style={s.grow} />
-      <Pressable onPress={onAction} accessibilityLabel={action}
-        style={({ pressed }) => [s.addBtn, pressed && s.pressed]}>
-        <Ionicons name="add" size={16} color={colors.onAccent} />
-        <Text style={s.addText}>{action}</Text>
-      </Pressable>
+      {onAction && (
+        <Pressable onPress={onAction} accessibilityLabel={action}
+          style={({ pressed }) => [s.addBtn, pressed && s.pressed]}>
+          <Ionicons name="add" size={16} color={colors.onAccent} />
+          <Text style={s.addText}>{action}</Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -789,10 +786,6 @@ function MemberSheet({ m, onClose, onChanged, onEarnings }: {
             <Ionicons name="chevron-forward" size={18} color={D.sub} />
           </Pressable>
 
-          <View style={s.actionGrid}>
-            <ActionBtn icon="chatbubble-outline" label={tr('Message')} onPress={soon} />
-            <ActionBtn icon="calendar-outline" label={tr('Schedule')} onPress={soon} />
-          </View>
 
           {m.role !== 'owner' && (
             <Pressable disabled={busy} onPress={() => Alert.alert(tr('Remove from salon?'),
@@ -807,16 +800,6 @@ function MemberSheet({ m, onClose, onChanged, onEarnings }: {
         </>
       )}
     </Sheet>
-  );
-}
-
-function ActionBtn({ icon, label, onPress }: { icon: keyof typeof Ionicons.glyphMap; label: string; onPress: () => void }) {
-  return (
-    <Pressable onPress={onPress} accessibilityLabel={label}
-      style={({ pressed }) => [s.actionBtn, pressed && s.pressed]}>
-      <Ionicons name={icon} size={16} color={colors.accent} />
-      <Text style={s.actionText}>{label}</Text>
-    </Pressable>
   );
 }
 
@@ -1082,7 +1065,7 @@ function BarberEarnings({ member, onBack }: { member: Member; onBack: () => void
               <Text style={s.heroValue}>{dh(member.rent)}<Text style={s.heroPer}>{' '}{tr('/ mo')}</Text></Text>
               <Text style={s.heroNote}>{tr('Rent barber — keeps 100% of takings, so revenue stays private.')}</Text>
             </View>
-            <Text style={s.emptyHint}>{tr('Rent collection + receipts arrive with the payout rail (BACKLOG).')}</Text>
+            <Text style={s.emptyHint}>{tr('Rent collection and receipts arrive with in-app payouts.')}</Text>
           </>
         )}
 
@@ -1431,11 +1414,6 @@ const s = StyleSheet.create({
   blockedText: { flex: 1, fontSize: font.small, color: D.sub, lineHeight: 18 },
 
   actionGrid: { flexDirection: 'row', gap: sp(2) },
-  actionBtn: {
-    flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-    height: 48, borderRadius: radius.md, backgroundColor: D.card2,
-  },
-  actionText: { fontSize: font.small, fontWeight: '700', color: D.text },
   approveBtn: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
     height: 50, borderRadius: radius.md, backgroundColor: colors.accent,

@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useEffect, useRef, useState } from 'react';
 import {
-  Alert, FlatList, Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text,
+  Alert, FlatList, Image, KeyboardAvoidingView, Linking, Modal, Platform, Pressable, StyleSheet, Text,
   TextInput, View,
 } from 'react-native';
 import { useBack } from '../components/motion';
@@ -33,6 +33,14 @@ type Props = {
   myId: string; title: string;
   subtitle?: string; avatarUrl?: string; onBack: () => void;
   dark?: boolean;   // 1m — the barber's thread sits on the dark canvas
+  // the options sheet (MSG-03 barber, MSG-08 customer). A row with nothing
+  // behind it is not drawn, and with no rows there is no ⋮.
+  onOpenBooking?: () => void;
+  /** "{day} {date} · {time} · {service}" under Open the booking */
+  bookingLine?: string;
+  onReport?: () => void;
+  /** the barber's Call, drawn only when the client has a phone */
+  peerPhone?: string | null;
 };
 
 // the three taps a barber actually makes mid-cut (1m)
@@ -55,8 +63,28 @@ function initialsOf(name: string) {
   return name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 }
 
-export default function ChatScreen({ bookingId, threadWith, myId, title, subtitle, avatarUrl, onBack, dark }: Props) {
+export default function ChatScreen({
+  bookingId, threadWith, myId, title, subtitle, avatarUrl, onBack, dark,
+  onOpenBooking, bookingLine, onReport, peerPhone,
+}: Props) {
   useHideTabBar();
+  const [options, setOptions] = useState(false);
+  // MSG-02/07 — unread is the only status there is. The NEW divider sits where the
+  // read mark was when the thread opened and stays until it is left; the mark
+  // moves on open, and again on the way out for whatever arrived meanwhile (0131).
+  const peer = threadWith && threadWith !== myId ? threadWith : null;
+  const [readMark, setReadMark] = useState<Date | 'never' | null>(null);
+  useEffect(() => {
+    if (!peer) return;
+    const mark = () => { supabase.rpc('mark_chat_read', { p_peer: peer }).then(() => {}); };
+    supabase.rpc('chat_unread').then(({ data }) => {
+      const row = ((data ?? []) as { peer_id: string; unread: number; last_read_at: string | null }[])
+        .find((r) => r.peer_id === peer);
+      if (row?.unread) setReadMark(row.last_read_at ? new Date(row.last_read_at) : 'never');
+      mark();
+    });
+    return mark;
+  }, [peer]);
   const [msgs, setMsgs] = useState<Msg[]>([]); // ascending (oldest → newest)
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
@@ -156,6 +184,28 @@ export default function ChatScreen({ bookingId, threadWith, myId, title, subtitl
   }
 
   const k = dark ? d : st;
+  const firstNew = readMark === null ? -1 : msgs.findIndex((m) => m.sender_id !== myId
+    && (readMark === 'never' || new Date(m.created_at) > readMark));
+  // open on the divider when there is one; after that, follow new messages down
+  const placed = useRef(false);
+  const count = useRef(0);
+  function place() {
+    if (!placed.current && firstNew >= 0) {
+      placed.current = true;
+      count.current = msgs.length;
+      listRef.current?.scrollToIndex({ index: firstNew, viewPosition: 0.15, animated: false });
+    } else if (firstNew < 0 || msgs.length > count.current) {
+      count.current = msgs.length;
+      listRef.current?.scrollToEnd({ animated: false });
+    }
+  }
+  const first = title.split(' ')[0];
+  const call = peerPhone ? () => Linking.openURL(`tel:${peerPhone}`).catch(() => {}) : undefined;
+  const rows = [
+    onOpenBooking && { icon: 'calendar-outline' as const, label: tr('Open the booking'), sub: bookingLine, onPress: onOpenBooking },
+    dark && call && { icon: 'call-outline' as const, label: tr('Call {name}', { name: first }), sub: peerPhone ?? undefined, onPress: call },
+    onReport && { icon: 'flag-outline' as const, label: dark ? tr('Report to ops') : tr('Report a problem'), onPress: onReport, danger: !!dark },
+  ].filter(Boolean) as OptionRow[];
 
   return (
     <KeyboardAvoidingView style={k.screen} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -172,11 +222,19 @@ export default function ChatScreen({ bookingId, threadWith, myId, title, subtitl
           <Text style={k.headerName} numberOfLines={1}>{title}</Text>
           <Text style={k.headerStatus} numberOfLines={1}>{subtitle ?? tr('Booking chat')}</Text>
         </View>
-        <Pressable onPress={() => Alert.alert(tr('Options'), tr('Coming soon — see BACKLOG.md'))} hitSlop={8}
-          accessibilityLabel={tr('More options')} style={dark ? d.headerPuck : st.backBtn}>
-          <Ionicons name={dark ? 'call-outline' : 'ellipsis-vertical'} size={dark ? 15 : 18}
-            color={colors.onAccent} />
-        </Pressable>
+        {/* MSG-02: Call only when there is a phone to call; options take its place otherwise */}
+        {dark && call && (
+          <Pressable onPress={call} accessibilityLabel={tr('Call {name}', { name: first })} style={d.headerPuck}>
+            <Ionicons name="call-outline" size={15} color={colors.onAccent} />
+          </Pressable>
+        )}
+        {rows.length > 0 && (
+          <Pressable onPress={() => setOptions(true)} accessibilityLabel={tr('Options')}
+            style={dark ? d.headerPuck : st.backBtn}>
+            <Ionicons name={dark ? 'ellipsis-horizontal' : 'ellipsis-vertical'} size={dark ? 15 : 18}
+              color={colors.onAccent} />
+          </Pressable>
+        )}
       </View>
 
       <FlatList
@@ -184,7 +242,8 @@ export default function ChatScreen({ bookingId, threadWith, myId, title, subtitl
         data={msgs}
         keyExtractor={(m) => m.id}
         contentContainerStyle={k.list}
-        onContentSizeChange={() => listRef.current?.scrollToEnd({ animated: false })}
+        onContentSizeChange={place}
+        onScrollToIndexFailed={() => listRef.current?.scrollToEnd({ animated: false })}
         ListFooterComponent={dark ? (
           <View style={d.quickRow}>
             {QUICK.map((q) => (
@@ -203,6 +262,13 @@ export default function ChatScreen({ bookingId, threadWith, myId, title, subtitl
             <>
               {showDay && (
                 <View style={st.daySep}><Text style={k.dayText}>{dayLabel(item.created_at)}</Text></View>
+              )}
+              {index === firstNew && (
+                <View style={st.newRow}>
+                  <View style={st.newLine} />
+                  <Text style={st.newText}>{tr('NEW')}</Text>
+                  <View style={st.newLine} />
+                </View>
               )}
               <View style={[k.bubble, mine ? k.mine : k.theirs]}>
                 {item.image_path && (
@@ -224,27 +290,71 @@ export default function ChatScreen({ bookingId, threadWith, myId, title, subtitl
       />
 
       <View style={k.inputRow}>
-        {!dark && (
-          <Pressable hitSlop={6} accessibilityLabel={tr('Emoji')}
-            onPress={() => Alert.alert(tr('Emoji'), tr('Use your keyboard’s emoji key — picker coming soon'))}>
-            <Ionicons name="happy-outline" size={22} color={colors.textSecondary} />
-          </Pressable>
-        )}
+        {/* photo · text · send — no emoji, paperclip or mic (the handoff removes all three) */}
+        <Pressable onPress={sendPhoto} disabled={busy} hitSlop={10} accessibilityLabel={tr('Add a photo')}
+          style={({ pressed }) => pressed && st.pressed}>
+          <Ionicons name="image-outline" size={dark ? 20 : 23} color={dark ? D.sub : colors.textSecondary} />
+        </Pressable>
         <TextInput style={k.input}
-          placeholder={dark ? tr('Message {title}…', { title: title.split(' ')[0] }) : tr('Type a message here…')}
+          placeholder={dark ? tr('Message {name}', { name: first }) : tr('Type a message here…')}
           placeholderTextColor={dark ? D.sub : colors.textTertiary}
           value={text} onChangeText={setText} onSubmitEditing={() => send()} returnKeyType="send" multiline />
-        <Pressable onPress={sendPhoto} disabled={busy} hitSlop={6} accessibilityLabel={tr('Attach photo')}
-          style={({ pressed }) => pressed && st.pressed}>
-          <Ionicons name="attach" size={dark ? 20 : 24} color={dark ? D.sub : colors.textSecondary} />
-        </Pressable>
-        <Pressable onPress={() => text.trim() ? send() : Alert.alert(tr('Voice notes'), tr('Coming soon — see BACKLOG.md'))}
-          hitSlop={6} accessibilityLabel={text.trim() ? tr('Send') : tr('Record voice note')}
-          style={({ pressed }) => [k.sendBtn, pressed && st.pressed]}>
-          <Ionicons name={text.trim() ? 'arrow-up' : 'mic'} size={dark ? 17 : 20} color={colors.onAccent} />
+        {/* voice notes are not built (BACKLOG, Chat) — the button is send, and waits for text */}
+        <Pressable onPress={() => send()} disabled={!text.trim()}
+          hitSlop={6} accessibilityLabel={tr('Send')}
+          style={({ pressed }) => [k.sendBtn, !text.trim() && st.sendIdle, pressed && st.pressed]}>
+          <Ionicons name="arrow-up" size={dark ? 17 : 20} color={colors.onAccent} />
         </Pressable>
       </View>
+
+      <OptionsSheet visible={options} dark={dark} title={title} sub={dark ? undefined : subtitle}
+        rows={rows} onClose={() => setOptions(false)} />
     </KeyboardAvoidingView>
+  );
+}
+
+type OptionRow = {
+  icon: keyof typeof Ionicons.glyphMap; label: string; sub?: string; onPress: () => void; danger?: boolean;
+};
+
+// MSG-03 (barber, dark) and MSG-08 (customer, light): the same few rows, each kit's sheet
+function OptionsSheet({ visible, dark, title, sub, rows, onClose }: {
+  visible: boolean; dark?: boolean; title: string; sub?: string; rows: OptionRow[]; onClose: () => void;
+}) {
+  const c = dark
+    ? { sheet: D.sheet, card: D.card, line: D.border, text: '#fff', sub: D.sub, bubble: D.card2, grab: D.hairline }
+    : { sheet: colors.surface, card: '#fff', line: colors.border, text: colors.text, sub: colors.textSecondary, bubble: colors.surface, grab: '#D8D4CA' };
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <View style={st.sheetWrap}>
+        <Pressable style={[st.scrim, { backgroundColor: dark ? D.scrim : 'rgba(0,0,0,.52)' }]} onPress={onClose} />
+        <View style={[st.sheet, { backgroundColor: c.sheet, borderTopLeftRadius: dark ? 26 : 28, borderTopRightRadius: dark ? 26 : 28 }]}>
+          <View style={[st.grabber, { backgroundColor: c.grab }]} />
+          <View>
+            <Text style={[st.sheetTitle, { color: c.text, fontSize: dark ? 18 : 17 }]}>{title}</Text>
+            {!!sub && <Text style={[st.sheetSub, { color: c.sub }]}>{sub}</Text>}
+          </View>
+          <View style={[st.optCard, { backgroundColor: c.card }, !dark && shadow]}>
+            {rows.map((r, i) => (
+              <Pressable key={r.label} onPress={() => { onClose(); r.onPress(); }} accessibilityRole="button"
+                style={({ pressed }) => [st.optRow, i < rows.length - 1 && { borderBottomWidth: 1, borderBottomColor: c.line }, pressed && st.pressed]}>
+                <View style={[st.optIcon, { backgroundColor: r.danger ? 'rgba(248,113,113,.14)' : c.bubble }]}>
+                  <Ionicons name={r.icon} size={16} color={r.danger ? '#F87171' : c.text} />
+                </View>
+                <View style={st.optBody}>
+                  <Text style={[st.optLabel, { color: r.danger ? '#F87171' : c.text }]}>{r.label}</Text>
+                  {!!r.sub && <Text style={[st.optSub, { color: c.sub }]}>{r.sub}</Text>}
+                </View>
+              </Pressable>
+            ))}
+          </View>
+          <Pressable onPress={onClose} accessibilityRole="button"
+            style={({ pressed }) => [st.cancel, dark ? { borderColor: D.border } : { backgroundColor: '#fff', borderColor: colors.border, borderWidth: 1.5 }, pressed && st.pressed]}>
+            <Text style={[st.cancelText, { color: c.text }]}>{dark ? tr('Cancel') : tr('CANCEL')}</Text>
+          </Pressable>
+        </View>
+      </View>
+    </Modal>
   );
 }
 
@@ -299,6 +409,24 @@ const st = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   pressed: { opacity: 0.7 },
+  sendIdle: { opacity: 0.4 },
+  newRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginVertical: sp(2) },
+  newLine: { flex: 1, height: 1, backgroundColor: colors.accent },
+  newText: { fontFamily: inter.b, fontSize: 10.5, letterSpacing: 1.4, color: colors.accent },
+  sheetWrap: { flex: 1, justifyContent: 'flex-end' },
+  scrim: { ...StyleSheet.absoluteFillObject },
+  sheet: { paddingTop: 12, paddingHorizontal: 20, paddingBottom: 34, gap: 13 },
+  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2 },
+  sheetTitle: { fontFamily: inter.b },
+  sheetSub: { fontFamily: inter.r, fontSize: 12.5, marginTop: 3 },
+  optCard: { borderRadius: 20, paddingHorizontal: 16 },
+  optRow: { flexDirection: 'row', alignItems: 'center', gap: 13, minHeight: 64 },
+  optIcon: { width: 38, height: 38, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
+  optBody: { flex: 1, minWidth: 0 },
+  optLabel: { fontFamily: inter.sb, fontSize: 15 },
+  optSub: { fontFamily: inter.r, fontSize: 12, marginTop: 3 },
+  cancel: { height: 52, borderRadius: 999, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  cancelText: { fontFamily: inter.b, fontSize: 13.5, letterSpacing: 0.8 },
 });
 
 // 1m — same layout, barber palette. Square header, coral for what you said.

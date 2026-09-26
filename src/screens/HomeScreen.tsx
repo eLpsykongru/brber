@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, AppState, StyleSheet, View } from 'react-native';
 import QuickAddSheet, { QuickPick } from '../components/QuickAddSheet';
 import TabBar, { TabBarHiders, TabItem } from '../components/TabBar';
 import { useAndroidBack } from '../lib/back';
+import { takeReopen } from '../lib/language';
+import { loadUnread } from '../lib/unread';
 import { onBannerOpen } from '../lib/push';
 import { supabase } from '../lib/supabase';
 import { colors } from '../theme';
@@ -71,8 +73,25 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged, q
   const tabs = barber
     ? [...BARBER_TABS, ...(holdsCash ? [WALLET_TAB] : []), BARBER_PROFILE_TAB]
     : CUSTOMER_TABS;
-  const [tab, setTab] = useState(tabs[0].key);
+  // BST-02: a barber's language restart lands back on Settings, not on Home
+  const [reopen] = useState(() => (barber ? takeReopen() : null));
+  const [tab, setTab] = useState(reopen ? 'profile' : tabs[0].key);
   const [chromeHidden, setChromeHidden] = useState(false);
+  // MSG — the Chat tab's badge, on every tab: refreshed whenever a screen opens
+  // or closes over a tab (a thread read), on a new message, and on the way back in
+  const [unread, setUnread] = useState(0);
+  const refreshUnread = useCallback(() => {
+    loadUnread().then((u) => setUnread(u.total)).catch(() => {});
+  }, []);
+  useEffect(() => { refreshUnread(); }, [tab, chromeHidden, refreshUnread]);
+  useEffect(() => {
+    const ch = supabase.channel('chat-badge')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, refreshUnread)
+      .subscribe();
+    const app = AppState.addEventListener('change', (st) => { if (st === 'active') refreshUnread(); });
+    return () => { supabase.removeChannel(ch); app.remove(); };
+  }, [refreshUnread]);
+  const barTabs = tabs.map((t) => (t.key === 'chat' || t.key === 'chats' ? { ...t, badge: unread } : t));
   // full screens mounted over the tab right now (useHideTabBar)
   const [hiders, setHiders] = useState(0);
   const bumpHiders = useCallback((d: 1 | -1) => setHiders((n) => n + d), []);
@@ -158,9 +177,11 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged, q
     else if (tab === 'calendar') content = <CalendarScreen barberId={barber.id} onChromeHidden={setChromeHidden} />;
     else if (tab === 'clients') content = <ClientsScreen barberId={barber.id} onChromeHidden={setChromeHidden} />;
     else if (tab === 'chat') content = <BarberChatsScreen barberId={barber.id}
-      onChromeHidden={setChromeHidden} onHelp={() => setTab('home')} />;
+      onChromeHidden={setChromeHidden} onHelp={() => setTab('home')} onOpenBooking={openGap} />;
     else if (tab === 'profile') content = <ProfileScreen profile={profile} barber={barber} phone={phone}
-      onProfileChanged={onProfileChanged} onChromeHidden={setChromeHidden} />;
+      onProfileChanged={onProfileChanged} onChromeHidden={setChromeHidden}
+      initialView={reopen ?? undefined}
+      onCalendar={() => { setChromeHidden(false); setTab('calendar'); }} />;
     else content = <AgentWalletScreen barberId={barber.id} />; // the wallet tab is the cash agent's
   } else {
     if (tab === 'home') content = <DiscoverScreen name={profile.full_name} customerId={profile.id}
@@ -201,7 +222,7 @@ export default function HomeScreen({ profile, barber, phone, onProfileChanged, q
           onClose={() => setQuickOpen(false)} onPick={onQuickPick} />
       )}
       {!chromeHidden && hiders === 0 && (
-        <TabBar items={tabs} active={tab} dark={!!barber}
+        <TabBar items={barTabs} active={tab} dark={!!barber}
           center={barber ? { label: tr('Quick add'), onPress: () => setQuickOpen(true) } : undefined}
           onChange={(k) => { setChromeHidden(false); setOpenBooking(undefined); setTab(k); }} />
       )}

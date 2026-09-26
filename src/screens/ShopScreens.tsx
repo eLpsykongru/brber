@@ -10,9 +10,12 @@ import {
 } from '../components/dark';
 import { qrSvg, queueUrl } from '../lib/qr';
 import { supabase } from '../lib/supabase';
+import ExportSheet from '../components/ExportSheet';
+import { fileRange, shopReportHtml } from '../lib/exportPdf';
 import { dark as D, inter, serif } from '../theme';
 import type { Member, ShopMeta } from './OwnerScreens';
 import { loc, tr, trn } from '../lib/i18n';
+import { nameOrFormer } from '../lib/deletion';
 
 // Turn 2, money & reputation: 2e shop report, 2f reviews inbox, 2g shop listing,
 // 2h/2i the walk-in QR poster, 2j the wall display.
@@ -59,6 +62,7 @@ export function ShopReportScreen({ onBack }: { onBack: () => void }) {
   const [lastSettled, setLastSettled] = useState<Record<string, string>>({});
   const [due, setDue] = useState<ReportRow[]>([]);
   const [busy, setBusy] = useState(false);
+  const [exporting, setExporting] = useState(false);   // EXP-01
 
   const load = useCallback(async () => {
     setRows(null);
@@ -130,8 +134,7 @@ export function ShopReportScreen({ onBack }: { onBack: () => void }) {
 
   return (
     <Screen gap={14}>
-      <TopBar title={tr('Shop report')} onBack={onBack} plain right="filter"
-        onRight={() => Alert.alert(tr('Export'), tr('Coming soon — see BACKLOG.md'))} />
+      <TopBar title={tr('Shop report')} onBack={onBack} plain right="share" onRight={() => setExporting(true)} />
 
       <Segmented track={D.card} height={38} active={period}
         items={PERIODS.map((p) => ({ key: p.key, label: p.label }))}
@@ -209,6 +212,36 @@ export function ShopReportScreen({ onBack }: { onBack: () => void }) {
             style={busy ? { opacity: 0.6 } : undefined} />
         </>
       )}
+
+      {/* EXP-03 — the same blocks as this screen, for the period picked (no "vs last month") */}
+      <ExportSheet visible={exporting} onClose={() => setExporting(false)} kind="shop"
+        build={async (from, to) => {
+          const [rep, tu, me] = await Promise.all([
+            supabase.rpc('salon_report', { p_from: from.toISOString(), p_to: to.toISOString() }),
+            supabase.from('wallet_transactions').select('amount_cents')
+              .gte('created_at', from.toISOString()).lt('created_at', to.toISOString()),
+            supabase.auth.getUser(),
+          ]);
+          if (rep.error) throw rep.error;
+          const r = (rep.data ?? []) as ReportRow[];
+          const { data: shop } = await supabase.from('salons').select('name')
+            .eq('owner_id', me.data.user?.id ?? '').maybeSingle();
+          const n = r.reduce((a, x) => a + x.bookings, 0);
+          const name = (shop?.name as string | undefined) ?? '';
+          return {
+            entries: n,
+            fileName: `sterncut-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'shop'}-${fileRange(from, to)}.pdf`,
+            html: shopReportHtml({
+              shop: name, from, to,
+              take: r.reduce((a, x) => a + (x.booked_cents ?? 0), 0), bookings: n,
+              byBarber: r.map((x) => ({ name: first(x.name), cents: x.booked_cents })),
+              commission: r.reduce((a, x) => a + x.commission_cents, 0),
+              topUps: (tu.data ?? []).reduce((a: number, t: any) => a + t.amount_cents, 0),
+              noShows: r.reduce((a, x) => a + x.no_shows, 0),
+              settlement: due.map((x) => ({ name: x.name, cents: x.commission_cents })),
+            }),
+          };
+        }} />
     </Screen>
   );
 }
@@ -243,7 +276,7 @@ export function ReviewsInboxScreen({ salon, team, onBack }: {
   const load = useCallback(async () => {
     if (!ids.length) return;
     const { data, error } = await supabase.from('reviews')
-      .select('id, rating, comment, created_at, reply, replied_at, flagged_at, barber_id, barbers!reviews_barber_id_fkey(profiles!barbers_id_fkey(full_name)), customer:profiles!customer_id(full_name)')
+      .select('id, rating, comment, created_at, reply, replied_at, flagged_at, barber_id, barbers!reviews_barber_id_fkey(profiles!barbers_id_fkey(full_name)), customer:profiles!customer_id(full_name, deleted_at)')
       .in('barber_id', ids).order('created_at', { ascending: false }).limit(100);
     if (error) return Alert.alert(tr('Could not load reviews'), error.message);
     setRows((data as unknown as ReviewRow[]) ?? []);
@@ -319,7 +352,7 @@ export function ReviewsInboxScreen({ salon, team, onBack }: {
 
       <View style={{ gap: 10 }}>
         {shown.map((r) => {
-          const who = r.customer?.full_name ?? tr('Client');
+          const who = nameOrFormer(r.customer, tr('Client'), 'customer');
           const barber = r.barbers?.profiles?.full_name ?? tr('the shop');
           return (
             <View key={r.id} style={s.reviewCard}>

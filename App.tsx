@@ -14,7 +14,9 @@ import { SUPPORT_PHONE } from './src/screens/SupportScreens';
 
 /** 38h — what my_account_state() (0056) answers. */
 type Account = { suspended: boolean; reason: string | null; since: string | null };
-import { onBannerAction, openLaunchResponse, registerPush } from './src/lib/push';
+import { leftOnPurpose, logOut, onBannerAction, openLaunchResponse, registerPush, takeFarewell } from './src/lib/push';
+import { BarberDeletedScreen } from './src/screens/BarberSettingsScreens';
+import { AccountDeletedScreen } from './src/screens/DeleteAccountScreens';
 import { useAndroidBack } from './src/lib/back';
 import { dropQueueLink, heldQueueLink, holdQueueLink, QueueLink, takeInstallLink } from './src/lib/queueLink';
 import { supabase } from './src/lib/supabase';
@@ -50,6 +52,8 @@ export default function App() {
   // 24a remembers who just got signed out; 23c is the emailed reset landing
   const [expired, setExpired] = useState<{ name: string | null; email: string | null } | null>(null);
   const [recovering, setRecovering] = useState(false);
+  // DEL-03 / DEL-06 — an account just deleted says goodbye before the welcome screen
+  const [farewell, setFarewell] = useState<'customer' | 'barber' | null>(null);
   const userRef = useRef<{ name: string | null; email: string | null } | null>(null);
   userRef.current = user ? { name: user.profile.full_name, email: user.profile.email ?? null } : null;
   // 24b — re-locks whenever the app comes back from the background
@@ -132,8 +136,13 @@ export default function App() {
     const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       // 24a — a session that dies while the app is open is a different event
       // from signing out on purpose, and gets the blocking sheet instead of
-      // dumping the user back on the welcome screen
-      if (event === 'SIGNED_OUT' && userRef.current) setExpired(userRef.current);
+      // dumping the user back on the welcome screen. A Logout went through
+      // logOut(), which says so — that one lands on the welcome screen.
+      if (event === 'SIGNED_OUT') {
+        if (!leftOnPurpose() && userRef.current) setExpired(userRef.current);
+        const bye = takeFarewell();
+        if (bye) setFarewell(bye);
+      }
       if (event === 'PASSWORD_RECOVERY') setRecovering(true);   // 23c
       setSession(s);
       if (!s) setUser(null);
@@ -170,12 +179,16 @@ export default function App() {
   let content;
   if (locked && user) {
     content = <LockScreen onUnlocked={() => setLocked(false)}
-      onPassword={() => { setLocked(false); supabase.auth.signOut(); }} />;
+      onPassword={() => { setLocked(false); logOut(); }} />;
   } else if (recovering) {
     content = <SetPasswordScreen mode="reset" email={session?.user.email ?? null}
       onBack={() => setRecovering(false)} onDone={() => setRecovering(false)} />;
   } else if (booting || !fontsLoaded || (session && !user)) {
     content = <ActivityIndicator color={colors.text} />;
+  } else if (farewell && !session) {
+    content = farewell === 'barber'
+      ? <BarberDeletedScreen onDone={() => setFarewell(null)} />
+      : <AccountDeletedScreen onDone={() => setFarewell(null)} />;
   } else if (!session || !user) {
     content = queueLink && !linkAuth
       // QL-22 — signed out, with a shop's link in hand

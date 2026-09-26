@@ -8,6 +8,8 @@ export type TabItem = {
   label: string;
   icon: keyof typeof Ionicons.glyphMap;       // filled variant, used when active
   iconOutline: keyof typeof Ionicons.glyphMap; // outline variant, used when inactive
+  /** MSG — the Chat tab's unread count, on every tab. Capped at 99+. */
+  badge?: number;
 };
 
 // A full screen over a tab needs the whole height — its pinned buttons sit where
@@ -40,8 +42,15 @@ export default function TabBar({ items, active, onChange, center, dark, centerOf
           dark ? (on ? s.dItemActive : s.dItem) : [s.item, on && s.itemActive],
           pressed && s.pressed,
         ]}>
-        <Ionicons name={on ? t.icon : t.iconOutline} size={dark ? 17 : 18}
-          color={on ? colors.onAccent : (dark ? d.sub : colors.tabInactiveText)} />
+        <View>
+          <Ionicons name={on ? t.icon : t.iconOutline} size={dark ? 17 : 18}
+            color={on ? colors.onAccent : (dark ? d.sub : colors.tabInactiveText)} />
+          {!!t.badge && (
+            <View style={[s.badge, { borderColor: dark ? (on ? d.accent : d.card) : (on ? colors.tabActive : colors.tabBg) }]}>
+              <Text style={s.badgeText}>{t.badge > 99 ? '99+' : t.badge}</Text>
+            </View>
+          )}
+        </View>
         {on && <Text style={dark ? s.dLabel : s.label}>{t.label}</Text>}
       </Pressable>
     );
@@ -67,6 +76,12 @@ export default function TabBar({ items, active, onChange, center, dark, centerOf
 }
 
 const s = StyleSheet.create({
+  badge: {
+    position: 'absolute', top: -7, start: 9, minWidth: 18, height: 18, borderRadius: 999,
+    paddingHorizontal: 4, backgroundColor: colors.accent, borderWidth: 2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  badgeText: { color: '#fff', fontSize: 9.5, fontFamily: inter.b, fontVariant: ['tabular-nums'] },
   wrap: { position: 'absolute', left: 0, right: 0, bottom: sp(7), alignItems: 'center' },
   bar: {
     flexDirection: 'row', backgroundColor: colors.tabBg, borderRadius: radius.pill,

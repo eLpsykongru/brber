@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  FlatList, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
+  FlatList, Image, Pressable, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { Empty } from '../components/ui';
 import { useAndroidBack } from '../lib/back';
@@ -12,6 +12,8 @@ import { colors, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
 import { Pushed } from '../components/motion';
 import ChatScreen from './ChatScreen';
 import { loc, tr } from '../lib/i18n';
+import { loadUnread } from '../lib/unread';
+import MyBookingScreen from './MyBookingScreen';
 
 const LIVE = ['pending', 'confirmed'];
 
@@ -25,7 +27,7 @@ type Convo = {
     profiles: { full_name: string | null; avatar_url: string | null } | null;
     salon: { name: string } | null;
   } | null;
-  last?: { body: string | null; image_path: string | null; created_at: string } | null;
+  last?: { body: string | null; image_path: string | null; created_at: string; sender_id: string } | null;
 };
 
 // what groupThreads needs, flattened off the nested join
@@ -36,7 +38,16 @@ function fmtTime(iso: string) {
   return new Date(iso).toLocaleTimeString(loc('en-US'), { hour: '2-digit', minute: '2-digit' });
 }
 
-function Avatar({ url, name, size, online }: { url?: string | null; name: string; size: number; online?: boolean }) {
+// MSG-04: today's time, YESTERDAY, or the day
+function fmtWhen(iso: string) {
+  const d = new Date(iso);
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  if (d.toDateString() === new Date().toDateString()) return fmtTime(iso);
+  if (d.toDateString() === y.toDateString()) return tr('YESTERDAY');
+  return d.toLocaleDateString(loc('en-US'), { month: 'short', day: 'numeric' }).toUpperCase();
+}
+
+function Avatar({ url, name, size }: { url?: string | null; name: string; size: number }) {
   const initials = name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
   return (
     <View>
@@ -47,8 +58,7 @@ function Avatar({ url, name, size, online }: { url?: string | null; name: string
             <Text style={[st.avatarText, { fontSize: size * 0.36 }]}>{initials}</Text>
           </View>
         )}
-      {/* TODO(backlog): real presence — dot is decorative */}
-      {online && <View style={st.onlineDot} />}
+      {/* no presence dot: nothing knows who is online (MSG) */}
     </View>
   );
 }
@@ -80,6 +90,13 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
   const [tab, setTab] = useState<'all' | 'unread'>('all');
   const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState('');
+  const [unread, setUnread] = useState<Map<string, number>>(new Map());
+  // MSG-08's two rows: the booking itself, or a report with the thread attached
+  const [bookingOpen, setBookingOpen] = useState<string | null>(null);
+  const [reportOn, setReportOn] = useState<string | undefined>();
+  const refreshUnread = useCallback(() => {
+    loadUnread().then((u) => setUnread(u.byPeer)).catch(() => {});
+  }, []);
 
   const load = useCallback(async () => {
     // every booking, not just the live ones - a chat tab that forgets a barber
@@ -95,13 +112,13 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
     if (list.length) {
       const ids = list.map((c) => c.id);
       const { data: msgs } = await supabase.from('messages')
-        .select('booking_id, body, image_path, created_at')
+        .select('booking_id, body, image_path, created_at, sender_id')
         .in('booking_id', ids)
         .order('created_at', { ascending: false });
       const lastByBooking = new Map<string, Convo['last']>();
       for (const m of msgs ?? []) {
         if (!lastByBooking.has(m.booking_id)) {
-          lastByBooking.set(m.booking_id, { body: m.body, image_path: m.image_path, created_at: m.created_at });
+          lastByBooking.set(m.booking_id, { body: m.body, image_path: m.image_path, created_at: m.created_at, sender_id: m.sender_id });
         }
       }
       for (const c of list) c.last = lastByBooking.get(c.id) ?? null;
@@ -114,7 +131,7 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
       .then(({ data }) => setCases((data ?? []) as CaseListRow[]));
   }, []);
 
-  useEffect(() => { load(); loadCases(); }, [load, loadCases]);
+  useEffect(() => { load(); loadCases(); refreshUnread(); }, [load, loadCases, refreshUnread]);
 
   // one row per barber, newest activity first. The row still says how many
   // upcoming bookings it stands for, rather than pretending the extra ones
@@ -132,6 +149,8 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
   function openChat(t: Thread | null) {
     setOpen(t);
     onChromeHidden(!!t);
+    // leaving a thread marks it read (ChatScreen); the list follows
+    if (!t) { refreshUnread(); load(); }
   }
 
   // Chats is a tab root; a thread, a case or the report form sit above it
@@ -143,8 +162,12 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
   const q = query.trim().toLowerCase();
   const filtered = threads.filter((t) =>
     !q || t.head.barbers?.profiles?.full_name?.toLowerCase().includes(q));
-  // TODO(backlog): real unread — nothing marked unread yet
-  const shown = tab === 'unread' ? [] : filtered;
+  // MSG-05 — the Unread filter lists real threads, barbers and ops
+  const unreadOf = (t: Thread) => (t.head.barbers?.id ? unread.get(t.head.barbers.id) ?? 0 : 0);
+  const shown = tab === 'unread' ? filtered.filter((t) => unreadOf(t) > 0) : filtered;
+  const unreadCases = cases.filter((c) => c.unread > 0);
+  let unreadTotal = unreadCases.reduce((n, c) => n + c.unread, 0);
+  threads.forEach((t) => { unreadTotal += unreadOf(t); });
 
   // built before the pushed screens below, so each can hand it over as
   // `behind` - the list then stays on stage and trails as you swipe back
@@ -163,22 +186,7 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
         {searching ? (
           <TextInput style={st.search} placeholder={tr('Search by name…')} placeholderTextColor={colors.tabInactiveText}
             value={query} onChangeText={setQuery} autoFocus />
-        ) : (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={st.strip}>
-            <View style={st.stripRow}>
-              {threads.map((t) => (
-                <Pressable key={t.head.barbers?.id ?? t.head.id} style={st.stripItem}
-                  onPress={() => openChat(t)}>
-                  <Avatar url={t.head.barbers?.profiles?.avatar_url}
-                    name={t.head.barbers?.profiles?.full_name ?? 'B'} size={56} online />
-                  <Text style={st.stripName} numberOfLines={1}>
-                    {(t.head.barbers?.profiles?.full_name ?? tr('Barber')).split(' ')[0]}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-          </ScrollView>
-        )}
+        ) : null}
       </View>
 
       {/* tabs */}
@@ -191,6 +199,11 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
         </Pressable>
         <Pressable onPress={() => setTab('unread')} style={st.tabBtn}>
           <Text style={[st.tabText, tab === 'unread' && st.tabTextActive]}>{tr('Unread')}</Text>
+          {unreadTotal > 0 && (
+            <View style={[st.tabCount, st.tabCountActive]}>
+              <Text style={[st.tabCountText, st.tabCountTextActive]}>{unreadTotal > 99 ? '99+' : unreadTotal}</Text>
+            </View>
+          )}
         </Pressable>
       </View>
 
@@ -198,10 +211,10 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
         data={shown}
         keyExtractor={({ head }) => head.barbers?.id ?? head.id}
         contentContainerStyle={st.list}
-        ListHeaderComponent={q || tab === 'unread' ? null : (
+        ListHeaderComponent={q || (tab === 'unread' && !unreadCases.length) ? null : (
           <View style={st.helpBlock}>
             <Text style={st.section}>{tr('HELP')}</Text>
-            <Pressable onPress={() => { setReporting(true); onChromeHidden(true); }}
+            {tab === 'all' && <Pressable onPress={() => { setReporting(true); onChromeHidden(true); }}
               accessibilityRole="button"
               style={({ pressed }) => [st.helpCard, pressed && st.rowPressed]}>
               <View style={st.helpIcon}>
@@ -209,14 +222,14 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
               </View>
               <View style={st.rowBody}>
                 <Text style={st.rowName}>{tr('Sterncut Support')}</Text>
-                <Text style={st.rowPreview}>{tr('Reviewed within 24 hours')}</Text>
+                <Text style={st.rowPreview}>{tr('Message the Sterncut team')}</Text>
               </View>
               <Text style={st.start}>{tr('START')}</Text>
-            </Pressable>
+            </Pressable>}
 
             {/* an ops case is not something the customer can open - it opens
                 itself when money is queried - so these rows only ever appear */}
-            {cases.map((c) => {
+            {(tab === 'unread' ? unreadCases : cases).map((c) => {
               const live = c.status === 'open';
               return (
                 <Pressable key={c.id} onPress={() => { setCaseOpen(c); onChromeHidden(true); }}
@@ -245,30 +258,46 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
           </View>
         )}
         ListEmptyComponent={
-          tab === 'unread'
-            ? <Empty text={tr('Unread tracking coming soon.')} />
-            : <Empty icon="chatbubble-outline" title={tr('No chats yet')}
+          tab === 'unread' && threads.length + cases.length > 0 && !unreadCases.length
+            ? (
+              <View style={st.caught}>
+                <Text style={st.caughtTitle}>{tr('ALL CAUGHT UP')}</Text>
+                <Text style={st.caughtBody}>{tr('Messages you haven’t opened show up here.')}</Text>
+                <Pressable onPress={() => setTab('all')} accessibilityRole="button"
+                  style={({ pressed }) => [st.caughtBtn, pressed && st.rowPressed]}>
+                  <Text style={st.caughtBtnText}>{tr('SEE ALL CHATS')}</Text>
+                </Pressable>
+              </View>
+            )
+            : tab === 'unread' ? null : <Empty icon="chatbubble-outline" title={tr('No chats yet')}
                 text={tr('Chats appear here once you have a booking with a barber.')} />
         }
         renderItem={({ item: thread }) => {
           const item = thread.head;
           const upcoming = thread.rows.filter((r) => LIVE.includes(r.status)).length;
           const name = item.barbers?.profiles?.full_name ?? tr('Barber');
+          const n = unreadOf(thread);
+          const said = item.last?.image_path && !item.last.body ? tr('Photo') : item.last?.body ?? '';
           const preview = item.last
-            ? (item.last.image_path ? tr('📷 Photo') : item.last.body ?? '')
+            ? (item.last.sender_id === customerId ? tr('You: {text}', { text: said }) : said)
             : tr('Booking at {salon}', { salon: item.barbers?.salon?.name ?? tr('salon') });
           return (
             <Pressable onPress={() => openChat(thread)}
               style={({ pressed }) => [st.row, pressed && st.rowPressed]}>
-              <Avatar url={item.barbers?.profiles?.avatar_url} name={name} size={52} online />
+              <Avatar url={item.barbers?.profiles?.avatar_url} name={name} size={50} />
               <View style={st.rowBody}>
                 <Text style={st.rowName} numberOfLines={1}>{name}</Text>
-                <Text style={st.rowPreview} numberOfLines={1}>{preview}</Text>
+                <Text style={[st.rowPreview, n > 0 && st.rowPreviewNew]} numberOfLines={1}>{preview}</Text>
                 {upcoming > 1 && (
                   <Text style={st.rowMore}>{tr('{upcoming} bookings with him coming up · one thread', { upcoming })}</Text>
                 )}
               </View>
-              {!!item.last && <Text style={st.rowTime}>{fmtTime(item.last.created_at)}</Text>}
+              {!!item.last && (
+                <View style={st.rowSide}>
+                  <Text style={[st.rowTime, n > 0 && st.rowTimeNew]}>{fmtWhen(item.last.created_at)}</Text>
+                  {n > 0 && <View style={st.badge}><Text style={st.badgeText}>{n}</Text></View>}
+                </View>
+              )}
             </Pressable>
           );
         }}
@@ -286,19 +315,30 @@ export default function ChatsScreen({ customerId, onChromeHidden }: {
   if (reporting) {
     return (
       <Pushed onBack={closeHelp} behind={list}>
-        <ReportProblemScreen onBack={closeHelp}
+        <ReportProblemScreen onBack={() => { setReportOn(undefined); closeHelp(); }} bookingId={reportOn}
           onOpenCase={(c) => { setReporting(false); setCaseOpen(c); }} />
       </Pushed>
     );
   }
 
+  if (open && bookingOpen) {
+    return <MyBookingScreen bookingId={bookingOpen} myId={customerId} onBack={() => setBookingOpen(null)}
+      onReport={(id) => { setBookingOpen(null); setReportOn(id); openChat(null); setReporting(true); onChromeHidden(true); }} />;
+  }
   if (open) {
+    const target = open.rows.find((r) => r.id === writeTarget(open)) ?? open.head;
+    const at = new Date(target.starts_at);
     return (
       <Pushed onBack={() => openChat(null)} behind={list}>
-        <ChatScreen bookingId={writeTarget(open)} threadWith={open.head.barbers?.id} myId={customerId}
-          title={open.head.barbers?.profiles?.full_name ?? tr('Chat')}
-          subtitle={open.head.barbers?.salon?.name ?? undefined}
+        <ChatScreen bookingId={target.id} threadWith={open.head.barbers?.id} myId={customerId}
+          title={open.head.barbers?.profiles?.full_name ?? tr('Former barber')}
+          subtitle={open.head.barbers?.salon?.name
+            ? tr('{shop} · Booking chat', { shop: open.head.barbers.salon.name }) : undefined}
           avatarUrl={open.head.barbers?.profiles?.avatar_url ?? undefined}
+          onOpenBooking={() => setBookingOpen(target.id)}
+          bookingLine={[at.toLocaleDateString(loc('en-GB'), { weekday: 'short', day: 'numeric', month: 'short' }),
+            at.toTimeString().slice(0, 5), target.services?.name].filter(Boolean).join(' · ')}
+          onReport={() => { setReportOn(target.id); openChat(null); setReporting(true); onChromeHidden(true); }}
           onBack={() => openChat(null)} />
       </Pushed>
     );
@@ -323,18 +363,10 @@ const st = StyleSheet.create({
     marginTop: sp(3), backgroundColor: colors.tabActive, borderRadius: radius.pill,
     paddingHorizontal: sp(4), minHeight: 44, color: colors.onAccent, fontSize: font.body,
   },
-  strip: { marginTop: sp(3) },
-  stripRow: { flexDirection: 'row', gap: sp(4) },
-  stripItem: { alignItems: 'center', gap: sp(1), width: 64 },
-  stripName: { fontSize: font.tiny, color: colors.onAccent, fontWeight: '600' },
 
   avatar: {},
   avatarFallback: { backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
   avatarText: { fontWeight: '700', color: colors.accent },
-  onlineDot: {
-    position: 'absolute', right: 2, bottom: 2, width: 12, height: 12, borderRadius: 6,
-    backgroundColor: '#4ADE80', borderWidth: 2, borderColor: colors.surface,
-  },
 
   tabs: { flexDirection: 'row', gap: sp(5), paddingHorizontal: sp(5), paddingVertical: sp(3) },
   tabBtn: { flexDirection: 'row', alignItems: 'center', gap: sp(1.5) },
@@ -380,5 +412,13 @@ const st = StyleSheet.create({
   },
   badgeText: { fontSize: 10, fontWeight: '700', color: colors.onAccent },
   rowPreview: { fontSize: font.small, color: colors.textSecondary },
-  rowTime: { fontSize: font.tiny, color: colors.textTertiary },
+  rowTime: { fontSize: 10.5, color: colors.textSecondary },
+  rowTimeNew: { color: colors.accent, fontWeight: '700' },
+  rowPreviewNew: { color: colors.text, fontWeight: '600' },
+  rowSide: { alignItems: 'flex-end', gap: 5 },
+  caught: { alignItems: 'center', gap: 10, paddingTop: sp(12), paddingHorizontal: sp(6) },
+  caughtTitle: { fontFamily: serif, fontSize: 22, letterSpacing: 0.4, color: colors.text, textAlign: 'center' },
+  caughtBody: { fontSize: 13.5, lineHeight: 20, color: '#5C5C58', textAlign: 'center' },
+  caughtBtn: { marginTop: 8, height: 52, paddingHorizontal: 26, borderRadius: 999, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
+  caughtBtnText: { color: '#fff', fontSize: 13, fontWeight: '700', letterSpacing: 1.3 },
 });

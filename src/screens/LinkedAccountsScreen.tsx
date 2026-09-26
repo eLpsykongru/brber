@@ -4,6 +4,7 @@ import * as LocalAuthentication from 'expo-local-authentication';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Display } from '../components/ui';
+import { logOut } from '../lib/push';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, TOP_INSET } from '../theme';
 import { loc, tr } from '../lib/i18n';
@@ -150,7 +151,7 @@ export default function LinkedAccountsScreen({ onBack, onSetPassword }: {
               {tr('Signed in {toLocaleDateString}', { toLocaleDateString: new Date(sessionSince).toLocaleDateString(loc('en-US'),
                 { month: 'short', day: 'numeric' }) })}
             </Text>
-            <Text style={s.link} onPress={() => supabase.auth.signOut()}>{tr('Sign out everywhere')}</Text>
+            <Text style={s.link} onPress={() => logOut('global')}>{tr('Sign out everywhere')}</Text>
           </View>
         )}
       </ScrollView>

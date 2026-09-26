@@ -6,10 +6,11 @@ import {
 } from 'react-native';
 import { useAndroidBack } from '../lib/back';
 import { OAuthProvider, signInWithProvider } from '../lib/oauth';
+import { openLegal } from '../lib/legal';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, serifBlack, shadow, sp } from '../theme';
 import { ForgotPasswordScreen } from './AccountScreens';
-import { tr } from '../lib/i18n';
+import { tr, trRich } from '../lib/i18n';
 
 export type AuthView = 'welcome' | 'signin' | 'register';
 
@@ -23,6 +24,21 @@ export default function AuthScreen({ initialView = 'welcome' }: { initialView?: 
   if (view === 'welcome') return <Welcome onEmail={() => setView('signin')} onRegister={() => setView('register')} />;
   if (view === 'signin') return <SignIn onBack={() => setView('welcome')} onRegister={() => setView('register')} />;
   return <Register onBack={() => setView('welcome')} onSignIn={() => setView('signin')} />;
+}
+
+// SGN — one line wherever an account can be created. A first Google or Apple
+// sign-in creates one too, so it sits under those buttons as well. Both names
+// open sterncut.ma in the in-app browser.
+function Consent({ onInk }: { onInk?: boolean }) {
+  const link = (page: 'terms' | 'privacy') => (text: string, key: number) => (
+    <Text key={key} onPress={() => openLegal(page)} suppressHighlighting accessibilityRole="link" style={onInk ? s.consentLinkInk : s.consentLink}>{text}</Text>
+  );
+  return (
+    <Text style={onInk ? s.consentInk : s.consent}>
+      {trRich('By continuing you agree to the <t>Terms of use</t> and the <p>Privacy policy</p>',
+        { t: link('terms'), p: link('privacy') })}
+    </Text>
+  );
 }
 
 // Google / Apple, shared by the welcome screen and sign-in. The browser covers
@@ -71,6 +87,7 @@ function Welcome({ onEmail, onRegister }: { onEmail: () => void; onRegister: () 
           <Ionicons name="mail-outline" size={17} color={colors.onAccent} />
           <Text style={s.socialDarkText}>{tr('Continue with email')}</Text>
         </Pressable>
+        <Consent onInk />
         <Text style={s.terms}>
           {tr('New here?')}{' '}
           <Text style={s.termsStrong} onPress={onRegister}>{tr('Create an account')}</Text>
@@ -177,6 +194,7 @@ function SignIn({ onBack, onRegister }: { onBack: () => void; onRegister: () => 
             <Text style={s.socialSmallDarkText}>{social.busy === 'apple' ? '…' : tr('Apple')}</Text>
           </Pressable>
         </View>
+        <Consent />
         <Text style={s.footer}>
           {tr('New to Sterncut?')}{' '}
           <Text style={s.footerLink} onPress={onRegister}>{tr('Create an account')}</Text>
@@ -223,6 +241,7 @@ function Register({ onBack, onSignIn }: { onBack: () => void; onSignIn: () => vo
           autoComplete="email" value={email} onChangeText={setEmail} />
         <PasswordField value={password} onChangeText={setPassword} />
         <CtaButton title={tr('Create account')} onPress={submit} busy={busy} />
+        <Consent />
         <Pressable onPress={() => setRole(role === 'barber' ? 'customer' : 'barber')} hitSlop={6}>
           <Text style={s.roleLink}>
             {role === 'barber'
@@ -241,6 +260,11 @@ function Register({ onBack, onSignIn }: { onBack: () => void; onSignIn: () => vo
 
 const s = StyleSheet.create({
   grow: { flex: 1 },
+  // an inline link's target is its line box: 24 tall, as close to 44 as a sentence allows
+  consent: { fontSize: 12.5, lineHeight: 24, color: '#5C5C58', textAlign: 'center', paddingVertical: 4 },
+  consentLink: { color: colors.text, fontWeight: '700' },
+  consentInk: { fontSize: 12.5, lineHeight: 24, color: 'rgba(255,255,255,0.65)', textAlign: 'center', paddingVertical: 4 },
+  consentLinkInk: { color: '#fff', fontWeight: '700' },
   pressed: { opacity: 0.8 },
 
   dark: { flex: 1, backgroundColor: colors.ink },

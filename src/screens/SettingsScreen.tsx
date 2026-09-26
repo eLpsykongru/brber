@@ -2,10 +2,12 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useEffect, useState } from 'react';
 import {
-  Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View,
+  Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
 } from 'react-native';
 import { Display } from '../components/ui';
 import { chooseLanguage, LANGUAGE_ROWS } from '../lib/language';
+import { openLegal } from '../lib/legal';
+import { logOut } from '../lib/push';
 import { supabase } from '../lib/supabase';
 import { colors, font, radius, serif, shadow, TOP_INSET } from '../theme';
 import type { Profile } from '../types';
@@ -22,21 +24,13 @@ type Summary = {
   top_barber_id: string | null; top_barber_visits: number | null;
 };
 
-const dh = (c: number) => (c / 100).toFixed(0);
 
 // ---- 19a -----------------------------------------------------------------
 export default function SettingsScreen({ profile, onBack, onProfileChanged, go }: {
   profile: Profile; onBack: () => void; onProfileChanged: () => void;
-  go: (view: 'edit' | 'notifications' | 'invite' | 'password' | 'linked') => void;
+  go: (view: 'edit' | 'notifications' | 'invite' | 'password' | 'linked' | 'delete') => void;
 }) {
   const [langOpen, setLangOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [locationOn, setLocationOn] = useState(true);
-  const [summary, setSummary] = useState<Summary | null>(null);
-
-  useEffect(() => {
-    supabase.rpc('my_account_summary').then(({ data }) => setSummary((data ?? [])[0] ?? null));
-  }, []);
 
   // What the app reads is the pick saved on this phone (lib/language.ts). The
   // profile keeps it too, for whatever sends texts later; offline, the switch
@@ -60,16 +54,10 @@ export default function SettingsScreen({ profile, onBack, onProfileChanged, go }
           <Row label={tr('Language')} value={current.native} onPress={() => setLangOpen(true)} border />
           {/* ponytail: single-city launch — the city is a fact, not a picker */}
           <Row label={tr('City')} value={tr('Tangier')} border />
+          {/* "Location while booking" was a switch nothing read — Explore asks the
+              phone for location itself, and the phone's own setting is the switch */}
           <Row label={tr('Notifications')} hint={tr('Queue, bookings, wallet')}
-            onPress={() => go('notifications')} border />
-          <View style={s.row}>
-            <View style={s.grow}>
-              <Text style={s.rowLabel}>{tr('Location while booking')}</Text>
-              <Text style={s.rowHint}>{tr('Used to sort salons by distance')}</Text>
-            </View>
-            <Switch value={locationOn} onValueChange={setLocationOn}
-              trackColor={{ false: '#DDD9CF', true: colors.accent }} thumbColor="#fff" />
-          </View>
+            onPress={() => go('notifications')} />
         </View>
 
         <Text style={s.section}>{tr('APPEARANCE')}</Text>
@@ -96,18 +84,19 @@ export default function SettingsScreen({ profile, onBack, onProfileChanged, go }
           <Row label={tr('Your profile')} onPress={() => go('edit')} border />
           <Row label={tr('Linked accounts')} value={tr('Email')} border onPress={() => go('linked')} />
           <Row label={tr('Invite friends')} value={tr('20 DH')} accentValue onPress={() => go('invite')} border />
-          <Row label={tr('Terms & Privacy')}
-            onPress={() => Alert.alert(tr('Terms & Privacy'), tr('Coming with the public site.'))} />
+          {/* sterncut.ma's pages (WEB-14/15), in the in-app browser */}
+          <Row label={tr('Terms of use')} onPress={() => openLegal('terms')} border />
+          <Row label={tr('Privacy policy')} onPress={() => openLegal('privacy')} />
         </View>
 
         <View style={[s.card, s.dangerCard]}>
           <Pressable onPress={() => Alert.alert(tr('Log out'), tr('Are you sure you want to log out?'), [
             { text: tr('Cancel'), style: 'cancel' },
-            { text: tr('Yes, log out'), style: 'destructive', onPress: () => supabase.auth.signOut() },
+            { text: tr('Yes, log out'), style: 'destructive', onPress: () => logOut() },
           ])} style={({ pressed }) => [s.row, s.rowBorder, pressed && s.pressed]}>
             <Text style={[s.rowLabel, s.danger]}>{tr('Log out')}</Text>
           </Pressable>
-          <Pressable onPress={() => setDeleteOpen(true)}
+          <Pressable onPress={() => go('delete')}
             style={({ pressed }) => [s.row, pressed && s.pressed]}>
             <Text style={[s.rowLabel, s.danger, s.grow]}>{tr('Delete my account')}</Text>
             <Ionicons name="chevron-forward" size={15} color={colors.accent} />
@@ -117,8 +106,6 @@ export default function SettingsScreen({ profile, onBack, onProfileChanged, go }
 
       <LanguageSheet visible={langOpen} value={lang()}
         onClose={() => setLangOpen(false)} onPick={saveLanguage} />
-      <DeleteAccountSheet visible={deleteOpen} summary={summary}
-        onClose={() => setDeleteOpen(false)} />
     </View>
   );
 }
@@ -209,86 +196,6 @@ function LanguageSheet({ visible, value, onClose, onPick }: {
           style={({ pressed }) => [s.wideDark, pressed && s.pressed]}>
           <Text style={s.wideDarkText}>{tr('SAVE')}</Text>
         </Pressable>
-      </View>
-    </Modal>
-  );
-}
-
-// ---- 20a -----------------------------------------------------------------
-function DeleteAccountSheet({ visible, summary, onClose }: {
-  visible: boolean; summary: Summary | null; onClose: () => void;
-}) {
-  const [typed, setTyped] = useState('');
-  const [busy, setBusy] = useState(false);
-  useEffect(() => { if (visible) setTyped(''); }, [visible]);
-
-  const blocked = (summary?.live_deposit_cents ?? 0) > 0;
-  const armed = typed.trim().toUpperCase() === 'DELETE' && !blocked;
-
-  async function destroy() {
-    setBusy(true);
-    const { error } = await supabase.rpc('delete_my_account', { p_confirm: typed.trim() });
-    setBusy(false);
-    if (error) return Alert.alert(tr('Could not delete'), error.message);
-    await supabase.auth.signOut();
-  }
-
-  return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable style={s.scrimDeep} onPress={onClose} />
-      <View style={s.sheet}>
-        <View style={s.grabber} />
-        <View style={s.center}>
-          <View style={s.warnCircle}>
-            <Ionicons name="trash-outline" size={26} color={colors.accent} />
-          </View>
-          <Display size={24} style={s.sheetTitleTight}>{tr('Delete account?')}</Display>
-          <Text style={s.sheetSub}>
-            {tr('This removes your bookings, chats, coupons and review history. It cannot be undone.')}
-          </Text>
-        </View>
-
-        <View style={s.summaryCard}>
-          {blocked && (
-            <>
-              <View style={s.warnRow}>
-                <Ionicons name="warning-outline" size={15} color={colors.accent} style={s.warnIcon} />
-                <Text style={s.warnBody}>
-                  <Text style={s.warnStrong}>
-                    {tr('You have a live booking with a {live_deposit_cents} DH deposit.', { live_deposit_cents: dh(summary!.live_deposit_cents) })}
-                  </Text>
-                  {' '}{tr("Cancel it or let it complete first — deposits aren't refunded on account deletion.")}
-                </Text>
-              </View>
-              <View style={s.hr} />
-            </>
-          )}
-          <View style={s.sumRow}>
-            <Text style={s.sumKey}>{tr('Wallet balance')}</Text>
-            <Text style={s.sumVal}>{tr('{dh} DH', { dh: dh(summary?.wallet_cents ?? 0) })}</Text>
-          </View>
-          <View style={s.sumRow}>
-            <Text style={s.sumKey}>{tr('Active coupons')}</Text>
-            <Text style={s.sumVal}>{tr('{active_coupons} · lost on delete', { active_coupons: summary?.active_coupons ?? 0 })}</Text>
-          </View>
-        </View>
-
-        <View style={s.confirmBlock}>
-          <Text style={s.section}>{tr('TYPE DELETE TO CONFIRM')}</Text>
-          <TextInput style={s.confirmInput} value={typed} onChangeText={setTyped}
-            autoCapitalize="characters" placeholder={tr('DELETE')}
-            placeholderTextColor={colors.textTertiary} />
-        </View>
-
-        <View style={s.sheetCtas}>
-          <Pressable onPress={destroy} disabled={!armed || busy}
-            style={({ pressed }) => [s.dangerBtn, (!armed || busy) && s.disabled, pressed && s.pressed]}>
-            <Text style={s.dangerText}>{tr('DELETE MY ACCOUNT')}</Text>
-          </Pressable>
-          <Pressable onPress={onClose} style={({ pressed }) => [s.keepBtn, pressed && s.pressed]}>
-            <Text style={s.keepText}>{tr('KEEP MY ACCOUNT')}</Text>
-          </Pressable>
-        </View>
       </View>
     </Modal>
   );

@@ -19,6 +19,8 @@
 //
 //   GET  /  /pour-les-salons  /ar/salons  /tarifs  /tarifs/qui-compte  /tarifs/exemple
 //   GET  /nouveau-mot-de-passe   WEB-11, where a password-reset e-mail can land
+//   GET  /confidentialite /conditions /supprimer-mon-compte, /ar/… and /en/…  WEB-14…16
+//   GET  /{fr,ar}/terms /{fr,ar}/privacy   301 to the above (the app's links)
 //   GET  /app                    the store, for the site's buttons
 //   anything else                the site's own 404 (WEB-12's frame)
 //   MAINTENANCE=1                WEB-13 on every address, 503
@@ -31,7 +33,7 @@ import {
   signature, taking, waitOf,
 } from './render.js';
 import {
-  READS_NUMBERS, renderGetApp, renderMaintenance, renderSiteMissing, siteContext, siteKey, sitePage,
+  LEGAL_REDIRECTS, READS_NUMBERS, renderGetApp, renderMaintenance, renderSiteMissing, siteContext, siteKey, sitePage,
 } from './site.js';
 
 // 0110's alphabet — no I, O, 0 or 1 — six characters for a shop, four for a
@@ -269,6 +271,8 @@ async function confirm({ request, env, call, token }) {
 // ---- sterncut.ma · the site's pages --------------------------------------------------
 async function site({ request, url, env, call, report, method }) {
   const key = siteKey(url.pathname);
+  // the app opens /{lang}/terms and /{lang}/privacy; each page has its own address
+  if (LEGAL_REDIRECTS[key]) return new Response(null, { status: 301, headers: { location: LEGAL_REDIRECTS[key] } });
   const render = sitePage(url.pathname);
   if (key !== 'app' && !render) return page(renderSiteMissing(siteContext(env, null)), 404);
   if (method !== 'GET') return new Response('Method not allowed', { status: 405 });

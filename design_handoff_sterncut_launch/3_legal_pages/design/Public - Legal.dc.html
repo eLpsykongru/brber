@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./legal-content.js"></script>
+<style>
+html{background:#EBE8E1}
+body{margin:0;background:#EBE8E1;font-family:Inter,system-ui,sans-serif}
+a{color:#E8442E;text-decoration:none}a:hover{color:#C33421}
+.dv-turn{padding:38px 44px 30px;scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#111;color:#fff;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 14px/1.2 Inter,sans-serif;color:#111}
+.dv-note{font:400 12px/1.5 Inter,sans-serif;color:rgba(0,0,0,.6);max-width:760px;margin:0 0 26px}
+.dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#111;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 Inter,sans-serif;color:rgba(0,0,0,.6)}
+.dv-opt:target .dv-oid{background:#E8442E;color:#fff}
+.dv-nav{display:flex;flex-wrap:wrap;gap:6px;padding:12px 44px 0}
+.dv-flag{max-width:760px;margin:14px 0 0;padding:14px 16px;border-radius:12px;background:rgba(232,68,46,.09);border:1px solid rgba(232,68,46,.22);font:400 12px/1.55 Inter,sans-serif;color:#7d2517}
+summary::-webkit-details-marker{display:none}
+</style>
+</helmet>
+<div style="padding:32px 44px 0">
+<a href="./Index.dc.html" style="font:600 10px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(0,0,0,.6)">← All pages</a>
+<div style="font-family:'Playfair Display',serif;font-weight:700;font-size:27px;letter-spacing:.02em;text-transform:uppercase;color:#111;margin:10px 0 0">Public · Legal pages</div>
+<div style="font:400 12px Inter,sans-serif;color:rgba(0,0,0,.6);margin:6px 0 0">WEB-14…16 · sterncut.ma · 13 artboards: each page full length in French, Arabic and English, plus phone views. The text lives in <code>legal-content.js</code>; the handoff is <code>design_handoff_legal_pages/</code>.</div>
+<div class="dv-flag"><strong>DRAFT — to be reviewed by a Moroccan lawyer before publishing.</strong> ⚑ marks a sentence I wasn&rsquo;t sure of: hover it for the reason; every reason is listed in the README. [Brackets] are not decided yet: legal entity and address, RC / ICE, contact email, support phone, CNDP declaration number, and the durations and deadlines nobody has set.</div>
+<div style="font:400 12px/1.55 Inter,sans-serif;color:rgba(0,0,0,.6);margin:12px 0 0;max-width:760px">None of WEB-01…13 had a footer (every one is cropped at the fold), so the footer at the bottom of these pages is new. It goes on every page of sterncut.ma, and it links all three legal pages and all three languages.</div>
+</div>
+<div class="dv-nav">
+<a href="#WEB-14" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:#111;color:#fff;text-decoration:none">WEB-14 · Confidentialité</a>
+<a href="#WEB-15" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111;text-decoration:none">WEB-15 · Conditions</a>
+<a href="#WEB-16" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111;text-decoration:none">WEB-16 · Supprimer votre compte</a>
+<span style="width:10px"></span>
+<a href="./Public - Website.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.04);color:rgba(0,0,0,.7);text-decoration:none">Public · Website</a>
+</div>
+<div style="height:1px;background:rgba(0,0,0,.10);margin:20px 0 0"></div>
+
+<sc-for list="{{ pages }}" as="pg" hint-placeholder-count="1">
+<section class="dv-turn" id="{{ pg.code }}">
+<div class="dv-thd"><a class="dv-tid" href="#{{ pg.code }}">{{ pg.code }}</a><span class="dv-tname">{{ pg.name }}</span></div>
+<p class="dv-note">{{ pg.note }}</p>
+<div class="dv-opts">
+
+<sc-for list="{{ pg.desk }}" as="a" hint-placeholder-count="1">
+<div class="dv-opt" id="{{ a.id }}"><div class="dv-olabel"><a class="dv-oid" href="#{{ a.id }}">{{ a.code }}</a>{{ a.label }}</div>
+<div data-screen-label="{{ a.id }}" dir="{{ a.dir }}" lang="{{ a.lang }}" style="width:1280px;background:#EBE8E1;color:#111;font-family:{{ a.font }};box-shadow:0 0 0 1px rgba(0,0,0,.06),0 24px 60px rgba(0,0,0,.10)">
+  <div style="height:66px;border-bottom:1px solid rgba(0,0,0,.08);display:flex;align-items:center;gap:22px;padding:0 40px">
+    <a href="./Public - Website.dc.html#WEB-01" style="display:flex;align-items:center;gap:9px;color:#111;text-decoration:none">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:15px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span>
+    </a>
+    <span style="flex:1"></span>
+    <sc-for list="{{ a.nav }}" as="n"><a href="{{ n.href }}" style="font-size:13px;font-weight:600;color:#5c5c58;text-decoration:none">{{ n.t }}</a></sc-for>
+    <a href="{{ a.langLink.href }}" style="font-size:12.5px;font-weight:600;color:#5c5c58;font-family:{{ a.langLink.font }};text-decoration:none">{{ a.langLink.label }}</a>
+    <a href="./Public - Website.dc.html#WEB-07" style="height:36px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;padding:0 18px;font-size:12px;font-weight:700;letter-spacing:{{ a.ls2 }};text-decoration:none">{{ a.signin }}</a>
+  </div>
+  <div style="background:rgba(232,68,46,.09);border-bottom:1px solid rgba(232,68,46,.22);padding:12px 40px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;color:#7d2517;font-size:12.5px;line-height:1.5">
+    <span style="font-weight:700">{{ a.draftTitle }}</span><span>{{ a.draftBody }}</span>
+  </div>
+  <div style="display:grid;grid-template-columns:250px minmax(0,1fr);gap:72px;padding:56px 64px 96px;align-items:start">
+    <nav style="position:sticky;top:24px;display:flex;flex-direction:column">
+      <span style="font-size:10.5px;font-weight:700;letter-spacing:{{ a.ls }};text-transform:{{ a.tt }};color:#8A8A85;margin-bottom:12px">{{ a.toc }}</span>
+      <sc-for list="{{ a.sections }}" as="s"><a href="{{ s.href }}" style="display:flex;gap:10px;padding-top:8px;padding-bottom:8px;padding-inline-start:14px;border-inline-start:2px solid {{ s.tocLine }};font-size:13px;line-height:1.45;color:{{ s.tocColor }};font-weight:{{ s.tocWeight }};text-decoration:none"><span style="font-family:Inter,sans-serif;font-variant-numeric:tabular-nums;color:#8A8A85;font-weight:600;font-size:11.5px;flex:none;padding-top:1px">{{ s.num }}</span><span>{{ s.t }}</span></a></sc-for>
+    </nav>
+    <article style="max-width:720px;display:flex;flex-direction:column">
+      <span style="font-size:11px;font-weight:700;letter-spacing:{{ a.ls }};text-transform:{{ a.tt }};color:#8A8A85">{{ a.eyebrow }}</span>
+      <h1 style="margin:14px 0 0;font-family:{{ a.tfont }};font-weight:700;font-size:{{ a.h1 }};line-height:{{ a.h1lh }};letter-spacing:{{ a.tls }};text-transform:{{ a.tt }};text-wrap:balance">{{ a.title }}</h1>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-top:20px">
+        <span style="font-size:13px;color:#5c5c58"><sc-for list="{{ a.updated }}" as="g"><sc-if value="{{ g.plain }}" hint-placeholder-val="{{ true }}">{{ g.t }}</sc-if><sc-if value="{{ g.br }}"><span style="background:rgba(140,137,128,.14);border:1px dashed rgba(140,137,128,.6);border-radius:5px;padding:0 4px;font-weight:600">{{ g.t }}</span></sc-if></sc-for></span>
+        <span style="font-size:12px;color:#8A8A85">{{ a.draftOf }}</span>
+        <span style="flex:1"></span>
+        <span style="display:flex;gap:2px;background:#E1DED6;border-radius:999px;padding:3px">
+          <sc-for list="{{ a.langs }}" as="l"><a href="{{ l.href }}" style="height:30px;border-radius:999px;display:flex;align-items:center;padding:0 13px;font-size:12px;font-weight:700;background:{{ l.bg }};color:{{ l.fg }};font-family:{{ l.font }};text-decoration:none">{{ l.label }}</a></sc-for>
+        </span>
+      </div>
+      <p style="margin:30px 0 0;font-size:18px;line-height:1.6;color:#2b2b28;text-wrap:pretty"><sc-for list="{{ a.intro }}" as="g"><sc-if value="{{ g.plain }}" hint-placeholder-val="{{ true }}">{{ g.t }}</sc-if><sc-if value="{{ g.br }}"><span style="background:rgba(140,137,128,.14);border:1px dashed rgba(140,137,128,.6);border-radius:5px;padding:0 4px;font-weight:600">{{ g.t }}</span></sc-if></sc-for></p>
+      <sc-for list="{{ a.sections }}" as="s">
+      <section id="{{ s.anchor }}" style="scroll-margin-top:24px;margin-top:52px;padding-top:28px;border-top:1px solid rgba(0,0,0,.1)">
+        <div style="display:flex;align-items:baseline;gap:14px">
+          <span style="font-family:Inter,sans-serif;font-size:12px;font-weight:700;color:#8A8A85;font-variant-numeric:tabular-nums">{{ s.num }}</span>
+          <h2 style="margin:0;font-family:{{ a.tfont }};font-weight:700;font-size:{{ a.h2 }};line-height:{{ a.h2lh }};letter-spacing:{{ a.tls }};text-transform:{{ a.tt }}">{{ s.t }}</h2>
+        </div>
+        <div style="margin-top:18px;background:#fff;border-radius:16px;padding:16px 20px;box-shadow:0 4px 14px rgba(0,0,0,.04)">
+          <span style="display:block;font-size:10.5px;font-weight:700;letter-spacing:{{ a.ls }};text-transform:{{ a.tt }};color:#E8442E">{{ a.summary }}</span>
+          <p style="margin:6px 0 0;font-size:15.5px;line-height:1.55;font-weight:600;text-wrap:pretty"><sc-for list="{{ s.sum }}" as="g"><sc-if value="{{ g.plain }}" hint-placeholder-val="{{ true }}">{{ g.t }}</sc-if><sc-if value="{{ g.br }}"><span style="background:rgba(140,137,128,.14);border:1px dashed rgba(140,137,128,.6);border-radius:5px;padding:0 4px;font-weight:600">{{ g.t }}</span></sc-if></sc-for></p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;margin-top:22px;font-size:15.5px;line-height:{{ a.lh }};color:#2b2b28">
+          <sc-for list="{{ s.blocks }}" as="b">
+            <sc-if value="{{ b.isH }}"><h3 style="margin:10px 0 -4px;font-size:{{ a.h3 }};font-weight:700;letter-spacing:{{ a.ls }};text-transform:{{ a.tt }};color:#111">{{ b.t }}</h3></sc-if>
+            <sc-if value="{{ b.isP }}"><p style="margin:0;text-wrap:pretty"><sc-for list="{{ b.segs }}" as="g"><sc-if value="{{ g.plain }}" hint-placeholder-val="{{ true }}">{{ g.t }}</sc-if><sc-if value="{{ g.br }}"><span style="background:rgba(140,137,128,.14);border:1px dashed rgba(140,137,128,.6);border-radius:5px;padding:0 4px;font-weight:600">{{ g.t }}</span></sc-if><sc-if value="{{ g.fl }}"><span title="{{ g.note }}" style="background:rgba(232,161,0,.17);box-shadow:inset 0 -1.5px 0 #C98A12;border-radius:3px;padding:0 2px;cursor:help">{{ g.t }}<sup style="font-family:Inter,sans-serif;font-size:9.5px;font-weight:700;color:#8F5E14;margin-inline-start:3px">⚑{{ g.n }}</sup></span></sc-if><sc-if value="{{ g.ln }}"><a href="{{ g.href }}" style="color:#111;font-weight:700;text-decoration:underline;text-underline-offset:3px">{{ g.t }}</a></sc-if></sc-for></p></sc-if>
+            <sc-if value="{{ b.isUl }}"><div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ b.items }}" as="it"><div style="display:flex;gap:12px"><span style="width:6px;height:6px;border-radius:999px;background:#8A8A85;flex:none;margin-top:{{ a.dot }}"></span><span style="flex:1;min-width:0;text-wrap:pretty"><sc-for list="{{ it.segs }}" as="g"><sc-if value="{{ g.plain }}" hint-placeholder-val="{{ true }}">{{ g.t }}</sc-if><sc-if value="{{ g.br }}"><span style="background:rgba(140,137,128,.14);border:1px dashed rgba(140,137,128,.6);border-radius:5px;padding:0 4px;font-weight:600">{{ g.t }}</span></sc-if><sc-if value="{{ g.fl }}"><span title="{{ g.note }}" style="background:rgba(232,161,0,.17);box-shadow:inset 0 -1.5px 0 #C98A12;border-radius:3px;padding:0 2px;cursor:help">{{ g.t }}<sup style="font-family:Inter,sans-serif;font-size:9.5px;font-weight:700;color:#8F5E14;margin-inline-start:3px">⚑{{ g.n }}</sup></span></sc-if></sc-for></span></div></sc-for>
+            </div></sc-if>
+            <sc-if value="{{ b.isOl }}"><div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ b.items }}" as="it"><div style="display:flex;gap:14px;align-items:flex-start"><span style="width:28px;height:28px;border-radius:999px;background:#101010;color:#fff;font-family:Inter,sans-serif;font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none">{{ it.n }}</span><span style="flex:1;min-width:0;padding-top:1px"><sc-for list="{{ it.segs }}" as="g"><sc-if value="{{ g.plain }}" hint-placeholder-val="{{ true }}">{{ g.t }}</sc-if></sc-for></span></div></sc-for>
+            </div></sc-if>
+            <sc-if value="{{ b.isTmpl }}"><div style="background:#fff;border:1px dashed #C9C5BB;border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:4px;font-family:{{ a.mono }};font-size:13.5px;line-height:1.6;color:#2b2b28">
+              <sc-for list="{{ b.lines }}" as="ln"><span>{{ ln.t }}</span></sc-for>
+            </div></sc-if>
+            <sc-if value="{{ b.isCta }}"><span style="align-self:flex-start;min-height:50px;border-radius:999px;background:#101010;color:#fff;display:inline-flex;align-items:center;gap:10px;padding:0 24px;font-size:13.5px;font-weight:700"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="m4 7 8 6 8-6"></path></svg><span><sc-for list="{{ b.segs }}" as="g"><sc-if value="{{ g.plain }}" hint-placeholder-val="{{ true }}">{{ g.t }}</sc-if><sc-if value="{{ g.br }}"><span style="background:rgba(140,137,128,.22);border:1px dashed rgba(255,255,255,.45);border-radius:5px;padding:0 4px">{{ g.t }}</span></sc-if></sc-for></span></span></sc-if>
+          </sc-for>
+        </div>
+      </section>
+      </sc-for>
+    </article>
+  </div>
+  <footer style="background:#101010;color:#fff;padding:52px 64px 30px">
+    <div style="display:grid;grid-template-columns:1.5fr 1fr 1.2fr 1.2fr;gap:40px">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <span style="display:flex;align-items:center;gap:9px"><span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span><span style="font-family:'Playfair Display',serif;font-weight:700;font-size:15px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span></span>
+        <span style="font-size:13px;color:#BDBAB2">{{ a.f.tagline }}</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:{{ a.ls }};text-transform:{{ a.tt }};color:#8A8A85;margin-bottom:2px">{{ a.f.site }}</span>
+        <sc-for list="{{ a.nav }}" as="n"><a href="{{ n.href }}" style="font-size:13px;color:#BDBAB2;text-decoration:none">{{ n.t }}</a></sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:{{ a.ls }};text-transform:{{ a.tt }};color:#8A8A85;margin-bottom:2px">{{ a.f.legal }}</span>
+        <sc-for list="{{ a.f.legalLinks }}" as="n"><a href="{{ n.href }}" style="font-size:13px;color:{{ n.fg }};font-weight:{{ n.fw }};text-decoration:none">{{ n.t }}</a></sc-for>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:{{ a.ls }};text-transform:{{ a.tt }};color:#8A8A85;margin-bottom:2px">{{ a.f.contact }}</span>
+        <span style="font-size:13px;color:#BDBAB2"><sc-for list="{{ a.f.email }}" as="g"><sc-if value="{{ g.plain }}">{{ g.t }}</sc-if><sc-if value="{{ g.br }}"><span style="border:1px dashed rgba(255,255,255,.35);border-radius:5px;padding:0 4px">{{ g.t }}</span></sc-if></sc-for></span>
+        <span style="font-size:13px;color:#BDBAB2"><sc-for list="{{ a.f.phone }}" as="g"><sc-if value="{{ g.plain }}">{{ g.t }}</sc-if><sc-if value="{{ g.br }}"><span style="border:1px dashed rgba(255,255,255,.35);border-radius:5px;padding:0 4px">{{ g.t }}</span></sc-if></sc-for></span>
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:{{ a.ls }};text-transform:{{ a.tt }};color:#8A8A85;margin:10px 0 2px">{{ a.f.langsT }}</span>
+        <span style="display:flex;gap:14px"><sc-for list="{{ a.f.langs }}" as="l"><a href="{{ l.href }}" style="font-size:13px;color:{{ l.fg }};font-weight:{{ l.fw }};font-family:{{ l.font }};text-decoration:none">{{ l.label }}</a></sc-for></span>
+      </div>
+    </div>
+    <div style="margin-top:40px;padding-top:20px;border-top:1px solid rgba(255,255,255,.12);font-size:12px;line-height:1.7;color:#9A9A95"><sc-for list="{{ a.f.bottom }}" as="g"><sc-if value="{{ g.plain }}">{{ g.t }}</sc-if><sc-if value="{{ g.br }}"><span style="border:1px dashed rgba(255,255,255,.3);border-radius:5px;padding:0 4px;color:#BDBAB2">{{ g.t }}</span></sc-if></sc-for></div>
+  </footer>
+</div>
+</div>
+</sc-for>
+
+<sc-for list="{{ pg.mob }}" as="m">
+<div class="dv-opt" id="{{ m.id }}"><div class="dv-olabel"><a class="dv-oid" href="#{{ m.id }}">{{ m.code }}</a>{{ m.label }}</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div data-screen-label="{{ m.id }}" dir="{{ m.dir }}" lang="{{ m.lang }}" style="position:relative;width:100%;height:100%;background:#EBE8E1;font-family:{{ m.font }};color:#111;overflow:hidden">
+  <div style="padding:58px 0 0;display:flex;flex-direction:column;height:100%;box-sizing:border-box">
+    <div style="flex:none;padding:0 16px 8px"><span dir="ltr" style="display:flex;align-items:center;justify-content:center;gap:6px;background:#E3E0D8;border-radius:11px;height:34px;font-family:Inter,sans-serif"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2.4"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg><span style="font-size:12.5px;color:#5c5c58">{{ m.url }}</span></span></div>
+    <div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+      <div style="flex:none;display:flex;align-items:center;gap:9px;padding:4px 12px 8px 20px">
+        <span style="width:26px;height:26px;border-radius:7px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+        <span style="flex:1;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span>
+        <a href="{{ m.langLink.href }}" style="min-height:44px;display:flex;align-items:center;padding:0 6px;font-size:12px;font-weight:600;color:#5c5c58;font-family:{{ m.langLink.font }};text-decoration:none">{{ m.langLink.label }}</a>
+        <span style="width:44px;height:44px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></span>
+      </div>
+      <div style="flex:none;background:rgba(232,68,46,.09);border-top:1px solid rgba(232,68,46,.22);border-bottom:1px solid rgba(232,68,46,.22);padding:9px 20px;color:#7d2517;font-size:11.5px;line-height:1.45;font-weight:600">{{ m.draftTitle }}</div>
+      <div style="padding:22px 20px 0;display:flex;flex-direction:column;gap:14px">
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:{{ m.ls }};text-transform:{{ m.tt }};color:#8A8A85">{{ m.eyebrow }}</span>
+        <h1 style="margin:-4px 0 0;font-family:{{ m.tfont }};font-weight:700;font-size:{{ m.mh1 }};line-height:{{ m.h1lh }};letter-spacing:{{ m.tls }};text-transform:{{ m.tt }}">{{ m.title }}</h1>
+        <span style="font-size:12.5px;color:#5c5c58"><sc-for list="{{ m.updated }}" as="g"><sc-if value="{{ g.plain }}">{{ g.t }}</sc-if><sc-if value="{{ g.br }}"><span style="background:rgba(140,137,128,.14);border:1px dashed rgba(140,137,128,.6);border-radius:5px;padding:0 4px;font-weight:600">{{ g.t }}</span></sc-if></sc-for></span>
+        <span style="display:flex;gap:2px;background:#E1DED6;border-radius:999px;padding:3px;align-self:flex-start">
+          <sc-for list="{{ m.langs }}" as="l"><a href="{{ l.href }}" style="height:38px;border-radius:999px;display:flex;align-items:center;padding:0 14px;font-size:12.5px;font-weight:700;background:{{ l.bg }};color:{{ l.fg }};font-family:{{ l.font }};text-decoration:none">{{ l.label }}</a></sc-for>
+        </span>
+        <details open="{{ m.open }}" style="background:#fff;border-radius:16px;box-shadow:0 4px 14px rgba(0,0,0,.05)">
+          <summary style="list-style:none;display:flex;align-items:center;gap:10px;min-height:54px;padding:0 16px;cursor:pointer"><span style="flex:1;font-size:14.5px;font-weight:700">{{ m.toc }}</span><span style="font-size:12px;color:#8A8A85">{{ m.tocCount }}</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.2" style="transform:{{ m.chev }}"><path d="M6 9l6 6 6-6"></path></svg></summary>
+          <div style="border-top:1px solid #EFECE5;padding:2px 16px 6px">
+            <sc-for list="{{ m.sections }}" as="s"><a href="{{ s.href }}" style="display:flex;align-items:center;gap:12px;min-height:46px;border-bottom:1px solid #F2F0EB;font-size:14px;color:#111;text-decoration:none"><span style="font-family:Inter,sans-serif;font-size:11.5px;font-weight:700;color:#8A8A85;font-variant-numeric:tabular-nums;flex:none">{{ s.num }}</span><span style="flex:1">{{ s.t }}</span></a></sc-for>
+          </div>
+        </details>
+        <p style="margin:4px 0 0;font-size:15.5px;line-height:1.6;color:#2b2b28"><sc-for list="{{ m.intro }}" as="g"><sc-if value="{{ g.plain }}">{{ g.t }}</sc-if><sc-if value="{{ g.br }}"><span style="background:rgba(140,137,128,.14);border:1px dashed rgba(140,137,128,.6);border-radius:5px;padding:0 4px;font-weight:600">{{ g.t }}</span></sc-if></sc-for></p>
+        <sc-for list="{{ m.sections }}" as="s">
+        <section id="{{ s.anchor }}" style="margin-top:14px;padding-top:18px;border-top:1px solid rgba(0,0,0,.1);display:flex;flex-direction:column;gap:12px">
+          <h2 style="margin:0;font-family:{{ m.tfont }};font-weight:700;font-size:{{ m.mh2 }};line-height:{{ m.h2lh }};letter-spacing:{{ m.tls }};text-transform:{{ m.tt }}"><span style="font-family:Inter,sans-serif;font-size:11.5px;color:#8A8A85;margin-inline-end:8px">{{ s.num }}</span>{{ s.t }}</h2>
+          <div style="background:#fff;border-radius:14px;padding:13px 16px">
+            <span style="display:block;font-size:10px;font-weight:700;letter-spacing:{{ m.ls }};text-transform:{{ m.tt }};color:#E8442E">{{ m.summary }}</span>
+            <p style="margin:5px 0 0;font-size:14.5px;line-height:1.5;font-weight:600"><sc-for list="{{ s.sum }}" as="g"><sc-if value="{{ g.plain }}">{{ g.t }}</sc-if><sc-if value="{{ g.br }}"><span style="background:rgba(140,137,128,.14);border:1px dashed rgba(140,137,128,.6);border-radius:5px;padding:0 4px">{{ g.t }}</span></sc-if></sc-for></p>
+          </div>
+          <sc-for list="{{ s.blocks }}" as="b">
+            <sc-if value="{{ b.isP }}"><p style="margin:0;font-size:15px;line-height:{{ m.lh }};color:#2b2b28"><sc-for list="{{ b.segs }}" as="g"><sc-if value="{{ g.plain }}">{{ g.t }}</sc-if><sc-if value="{{ g.br }}"><span style="background:rgba(140,137,128,.14);border:1px dashed rgba(140,137,128,.6);border-radius:5px;padding:0 4px;font-weight:600">{{ g.t }}</span></sc-if><sc-if value="{{ g.fl }}"><span style="background:rgba(232,161,0,.17);box-shadow:inset 0 -1.5px 0 #C98A12;border-radius:3px;padding:0 2px">{{ g.t }}<sup style="font-family:Inter,sans-serif;font-size:9px;font-weight:700;color:#8F5E14;margin-inline-start:3px">⚑{{ g.n }}</sup></span></sc-if><sc-if value="{{ g.ln }}"><a href="{{ g.href }}" style="color:#111;font-weight:700;text-decoration:underline">{{ g.t }}</a></sc-if></sc-for></p></sc-if>
+            <sc-if value="{{ b.isOl }}"><div style="display:flex;flex-direction:column;gap:9px"><sc-for list="{{ b.items }}" as="it"><div style="display:flex;gap:12px;align-items:flex-start;font-size:15px;line-height:1.5"><span style="width:26px;height:26px;border-radius:999px;background:#101010;color:#fff;font-family:Inter,sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none">{{ it.n }}</span><span style="flex:1;padding-top:2px"><sc-for list="{{ it.segs }}" as="g"><sc-if value="{{ g.plain }}">{{ g.t }}</sc-if></sc-for></span></div></sc-for></div></sc-if>
+          </sc-for>
+        </section>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+</x-import>
+</div>
+</sc-for>
+
+</div>
+</section>
+</sc-for>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const PF = "'Playfair Display',serif", AR = "'Noto Kufi Arabic',sans-serif", INTER = "Inter,sans-serif", MONO = "ui-monospace,Menlo,monospace";
+const CODES = { privacy: 'WEB-14', terms: 'WEB-15', deletion: 'WEB-16' };
+const NAVH = ['./Public - Website.dc.html#WEB-01', './Public - List Your Shop.dc.html#PUB-01', './Public - Website.dc.html#WEB-04'];
+const NOTES = {
+  privacy: "The privacy policy, and the long-form layout all three pages share: sticky contents in the margin (right-hand in Arabic), a last-updated line and language switch under the title, then one plain-language summary box at the top of every section. Every data item is taken from the inventory in the brief, nothing added. The phone views show the contents collapsed and open; the collapsible is a native disclosure, so it works without script.",
+  terms: "Terms of use. It covers the brief and nothing more: a booking tool with independent barbers and shops; payment at the shop; deposits (amount and free-cancellation deadline shown before booking, not refunded after it); no-shows and reliability; reviews, takedowns and appeals; suspension; the wallet (cash top-up at a shop only, no cash-out); shop subscriptions for owners. The wallet section carries the flag that matters most (⚑14: payment-services regulation).",
+  deletion: "The page Google Play asks for, at a URL that works without signing in. It names the app and its publisher, gives the in-app steps, lets someone without the app ask by email (a template plus a button), and says what is erased, what is kept and for how long. It's also drawn on the phone, in French and Arabic, because the Play Store link opens there."
+};
+class Component extends DCLogic {
+  state = { ready: !!window.STERNCUT_LEGAL };
+  componentDidMount() {
+    if (!window.STERNCUT_LEGAL) this._t = setInterval(() => { if (window.STERNCUT_LEGAL) { clearInterval(this._t); this.setState({ ready: true }); } }, 60);
+  }
+  componentWillUnmount() { clearInterval(this._t); }
+  segs(str, ctx) {
+    const out = [], re = /⟦(\d+)\|([^⟧]+)⟧|⟪(\w+)\|([^⟫]+)⟫|(\[[^\]]+\])/g; let last = 0, m;
+    while ((m = re.exec(str))) {
+      if (m.index > last) out.push({ t: str.slice(last, m.index), plain: true });
+      if (m[1]) out.push({ t: m[2], fl: true, n: m[1], note: ctx.flags[m[1]] || '' });
+      else if (m[3]) out.push({ t: m[4], ln: true, href: '#' + ctx.ids[m[3]] });
+      else out.push({ t: m[5], br: true });
+      last = re.lastIndex;
+    }
+    if (last < str.length) out.push({ t: str.slice(last), plain: true });
+    return out;
+  }
+  block(b, ctx) {
+    if (typeof b === 'string') return { isP: true, segs: this.segs(b, ctx) };
+    if (Array.isArray(b)) return { isUl: true, items: b.map(x => ({ segs: this.segs(x, ctx) })) };
+    if (b.h) return { isH: true, t: b.h };
+    if (b.ol) return { isOl: true, items: b.ol.map((x, i) => ({ n: i + 1, segs: this.segs(x, ctx) })) };
+    if (b.tmpl) return { isTmpl: true, lines: b.tmpl.map(t => ({ t })) };
+    if (b.cta) return { isCta: true, segs: this.segs(b.cta, ctx) };
+    return {};
+  }
+  board(pk, lang, o) {
+    const D = window.STERNCUT_LEGAL, L = D.langs[lang], U = L.ui, P = L[pk], code = CODES[pk], LG = lang.toUpperCase(), ar = lang === 'ar';
+    const id = code + '-' + LG + (o.mobile ? (o.open ? '-M-OPEN' : '-M') : '');
+    const ids = { privacy: 'WEB-14-' + LG, terms: 'WEB-15-' + LG, deletion: 'WEB-16-' + LG };
+    const ctx = { flags: D.flags[pk], ids };
+    const n = P.sections.length;
+    const sections = P.sections.map((s, i) => ({
+      anchor: id + '-' + s.id, href: '#' + id + '-' + s.id, num: String(i + 1).padStart(2, '0'), t: s.t,
+      sum: this.segs(s.sum, ctx), blocks: s.body.map(b => this.block(b, ctx)),
+      tocLine: i === 0 ? '#111' : 'rgba(0,0,0,.12)', tocColor: i === 0 ? '#111' : '#5c5c58', tocWeight: i === 0 ? 700 : 500
+    }));
+    const other = lang === 'fr' ? 'ar' : 'fr';
+    const langItem = (c, dark) => ({ label: D.langs[c].ui.name, href: '#' + code + '-' + c.toUpperCase(), font: c === 'ar' ? AR : INTER,
+      bg: c === lang ? '#101010' : 'transparent', fg: dark ? (c === lang ? '#fff' : '#BDBAB2') : (c === lang ? '#fff' : '#5c5c58'), fw: c === lang ? 700 : 500 });
+    return {
+      id, lang, dir: ar ? 'rtl' : 'ltr',
+      code: code + ' · ' + LG + (o.mobile ? (o.open ? ' · phone, contents open' : ' · phone') : ''),
+      label: o.mobile ? (U.slugs[pk] + (o.open ? ' · contents open' : ' · contents collapsed')) : (U.slugs[pk] + ' · desktop, full length'),
+      font: ar ? AR : INTER, tfont: ar ? AR : PF, tt: ar ? 'none' : 'uppercase', ls: ar ? '0' : '.15em', ls2: ar ? '0' : '.04em', tls: ar ? '0' : '.01em',
+      h1: ar ? '36px' : '46px', h1lh: ar ? '1.55' : '1.05', mh1: ar ? '25px' : '30px', h2: ar ? '21px' : '24px', mh2: ar ? '18px' : '19px', h2lh: ar ? '1.6' : '1.2',
+      h3: ar ? '14px' : '11.5px', lh: ar ? '1.95' : '1.7', dot: ar ? '12px' : '10px', mono: ar ? AR : MONO,
+      nav: U.nav.map((t, i) => ({ t, href: NAVH[i] })),
+      langLink: { label: D.langs[other].ui.name, href: '#' + code + '-' + other.toUpperCase(), font: other === 'ar' ? AR : INTER },
+      signin: U.signin, draftTitle: U.draftTitle, draftBody: U.draftBody, eyebrow: U.eyebrow, title: P.title,
+      updated: this.segs(U.updated, ctx), draftOf: U.draftOf, langs: ['fr', 'ar', 'en'].map(c => langItem(c, false)),
+      intro: this.segs(P.intro, ctx), toc: U.toc, summary: U.summary, sections,
+      tocCount: ar ? (n >= 11 ? n + ' قسماً' : n + ' أقسام') : U.tocCount.replace('{n}', n),
+      url: U.slugs[pk], open: !!o.open, chev: o.open ? 'rotate(180deg)' : 'none',
+      f: {
+        tagline: U.footer.tagline, site: U.footer.site, legal: U.footer.legal, contact: U.footer.contact, langsT: U.footer.langs,
+        legalLinks: ['privacy', 'terms', 'deletion'].map(k => ({ t: U.names[k], href: '#' + ids[k], fg: k === pk ? '#fff' : '#BDBAB2', fw: k === pk ? 700 : 500 })),
+        email: this.segs(U.footer.email, ctx), phone: this.segs(U.footer.phone, ctx),
+        bottom: this.segs(U.footer.copy + '  ·  ' + U.footer.cndp, ctx), langs: ['fr', 'ar', 'en'].map(c => langItem(c, true))
+      }
+    };
+  }
+  renderVals() {
+    const D = window.STERNCUT_LEGAL;
+    if (!D) return { pages: [] };
+    const P = [
+      { key: 'privacy', mob: [['fr', false], ['fr', true]] },
+      { key: 'terms', mob: [] },
+      { key: 'deletion', mob: [['fr', false], ['ar', false]] }
+    ];
+    return {
+      pages: P.map(p => ({
+        code: CODES[p.key], name: D.langs.fr.ui.names[p.key] + ' · ' + D.langs.ar.ui.names[p.key] + ' · ' + D.langs.en.ui.names[p.key],
+        note: NOTES[p.key],
+        desk: ['fr', 'ar', 'en'].map(l => this.board(p.key, l, {})),
+        mob: p.mob.map(([l, op]) => this.board(p.key, l, { mobile: true, open: op }))
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

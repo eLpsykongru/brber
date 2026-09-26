@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<svg viewBox="0 0 1024 1024" width="100%" height="100%" style="display:block"><defs><clipPath id="{{ oId }}"><path clip-rule="evenodd" d="{{ outD }}"></path></clipPath><clipPath id="{{ iId }}"><polygon points="{{ inPts }}"></polygon></clipPath></defs><rect width="1024" height="1024" fill="{{ bgc }}"></rect><text x="512" y="{{ by }}" text-anchor="middle" font-family="'Playfair Display',serif" font-weight="900" font-size="{{ fs }}" fill="{{ fgc }}" clip-path="{{ oUrl }}">S</text><text x="512" y="{{ by }}" text-anchor="middle" font-family="'Playfair Display',serif" font-weight="900" font-size="{{ fs }}" fill="{{ cutc }}" clip-path="{{ iUrl }}">S</text></svg>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:256,&quot;height&quot;:256},&quot;variant&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;icon&quot;,&quot;adapt&quot;,&quot;notif&quot;,&quot;splash&quot;],&quot;default&quot;:&quot;icon&quot;,&quot;tsType&quot;:&quot;'icon'|'adapt'|'notif'|'splash'&quot;},&quot;bg&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#101010&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;fg&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#F2F0EB&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;cut&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#E8442E&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const TH = 24, SIZE = { icon: 800, adapt: 600, notif: 1150, splash: 640 };
+let N = 0;
+class Component extends DCLogic {
+  uid = 'sm' + (++N) + Math.random().toString(36).slice(2, 6);
+  cut(fs) {
+    const r = TH * Math.PI / 180, dx = Math.cos(r), dy = -Math.sin(r), nx = Math.sin(r), ny = Math.cos(r), c = 512, h = fs * 0.025, R = fs * 0.2;
+    const pts = [[-R, -h], [R, -h], [R, h], [-R, h]].map(([t, o]) => [c + t * dx + o * nx, c + t * dy + o * ny]);
+    const s = pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1));
+    return { inPts: s.join(' '), outD: 'M-10 -10H1034V1034H-10Z M' + s.join(' L') + ' Z' };
+  }
+  renderVals() {
+    const fs = SIZE[this.props.variant] || 800, k = this.cut(fs);
+    return {
+      oId: this.uid + 'o', iId: this.uid + 'i', oUrl: 'url(#' + this.uid + 'o)', iUrl: 'url(#' + this.uid + 'i)',
+      inPts: k.inPts, outD: k.outD, fs, by: Math.round(512 + 0.354 * fs),
+      bgc: this.props.bg || 'none', fgc: this.props.fg || '#F2F0EB', cutc: this.props.cut || 'none'
+    };
+  }
+}
+</script>
+</body>
+</html>

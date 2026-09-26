@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Noto+Kufi+Arabic:wght@400;500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+html{background:#0D0D0F}
+body{margin:0;background:#0D0D0F;font-family:Inter,system-ui,sans-serif}
+a{color:#E8442E;text-decoration:none}a:hover{color:#C33421}
+.dv-turn{padding:38px 44px 30px;scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#fff;color:#111;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 14px/1.2 Inter,sans-serif;color:#fff}
+.dv-note{font:400 12px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:760px;margin:0 0 26px}
+.dv-src{font:400 10.5px/1.4 Inter,sans-serif;color:rgba(255,255,255,.6);opacity:.55;margin:-18px 0 22px}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(255,255,255,.12);color:#fff;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 Inter,sans-serif;color:rgba(255,255,255,.6)}
+.dv-opt:target .dv-oid{background:#E8442E;color:#fff}
+.dv-next{flex-basis:100%;margin:24px 0 0;font:12px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6)}
+.dv-nav{display:flex;flex-wrap:wrap;gap:6px;padding:12px 44px 0}
+</style>
+</helmet>
+<div style="padding:32px 44px 0">
+<a href="./Index.dc.html" style="font:600 10px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.6)">← All pages</a>
+<div style="font-family:'Playfair Display',serif;font-weight:700;font-size:27px;letter-spacing:.02em;text-transform:uppercase;color:#fff;margin:10px 0 0">Barber · Support & Obligations</div>
+<div style="font:400 12px Inter,sans-serif;color:rgba(255,255,255,.6);margin:6px 0 0">5 current</div>
+</div>
+<div class="dv-nav"><a href="./Barber - Onboarding.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Onboarding</a><a href="./Barber - Today.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Today</a><a href="./Barber - My Day.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">My day</a><a href="./Barber - Clients.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Clients</a><a href="./Barber - Messages.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Messages</a><a href="./Barber - My Services.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">My services</a><a href="./Barber - My Work.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">My work</a><a href="./Barber - Reviews.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Reviews</a><a href="./Barber - Float.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Float</a><a href="./Barber - Account.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">The account</a><a href="./Barber - Earnings.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Earnings</a><a href="./Barber - Waitlist.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Waitlist</a><a href="./Barber - Notifications.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Notifs</a><a href="./Barber - Support.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:#E8442E;color:#fff;text-decoration:none">Support</a><a href="./Barber - Profile.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Profile</a><a href="./Barber - System States.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">System</a></div>
+<div class="dv-nav" style="padding-top:0;opacity:.75"><span style="font:700 9.5px Inter,sans-serif;letter-spacing:.14em;color:rgba(255,255,255,.6);align-self:center;margin-right:4px">OWNER</span><a href="./Owner - Shop.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Shop</a><a href="./Owner - Barbers.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Barbers</a><a href="./Owner - Services.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Services</a><a href="./Owner - Reviews.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Reviews</a><a href="./Owner - Reports.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Reports</a><a href="./Owner - Subscription.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Subscription</a></div>
+<div style="height:1px;background:rgba(255,255,255,.14);margin:20px 0 0"></div>
+<section class="dv-turn" id="T1">
+<div class="dv-thd"><a class="dv-tid" href="#T1">T1</a><span class="dv-tname">In-app support console — the barber's end</span></div>
+<p class="dv-note">The barber's side of the queue Nadia works in the admin console. Every case here has a counterpart there, so the console is built around <em>the thing that went wrong</em> rather than a generic chat: each case carries the booking or payout it's about, and the composer starts from a booking rather than a blank box. Three screens — the help home with open cases (<a class="dv-oid" href="#BSP-01">BSP-01</a>), a live thread where ops asks Youssef about the rating Anas disputed (<a class="dv-oid" href="./Barber - Messages.dc.html#BMS-02">BMS-02</a>), and reporting a problem from a booking (<a class="dv-oid" href="#BSP-02">BSP-02</a>). Reached from Help Center in <a class="dv-oid" href="./Barber - Profile.dc.html#BPR-01">BPR-01</a>.</p>
+<p class="dv-src">from Barber App - Foundations · turn 5</p>
+<div class="dv-opts">
+<div class="dv-opt" id="BSP-01"><div class="dv-olabel"><a class="dv-oid" href="#BSP-01">BSP-01</a>Help &amp; support · questions open <a class="dv-oid" href="./Barber - Store Readiness.dc.html#HLP-01">HLP-01</a></div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;letter-spacing:.14em;text-transform:uppercase">Support</span>
+      <span style="width:38px"></span>
+    </div>
+    <span style="display:flex;align-items:center;gap:10px;background:#17171A;border-radius:14px;height:46px;padding:0 16px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2" style="flex:none"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5 21 21"></path></svg><span style="font-size:14px;color:#9A9CA3">Search help</span></span>
+    <div style="display:flex;align-items:center;gap:11px;background:#17171A;border-radius:18px;padding:14px 16px">
+      <span style="width:34px;height:34px;border-radius:999px;background:rgba(74,222,128,.16);display:flex;align-items:center;justify-content:center;flex:none"><span style="width:9px;height:9px;border-radius:999px;background:#4ADE80"></span></span>
+      <span style="flex:1"><span style="display:block;font-size:13px;font-weight:700">Ops is online</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Replies in about 40 min · Arabic, Français, English</span></span>
+    </div>
+    <div style="display:flex;align-items:baseline;justify-content:space-between">
+      <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3">YOUR CASES</span>
+      <span style="font-size:12px;font-weight:600;color:#E8442E">Closed (9)</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:18px;padding:13px 14px;outline:2px solid #E8442E;outline-offset:-2px">
+        <span style="width:38px;height:38px;border-radius:12px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="1.9"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg></span>
+        <span style="flex:1"><span style="display:block;font-size:13px;font-weight:700">A client disputed your rating</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">CS-4467 · Anas Bouzid · needs your reply</span></span>
+        <span style="width:22px;height:22px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">1</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:18px;padding:13px 14px">
+        <span style="width:38px;height:38px;border-radius:12px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg></span>
+        <span style="flex:1"><span style="display:block;font-size:13px;font-weight:600">Float pickup was late</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">CS-4462 · with ops · opened 3d ago</span></span>
+        <span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#E8A100;background:rgba(232,161,0,.12);border-radius:6px;padding:4px 7px;flex:none">WAITING</span>
+      </div>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">COMMON FOR BARBERS</span>
+    <div style="background:#17171A;border-radius:20px;padding:6px 16px">
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #26262B"><span style="flex:1;font-size:13px;font-weight:600">When do I get the deposit money?</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #26262B"><span style="flex:1;font-size:13px;font-weight:600">Settling the cash float</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #26262B"><span style="flex:1;font-size:13px;font-weight:600">Marking a client as a no-show</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #26262B"><span style="flex:1;font-size:13px;font-weight:600">Asking a client to pay up front</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 0"><span style="flex:1;font-size:13px;font-weight:600">Adding a barber to my shop</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></div>
+    </div>
+    <div style="display:flex;gap:9px;margin-top:2px">
+      <span style="flex:1;height:50px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.05em"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M5 4h4l2 5-3 2a12 12 0 0 0 5 5l2-3 5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"></path></svg>CALL OPS</span>
+      <span style="flex:1.3;height:50px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.05em"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M12 5v14M5 12h14"></path></svg>NEW CASE</span>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<div class="dv-opt" id="BSP-02"><div class="dv-olabel"><a class="dv-oid" href="#BSP-02">BSP-02</a>Report a problem</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.62)"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#151517;border-radius:26px 26px 0 0;padding:12px 22px 34px;display:flex;flex-direction:column;gap:13px">
+    <span style="align-self:center;width:40px;height:4px;border-radius:2px;background:#333"></span>
+    <div style="display:flex;align-items:center">
+      <span style="flex:1;font-size:17px;font-weight:700">Report a problem</span>
+      <span style="width:32px;height:32px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+    </div>
+    <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">WHAT'S IT ABOUT?</span>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:14px;padding:14px 15px;outline:2px solid #E8442E;outline-offset:-2px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="1.9" style="flex:none"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18"></path></svg>
+        <span style="flex:1;font-size:13px;font-weight:700">A booking</span>
+        <span style="width:20px;height:20px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4"><path d="M5 12l5 5L20 7"></path></svg></span>
+      </span>
+      <span style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:14px;padding:14px 15px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9" style="flex:none"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01"></path></svg>
+        <span style="flex:1;font-size:13px;font-weight:600">Money or float</span>
+        <span style="width:20px;height:20px;border-radius:999px;border:1.5px solid #3A3A40;flex:none"></span>
+      </span>
+      <span style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:14px;padding:14px 15px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9" style="flex:none"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg>
+        <span style="flex:1;font-size:13px;font-weight:600">A client's behaviour</span>
+        <span style="width:20px;height:20px;border-radius:999px;border:1.5px solid #3A3A40;flex:none"></span>
+      </span>
+      <span style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:14px;padding:14px 15px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9" style="flex:none"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg>
+        <span style="flex:1;font-size:13px;font-weight:600">The app is broken</span>
+        <span style="width:20px;height:20px;border-radius:999px;border:1.5px solid #3A3A40;flex:none"></span>
+      </span>
+    </div>
+    <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">WHICH BOOKING?</span>
+    <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:16px;padding:13px 15px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#9A9CA3;flex:none">AB</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:700">Anas Bouzid · 14:00</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Haircut + Beard · 90 DH paid up front</span></span>
+      <span style="font-size:12px;font-weight:600;color:#E8442E;flex:none">Change</span>
+    </div>
+    <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">TELL US WHAT HAPPENED</span>
+    <span style="display:flex;align-items:flex-start;background:#212125;border-radius:16px;min-height:78px;padding:14px 16px;font-size:14px;line-height:1.5;color:#9A9CA3">He turned up 25 min late and blamed the shop<span style="display:inline-block;width:2px;height:18px;background:#E8442E;margin-left:2px"></span></span>
+    <div style="display:flex;align-items:center;gap:10px;background:#17171A;border-radius:16px;padding:12px 14px">
+      <span style="width:38px;height:38px;border-radius:12px;border:1px dashed #3A3A40;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="6" width="18" height="14" rx="3"></rect><circle cx="12" cy="13" r="3"></circle></svg></span>
+      <span style="flex:1;font-size:12px;color:#9A9CA3;line-height:1.45">Add a photo if it helps — the check-in log is attached automatically.</span>
+    </div>
+    <a href="#BSP-04" style="height:54px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.06em;text-decoration:none">SEND TO OPS</a>
+    <span style="text-align:center;font-size:11px;color:#9A9CA3">Usually answered within an hour during shop hours</span>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#BSP-04">SEND TO OPS</a></div></div>
+
+<p class="dv-next">Try next: "make the barber app a working prototype" · "add the owner's payout statement"</p>
+</div>
+</section>
+
+<section class="dv-turn" id="T2">
+<div class="dv-thd"><a class="dv-tid" href="#T2">T2</a><span class="dv-tname">The receiving end — where admin actions land in the shop</span></div>
+<p class="dv-note">Admin <a class="dv-oid" href="#BSP-01">BSP-01</a> issues obligations and <a class="dv-oid" href="./Barber - My Day.dc.html#BDY-03">BDY-03</a> blocks approval on a map pin, but neither had a barber-side surface — ops was writing into a void, then counting the silence as non-compliance. Marina's owner "ignored 3 reminders"; this is what he'd actually have seen. <a class="dv-oid" href="#BSP-03">BSP-03</a> is the task inbox, <a class="dv-oid" href="#BSP-04">BSP-04</a> proof of the poster moved (which is what flips the VERIFY row in 5a), <a class="dv-oid" href="./Barber - Onboarding.dc.html#BON-01">BON-01</a> the applying shop's status screen behind 1f. Same records, no new tables — a task is a row ops already writes.</p>
+<p class="dv-src">from Barber App - Foundations · turn 9</p>
+<div class="dv-opts">
+<div class="dv-opt" id="BSP-03"><div class="dv-olabel"><a class="dv-oid" href="#BSP-03">BSP-03</a>To do · 2 from Sterncut</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;letter-spacing:.14em;text-transform:uppercase">To do</span>
+      <span style="width:38px"></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:11px;background:#17171A;border-radius:18px;padding:14px 16px">
+      <span style="width:34px;height:34px;border-radius:999px;background:rgba(74,222,128,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:700">Le Fade is in good standing</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Nothing overdue · 6 tasks done on time</span></span>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">OPEN · 2</span>
+    <div style="background:#17171A;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:13px;outline:2px solid #E8A100;outline-offset:-2px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:6px;padding:4px 8px">DUE IN 6 DAYS</span>
+        <span style="flex:1"></span>
+        <span style="font-size:10px;font-family:ui-monospace,Menlo,monospace;color:#6B6B72">RV-2291</span>
+      </div>
+      <div>
+        <div style="font-size:15px;font-weight:700">Move your QR poster outside</div>
+        <div style="font-size:12px;color:#9A9CA3;margin-top:6px;line-height:1.5;text-wrap:pretty">It's by the mirror, so a scan tells us when someone reached the counter — not when they arrived. That's why the review stayed up.</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px;background:#111113;border-radius:12px;padding:11px 13px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+        <span style="flex:1;min-width:0;font-size:11.5px;color:#9A9CA3">Fri Aug 15 · nothing happens to your page before then</span>
+      </div>
+      <div style="display:flex;gap:9px">
+        <span style="flex:1;height:46px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;gap:7px;font-size:12px;font-weight:700;letter-spacing:.05em"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><rect x="3" y="6" width="18" height="14" rx="3"></rect><circle cx="12" cy="13" r="3"></circle></svg>SEND A PHOTO</span>
+        <span style="width:46px;height:46px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg></span>
+      </div>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#9A9CA3;background:#212125;border-radius:6px;padding:4px 8px">DUE IN 12 DAYS</span>
+        <span style="flex:1"></span>
+        <span style="font-size:10px;font-family:ui-monospace,Menlo,monospace;color:#6B6B72">ONB-197</span>
+      </div>
+      <div>
+        <div style="font-size:15px;font-weight:700">Add Salim to the shop properly</div>
+        <div style="font-size:12px;color:#9A9CA3;margin-top:6px;line-height:1.5;text-wrap:pretty">He's cutting under your name. Give him his own login so his bookings and ratings are his.</div>
+      </div>
+      <a href="./Owner - Barbers.dc.html#OBR-02" style="height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.05em;color:#fff;text-decoration:none">INVITE HIM</a>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">DONE</span>
+    <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:18px;padding:13px 15px;opacity:.6">
+      <span style="width:30px;height:30px;border-radius:999px;background:rgba(74,222,128,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="3"><path d="M5 12l5 5L20 7"></path></svg></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">Settled your cash float</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Jul 12 · 2 940 DH · on time</span></span>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="./Owner - Barbers.dc.html#OBR-02">INVITE HIM</a></div></div>
+
+<div class="dv-opt" id="BSP-04"><div class="dv-olabel"><a class="dv-oid" href="#BSP-04">BSP-04</a>Proof sent · waiting on ops</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:11px;letter-spacing:.16em;font-weight:700;color:#9A9CA3">TASK · RV-2291</span>
+      <span style="width:38px"></span>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding-top:2px">
+      <span style="width:60px;height:60px;border-radius:999px;background:#17171A;display:flex;align-items:center;justify-content:center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="1.9"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase">Sent for checking</div>
+        <div style="font-size:12.5px;color:#9A9CA3;margin-top:8px;line-height:1.5;max-width:270px;text-wrap:pretty">Ops looks at it within a day. You don't need to do anything else.</div>
+      </div>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:12px">
+      <span style="height:158px;border-radius:14px;overflow:hidden;background:#212125;display:block"><image-slot id="task-proof" shape="rect" placeholder="Poster on the street door"></image-slot></span>
+      <div style="display:flex;align-items:center;gap:9px">
+        <span style="flex:1;min-width:0;font-size:11.5px;color:#9A9CA3">Sent today, 09:12 · with your shop's location</span>
+        <span style="font-size:11.5px;font-weight:700;color:#E8442E;flex:none">Replace</span>
+      </div>
+    </div>
+    <div style="background:#111113;border:1px solid #1E1E22;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:0">
+      <div style="display:flex;gap:12px">
+        <span style="width:20px;flex:none;display:flex;flex-direction:column;align-items:center">
+          <span style="width:20px;height:20px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span>
+          <span style="flex:1;width:2px;background:#26262B"></span>
+        </span>
+        <span style="flex:1;min-width:0;padding-bottom:15px"><span style="display:block;font-size:12.5px;font-weight:600;color:#9A9CA3">Task issued</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Aug 8 · after the review was restored</span></span>
+      </div>
+      <div style="display:flex;gap:12px">
+        <span style="width:20px;flex:none;display:flex;flex-direction:column;align-items:center">
+          <span style="width:20px;height:20px;border-radius:999px;background:#E8A100;display:flex;align-items:center;justify-content:center"><span style="width:7px;height:7px;border-radius:999px;background:#0D0D0F"></span></span>
+          <span style="flex:1;width:2px;background:#26262B"></span>
+        </span>
+        <span style="flex:1;min-width:0;padding-bottom:15px"><span style="display:block;font-size:12.5px;font-weight:700">You sent a photo <span style="font-size:9.5px;letter-spacing:.08em;color:#E8A100;background:rgba(232,161,0,.14);border-radius:5px;padding:3px 7px;margin-left:4px">NOW</span></span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Today 09:12 · 6 days before it was due</span></span>
+      </div>
+      <div style="display:flex;gap:12px">
+        <span style="width:20px;flex:none;display:flex;justify-content:center"><span style="width:20px;height:20px;border-radius:999px;border:1.5px dashed #3A3A40"></span></span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;color:#6B6B72">Ops confirms it</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">By Sun Aug 10</span></span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:9px;background:#17171A;border-radius:16px;padding:13px 15px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.2" style="flex:none;margin-top:1px"><path d="M9 11l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg>
+      <span style="flex:1;font-size:12px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Once it's outside, scan times count as arrival times again — so a late client can't blame the shop.</span>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<p class="dv-next">Try next: "add the coupon campaign screens" · "make the barber app a working prototype"</p>
+</div>
+</section>
+
+<section class="dv-turn" id="T3">
+<div class="dv-thd"><a class="dv-tid" href="#T3">T3</a><span class="dv-tname">When it breaks in the shop</span></div>
+<p class="dv-note">The barber's failures are not the customer's. He's mid-cut, one-handed, with someone in the chair and three waiting — so the rule from Customer <a class="dv-oid" href="./Customer - System States.dc.html#SYS-08">SYS-08</a> gets sharper here: <strong>an error must never stop the queue moving.</strong> Every screen keeps the chair working offline and syncs later; none of them asks him to stop and fix something while a client watches. Six states — connection, double-booking, a failed collection, an expiring licence, a suspended shop, and a stale app.</p>
+<p class="dv-src">from Barber App - Foundations · turn 10</p>
+<div class="dv-opts">
+<div class="dv-opt" id="BSP-05"><div class="dv-olabel"><a class="dv-oid" href="#BSP-05">BSP-05</a>Licence runs out in 9 days</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:14px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between">
+      <span><span style="display:block;font-size:10px;letter-spacing:.18em;font-weight:700;color:#9A9CA3">SUNDAY, 9 AUGUST</span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:26px;line-height:1.1;letter-spacing:.03em;text-transform:uppercase;margin-top:5px">Salam, Youssef</span></span>
+      <span style="position:relative;width:38px;height:38px;border-radius:999px;background:#17171A;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 8a6 6 0 0 1 12 0c0 7 2 7 2 9H4c0-2 2-2 2-9z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg><span style="position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:999px;background:#E8442E"></span></span>
+    </div>
+    <div style="background:rgba(232,161,0,.1);border:1px solid rgba(232,161,0,.32);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:13px">
+      <div style="display:flex;align-items:center;gap:11px">
+        <span style="width:34px;height:34px;border-radius:999px;background:rgba(232,161,0,.2);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg></span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:700;color:#E8A100">Your licence expires Aug 18</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">9 days · takes two minutes to sort</span></span>
+      </div>
+      <span style="font-size:12px;line-height:1.5;color:#D8D8DC;border-top:1px solid rgba(232,161,0,.2);padding-top:13px;text-wrap:pretty">After that we have to hide you from search until it's renewed. Bookings you already have would still stand.</span>
+      <span style="height:44px;border-radius:999px;background:#E8A100;color:#0D0D0F;display:flex;align-items:center;justify-content:center;gap:7px;font-size:12px;font-weight:800;letter-spacing:.05em"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0D0D0F" stroke-width="2"><rect x="3" y="6" width="18" height="14" rx="3"></rect><circle cx="12" cy="13" r="3"></circle></svg>PHOTOGRAPH THE NEW ONE</span>
+    </div>
+    <div>
+      <span style="display:block;font-size:10px;letter-spacing:.16em;font-weight:700;color:#9A9CA3">BOOKED TODAY</span>
+      <span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:40px;line-height:1.05;margin-top:4px;font-variant-numeric:tabular-nums">380 DH</span>
+    </div>
+    <div style="display:flex;gap:10px">
+      <div style="flex:1;background:#17171A;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#9A9CA3">TODAY</span><span style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums">6</span></div>
+      <div style="flex:1;background:#17171A;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#9A9CA3">WALK-INS</span><span style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums">2</span></div>
+      <div style="flex:1;background:#17171A;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:3px"><span style="font-size:10px;letter-spacing:.08em;font-weight:700;color:#9A9CA3">FREE SLOTS</span><span style="font-size:22px;font-weight:700;font-variant-numeric:tabular-nums">3</span></div>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">NEXT UP</span>
+    <div style="background:#17171A;border-radius:22px;padding:16px;display:flex;align-items:center;gap:12px">
+      <span style="width:44px;height:44px;border-radius:999px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#E8442E;flex:none">MK</span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:700">Mehdi Kabbaj</span><span style="display:block;font-size:11.5px;color:#9A9CA3;margin-top:3px">Haircut + Beard · 45 min · 90 DH</span></span>
+      <span style="text-align:right;flex:none"><span style="display:block;font-size:14px;font-weight:800;color:#E8442E;font-variant-numeric:tabular-nums">11:30</span><span style="display:block;font-size:10px;letter-spacing:.08em;color:#9A9CA3;margin-top:2px">IN 24 MIN</span></span>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<p class="dv-next">Try next: "do the admin error states" · "wire packages into the customer prototype"</p>
+</div>
+</section>
+
+
+</x-dc>
+</body>
+</html>

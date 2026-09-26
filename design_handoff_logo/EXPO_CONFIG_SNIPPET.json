@@ -1,0 +1,24 @@
+{
+  "icon": "./assets/sterncut/icon.png",
+  "android": {
+    "adaptiveIcon": {
+      "foregroundImage": "./assets/sterncut/android-foreground.png",
+      "monochromeImage": "./assets/sterncut/android-monochrome.png",
+      "backgroundColor": "#101010"
+    }
+  },
+  "plugins": [
+    [
+      "expo-splash-screen",
+      {
+        "image": "./assets/sterncut/splash-icon-light.png",
+        "backgroundColor": "#F8F8F6",
+        "dark": {
+          "image": "./assets/sterncut/splash-icon-dark.png",
+          "backgroundColor": "#101010"
+        },
+        "imageWidth": 200
+      }
+    ]
+  ]
+}

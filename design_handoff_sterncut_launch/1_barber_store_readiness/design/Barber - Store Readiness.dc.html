@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Noto+Kufi+Arabic:wght@400;500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+html{background:#0D0D0F}
+body{margin:0;background:#0D0D0F;font-family:Inter,system-ui,sans-serif}
+a{color:#E8442E;text-decoration:none}a:hover{color:#C33421}
+.dv-turn{padding:38px 44px 30px;scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#fff;color:#111;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 14px/1.2 Inter,sans-serif;color:#fff}
+.dv-note{font:400 12px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:760px;margin:0 0 26px}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(255,255,255,.12);color:#fff;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 Inter,sans-serif;color:rgba(255,255,255,.6)}
+.dv-opt:target .dv-oid{background:#E8442E;color:#fff}
+.dv-next{flex-basis:100%;margin:24px 0 0;font:12px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6)}
+.dv-nav{display:flex;flex-wrap:wrap;gap:6px;padding:12px 44px 0}
+</style>
+</helmet>
+<div style="padding:32px 44px 0">
+<a href="./Index.dc.html" style="font:600 10px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.6)">← All pages</a>
+<div style="font-family:'Playfair Display',serif;font-weight:700;font-size:27px;letter-spacing:.02em;text-transform:uppercase;color:#fff;margin:10px 0 0">Barber · Store readiness</div>
+<div style="font:400 12px Inter,sans-serif;color:rgba(255,255,255,.6);margin:6px 0 0">20 screens · settings, leaving, chat, export, cash top-up, help. Drawn in English, BST-01 and DEL-01 also in Arabic. Every string in English, French and Arabic is in <code>design_handoff_store_readiness/README.md</code>.</div>
+<div style="font:400 12px/1.55 Inter,sans-serif;color:rgba(255,255,255,.6);margin:12px 0 0;max-width:760px">Applied on every screen: nothing is drawn that the product doesn't do (no &ldquo;coming soon&rdquo;, no greyed-out teasers); copy about clients names them instead of using a pronoun; one decision per screen, every target 44&nbsp;px or more, list rows 64&nbsp;px.</div>
+</div>
+<div class="dv-nav">
+<a href="#BST" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:#E8442E;color:#fff;text-decoration:none">BST · Settings</a>
+<a href="#DEL" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">DEL · Delete account</a>
+<a href="#MSG" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">MSG · Chat</a>
+<a href="#EXP" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">EXP · Export</a>
+<a href="#TOP" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">BCF-02b · Cash top-up</a>
+<a href="#HLP" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">HLP · Help article</a>
+<span style="width:10px"></span>
+<a href="./Barber - Profile.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.75);text-decoration:none">Profile</a>
+<a href="./Barber - Notifications.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.75);text-decoration:none">Notifications</a>
+<a href="./Barber - Messages.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.75);text-decoration:none">Messages</a>
+<a href="./Barber - Float.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.75);text-decoration:none">Float</a>
+<a href="./Barber - Support.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.75);text-decoration:none">Support</a>
+<a href="./Owner - Reports.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.75);text-decoration:none">Owner · Reports</a>
+</div>
+<div style="height:1px;background:rgba(255,255,255,.14);margin:20px 0 0"></div>
+
+<section class="dv-turn" id="BST">
+<div class="dv-thd"><a class="dv-tid" href="#BST">BST</a><span class="dv-tname">Settings &mdash; one row on Profile, only what exists behind it</span></div>
+<p class="dv-note">Profile gains one row, <strong>Settings</strong>, between Help Center and Logout, and gives Language up to it (<a class="dv-oid" href="#BST-00">BST-00</a>). Behind it sits only what the app does today: language, a one-line summary of the notification settings behind the bell (<a class="dv-oid" href="./Barber - Notifications.dc.html#BNT-03">BNT-03</a> &mdash; opened, not redrawn), sign-in and security, two legal links that open sterncut.ma in the in-app browser, log out of this phone, and Delete account &mdash; last, in red. Logout stays on Profile too; both open the same small sheet (<a class="dv-oid" href="#BST-05">BST-05</a>). The Arabic version sits beside the English so the mirroring can be checked row by row.</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="BST-00"><div class="dv-olabel"><a class="dv-oid" href="#BST-00">BST-00</a>Profile &middot; Settings above Logout</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="BST-00" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="position:absolute;left:0;right:0;top:0;z-index:3;background:#0D0D0F;border-bottom:1px solid #26262B;padding:58px 20px 13px;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:15px;letter-spacing:.18em;text-transform:uppercase">Profile</div>
+  <div style="padding:106px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:11px;background:#17171A;border-radius:18px;padding:14px 16px">
+      <span style="width:34px;height:34px;border-radius:999px;background:rgba(74,222,128,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M9 12l2 2 4-4"></path></svg></span>
+      <span style="flex:1"><span style="display:block;font-size:13px;font-weight:700">Page is live</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Customers can find and book you</span></span>
+      <span style="font-size:12px;font-weight:600;color:#E8442E;flex:none">Preview</span>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:6px 16px">
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #26262B"><span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg></span><span style="flex:1;font-size:14px;font-weight:600">Your profile</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #26262B"><span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg></span><span style="flex:1;font-size:14px;font-weight:600">Schedule settings</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #26262B"><span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span><span style="flex:1;font-size:14px;font-weight:600">My services</span><span style="font-size:12px;color:#9A9CA3">5</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #26262B"><span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="6" width="18" height="14" rx="3"></rect><circle cx="12" cy="13" r="3"></circle></svg></span><span style="flex:1;font-size:14px;font-weight:600">My work</span><span style="font-size:12px;color:#9A9CA3">4 photos</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #26262B"><span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 20h4l10-10-4-4L4 16z"></path><path d="M15 5l4 4"></path></svg></span><span style="flex:1;font-size:14px;font-weight:600">Salon management</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #26262B"><span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8"></path><path d="M21 3h-6M21 3v6"></path></svg></span><span style="flex:1;font-size:14px;font-weight:600">Earnings</span><span style="font-size:12px;color:#9A9CA3;font-variant-numeric:tabular-nums">2 780 DH</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #26262B"><span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1.9-1.1 1.8M12 17h.01"></path></svg></span><span style="flex:1;font-size:14px;font-weight:600">Help Center</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <a href="#BST-01" style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #26262B;color:#fff;text-decoration:none"><span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span><span style="flex:1;font-size:14px;font-weight:600">Settings</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></a>
+      <a href="#BST-05" style="display:flex;align-items:center;gap:13px;padding:14px 0;color:#E8442E;text-decoration:none"><span style="width:34px;height:34px;border-radius:999px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path></svg></span><span style="flex:1;font-size:14px;font-weight:600">Logout</span></a>
+    </div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center;z-index:5">
+    <div style="display:flex;align-items:center;gap:2px;background:#17171A;border:1px solid #26262B;border-radius:999px;padding:6px;box-shadow:0 10px 28px rgba(0,0,0,.5)">
+      <span style="width:46px;height:46px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg></span>
+      <span style="width:46px;height:46px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg></span>
+      <span style="width:50px;height:50px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(232,68,46,.5)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><path d="M12 5v14M5 12h14"></path></svg></span>
+      <span style="position:relative;width:46px;height:46px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg><span style="position:absolute;top:5px;right:3px;min-width:19px;height:19px;border-radius:999px;background:#E8442E;border:2px solid #17171A;box-sizing:border-box;font-size:10px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;padding:0 4px">4</span></span>
+      <span style="width:46px;height:46px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg></span>
+    </div>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">Scrolled to the bottom of <a class="dv-oid" href="./Barber - Profile.dc.html#BPR-01">BPR-01</a>. The only change: Settings is new, Language is gone from this list. Leads to · <a class="dv-oid" href="#BST-01">BST-01</a> · Logout opens <a class="dv-oid" href="#BST-05">BST-05</a></div>
+</div>
+
+<div class="dv-opt" id="BST-01"><div class="dv-olabel"><a class="dv-oid" href="#BST-01">BST-01</a>Settings</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="BST-01" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <a href="#BST-00" style="width:44px;height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></a>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;letter-spacing:.16em;text-transform:uppercase">Settings</span>
+      <span style="width:44px;flex:none"></span>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px">
+      <a href="#BST-02" style="display:flex;align-items:center;gap:13px;min-height:64px;border-bottom:1px solid #26262B;color:#fff;text-decoration:none"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9M12 3c-2.5 2.6-3.8 5.6-3.8 9s1.3 6.4 3.8 9"></path></svg></span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600">Language</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:3px">English</span></span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></a>
+      <a href="./Barber - Notifications.dc.html#BNT-03" style="display:flex;align-items:center;gap:13px;min-height:64px;color:#fff;text-decoration:none"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 8a6 6 0 0 1 12 0c0 7 2 7 2 9H4c0-2 2-2 2-9z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg></span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600">Notifications</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:3px;font-variant-numeric:tabular-nums">3 of 4 alerts on · quiet 19:00–09:30</span></span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></a>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin:6px 0 -4px 4px">ACCOUNT</span>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px">
+      <a href="#BST-03" style="display:flex;align-items:center;gap:13px;min-height:64px;color:#fff;text-decoration:none"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600">Sign-in &amp; security</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:3px">youssef.elamrani@gmail.com</span></span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></a>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin:6px 0 -4px 4px">LEGAL</span>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px">
+      <div style="display:flex;align-items:center;gap:13px;min-height:64px;border-bottom:1px solid #26262B"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg></span><span style="flex:1;min-width:0;font-size:15px;font-weight:600">Terms of use</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2" style="flex:none"><path d="M14 4h6v6M20 4l-8 8M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:13px;min-height:64px"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3z"></path></svg></span><span style="flex:1;min-width:0;font-size:15px;font-weight:600">Privacy policy</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2" style="flex:none"><path d="M14 4h6v6M20 4l-8 8M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></div>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px;margin-top:8px">
+      <a href="#BST-05" style="display:flex;align-items:center;gap:13px;min-height:64px;color:#fff;text-decoration:none"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path></svg></span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600">Log out</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:3px">This phone only</span></span></a>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px">
+      <a href="#DEL-01" style="display:flex;align-items:center;gap:13px;min-height:64px;color:#F87171;text-decoration:none"><span style="width:36px;height:36px;border-radius:999px;background:rgba(248,113,113,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="1.8"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"></path><path d="M10 11v5M14 11v5"></path></svg></span><span style="flex:1;min-width:0;font-size:15px;font-weight:600">Delete account</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></a>
+    </div>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">Terms and Privacy open sterncut.ma in the in-app browser &mdash; nothing to draw. Leads to · <a class="dv-oid" href="#BST-02">BST-02</a> · <a class="dv-oid" href="./Barber - Notifications.dc.html#BNT-03">BNT-03</a> · <a class="dv-oid" href="#BST-03">BST-03</a> · <a class="dv-oid" href="#BST-05">BST-05</a> · <a class="dv-oid" href="#DEL-01">DEL-01</a> or <a class="dv-oid" href="#DEL-02">DEL-02</a></div>
+</div>
+
+<div class="dv-opt" id="BST-01-AR"><div class="dv-olabel"><a class="dv-oid" href="#BST-01-AR">BST-01 · AR</a>Settings, right-to-left</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="BST-01-AR" dir="rtl" lang="ar" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:'IBM Plex Sans Arabic',Inter,sans-serif;color:#fff;overflow:hidden;direction:rtl">
+  <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <span style="width:44px;height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-family:'Noto Kufi Arabic',sans-serif;font-weight:700;font-size:18px">الإعدادات</span>
+      <span style="width:44px;flex:none"></span>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px">
+      <div style="display:flex;align-items:center;gap:13px;min-height:64px;border-bottom:1px solid #26262B"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9M12 3c-2.5 2.6-3.8 5.6-3.8 9s1.3 6.4 3.8 9"></path></svg></span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;line-height:1.4">اللغة</span><span style="display:block;font-size:12.5px;color:#9A9CA3;margin-top:1px">العربية</span></span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.2" style="flex:none"><path d="M15 6l-6 6 6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:13px;min-height:64px"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M6 8a6 6 0 0 1 12 0c0 7 2 7 2 9H4c0-2 2-2 2-9z"></path><path d="M10 20a2 2 0 0 0 4 0"></path></svg></span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;line-height:1.4">الإشعارات</span><span style="display:block;font-size:12.5px;color:#9A9CA3;margin-top:1px">3 من 4 تنبيهات مفعّلة · صامت <span dir="ltr" style="unicode-bidi:isolate;font-family:Inter,sans-serif;font-size:12px;font-variant-numeric:tabular-nums">19:00–09:30</span></span></span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.2" style="flex:none"><path d="M15 6l-6 6 6 6"></path></svg></div>
+    </div>
+    <span style="font-size:12.5px;font-weight:700;color:#9A9CA3;margin:6px 4px -4px 0">الحساب</span>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px">
+      <div style="display:flex;align-items:center;gap:13px;min-height:64px"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;line-height:1.4">الدخول والأمان</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:1px;font-family:Inter,sans-serif"><span dir="ltr" style="unicode-bidi:isolate">youssef.elamrani@gmail.com</span></span></span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.2" style="flex:none"><path d="M15 6l-6 6 6 6"></path></svg></div>
+    </div>
+    <span style="font-size:12.5px;font-weight:700;color:#9A9CA3;margin:6px 4px -4px 0">الوثائق القانونية</span>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px">
+      <div style="display:flex;align-items:center;gap:13px;min-height:64px;border-bottom:1px solid #26262B"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5M9 13h6M9 17h4"></path></svg></span><span style="flex:1;min-width:0;font-size:15px;font-weight:600">شروط الاستخدام</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2" style="flex:none;transform:scaleX(-1)"><path d="M14 4h6v6M20 4l-8 8M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:13px;min-height:64px"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6l7-3z"></path></svg></span><span style="flex:1;min-width:0;font-size:15px;font-weight:600">سياسة الخصوصية</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2" style="flex:none;transform:scaleX(-1)"><path d="M14 4h6v6M20 4l-8 8M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"></path></svg></div>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px;margin-top:8px">
+      <div style="display:flex;align-items:center;gap:13px;min-height:64px"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" style="transform:scaleX(-1)"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path></svg></span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;line-height:1.4">تسجيل الخروج</span><span style="display:block;font-size:12.5px;color:#9A9CA3;margin-top:1px">من هذا الهاتف فقط</span></span></div>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px">
+      <div style="display:flex;align-items:center;gap:13px;min-height:64px;color:#F87171"><span style="width:36px;height:36px;border-radius:999px;background:rgba(248,113,113,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="1.8"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"></path><path d="M10 11v5M14 11v5"></path></svg></span><span style="flex:1;min-width:0;font-size:15px;font-weight:600">حذف الحساب</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.2" style="flex:none"><path d="M15 6l-6 6 6 6"></path></svg></div>
+    </div>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">Mirrored, not translated in place: back arrow and chevrons flip, icons sit on the right, section labels carry no letter-spacing. The email and the time range are LTR isolates; digits stay Western.</div>
+</div>
+
+<div class="dv-opt" id="BST-02"><div class="dv-olabel"><a class="dv-oid" href="#BST-02">BST-02</a>Language &middot; sheet</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="BST-02" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span style="width:44px;height:44px;border-radius:999px;background:#212125;flex:none"></span><span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;letter-spacing:.16em;text-transform:uppercase">Settings</span><span style="width:44px;flex:none"></span></div>
+    <div style="height:128px;border-radius:20px;background:#17171A"></div>
+    <div style="height:64px;border-radius:20px;background:#17171A;margin-top:26px"></div>
+    <div style="height:128px;border-radius:20px;background:#17171A;margin-top:26px"></div>
+  </div>
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:4"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:5;background:#151517;border-radius:26px 26px 0 0;padding:12px 20px 34px;display:flex;flex-direction:column;gap:13px">
+    <span style="align-self:center;width:40px;height:4px;border-radius:2px;background:#333"></span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="flex:1;font-size:18px;font-weight:700">Language</span>
+      <span style="width:44px;height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="display:flex;align-items:center;gap:12px;min-height:64px;background:#17171A;border-radius:18px;padding:0 16px;box-sizing:border-box;border:1.5px solid transparent">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:700">English</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:3px">Current language</span></span>
+        <span style="width:24px;height:24px;border-radius:999px;border:2px solid #3A3A40;box-sizing:border-box;flex:none"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;min-height:64px;background:#17171A;border-radius:18px;padding:0 16px;box-sizing:border-box;border:1.5px solid transparent">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:700">Français</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:3px">French</span></span>
+        <span style="width:24px;height:24px;border-radius:999px;border:2px solid #3A3A40;box-sizing:border-box;flex:none"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;min-height:64px;background:#212125;border-radius:18px;padding:0 16px;box-sizing:border-box;border:1.5px solid #FFFFFF">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:16px;font-weight:700;font-family:'IBM Plex Sans Arabic',sans-serif;line-height:1.3">العربية</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:2px">Arabic</span></span>
+        <span style="width:24px;height:24px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:10px;background:#17171A;border-radius:16px;padding:13px 15px">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>
+      <span style="flex:1;font-size:13px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">Arabic turns the app right-to-left. The app restarts to switch.</span>
+    </div>
+    <a href="#BST-01-AR" style="height:54px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;text-decoration:none">Restart in Arabic</a>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">Each language in its own script, its name in the current language beneath. The button appears only once a different language is picked. Leads to · <a class="dv-oid" href="#BST-01-AR">BST-01 · AR</a> after the restart</div>
+</div>
+
+<div class="dv-opt" id="BST-03"><div class="dv-olabel"><a class="dv-oid" href="#BST-03">BST-03</a>Sign-in &amp; security</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="BST-03" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <a href="#BST-01" style="width:44px;height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></a>
+      <span style="flex:1;text-align:center;font-size:17px;font-weight:700">Sign-in &amp; security</span>
+      <span style="width:44px;flex:none"></span>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin:0 0 -4px 4px">EMAIL</span>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px">
+      <div style="display:flex;align-items:center;gap:13px;min-height:66px"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="M4 7l8 6 8-6"></path></svg></span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600">youssef.elamrani@gmail.com</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:3px">Your sign-in email</span></span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9" style="flex:none"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></div>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin:6px 0 -4px 4px">PASSWORD</span>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px">
+      <a href="#BST-04" style="display:flex;align-items:center;gap:13px;min-height:64px;color:#fff;text-decoration:none"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="8" cy="15" r="4"></circle><path d="M10.8 12.2 20 3M16 7l3 3M14 9l2 2"></path></svg></span><span style="flex:1;min-width:0;font-size:15px;font-weight:600">Change password</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></a>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin:6px 0 -4px 4px">LINKED ACCOUNTS</span>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px">
+      <div style="display:flex;align-items:center;gap:13px;min-height:64px;border-bottom:1px solid #26262B"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.2H12v4.1h6.5c-.1 1.1-.8 2.7-2.4 3.8l3.7 2.9c2.3-2.1 3.7-5.1 3.7-8.6z"></path><path fill="#34A853" d="M12 24c3.2 0 6-1.1 7.9-2.9l-3.7-2.9c-1 .7-2.4 1.2-4.2 1.2-3.2 0-6-2.2-6.9-5.2L1.2 17c1.9 4.1 6 7 10.8 7z"></path><path fill="#FBBC05" d="M5.1 14.2a7 7 0 0 1 0-4.4L1.2 6.8a12 12 0 0 0 0 10.4l3.9-3z"></path><path fill="#EA4335" d="M12 4.7c1.8 0 3 .8 3.7 1.4l3.3-3.2C17.9 1.1 15.2 0 12 0 7.2 0 3.1 2.9 1.2 6.8l3.9 3c.9-3 3.7-5.1 6.9-5.1z"></path></svg></span><span style="flex:1;min-width:0;font-size:15px;font-weight:600">Google</span><span style="display:flex;align-items:center;gap:5px;flex:none;font-size:12px;font-weight:700;color:#4ADE80"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="3"><path d="M5 12l5 5L20 7"></path></svg>Linked</span></div>
+      <div style="display:flex;align-items:center;gap:13px;min-height:64px"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="#fff" d="M16.4 12.6c0-2.5 2-3.7 2.1-3.8-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.8-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.3.8c1.4 0 2.3-1.2 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.8-1.1-2.8-4.2zM14 5.2c.7-.8 1.2-2 1-3.2-1 .1-2.3.7-3 1.5-.7.7-1.3 1.9-1.1 3.1 1.2.1 2.3-.6 3.1-1.4z"></path></svg></span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600">Apple</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:3px">Not linked</span></span><span style="height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;padding:0 20px;font-size:13px;font-weight:700;flex:none">Link</span></div>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin:6px 0 -4px 4px">APP LOCK</span>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px">
+      <div style="display:flex;align-items:center;gap:13px;min-height:66px"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"></path><path d="M9 9.5v1M15 9.5v1M12 9.5v3.5h-1M9.5 16c1.5 1 3.5 1 5 0"></path></svg></span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600">Face ID</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:3px">Ask for it when Sterncut opens</span></span><span style="width:50px;height:30px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:flex-end;padding:0 3px;box-sizing:border-box;flex:none"><span style="width:24px;height:24px;border-radius:999px;background:#fff"></span></span></div>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px;margin-top:8px">
+      <a href="#BST-06" style="display:flex;align-items:center;gap:13px;min-height:66px;color:#fff;text-decoration:none"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="2" y="4" width="14" height="10" rx="2"></rect><rect x="16.5" y="8" width="5.5" height="12" rx="1.5"></rect><path d="M6 18h7M9 14v4"></path></svg></span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600">Sign out on every device</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:3px">Including this phone</span></span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></a>
+    </div>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">Email is read-only. With no password yet the row reads <em>Set a password</em>. Face ID reads <em>Fingerprint</em> on Android and isn't drawn on a phone with no biometrics enrolled. Leads to · <a class="dv-oid" href="#BST-04">BST-04</a> · <a class="dv-oid" href="#BST-06">BST-06</a></div>
+</div>
+
+<div class="dv-opt" id="BST-04"><div class="dv-olabel"><a class="dv-oid" href="#BST-04">BST-04</a>Change password &middot; sheet</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="BST-04" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span style="width:44px;height:44px;border-radius:999px;background:#212125;flex:none"></span><span style="flex:1;text-align:center;font-size:17px;font-weight:700">Sign-in &amp; security</span><span style="width:44px;flex:none"></span></div>
+    <div style="height:66px;border-radius:20px;background:#17171A;margin-top:22px"></div>
+    <div style="height:64px;border-radius:20px;background:#17171A;margin-top:26px"></div>
+  </div>
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:4"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:5;background:#151517;border-radius:26px 26px 0 0;padding:12px 20px 34px;display:flex;flex-direction:column;gap:12px">
+    <span style="align-self:center;width:40px;height:4px;border-radius:2px;background:#333"></span>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="flex:1;font-size:18px;font-weight:700">Change password</span>
+      <span style="width:44px;height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:10.5px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">CURRENT PASSWORD</span>
+      <span style="display:flex;align-items:center;gap:10px;height:54px;border-radius:16px;background:#212125;padding:0 6px 0 16px"><span style="flex:1;font-size:18px;letter-spacing:.2em;color:#D8D8DC">••••••••••</span><span style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg></span></span>
+      <span style="display:flex;align-items:center;min-height:44px;font-size:13px;color:#9A9CA3">Forgot it?&nbsp;<span style="color:#E8442E;font-weight:700">Email me a reset link</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:10.5px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">NEW PASSWORD</span>
+      <span style="display:flex;align-items:center;gap:10px;height:54px;border-radius:16px;background:#212125;border:1.5px solid #FFFFFF;box-sizing:border-box;padding:0 6px 0 16px"><span style="flex:1;display:flex;align-items:center;font-size:18px;letter-spacing:.2em;color:#fff">•••••••••••<span style="display:inline-block;width:2px;height:20px;background:#E8442E;margin-left:2px"></span></span><span style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg></span></span>
+      <span style="display:flex;align-items:center;gap:7px;font-size:12.5px;color:#4ADE80;margin-top:2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.8"><path d="M5 12l5 5L20 7"></path></svg>At least 8 characters</span>
+    </div>
+    <a href="#BST-03" style="height:54px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;text-decoration:none;margin-top:4px">Save password</a>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">The <em>Set a password</em> variant drops the current-password field and its link. Wrong current password: the field turns red with one line under it; the new one is kept. Leads to · <a class="dv-oid" href="#BST-03">BST-03</a> with a <em>Password changed</em> toast</div>
+</div>
+
+<div class="dv-opt" id="BST-05"><div class="dv-olabel"><a class="dv-oid" href="#BST-05">BST-05</a>Log out &middot; this phone only</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="BST-05" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span style="width:44px;height:44px;border-radius:999px;background:#212125;flex:none"></span><span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;letter-spacing:.16em;text-transform:uppercase">Settings</span><span style="width:44px;flex:none"></span></div>
+    <div style="height:128px;border-radius:20px;background:#17171A"></div>
+    <div style="height:64px;border-radius:20px;background:#17171A;margin-top:26px"></div>
+    <div style="height:128px;border-radius:20px;background:#17171A;margin-top:26px"></div>
+    <div style="height:64px;border-radius:20px;background:#17171A;margin-top:8px"></div>
+    <div style="height:64px;border-radius:20px;background:#17171A"></div>
+  </div>
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:4"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:5;background:#151517;border-radius:26px 26px 0 0;padding:12px 22px 34px;display:flex;flex-direction:column;gap:14px">
+    <span style="align-self:center;width:40px;height:4px;border-radius:2px;background:#333"></span>
+    <span style="width:52px;height:52px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;margin-top:4px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path></svg></span>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:20px;font-weight:700;line-height:1.25">Log out of this phone?</span>
+      <span style="font-size:13.5px;line-height:1.55;color:#9A9CA3;text-wrap:pretty">Your bookings, clients and messages stay. Booking alerts stop on this phone until you sign in again.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+      <span style="height:54px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700">Log out</span>
+      <a href="#BST-01" style="height:52px;border-radius:999px;border:1px solid #26262B;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;text-decoration:none">Cancel</a>
+    </div>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">Same sheet from Profile&rsquo;s Logout row. Log out lands on the sign-in screen.</div>
+</div>
+
+<div class="dv-opt" id="BST-06"><div class="dv-olabel"><a class="dv-oid" href="#BST-06">BST-06</a>Sign out on every device &middot; sheet</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="BST-06" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span style="width:44px;height:44px;border-radius:999px;background:#212125;flex:none"></span><span style="flex:1;text-align:center;font-size:17px;font-weight:700">Sign-in &amp; security</span><span style="width:44px;flex:none"></span></div>
+    <div style="height:66px;border-radius:20px;background:#17171A;margin-top:22px"></div>
+    <div style="height:64px;border-radius:20px;background:#17171A;margin-top:26px"></div>
+    <div style="height:128px;border-radius:20px;background:#17171A;margin-top:26px"></div>
+  </div>
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:4"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:5;background:#151517;border-radius:26px 26px 0 0;padding:12px 22px 34px;display:flex;flex-direction:column;gap:14px">
+    <span style="align-self:center;width:40px;height:4px;border-radius:2px;background:#333"></span>
+    <span style="width:52px;height:52px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;margin-top:4px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="2" y="4" width="14" height="10" rx="2"></rect><rect x="16.5" y="8" width="5.5" height="12" rx="1.5"></rect><path d="M6 18h7M9 14v4"></path></svg></span>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:20px;font-weight:700;line-height:1.25">Sign out on every device?</span>
+      <span style="font-size:13.5px;line-height:1.55;color:#9A9CA3;text-wrap:pretty">Every phone signed in as youssef.elamrani@gmail.com is signed out &mdash; this one now, the others within the hour.</span>
+      <span style="font-size:13.5px;line-height:1.55;color:#9A9CA3;text-wrap:pretty">Use it if a phone is lost, or someone else knows your password.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">
+      <span style="height:54px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700">Sign out everywhere</span>
+      <a href="#BST-03" style="height:52px;border-radius:999px;border:1px solid #26262B;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;text-decoration:none">Cancel</a>
+    </div>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">&ldquo;Within the hour&rdquo; is the access-token lifetime: revoking sessions stops refreshes, it doesn&rsquo;t kill a live token. Change the line if the project&rsquo;s JWT expiry isn&rsquo;t 3600 s.</div>
+</div>
+
+</div>
+</section>
+
+
+<section class="dv-turn" id="DEL">
+<div class="dv-thd"><a class="dv-tid" href="#DEL">DEL</a><span class="dv-tname">Delete account &mdash; anonymised, not wiped</span></div>
+<p class="dv-note">The server&rsquo;s rule decides the screens. Removed: name, phone, email, photo, bio, ID document, portfolio photos, chat messages and photos. Kept without a name: bookings, reviews and every money record &mdash; statements and invoices are kept ten years by law. <a class="dv-oid" href="#DEL-01">DEL-01</a> is a checklist of the four things that stand in the way, each with the one action that clears it; while any row is open the delete control isn&rsquo;t drawn at all. A cleared row keeps its place with a green tick, so the list never reshuffles between two cuts. <strong>There is no shop transfer</strong>: an owner whose shop still has other barbers or an unpaid bill gets <em>Talk to us</em>, nothing more. <a class="dv-oid" href="#DEL-02">DEL-02</a> says what goes and what stays in plain lines; the confirm word is the Latin <code>DELETE</code> in all three languages because the server checks it. <a class="dv-oid" href="#DEL-03">DEL-03</a> is the signed-out end, with one line on why anything was kept.</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="DEL-01"><div class="dv-olabel"><a class="dv-oid" href="#DEL-01">DEL-01</a>Blocked &middot; three things first</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="DEL-01" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="#BST-01" style="width:44px;height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></a>
+      <span style="flex:1;text-align:center;font-size:17px;font-weight:700">Delete account</span>
+      <span style="width:44px;flex:none"></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;padding:8px 2px 0">
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:28px;line-height:1.15">Three things first</span>
+      <span style="font-size:13px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Clear each one and you can delete. Nothing has been deleted yet.</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;padding:2px 2px">
+      <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;flex:none">1 OF 4 CLEAR</span>
+      <span style="flex:1;display:flex;gap:4px"><span style="flex:1;height:4px;border-radius:2px;background:#4ADE80"></span><span style="flex:1;height:4px;border-radius:2px;background:#26262B"></span><span style="flex:1;height:4px;border-radius:2px;background:#26262B"></span><span style="flex:1;height:4px;border-radius:2px;background:#26262B"></span></span>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:11px">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <span style="width:36px;height:36px;border-radius:999px;background:rgba(232,161,0,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="1.9"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg></span>
+        <span style="flex:1;min-width:0;padding-top:1px"><span style="display:block;font-size:15px;font-weight:700;line-height:1.3">6 client bookings ahead</span><span style="display:block;font-size:12.5px;line-height:1.45;color:#9A9CA3;margin-top:3px;text-wrap:pretty">Cancel or finish each one. Clients are told when a booking is cancelled.</span></span>
+      </div>
+      <a href="./Barber - My Day.dc.html#BDY-02" style="align-self:flex-start;margin-inline-start:48px;height:44px;border-radius:999px;background:#212125;color:#fff;display:flex;align-items:center;gap:6px;padding:0 14px 0 18px;font-size:13px;font-weight:700;text-decoration:none">Calendar<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.2"><path d="M9 6l6 6-6 6"></path></svg></a>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:11px">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <span style="width:36px;height:36px;border-radius:999px;background:rgba(232,161,0,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="1.9"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg></span>
+        <span style="flex:1;min-width:0;padding-top:1px"><span style="display:block;font-size:15px;font-weight:700;line-height:1.3">You owe Sterncut <span style="font-variant-numeric:tabular-nums">1 420 DH</span></span><span style="display:block;font-size:12.5px;line-height:1.45;color:#9A9CA3;margin-top:3px;text-wrap:pretty">It has to reach zero, whichever way it runs.</span></span>
+      </div>
+      <a href="./Barber - Account.dc.html#BAC-01" style="align-self:flex-start;margin-inline-start:48px;height:44px;border-radius:999px;background:#212125;color:#fff;display:flex;align-items:center;gap:6px;padding:0 14px 0 18px;font-size:13px;font-weight:700;text-decoration:none">You &amp; Sterncut<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.2"><path d="M9 6l6 6-6 6"></path></svg></a>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:12px">
+      <span style="width:36px;height:36px;border-radius:999px;background:rgba(74,222,128,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.6"><path d="M5 12l5 5L20 7"></path></svg></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;color:#D8D8DC;line-height:1.3">The shop&rsquo;s cash drawer</span><span style="display:block;font-size:12.5px;color:#9A9CA3;margin-top:3px">Hamza holds it, not you.</span></span>
+      <span style="font-size:10px;letter-spacing:.12em;font-weight:700;color:#4ADE80;flex:none">CLEAR</span>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:11px">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <span style="width:36px;height:36px;border-radius:999px;background:rgba(232,161,0,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="1.9"><path d="M4 9.5 5.5 4h13L20 9.5M4 9.5V20h16V9.5M4 9.5h16M9.5 20v-5.5h5V20"></path></svg></span>
+        <span style="flex:1;min-width:0;padding-top:1px"><span style="display:block;font-size:15px;font-weight:700;line-height:1.3">You own Le Fade Tanger</span><span style="display:block;font-size:12.5px;line-height:1.45;color:#9A9CA3;margin-top:3px;text-wrap:pretty">Hamza and Salim still work there, and a shop can&rsquo;t be handed over from the app.</span></span>
+      </div>
+      <a href="./Barber - Support.dc.html#BSP-02" style="align-self:flex-start;margin-inline-start:48px;height:44px;border-radius:999px;background:#212125;color:#fff;display:flex;align-items:center;gap:6px;padding:0 14px 0 18px;font-size:13px;font-weight:700;text-decoration:none">Talk to us<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.2"><path d="M9 6l6 6-6 6"></path></svg></a>
+    </div>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">Youssef, who owns Le Fade Tanger. Blocked drawer reads <em>You hold the shop&rsquo;s cash &middot; 3 000 DH</em> with <em>Settle up</em> (<em>Who holds the cash</em> for an owner). Leads to · <a class="dv-oid" href="./Barber - My Day.dc.html#BDY-02">BDY-02</a> · <a class="dv-oid" href="./Barber - Account.dc.html#BAC-01">BAC-01</a> · <a class="dv-oid" href="./Barber - Support.dc.html#BSP-02">BSP-02</a> · <a class="dv-oid" href="#DEL-02">DEL-02</a> once all four clear</div>
+</div>
+
+<div class="dv-opt" id="DEL-01-AR"><div class="dv-olabel"><a class="dv-oid" href="#DEL-01-AR">DEL-01 · AR</a>Blocked, right-to-left</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="DEL-01-AR" dir="rtl" lang="ar" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:'IBM Plex Sans Arabic',Inter,sans-serif;color:#fff;overflow:hidden;direction:rtl">
+  <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:44px;height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:17px;font-weight:700">حذف الحساب</span>
+      <span style="width:44px;flex:none"></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px;padding:6px 2px 0">
+      <span style="font-family:'Noto Kufi Arabic',sans-serif;font-weight:700;font-size:24px;line-height:1.45">ثلاثة أمور أولاً</span>
+      <span style="font-size:13.5px;line-height:1.55;color:#9A9CA3;text-wrap:pretty">عالِج كل واحد منها ويصبح الحذف ممكناً. لم يُحذف أي شيء بعد.</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;padding:2px 2px">
+      <span style="font-size:12.5px;font-weight:700;color:#9A9CA3;flex:none">تمّ 1 من 4</span>
+      <span style="flex:1;display:flex;gap:4px"><span style="flex:1;height:4px;border-radius:2px;background:#4ADE80"></span><span style="flex:1;height:4px;border-radius:2px;background:#26262B"></span><span style="flex:1;height:4px;border-radius:2px;background:#26262B"></span><span style="flex:1;height:4px;border-radius:2px;background:#26262B"></span></span>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:13px 16px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <span style="width:36px;height:36px;border-radius:999px;background:rgba(232,161,0,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="1.9"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg></span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:700;line-height:1.45">6 حجوزات قادمة للزبائن</span><span style="display:block;font-size:13px;line-height:1.5;color:#9A9CA3;margin-top:1px;text-wrap:pretty">ألغِها أو أنجِزها. يُبلَّغ الزبائن عند إلغاء أي حجز.</span></span>
+      </div>
+      <span style="align-self:flex-start;margin-inline-start:48px;height:44px;border-radius:999px;background:#212125;color:#fff;display:flex;align-items:center;gap:6px;padding:0 18px 0 14px;font-size:13.5px;font-weight:700">التقويم<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.2"><path d="M15 6l-6 6 6 6"></path></svg></span>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:13px 16px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <span style="width:36px;height:36px;border-radius:999px;background:rgba(232,161,0,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="1.9" style="transform:scaleX(-1)"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg></span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:700;line-height:1.45">عليك <span dir="ltr" style="unicode-bidi:isolate;font-family:Inter,sans-serif;font-variant-numeric:tabular-nums">1 420 DH</span> لـ Sterncut</span><span style="display:block;font-size:13px;line-height:1.5;color:#9A9CA3;margin-top:1px;text-wrap:pretty">يجب أن يعود الحساب إلى الصفر، في أي اتجاه كان.</span></span>
+      </div>
+      <span style="align-self:flex-start;margin-inline-start:48px;height:44px;border-radius:999px;background:#212125;color:#fff;display:flex;align-items:center;gap:6px;padding:0 18px 0 14px;font-size:13.5px;font-weight:700">أنت و Sterncut<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.2"><path d="M15 6l-6 6 6 6"></path></svg></span>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:13px 16px;display:flex;align-items:center;gap:12px">
+      <span style="width:36px;height:36px;border-radius:999px;background:rgba(74,222,128,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.6"><path d="M5 12l5 5L20 7"></path></svg></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600;color:#D8D8DC;line-height:1.45">صندوق نقود المحل</span><span style="display:block;font-size:13px;color:#9A9CA3;margin-top:1px">يمسكه حمزة، لا أنت.</span></span>
+      <span style="font-size:12px;font-weight:700;color:#4ADE80;flex:none">تمّ</span>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:13px 16px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <span style="width:36px;height:36px;border-radius:999px;background:rgba(232,161,0,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="1.9"><path d="M4 9.5 5.5 4h13L20 9.5M4 9.5V20h16V9.5M4 9.5h16M9.5 20v-5.5h5V20"></path></svg></span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:700;line-height:1.45">أنت صاحب <span dir="ltr" style="unicode-bidi:isolate;font-family:Inter,sans-serif">Le Fade Tanger</span></span><span style="display:block;font-size:13px;line-height:1.5;color:#9A9CA3;margin-top:1px;text-wrap:pretty">ما زال حمزة وسليم يعملان هناك، ولا يمكن نقل المحل من التطبيق.</span></span>
+      </div>
+      <span style="align-self:flex-start;margin-inline-start:48px;height:44px;border-radius:999px;background:#212125;color:#fff;display:flex;align-items:center;gap:6px;padding:0 18px 0 14px;font-size:13.5px;font-weight:700">تحدّث إلينا<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.2"><path d="M15 6l-6 6 6 6"></path></svg></span>
+    </div>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">Every amount and the shop&rsquo;s Latin name are LTR isolates, so <em>1 420 DH</em> can never render as <em>DH 420 1</em>. Digits stay Western; labels carry no letter-spacing.</div>
+</div>
+
+<div class="dv-opt" id="DEL-02"><div class="dv-olabel"><a class="dv-oid" href="#DEL-02">DEL-02</a>Clear &middot; what goes, what stays</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="DEL-02" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;display:flex;flex-direction:column;overflow:hidden">
+  <div style="flex:none;padding:58px 20px 0;display:flex;align-items:center;gap:10px">
+    <a href="#BST-01" style="width:44px;height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></a>
+    <span style="flex:1;text-align:center;font-size:17px;font-weight:700">Delete account</span>
+    <span style="width:44px;flex:none"></span>
+  </div>
+  <div style="flex:1;min-height:0;padding:14px 20px 0;display:flex;flex-direction:column;gap:12px;overflow:hidden">
+    <span style="align-self:flex-start;display:flex;align-items:center;gap:6px;height:28px;border-radius:999px;background:rgba(74,222,128,.12);padding:0 12px;font-size:11.5px;font-weight:700;color:#4ADE80"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="3"><path d="M5 12l5 5L20 7"></path></svg>All clear</span>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:26px;line-height:1.15">Nothing stands in the way</span>
+      <span style="font-size:13px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Your name comes off everything. The records stay, without it.</span>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:9px">
+      <span style="font-size:10.5px;letter-spacing:.14em;font-weight:700;color:#F87171">WHAT GOES</span>
+      <span style="display:flex;align-items:center;gap:10px;font-size:13.5px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.8" style="flex:none"><path d="M6 6l12 12M18 6 6 18"></path></svg>Name, phone and email</span>
+      <span style="display:flex;align-items:center;gap:10px;font-size:13.5px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.8" style="flex:none"><path d="M6 6l12 12M18 6 6 18"></path></svg>Photo and bio</span>
+      <span style="display:flex;align-items:center;gap:10px;font-size:13.5px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.8" style="flex:none"><path d="M6 6l12 12M18 6 6 18"></path></svg>ID document</span>
+      <span style="display:flex;align-items:center;gap:10px;font-size:13.5px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.8" style="flex:none"><path d="M6 6l12 12M18 6 6 18"></path></svg>6 portfolio photos</span>
+      <span style="display:flex;align-items:center;gap:10px;font-size:13.5px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.8" style="flex:none"><path d="M6 6l12 12M18 6 6 18"></path></svg>Chat messages and photos</span>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+      <span style="font-size:10.5px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">WHAT STAYS, WITHOUT A NAME</span>
+      <span style="display:flex;align-items:flex-start;gap:10px"><span style="width:6px;height:6px;border-radius:999px;background:#9A9CA3;flex:none;margin:7px 3px 0"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600">212 bookings</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:2px">Clients see &ldquo;Former barber&rdquo;</span></span></span>
+      <span style="display:flex;align-items:flex-start;gap:10px"><span style="width:6px;height:6px;border-radius:999px;background:#9A9CA3;flex:none;margin:7px 3px 0"></span><span style="flex:1;min-width:0;font-size:13.5px;font-weight:600">58 reviews</span></span>
+      <span style="display:flex;align-items:flex-start;gap:10px"><span style="width:6px;height:6px;border-radius:999px;background:#9A9CA3;flex:none;margin:7px 3px 0"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:600">Every money record</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:2px;text-wrap:pretty">Statements and invoices are kept 10 years by law</span></span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:2px">
+      <span style="font-size:10.5px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">TYPE DELETE TO CONFIRM</span>
+      <span style="display:flex;align-items:center;height:54px;border-radius:16px;background:#212125;border:1.5px solid #F87171;box-sizing:border-box;padding:0 16px;font-size:16px;font-weight:700;letter-spacing:.14em">DELETE<span style="display:inline-block;width:2px;height:20px;background:#F87171;margin-left:3px"></span></span>
+      <span style="font-size:12px;color:#9A9CA3">This can&rsquo;t be undone.</span>
+    </div>
+  </div>
+  <div style="flex:none;padding:10px 20px 30px;display:flex;flex-direction:column;gap:10px">
+    <a href="#DEL-03" style="height:54px;border-radius:999px;background:#F87171;color:#0D0D0F;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;text-decoration:none">Delete my account</a>
+    <a href="#BST-01" style="height:52px;border-radius:999px;border:1px solid #26262B;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;text-decoration:none">Keep my account</a>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">Anouar, who left Le Fade and has since been paid his 320 DH (<a class="dv-oid" href="./Barber - Account.dc.html#BAC-11">BAC-11</a>): nothing open. The red button stays at 40 % and does nothing until the field reads DELETE. Leads to · <a class="dv-oid" href="#DEL-03">DEL-03</a> · Keep → <a class="dv-oid" href="#BST-01">BST-01</a></div>
+</div>
+
+<div class="dv-opt" id="DEL-03"><div class="dv-olabel"><a class="dv-oid" href="#DEL-03">DEL-03</a>Done &middot; signed out</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="DEL-03" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;display:flex;flex-direction:column;overflow:hidden">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px 34px 0;text-align:center">
+    <span style="width:68px;height:68px;border-radius:999px;background:rgba(74,222,128,.14);display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.4"><path d="M5 12l5 5L20 7"></path></svg></span>
+    <span style="font-size:11px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:10px">SIGNED OUT</span>
+    <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:32px;line-height:1.1">Account deleted</span>
+    <span style="font-size:14px;line-height:1.6;color:#9A9CA3;max-width:310px;text-wrap:pretty;margin-top:2px">Bookings, reviews and money records stay without your name &mdash; the law has us keep statements and invoices for 10 years.</span>
+  </div>
+  <div style="flex:none;padding:0 20px 40px"><span style="height:54px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700">Done</span></div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">Drawn from local state once the server confirms and the session is already gone &mdash; nothing here can fetch. Done → the sign-in screen.</div>
+</div>
+
+</div>
+</section>
+
+<section class="dv-turn" id="MSG">
+<div class="dv-thd"><a class="dv-tid" href="#MSG">MSG</a><span class="dv-tname">Chat &mdash; unread you can count, only real actions</span></div>
+<p class="dv-note">Unread is the one signal the product has, so it shows in three places: a count per thread, a badge on the Chat tab (sum of thread counts), and a <strong>New</strong> divider above the first unread message inside a thread. No read receipts, no online dots, no &ldquo;typing&hellip;&rdquo; &mdash; none exist. The phone icon in the header calls the client and is not drawn for a walk-in with no phone. The options sheet has three rows and nothing else. The composer is text and photo; the mic and emoji buttons are gone (the keyboard has its own emoji key).</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="MSG-01"><div class="dv-olabel"><a class="dv-oid" href="#MSG-01">MSG-01</a>Threads &middot; unread counts</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="MSG-01" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;padding:4px 2px 6px"><span style="font-family:'Playfair Display',serif;font-weight:700;font-size:28px">Chat</span><span style="font-size:12px;color:#9A9CA3">4 unread</span></div>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px">
+      <a href="#MSG-02" style="display:flex;align-items:center;gap:12px;min-height:72px;border-bottom:1px solid #26262B;color:#fff;text-decoration:none"><span style="width:44px;height:44px;border-radius:999px;background:#2A2A30;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex:none">AB</span><span style="flex:1;min-width:0"><span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:15px;font-weight:700">Anas Benali</span><span style="font-size:11.5px;color:#E8442E;font-weight:600;font-variant-numeric:tabular-nums">10:42</span></span><span style="display:flex;align-items:center;gap:8px;margin-top:4px"><span style="flex:1;min-width:0;font-size:13px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Same fade as last time, a bit shorter on top</span><span style="min-width:22px;height:22px;border-radius:999px;background:#E8442E;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 6px;box-sizing:border-box;flex:none">3</span></span></span></a>
+      <div style="display:flex;align-items:center;gap:12px;min-height:72px;border-bottom:1px solid #26262B"><span style="width:44px;height:44px;border-radius:999px;background:#2A2A30;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;flex:none">KT</span><span style="flex:1;min-width:0"><span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:15px;font-weight:700">Karim Tazi</span><span style="font-size:11.5px;color:#E8442E;font-weight:600;font-variant-numeric:tabular-nums">09:15</span></span><span style="display:flex;align-items:center;gap:8px;margin-top:4px"><span style="flex:1;min-width:0;font-size:13px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Photo</span><span style="min-width:22px;height:22px;border-radius:999px;background:#E8442E;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 6px;box-sizing:border-box;flex:none">1</span></span></span></div>
+      <div style="display:flex;align-items:center;gap:12px;min-height:72px;border-bottom:1px solid #26262B"><span style="width:44px;height:44px;border-radius:999px;background:#2A2A30;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#9A9CA3;flex:none">OM</span><span style="flex:1;min-width:0"><span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:15px;font-weight:600">Omar Mansouri</span><span style="font-size:11.5px;color:#9A9CA3;font-variant-numeric:tabular-nums">Yesterday</span></span><span style="display:block;font-size:13px;color:#9A9CA3;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">You: See you Saturday at 11:00</span></span></div>
+      <div style="display:flex;align-items:center;gap:12px;min-height:72px"><span style="width:44px;height:44px;border-radius:999px;background:#2A2A30;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#9A9CA3;flex:none">YR</span><span style="flex:1;min-width:0"><span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:15px;font-weight:600">Yassine R.</span><span style="font-size:11.5px;color:#9A9CA3">Mon</span></span><span style="display:block;font-size:13px;color:#9A9CA3;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Thanks, perfect as always</span></span></div>
+    </div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center;z-index:5">
+    <div style="display:flex;align-items:center;gap:2px;background:#17171A;border:1px solid #26262B;border-radius:999px;padding:6px;box-shadow:0 10px 28px rgba(0,0,0,.5)">
+      <span style="width:46px;height:46px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg></span>
+      <span style="width:46px;height:46px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg></span>
+      <span style="width:50px;height:50px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><path d="M12 5v14M5 12h14"></path></svg></span>
+      <span style="position:relative;width:46px;height:46px;border-radius:999px;background:#26262B;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg><span style="position:absolute;top:3px;right:1px;min-width:19px;height:19px;border-radius:999px;background:#E8442E;border:2px solid #17171A;box-sizing:border-box;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px">4</span></span>
+      <span style="width:46px;height:46px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg></span>
+    </div>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">Unread threads: bold name, white preview, red time, count. Tab badge = 3 + 1. Counts cap at 99+. Leads to · <a class="dv-oid" href="#MSG-02">MSG-02</a></div>
+</div>
+
+<div class="dv-opt" id="MSG-02"><div class="dv-olabel"><a class="dv-oid" href="#MSG-02">MSG-02</a>Thread &middot; New divider, text + photo</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="MSG-02" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;display:flex;flex-direction:column;overflow:hidden">
+  <div style="flex:none;padding:56px 14px 10px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #26262B">
+    <a href="#MSG-01" style="width:44px;height:44px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></a>
+    <span style="width:38px;height:38px;border-radius:999px;background:#2A2A30;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none">AB</span>
+    <span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:700">Anas Benali</span><span style="display:block;font-size:11.5px;color:#9A9CA3;margin-top:2px">Sat 27 Sep · 11:00 · Fade + beard</span></span>
+    <span style="width:44px;height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg></span>
+    <a href="#MSG-03" style="width:44px;height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="#fff"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg></a>
+  </div>
+  <div style="flex:1;min-height:0;padding:14px 16px;display:flex;flex-direction:column;justify-content:flex-end;gap:8px">
+    <span style="align-self:center;font-size:11px;color:#9A9CA3">Yesterday</span>
+    <span style="align-self:flex-end;max-width:76%;background:#26262B;border-radius:18px 18px 6px 18px;padding:10px 13px;font-size:14px;line-height:1.4">Booked you for Saturday 11:00 👍</span>
+    <span style="align-self:flex-start;max-width:76%;background:#17171A;border-radius:18px 18px 18px 6px;padding:10px 13px;font-size:14px;line-height:1.4">Great, thanks</span>
+    <div style="display:flex;align-items:center;gap:10px;margin:8px 0 2px"><span style="flex:1;height:1px;background:#E8442E;opacity:.6"></span><span style="font-size:10.5px;letter-spacing:.14em;font-weight:700;color:#E8442E">NEW</span><span style="flex:1;height:1px;background:#E8442E;opacity:.6"></span></div>
+    <span style="align-self:flex-start;max-width:76%;background:#17171A;border-radius:18px 18px 18px 6px;padding:10px 13px;font-size:14px;line-height:1.4">Same fade as last time, a bit shorter on top</span>
+    <span style="align-self:flex-start;width:180px;height:200px;border-radius:18px 18px 18px 6px;background:repeating-linear-gradient(135deg,#1C1C20 0 10px,#202025 10px 20px);display:flex;align-items:flex-end;padding:10px;box-sizing:border-box;font:500 10px ui-monospace,Menlo,monospace;color:#9A9CA3">client photo</span>
+    <span style="align-self:flex-start;max-width:76%;background:#17171A;border-radius:18px 18px 18px 6px;padding:10px 13px;font-size:14px;line-height:1.4">Like this one <span style="font-size:11px;color:#9A9CA3;margin-left:6px;font-variant-numeric:tabular-nums">10:42</span></span>
+  </div>
+  <div style="flex:none;padding:10px 12px 30px;display:flex;align-items:center;gap:8px;border-top:1px solid #26262B;background:#0D0D0F">
+    <span style="width:44px;height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="3"></rect><circle cx="9" cy="10" r="1.6"></circle><path d="M21 16l-5-5-8 8"></path></svg></span>
+    <span style="flex:1;height:44px;border-radius:999px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 16px;font-size:14px;color:#9A9CA3">Message Anas</span>
+    <span style="width:44px;height:44px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">Opens scrolled to the New divider; it clears when the thread is left. Sent messages carry no ticks. Walk-in with no phone: the phone button is not drawn and options slides right. Send is disabled until there&rsquo;s text or a photo. Leads to · <a class="dv-oid" href="#MSG-03">MSG-03</a></div>
+</div>
+
+<div class="dv-opt" id="MSG-03"><div class="dv-olabel"><a class="dv-oid" href="#MSG-03">MSG-03</a>Thread options &middot; sheet</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="MSG-03" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:56px 14px 10px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #26262B"><span style="width:44px;height:44px;flex:none"></span><span style="width:38px;height:38px;border-radius:999px;background:#2A2A30;flex:none"></span><span style="flex:1;font-size:15px;font-weight:700">Anas Benali</span></div>
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:4"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:5;background:#151517;border-radius:26px 26px 0 0;padding:12px 20px 34px;display:flex;flex-direction:column;gap:12px">
+    <span style="align-self:center;width:40px;height:4px;border-radius:2px;background:#333"></span>
+    <span style="font-size:18px;font-weight:700">Anas Benali</span>
+    <div style="background:#17171A;border-radius:20px;padding:0 16px">
+      <div style="display:flex;align-items:center;gap:13px;min-height:64px;border-bottom:1px solid #26262B"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg></span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600">Open the booking</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:3px">Sat 27 Sep · 11:00</span></span></div>
+      <div style="display:flex;align-items:center;gap:13px;min-height:64px;border-bottom:1px solid #26262B"><span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg></span><span style="flex:1;min-width:0"><span style="display:block;font-size:15px;font-weight:600">Call Anas</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:3px;font-variant-numeric:tabular-nums">06 61 24 88 10</span></span></div>
+      <div style="display:flex;align-items:center;gap:13px;min-height:64px;color:#F87171"><span style="width:36px;height:36px;border-radius:999px;background:rgba(248,113,113,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="1.8"><path d="M5 21V4h11l-1.5 4L16 12H5"></path></svg></span><span style="flex:1;min-width:0;font-size:15px;font-weight:600">Report to ops</span></div>
+    </div>
+    <span style="height:52px;border-radius:999px;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700">Cancel</span>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">Three rows only. No booking linked → Open the booking isn&rsquo;t drawn; no phone → Call isn&rsquo;t drawn. Report to ops opens the existing support ticket form with the thread attached.</div>
+</div>
+
+</div>
+</section>
+
+<section class="dv-turn" id="EXP">
+<div class="dv-thd"><a class="dv-tid" href="#EXP">EXP</a><span class="dv-tname">Export &mdash; one sheet, two doors</span></div>
+<p class="dv-note">Wallet &rsaquo; Activity (<a class="dv-oid" href="./Barber - Float.dc.html#BCF-01">BCF-01</a>) and Owner &rsaquo; Shop report (<a class="dv-oid" href="./Owner - Reports.dc.html#ORP-01">ORP-01</a>) both open this sheet; only the title and the PDF&rsquo;s content differ. Pick a period, see the first page, hit <strong>Share PDF</strong> &mdash; the phone&rsquo;s own share sheet takes over (WhatsApp, Mail, Files). No CSV, no email-it-to-me: the app prints PDFs already, and nothing else. The first page of each PDF is drawn full size beside the sheet; each carries only what its screen already shows.</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="EXP-01"><div class="dv-olabel"><a class="dv-oid" href="#EXP-01">EXP-01</a>Export &middot; sheet (from Wallet)</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="EXP-01" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:12px"><span style="font-family:'Playfair Display',serif;font-weight:700;font-size:28px">Wallet</span><div style="height:140px;border-radius:20px;background:#17171A"></div><div style="height:260px;border-radius:20px;background:#17171A"></div></div>
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:4"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:5;background:#151517;border-radius:26px 26px 0 0;padding:12px 20px 34px;display:flex;flex-direction:column;gap:14px">
+    <span style="align-self:center;width:40px;height:4px;border-radius:2px;background:#333"></span>
+    <div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:18px;font-weight:700">Export activity</span><span style="width:44px;height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <span style="height:48px;border-radius:999px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:600">This week</span>
+      <span style="height:48px;border-radius:999px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:600">Last week</span>
+      <span style="height:48px;border-radius:999px;background:#fff;color:#0D0D0F;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:700">This month</span>
+      <span style="height:48px;border-radius:999px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;gap:7px;font-size:13.5px;font-weight:600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg>Pick dates</span>
+    </div>
+    <div style="display:flex;gap:14px;align-items:center;background:#17171A;border-radius:18px;padding:12px">
+      <span style="width:84px;height:118px;border-radius:6px;background:#F4F2EE;flex:none;padding:8px;box-sizing:border-box;display:flex;flex-direction:column;gap:4px"><span style="font:700 6px 'Playfair Display',serif;color:#111;letter-spacing:.1em">STERNCUT</span><span style="height:10px;background:#111;border-radius:2px;width:60%;margin-top:3px"></span><span style="height:3px;background:#CFCBC4;border-radius:1px"></span><span style="height:3px;background:#CFCBC4;border-radius:1px"></span><span style="height:3px;background:#CFCBC4;border-radius:1px;width:80%"></span><span style="height:3px;background:#CFCBC4;border-radius:1px"></span><span style="height:3px;background:#CFCBC4;border-radius:1px;width:70%"></span><span style="height:3px;background:#CFCBC4;border-radius:1px"></span></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:700">Wallet activity · September 2026</span><span style="display:block;font-size:12px;color:#9A9CA3;margin-top:4px;line-height:1.5;font-variant-numeric:tabular-nums">1 – 25 Sep · 2 pages<br>38 top-ups · PDF</span><span style="display:block;font-size:12.5px;color:#fff;font-weight:600;margin-top:8px">See full page</span></span>
+    </div>
+    <span style="height:54px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 15V3M7 8l5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg>Share PDF</span>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">From Shop report the title reads <em>Export shop report</em>. Pick dates opens the system date-range picker. A period with nothing in it: the preview says <em>Nothing in this period</em> and Share PDF is disabled. Leads to · <a class="dv-oid" href="#EXP-02">EXP-02</a> / <a class="dv-oid" href="#EXP-03">EXP-03</a> · the phone&rsquo;s share sheet</div>
+</div>
+
+<div class="dv-opt" id="EXP-02"><div class="dv-olabel"><a class="dv-oid" href="#EXP-02">EXP-02</a>PDF page 1 &middot; wallet activity (A4)</div>
+<div data-screen-label="EXP-02" style="width:420px;height:594px;background:#FFFFFF;color:#111;font-family:Inter,sans-serif;padding:30px 30px 24px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;box-shadow:0 12px 36px rgba(0,0,0,.5)">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between"><span style="font-family:'Playfair Display',serif;font-weight:700;font-size:13px;letter-spacing:.2em">STERNCUT</span><span style="font-size:8px;color:#666;text-align:right;line-height:1.5">Generated 25 Sep 2026, 14:02<br>Page 1 of 2</span></div>
+  <div><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:22px">Wallet activity</span><span style="display:block;font-size:9.5px;color:#555;margin-top:4px">Agent &middot; Le Fade Tanger &middot; 1 &ndash; 25 September 2026</span></div>
+  <div style="display:grid;grid-template-columns:repeat(2,1fr);border:1px solid #E2E0DC;border-radius:6px">
+    <span style="padding:9px 10px;border-right:1px solid #E2E0DC"><span style="display:block;font-size:7.5px;letter-spacing:.12em;color:#777;font-weight:700">TOP-UPS</span><span style="display:block;font-size:13px;font-weight:700;margin-top:3px">38</span></span>
+    <span style="padding:9px 10px"><span style="display:block;font-size:7.5px;letter-spacing:.12em;color:#777;font-weight:700">CASH COLLECTED</span><span style="display:block;font-size:13px;font-weight:700;margin-top:3px">7 600 DH</span></span>
+  </div>
+  <div style="display:flex;flex-direction:column;font-size:9px">
+    <div style="display:grid;grid-template-columns:74px 1fr 96px 52px;gap:8px;padding:0 0 6px;border-bottom:1px solid #111;font-size:7.5px;letter-spacing:.1em;font-weight:700;color:#555"><span>DATE</span><span>CUSTOMER</span><span>PHONE</span><span style="text-align:right">AMOUNT</span></div>
+    <div style="display:grid;grid-template-columns:74px 1fr 96px 52px;gap:8px;padding:6px 0;border-bottom:1px solid #EEE"><span>25 Sep · 11:42</span><span>Amine Berrada</span><span>+212 661••• 567</span><span style="text-align:right">+200 DH</span></div>
+    <div style="display:grid;grid-template-columns:74px 1fr 96px 52px;gap:8px;padding:6px 0;border-bottom:1px solid #EEE"><span>25 Sep · 10:04</span><span>Mehdi Kabbaj</span><span>+212 662••• 512</span><span style="text-align:right">+100 DH</span></div>
+    <div style="display:grid;grid-template-columns:74px 1fr 96px 52px;gap:8px;padding:6px 0;border-bottom:1px solid #EEE"><span>24 Sep · 18:20</span><span>Yassine Bennis</span><span>+212 663••• 880</span><span style="text-align:right">+300 DH</span></div>
+    <div style="display:grid;grid-template-columns:74px 1fr 96px 52px;gap:8px;padding:6px 0;border-bottom:1px solid #EEE"><span>24 Sep · 12:15</span><span>Omar Mansouri</span><span>+212 664••• 231</span><span style="text-align:right">+150 DH</span></div>
+    <div style="display:grid;grid-template-columns:74px 1fr 96px 52px;gap:8px;padding:6px 0;border-bottom:1px solid #EEE"><span>23 Sep · 17:48</span><span>Karim Tazi</span><span>+212 661••• 104</span><span style="text-align:right">+200 DH</span></div>
+    <div style="display:grid;grid-template-columns:74px 1fr 96px 52px;gap:8px;padding:6px 0;border-bottom:1px solid #EEE"><span>23 Sep · 09:55</span><span>Anas Benali</span><span>+212 661••• 810</span><span style="text-align:right">+100 DH</span></div>
+    <div style="display:grid;grid-template-columns:74px 1fr 96px 52px;gap:8px;padding:6px 0;border-bottom:1px solid #EEE"><span>22 Sep · 16:30</span><span>Reda Lahlou</span><span>+212 665••• 042</span><span style="text-align:right">+500 DH</span></div>
+    <div style="display:grid;grid-template-columns:74px 1fr 96px 52px;gap:8px;padding:6px 0;color:#999"><span>&hellip;</span><span>31 more top-ups</span><span></span><span></span></div>
+  </div>
+  <span style="margin-top:auto;font-size:7.5px;color:#888;line-height:1.5">A record of activity in Sterncut. Not a tax invoice. sterncut.ma</span>
+</div>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:420px">Mirrors the Activity list on <a class="dv-oid" href="./Barber - Float.dc.html#BCF-01">BCF-01</a>: customer, masked phone, amount, time &mdash; nothing the screen doesn&rsquo;t show. Same template as the receipt printer; always A4, in the app&rsquo;s current language. Arabic PDFs mirror the table; amounts keep Western digits.</div>
+</div>
+
+<div class="dv-opt" id="EXP-03"><div class="dv-olabel"><a class="dv-oid" href="#EXP-03">EXP-03</a>PDF page 1 &middot; shop report (A4)</div>
+<div data-screen-label="EXP-03" style="width:420px;height:594px;background:#FFFFFF;color:#111;font-family:Inter,sans-serif;padding:30px 30px 24px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;box-shadow:0 12px 36px rgba(0,0,0,.5)">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between"><span style="font-family:'Playfair Display',serif;font-weight:700;font-size:13px;letter-spacing:.2em">STERNCUT</span><span style="font-size:8px;color:#666;text-align:right;line-height:1.5">Generated 25 Sep 2026, 14:05<br>Page 1 of 1</span></div>
+  <div><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:22px">Shop report</span><span style="display:block;font-size:9.5px;color:#555;margin-top:4px">Le Fade Tanger &middot; 1 &ndash; 25 September 2026</span></div>
+  <div><span style="display:block;font-size:7.5px;letter-spacing:.12em;color:#777;font-weight:700">SHOP TAKE</span><span style="display:block;font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-top:3px">24 310 DH</span><span style="display:block;font-size:9px;color:#555;margin-top:2px">356 bookings</span></div>
+  <div style="display:flex;flex-direction:column;font-size:9.5px">
+    <span style="font-size:7.5px;letter-spacing:.12em;color:#777;font-weight:700;padding-bottom:5px;border-bottom:1px solid #111">BY BARBER</span>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #EEE"><span>Youssef</span><span>9 980 DH</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #EEE"><span>Hamza</span><span>8 040 DH</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #111"><span>Salim</span><span>6 290 DH</span></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #E2E0DC;border-radius:6px">
+    <span style="padding:9px 10px;border-right:1px solid #E2E0DC"><span style="display:block;font-size:7.5px;letter-spacing:.12em;color:#777;font-weight:700">COMMISSION</span><span style="display:block;font-size:13px;font-weight:700;margin-top:3px">4 862 DH</span></span>
+    <span style="padding:9px 10px;border-right:1px solid #E2E0DC"><span style="display:block;font-size:7.5px;letter-spacing:.12em;color:#777;font-weight:700">DEPOSITS</span><span style="display:block;font-size:13px;font-weight:700;margin-top:3px">1 620 DH</span></span>
+    <span style="padding:9px 10px"><span style="display:block;font-size:7.5px;letter-spacing:.12em;color:#777;font-weight:700">NO-SHOWS</span><span style="display:block;font-size:13px;font-weight:700;margin-top:3px">11</span></span>
+  </div>
+  <div style="display:flex;flex-direction:column;font-size:9.5px">
+    <span style="font-size:7.5px;letter-spacing:.12em;color:#777;font-weight:700;padding-bottom:5px;border-bottom:1px solid #111">SETTLEMENT &middot; DUE FRIDAY</span>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #EEE"><span>Hamza Bennani</span><span>1 608 DH</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #111"><span>Salim Alaoui</span><span>1 258 DH</span></div>
+    <div style="display:flex;justify-content:space-between;padding:6px 0;font-weight:700"><span>Total to collect</span><span>2 866 DH</span></div>
+  </div>
+  <span style="margin-top:auto;font-size:7.5px;color:#888;line-height:1.5">A record of activity in Sterncut. Not a tax invoice. sterncut.ma</span>
+</div>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:420px">Same blocks as <a class="dv-oid" href="./Owner - Reports.dc.html#ORP-01">ORP-01</a> in the same order, for the picked period. The &ldquo;vs last month&rdquo; percentage is left off: it only means something next to the screen&rsquo;s Week / Month / Year control.</div>
+</div>
+
+</div>
+</section>
+
+<section class="dv-turn" id="TOP">
+<div class="dv-thd"><a class="dv-tid" href="#TOP">BCF-02b</a><span class="dv-tname">Cash top-up &mdash; phone number, nothing else</span></div>
+<p class="dv-note">Replaces <a class="dv-oid" href="./Barber - Float.dc.html#BCF-02">BCF-02</a>. The Scan QR tab is gone because no customer QR exists; with the phone number as the only way in there is nothing to segment, so the segmented control goes and everything else stays.</p>
+<div class="dv-opts">
+<div class="dv-opt" id="BCF-02b"><div class="dv-olabel"><a class="dv-oid" href="#BCF-02b">BCF-02b</a>Cash top-up &middot; sheet</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="BCF-02b" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="position:absolute;inset:0;background:rgba(0,0,0,.6)"></div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#151517;border-radius:26px 26px 0 0;padding:12px 22px 34px;display:flex;flex-direction:column;gap:14px">
+    <span style="align-self:center;width:40px;height:4px;border-radius:2px;background:#333"></span>
+    <div style="display:flex;align-items:center">
+      <span style="flex:1;font-size:17px;font-weight:700">Cash top-up</span>
+      <span style="width:44px;height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">CUSTOMER PHONE</span>
+      <span style="display:flex;align-items:center;gap:10px;background:#212125;border-radius:16px;height:52px;padding:0 16px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5 21 21"></path></svg><span style="font-size:15px;font-weight:500;font-variant-numeric:tabular-nums">+212 661 234 567</span></span>
+      <div style="display:flex;align-items:center;gap:11px;background:#17171A;border-radius:16px;padding:12px 14px;margin-top:2px">
+        <span style="width:36px;height:36px;border-radius:999px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#E8442E;flex:none">AB</span>
+        <span style="flex:1"><span style="display:block;font-size:13px;font-weight:700">Amine Berrada</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Wallet 216 DH &middot; 4 visits with you</span></span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.6" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">AMOUNT (DH)</span>
+      <span style="display:flex;align-items:center;background:#212125;border-radius:16px;height:60px;padding:0 16px;font-size:30px;font-weight:700;font-variant-numeric:tabular-nums">200<span style="display:inline-block;width:2px;height:30px;background:#E8442E;margin-left:3px"></span></span>
+      <div style="display:flex;gap:8px;margin-top:2px"><span style="height:44px;border:1px solid #333;border-radius:999px;padding:0 18px;display:flex;align-items:center;font-size:13px;font-weight:700">+50</span><span style="height:44px;border:1px solid #333;border-radius:999px;padding:0 18px;display:flex;align-items:center;font-size:13px;font-weight:700">+100</span><span style="height:44px;border:1px solid #333;border-radius:999px;padding:0 18px;display:flex;align-items:center;font-size:13px;font-weight:700">+200</span><span style="height:44px;border:1px solid #333;border-radius:999px;padding:0 18px;display:flex;align-items:center;font-size:13px;font-weight:700">+500</span></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;background:#17171A;border-radius:16px;padding:14px 16px">
+      <span style="font-size:12px;color:#9A9CA3">Amine&rsquo;s wallet after</span>
+      <span style="font-size:14px;font-weight:800;font-variant-numeric:tabular-nums">416 DH</span>
+    </div>
+    <span style="height:54px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700">Confirm cash received</span>
+    <span style="display:flex;align-items:center;justify-content:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg><span style="font-size:11px;color:#9A9CA3">Credited to the customer&rsquo;s wallet instantly</span></span>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">Only change from <a class="dv-oid" href="./Barber - Float.dc.html#BCF-02">BCF-02</a>: the Phone / Scan QR control is gone and the number field sits directly under the title. Fixed on the way: close button and amount chips are 44&nbsp;px, and &ldquo;Their balance after&rdquo; names the customer. Confirm leads to <a class="dv-oid" href="./Barber - Float.dc.html#BCF-03">BCF-03</a> as before.</div>
+</div>
+</div>
+</section>
+
+<section class="dv-turn" id="HLP">
+<div class="dv-thd"><a class="dv-tid" href="#HLP">HLP</a><span class="dv-tname">Help article &mdash; drawn once, every question uses it</span></div>
+<p class="dv-note">Each <em>Common for barbers</em> row on <a class="dv-oid" href="./Barber - Support.dc.html#BSP-01">BSP-01</a> opens this screen instead of the &ldquo;coming soon&rdquo; toast. Title, body, one way out: <strong>Message ops</strong>. No &ldquo;Was this helpful?&rdquo; and no related-articles block &mdash; neither is built. The body below is placeholder; Claude Code writes the real articles from what the app actually does.</p>
+<div class="dv-opts">
+<div class="dv-opt" id="HLP-01"><div class="dv-olabel"><a class="dv-oid" href="#HLP-01">HLP-01</a>Help article</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="HLP-01" style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;display:flex;flex-direction:column;overflow:hidden">
+  <div style="flex:none;padding:58px 20px 0;display:flex;align-items:center;gap:10px">
+    <a href="./Barber - Support.dc.html#BSP-01" style="width:44px;height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></a>
+    <span style="flex:1;text-align:center;font-size:13px;font-weight:600;color:#9A9CA3">Help Center</span>
+    <span style="width:44px;flex:none"></span>
+  </div>
+  <div style="flex:1;min-height:0;padding:22px 24px 0;display:flex;flex-direction:column;gap:14px;overflow:hidden">
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3">COMMON FOR BARBERS</span>
+    <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:28px;line-height:1.15;text-wrap:pretty">Marking a client as a no-show</span>
+    <span style="font-size:15px;line-height:1.65;color:#D8D8DC;text-wrap:pretty">Placeholder body. One short paragraph saying when the action becomes available and where to find it on the booking.</span>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;gap:12px"><span style="width:26px;height:26px;border-radius:999px;background:#212125;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none">1</span><span style="flex:1;font-size:15px;line-height:1.55;color:#D8D8DC">Placeholder step one.</span></div>
+      <div style="display:flex;gap:12px"><span style="width:26px;height:26px;border-radius:999px;background:#212125;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none">2</span><span style="flex:1;font-size:15px;line-height:1.55;color:#D8D8DC">Placeholder step two.</span></div>
+      <div style="display:flex;gap:12px"><span style="width:26px;height:26px;border-radius:999px;background:#212125;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none">3</span><span style="flex:1;font-size:15px;line-height:1.55;color:#D8D8DC">Placeholder step three.</span></div>
+    </div>
+    <span style="font-size:15px;line-height:1.65;color:#D8D8DC;text-wrap:pretty">Placeholder closing paragraph on what the client sees afterwards.</span>
+  </div>
+  <div style="flex:none;padding:14px 20px 34px;border-top:1px solid #26262B;display:flex;align-items:center;gap:12px">
+    <span style="flex:1;font-size:14px;font-weight:600">Still stuck?</span>
+    <a href="./Barber - Support.dc.html#BSP-02" style="height:48px;border-radius:999px;background:#E8442E;color:#fff;display:flex;align-items:center;padding:0 22px;font-size:14px;font-weight:700;text-decoration:none">Message ops</a>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:422px">Body supports paragraphs and numbered steps only. Message ops opens the ops chat with the article title as the first line.</div>
+</div>
+</div>
+</section>
+</x-dc>
+</body>
+</html>

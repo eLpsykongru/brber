@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Noto+Kufi+Arabic:wght@400;500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+html{background:#0D0D0F}
+body{margin:0;background:#0D0D0F;font-family:Inter,system-ui,sans-serif}
+a{color:#E8442E;text-decoration:none}a:hover{color:#C33421}
+.dv-turn{padding:38px 44px 30px;scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#fff;color:#111;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 14px/1.2 Inter,sans-serif;color:#fff}
+.dv-note{font:400 12px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6);max-width:760px;margin:0 0 26px}
+.dv-src{font:400 10.5px/1.4 Inter,sans-serif;color:rgba(255,255,255,.6);opacity:.55;margin:-18px 0 22px}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(255,255,255,.12);color:#fff;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 Inter,sans-serif;color:rgba(255,255,255,.6)}
+.dv-opt:target .dv-oid{background:#E8442E;color:#fff}
+.dv-next{flex-basis:100%;margin:24px 0 0;font:12px/1.5 Inter,sans-serif;color:rgba(255,255,255,.6)}
+.dv-nav{display:flex;flex-wrap:wrap;gap:6px;padding:12px 44px 0}
+</style>
+</helmet>
+<div style="padding:32px 44px 0">
+<a href="./Index.dc.html" style="font:600 10px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.6)">← All pages</a>
+<div style="font-family:'Playfair Display',serif;font-weight:700;font-size:27px;letter-spacing:.02em;text-transform:uppercase;color:#fff;margin:10px 0 0">Barber · Profile & Standing</div>
+<div style="font:400 12px Inter,sans-serif;color:rgba(255,255,255,.6);margin:6px 0 0">8 current</div>
+</div>
+<div class="dv-nav"><a href="./Barber - Onboarding.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Onboarding</a><a href="./Barber - Today.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Today</a><a href="./Barber - My Day.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">My day</a><a href="./Barber - Clients.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Clients</a><a href="./Barber - Messages.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Messages</a><a href="./Barber - My Services.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">My services</a><a href="./Barber - My Work.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">My work</a><a href="./Barber - Reviews.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Reviews</a><a href="./Barber - Float.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Float</a><a href="./Barber - Account.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">The account</a><a href="./Barber - Earnings.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Earnings</a><a href="./Barber - Waitlist.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Waitlist</a><a href="./Barber - Notifications.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Notifs</a><a href="./Barber - Support.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Support</a><a href="./Barber - Profile.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:#E8442E;color:#fff;text-decoration:none">Profile</a><a href="./Barber - System States.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">System</a></div>
+<div class="dv-nav" style="padding-top:0;opacity:.75"><span style="font:700 9.5px Inter,sans-serif;letter-spacing:.14em;color:rgba(255,255,255,.6);align-self:center;margin-right:4px">OWNER</span><a href="./Owner - Shop.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Shop</a><a href="./Owner - Barbers.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Barbers</a><a href="./Owner - Services.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Services</a><a href="./Owner - Reviews.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Reviews</a><a href="./Owner - Reports.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Reports</a><a href="./Owner - Subscription.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(255,255,255,.12);color:#fff;text-decoration:none">Subscription</a></div>
+<div style="height:1px;background:rgba(255,255,255,.14);margin:20px 0 0"></div>
+<section class="dv-turn" id="T1">
+<div class="dv-thd"><a class="dv-tid" href="#T1">T1</a><span class="dv-tname">Sterncut — barber side, dark dashboard skin</span></div>
+<p class="dv-note">Every barber screen from the repo, rebuilt on the dark surfaces the code already declares (<code>theme.ts → dark</code>: canvas #0D0D0F, cards #17171A, raised #212125, sub #9A9CA3) with the Rentra display type and coral kept for money and live state only. Tabs are the barber set — Home · Calendar · Clients · Wallet · Profile with a centre Quick&nbsp;add. Currency MAD, Tangier data, same fixtures as the customer canvas so the two sides line up.</p>
+<p class="dv-src">from Barber App - Foundations · turn 1</p>
+<div class="dv-opts">
+<div class="dv-opt" id="BPR-01"><div class="dv-olabel"><a class="dv-oid" href="#BPR-01">BPR-01</a>Barber profile · list bottom replaced by <a class="dv-oid" href="./Barber - Store Readiness.dc.html#BST-00">BST-00</a></div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:15px">
+    <div style="text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;letter-spacing:.18em;text-transform:uppercase">Profile</div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <span style="position:relative;width:76px;height:76px;flex:none">
+        <span style="position:absolute;inset:0;border-radius:999px;background:#17171A;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#fff">YE</span>
+        <span style="position:absolute;bottom:-2px;right:-2px;width:26px;height:26px;border-radius:999px;background:#E8442E;border:3px solid #0D0D0F;display:flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><path d="M4 20l1-4L17 4l3 3L8 19l-4 1z"></path></svg></span>
+      </span>
+      <span style="flex:1">
+        <span style="display:block;font-size:17px;font-weight:700">Youssef El Amrani</span>
+        <span style="display:block;font-size:12px;color:#9A9CA3;margin-top:3px">Fade specialist · Le Fade Tanger</span>
+        <span style="display:flex;align-items:center;gap:9px;margin-top:6px"><span style="font-size:12px;font-weight:700">4.9 ★</span><span style="font-size:12px;color:#9A9CA3">126 reviews · 320 clients</span></span>
+      </span>
+    </div>
+    <div style="display:flex;align-items:center;gap:11px;background:#17171A;border-radius:18px;padding:14px 16px">
+      <span style="width:34px;height:34px;border-radius:999px;background:rgba(74,222,128,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2"><circle cx="12" cy="12" r="9"></circle><path d="M9 12l2 2 4-4"></path></svg></span>
+      <span style="flex:1"><span style="display:block;font-size:13px;font-weight:700">Page is live</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Customers can find and book you</span></span>
+      <span style="font-size:12px;font-weight:600;color:#E8442E;flex:none">Preview</span>
+    </div>
+    <div style="background:#17171A;border-radius:20px;padding:6px 16px">
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #26262B"><span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg></span><span style="flex:1;font-size:14px;font-weight:600">Your profile</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #26262B"><span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg></span><span style="flex:1;font-size:14px;font-weight:600">Schedule settings</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #26262B"><span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span><span style="flex:1;font-size:14px;font-weight:600">My services</span><span style="font-size:12px;color:#9A9CA3">5</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #26262B"><span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="6" width="18" height="14" rx="3"></rect><circle cx="12" cy="13" r="3"></circle></svg></span><span style="flex:1;font-size:14px;font-weight:600">My work</span><span style="font-size:12px;color:#9A9CA3">4 photos</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #26262B"><span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 20h4l10-10-4-4L4 16z"></path><path d="M15 5l4 4"></path></svg></span><span style="flex:1;font-size:14px;font-weight:600">Salon management</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #26262B"><span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-8"></path><path d="M21 3h-6M21 3v6"></path></svg></span><span style="flex:1;font-size:14px;font-weight:600">Earnings</span><span style="font-size:12px;color:#9A9CA3">2 780 DH</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 0;border-bottom:1px solid #26262B"><span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9a2.5 2.5 0 1 1 3.6 2.2c-.7.4-1.1.9-1.1 1.8M12 17h.01"></path></svg></span><span style="flex:1;font-size:14px;font-weight:600">Help Center</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:13px;padding:14px 0"><span style="width:34px;height:34px;border-radius:999px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path></svg></span><span style="flex:1;font-size:14px;font-weight:600;color:#E8442E">Logout</span></div>
+    </div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center;z-index:5">
+    <div style="display:flex;align-items:center;gap:2px;background:#17171A;border:1px solid #26262B;border-radius:999px;padding:6px;box-shadow:0 10px 28px rgba(0,0,0,.5)">
+      <span style="width:42px;height:42px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg></span>
+      <span style="width:42px;height:42px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg></span>
+      <span style="width:48px;height:48px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(232,68,46,.5)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><path d="M12 5v14M5 12h14"></path></svg></span>
+      <span style="width:42px;height:42px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="9" cy="8" r="3"></circle><circle cx="16" cy="9" r="2.5"></circle><path d="M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5"></path></svg></span>
+      <span style="width:42px;height:42px;border-radius:999px;display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="7" width="18" height="12" rx="3"></rect><path d="M16 13h.01M3 10V7a2 2 0 0 1 2-2h11"></path></svg></span>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<p class="dv-next">Try next: "make the barber app a working prototype" · "add the salon-owner screens"</p>
+</div>
+</section>
+
+<section class="dv-turn" id="T2">
+<div class="dv-thd"><a class="dv-tid" href="#T2">T2</a><span class="dv-tname">A watch you can read, and a door you can open yourself</span></div>
+<p class="dv-note">Two screens where the platform tells someone something it could have kept quiet about. <a class="dv-oid" href="#BPR-02">BPR-02</a> is Karim reading the watch from <a class="dv-oid" href="./Barber - Clients.dc.html#BCL-05">BCL-05</a>, and the point is that <strong>a watch nobody is told about is just surveillance</strong> — so he gets the four lines, the two that were held against him and the two that were not, the closing date, and the plain statement that customers see nothing. <a class="dv-oid" href="#BPR-03">BPR-03</a> is Abdelhak, refused in June, holding the link the seven months bought: <strong>the reopen button is his, works the day the document exists, and is honest that a reopened file is not an approved one</strong>. The June answers are listed so he can see what he does not have to type again.</p>
+<p class="dv-src">from Barber App · turn 25</p>
+<div class="dv-opts">
+<div class="dv-opt" id="BPR-02"><div class="dv-olabel"><a class="dv-oid" href="#BPR-02">BPR-02</a>Karim · you are being watched for fourteen days</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;letter-spacing:.16em;text-transform:uppercase">From Sterncut</span>
+      <span style="width:38px"></span>
+    </div>
+    <div style="background:rgba(232,161,0,.1);border:1px solid rgba(232,161,0,.32);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px">
+      <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#E8A100">19 MARCH · NOT A CAP</span>
+      <span style="font-family:'Playfair Display',serif;font-size:19px;font-weight:700;line-height:1.3;text-wrap:pretty">Four cancellations in thirty days put you back in front of a person.</span>
+      <span style="font-size:12.5px;line-height:1.5;color:#D8D8DC;border-top:1px solid rgba(232,161,0,.2);padding-top:12px;text-wrap:pretty">She read the four and decided not to cap you. Your day stays at eleven bookings. We are watching for fourteen days and telling you so.</span>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">THE FOUR, AS SHE READ THEM</span>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;gap:11px;background:#17171A;border-radius:14px;padding:11px 13px">
+        <span style="width:44px;flex:none;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">2 Mar</span>
+        <span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:#D8D8DC">You told us the same morning</span>
+        <span style="flex:none;font-size:10px;font-weight:700;color:#9A9CA3">NOT HELD</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;background:#17171A;border-radius:14px;padding:11px 13px">
+        <span style="width:44px;flex:none;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">3 Mar</span>
+        <span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:#D8D8DC">Then you blocked the week in advance</span>
+        <span style="flex:none;font-size:10px;font-weight:700;color:#4ADE80">RIGHT CALL</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;background:#17171A;border-radius:14px;padding:11px 13px;outline:2px solid rgba(248,113,113,.4);outline-offset:-2px">
+        <span style="width:44px;flex:none;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">11 Mar</span>
+        <span style="flex:1;min-width:0;font-size:12px;font-weight:600">Forty minutes before, no reason</span>
+        <span style="flex:none;font-size:10px;font-weight:700;color:#F87171">HELD</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;background:#17171A;border-radius:14px;padding:11px 13px">
+        <span style="width:44px;flex:none;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">17 Mar</span>
+        <span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:#D8D8DC">Water cut on the whole street</span>
+        <span style="flex:none;font-size:10px;font-weight:700;color:#9A9CA3">NOT YOURS</span>
+      </div>
+    </div>
+    <div style="background:#111113;border:1px solid #1E1E22;border-radius:18px;padding:14px 15px;display:flex;flex-direction:column;gap:10px">
+      <span style="font-size:12.5px;font-weight:700">What a watch is, exactly</span>
+      <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #1E1E22;padding-top:11px">
+        <span style="display:flex;align-items:center;gap:9px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.1" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg><span style="flex:1;font-size:11.5px;color:#D8D8DC">Closes itself on 2 April</span></span>
+        <span style="display:flex;align-items:center;gap:9px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.1" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg><span style="flex:1;font-size:11.5px;color:#D8D8DC">Nothing on your page · no customer sees it</span></span>
+        <span style="display:flex;align-items:center;gap:9px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.1" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg><span style="flex:1;font-size:11.5px;color:#D8D8DC">Your slots, prices and pay are untouched</span></span>
+        <span style="display:flex;align-items:flex-start;gap:9px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2.1" style="flex:none;margin-top:1px"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg><span style="flex:1;font-size:11.5px;line-height:1.45;color:#D8D8DC">One more inside the fourteen days and the cap comes back — at four a day, for ninety, and you have used your appeal</span></span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <span style="height:48px;border-radius:16px;background:#17171A;border:1px solid #26262B;color:#D8D8DC;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700">Add something to the record</span>
+      <span style="font-size:11px;line-height:1.5;color:#6B6B72;text-align:center;padding:0 6px;text-wrap:pretty">She will read it. She cannot delete the four lines and neither can you.</span>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<div class="dv-opt" id="BPR-03"><div class="dv-olabel"><a class="dv-oid" href="#BPR-03">BPR-03</a>Abdelhak · reopen your own file</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;letter-spacing:.16em;text-transform:uppercase">Your shop</span>
+      <span style="width:38px"></span>
+    </div>
+    <div style="background:#111113;border:1px solid #1E1E22;border-radius:20px;padding:15px 16px;display:flex;align-items:center;gap:12px">
+      <span style="width:38px;height:38px;border-radius:12px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><path d="M4 20V9l8-5 8 5v11"></path><path d="M9 20v-6h6v6"></path></svg></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:700">Barbier Mesnana</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Abdelhak Rmiki · applied 2 June</span></span>
+    </div>
+    <div style="background:rgba(232,161,0,.1);border:1px solid rgba(232,161,0,.32);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px">
+      <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#E8A100">REFUSED 14 JUNE · ONE THING MISSING</span>
+      <span style="font-family:'Playfair Display',serif;font-size:19px;font-weight:700;line-height:1.3;text-wrap:pretty">A lease in your own name.</span>
+      <span style="font-size:12.5px;line-height:1.5;color:#D8D8DC;border-top:1px solid rgba(232,161,0,.2);padding-top:12px;text-wrap:pretty">That was the only thing wrong. Everything else you sent us passed, and it is still here.</span>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">WHAT YOU DO NOT HAVE TO DO AGAIN</span>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="display:flex;align-items:center;gap:10px;background:#17171A;border-radius:14px;padding:11px 13px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.2" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg><span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:#D8D8DC">Your hours · 09:00–21:00, six days</span></span>
+      <span style="display:flex;align-items:center;gap:10px;background:#17171A;border-radius:14px;padding:11px 13px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.2" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg><span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:#D8D8DC">Two chairs, your prices, eleven photographs</span></span>
+      <span style="display:flex;align-items:center;gap:10px;background:#17171A;border-radius:14px;padding:11px 13px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.2" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg><span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:#D8D8DC">Your licence · valid to 2029</span></span>
+      <span style="display:flex;align-items:center;gap:10px;background:#17171A;border-radius:14px;padding:11px 13px;opacity:.6"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2.2" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:#9A9CA3">Your identity check · seven months is too old to reuse</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px;margin-top:2px">
+      <a href="#BPR-04" style="height:52px;border-radius:16px;background:#fff;color:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none"><span style="font-size:12.5px;font-weight:800;letter-spacing:.04em">UPLOAD THE LEASE · REOPEN</span><span style="font-size:10.5px;font-weight:600;color:#5c5c58">Goes back into review the same day</span></a>
+      <span style="font-size:11px;line-height:1.5;color:#6B6B72;text-align:center;padding:0 4px;text-wrap:pretty">Reopening is not approval. One check runs again and it can still be refused — but you will not start from the beginning.</span>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:9px;background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:13px 15px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.2" style="flex:none;margin-top:1px"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"></path><circle cx="12" cy="11" r="2"></circle></svg>
+      <span style="flex:1;min-width:0;font-size:12px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Thirty-four people in Mesnana have asked for a cut since June. They are not told about you until you turn bookings on yourself.</span>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#BPR-04">UPLOAD THE LEASE …</a></div></div>
+
+<p class="dv-next">Try next: &quot;2 April · the watch closing&quot; · &quot;Abdelhak&#39;s first booking&quot;</p>
+</div>
+</section>
+
+<section class="dv-turn" id="T3">
+<div class="dv-thd"><a class="dv-tid" href="#T3">T3</a><span class="dv-tname">A watch that ends, and a shop that opens</span></div>
+<p class="dv-note">Both threads from <a class="dv-oid" href="#BPR-02">BPR-02</a> and <a class="dv-oid" href="#BPR-03">BPR-03</a>, finished. <a class="dv-oid" href="#BPR-04">BPR-04</a> is 2 April: the watch closes itself, and the screen does the one thing that makes a watch survivable — <strong>it says the record is gone, not archived</strong>, and refuses to congratulate him for a fortnight of ordinary work. No badge, no streak restored, one sentence about the eleven that stay in his file. <a class="dv-oid" href="#BPR-05">BPR-05</a> is Abdelhak on 29 January with a live shop and an empty first day, and it holds the promise <a class="dv-oid" href="./Customer - Booking Flow.dc.html#BOOK-06">BOOK-06</a> made: <strong>the thirty-four hear nothing until he presses the button himself</strong> — and when he does, the message is about his shop, not about a discount.</p>
+<p class="dv-src">from Barber App · turn 26</p>
+<div class="dv-opts">
+<div class="dv-opt" id="BPR-04"><div class="dv-olabel"><a class="dv-oid" href="#BPR-04">BPR-04</a>2 April · the watch closes</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;letter-spacing:.16em;text-transform:uppercase">From Sterncut</span>
+      <span style="width:38px"></span>
+    </div>
+    <div style="background:#111113;border:1px solid #1E1E22;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px">
+      <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#6B6B72">2 APRIL · CLOSED</span>
+      <span style="font-family:'Playfair Display',serif;font-size:19px;font-weight:700;line-height:1.3;text-wrap:pretty">The fourteen days are up. Nothing happens.</span>
+      <span style="font-size:12.5px;line-height:1.5;color:#9A9CA3;border-top:1px solid #1E1E22;padding-top:12px;text-wrap:pretty">You cancelled nothing between 19 March and today. The watch closed itself, exactly as it said it would. No customer was ever told it existed, and neither was Rachid — a watch is between you and us.</span>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">WHAT IS GONE NOW</span>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;gap:11px;background:#17171A;border-radius:14px;padding:12px 13px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.2" style="flex:none"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"></path></svg>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">The watch itself · deleted, not filed</span><span style="display:block;font-size:11px;color:#6B6B72;margin-top:2px">It is not on your record and cannot be cited later</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;background:#17171A;border-radius:14px;padding:12px 13px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.2" style="flex:none"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"></path></svg>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">The four March cancellations · aged out</span><span style="display:block;font-size:11px;color:#6B6B72;margin-top:2px">Thirty days each. The oldest went on 1 April</span></span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:11px;background:#17171A;border-radius:14px;padding:12px 13px;opacity:.65">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.2" style="flex:none;margin-top:2px"><path d="M4 6h16M4 12h10M4 18h7"></path></svg>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#9A9CA3">October&#39;s eleven · still in your file</span><span style="display:block;font-size:11px;color:#6B6B72;margin-top:2px">Nobody is shown them. They only count if a cap is proposed again</span></span>
+      </div>
+    </div>
+    <div style="background:#111113;border:1px solid #1E1E22;border-radius:18px;padding:15px 16px;display:flex;flex-direction:column;gap:11px">
+      <span style="font-size:12.5px;font-weight:700">We are not going to congratulate you</span>
+      <span style="font-size:12px;line-height:1.5;color:#9A9CA3;border-top:1px solid #1E1E22;padding-top:11px;text-wrap:pretty">You kept your bookings for a fortnight, which is what everybody here does. There is no badge for it and your rating has not moved. The only thing that changed is that a page about you has been deleted.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px;margin-top:2px">
+      <span style="height:48px;border-radius:16px;background:#17171A;border:1px solid #26262B;color:#D8D8DC;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700">Read what was written about you</span>
+      <span style="font-size:11px;line-height:1.5;color:#6B6B72;text-align:center;padding:0 6px;text-wrap:pretty">Available for thirty days, then it goes too. Nothing about you is kept longer than it is used.</span>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<div class="dv-opt" id="BPR-05"><div class="dv-olabel"><a class="dv-oid" href="#BPR-05">BPR-05</a>29 January · Abdelhak&#39;s first day live</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"></rect><path d="M3 9h18"></path></svg></span>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;letter-spacing:.16em;text-transform:uppercase">Your shop</span>
+      <span style="width:38px"></span>
+    </div>
+    <div style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.28);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px">
+      <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#4ADE80">APPROVED · WEDNESDAY 29 JANUARY</span>
+      <span style="font-family:'Playfair Display',serif;font-size:19px;font-weight:700;line-height:1.3;text-wrap:pretty">Barbier Mesnana can take bookings.</span>
+      <span style="font-size:12.5px;line-height:1.5;color:#D8D8DC;border-top:1px solid rgba(74,222,128,.2);padding-top:12px;text-wrap:pretty">Seven months and twenty-seven days after you applied. The identity check cleared on Monday.</span>
+    </div>
+    <div style="background:#111113;border:1px solid #1E1E22;border-radius:20px;padding:15px 16px;display:flex;flex-direction:column;gap:12px">
+      <span style="font-size:12.5px;font-weight:700">Nobody knows yet</span>
+      <div style="display:flex;align-items:center;gap:12px;border-top:1px solid #1E1E22;padding-top:12px">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;color:#9A9CA3">People in Mesnana who asked for a cut</span></span>
+        <span style="flex:none;font-size:20px;font-weight:700;color:#E8A100;font-variant-numeric:tabular-nums">34</span>
+      </div>
+      <span style="font-size:12px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">They have been waiting since June. We have not told them about you, and we will not until you say so.</span>
+      <a href="./Barber - Clients.dc.html#BCL-05" style="height:50px;border-radius:16px;background:#fff;color:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none"><span style="font-size:12.5px;font-weight:800;letter-spacing:.04em">TELL THEM I AM OPEN</span><span style="font-size:10.5px;font-weight:600;color:#5c5c58">One message each · nothing offered, no discount</span></a>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">TODAY</span>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="display:flex;align-items:center;gap:12px;border:1px dashed #3A3A40;border-radius:16px;padding:15px;background:#111113">
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;color:#9A9CA3">Nothing booked</span><span style="display:block;font-size:11px;color:#6B6B72;margin-top:2px">Twelve free slots, 09:00 to 21:00 · two chairs</span></span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:11px;background:#17171A;border-radius:16px;padding:12px 14px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.2" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+        <span style="flex:1;min-width:0;font-size:12px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">An empty first day is normal. Al Mansour in Mghogha had four bookings by his first afternoon and he had a message going out; most shops take a week.</span>
+      </div>
+    </div>
+    <div style="background:#111113;border:1px solid #1E1E22;border-radius:18px;padding:14px 15px;display:flex;flex-direction:column;gap:10px">
+      <span style="font-size:12px;font-weight:700">Two things to know before you press it</span>
+      <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #1E1E22;padding-top:11px">
+        <span style="display:flex;align-items:flex-start;gap:9px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.2" style="flex:none;margin-top:2px"><path d="M5 12l5 5L20 7"></path></svg><span style="flex:1;font-size:11.5px;line-height:1.45;color:#D8D8DC">It goes once. There is no reminder and you cannot send it again</span></span>
+        <span style="display:flex;align-items:flex-start;gap:9px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.2" style="flex:none;margin-top:2px"><path d="M5 12l5 5L20 7"></path></svg><span style="flex:1;font-size:11.5px;line-height:1.45;color:#D8D8DC">Nine of the thirty-four have 20 DH off their first cut from us, not from you. You are paid your full price</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="./Barber - Clients.dc.html#BCL-05">TELL THEM I AM OP…</a></div></div>
+
+<p class="dv-next">Both close here. The 34 hearing from him is the same machinery as <a class="dv-oid" href="./Customer - Notifications.dc.html#NTF-01">NTF-01</a>.</p>
+</div>
+</section>
+
+
+
+<section class="dv-turn" id="T4">
+<div class="dv-thd"><a class="dv-tid" href="#T4">T4</a><span class="dv-tname">Your profile — the row in BPR-01 finally goes somewhere</span></div>
+<p class="dv-note">The destination of <strong>Your profile</strong> in <a class="dv-oid" href="#BPR-01">BPR-01</a>, built on one rule: <strong>the screen says who each field is for</strong>. Six fields customers read, four Sterncut reads and nobody else, and a line at the bottom naming the numbers a barber cannot touch — rating, reviews, cancellations — so the absence is a statement rather than an oversight. <a class="dv-oid" href="#BPR-07">BPR-07</a> is the Preview button from <a class="dv-oid" href="#BPR-01">BPR-01</a>: his own page in the customer skin, with booking dead. <a class="dv-oid" href="#BPR-08">BPR-08</a> is what happens when he retypes his name — 320 clients know it, so the change is rationed, dated, and checked against the licence.</p>
+<div class="dv-opts">
+<div class="dv-opt" id="BPR-06"><div class="dv-olabel"><a class="dv-oid" href="#BPR-06">BPR-06</a>Your profile · what is yours to edit</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;letter-spacing:.16em;text-transform:uppercase">Your profile</span>
+      <span style="width:38px;text-align:right;font-size:12px;font-weight:700;color:#3A3A40;flex:none">SAVE</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:13px;background:#17171A;border-radius:18px;padding:12px 15px">
+      <span style="position:relative;width:54px;height:54px;flex:none">
+        <span style="position:absolute;inset:0;border-radius:999px;overflow:hidden"><image-slot id="bpr06-avatar" shape="circle" placeholder="YE"></image-slot></span>
+      </span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">Your photograph</span><span style="display:block;font-size:11px;line-height:1.45;color:#9A9CA3;margin-top:2px;text-wrap:pretty">Your face, not your work — your work has its own tab.</span></span>
+      <span style="flex:none;font-size:12px;font-weight:600;color:#E8442E">Replace</span>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">WHAT CUSTOMERS SEE</span>
+    <div style="background:#17171A;border-radius:16px;padding:11px 15px;outline:2px solid #E8442E;outline-offset:-2px"><span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#6B6B72">NAME ON YOUR PAGE</span><span style="display:block;font-size:14px;font-weight:600;margin-top:3px">Youssef El Amrani<span style="display:inline-block;width:2px;height:15px;background:#E8442E;vertical-align:-3px;margin-left:2px"></span></span></div>
+    <div style="display:flex;align-items:center;gap:8px;margin:-4px 0 0;padding:0 4px">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2.2" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+      <span style="flex:1;min-width:0;font-size:11px;line-height:1.45;color:#9A9CA3;text-wrap:pretty">Changed once already. Next change 12 November — <a href="#BPR-08" style="font-weight:600">why</a></span>
+    </div>
+    <div style="display:flex;gap:9px">
+      <div style="flex:1;min-width:0;background:#17171A;border-radius:16px;padding:11px 15px"><span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#6B6B72">HEADLINE</span><span style="display:block;font-size:13.5px;font-weight:600;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Fade specialist</span></div>
+      <div style="flex:none;width:112px;background:#17171A;border-radius:16px;padding:11px 15px"><span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#6B6B72">CUTTING SINCE</span><span style="display:block;font-size:13.5px;font-weight:600;margin-top:3px">2016</span></div>
+    </div>
+    <div style="background:#17171A;border-radius:16px;padding:11px 15px;display:flex;flex-direction:column;gap:9px">
+      <span style="font-size:10px;letter-spacing:.12em;font-weight:700;color:#6B6B72">LANGUAGES IN THE CHAIR</span>
+      <span style="display:flex;flex-wrap:wrap;gap:7px">
+        <span style="display:flex;align-items:center;gap:6px;background:#fff;border-radius:999px;padding:6px 11px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3"><path d="M5 12l5 5L20 7"></path></svg><span style="font-size:11.5px;font-weight:700;color:#111">Darija</span></span>
+        <span style="display:flex;align-items:center;gap:6px;background:#fff;border-radius:999px;padding:6px 11px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3"><path d="M5 12l5 5L20 7"></path></svg><span style="font-size:11.5px;font-weight:700;color:#111;font-family:'IBM Plex Sans Arabic',Inter,sans-serif">العربية</span></span>
+        <span style="display:flex;align-items:center;gap:6px;background:#fff;border-radius:999px;padding:6px 11px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="3"><path d="M5 12l5 5L20 7"></path></svg><span style="font-size:11.5px;font-weight:700;color:#111">Français</span></span>
+        <span style="display:flex;align-items:center;gap:6px;border:1px solid #3A3A40;border-radius:999px;padding:6px 11px"><span style="font-size:11.5px;font-weight:600;color:#9A9CA3">English</span></span>
+      </span>
+    </div>
+    <div style="background:#17171A;border-radius:16px;padding:11px 15px;display:flex;flex-direction:column;gap:7px">
+      <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:10px;letter-spacing:.12em;font-weight:700;color:#6B6B72">ABOUT YOU</span><span style="flex:none;font-size:10px;font-weight:600;color:#6B6B72;font-variant-numeric:tabular-nums">118 / 200</span></span>
+      <span style="font-size:12.5px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">Nine years on the same street. Skin fades, beard work, and I will tell you if the cut you asked for will not sit on your hair.</span>
+      <span style="font-size:10.5px;line-height:1.45;color:#6B6B72;border-top:1px solid #26262B;padding-top:8px;text-wrap:pretty">No prices here — those belong to your services.</span>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3;margin-top:2px">WHAT ONLY STERNCUT SEES</span>
+    <div style="background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:4px 15px">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #1E1E22"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg><span style="flex:1;min-width:0;font-size:11.5px;color:#9A9CA3">Name on your licence</span><span style="flex:none;font-size:11.5px;font-weight:600;color:#D8D8DC">Youssef El Amrani</span></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #1E1E22"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.2" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg><span style="flex:1;min-width:0;font-size:11.5px;color:#9A9CA3">Phone · verified</span><span style="flex:none;font-size:11.5px;font-weight:600;color:#D8D8DC">+212 661 20 44 13</span></div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #1E1E22"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.2" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg><span style="flex:1;min-width:0;font-size:11.5px;color:#9A9CA3">Licence · valid to</span><span style="flex:none;font-size:11.5px;font-weight:600;color:#D8D8DC">March 2027</span></div>
+      <div style="padding:9px 0"><span style="font-size:10.5px;line-height:1.45;color:#6B6B72;text-wrap:pretty">To change one of these, send us the document. Your page stays live and bookable while we read it.</span></div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:9px;background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:12px 14px;margin-top:2px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.2" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+      <span style="flex:1;min-width:0;font-size:11.5px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Your 4.9, your reviews and your cancellations are not here — they are not yours to edit. They sit on <a href="#BPR-01" style="font-weight:600">your standing</a>, with how each was counted.</span>
+    </div>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(255,255,255,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#BPR-08">why</a> · <a class="dv-oid" href="#BPR-07">Preview</a></div></div>
+
+<div class="dv-opt" id="BPR-07"><div class="dv-olabel"><a class="dv-oid" href="#BPR-07">BPR-07</a>Preview · your page, in their app</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;overflow:hidden">
+  <div style="padding:58px 20px 12px;display:flex;align-items:center;gap:10px;background:#0D0D0F">
+    <span style="flex:1;min-width:0"><span style="display:block;font-size:10px;letter-spacing:.15em;font-weight:700;color:#E8442E">PREVIEW</span><span style="display:block;font-size:11.5px;color:#9A9CA3;margin-top:2px">Exactly what a customer opens</span></span>
+    <span style="flex:none;background:#fff;color:#111;border-radius:999px;padding:8px 15px;font-size:12px;font-weight:700">Done</span>
+  </div>
+  <div style="position:absolute;left:0;right:0;top:98px;bottom:0;background:#F2F0EB;color:#111;padding:16px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:13px">
+      <span style="width:66px;height:66px;border-radius:999px;overflow:hidden;flex:none"><image-slot id="bpr07-avatar" shape="circle" placeholder="YE"></image-slot></span>
+      <span style="flex:1;min-width:0">
+        <span style="display:block;font-family:'Playfair Display',serif;font-size:19px;font-weight:700">Youssef El Amrani</span>
+        <span style="display:block;font-size:12px;color:#8A8A85;margin-top:2px">Fade specialist · Le Fade Tanger</span>
+        <span style="display:flex;align-items:center;gap:7px;margin-top:5px"><span style="font-size:12px;font-weight:700">4.9 ★</span><span style="font-size:11.5px;color:#8A8A85">126 reviews · cutting since 2016</span></span>
+      </span>
+    </div>
+    <div style="display:flex;gap:9px">
+      <span style="flex:1;background:#fff;border-radius:14px;padding:11px 12px;box-shadow:0 4px 12px rgba(0,0,0,.04)"><span style="display:block;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums">320</span><span style="display:block;font-size:10px;letter-spacing:.08em;font-weight:700;color:#B9B6AD;margin-top:2px">CLIENTS</span></span>
+      <span style="flex:1;background:#fff;border-radius:14px;padding:11px 12px;box-shadow:0 4px 12px rgba(0,0,0,.04)"><span style="display:block;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums">30′</span><span style="display:block;font-size:10px;letter-spacing:.08em;font-weight:700;color:#B9B6AD;margin-top:2px">A CUT TAKES</span></span>
+      <span style="flex:1;background:#fff;border-radius:14px;padding:11px 12px;box-shadow:0 4px 12px rgba(0,0,0,.04)"><span style="display:block;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums">98%</span><span style="display:block;font-size:10px;letter-spacing:.08em;font-weight:700;color:#B9B6AD;margin-top:2px">KEPT</span></span>
+    </div>
+    <span style="font-size:12.5px;line-height:1.55;color:#3F3F3B;text-wrap:pretty">Nine years on the same street. Skin fades, beard work, and I will tell you if the cut you asked for will not sit on your hair.</span>
+    <span style="display:flex;flex-wrap:wrap;gap:7px">
+      <span style="border:1px solid #DCD8CF;border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:600;color:#5c5c58">Darija</span>
+      <span style="border:1px solid #DCD8CF;border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:600;color:#5c5c58;font-family:'IBM Plex Sans Arabic',Inter,sans-serif">العربية</span>
+      <span style="border:1px solid #DCD8CF;border-radius:999px;padding:5px 11px;font-size:11.5px;font-weight:600;color:#5c5c58">Français</span>
+    </span>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#8A8A85">NEXT FREE</span>
+      <span style="display:flex;gap:8px">
+        <span style="flex:1;background:#fff;border-radius:14px;padding:10px 0;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.04)"><span style="display:block;font-size:13px;font-weight:700">14:30</span><span style="display:block;font-size:10.5px;color:#8A8A85;margin-top:2px">Today</span></span>
+        <span style="flex:1;background:#fff;border-radius:14px;padding:10px 0;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.04)"><span style="display:block;font-size:13px;font-weight:700">16:00</span><span style="display:block;font-size:10.5px;color:#8A8A85;margin-top:2px">Today</span></span>
+        <span style="flex:1;background:#fff;border-radius:14px;padding:10px 0;text-align:center;box-shadow:0 4px 12px rgba(0,0,0,.04)"><span style="display:block;font-size:13px;font-weight:700">09:30</span><span style="display:block;font-size:10.5px;color:#8A8A85;margin-top:2px">Tomorrow</span></span>
+      </span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:2px">
+      <span style="height:50px;border-radius:16px;background:#C9C5BC;color:#F2F0EB;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;letter-spacing:.04em">BOOK YOUSSEF</span>
+      <span style="font-size:11px;line-height:1.45;color:#8A8A85;text-align:center;text-wrap:pretty">Dead in preview. You cannot book yourself, and nothing here writes to your day.</span>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:9px;background:rgba(232,68,46,.08);border-radius:14px;padding:11px 13px;margin-top:2px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2.2" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+      <span style="flex:1;min-width:0;font-size:11.5px;line-height:1.5;color:#5c5c58;text-wrap:pretty"><strong style="color:#111">98% kept</strong> is ours, not yours — it is the share of bookings you did not cancel. It appears once you pass fifty cuts and you cannot hide it.</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px;margin-top:2px">
+      <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:11px;letter-spacing:.15em;font-weight:700;color:#8A8A85">WHAT THEY SAID</span><span style="flex:none;font-size:11.5px;font-weight:600;color:#E8442E">All 126</span></span>
+      <div style="background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 4px 12px rgba(0,0,0,.04);display:flex;flex-direction:column;gap:6px">
+        <span style="display:flex;align-items:center;gap:8px"><span style="font-size:11.5px;font-weight:700">Anas B.</span><span style="font-size:11px;color:#B9B6AD">5 ★ · 4 days ago</span></span>
+        <span style="font-size:12px;line-height:1.5;color:#3F3F3B;text-wrap:pretty">Told me the fade I asked for would not hold on my hair and gave me a better one. Out in half an hour.</span>
+      </div>
+      <div style="background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 4px 12px rgba(0,0,0,.04);display:flex;flex-direction:column;gap:6px">
+        <span style="display:flex;align-items:center;gap:8px"><span style="font-size:11.5px;font-weight:700">Mehdi K.</span><span style="font-size:11px;color:#B9B6AD">4 ★ · 2 weeks ago</span></span>
+        <span style="font-size:12px;line-height:1.5;color:#3F3F3B;text-wrap:pretty">Good cut, ten minutes late starting. He said so himself when I sat down.</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<div class="dv-opt" id="BPR-08"><div class="dv-olabel"><a class="dv-oid" href="#BPR-08">BPR-08</a>Retyping your own name</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="padding:62px 20px 0;display:flex;flex-direction:column;gap:12px;opacity:.28">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125"></span>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:17px;letter-spacing:.16em;text-transform:uppercase">Your profile</span>
+      <span style="width:38px"></span>
+    </div>
+    <div style="height:84px;background:#17171A;border-radius:18px"></div>
+    <div style="height:62px;background:#17171A;border-radius:16px"></div>
+    <div style="height:62px;background:#17171A;border-radius:16px"></div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#141416;border-top:1px solid #26262B;border-radius:28px 28px 0 0;padding:20px 20px 30px;display:flex;flex-direction:column;gap:13px;box-shadow:0 -20px 60px rgba(0,0,0,.6)">
+    <span style="width:38px;height:4px;border-radius:999px;background:#3A3A40;align-self:center"></span>
+    <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#9A9CA3">CHANGE THE NAME ON YOUR PAGE</span>
+    <span style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;line-height:1.3;text-wrap:pretty">320 people know you by the name you are about to delete.</span>
+    <div style="display:flex;align-items:center;gap:11px;background:#0D0D0F;border-radius:16px;padding:13px 15px">
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#6B6B72">NOW</span><span style="display:block;font-size:13.5px;font-weight:600;margin-top:2px">Youssef El Amrani</span></span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2" style="flex:none"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#6B6B72">NEW</span><span style="display:block;font-size:13.5px;font-weight:600;margin-top:2px;color:#E8442E">Youssef · Le Fade</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px;border-top:1px solid #26262B;padding-top:13px">
+      <span style="display:flex;align-items:flex-start;gap:9px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.2" style="flex:none;margin-top:2px"><path d="M5 12l5 5L20 7"></path></svg><span style="flex:1;font-size:11.5px;line-height:1.45;color:#D8D8DC">Your 126 reviews, your photographs and your regulars all follow the change</span></span>
+      <span style="display:flex;align-items:flex-start;gap:9px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2.2" style="flex:none;margin-top:2px"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg><span style="flex:1;font-size:11.5px;line-height:1.45;color:#D8D8DC">For thirty days your page reads <em>formerly Youssef El Amrani</em>, so the 320 can still find you</span></span>
+      <span style="display:flex;align-items:flex-start;gap:9px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2.2" style="flex:none;margin-top:2px"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg><span style="flex:1;font-size:11.5px;line-height:1.45;color:#D8D8DC">Once done, it locks for sixty days — until <strong>12 November</strong></span></span>
+      <span style="display:flex;align-items:flex-start;gap:9px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.2" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg><span style="flex:1;font-size:11.5px;line-height:1.45;color:#D8D8DC">A shop name in your own name needs the owner&#39;s consent. Rachid will be asked, and can say no</span></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <span style="height:50px;border-radius:16px;background:#fff;color:#111;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px"><span style="font-size:12.5px;font-weight:800;letter-spacing:.04em">CHANGE IT</span><span style="font-size:10.5px;font-weight:600;color:#5c5c58">Live within the hour if Rachid agrees</span></span>
+      <span style="height:46px;border-radius:16px;background:#17171A;border:1px solid #26262B;color:#D8D8DC;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700">Keep Youssef El Amrani</span>
+    </div>
+  </div>
+</div>
+</x-import></div>
+
+<p class="dv-next">Try next: &quot;Rachid is asked about the name&quot; · &quot;the licence photo that no longer matches&quot;</p>
+</div>
+</section>
+</x-dc>
+</body>
+</html>

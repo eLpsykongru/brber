@@ -192,8 +192,8 @@ export default function CancelledGap({
                 <Pressable style={[s.whatRow, !r.offer!.public_too && s.whatRowOn]}
                   disabled={r.offer!.public_too}
                   onPress={async () => {
-                    const { error } = await supabase.from('slot_offers')
-                      .update({ public_too: true, expires_at: r.starts_at }).eq('id', r.offer!.id);
+                    // a function, not an update: the table is read-only to the app (0132)
+                    const { error } = await supabase.rpc('open_offer_to_all', { p_offer: r.offer!.id });
                     if (error) return Alert.alert(tr('Could not open it'), error.message);
                     load();
                   }}>

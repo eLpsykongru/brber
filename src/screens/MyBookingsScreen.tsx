@@ -13,6 +13,7 @@ import { colors, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
 import { BookingDetailSheet } from './MyBookingScreen';
 import QueueScreen, { DayQueueRow, minutesUntil } from './QueueScreen';
 import { loc, tr, trn } from '../lib/i18n';
+import { nameOrFormer } from '../lib/deletion';
 
 // Turn 6 of "Customer App 1.dc.html" — the three tabs with per-state cards:
 // 6a upcoming (live queue hero + confirmed + pending), 6b completed
@@ -225,7 +226,7 @@ export default function MyBookingsScreen({ customerId, onChromeHidden, onRebook,
           + ' bundle:bundles!bundle_id(name),'
           + ' booking_services(service_id, price_cents, duration_min, sort, done_at, services(name)),'
           + ' deposit_holds(state),'
-          + ' barbers(id, profiles!barbers_id_fkey(full_name), salon:salons!salon_id(name, address))')
+          + ' barbers(id, profiles!barbers_id_fkey(full_name, deleted_at), salon:salons!salon_id(name, address))')
         .eq('customer_id', customerId)
         .order('starts_at', { ascending: false })
         .limit(50),

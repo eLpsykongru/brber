@@ -17,9 +17,11 @@ distances, locate-me FAB, navigate-to-salon. Still open:
 - Toggling does nothing yet. Needs a `wishlists (customer_id, salon_id)` table +
   RLS, and a Wishlist tab (mockup shows one; we kept Bookings in the 5-tab slot).
 
-## Promotions  → "5% OFF" badge on Explore cards
-- Hardcoded label. Needs a `promotions` table (salon_id, percent, validity) and
-  application to the deposit/price once a payment rail exists.
+## Promotions  → no badge (removed 2026-09-25)
+- The "5% OFF" on every Explore card and "10% OFF" on every salon page were hardcoded
+  and applied to nothing — a discount promised to every customer and honoured for none.
+  Both badges are gone. Needs a `promotions` table (salon_id, percent, validity) and
+  application to the deposit/price once a payment rail exists; the badge comes back then.
 
 ## Filters  → filter button next to search — PARTIAL 2026-07-15
 - Rating / distance / starting-price filters are live (bottom sheet).
@@ -129,8 +131,7 @@ owner-only RPCs (`salon_team`, `salon_stats`, `salon_set_terms`,
   (applies on next edit). Not enforced in the booking path directly — availability is
   the gate, and it's now envelope-bound at write time.
 - **Shop open/closed** — header power button writes `salons.accepting_bookings`.
-  NOTE: nothing **enforces** it in the booking flow yet (like the per-barber
-  `accepting_bookings`) — wire the check when the request path is next touched.
+  Enforced since 0064: `before_shop_closed` refuses a booking insert while it is off.
 **Still blocked / deferred (can't build now, not laziness):**
 - **Saved-gap alerts have no sender** (EXPL-28 §6) — `push_saved_gap` (0065) is
   written by SavedScreen and read by `my_wishlist`, and *nothing sends a
@@ -207,7 +208,9 @@ Still open:
 - **Card rail** (YouCan Pay) → customer Add-Money returns then.
 - **Spending the balance** — bookings can't be paid from the wallet yet; that's
   the deposit/coupon unlock in the Payments bet.
-- **Scan-QR tab is still mock** — needs `expo-camera` + a customer-side QR.
+- **Scan QR** — the mock tab (and the header's Export) opened a "coming soon"; both
+  were removed 2026-09-25, so a top-up is by phone only. Needs `expo-camera` + a
+  customer-side QR to come back.
 - **Cash-out** stays cut (top-up-only; would need customer withdrawal codes).
 - **Other-than-owner agent** = `salons.cash_agent_id` picker (Salon-management
   plan); don't widen the gate ad hoc. Aggregate/paginate the till query when a
@@ -227,14 +230,17 @@ Still open:
   (My Bookings → Rate). No arbitrary review entry from the salon screen.
 
 ## Chat  → `src/screens/ChatsScreen.tsx` + `src/screens/ChatScreen.tsx`
-- **Online/presence status** — the green dot + "Online" are decorative. Needs
-  Supabase Realtime Presence (track online users per channel).
-- **Unread tracking** — "Unread" tab, per-row unread badges, and read receipts
-  (✓✓). Needs a `chat_reads (booking_id, user_id, last_read_at)` table; unread =
-  messages newer than last_read_at not sent by me.
-- **Voice notes** — mic button in the composer. Needs `expo-av` record + upload to
-  a `voice` bucket + a waveform/play message type.
-- **Emoji picker** — emoji button is a placeholder (system keyboard has emoji).
+- **Presence** — removed everywhere (2026-09-26, launch handoff MSG): no dots, no
+  "Online", no "we're online · replies in 40 min". Nothing measures either; add
+  Realtime Presence first if it ever comes back.
+- **Unread tracking** — REAL since 0131 (`chat_reads`, per reader and peer): thread
+  counts, the Chat tab badge, the Unread filter and the NEW divider. Read receipts
+  (✓✓) are deliberately not drawn.
+- **Voice notes** — not built. Needs `expo-av` record + upload to a `voice` bucket +
+  a waveform/play message type. The mic that opened a "coming soon" went (2026-09-25):
+  the button is send, dimmed until there is text.
+- **Emoji picker** — the button that only said "use your keyboard" went, and so did
+  the header's options/call puck (2026-09-25). The system keyboard has emoji.
 - **Chat search** — search icon filters the conversation list (basic filter is live;
   full-text over message bodies is TODO).
 
@@ -259,6 +265,7 @@ with social sign-in, email sign-in, register. Email/password and OAuth are both 
     never a number, so the profile lands with `phone` null and the barber has
     nothing to call. Trigger: the first booking made by an OAuth account — ask
     for a phone after first sign-in, or block booking until there is one.
+    DONE 2026-09-26: asked after sign-in, before Home (`AddPhoneScreen`).
   - **Apple is the web flow, not native.** Acceptable for App Store review, but
     iOS gets a browser sheet instead of the Face ID sheet. Trigger: shipping to
     the App Store — `expo-apple-authentication` + `signInWithIdToken`, dev build
@@ -384,10 +391,10 @@ reply shows on his page.
   **beyond the admin design**, which predates appeals — replace it with a real
   screen when appeals are more than a couple a week.
 Still open here:
-- **Help articles are stubs.** The five rows in 30a/5a alert; the real FAQ content
-  is in `HelpCenterScreen`. Wire the rows to it (or to a `help_articles` table)
-  when someone writes the articles.
-- **CALL US / CALL OPS dial a placeholder number** (`SUPPORT_PHONE` / `OPS_PHONE`).
+- ~~**Help articles are stubs.**~~ — written 2026-09-25; see "Store readiness, the
+  no-design half" at the end.
+- ~~**CALL US / CALL OPS dial a placeholder number**~~ — the owner's number since
+  2026-09-25, same entry.
 - **Photo attachments on the barber's report (5c)** — the sheet says the check-in
   log is attached, which is true (ops reads it off the booking); an actual image
   upload is customer-side only for now.
@@ -1212,8 +1219,8 @@ See "French and Arabic, both sides of the app" at the end. Darija, the web queue
 and everything the server writes are still English.*
 
 ## Profile menu rows  → `src/screens/ProfileScreen.tsx` (customer)
-- **Payment Methods** — needs a payment rail (no Stripe in Morocco; pay at shop
-  for now). **My Wallet** is real since 0022 (cash top-ups at the salon); card
+- **Payment Methods** — no row since 2026-09-25 (it opened a "coming soon"). Needs a
+  payment rail (no Stripe in Morocco; pay at shop for now). **My Wallet** is real since 0022 (cash top-ups at the salon); card
   top-ups + spending the balance still need the rail.
 - **My Coupons** — needs the same `promotions`/coupons table as Explore badges.
 - **Settings** — language is real now: 20b drives the app (2026-09-18). Notification
@@ -2368,7 +2375,8 @@ Still open:
   launches the app from closed — now lands on BDY-06, the day timeline on that
   booking's day. Every other kind still opens the app wherever it was.
   `onBannerOpen` (push.ts) is the bus: a screen that owns a destination subscribes.
-  **Trigger:** the first build that delivers push to barbers.
+  **Trigger:** the first build that delivers push to barbers. DONE 2026-09-26: every
+  kind routes now, on both sides (see "Leaving, and whose phone it is").
 - **Requests expire in 2 h** (the handoff's contract) instead of at start time.
   **Trigger:** a product decision — it changes what customers wait on.
 - **Waitlist asks for a time**, which would let BDY-14 say "asked for 16:00" and
@@ -3266,3 +3274,193 @@ The four things 0128 left open, built after the owner said to.
 Tested in PGlite: 0129 applied on top of 0128's test data (and twice), and every earlier
 suite with 0129 applied first. Every message has the same placeholders in all three
 languages, and none goes out with a `{placeholder}` left in it.
+
+## Leaving, and whose phone it is (0130, 2026-09-25)
+
+From a scan of both apps before the owner and admin pages. Three things were broken
+and are fixed here.
+
+- **Deleting an account failed for almost everyone.** 0039 deleted the profile and
+  let the cascades take the rest, but `push_attempts` (0104) refuses every delete and
+  `wallet_transactions` has no cascade. So anyone who was ever pushed, or ever topped
+  up, got a raw SQL error. Barbers had no delete button at all. Now deleting **erases
+  the person and keeps the rows**: the profile, barber row and auth user stay with no
+  name, phone, photo, bio, email, password or identities, the user is banned, and the
+  barber's public code is replaced. Every booking, payment and review keeps its key.
+  It is refused, with a reason in the reader's language, while something is still
+  open: an upcoming booking on either side, a shop he owns, the shop's cash, a drawer
+  handover under way, an open shortfall, or a staff role. A team barber leaves the
+  team on the way out, the same way `salon_remove_member` moves him. The 0109 name
+  lock stands aside for a deletion, because it would have copied the name into
+  `previous_name`. The sheet's copy now says what happens ("stay on the books, with
+  no name on them") instead of "removes your bookings". The app removes the avatar and
+  portfolio folders afterwards; avatars got the missing select and delete policies.
+  **ID documents stay**: private, ops-only, and the only KYC record.
+- **A shared phone kept the last person's pushes.** The token is the key, and RLS
+  refused the second person's upsert without a word. `claim_push_token` hands it over,
+  and `logOut()` (lib/push.ts) deletes this phone's token before signing out.
+- **Logout signed every phone out.** supabase-js defaults to `scope: 'global'`. Every
+  sign-out now goes through `logOut()`, which is local, apart from "Sign out
+  everywhere". A deliberate logout also no longer shows 24a's "Session expired" sheet,
+  which it did every time.
+
+Also on the barber's menu: **Linked accounts** (password, Face ID lock, sign out
+everywhere) and **Delete my account**. The light 20a sheet opens over the dark menu
+until a barber design draws one. Barber Settings is still not a screen of its own.
+
+Removed because they did nothing: "5% OFF" / "10% OFF", the "Location while booking"
+switch, Payment Methods, chat's options puck, emoji and mic buttons, the agent's Scan QR
+tab and Export, the shop report's Export, the salon page's Message (and Website when
+the shop has none), and the owner's Roles / Payouts / Reports rows, "PACKAGES · MOCK",
+and the member sheet's Message / Schedule. Nothing a user sees says "BACKLOG" any more.
+
+Tested in PGlite (every migration from 0001, seeds skipped, auth, storage and pg_net
+stubbed): on 0129, all three bugs reproduce. On 0130, 34 checks pass, covering each
+refusal, what is erased, what is kept, the name lock still holding for everyone else,
+and the token claim. 0130 applied twice is clean. PGlite runs as superuser, so the
+auth-table privileges are only proven on Supabase: 0130 asserts them at apply time,
+and if that assert fails the delete has to move to an Edge Function on the Auth admin
+API.
+
+**0130 is NOT APPLIED — apply it before this build reaches a phone.** The app now
+registers push through `claim_push_token`; without it, new phones get no token.
+
+From the same scan, fixed 2026-09-26 (0132 and the app):
+- ~~"Open it to everyone" did nothing~~ — `open_offer_to_all` (0132) does it, checked:
+  his own offer, unclaimed, not withdrawn, slot still ahead. PGlite: 7 checks.
+- ~~A notification's booking reopened later~~ — cleared whenever Bookings is left.
+- ~~Two local-day slips at UTC+1~~ — both compare the phone's own calendar now.
+- ~~Push-tap deep links~~ — every banner lands where the inbox sends the same row:
+  barber → the ask, the review, the request or booking sheet (else that day's
+  timeline), the chat thread; customer → the booking or its rating, the wallet,
+  the chat thread. A cold start's tap waits in push.ts until Home listens.
+- ~~OAuth users have no phone~~ — a customer without one is asked right after
+  sign-in, before Home (`AddPhoneScreen`), with a way to log out instead.
+- **Store blockers:** no privacy policy or terms page anywhere, and no Android Google
+  Maps key. (The support/ops numbers, the iOS permission strings and the help articles
+  were taken by a parallel session the same day — see its entry.)
+
+## Store readiness, the no-design half (2026-09-25)
+
+The parallel session's entry, from the same scan.
+
+- **Support and ops dial the owner's own number** (`+212659941507`) until each has a
+  line: `SUPPORT_PHONE` (SupportScreens) and `OPS_PHONE` (BarberSupportScreens) reach
+  CALL US, CALL OPS, the suspended screen, the subscription card and the float-cap
+  sheet. Support email for the store listings and the legal pages is
+  `adil.boudraa3@gmail.com`, also for now. Nothing in the app prints it.
+- **Permission prompts say why** (app.json plugin config), in English, which is what
+  App Review reads: location for distance, the shop pin and poster-photo tags; camera
+  for the queue QR, the licence and the poster; photos for profile, work and chat;
+  Face ID for the app lock. **Removed:** the "Always" location strings (nothing
+  tracks in the background) and the microphone (iOS key gone, Android `RECORD_AUDIO`
+  blocked; no voice notes). `supportsTablet` is false, so the App Store needs phone
+  screenshots only and iPads run the phone layout. Checked with `expo config --type
+  introspect`. It needs a new build.
+- **Help articles are real.** The barber's five "Common for barbers" rows and the
+  customer's five "Common questions" open 22b's article (`ArticleModal`, exported from
+  HelpCenterScreen), where they used to alert "Help article coming soon". The
+  customer's rows were English strings outside `tr()`; they are now the Help center's
+  own articles, including two new ones (up-front payment, joining by QR). Every
+  answer is what the rails do today, and the barber file names the migration for each.
+  The account article no longer says the phone "is verified by SMS": no SMS rail exists.
+Still open:
+- **The barber reads a light article over the dark screen**, like SlotPicker. A dark
+  one comes with the barber design's HLP turn.
+- **Permission prompts are English on a French or Arabic phone.** iOS localises them
+  through `InfoPlist.strings` (Expo's `locales` key in app.json). Trigger: the first
+  store build that ships to Moroccan users.
+- **The legal pages' draft needs one correction** to the Claude Design prompt: a
+  barber's location *is* stored when attached to a poster photo sent to ops
+  (`task-proof`). It is not only "used while the app is open".
+
+## Launch readiness — the handoff (0131, 2026-09-26)
+
+`design_handoff_sterncut_launch/` — four parts, all built. Decided with the owner before
+building: 0130 was already applied (so 0131 goes on top); a forfeited wallet balance is a
+ledger row and Sterncut keeps it; a solo owner who deletes closes the shop; the legal
+pages go up as a draft with their brackets.
+
+**Part 1 · barber (dark).** Settings (BST-00…06): Profile gains Settings and loses
+Language; Language, sign-in & security (password change/set, linked Google/Apple, app
+lock, sign out everywhere), Notifications (opens BNT-03), Terms and Privacy (in-app
+browser), log out, delete. Delete (DEL-01…03): up to four blockers from
+`account_deletion_check()`, each with one door (Calendar, You & Sterncut, Settle up /
+Who holds the cash, Talk to us, which opens an ops case prefilled with "Delete my
+account — I own {shop}"). No delete control while any is open. Chat (MSG-01…03): unread
+counts, "You:", Call only with a phone, a three-row options sheet. Export (EXP-01…03):
+one sheet from Wallet › Activity and Shop report, an A4 PDF from the receipt renderer,
+shared through `expo-sharing`. Cash top-up (BCF-02b): no QR, and the matched customer
+before the cash is taken (`agent_find_customer`). Help (HLP-01): a dark article with
+Message ops.
+
+**Part 2 · customer (light).** Delete (DEL-04…06) as pushed screens: refused only
+while a deposit booking is live; other upcoming bookings are cancelled so barbers are
+told; a wallet balance needs the tick and is forfeited on the record. Chat (MSG-04…08):
+real Unread filter with its empty state, the tab badge, the NEW divider, a two-row ⋮
+sheet, no presence, no avatar strip, no emoji/paperclip/mic. Consent (SGN) under the
+welcome buttons, under Create account, and under sign-in's Google/Apple row.
+
+**Both sides.** Kept bookings and reviews read "Former customer" / "Former barber",
+keyed on `profiles.deleted_at`, never on a missing name (an Apple sign-in can hide the
+name of a live account).
+
+**Part 3 · sterncut.ma.** WEB-14…16 at their nine addresses, rendered from
+`web/src/legal-content.js` (the handoff's file, as a module). The draft banner, ⚑
+highlights and bracket chips stay until the lawyer is done. `CONTACT_EMAIL` and
+`SUPPORT_PHONE` on the host fill their brackets. 301s from `/{fr,ar}/terms|privacy`
+(the app's links; English is already canonical). The footer is on every site page,
+not on the queue pages.
+**Register `https://sterncut.ma/supprimer-mon-compte` in Play Console › App content ›
+Data safety › "Delete account URL".**
+
+**Part 4 · store.** Icon, adaptive icon (dark background), monochrome, notification icon
+and the ink splash are in `assets/` and app.json. The screenshots, feature graphics and
+listing copy stay in the handoff folder for the consoles.
+**Superseded the same day by the S + sparkle logo** (`design_handoff_logo/`): its icon,
+notification icon and splash logos replace part 4's, and the splash now follows the phone
+(light #F8F8F6, dark #101010). The Android foreground and monochrome came in 3 % past the
+adaptive safe zone (the gold tail reached 33.8 % from centre against 30.6 %); they ship
+scaled to 88 %, which lands it at 29.8 %. Still showing the old coral-cut S: part 4's
+screenshots and feature graphics, and the website's favicon and header logo. Re-export
+before upload. The notification tint stays coral, the app's accent.
+
+**Server — 0131.** The deletion check and delete by role; the `forfeit` wallet kind
+(with `created_by` now nullable) and `ledger_check()` counting it; `salons.status
+'closed'` (the admin console knows it); `chat_reads` with `chat_unread()` and
+`mark_chat_read()` — everything said before today counts as read; `agent_find_customer`;
+delete policies for ID documents and your own chat photos. Tested in PGlite: 38
+checks, applied twice clean.
+
+**Changed from the handoff, and why:**
+- The terms said "your phone number is verified by SMS" and the delete page promised
+  confirmation "by email or SMS". Nothing sends SMS (the SMS rail is blocked), so both
+  lines lost the SMS in all three languages — the handoff's own open question, answered
+  from the code. The lawyer should know.
+- BST-01's "{n} of 4 alerts" reads "{n} of {total}": BNT-03 has six alerts, not four.
+- EXP-01's "Pick dates" isn't drawn: the app has no date-range picker. The three
+  period chips are.
+- BST-03's Link button isn't drawn: manual identity linking isn't switched on in the
+  auth project. The Apple row shows on iOS only.
+- EXP-03 shows the Shop report's own tiles (commission, top-ups, no-shows, owed now),
+  because "each PDF shows only figures its screen already shows" and the screen has
+  top-ups where the drawing had deposits.
+- A barber's own deposit bookings elsewhere count in the bookings row, so the server's
+  refusal always has a row on screen.
+- The auth user is banned and scrubbed rather than deleted: deleting it would cascade
+  into the rows the rule keeps. The email is freed either way.
+
+**0131 is NOT APPLIED — apply it before this build reaches a phone.** The app calls
+`account_deletion_check`, the new `delete_my_account(text, boolean)`, `chat_unread`,
+`mark_chat_read` and `agent_find_customer`.
+
+**A new build is needed** for the icons and splash, `expo-sharing` and
+`expo-splash-screen`. Until then, export falls back to the system print sheet.
+
+Still open:
+- The legal text needs the lawyer and every bracket filled; the draft banner comes off
+  then (`lg-draft` in `web/src/legal.js`).
+- Store screenshot 2 needs three real portfolio photos before it can be exported.
+- The listing copy goes into App Store Connect and Play Console by hand.
+- BST-06 says "within the hour": that's the default 3600 s JWT expiry. Change the copy
+  if the project's expiry differs.

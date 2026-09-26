@@ -23,13 +23,13 @@ type Notif = {
   read_at: string | null; created_at: string;
 };
 
-type Prefs = {
+export type Prefs = {
   push_booking_request: boolean; push_cancellation: boolean; push_checked_in: boolean;
   push_wallet: boolean; push_message: boolean; push_review: boolean;
   silent_while_cutting: boolean; quiet_outside_hours: boolean; urgent_always: boolean;
 };
 
-const DEFAULTS: Prefs = {
+export const DEFAULTS: Prefs = {
   push_booking_request: true, push_cancellation: true, push_checked_in: true,
   push_wallet: true, push_message: true, push_review: false,
   silent_while_cutting: true, quiet_outside_hours: true, urgent_always: true,
@@ -299,7 +299,7 @@ export default function NotificationsScreen({ barberId, onBack, onOpenBooking, o
 }
 
 // ---- 4c · notification settings -------------------------------------------
-const PUSH_ROWS: { key: keyof Prefs; label: string; hint: string }[] = [
+export const PUSH_ROWS: { key: keyof Prefs; label: string; hint: string }[] = [
   { key: 'push_booking_request', label: tr('New booking requests'), hint: tr('Accept or decline from the banner') },
   { key: 'push_cancellation', label: tr('Cancellations'), hint: tr('A slot just opened up') },
   { key: 'push_checked_in', label: tr('Client checked in'), hint: tr('He\'s in the shop waiting') },
@@ -308,7 +308,8 @@ const PUSH_ROWS: { key: keyof Prefs; label: string; hint: string }[] = [
   { key: 'push_review', label: tr('New reviews'), hint: tr('Waits for the inbox') },
 ];
 
-function NotificationSettings({ barberId, onBack }: { barberId: string; onBack: () => void }) {
+// BNT-03 — also opened from Settings (BST-01)
+export function NotificationSettings({ barberId, onBack }: { barberId: string; onBack: () => void }) {
   const [prefs, setPrefs] = useState<Prefs>(DEFAULTS);
   const [perm, setPerm] = useState<'granted' | 'denied' | 'undetermined'>('undetermined');
   const [hours, setHours] = useState<Window | null>(null);

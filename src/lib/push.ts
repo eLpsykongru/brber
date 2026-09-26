@@ -80,7 +80,7 @@ async function registerCategory() {
 }
 
 /**
- * Asks once, stores the token against the barber, and wires the banner actions.
+ * Asks once, stores the token against whoever is signed in, and wires the banner actions.
  * Safe to call on every sign-in; returns the token or null when unavailable.
  */
 export async function registerPush(userId: string): Promise<string | null> {
@@ -108,10 +108,40 @@ export async function registerPush(userId: string): Promise<string | null> {
   if (!projectId) return null; // ponytail: needs an EAS project before tokens mean anything
 
   const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId });
-  await supabase.from('push_tokens')
-    .upsert({ token, user_id: userId, platform: Platform.OS, updated_at: new Date().toISOString() },
-      { onConflict: 'token' });
+  // a claim, not an upsert: the row may still be the last person's on this phone,
+  // and RLS refused them the update without a word (0130)
+  const { error } = await supabase.rpc('claim_push_token', { p_token: token, p_platform: Platform.OS });
+  if (error) return null;
+  myToken = token;
   return token;
+}
+
+let myToken: string | null = null;
+// a sign-out this phone asked for, so App shows 24a's "session expired" sheet
+// only for a session that died on its own
+let leaving = false;
+export function leftOnPurpose() { const was = leaving; leaving = false; return was; }
+// DEL-03 / DEL-06: an account that was just deleted says goodbye before sign-in.
+// Drawn from this, never fetched — the session is already gone.
+let farewell: 'customer' | 'barber' | null = null;
+export function takeFarewell() { const f = farewell; farewell = null; return f; }
+
+/**
+ * Every sign-out goes through here. This phone's push token goes first, while the
+ * session can still delete it — otherwise the last person's pushes keep arriving on
+ * a phone they left. "Sign out everywhere" drops every phone's token, since none of
+ * them is signed in any more. `local` because supabase-js defaults to global, which
+ * signed every other phone out on each Logout.
+ */
+export async function logOut(scope: 'local' | 'global' = 'local', deleted?: 'customer' | 'barber') {
+  leaving = true;
+  farewell = deleted ?? null;
+  const { data } = await supabase.auth.getSession();
+  const uid = data.session?.user.id;
+  if (scope === 'global' && uid) await supabase.from('push_tokens').delete().eq('user_id', uid);
+  else if (myToken) await supabase.from('push_tokens').delete().eq('token', myToken);
+  myToken = null;
+  await supabase.auth.signOut({ scope });
 }
 
 /** Whether the OS is letting anything through — drives 4c's "Push is on" card. */

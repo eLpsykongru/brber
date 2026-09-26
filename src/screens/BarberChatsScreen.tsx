@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Avatar, Eyebrow, Serif, T, TAB_INSET } from '../components/dark';
 import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { groupThreads, Thread as ThreadOf } from '../lib/threads';
 import { dark as d, radius, sp, TOP_INSET } from '../theme';
-import { BarberCaseScreen, CaseRow } from './BarberSupportScreens';
+import { BarberCaseScreen, BarberReportSheet, CaseRow } from './BarberSupportScreens';
+import { loadUnread } from '../lib/unread';
 import { Pushed } from '../components/motion';
 import ChatScreen from './ChatScreen';
 import { loc, tr } from '../lib/i18n';
@@ -28,8 +29,8 @@ type Convo = {
   walk_in_name: string | null;
   customer_id: string;
   services: { name: string } | null;
-  customer: { full_name: string | null } | null;
-  last?: { body: string | null; image_path: string | null; created_at: string } | null;
+  customer: { full_name: string | null; phone: string | null } | null;
+  last?: { body: string | null; image_path: string | null; created_at: string; sender_id: string } | null;
 };
 
 type Row = Convo & { peer_id: string | null; last_at: string | null };
@@ -54,8 +55,12 @@ function writeTarget(t: Thread) {
   return upcoming[0]?.id ?? t.head.id;
 }
 
-export default function BarberChatsScreen({ barberId, onChromeHidden, onHelp }: {
+export default function BarberChatsScreen({ barberId, onChromeHidden, onHelp, onOpenBooking, openBookingId }: {
   barberId: string;
+  /** a message banner: open the thread that booking belongs to */
+  openBookingId?: string;
+  /** MSG-03's Open the booking: the day timeline, on that booking */
+  onOpenBooking?: (bookingId: string) => void;
   onChromeHidden?: (hidden: boolean) => void;
   /** Help Center — the only door to a NEW ops thread (BMS-04's footer note) */
   onHelp?: () => void;
@@ -65,11 +70,14 @@ export default function BarberChatsScreen({ barberId, onChromeHidden, onHelp }: 
   const [cases, setCases] = useState<CaseRow[] | null>(null);
   const [open, setOpen] = useState<Thread | null>(null);
   const [openCase, setOpenCase] = useState<CaseRow | null>(null);
+  const [unread, setUnread] = useState<Map<string, number>>(new Map());
+  // MSG-03's Report to ops: the report sheet with the thread's booking attached
+  const [reportOn, setReportOn] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const { data } = await supabase.from('bookings')
       .select('id, starts_at, status, walk_in_name, customer_id, services(name),'
-        + ' customer:profiles!customer_id(full_name)')
+        + ' customer:profiles!customer_id(full_name, phone)')
       .eq('barber_id', barberId)
       // a walk-in has no account and therefore no thread; without this every
       // walk-in he has ever taken would pool into one conversation
@@ -79,18 +87,19 @@ export default function BarberChatsScreen({ barberId, onChromeHidden, onHelp }: 
     const list = (data as unknown as Convo[]) ?? [];
     if (list.length) {
       const { data: msgs } = await supabase.from('messages')
-        .select('booking_id, body, image_path, created_at')
+        .select('booking_id, body, image_path, created_at, sender_id')
         .in('booking_id', list.map((c) => c.id))
         .order('created_at', { ascending: false });
       const lastOf = new Map<string, Convo['last']>();
       for (const m of msgs ?? []) {
         if (!lastOf.has(m.booking_id)) {
-          lastOf.set(m.booking_id, { body: m.body, image_path: m.image_path, created_at: m.created_at });
+          lastOf.set(m.booking_id, { body: m.body, image_path: m.image_path, created_at: m.created_at, sender_id: m.sender_id });
         }
       }
       for (const c of list) c.last = lastOf.get(c.id) ?? null;
     }
     setConvos(list);
+    loadUnread().then((u) => setUnread(u.byPeer)).catch(() => {});
 
     const { data: cs, error } = await supabase.rpc('my_support_cases');
     if (error) Alert.alert(tr('Could not load cases'), error.message);
@@ -125,6 +134,13 @@ export default function BarberChatsScreen({ barberId, onChromeHidden, onHelp }: 
 
   useAndroidBack(open ? () => openThread(null) : openCase ? () => showCase(null) : null);
 
+  const opened = useRef(false);
+  useEffect(() => {
+    if (!openBookingId || opened.current) return;
+    const t = threads.find((x) => x.rows.some((r) => r.id === openBookingId));
+    if (t) { opened.current = true; openThread(t); }
+  }, [openBookingId, threads]);
+
   // built before the pushed screens below, so each can hand it over as
   // `behind` - the inbox then stays on stage and trails as you swipe back
   const inbox = (
@@ -148,9 +164,11 @@ export default function BarberChatsScreen({ barberId, onChromeHidden, onHelp }: 
         ) : (
           <>
             {today.length > 0 && <Eyebrow>{tr('IN THE CHAIR TODAY')}</Eyebrow>}
-            {today.map((t) => <ClientRow key={t.head.customer_id} t={t} live onPress={() => openThread(t)} />)}
+            {today.map((t) => <ClientRow key={t.head.customer_id} t={t} live me={barberId}
+              n={unread.get(t.head.customer_id) ?? 0} onPress={() => openThread(t)} />)}
             {earlier.length > 0 && <Eyebrow style={s.gap}>{tr('EARLIER')}</Eyebrow>}
-            {earlier.map((t) => <ClientRow key={t.head.customer_id} t={t} onPress={() => openThread(t)} />)}
+            {earlier.map((t) => <ClientRow key={t.head.customer_id} t={t} me={barberId}
+              n={unread.get(t.head.customer_id) ?? 0} onPress={() => openThread(t)} />)}
           </>
         ))}
 
@@ -180,13 +198,23 @@ export default function BarberChatsScreen({ barberId, onChromeHidden, onHelp }: 
   );
 
   if (open) {
-    const name = open.head.customer?.full_name ?? open.head.walk_in_name ?? tr('Client');
+    const name = open.head.customer?.full_name ?? open.head.walk_in_name ?? tr('Former customer');
+    const target = open.rows.find((r) => r.id === writeTarget(open)) ?? open.head;
+    const at = new Date(target.starts_at);
+    // MSG-02's booking line: {day} {date} · {time} · {service}
+    const line = [at.toLocaleDateString(loc('en-GB'), { weekday: 'short', day: 'numeric', month: 'short' }),
+      hhmm(target.starts_at), target.services?.name].filter(Boolean).join(' · ');
     return (
       <Pushed onBack={() => { openThread(null); load(); }} behind={inbox}>
-        <ChatScreen dark bookingId={writeTarget(open)} threadWith={open.head.customer_id}
-      myId={barberId} title={name}
-      subtitle={tr('{day} {time} · {service}', { day: isToday(open.head.starts_at) ? tr('Today') : stamp(open.head.starts_at), time: hhmm(open.head.starts_at), service: open.head.services?.name ?? tr('Service') })}
+        <ChatScreen dark bookingId={target.id} threadWith={open.head.customer_id}
+          myId={barberId} title={name} subtitle={line}
+          peerPhone={open.head.customer?.phone}
+          onOpenBooking={onOpenBooking ? () => { openThread(null); onOpenBooking(target.id); } : undefined}
+          bookingLine={line}
+          onReport={() => setReportOn(target.id)}
           onBack={() => { openThread(null); load(); }} />
+        <BarberReportSheet visible={!!reportOn} booking={reportOn ?? undefined} onClose={() => setReportOn(null)}
+          onFiled={(c) => { setReportOn(null); openThread(null); showCase(c); }} />
       </Pushed>
     );
   }
@@ -218,22 +246,21 @@ function Tab({ label, count, on, warn, onPress }: {
   );
 }
 
-function ClientRow({ t, live, onPress }: { t: Thread; live?: boolean; onPress: () => void }) {
+function ClientRow({ t, live, n, me, onPress }: { t: Thread; live?: boolean; n: number; me: string; onPress: () => void }) {
   const b = t.head;
-  const name = b.customer?.full_name ?? b.walk_in_name ?? tr('Client');
-  // ponytail: no unread badge — `messages` has no read tracking on either
-  // side (the customer's Unread tab says so too). Add when it exists.
+  const name = b.customer?.full_name ?? b.walk_in_name ?? tr('Former customer');
+  // MSG-01: unread shows as the count; the last line is "You: …" when it was his
+  const said = b.last?.image_path && !b.last.body ? tr('Photo') : b.last?.body ?? '';
   const preview = b.last
-    ? (b.last.image_path ? tr('📷 Photo') : b.last.body ?? '')
+    ? (b.last.sender_id === me ? tr('You: {text}', { text: said }) : said)
     : tr('{service} · nothing said yet', { service: b.services?.name ?? tr('Booking') });
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={name}
       style={({ pressed }) => [live ? s.liveCard : s.row, pressed && s.pressed]}>
-      <Avatar initials={initials(name)} size={live ? 46 : 44} warm={live}
-        dot={live ? d.green : undefined} />
+      <Avatar initials={initials(name)} size={live ? 46 : 44} warm={live} />
       <View style={s.grow}>
-        <T size={13.5} w="b" numberOfLines={1}>{name}</T>
-        <T size={11.5} c={d.sub} numberOfLines={1} style={s.preview}>{preview}</T>
+        <T size={13.5} w={n > 0 ? 'b' : 'sb'} numberOfLines={1}>{name}</T>
+        <T size={11.5} c={n > 0 ? d.text : d.sub} numberOfLines={1} style={s.preview}>{preview}</T>
         {live && (
           <View style={s.slotChip}>
             <T size={10} w="b" c={d.accent}>{hhmm(b.starts_at)}</T>
@@ -241,7 +268,10 @@ function ClientRow({ t, live, onPress }: { t: Thread; live?: boolean; onPress: (
           </View>
         )}
       </View>
-      <T size={10} c={d.sub}>{b.last ? stamp(b.last.created_at) : stamp(b.starts_at)}</T>
+      <View style={s.caseEnd}>
+        <T size={10} w={n > 0 ? 'b' : 'r'} c={n > 0 ? d.accent : d.sub}>{b.last ? stamp(b.last.created_at) : stamp(b.starts_at)}</T>
+        {n > 0 && <View style={s.unread}><T size={10} w="b" c="#fff">{n}</T></View>}
+      </View>
     </Pressable>
   );
 }

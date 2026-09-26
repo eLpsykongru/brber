@@ -67,7 +67,17 @@ if (I18nManager.isRTL) {
 }
 
 /** Save the pick and reload into it: new words, and a new direction if Arabic came or went. */
-export async function chooseLanguage(next: Lang) {
+// BST-02: a switch from Settings lands back on Settings after the restart
+const REOPEN = 'app_reopen';
+/** Where the last language restart asked to land. Read once. */
+export function takeReopen(): 'settings' | null {
+  const v = read(REOPEN);
+  if (v) write(REOPEN, '');
+  return v === 'settings' ? v : null;
+}
+
+export async function chooseLanguage(next: Lang, reopen?: 'settings') {
+  if (reopen) write(REOPEN, reopen);
   write(KEY, next);
   write(FLIPPED, next);
   I18nManager.allowRTL(next === 'ar');

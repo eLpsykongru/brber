@@ -4,11 +4,12 @@ import {
   StyleSheet, TextInput, View,
 } from 'react-native';
 import {
-  Avatar, Btn, Card, Eyebrow, GhostBtn, Ico, IconName, Screen, Sheet, SheetHead, T, TopBar,
+  Avatar, Btn, Card, Eyebrow, GhostBtn, Ico, IconName, Screen, Serif, Sheet, SheetHead, T, TopBar,
 } from '../components/dark';
 import { supabase } from '../lib/supabase';
 import { dark as d, inter, radius, serif, TOP_INSET } from '../theme';
-import { loc, tr, trRich } from '../lib/i18n';
+import { lang, loc, tr, trRich } from '../lib/i18n';
+import { Article } from './HelpCenterScreen';
 
 // Barber turns 5 (support console) and 6 (losing the dispute) of "Barber App.dc.html".
 //
@@ -16,7 +17,7 @@ import { loc, tr, trRich } from '../lib/i18n';
 // half of the same support_cases row. 6a/6b are what he is told when an appeal he
 // never sees goes against him — see 0045 for why he is not told there was one.
 
-export const OPS_PHONE = '+212522000000';   // TODO(backlog): a real ops line
+export const OPS_PHONE = '+212659941507';   // the owner's own line until ops has one
 
 export type CaseRow = {
   id: string; case_no: string; reason: string; detail: string | null;
@@ -43,12 +44,35 @@ const REASON: Record<string, { label: string; icon: IconName }> = {
   other: { label: tr('Something else'), icon: 'help-circle' },
 };
 
-const FAQ = [
-  tr('When do I get the deposit money?'),
-  tr('Settling the cash float'),
-  tr('Marking a client as a no-show'),
-  tr('Asking a client to pay up front'),
-  tr('Adding a barber to my shop'),
+// each answer is what the rails do today — 0075/0081 (deposits, the Friday week),
+// 0127 (payout codes), 0042/0044 (the float), 0019 (no-show), 0046 (late marks),
+// 0030 (the barber's own flag, which moves no money), 0025 (join + approve)
+const FAQ: Article[] = [
+  {
+    id: 'deposit-money', topic: tr('COMMON FOR BARBERS'), icon: 'lock-closed-outline',
+    title: tr('When do I get the deposit money?'),
+    body: tr('A client\'s deposit is held from the moment they book. It is not yours yet.\n\nIt becomes yours when you mark the cut done, or when the client does not turn up or cancels too late. If you cancel, or the client cancels in time, it goes back to their wallet.\n\nSterncut settles with your shop once a week, and the week closes on Friday at 21:00. Whoever holds the shop\'s cash pays you what you are owed, in cash, in the shop, and asks for the four-digit code on your phone. Your running total is in Profile → You & Sterncut.'),
+  },
+  {
+    id: 'float', topic: tr('COMMON FOR BARBERS'), icon: 'cash-outline',
+    title: tr('Settling the cash float'),
+    body: tr('When a client hands you cash to top up their wallet, that cash is Sterncut\'s: their wallet is credited on the spot. It waits in your drawer as the float.\n\nSettle up, in your profile, sets the float against what Sterncut owes you for finished cuts. If the float is bigger, you hand over the difference; if Sterncut owes you more, it hands that over.\n\nWhen someone comes to collect, open Settle up and show them the four-digit code. They type it in to confirm they have the cash. Do not hand anything over without it.\n\nOnly whoever holds the shop\'s cash has a float. Above your shop\'s limit, new top-ups are refused until you settle.'),
+  },
+  {
+    id: 'no-show', topic: tr('COMMON FOR BARBERS'), icon: 'close-circle-outline',
+    title: tr('Marking a client as a no-show'),
+    body: tr('Once a booking\'s start time has passed and the client is not there, open it on your day: its Cancel button has turned into No-show. Tap it.\n\nIf they paid a deposit, it stays with the shop. The booking shows as a no-show on their side, and on their card in Clients.\n\nIf they turn up late instead, check them in as usual. A check-in more than 15 minutes late is noted on its own: for the next 90 days, that client pays the full price up front at shops that take deposits.'),
+  },
+  {
+    id: 'up-front', topic: tr('COMMON FOR BARBERS'), icon: 'wallet-outline',
+    title: tr('Asking a client to pay up front'),
+    body: tr('For the whole shop, the owner sets a deposit in Salon management. Clients pay that share from their wallet when they book, and the rest in cash at the shop. A client whose wallet is short can still send you a request without a deposit, and you decide.\n\nFor one client, rate them two stars or fewer after a cut and switch on "Ask for full payment next time". Their next booking reaches you as a request with your flag on it, and they are told to pay the full price. The rating and your note stay inside your shop.\n\nSterncut does not collect that full payment for you: take it at the shop.'),
+  },
+  {
+    id: 'add-barber', topic: tr('COMMON FOR BARBERS'), icon: 'person-add-outline',
+    title: tr('Adding a barber to my shop'),
+    body: tr('Open Salon management, tap Invite a barber, and share the invite or text it to their number.\n\nThey install Sterncut, sign up with "Join as a barber" and pick your shop while setting up. Their request then shows in Salon management: approve it and set their pay, commission or chair rent.\n\nThey appear on your shop\'s page once you have approved them and Sterncut has checked their ID.'),
+  },
 ];
 
 const ago = (iso: string) => {
@@ -64,12 +88,16 @@ const at = (iso: string) => {
 };
 
 // ---- 5a ------------------------------------------------------------------
-export default function BarberSupportScreen({ onBack, onOpenCase }: {
+export default function BarberSupportScreen({ onBack, onOpenCase, prefill }: {
   onBack: () => void; onOpenCase: (c: CaseRow) => void;
+  /** DEL-01's "Talk to us" and HLP-01's "Message ops": the ops thread opens with this first line */
+  prefill?: string;
 }) {
   const [cases, setCases] = useState<CaseRow[]>([]);
   const [q, setQ] = useState('');
-  const [reporting, setReporting] = useState(false);
+  const [reporting, setReporting] = useState(!!prefill);
+  const [firstLine, setFirstLine] = useState(prefill ?? '');
+  const [article, setArticle] = useState<Article | null>(null);
   // 6a — a review of his that came back. He is told the outcome, never that
   // anyone appealed (0045).
   const [restored, setRestored] = useState<Restored[]>([]);
@@ -89,6 +117,13 @@ export default function BarberSupportScreen({ onBack, onOpenCase }: {
   }, []);
   useEffect(() => { load(); }, [load]);
 
+  // HLP-01 — the article on the dark canvas, one action under it
+  if (article) {
+    return (
+      <HelpArticleScreen article={article} onBack={() => setArticle(null)}
+        onMessageOps={() => { setFirstLine(article.title); setArticle(null); setReporting(true); }} />
+    );
+  }
   if (replying) {
     return (
       <PublicReplyScreen
@@ -122,15 +157,8 @@ export default function BarberSupportScreen({ onBack, onOpenCase }: {
             placeholderTextColor={d.sub} style={s.searchInput} />
         </View>
 
-        <Card style={s.rowCard}>
-          <View style={s.onlineDot}><View style={s.onlineDotInner} /></View>
-          <View style={s.grow}>
-            <T w="b" size={13}>{tr('Ops is online')}</T>
-            <T size={11} c={d.sub} style={{ marginTop: 2 }}>
-              {tr('Replies in about 40 min · Arabic, Français, English')}
-            </T>
-          </View>
-        </Card>
+        {/* no "Ops is online · replies in 40 min": presence doesn't exist and nothing
+            measures a reply time (the launch handoff's MSG rule) */}
 
         {restored.map((r) => (
           <Card key={r.id} onPress={() => setShowing(r)} ring={d.amber} style={s.caseRow}>
@@ -189,9 +217,9 @@ export default function BarberSupportScreen({ onBack, onOpenCase }: {
         <Eyebrow ls={1.65} style={{ marginTop: 2 }}>{tr('COMMON FOR BARBERS')}</Eyebrow>
         <View style={s.faq}>
           {FAQ.map((f, i) => (
-            <Pressable key={f} onPress={() => Alert.alert(f, tr('Help article coming soon.'))}
+            <Pressable key={f.id} onPress={() => setArticle(f)}
               style={[s.faqRow, i < FAQ.length - 1 && s.faqLine]}>
-              <T w="sb" size={13} style={s.grow}>{f}</T>
+              <T w="sb" size={13} style={s.grow}>{f.title}</T>
               <Ico name="chevron-right" size={14} color={d.muted} />
             </Pressable>
           ))}
@@ -205,9 +233,57 @@ export default function BarberSupportScreen({ onBack, onOpenCase }: {
         </View>
       </Screen>
 
-      <BarberReportSheet visible={reporting} onClose={() => setReporting(false)}
-        onFiled={(c) => { setReporting(false); load(); onOpenCase(c); }} />
+      <BarberReportSheet visible={reporting} onClose={() => { setReporting(false); setFirstLine(''); }}
+        prefill={firstLine}
+        onFiled={(c) => { setReporting(false); setFirstLine(''); load(); onOpenCase(c); }} />
     </>
+  );
+}
+
+// ---- HLP-01 --------------------------------------------------------------
+// Paragraphs and numbered steps only (a line starting "1." is a step). The text is
+// what the rails do today — see FAQ above.
+function HelpArticleScreen({ article, onBack, onMessageOps }: {
+  article: Article; onBack: () => void; onMessageOps: () => void;
+}) {
+  const blocks = article.body.split(/\n\n+/);
+  return (
+    <View style={s.fill}>
+      <ScrollView contentContainerStyle={s.hlpBody} showsVerticalScrollIndicator={false}>
+        <View style={s.hlpHead}>
+          <Pressable onPress={onBack} accessibilityLabel={tr('Go back')} style={s.hlpBack}>
+            <Ico name={lang() === 'ar' ? 'arrow-right' : 'arrow-left'} size={17} />
+          </Pressable>
+          <T w="sb" size={13} c={d.sub} style={s.hlpHeadText}>{tr('Help Center')}</T>
+          <View style={{ width: 44 }} />
+        </View>
+        <T w="b" size={11} c={d.sub} ls={1.65} style={{ marginTop: 22 }}>{article.topic}</T>
+        <Serif size={28} ls={0} style={s.hlpTitle}>{article.title}</Serif>
+        {blocks.map((b, i) => {
+          const steps = b.split('\n').filter((l) => /^\d+\.\s/.test(l));
+          if (steps.length) {
+            return (
+              <View key={i} style={{ gap: 10 }}>
+                {steps.map((l, j) => (
+                  <View key={j} style={s.hlpStep}>
+                    <View style={s.hlpDisc}><T w="b" size={12}>{j + 1}</T></View>
+                    <T size={15} c={d.textDim} style={s.hlpStepText}>{l.replace(/^\d+\.\s*/, '')}</T>
+                  </View>
+                ))}
+              </View>
+            );
+          }
+          return <T key={i} size={15} c={d.textDim} style={s.hlpPara}>{b}</T>;
+        })}
+      </ScrollView>
+      <View style={s.hlpFoot}>
+        <T w="sb" size={14} style={s.grow}>{tr('Still stuck?')}</T>
+        <Pressable onPress={onMessageOps} accessibilityRole="button"
+          style={({ pressed }) => [s.hlpCta, pressed && { opacity: 0.8 }]}>
+          <T w="b" size={14}>{tr('Message ops')}</T>
+        </Pressable>
+      </View>
+    </View>
   );
 }
 
@@ -217,6 +293,7 @@ const ABOUT: { key: string; label: string; icon: IconName }[] = [
   { key: 'money', label: tr('Money or float'), icon: 'credit-card' },
   { key: 'client', label: tr('A client\'s behaviour'), icon: 'user' },
   { key: 'app', label: tr('The app is broken'), icon: 'alert-triangle' },
+  { key: 'other', label: tr('Something else'), icon: 'help-circle' },
 ];
 
 type Bk = {
@@ -224,11 +301,16 @@ type Bk = {
   services: { name: string } | null; profiles: { full_name: string | null } | null;
 };
 
-export function BarberReportSheet({ visible, onClose, onFiled }: {
-  visible: boolean; onClose: () => void; onFiled: (c: CaseRow) => void;
+export function BarberReportSheet({ visible, onClose, onFiled, prefill, booking }: {
+  visible: boolean; onClose: () => void; onFiled: (c: CaseRow) => void; prefill?: string;
+  /** MSG-03: the thread's booking, attached */
+  booking?: string;
 }) {
   const [about, setAbout] = useState('booking');
   const [detail, setDetail] = useState('');
+  // a prefilled thread is about the account or an article, not a booking
+  useEffect(() => { if (visible && prefill) { setAbout('other'); setDetail(prefill); } }, [visible, prefill]);
+  useEffect(() => { if (visible && booking) { setAbout('client'); setBookingId(booking); } }, [visible, booking]);
   const [bookings, setBookings] = useState<Bk[]>([]);
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
@@ -690,6 +772,21 @@ export function PublicReplyScreen({ review, onClose, onPosted }: {
 }
 
 const s = StyleSheet.create({
+  fill: { flex: 1, backgroundColor: d.bg },
+  hlpBody: { paddingTop: TOP_INSET - 6, paddingHorizontal: 24, paddingBottom: 24, gap: 14 },
+  hlpHead: { flexDirection: 'row', alignItems: 'center', gap: 10, marginHorizontal: -4 },
+  hlpBack: { width: 44, height: 44, borderRadius: 999, backgroundColor: d.card2, alignItems: 'center', justifyContent: 'center' },
+  hlpHeadText: { flex: 1, textAlign: 'center' },
+  hlpTitle: { lineHeight: 32, textTransform: 'none' },
+  hlpPara: { lineHeight: 24.75 },
+  hlpStep: { flexDirection: 'row', gap: 12 },
+  hlpDisc: { width: 26, height: 26, borderRadius: 999, backgroundColor: d.card2, alignItems: 'center', justifyContent: 'center' },
+  hlpStepText: { flex: 1, lineHeight: 23.25 },
+  hlpFoot: {
+    flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 14, paddingHorizontal: 20, paddingBottom: 34,
+    borderTopWidth: 1, borderTopColor: d.border, backgroundColor: d.bg,
+  },
+  hlpCta: { height: 48, borderRadius: 999, backgroundColor: d.accent, paddingHorizontal: 22, justifyContent: 'center' },
   grow: { flex: 1 },
   center: { textAlign: 'center' },
   rowMid: { flexDirection: 'row', alignItems: 'center', gap: 9 },

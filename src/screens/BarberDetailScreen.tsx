@@ -13,6 +13,7 @@ import { colors, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
 import type { Service, Specialist } from '../types';
 import ChatScreen from './ChatScreen';
 import { loc, tr, trn, weekdayName } from '../lib/i18n';
+import { nameOrFormer } from '../lib/deletion';
 
 type Props = {
   barber: Specialist;
@@ -167,7 +168,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
     // never arrive: reviews_select (0042) hides them from everyone but their author.
     supabase.from('reviews')
       .select('id, rating, comment, created_at, reply, replied_at,'
-        + ' customer:profiles!customer_id(full_name)')
+        + ' customer:profiles!customer_id(full_name, deleted_at)')
       .eq('barber_id', barber.id).order('created_at', { ascending: false }).limit(50)
       .then(({ data }) => setReviews((data as unknown as Review[]) ?? []));
     supabase.rpc('barber_customer_count', { p_barber: barber.id })
@@ -530,7 +531,7 @@ export default function BarberDetailScreen({ barber, salonName, onBack, onChrome
             {filteredReviews.map((r) => (
               <View key={r.id} style={s.reviewCard}>
                 <View style={s.reviewTop}>
-                  <Text style={s.reviewName}>{r.customer?.full_name ?? tr('Customer')}</Text>
+                  <Text style={s.reviewName}>{nameOrFormer(r.customer, tr('Customer'), 'customer')}</Text>
                   <Text style={s.meta}>{timeAgo(r.created_at)}</Text>
                 </View>
                 {!!r.comment && <Text style={s.bodyText}>{r.comment}</Text>}

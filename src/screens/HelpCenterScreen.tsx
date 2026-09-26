@@ -8,16 +8,16 @@ import { tr } from '../lib/i18n';
 // 16b — search, popular articles, topic list, contact row. 22b is the article
 // itself, opened over the top.
 //
-// ponytail: the articles live in this file, not a CMS. Seven answers do not need
+// ponytail: the articles live in this file, not a CMS. Nine answers do not need
 // a table, an editor and a fetch; when someone wants to edit copy without
 // shipping a release, that is the moment to move them.
 
-type Article = {
+export type Article = {
   id: string; title: string; topic: string; body: string;
   icon: keyof typeof Ionicons.glyphMap; hot?: boolean;
 };
 
-const ARTICLES: Article[] = [
+export const ARTICLES: Article[] = [
   {
     id: 'deposits', topic: tr('Wallet, deposits & coupons'), hot: true, icon: 'lock-closed-outline',
     title: tr('How do deposits and refunds work?'),
@@ -46,7 +46,18 @@ const ARTICLES: Article[] = [
   {
     id: 'account', topic: tr('Account & sign-in'), icon: 'person-outline',
     title: tr('Changing your phone or email'),
-    body: tr('Your name, photo and date of birth are editable in Settings → Your profile.\n\nYour phone is verified by SMS and your email is tied to how you sign in, so neither can be edited in place yet — report a problem and support will move the account for you.'),
+    // no SMS rail exists (BACKLOG), so nothing verifies a phone — the old line said it did
+    body: tr('Your name, photo and date of birth are editable in Settings → Your profile.\n\nYour phone and email are tied to how you sign in, so neither can be changed in place yet — report a problem and support will move the account for you.'),
+  },
+  {
+    id: 'upfront', topic: tr('Wallet, deposits & coupons'), icon: 'shield-checkmark-outline',
+    title: tr('Why am I asked to pay up front?'),
+    body: tr('Some shops ask for a deposit: part of the price, paid from your wallet when you book. It holds your chair, and you pay the rest in cash at the shop. Each shop sets its own share.\n\nIf you checked in more than 15 minutes late in the last 90 days, shops that take deposits ask you for the full price up front instead. Your standing, in your profile, shows the mark and the day it ends, and you can dispute it there.\n\nA barber can also ask a client to pay in full after a difficult visit.\n\nIf your wallet cannot cover the deposit, you can still send the barber a request without one. The barber decides.'),
+  },
+  {
+    id: 'qr', topic: tr('Queue & walk-ins'), icon: 'qr-code-outline',
+    title: tr('Joining a queue by QR'),
+    body: tr('Shops on Sterncut put up a poster with a QR code.\n\nScan it with your phone\'s camera. With Sterncut installed, the shop opens in the app: you see the wait, and HOLD MY PLACE puts you in the line. Without the app, the page shows the live wait and a link to get it.\n\nAlready in the app? Tap the QR button at the top of Home and point it at the poster, or type the shop\'s code.\n\nOnce you are in the line, your ticket shows how many people are ahead of you.'),
   },
   {
     id: 'report', topic: tr('Reviews & reporting'), icon: 'flag-outline',
@@ -148,31 +159,38 @@ export default function HelpCenterScreen({ onBack, onContact }: {
         </View>
       </ScrollView>
 
-      {/* 22b — the article itself */}
-      <Modal visible={!!article} animationType="slide" onRequestClose={() => setArticle(null)}>
-        <View style={s.screen}>
-          <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-            <View style={s.header}>
-              <Pressable onPress={() => setArticle(null)} hitSlop={8}
-                style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel={tr('Close')}>
-                <Ionicons name="arrow-back" size={16} color={colors.text} />
-              </Pressable>
-              <Display size={18} style={s.headerTitle}>{tr('Help')}</Display>
-              <View style={s.puckGhost} />
-            </View>
-            {!!article && (
-              <>
-                <Text style={s.articleTopic}>{article.topic.toUpperCase()}</Text>
-                <Display size={24} style={s.articleTitle}>{article.title}</Display>
-                <View style={s.articleCard}>
-                  <Text style={s.articleBody}>{article.body}</Text>
-                </View>
-              </>
-            )}
-          </ScrollView>
-        </View>
-      </Modal>
+      <ArticleModal article={article} onClose={() => setArticle(null)} />
     </View>
+  );
+}
+
+// 22b — the article itself. Exported for Support's "common questions" and the
+// barber's FAQ, so every help answer opens the same way.
+export function ArticleModal({ article, onClose }: { article: Article | null; onClose: () => void }) {
+  return (
+    <Modal visible={!!article} animationType="slide" onRequestClose={onClose}>
+      <View style={s.screen}>
+        <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+          <View style={s.header}>
+            <Pressable onPress={onClose} hitSlop={8}
+              style={({ pressed }) => [s.puck, pressed && s.pressed]} accessibilityLabel={tr('Close')}>
+              <Ionicons name="arrow-back" size={16} color={colors.text} />
+            </Pressable>
+            <Display size={18} style={s.headerTitle}>{tr('Help')}</Display>
+            <View style={s.puckGhost} />
+          </View>
+          {!!article && (
+            <>
+              <Text style={s.articleTopic}>{article.topic.toUpperCase()}</Text>
+              <Display size={24} style={s.articleTitle}>{article.title}</Display>
+              <View style={s.articleCard}>
+                <Text style={s.articleBody}>{article.body}</Text>
+              </View>
+            </>
+          )}
+        </ScrollView>
+      </View>
+    </Modal>
   );
 }
 

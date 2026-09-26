@@ -19,6 +19,7 @@ import { Pushed } from '../components/motion';
 import BarberDetailScreen from './BarberDetailScreen';
 import { tr, trn } from '../lib/i18n';
 import { useHideTabBar } from '../components/TabBar';
+import { nameOrFormer } from '../lib/deletion';
 
 export type SalonCard = {
   id: string;
@@ -85,7 +86,7 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
   useEffect(() => {
     (async () => setPhotos((await Promise.all(salon.barbers.map((b) => listPortfolio(b.id)))).flat()))();
     supabase.from('reviews')
-      .select('id, rating, comment, created_at, customer:profiles!customer_id(full_name)')
+      .select('id, rating, comment, created_at, customer:profiles!customer_id(full_name, deleted_at)')
       .in('barber_id', salon.barbers.map((b) => b.id))
       .order('created_at', { ascending: false }).limit(50)
       .then(({ data }) => setReviews((data as unknown as Review[]) ?? []));
@@ -135,9 +136,8 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
   const moreCount = Math.max(0, photos.length - 6);
   const TABS: Tab[] = ['about', 'services', 'specialist', 'bundles', 'gallery', 'review'];
 
-  function action(name: string, url?: string | null) {
-    if (url) Linking.openURL(url).catch(() => Alert.alert(name, tr('Could not open.')));
-    else Alert.alert(name, tr('Coming soon — see BACKLOG.md'));
+  function action(name: string, url: string) {
+    Linking.openURL(url).catch(() => Alert.alert(name, tr('Could not open.')));
   }
 
   // built before the specialist page below, so it can be handed over as
@@ -190,11 +190,7 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
         <View>
           {/* badges + rating */}
           <View style={s.badgeRow}>
-            {/* TODO(backlog): promotions */}
-            <View style={s.offBadge}>
-              <Ionicons name="pricetag" size={12} color={colors.accent} />
-              <Text style={s.offText}>{tr('10% OFF')}</Text>
-            </View>
+            {/* no "10% OFF": it was on every shop and applied to nothing (BACKLOG, Promotions) */}
             {avg != null && <Stars rating={avg} count={allReviews.length} />}
           </View>
 
@@ -224,12 +220,15 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
 
           {/* actions */}
           <View style={s.actions}>
-            <Action icon="globe-outline" label={tr('Website')} onPress={() => action(tr('Website'), salon.website)} />
+            {/* only a shop that has a site gets the button; Message waits on a
+                booking-scoped chat entry (BACKLOG, Salon screen) */}
+            {!!salon.website && (
+              <Action icon="globe-outline" label={tr('Website')} onPress={() => action(tr('Website'), salon.website!)} />
+            )}
             <Action icon="map-outline" label={tr('Direction')}
               onPress={() => (salon.lat != null && salon.lng != null
                 ? openDirections(salon.lat, salon.lng, salon.name)
                 : Alert.alert(tr('Direction'), tr('This salon has not set its map location yet.')))} />
-            <Action icon="chatbubble-outline" label={tr('Message')} onPress={() => action(tr('Message'))} />
             <Action icon="paper-plane-outline" label={tr('Share')}
               onPress={() => Share.share({ message: tr('{salon} on Sterncut!', { salon: salon.name }) })} />
           </View>
@@ -333,7 +332,7 @@ export default function SalonDetailScreen({ salon, km, onBack, onChromeHidden, o
               {filteredReviews.map((r) => (
                 <View key={r.id} style={s.reviewCard}>
                   <View style={s.reviewTop}>
-                    <Text style={s.rowName}>{r.customer?.full_name ?? tr('Customer')}</Text>
+                    <Text style={s.rowName}>{nameOrFormer(r.customer, tr('Customer'), 'customer')}</Text>
                     <Text style={s.rowMeta}>{timeAgo(r.created_at)}</Text>
                   </View>
                   {!!r.comment && <Text style={s.body}>{r.comment}</Text>}
@@ -428,11 +427,6 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: sp(5), marginTop: sp(4),
   },
-  offBadge: {
-    flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: colors.accentSoft,
-    borderRadius: radius.pill, paddingVertical: 4, paddingHorizontal: sp(3),
-  },
-  offText: { fontSize: font.small, fontWeight: '700', color: colors.accent },
   title: {
     fontFamily: serif, fontSize: 28, letterSpacing: 0.6, textTransform: 'uppercase',
     color: colors.text, paddingHorizontal: sp(5), marginTop: sp(2),

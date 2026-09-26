@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 import { dark as D, inter, TOP_INSET } from '../theme';
 import ChatScreen from './ChatScreen';
 import { tr, trn } from '../lib/i18n';
+import { nameOrFormer } from '../lib/deletion';
 
 // Client book v1 (BACKLOG bet #3, partial): everyone who ever sat in the chair,
 // aggregated from booking history. Preferences + debt ledger are still TODO.
@@ -53,7 +54,7 @@ export default function ClientsScreen({ barberId, onChromeHidden }: {
 
   const load = useCallback(async () => {
     const { data, error } = await supabase.from('bookings')
-      .select('id, starts_at, status, customer_id, walk_in_name, customer:profiles!customer_id(full_name, avatar_url, phone)')
+      .select('id, starts_at, status, customer_id, walk_in_name, customer:profiles!customer_id(full_name, deleted_at, avatar_url, phone)')
       .eq('barber_id', barberId)
       .in('status', ['confirmed', 'no_show'])
       .lt('starts_at', new Date().toISOString())
@@ -66,7 +67,7 @@ export default function ClientsScreen({ barberId, onChromeHidden }: {
       const key = isWalkIn ? `w:${(r.walk_in_name ?? tr('Walk-in')).trim().toLowerCase()}` : r.customer_id;
       const c = map.get(key) ?? {
         key,
-        name: isWalkIn ? (r.walk_in_name ?? tr('Walk-in')) : (r.customer?.full_name ?? tr('Client')),
+        name: isWalkIn ? (r.walk_in_name ?? tr('Walk-in')) : nameOrFormer(r.customer, tr('Client'), 'customer'),
         avatar: isWalkIn ? null : r.customer?.avatar_url ?? null,
         phone: isWalkIn ? null : r.customer?.phone ?? null,
         isWalkIn,

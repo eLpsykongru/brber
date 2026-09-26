@@ -24,6 +24,15 @@
 //   · owners' names and faces, live "libres maintenant" cards and photos nobody
 //     has supplied. A photo box shows `/img/<name>.jpg` once it exists.
 
+import { LEGAL_REDIRECTS, LEGAL_ROUTES, legalPage, siteFooter } from './legal.js';
+
+export { LEGAL_REDIRECTS };
+
+// ponytail: the footer's contact brackets read the request's env from here — set by
+// siteContext()/renderMaintenance(), and every page renders synchronously right
+// after, so no request can see another's. Thread ctx into shell() if that changes.
+let FOOT_ENV = {};
+
 const FONTS = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800'
   + '&family=Playfair+Display:wght@700;800&family=Noto+Kufi+Arabic:wght@400;500;700&display=swap';
 
@@ -75,7 +84,7 @@ const ICON = {
 };
 
 // ---- the frame -----------------------------------------------------------------------
-function shell({ title, description, body, lang = 'fr', dir = 'ltr', index = true, dark = false, head = '', script = '' }) {
+function shell({ title, description, body, lang = 'fr', dir = 'ltr', index = true, dark = false, head = '', script = '', footerPage = null }) {
   return `<!doctype html>
 <html lang="${lang}" dir="${dir}">
 <head>
@@ -94,6 +103,7 @@ ${index ? '' : '<meta name="robots" content="noindex">\n'}<meta name="theme-colo
 </head>
 <body${dark ? ' class="dark"' : ''}${dir === 'rtl' ? ' dir="rtl"' : ''}>
 ${body}
+${siteFooter(['fr', 'ar', 'en'].includes(lang) ? lang : 'fr', footerPage, FOOT_ENV)}
 ${script}
 </body>
 </html>`;
@@ -431,6 +441,7 @@ fetch(cfg.url+'/auth/v1/user',{method:'PUT',headers:H,body:JSON.stringify({passw
 // appointment at 15:30" card needs the database that is down, so it is the general
 // sentence instead — which is the part that matters.
 export function renderMaintenance(env = {}) {
+  FOOT_ENV = env;
   const until = env.MAINTENANCE_UNTIL && /^\d{1,2}:\d{2}$/.test(env.MAINTENANCE_UNTIL) ? env.MAINTENANCE_UNTIL : null;
   const at = env.MAINTENANCE_AT ? new Date(env.MAINTENANCE_AT) : null;
   const ago = at && !Number.isNaN(at.getTime())
@@ -507,6 +518,7 @@ ${stores(ctx)}
 // ---- routing -------------------------------------------------------------------------------
 /** What every page reads: the store links, the phone, and 0126's numbers (null when unread). */
 export function siteContext(env, numbers) {
+  FOOT_ENV = env ?? {};
   const read = numbers && Number(numbers.monthly_cents) > 0 && Number(numbers.cap) > 0;
   const pkg = env.ANDROID_PACKAGE || 'com.sterncut.app';
   return {
@@ -531,6 +543,9 @@ const PAGES = {
   'tarifs/qui-compte': quiCompte,
   'tarifs/exemple': exemple,
   'nouveau-mot-de-passe': reset,
+  // WEB-14 … 16, each language at its own address
+  ...Object.fromEntries(Object.entries(LEGAL_ROUTES).map(([path, [page, lang]]) =>
+    [path, (ctx) => shell(legalPage(page, lang, ctx.env))])),
 };
 
 /** The page for a path, or null — `/tarifs/`, `/tarifs` and `/Tarifs` are one page. */

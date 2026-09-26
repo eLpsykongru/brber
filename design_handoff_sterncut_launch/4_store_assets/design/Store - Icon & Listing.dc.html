@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800&family=Noto+Kufi+Arabic:wght@500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<script src="./store-content.js"></script>
+<style>
+html{background:#EBE8E1}
+body{margin:0;background:#EBE8E1;font-family:Inter,system-ui,sans-serif}
+a{color:#E8442E;text-decoration:none}a:hover{color:#C33421}
+.dv-turn{padding:38px 44px 30px;scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#111;color:#fff;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 14px/1.2 Inter,sans-serif;color:#111}
+.dv-note{font:400 12px/1.5 Inter,sans-serif;color:rgba(0,0,0,.6);max-width:780px;margin:0 0 26px}
+.dv-opts{display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#111;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 Inter,sans-serif;color:rgba(0,0,0,.6)}
+.dv-opt:target .dv-oid{background:#E8442E;color:#fff}
+.dv-nav{display:flex;flex-wrap:wrap;gap:6px;padding:12px 44px 0}
+</style>
+</helmet>
+<div style="padding:32px 44px 0">
+<a href="./Index.dc.html" style="font:600 10px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(0,0,0,.6)">← All pages</a>
+<div style="font-family:'Playfair Display',serif;font-weight:700;font-size:27px;letter-spacing:.02em;text-transform:uppercase;color:#111;margin:10px 0 0">Store · Icon, splash &amp; listing</div>
+<div style="font:400 12px/1.55 Inter,sans-serif;color:rgba(0,0,0,.6);margin:6px 0 0;max-width:780px">Replaces Expo&rsquo;s placeholder icon. Each artboard is drawn at a fraction of its export size; the label gives the exported size and file. The PNGs are in <code>store-assets/</code>, and the handoff is <code>design_handoff_store_assets/</code>.</div>
+</div>
+<div class="dv-nav">
+<a href="#ICN" style="font:600 10.5px Inter,sans-serif;padding:6px 11px;border-radius:7px;background:#111;color:#fff">ICN · App icon</a>
+<a href="#AND" style="font:600 10.5px Inter,sans-serif;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111">AND · Android</a>
+<a href="#SPL" style="font:600 10.5px Inter,sans-serif;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111">SPL · Splash</a>
+<a href="#SHOT" style="font:600 10.5px Inter,sans-serif;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111">SHOT · Screenshots</a>
+<a href="#FEAT" style="font:600 10.5px Inter,sans-serif;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111">FEAT · Feature graphic</a>
+<a href="#COPY" style="font:600 10.5px Inter,sans-serif;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111">COPY · Listing</a>
+</div>
+<div style="height:1px;background:rgba(0,0,0,.10);margin:20px 0 0"></div>
+
+<section class="dv-turn" id="ICN">
+<div class="dv-thd"><a class="dv-tid" href="#ICN">ICN</a><span class="dv-tname">App icon &mdash; three directions, one chosen</span></div>
+<p class="dv-note">Each direction is tested where the brief says it has to work: at 29&nbsp;px in a Settings list, between stand-ins for WhatsApp and Instagram (flat tiles in their colours; their logos aren&rsquo;t reproduced). <a class="dv-oid" href="#ICN-A">ICN-A</a> is chosen and carried through every asset below.</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="ICN-A"><div class="dv-olabel"><a class="dv-oid" href="#ICN-A">ICN-A</a>The S, cut &middot; chosen</div>
+<div style="width:360px;background:#fff;border-radius:18px;padding:22px;box-sizing:border-box;display:flex;flex-direction:column;gap:18px;box-shadow:0 0 0 2px #E8442E">
+  <div style="display:flex;justify-content:center"><div style="width:200px;height:200px;border-radius:45px;overflow:hidden"><dc-import name="Sterncut Mark" variant="icon" bg="#101010" fg="#F2F0EB" cut="#E8442E" hint-size="200px,200px" style="display:block;width:100%;height:100%"></dc-import></div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div style="background:#F2F2F7;border-radius:12px;padding:6px 0">
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;background:#25D366;display:flex;align-items:center;justify-content:center;flex:none"><span style="width:13px;height:13px;border-radius:999px;border:2.5px solid #fff;box-sizing:border-box"></span></span><span style="font-size:13px;color:#111">WhatsApp</span></div>
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;overflow:hidden;flex:none"><dc-import name="Sterncut Mark" variant="icon" bg="#101010" fg="#F2F0EB" cut="#E8442E" hint-size="29px,29px" style="display:block;width:100%;height:100%"></dc-import></span><span style="font-size:13px;color:#111;font-weight:600">Sterncut</span></div>
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;background:linear-gradient(45deg,#F9A13A,#E1306C 55%,#7B3FE4);display:flex;align-items:center;justify-content:center;flex:none"><span style="width:14px;height:14px;border-radius:5px;border:2.5px solid #fff;box-sizing:border-box"></span></span><span style="font-size:13px;color:#111">Instagram</span></div>
+    </div>
+    <div style="background:#000;border-radius:12px;padding:6px 0">
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;background:#25D366;display:flex;align-items:center;justify-content:center;flex:none"><span style="width:13px;height:13px;border-radius:999px;border:2.5px solid #fff;box-sizing:border-box"></span></span><span style="font-size:13px;color:#fff">WhatsApp</span></div>
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;overflow:hidden;flex:none;box-shadow:0 0 0 .5px rgba(255,255,255,.18)"><dc-import name="Sterncut Mark" variant="icon" bg="#101010" fg="#F2F0EB" cut="#E8442E" hint-size="29px,29px" style="display:block;width:100%;height:100%"></dc-import></span><span style="font-size:13px;color:#fff;font-weight:600">Sterncut</span></div>
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;background:linear-gradient(45deg,#F9A13A,#E1306C 55%,#7B3FE4);display:flex;align-items:center;justify-content:center;flex:none"><span style="width:14px;height:14px;border-radius:5px;border:2.5px solid #fff;box-sizing:border-box"></span></span><span style="font-size:13px;color:#fff">Instagram</span></div>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#4A4A46">A single letter is the easiest shape to read at small sizes. The Playfair S is the app&rsquo;s own display type, and the coral cut through the spine is the accent kept small, as the kit uses it. Ink sets it apart from green and gradient neighbours, in light and dark.</p>
+</div>
+</div>
+
+<div class="dv-opt" id="ICN-B"><div class="dv-olabel"><a class="dv-oid" href="#ICN-B">ICN-B</a>The website&rsquo;s scissors tile, redrawn</div>
+<div style="width:360px;background:#fff;border-radius:18px;padding:22px;box-sizing:border-box;display:flex;flex-direction:column;gap:18px">
+  <div style="display:flex;justify-content:center"><div style="width:200px;height:200px;border-radius:45px;overflow:hidden;background:#E8442E"><svg viewBox="0 0 24 24" width="100%" height="100%" style="display:block"><g transform="translate(12 12) scale(.62) translate(-11.75 -12)" fill="none" stroke="#fff" stroke-width="2.7" stroke-linecap="round"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M8.4 7.8 20 20M8.4 16.2 20 4"></path></g></svg></div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div style="background:#F2F2F7;border-radius:12px;padding:6px 0">
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;background:#25D366;display:flex;align-items:center;justify-content:center;flex:none"><span style="width:13px;height:13px;border-radius:999px;border:2.5px solid #fff;box-sizing:border-box"></span></span><span style="font-size:13px;color:#111">WhatsApp</span></div>
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;overflow:hidden;flex:none;background:#E8442E"><svg viewBox="0 0 24 24" width="100%" height="100%" style="display:block"><g transform="translate(12 12) scale(.62) translate(-11.75 -12)" fill="none" stroke="#fff" stroke-width="2.7" stroke-linecap="round"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M8.4 7.8 20 20M8.4 16.2 20 4"></path></g></svg></span><span style="font-size:13px;color:#111;font-weight:600">Sterncut</span></div>
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;background:linear-gradient(45deg,#F9A13A,#E1306C 55%,#7B3FE4);display:flex;align-items:center;justify-content:center;flex:none"><span style="width:14px;height:14px;border-radius:5px;border:2.5px solid #fff;box-sizing:border-box"></span></span><span style="font-size:13px;color:#111">Instagram</span></div>
+    </div>
+    <div style="background:#000;border-radius:12px;padding:6px 0">
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;background:#25D366;display:flex;align-items:center;justify-content:center;flex:none"><span style="width:13px;height:13px;border-radius:999px;border:2.5px solid #fff;box-sizing:border-box"></span></span><span style="font-size:13px;color:#fff">WhatsApp</span></div>
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;overflow:hidden;flex:none;background:#E8442E"><svg viewBox="0 0 24 24" width="100%" height="100%" style="display:block"><g transform="translate(12 12) scale(.62) translate(-11.75 -12)" fill="none" stroke="#fff" stroke-width="2.7" stroke-linecap="round"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M8.4 7.8 20 20M8.4 16.2 20 4"></path></g></svg></span><span style="font-size:13px;color:#fff;font-weight:600">Sterncut</span></div>
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;background:linear-gradient(45deg,#F9A13A,#E1306C 55%,#7B3FE4);display:flex;align-items:center;justify-content:center;flex:none"><span style="width:14px;height:14px;border-radius:5px;border:2.5px solid #fff;box-sizing:border-box"></span></span><span style="font-size:13px;color:#fff">Instagram</span></div>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#4A4A46">The website&rsquo;s tile, with heavier strokes, is the continuity option. But every app in the category uses scissors, the blades thin out at 29&nbsp;px, and the coral sits close to Instagram&rsquo;s warm end.</p>
+</div>
+</div>
+
+<div class="dv-opt" id="ICN-C"><div class="dv-olabel"><a class="dv-oid" href="#ICN-C">ICN-C</a>The pole</div>
+<div style="width:360px;background:#fff;border-radius:18px;padding:22px;box-sizing:border-box;display:flex;flex-direction:column;gap:18px">
+  <div style="display:flex;justify-content:center"><div style="width:200px;height:200px;border-radius:45px;background:#101010;display:flex;align-items:center;justify-content:center"><span style="width:62px;height:138px;border-radius:999px;background:repeating-linear-gradient(-38deg,#E8442E 0 14px,#F2F0EB 14px 28px)"></span></div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div style="background:#F2F2F7;border-radius:12px;padding:6px 0">
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;background:#25D366;display:flex;align-items:center;justify-content:center;flex:none"><span style="width:13px;height:13px;border-radius:999px;border:2.5px solid #fff;box-sizing:border-box"></span></span><span style="font-size:13px;color:#111">WhatsApp</span></div>
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;background:#101010;display:flex;align-items:center;justify-content:center;flex:none"><span style="width:9px;height:20px;border-radius:999px;background:repeating-linear-gradient(-38deg,#E8442E 0 2px,#F2F0EB 2px 4px)"></span></span><span style="font-size:13px;color:#111;font-weight:600">Sterncut</span></div>
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;background:linear-gradient(45deg,#F9A13A,#E1306C 55%,#7B3FE4);display:flex;align-items:center;justify-content:center;flex:none"><span style="width:14px;height:14px;border-radius:5px;border:2.5px solid #fff;box-sizing:border-box"></span></span><span style="font-size:13px;color:#111">Instagram</span></div>
+    </div>
+    <div style="background:#000;border-radius:12px;padding:6px 0">
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;background:#25D366;display:flex;align-items:center;justify-content:center;flex:none"><span style="width:13px;height:13px;border-radius:999px;border:2.5px solid #fff;box-sizing:border-box"></span></span><span style="font-size:13px;color:#fff">WhatsApp</span></div>
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;background:#101010;display:flex;align-items:center;justify-content:center;flex:none;box-shadow:0 0 0 .5px rgba(255,255,255,.18)"><span style="width:9px;height:20px;border-radius:999px;background:repeating-linear-gradient(-38deg,#E8442E 0 2px,#F2F0EB 2px 4px)"></span></span><span style="font-size:13px;color:#fff;font-weight:600">Sterncut</span></div>
+      <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 10px"><span style="width:29px;height:29px;border-radius:7px;background:linear-gradient(45deg,#F9A13A,#E1306C 55%,#7B3FE4);display:flex;align-items:center;justify-content:center;flex:none"><span style="width:14px;height:14px;border-radius:5px;border:2.5px solid #fff;box-sizing:border-box"></span></span><span style="font-size:13px;color:#fff">Instagram</span></div>
+    </div>
+  </div>
+  <p style="margin:0;font-size:12.5px;line-height:1.55;color:#4A4A46">The barber&rsquo;s pole says barbershop instantly and holds up at 29&nbsp;px. But it names the category, not Sterncut: any competitor can use it, and at 29&nbsp;px the stripes blur into a pink bar.</p>
+</div>
+</div>
+
+<div class="dv-opt" id="ICN-01"><div class="dv-olabel"><a class="dv-oid" href="#ICN-01">ICN-01</a>App icon &middot; 1024 × 1024, opaque, square (the OS rounds it) &middot; store-assets/icon.png</div>
+<div style="display:flex;gap:30px;align-items:flex-end;background:#fff;border-radius:18px;padding:22px">
+  <div id="exp-icon" style="width:256px;height:256px;flex:none"><dc-import name="Sterncut Mark" variant="icon" bg="#101010" fg="#F2F0EB" cut="#E8442E" hint-size="256px,256px" style="display:block;width:100%;height:100%"></dc-import></div>
+  <div style="display:flex;gap:18px;align-items:flex-end">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="width:120px;height:120px;border-radius:27px;overflow:hidden"><dc-import name="Sterncut Mark" variant="icon" bg="#101010" fg="#F2F0EB" cut="#E8442E" hint-size="120px,120px" style="display:block;width:100%;height:100%"></dc-import></span><span style="font:600 10px ui-monospace,Menlo,monospace;color:rgba(0,0,0,.5)">120</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="width:60px;height:60px;border-radius:13.5px;overflow:hidden"><dc-import name="Sterncut Mark" variant="icon" bg="#101010" fg="#F2F0EB" cut="#E8442E" hint-size="60px,60px" style="display:block;width:100%;height:100%"></dc-import></span><span style="font:600 10px ui-monospace,Menlo,monospace;color:rgba(0,0,0,.5)">60</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="width:40px;height:40px;border-radius:9px;overflow:hidden"><dc-import name="Sterncut Mark" variant="icon" bg="#101010" fg="#F2F0EB" cut="#E8442E" hint-size="40px,40px" style="display:block;width:100%;height:100%"></dc-import></span><span style="font:600 10px ui-monospace,Menlo,monospace;color:rgba(0,0,0,.5)">40</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="width:29px;height:29px;border-radius:6.5px;overflow:hidden"><dc-import name="Sterncut Mark" variant="icon" bg="#101010" fg="#F2F0EB" cut="#E8442E" hint-size="29px,29px" style="display:block;width:100%;height:100%"></dc-import></span><span style="font:600 10px ui-monospace,Menlo,monospace;color:rgba(0,0,0,.5)">29</span></div>
+  </div>
+</div>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.5);max-width:720px">Playfair Display Black S in canvas #F2F0EB on ink #101010. The cut is a 5&nbsp;% band at 20° through the centre, filled coral. The S stands 56&nbsp;% of the tile tall, so the iOS mask never touches it. The same file serves as the Play Store 512 icon, scaled down.</div>
+</div>
+
+</div>
+</section>
+
+<section class="dv-turn" id="AND">
+<div class="dv-thd"><a class="dv-tid" href="#AND">AND</a><span class="dv-tname">Android &mdash; adaptive layers and notification icon</span></div>
+<p class="dv-note">The three adaptive layers are 512 × 512 (108&nbsp;dp). The dashed coral circle is the 66&nbsp;dp safe zone (313&nbsp;px); the grey one is the 72&nbsp;dp area a launcher shows. The S sits inside the safe zone on the foreground and on the monochrome layer. Checkerboards mean transparent and aren&rsquo;t part of the files.</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="AND-01"><div class="dv-olabel"><a class="dv-oid" href="#AND-01">AND-01</a>Foreground &middot; 512 × 512, transparent &middot; adaptive-foreground.png</div>
+<div style="position:relative;width:256px;height:256px;background-color:#1B1B1D;background-image:repeating-conic-gradient(#262629 0 25%,transparent 0 50%);background-size:16px 16px">
+  <div id="exp-and-fg" style="position:absolute;left:0;top:0;width:256px;height:256px"><dc-import name="Sterncut Mark" variant="adapt" bg="none" fg="#F2F0EB" cut="#E8442E" hint-size="256px,256px" style="display:block;width:100%;height:100%"></dc-import></div>
+  <span style="position:absolute;left:43px;top:43px;width:170px;height:170px;border-radius:999px;border:1px dashed rgba(255,255,255,.35);box-sizing:border-box;pointer-events:none"></span>
+  <span style="position:absolute;left:50px;top:50px;width:156px;height:156px;border-radius:999px;border:1.5px dashed #E8442E;box-sizing:border-box;pointer-events:none"></span>
+</div>
+</div>
+
+<div class="dv-opt" id="AND-02"><div class="dv-olabel"><a class="dv-oid" href="#AND-02">AND-02</a>Background &middot; 512 × 512, ink #101010 &middot; adaptive-background.png</div>
+<div id="exp-and-bg" style="width:256px;height:256px;background:#101010"></div>
+</div>
+
+<div class="dv-opt" id="AND-03"><div class="dv-olabel"><a class="dv-oid" href="#AND-03">AND-03</a>Monochrome &middot; 512 × 512, white on transparent &middot; adaptive-monochrome.png</div>
+<div style="position:relative;width:256px;height:256px;background-color:#1B1B1D;background-image:repeating-conic-gradient(#262629 0 25%,transparent 0 50%);background-size:16px 16px">
+  <div id="exp-and-mono" style="position:absolute;left:0;top:0;width:256px;height:256px"><dc-import name="Sterncut Mark" variant="adapt" bg="none" fg="#FFFFFF" cut="none" hint-size="256px,256px" style="display:block;width:100%;height:100%"></dc-import></div>
+  <span style="position:absolute;left:50px;top:50px;width:156px;height:156px;border-radius:999px;border:1.5px dashed #E8442E;box-sizing:border-box;pointer-events:none"></span>
+</div>
+</div>
+
+<div class="dv-opt" id="AND-04"><div class="dv-olabel"><a class="dv-oid" href="#AND-04">AND-04</a>Notification &middot; 96 × 96, white on transparent &middot; notification-icon.png</div>
+<div style="display:flex;gap:18px;align-items:flex-end">
+  <div style="width:96px;height:96px;background-color:#1B1B1D;background-image:repeating-conic-gradient(#262629 0 25%,transparent 0 50%);background-size:12px 12px;display:flex;align-items:center;justify-content:center"><div id="exp-notif" style="width:48px;height:48px"><dc-import name="Sterncut Mark" variant="notif" bg="none" fg="#FFFFFF" cut="none" hint-size="48px,48px" style="display:block;width:100%;height:100%"></dc-import></div></div>
+  <div style="width:192px;height:192px;background-color:#1B1B1D;background-image:repeating-conic-gradient(#262629 0 25%,transparent 0 50%);background-size:16px 16px;position:relative"><dc-import name="Sterncut Mark" variant="notif" bg="none" fg="#FFFFFF" cut="none" hint-size="192px,192px" style="display:block;width:100%;height:100%"></dc-import><span style="position:absolute;inset:16px;border:1px dashed rgba(255,255,255,.35);pointer-events:none"></span></div>
+</div>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.5);max-width:320px">Left: actual size at 48 (exported ×2). Right: enlarged, with the 20&nbsp;dp live area dashed. No coral: Android uses only the alpha and tints it with the <code>color</code> set in app.json.</div>
+</div>
+
+<div class="dv-opt" id="AND-05"><div class="dv-olabel"><a class="dv-oid" href="#AND-05">AND-05</a>How Android shows it &middot; preview, not a file</div>
+<div style="width:420px;background:#fff;border-radius:18px;padding:22px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px">
+  <div style="display:flex;gap:22px;align-items:flex-end">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="position:relative;width:72px;height:72px;border-radius:999px;overflow:hidden;background:#101010"><span style="position:absolute;left:-18px;top:-18px;width:108px;height:108px"><dc-import name="Sterncut Mark" variant="adapt" bg="none" fg="#F2F0EB" cut="#E8442E" hint-size="108px,108px" style="display:block;width:100%;height:100%"></dc-import></span></span><span style="font-size:10.5px;color:rgba(0,0,0,.55)">Circle</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="position:relative;width:72px;height:72px;border-radius:24px;overflow:hidden;background:#101010"><span style="position:absolute;left:-18px;top:-18px;width:108px;height:108px"><dc-import name="Sterncut Mark" variant="adapt" bg="none" fg="#F2F0EB" cut="#E8442E" hint-size="108px,108px" style="display:block;width:100%;height:100%"></dc-import></span></span><span style="font-size:10.5px;color:rgba(0,0,0,.55)">Squircle</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="position:relative;width:72px;height:72px;border-radius:999px;overflow:hidden;background:#CFE6D8"><span style="position:absolute;left:-18px;top:-18px;width:108px;height:108px"><dc-import name="Sterncut Mark" variant="adapt" bg="none" fg="#1E3A2B" cut="none" hint-size="108px,108px" style="display:block;width:100%;height:100%"></dc-import></span></span><span style="font-size:10.5px;color:rgba(0,0,0,.55)">Themed</span></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;align-items:center;gap:8px;height:30px;background:#1A1A1C;border-radius:8px;padding:0 12px;color:#fff;font:600 12px Inter,sans-serif"><span>10:32</span><span style="width:16px;height:16px"><dc-import name="Sterncut Mark" variant="notif" bg="none" fg="#FFFFFF" cut="none" hint-size="16px,16px" style="display:block;width:100%;height:100%"></dc-import></span><span style="flex:1"></span><span style="width:14px;height:9px;border-radius:2px;border:1.5px solid #fff;box-sizing:border-box"></span></div>
+    <div style="display:flex;align-items:center;gap:8px;background:#F1EFEA;border-radius:14px;padding:12px 14px;font:500 12px Inter,sans-serif;color:#111"><span style="width:16px;height:16px"><dc-import name="Sterncut Mark" variant="notif" bg="none" fg="#E8442E" cut="none" hint-size="16px,16px" style="display:block;width:100%;height:100%"></dc-import></span><span style="font-weight:600">Sterncut</span><span style="color:#8A8A85">· 10:32</span></div>
+  </div>
+</div>
+</div>
+
+</div>
+</section>
+
+<section class="dv-turn" id="SPL">
+<div class="dv-thd"><a class="dv-tid" href="#SPL">SPL</a><span class="dv-tname">Splash &mdash; the mark on ink, and a light variant on canvas</span></div>
+<p class="dv-note">The splash image is the mark alone, on transparent, drawn inside a centred circle two-thirds wide so Android 12&rsquo;s round mask can&rsquo;t clip it. Expo paints the background colour and shows the image at 200&nbsp;dp wide. There&rsquo;s no wordmark, loader or tagline.</p>
+<div class="dv-opts">
+<div class="dv-opt" id="SPL-01"><div class="dv-olabel"><a class="dv-oid" href="#SPL-01">SPL-01</a>Splash &middot; ink #101010</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div data-screen-label="SPL-01" style="width:100%;height:100%;background:#101010;display:flex;align-items:center;justify-content:center"><div style="width:200px;height:200px"><dc-import name="Sterncut Mark" variant="splash" bg="none" fg="#F2F0EB" cut="#E8442E" hint-size="200px,200px" style="display:block;width:100%;height:100%"></dc-import></div></div>
+</x-import>
+</div>
+<div class="dv-opt" id="SPL-02"><div class="dv-olabel"><a class="dv-oid" href="#SPL-02">SPL-02</a>Splash &middot; light, canvas #F2F0EB</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div data-screen-label="SPL-02" style="width:100%;height:100%;background:#F2F0EB;display:flex;align-items:center;justify-content:center"><div style="width:200px;height:200px"><dc-import name="Sterncut Mark" variant="splash" bg="none" fg="#101010" cut="#E8442E" hint-size="200px,200px" style="display:block;width:100%;height:100%"></dc-import></div></div>
+</x-import>
+</div>
+<div class="dv-opt" id="SPL-03"><div class="dv-olabel"><a class="dv-oid" href="#SPL-03">SPL-03</a>Splash images &middot; 1024 × 1024, transparent &middot; splash-icon-dark.png · splash-icon-light.png</div>
+<div style="display:flex;flex-direction:column;gap:20px">
+  <div style="position:relative;width:256px;height:256px;background-color:#1B1B1D;background-image:repeating-conic-gradient(#262629 0 25%,transparent 0 50%);background-size:16px 16px"><div id="exp-spl-dark" style="position:absolute;left:0;top:0;width:256px;height:256px"><dc-import name="Sterncut Mark" variant="splash" bg="none" fg="#F2F0EB" cut="#E8442E" hint-size="256px,256px" style="display:block;width:100%;height:100%"></dc-import></div><span style="position:absolute;left:43px;top:43px;width:170px;height:170px;border-radius:999px;border:1px dashed rgba(255,255,255,.35);box-sizing:border-box;pointer-events:none"></span></div>
+  <div style="position:relative;width:256px;height:256px;background-color:#F4F2EE;background-image:repeating-conic-gradient(#E4E1D9 0 25%,transparent 0 50%);background-size:16px 16px"><div id="exp-spl-light" style="position:absolute;left:0;top:0;width:256px;height:256px"><dc-import name="Sterncut Mark" variant="splash" bg="none" fg="#101010" cut="#E8442E" hint-size="256px,256px" style="display:block;width:100%;height:100%"></dc-import></div><span style="position:absolute;left:43px;top:43px;width:170px;height:170px;border-radius:999px;border:1px dashed rgba(0,0,0,.25);box-sizing:border-box;pointer-events:none"></span></div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="dv-turn" id="SHOT">
+<div class="dv-thd"><a class="dv-tid" href="#SHOT">SHOT</a><span class="dv-tname">Store screenshots &mdash; one set of six, two sizes, three languages</span></div>
+<p class="dv-note">iPhone 6.9″ is drawn at 440 × 956 and exported ×3 (1320 × 2868); Android at 360 × 640, exported ×3 (1080 × 1920). Screens 1–4 are the client app on canvas, 5–6 the barber app on ink, and the eyebrow says who each is for. The Arabic set is right-to-left, UI included. People and shops are invented; the three portfolio photos in screen 2 are slots for the shop&rsquo;s own photos. The app&rsquo;s real bottom tabs aren&rsquo;t known here, so the tab icons are illustrative.</p>
+<sc-for list="{{ shotRows }}" as="row" hint-placeholder-count="1">
+<div style="margin:0 0 34px">
+<div style="font:600 12px Inter,sans-serif;color:#111;margin:0 0 12px">{{ row.title }}</div>
+<div style="display:flex;gap:24px;align-items:flex-start">
+<sc-for list="{{ row.shots }}" as="s" hint-placeholder-count="6">
+<div class="dv-opt" id="{{ s.id }}"><div class="dv-olabel"><a class="dv-oid" href="#{{ s.id }}">{{ s.code }}</a></div>
+<div id="{{ s.eid }}" data-screen-label="{{ s.id }}" dir="{{ s.dir }}" lang="{{ s.lang }}" style="position:relative;width:{{ s.W }}px;height:{{ s.H }}px;overflow:hidden;background:{{ s.bg }};font-family:{{ s.font }}">
+  <div style="position:absolute;left:{{ s.padX }}px;right:{{ s.padX }}px;top:{{ s.padT }}px;display:flex;flex-direction:column;align-items:center;gap:{{ s.gap }}px;text-align:center">
+    <span style="display:flex;align-items:center;gap:8px;font-size:{{ s.eyeSize }}px;font-weight:700;letter-spacing:{{ s.ls }};color:{{ s.eyeColor }}"><span style="width:16px;height:3px;border-radius:2px;background:#E8442E"></span>{{ s.eyebrow }}</span>
+    <span style="font-family:{{ s.disp }};font-weight:700;font-size:{{ s.capSize }}px;line-height:{{ s.capLh }};letter-spacing:{{ s.capLs }};text-transform:{{ s.tt }};color:{{ s.capColor }};text-wrap:balance">{{ s.caption }}</span>
+  </div>
+  <div style="position:absolute;left:{{ s.phoneX }}px;top:{{ s.phoneTop }}px;width:{{ s.phoneW }}px;height:{{ s.phoneH }}px;border-radius:{{ s.phoneR }}px;background:{{ s.bezel }};padding:{{ s.bez }}px;box-sizing:border-box;box-shadow:{{ s.shadow }}">
+    <div style="position:relative;width:100%;height:100%;border-radius:{{ s.screenR }}px;overflow:hidden;background:{{ s.screenBg }}">
+      <div style="position:absolute;left:0;top:0;width:375px;height:812px;transform:scale({{ s.k }});transform-origin:0 0;overflow:hidden;color:#111">
+
+<sc-if value="{{ s.n1 }}">
+<div style="position:absolute;inset:0;background:#F2F0EB">
+  <div style="background:#101010;border-radius:0 0 30px 30px;padding:64px 20px 20px;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-size:13px;color:rgba(255,255,255,.62)">{{ s.t.s1.hello }}</span><span style="display:flex;align-items:center;gap:7px;font-size:19px;font-weight:700;color:#fff"><svg width="15" height="15" viewBox="0 0 24 24" fill="#E8442E"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2z"></path></svg>{{ s.t.s1.loc }}</span></span>
+      <span style="width:44px;height:44px;border-radius:999px;background:#2B2B28;color:#fff;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none">{{ s.t.s1.me }}</span>
+    </div>
+    <span style="display:flex;align-items:center;gap:10px;height:50px;border-radius:999px;background:#1E1E1C;padding:0 18px;font-size:14px;color:#9A9A95"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9A9A95" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5 21 21"></path></svg>{{ s.t.s1.search }}</span>
+  </div>
+  <div style="padding:22px 18px 0;display:flex;flex-direction:column;gap:10px">
+    <span style="display:flex;align-items:center;gap:8px;padding:0 4px;font-size:11px;font-weight:700;letter-spacing:{{ s.ls }};color:#8A8A85"><span style="width:7px;height:7px;border-radius:999px;background:#E8442E"></span>{{ s.t.s1.freeNow }}</span>
+    <sc-for list="{{ s.t.s1.rows }}" as="r">
+    <div style="display:flex;align-items:center;gap:12px;background:#fff;border-radius:20px;padding:12px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span style="width:48px;height:48px;border-radius:999px;background:rgba(232,68,46,.12);color:#E8442E;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none">{{ r.ini }}</span>
+      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="display:flex;align-items:center;gap:8px"><span style="font-size:15px;font-weight:700;color:#111">{{ r.name }}</span><span style="display:flex;align-items:center;gap:3px;font-size:12px;color:#111;font-weight:600"><span style="color:#E8442E">★</span>{{ r.rate }}</span></span><span style="display:flex;align-items:center;gap:6px;font-size:12px;color:#8A8A85;white-space:nowrap;overflow:hidden"><span style="overflow:hidden;text-overflow:ellipsis">{{ r.shop }}</span><span>·</span><span style="flex:none">{{ r.dist }}</span></span></span>
+      <span style="display:flex;flex-direction:column;align-items:center;gap:5px;flex:none"><span style="height:32px;border-radius:999px;background:#101010;color:#fff;font-family:Inter,sans-serif;font-size:13px;font-weight:700;padding:0 13px;display:flex;align-items:center;font-variant-numeric:tabular-nums">{{ r.slot }}</span><span style="font-size:11px;color:#8A8A85;white-space:nowrap">{{ r.price }}</span></span>
+    </div>
+    </sc-for>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center">
+    <div style="display:flex;align-items:center;gap:2px;background:#101010;border-radius:999px;padding:6px;box-shadow:0 10px 28px rgba(0,0,0,.28)">
+      <span style="display:flex;align-items:center;gap:8px;background:#2B2B28;border-radius:999px;height:46px;padding:0 16px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path></svg><span style="color:#fff;font-size:12.5px;font-weight:700">{{ s.t.s1.tab }}</span></span>
+      <span style="width:46px;height:46px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9A95" stroke-width="1.8"><circle cx="12" cy="12" r="9"></circle><path d="m14.5 9.5-1.5 3.5-3.5 1.5L11 11z"></path></svg></span>
+      <span style="width:46px;height:46px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9A95" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg></span>
+      <span style="width:46px;height:46px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9A95" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg></span>
+      <span style="width:46px;height:46px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9A95" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg></span>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ s.n2 }}">
+<div style="position:absolute;inset:0;background:#F2F0EB">
+  <div style="padding:58px 18px 0;display:flex;align-items:center;justify-content:space-between">
+    <span style="width:42px;height:42px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" style="transform:{{ s.flip }}"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+    <span style="width:42px;height:42px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.9"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg></span>
+  </div>
+  <div style="padding:14px 22px 0;display:flex;align-items:center;gap:16px">
+    <span style="width:72px;height:72px;border-radius:999px;background:rgba(232,68,46,.12);color:#E8442E;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none">{{ s.t.s2.ini }}</span>
+    <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px"><span style="font-family:{{ s.disp }};font-weight:700;font-size:{{ s.h2 }};line-height:1.2;letter-spacing:{{ s.tls }};text-transform:{{ s.tt }};color:#111">{{ s.t.s2.name }}</span><span style="font-size:13px;color:#8A8A85">{{ s.t.s2.shop }}</span><span style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#111"><span style="color:#E8442E">★</span>{{ s.t.s2.rate }}<span style="color:#8A8A85;font-weight:500">· {{ s.t.s2.reviews }}</span></span></span>
+  </div>
+  <div style="padding:14px 22px 0;display:flex"><span style="height:30px;display:flex;align-items:center;border-radius:999px;background:#fff;padding:0 12px;font-size:12px;font-weight:600;color:#111">{{ s.t.s2.spec }}</span></div>
+  <div style="padding:18px 22px 0;display:flex;flex-direction:column;gap:10px">
+    <span style="font-size:11px;font-weight:700;letter-spacing:{{ s.ls }};color:#8A8A85">{{ s.t.s2.workL }}</span>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+      <div style="height:124px;border-radius:16px;overflow:hidden;background:#E3DFD6"><image-slot id="store-work-1" shape="rect" placeholder="Portfolio photo 1"></image-slot></div>
+      <div style="height:124px;border-radius:16px;overflow:hidden;background:#E3DFD6"><image-slot id="store-work-2" shape="rect" placeholder="Portfolio photo 2"></image-slot></div>
+      <div style="height:124px;border-radius:16px;overflow:hidden;background:#E3DFD6"><image-slot id="store-work-3" shape="rect" placeholder="Portfolio photo 3"></image-slot></div>
+    </div>
+  </div>
+  <div style="padding:18px 22px 0;display:flex;flex-direction:column;gap:10px">
+    <span style="font-size:11px;font-weight:700;letter-spacing:{{ s.ls }};color:#8A8A85">{{ s.t.s2.servicesL }}</span>
+    <div style="background:#fff;border-radius:20px;padding:0 16px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <sc-for list="{{ s.t.s2.services }}" as="v"><div style="display:flex;align-items:center;gap:12px;min-height:54px;border-bottom:1px solid #EFECE5"><span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:600;color:#111">{{ v.n }}</span><span style="font-size:12px;color:#8A8A85">{{ v.d }}</span></span><span style="font-family:Inter,sans-serif;font-size:14.5px;font-weight:700;color:#111;font-variant-numeric:tabular-nums">{{ v.p }}</span></div></sc-for>
+    </div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:26px 26px 0 0;padding:14px 20px 34px;display:flex;align-items:center;gap:14px;box-shadow:0 -8px 24px rgba(0,0,0,.06)">
+    <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;color:#8A8A85">{{ s.t.s2.nextL }}</span><span style="font-size:16px;font-weight:700;color:#111">{{ s.t.s2.next }}</span></span>
+    <span style="height:54px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;padding:0 34px;font-size:13px;font-weight:700;letter-spacing:{{ s.ls2 }}">{{ s.t.s2.cta }}</span>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ s.n3 }}">
+<div style="position:absolute;inset:0;background:#F2F0EB">
+  <div style="padding:58px 18px 0;display:flex;align-items:center;gap:12px">
+    <span style="width:42px;height:42px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06);flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" style="transform:{{ s.flip }}"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+    <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-family:{{ s.disp }};font-weight:700;font-size:{{ s.h2 }};line-height:1.2;letter-spacing:{{ s.tls }};text-transform:{{ s.tt }};color:#111">{{ s.t.s3.title }}</span><span style="font-size:12.5px;color:#8A8A85">{{ s.t.s3.barber }}</span></span>
+  </div>
+  <div style="padding:20px 22px 0;display:flex;gap:8px">
+    <sc-for list="{{ s.steps }}" as="p"><span style="flex:1;display:flex;flex-direction:column;gap:8px"><span style="height:4px;border-radius:2px;background:{{ p.bar }}"></span><span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:{{ p.fg }}"><span style="width:18px;height:18px;border-radius:999px;background:{{ p.bar }};color:#fff;font-family:Inter,sans-serif;font-size:10px;display:flex;align-items:center;justify-content:center;flex:none">{{ p.mark }}</span>{{ p.t }}</span></span></sc-for>
+  </div>
+  <div style="padding:18px 18px 0">
+    <div style="background:#fff;border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span style="width:38px;height:38px;border-radius:999px;background:rgba(232,68,46,.12);display:flex;align-items:center;justify-content:center;flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2.6"><path d="M5 12l5 5L20 7"></path></svg></span>
+      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:15px;font-weight:700;color:#111">{{ s.t.s3.service }}</span><span style="font-size:12.5px;color:#8A8A85">{{ s.t.s3.dur }}</span></span>
+      <span style="font-family:Inter,sans-serif;font-size:15px;font-weight:700;color:#111">{{ s.t.s3.price }}</span>
+    </div>
+  </div>
+  <div style="padding:14px 18px 0;display:flex;gap:8px">
+    <sc-for list="{{ s.days }}" as="d"><span style="flex:1;height:70px;border-radius:18px;background:{{ d.bg }};color:{{ d.fg }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px"><span style="font-size:11px;font-weight:600">{{ d.d }}</span><span style="font-family:Inter,sans-serif;font-size:19px;font-weight:700">{{ d.n }}</span></span></sc-for>
+  </div>
+  <div style="padding:20px 22px 0;display:flex;flex-direction:column;gap:10px">
+    <span style="font-size:11px;font-weight:700;letter-spacing:{{ s.ls }};color:#8A8A85">{{ s.t.s3.am }}</span>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px"><sc-for list="{{ s.am }}" as="x"><span style="height:46px;border-radius:14px;background:{{ x.bg }};color:{{ x.fg }};display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;font-size:14px;font-weight:700">{{ x.t }}</span></sc-for></div>
+    <span style="font-size:11px;font-weight:700;letter-spacing:{{ s.ls }};color:#8A8A85;margin-top:8px">{{ s.t.s3.pm }}</span>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px"><sc-for list="{{ s.pm }}" as="x"><span style="height:46px;border-radius:14px;background:{{ x.bg }};color:{{ x.fg }};display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;font-size:14px;font-weight:700">{{ x.t }}</span></sc-for></div>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:0;padding:12px 20px 36px;display:flex;flex-direction:column;gap:12px">
+    <span style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:12.5px;color:#5C5C58"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5C5C58" stroke-width="1.8"><rect x="3" y="6" width="18" height="12" rx="2.5"></rect><circle cx="12" cy="12" r="2.4"></circle></svg>{{ s.t.s3.pay }}</span>
+    <span style="height:56px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13.5px;font-weight:700;letter-spacing:{{ s.ls2 }}">{{ s.t.s3.cta }}</span>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ s.n4 }}">
+<div style="position:absolute;inset:0;background:#F2F0EB">
+  <div style="padding:58px 18px 0;display:flex;align-items:center;gap:12px">
+    <span style="width:42px;height:42px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06);flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" style="transform:{{ s.flip }}"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+    <span style="flex:1;text-align:center;font-size:11px;font-weight:700;letter-spacing:{{ s.ls }};color:#8A8A85">{{ s.t.s4.top }}</span>
+    <span style="width:42px;flex:none"></span>
+  </div>
+  <div style="padding:20px 24px 0;display:flex;flex-direction:column;gap:4px">
+    <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:30px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase;color:#111">{{ s.t.s4.shop }}</span>
+    <span style="font-size:13px;color:#8A8A85">{{ s.t.s4.area }}</span>
+  </div>
+  <div style="margin:20px 18px 0;background:#101010;border-radius:30px;padding:24px 24px 28px;display:flex;flex-direction:column;color:#fff">
+    <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;letter-spacing:{{ s.ls }};color:rgba(255,255,255,.66)">{{ s.t.s4.label }}</span><span style="display:flex;align-items:center;gap:7px;height:28px;border-radius:999px;background:rgba(255,255,255,.1);padding:0 11px;font-size:11.5px;font-weight:700"><span style="width:7px;height:7px;border-radius:999px;background:#E8442E;box-shadow:0 0 0 4px rgba(232,68,46,.25)"></span>{{ s.t.s4.live }}</span></div>
+    <div dir="ltr" style="display:flex;align-items:flex-start;justify-content:{{ s.numJust }};font-family:'Playfair Display',serif;font-weight:800;line-height:.9;margin-top:14px"><span style="font-size:150px">{{ s.t.s4.num }}</span><span style="font-size:44px;margin-top:14px">{{ s.t.s4.suf }}</span></div>
+    <span style="font-size:17px;font-weight:600;margin-top:10px">{{ s.t.s4.ahead }}</span>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:22px"><span style="flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.28)"></span><span style="flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.28)"></span><span style="flex:1;height:8px;border-radius:4px;background:#E8442E"></span></div>
+  </div>
+  <div style="position:absolute;left:20px;right:20px;bottom:44px"><span style="height:54px;border-radius:999px;border:1.5px solid #D6D2C8;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:{{ s.ls2 }};color:#111">{{ s.t.s4.leave }}</span></div>
+</div>
+</sc-if>
+
+<sc-if value="{{ s.n5 }}">
+<div style="position:absolute;inset:0;background:#0D0D0F;color:#fff">
+  <div style="padding:62px 22px 0;display:flex;flex-direction:column;gap:4px">
+    <span style="font-size:13px;color:#9A9CA3">{{ s.t.s5.date }}</span>
+    <span style="font-family:{{ s.disp }};font-weight:700;font-size:{{ s.h1 }};line-height:1.2;letter-spacing:{{ s.tls }};text-transform:{{ s.tt }}">{{ s.t.s5.title }}</span>
+  </div>
+  <div style="padding:16px 18px 0;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <sc-for list="{{ s.t.s5.stats }}" as="st"><span style="background:#17171A;border:1px solid #26262B;border-radius:20px;padding:14px 16px;display:flex;flex-direction:column;gap:2px"><span style="font-family:Inter,sans-serif;font-size:30px;font-weight:800;font-variant-numeric:tabular-nums">{{ st.v }}</span><span style="font-size:12.5px;color:#9A9CA3">{{ st.l }}</span></span></sc-for>
+  </div>
+  <div style="margin:10px 18px 0;background:#17171A;border:1px solid #26262B;border-radius:20px;padding:14px;display:flex;align-items:center;gap:12px">
+    <span style="width:40px;height:40px;border-radius:999px;background:rgba(232,161,0,.16);display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="1.9"><circle cx="9" cy="8" r="3.2"></circle><path d="M3 20c.7-3.6 3-5.4 6-5.4s5.3 1.8 6 5.4"></path><path d="M16 5a3 3 0 0 1 0 6M18 14.8c1.8.7 2.8 2.4 3 5.2"></path></svg></span>
+    <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:700">{{ s.t.s5.queue }}</span><span style="font-size:12px;color:#9A9CA3">{{ s.t.s5.queueSub }}</span></span>
+    <span style="height:38px;border-radius:999px;background:#fff;color:#111;display:flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:700;letter-spacing:{{ s.ls2 }};flex:none">{{ s.t.s5.queueCta }}</span>
+  </div>
+  <div style="padding:18px 22px 8px"><span style="font-size:11px;font-weight:700;letter-spacing:{{ s.ls }};color:#9A9CA3">{{ s.t.s5.planL }}</span></div>
+  <div style="margin:0 18px;background:#17171A;border:1px solid #26262B;border-radius:20px;padding:0 16px">
+    <sc-for list="{{ s.rows5 }}" as="r"><div style="display:flex;align-items:center;gap:12px;min-height:60px;border-bottom:1px solid #26262B"><span style="width:46px;font-family:Inter,sans-serif;font-size:13.5px;font-weight:700;font-variant-numeric:tabular-nums;color:{{ r.tc }};flex:none">{{ r.t }}</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:600;color:{{ r.nc }}">{{ r.n }}</span><span style="font-size:12px;color:#9A9CA3">{{ r.s }}</span></span><span style="height:26px;border-radius:999px;padding:0 10px;display:flex;align-items:center;font-size:11px;font-weight:700;background:{{ r.cb }};color:{{ r.cf }};flex:none">{{ r.st }}</span></div></sc-for>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center">
+    <div style="display:flex;align-items:center;gap:2px;background:#17171A;border:1px solid #26262B;border-radius:999px;padding:6px">
+      <span style="display:flex;align-items:center;gap:8px;background:#2A2A2F;border-radius:999px;height:46px;padding:0 16px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"></path></svg><span style="color:#fff;font-size:12.5px;font-weight:700">{{ s.t.s5.tab }}</span></span>
+      <span style="width:46px;height:46px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg></span>
+      <span style="width:46px;height:46px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg></span>
+      <span style="width:46px;height:46px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="6" width="18" height="13" rx="3"></rect><path d="M16 12.5h2"></path></svg></span>
+      <span style="width:46px;height:46px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg></span>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ s.n6 }}">
+<div style="position:absolute;inset:0;background:#0D0D0F;color:#fff">
+  <div style="padding:62px 22px 0"><span style="font-family:{{ s.disp }};font-weight:700;font-size:{{ s.h1 }};line-height:1.2;letter-spacing:{{ s.tls }};text-transform:{{ s.tt }}">{{ s.t.s6.title }}</span></div>
+  <div style="margin:16px 18px 0;background:#17171A;border:1px solid #26262B;border-radius:24px;padding:18px 18px 4px;display:flex;flex-direction:column;gap:4px">
+    <span style="font-size:11px;font-weight:700;letter-spacing:{{ s.ls }};color:#9A9CA3">{{ s.t.s6.cashL }}</span>
+    <span style="font-family:Inter,sans-serif;font-size:40px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums;margin-top:4px">{{ s.t.s6.cash }}</span>
+    <span style="font-size:13px;color:#9A9CA3">{{ s.t.s6.cashSub }}</span>
+    <div style="display:flex;align-items:center;min-height:50px;border-top:1px solid #26262B;margin-top:12px"><span style="flex:1;font-size:14px;font-weight:600">{{ s.t.s6.weekly }}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.2" style="transform:{{ s.flip }}"><path d="M9 6l6 6-6 6"></path></svg></div>
+  </div>
+  <div style="padding:18px 22px 8px"><span style="font-size:11px;font-weight:700;letter-spacing:{{ s.ls }};color:#9A9CA3">{{ s.t.s6.actL }}</span></div>
+  <div style="margin:0 18px;background:#17171A;border:1px solid #26262B;border-radius:20px;padding:0 16px">
+    <sc-for list="{{ s.rows6 }}" as="r"><div style="display:flex;align-items:center;gap:12px;min-height:62px;border-bottom:1px solid #26262B"><span style="width:40px;height:40px;border-radius:999px;background:#26262B;color:#fff;font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none"><sc-if value="{{ r.walk }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.9"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg></sc-if>{{ r.ini }}</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:14.5px;font-weight:600">{{ r.n }}</span><span style="font-size:12px;color:#9A9CA3">{{ r.meta }}</span></span><span style="font-family:Inter,sans-serif;font-size:14.5px;font-weight:700;color:#4ADE80;font-variant-numeric:tabular-nums">{{ r.a }}</span></div></sc-for>
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:26px;display:flex;justify-content:center">
+    <div style="display:flex;align-items:center;gap:2px;background:#17171A;border:1px solid #26262B;border-radius:999px;padding:6px">
+      <span style="width:46px;height:46px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"></path></svg></span>
+      <span style="width:46px;height:46px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M3 9.5h18M8 3v4M16 3v4"></path></svg></span>
+      <span style="width:46px;height:46px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg></span>
+      <span style="display:flex;align-items:center;gap:8px;background:#2A2A2F;border-radius:999px;height:46px;padding:0 16px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="3"></rect><path d="M16 12.5h2"></path></svg><span style="color:#fff;font-size:12.5px;font-weight:700">{{ s.t.s6.tab }}</span></span>
+      <span style="width:46px;height:46px;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="1.8"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5"></path></svg></span>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+        <div dir="ltr" style="position:absolute;left:0;right:0;top:0;height:50px;display:flex;align-items:center;justify-content:space-between;padding:6px 30px 0 34px;box-sizing:border-box;flex-direction:{{ s.sbDir }};color:{{ s.sb }};font-family:Inter,sans-serif;z-index:3">
+          <span style="font-size:15px;font-weight:600;font-variant-numeric:tabular-nums">{{ s.time }}</span>
+          <span style="display:flex;align-items:center;gap:6px"><svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"></rect><rect x="4.5" y="5" width="3" height="6" rx="1"></rect><rect x="9" y="2.5" width="3" height="8.5" rx="1"></rect><rect x="13.5" y="0" width="3" height="11" rx="1"></rect></svg><svg width="24" height="11" viewBox="0 0 24 11" fill="none"><rect x="0.5" y="0.5" width="21" height="10" rx="3" stroke="currentColor" opacity=".45"></rect><rect x="2" y="2" width="15" height="7" rx="1.6" fill="currentColor"></rect><rect x="22.5" y="3.5" width="1.5" height="4" rx=".75" fill="currentColor" opacity=".45"></rect></svg></span>
+        </div>
+        <sc-if value="{{ s.ios }}"><div style="position:absolute;top:11px;left:125px;width:125px;height:36px;border-radius:999px;background:#000;z-index:4"></div></sc-if>
+        <sc-if value="{{ s.android }}"><div style="position:absolute;top:15px;left:180px;width:15px;height:15px;border-radius:999px;background:#000;z-index:4"></div></sc-if>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</section>
+
+<section class="dv-turn" id="FEAT">
+<div class="dv-thd"><a class="dv-tid" href="#FEAT">FEAT</a><span class="dv-tname">Google Play feature graphic &mdash; 1024 × 500, one per language</span></div>
+<p class="dv-note">The mark and the website&rsquo;s wordmark (Playfair, spaced caps), the tagline, and the two moments the app is for: a confirmed booking and a live place in line. Everything stays 80&nbsp;px or more from the edges, because Play crops and overlays the graphic on some surfaces.</p>
+<div class="dv-opts">
+<sc-for list="{{ feats }}" as="f" hint-placeholder-count="3">
+<div class="dv-opt" id="{{ f.id }}"><div class="dv-olabel"><a class="dv-oid" href="#{{ f.id }}">{{ f.code }}</a>{{ f.file }}</div>
+<div id="{{ f.eid }}" dir="{{ f.dir }}" lang="{{ f.lang }}" style="position:relative;width:1024px;height:500px;overflow:hidden;background:#101010;font-family:{{ f.font }};display:flex;align-items:center;gap:60px;padding:0 88px;box-sizing:border-box">
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:30px">
+    <span dir="ltr" style="display:flex;align-items:center;gap:14px;align-self:flex-start"><span style="width:46px;height:46px;flex:none"><dc-import name="Sterncut Mark" variant="notif" bg="none" fg="#F2F0EB" cut="#E8442E" hint-size="46px,46px" style="display:block;width:100%;height:100%"></dc-import></span><span style="font-family:'Playfair Display',serif;font-weight:700;font-size:24px;letter-spacing:.2em;color:#F2F0EB">STERNCUT</span></span>
+    <span style="font-family:{{ f.disp }};font-weight:700;font-size:{{ f.tagSize }}px;line-height:{{ f.tagLh }};letter-spacing:{{ f.tls }};text-transform:{{ f.tt }};color:#fff;text-wrap:balance">{{ f.t.tagline }}</span>
+  </div>
+  <div style="position:relative;width:340px;height:330px;flex:none">
+    <div style="position:absolute;top:0;inset-inline-end:0;width:250px;background:#F2F0EB;border-radius:28px;padding:22px 22px 24px;box-sizing:border-box;display:flex;flex-direction:column;color:#111">
+      <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;font-weight:700;letter-spacing:{{ f.ls }};color:#5C5C58">{{ f.t.ticketL }}</span><span style="display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700"><span style="width:7px;height:7px;border-radius:999px;background:#E8442E"></span>{{ f.t.live }}</span></div>
+      <div dir="ltr" style="display:flex;align-items:flex-start;justify-content:{{ f.numJust }};font-family:'Playfair Display',serif;font-weight:800;line-height:.9;margin-top:12px"><span style="font-size:120px">{{ f.t.num }}</span><span style="font-size:36px;margin-top:10px">{{ f.t.suf }}</span></div>
+      <span style="font-size:14px;font-weight:600;margin-top:8px">{{ f.t.ahead }}</span>
+      <span style="font-size:12.5px;color:#5C5C58;margin-top:4px">Le Fade Tanger</span>
+    </div>
+    <div style="position:absolute;bottom:0;inset-inline-start:0;width:238px;background:#fff;border-radius:22px;padding:16px 18px;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;box-shadow:0 18px 40px rgba(0,0,0,.45);color:#111">
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:24px;height:24px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span><span style="font-size:14px;font-weight:700">{{ f.t.booked }}</span></span>
+      <span style="font-size:20px;font-weight:800;font-family:Inter,sans-serif">{{ f.t.when }}</span>
+      <span style="font-size:12.5px;color:#5C5C58">{{ f.t.line }}</span>
+    </div>
+  </div>
+</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section class="dv-turn" id="COPY">
+<div class="dv-thd"><a class="dv-tid" href="#COPY">COPY</a><span class="dv-tname">Listing copy &mdash; French, Arabic, English</span></div>
+<p class="dv-note">Counts are live: a limit turns red if the text runs over. Nothing here claims card payments, SMS or cities other than Tangier. iOS keywords don&rsquo;t repeat words already in the name or subtitle, because Apple indexes those anyway.</p>
+<div style="display:flex;flex-direction:column;gap:14px;max-width:1440px">
+  <div style="display:flex;gap:16px"><span style="width:150px;flex:none"></span><sc-for list="{{ copyHead }}" as="h"><span style="flex:1;min-width:0;font:700 11px Inter,sans-serif;letter-spacing:.14em;color:#111">{{ h }}</span></sc-for></div>
+  <sc-for list="{{ copyRows }}" as="row">
+  <div style="display:flex;gap:16px;align-items:flex-start">
+    <span style="width:150px;flex:none;display:flex;flex-direction:column;gap:3px;padding-top:12px"><span style="font:600 12.5px Inter,sans-serif;color:#111">{{ row.label }}</span><span style="font:400 11px Inter,sans-serif;color:rgba(0,0,0,.55)">{{ row.limitL }}</span></span>
+    <sc-for list="{{ row.cells }}" as="c">
+    <div dir="{{ c.dir }}" style="flex:1;min-width:0;background:#fff;border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px">
+      <span style="font-family:{{ c.font }};font-size:{{ c.size }}px;line-height:1.6;color:#111;white-space:pre-wrap;overflow-wrap:anywhere">{{ c.text }}</span>
+      <span dir="ltr" style="align-self:flex-end;font:600 10.5px ui-monospace,Menlo,monospace;padding:2px 7px;border-radius:5px;background:{{ c.cntBg }};color:{{ c.cntFg }}">{{ c.count }}</span>
+    </div>
+    </sc-for>
+  </div>
+  </sc-for>
+</div>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const PF = "'Playfair Display',serif", KUFI = "'Noto Kufi Arabic',sans-serif", INTER = "Inter,sans-serif", PLEX = "'IBM Plex Sans Arabic',Inter,sans-serif";
+const FMT = {
+  ios: { W: 440, H: 956, padT: 56, padX: 30, gap: 12, eye: 11.5, cap: 30, capAr: 27, phoneTop: 214, bez: 6, k: 0.9, phoneR: 56, screenR: 50, lab: 'iPhone 6.9″', FL: 'IOS', px: '1320 × 2868' },
+  android: { W: 360, H: 640, padT: 30, padX: 24, gap: 9, eye: 10, cap: 23, capAr: 21, phoneTop: 146, bez: 5, k: 0.62, phoneR: 36, screenR: 31, lab: 'Android', FL: 'AND', px: '1080 × 1920' }
+};
+const AM = ['10:15', '11:00', '11:45', '12:30'], PM = ['14:00', '14:45', '15:30', '16:15'];
+const ST = {
+  done: { tc: '#9A9CA3', nc: '#C4C5CA', cb: 'rgba(74,222,128,.14)', cf: '#4ADE80' },
+  now: { tc: '#fff', nc: '#fff', cb: '#E8442E', cf: '#101010' },
+  walk: { tc: '#fff', nc: '#fff', cb: 'rgba(232,161,0,.16)', cf: '#E8A100' },
+  next: { tc: '#fff', nc: '#fff', cb: 'rgba(255,255,255,.07)', cf: '#9A9CA3' }
+};
+const LIM = [['name', 'App name', 30, 'App Store + Play · 30'], ['subtitle', 'iOS subtitle', 30, 'App Store · 30'], ['short', 'Short description', 80, 'Play · 80'], ['keywords', 'iOS keywords', 100, 'App Store · 100, comma-separated'], ['full', 'Full description', 4000, 'Play + App Store · 4000']];
+class Component extends DCLogic {
+  state = { ready: !!window.STERNCUT_STORE };
+  componentDidMount() { if (!window.STERNCUT_STORE) this._t = setInterval(() => { if (window.STERNCUT_STORE) { clearInterval(this._t); this.setState({ ready: true }); } }, 60); }
+  componentWillUnmount() { clearInterval(this._t); }
+  shot(D, n, lang, fmt) {
+    const L = D.langs[lang], F = FMT[fmt], ar = lang === 'ar', dark = n >= 5, LG = lang.toUpperCase();
+    const phoneW = Math.round(375 * F.k + 2 * F.bez), phoneH = Math.round(812 * F.k + 2 * F.bez);
+    const slot = t => ({ t, bg: t === '11:00' ? '#101010' : '#fff', fg: t === '11:00' ? '#fff' : '#111' });
+    return {
+      id: 'SHOT-0' + n + '-' + F.FL + '-' + LG, eid: 'exp-shot-' + n + '-' + fmt + '-' + lang,
+      code: 'SHOT-0' + n + ' · ' + F.lab + ' · ' + LG,
+      n1: n === 1, n2: n === 2, n3: n === 3, n4: n === 4, n5: n === 5, n6: n === 6, ios: fmt === 'ios', android: fmt === 'android',
+      W: F.W, H: F.H, bg: dark ? '#101010' : '#F2F0EB', dir: ar ? 'rtl' : 'ltr', lang,
+      font: ar ? PLEX : INTER, disp: ar ? KUFI : PF, tt: ar ? 'none' : 'uppercase', ls: ar ? '0' : '.14em', ls2: ar ? '0' : '.08em', tls: ar ? '0' : '.02em',
+      padT: F.padT, padX: F.padX, gap: F.gap, eyeSize: F.eye, eyebrow: n <= 4 ? L.eyebrowC : L.eyebrowB, eyeColor: dark ? '#F2F0EB' : '#111',
+      caption: L.cap[n - 1], capSize: ar ? F.capAr : F.cap, capLh: ar ? 1.5 : 1.08, capLs: ar ? '0' : '.01em', capColor: dark ? '#fff' : '#111',
+      phoneX: Math.round((F.W - phoneW) / 2), phoneTop: F.phoneTop, phoneW, phoneH, phoneR: F.phoneR, bez: F.bez, screenR: F.screenR,
+      bezel: dark ? '#2A2A2E' : '#101010', shadow: dark ? 'none' : '0 24px 50px rgba(0,0,0,.18)', screenBg: dark ? '#0D0D0F' : '#F2F0EB', k: F.k,
+      sb: (n >= 2 && n <= 4) ? '#111' : '#fff', sbDir: ar ? 'row-reverse' : 'row', time: n === 6 ? '19:40' : '10:32',
+      h1: ar ? '24px' : '30px', h2: ar ? '20px' : '23px', flip: ar ? 'scaleX(-1)' : 'none', numJust: ar ? 'flex-end' : 'flex-start',
+      t: L,
+      steps: L.s3.steps.map((t, i) => ({ t, mark: i < 2 ? '✓' : '3', bar: i < 2 ? '#101010' : '#E8442E', fg: i < 2 ? '#111' : '#E8442E' })),
+      days: L.s3.days.map((d, i) => ({ d: d.d, n: d.n, bg: i === 0 ? '#101010' : '#fff', fg: i === 0 ? '#fff' : '#111' })),
+      am: AM.map(slot), pm: PM.map(slot),
+      rows5: L.s5.rows.map(r => Object.assign({}, r, ST[r.k])),
+      rows6: L.s6.rows.map(r => Object.assign({}, r, { walk: !r.ini, meta: r.s + ' · ' + r.t }))
+    };
+  }
+  renderVals() {
+    const D = window.STERNCUT_STORE;
+    if (!D) return { shotRows: [], feats: [], copyRows: [], copyHead: [] };
+    const shotRows = [];
+    for (const lang of ['fr', 'ar', 'en']) for (const fmt of ['ios', 'android'])
+      shotRows.push({ title: FMT[fmt].lab + ' · ' + FMT[fmt].px + ' · ' + D.langs[lang].name + ' · store-assets/screenshots/' + fmt + '/' + lang + '/01…06.png', shots: [1, 2, 3, 4, 5, 6].map(n => this.shot(D, n, lang, fmt)) });
+    const feats = ['fr', 'ar', 'en'].map(lang => {
+      const ar = lang === 'ar';
+      return { id: 'FEAT-01-' + lang.toUpperCase(), eid: 'exp-feat-' + lang, code: 'FEAT-01 · ' + lang.toUpperCase(), file: '1024 × 500 · store-assets/feature-graphic-' + lang + '.png',
+        dir: ar ? 'rtl' : 'ltr', lang, font: ar ? PLEX : INTER, disp: ar ? KUFI : PF, tt: ar ? 'none' : 'uppercase', tls: ar ? '0' : '.01em', ls: ar ? '0' : '.14em',
+        tagSize: ar ? 46 : 56, tagLh: ar ? 1.5 : 1.02, numJust: ar ? 'flex-end' : 'flex-start', t: D.langs[lang].feature };
+    });
+    const copyRows = LIM.map(([key, label, max, limitL]) => ({
+      label, limitL,
+      cells: ['fr', 'ar', 'en'].map(lang => {
+        const text = D.listing[lang][key], n = [...text].length, ok = n <= max, ar = lang === 'ar';
+        return { text, dir: ar ? 'rtl' : 'ltr', font: ar ? PLEX : INTER, size: key === 'full' ? 12.5 : (ar ? 15 : 14), count: n + ' / ' + max, cntBg: ok ? 'rgba(74,160,110,.14)' : 'rgba(232,68,46,.14)', cntFg: ok ? '#2E6B47' : '#B3301E' };
+      })
+    }));
+    return { shotRows, feats, copyRows, copyHead: ['FRANÇAIS', 'العربية', 'ENGLISH'] };
+  }
+}
+</script>
+</body>
+</html>

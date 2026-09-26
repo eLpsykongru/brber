@@ -165,6 +165,36 @@ ok('a shop link that is not a shop is still the queue page\'s 404', (await get('
 ok('POST to a page is refused', (await get('/tarifs', numbers(), ENV, {}, 'POST')).status === 405);
 ok('HEAD is a GET', (await get('/tarifs', numbers(), ENV, {}, 'HEAD')).status === 200);
 
+// ---- WEB-14 … 16 · the legal pages, and the footer everywhere ------------------------------------
+const LEGAL_PAGES = [
+  ['/confidentialite', 'fr', 'Politique de confidentialité'], ['/ar/confidentialite', 'ar', 'سياسة الخصوصية'], ['/en/privacy', 'en', 'Privacy policy'],
+  ['/conditions', 'fr', "Conditions d'utilisation"], ['/ar/conditions', 'ar', 'شروط الاستخدام'], ['/en/terms', 'en', 'Terms of use'],
+  ['/supprimer-mon-compte', 'fr', 'Supprimer votre compte'], ['/ar/supprimer-mon-compte', 'ar', 'حذف حسابك'], ['/en/delete-account', 'en', 'Delete your account'],
+];
+for (const [path, lang, title] of LEGAL_PAGES) {
+  const p = await get(path, down);   // Play Console opens it signed out, and nothing on it needs the database
+  ok(`${path} answers without the database`, p.status === 200, p.status);
+  ok(`${path} is in its own language`, p.body.includes(`<html lang="${lang}" dir="${lang === 'ar' ? 'rtl' : 'ltr'}"`));
+  ok(`${path} carries its title`, has(p, title));
+  ok(`${path} is still marked a draft`, p.body.includes('class="lg-draft"') && p.body.includes('lg-flag') && p.body.includes('lg-br'));
+  ok(`${path} names all three languages`, (p.body.match(/hreflang=/g) ?? []).length === 4);
+  ok(`${path} has one h1`, (p.body.match(/<h1/g) ?? []).length === 1);
+  ok(`${path} promises no SMS`, !/\bSMS\b|رسالة قصيرة/.test(visible(p.body)), visible(p.body).match(/.{40}SMS.{20}/)?.[0]);
+}
+for (const [from, to] of [['/fr/terms', '/conditions'], ['/fr/privacy', '/confidentialite'], ['/ar/terms', '/ar/conditions'], ['/ar/privacy', '/ar/confidentialite']]) {
+  const p = await get(from);
+  ok(`the app's ${from} redirects to ${to}`, p.status === 301 && p.location === to, [p.status, p.location]);
+}
+ok("the app's /en/terms is the page itself", (await get('/en/terms', down)).status === 200);
+for (const path of ['/', '/tarifs', '/pour-les-salons', '/ar/salons', '/nope']) {
+  const p = await get(path);
+  ok(`${path} ends with the footer and all three legal pages`, p.body.includes('class="lg-foot"')
+    && /confidentialite/.test(p.body) && /conditions/.test(p.body) && /supprimer-mon-compte/.test(p.body), p.status);
+}
+const filled = await get('/supprimer-mon-compte', down, { ...ENV, CONTACT_EMAIL: 'bonjour@sterncut.ma', SUPPORT_PHONE: '+212 6 59 94 15 07' });
+ok('CONTACT_EMAIL fills the delete page\'s button', filled.body.includes('mailto:bonjour@sterncut.ma?subject=')
+  && !has(filled, '[e-mail de contact]') && has(filled, '+212 6 59 94 15 07'));
+
 // ---- WEB-13 · maintenance --------------------------------------------------------------------------
 const M = { ...ENV, MAINTENANCE: '1', MAINTENANCE_UNTIL: '14:30', MAINTENANCE_AT: new Date(Date.now() - 12 * 60000).toISOString() };
 for (const path of ['/', '/tarifs', '/q/LF7K2M', '/c/0123456789ab', '/nope']) {

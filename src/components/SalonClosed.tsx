@@ -66,7 +66,10 @@ export function ClosedCard({ c, salonId, onBookLater }: {
   async function tellMe() {
     const { data: u } = await supabase.auth.getUser();
     if (!u.user) return;
-    const day = c!.back_on ?? new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    // tomorrow on the phone's calendar: a UTC date is today between 00:00 and 01:00
+    const t = new Date(); t.setDate(t.getDate() + 1);
+    const day = c!.back_on
+      ?? `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
     const { error } = await supabase.from('waitlist_requests')
       .insert({ customer_id: u.user.id, salon_id: salonId, day });
     // the partial unique index means "already asked" is a success, not a failure

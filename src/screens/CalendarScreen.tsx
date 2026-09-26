@@ -14,6 +14,7 @@ import { supabase } from '../lib/supabase';
 import { colors, dark as D, font, inter, radius, sp, TOP_INSET } from '../theme';
 import ChatScreen from './ChatScreen';
 import { en, loc, tr, trn, weekdayDate } from '../lib/i18n';
+import { nameOrFormer } from '../lib/deletion';
 
 // Calendar tab: day timeline / week summary of what's on the books.
 // Hours & breaks are EDITED in Profile → Schedule settings; here they're only shown.
@@ -80,7 +81,7 @@ const minutesOf = (iso: string) => { const d = new Date(iso); return d.getHours(
 const durMin = (b: { starts_at: string; ends_at: string }) =>
   Math.round((new Date(b.ends_at).getTime() - new Date(b.starts_at).getTime()) / 60_000);
 const nameOf = (b: CalBooking, barberId: string) =>
-  b.walk_in_name ?? (b.customer_id === barberId ? tr('Walk-in') : b.customer?.full_name ?? tr('Client'));
+  b.walk_in_name ?? (b.customer_id === barberId ? tr('Walk-in') : nameOrFormer(b.customer, tr('Client'), 'customer'));
 
 function Avatar({ url, name, size = 44 }: { url?: string | null; name: string; size?: number }) {
   if (url) return <Image source={{ uri: url }} style={{ width: size, height: size, borderRadius: 999 }} />;
@@ -179,7 +180,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
     const to = addDays(gridStart, GRID_DAYS);
     const [bk, blk, av, off, sv] = await Promise.all([
       supabase.from('bookings')
-        .select('id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, services(name), customer:profiles!customer_id(full_name, phone, avatar_url)')
+        .select('id, starts_at, ends_at, status, price_cents, walk_in_name, customer_id, checked_in_at, started_at, completed_at, services(name), customer:profiles!customer_id(full_name, deleted_at, phone, avatar_url)')
         .eq('barber_id', barberId)
         .gte('starts_at', weekStart.toISOString()).lt('starts_at', to.toISOString())
         .in('status', ['pending', 'confirmed'])
@@ -212,7 +213,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
   useEffect(() => {
     if (!newAt || clients !== null) return;
     supabase.from('bookings')
-      .select('customer_id, walk_in_name, customer:profiles!customer_id(full_name, avatar_url)')
+      .select('customer_id, walk_in_name, customer:profiles!customer_id(full_name, deleted_at, avatar_url)')
       .eq('barber_id', barberId).in('status', ['confirmed', 'no_show'])
       .order('starts_at', { ascending: false }).limit(200)
       .then(({ data }) => {

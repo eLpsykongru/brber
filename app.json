@@ -8,20 +8,23 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.sterncut.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "CFBundleLocalizations": ["en", "fr", "ar"]
+        "CFBundleLocalizations": [
+          "en",
+          "fr",
+          "ar"
+        ]
       }
     },
     "android": {
       "package": "com.sterncut.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#101010",
+        "foregroundImage": "./assets/adaptive-foreground.png",
+        "monochromeImage": "./assets/adaptive-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -33,11 +36,54 @@
       [
         "expo-notifications",
         {
+          "icon": "./assets/notification-icon.png",
           "color": "#E8442E"
         }
       ],
       "expo-sqlite",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Sterncut uses your location to sort barbershops by distance. Barbers also use it to pin their shop on the map and to tag the shop photos they send us.",
+          "locationAlwaysAndWhenInUsePermission": false,
+          "locationAlwaysPermission": false
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Sterncut uses the camera to scan a shop's queue QR code, and for barbers to photograph their licence or their shop's poster.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Sterncut lets you pick photos for your profile, your work and your chats.",
+          "cameraPermission": "Sterncut uses the camera to scan a shop's queue QR code, and for barbers to photograph their licence or their shop's poster.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Face ID unlocks Sterncut when you turn on the app lock."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon-light.png",
+          "imageWidth": 200,
+          "backgroundColor": "#F8F8F6",
+          "dark": {
+            "image": "./assets/splash-icon-dark.png",
+            "backgroundColor": "#101010"
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {

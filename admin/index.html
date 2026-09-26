@@ -3831,6 +3831,8 @@ const SALON_PILL = {
   pending: () => pill('PENDING', '#E8A100', 'rgba(232,161,0,.12)'),
   suspended: () => pill('SUSPENDED', '#F87171', 'rgba(248,113,113,.12)'),
   rejected: () => pill('REJECTED', '#F87171', 'rgba(248,113,113,.12)'),
+  // 0131: the owner deleted their account and the shop closed with it
+  closed: () => pill('CLOSED · OWNER LEFT', '#9A9CA3', '#212125'),
   live: (open) => (open ? pill('OPEN', '#4ADE80', 'rgba(74,222,128,.12)')
     : `<span style="display:flex"><span style="display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#9A9CA3;background:#212125;border-radius:7px;padding:4px 8px"><span style="width:5px;height:5px;border-radius:999px;background:#6B6B72"></span>CLOSED</span></span>`),
 };

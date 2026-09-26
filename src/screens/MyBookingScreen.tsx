@@ -16,6 +16,7 @@ import ChatScreen from './ChatScreen';
 import { DayQueueRow, minutesUntil } from './QueueScreen';
 import { en, loc, tr, trn, trRich } from '../lib/i18n';
 import { useHideTabBar } from '../components/TabBar';
+import { nameOrFormer } from '../lib/deletion';
 
 // Turn 9-13 of "Customer App.dc.html" — one booking in full.
 //   9a  My booking (confirmed, with the live ticket)
@@ -68,7 +69,7 @@ const SELECT =
   + ' services(name, duration_min),'
   // 38f needs the shop's status: a shop vanishing from search must never read as
   // a booking vanishing, and the only way to say so is to know it happened.
-  + ' barbers(id, specialty, profiles!barbers_id_fkey(full_name), salon:salons!salon_id(name, address, status))';
+  + ' barbers(id, specialty, profiles!barbers_id_fkey(full_name, deleted_at), salon:salons!salon_id(name, address, status))';
 
 function initials(name: string) {
   return name.split(' ').filter(Boolean).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
@@ -286,7 +287,7 @@ function SalonCard({ d, photo, rating, statusChip, photoSize, onChat, compact }:
   d: Detail; photo: string | null; rating: number | null; statusChip: string;
   photoSize: number; onChat?: () => void; compact?: boolean;
 }) {
-  const name = d.barbers?.profiles?.full_name ?? tr('Your barber');
+  const name = nameOrFormer(d.barbers?.profiles, tr('Your barber'), 'barber');
   const address = d.barbers?.salon?.address ?? tr('Tangier');
   const pending = d.status === 'pending';
 
@@ -486,7 +487,7 @@ function DeclinedCard({ d, request, onAcceptOffer }: {
   const [fallback, setFallback] = useState<string[]>([]);
   const offered = request.alt_starts ?? [];
   const barberId = d.barbers?.id;
-  const name = d.barbers?.profiles?.full_name ?? tr('Your barber');
+  const name = nameOrFormer(d.barbers?.profiles, tr('Your barber'), 'barber');
 
   useEffect(() => {
     if (offered.length || !barberId) return;
@@ -770,7 +771,7 @@ function CancelledScreen({ d, ticketNo, reason, withdrawn, refunded, onMessage, 
   refunded: boolean;
   onMessage: () => void; onBookAgain: () => void; onBack: () => void;
 }) {
-  const first = (d.barbers?.profiles?.full_name ?? tr('Your barber')).split(' ')[0];
+  const first = (nameOrFormer(d.barbers?.profiles, tr('Your barber'), 'barber')).split(' ')[0];
   const dep = d.deposit_cents / 100;
   const at = new Date(d.starts_at).toTimeString().slice(0, 5);
 
@@ -955,7 +956,7 @@ function RescheduleSheet({ d, visible, onClose, onSent }: {
 function RequestedScreen({ d, request, onBack, onChat }: {
   d: Detail; request: Request; onBack: () => void; onChat: () => void;
 }) {
-  const name = d.barbers?.profiles?.full_name ?? tr('Your barber');
+  const name = nameOrFormer(d.barbers?.profiles, tr('Your barber'), 'barber');
   const dep = d.deposit_cents / 100;
   return (
     <View style={s.outcome}>
@@ -1013,7 +1014,7 @@ function RequestedScreen({ d, request, onBack, onChat }: {
 function MovedScreen({ d, request, ticketNo, onDone }: {
   d: Detail; request: Request; ticketNo: number | null; onDone: () => void;
 }) {
-  const name = d.barbers?.profiles?.full_name ?? tr('Your barber');
+  const name = nameOrFormer(d.barbers?.profiles, tr('Your barber'), 'barber');
   const dep = d.deposit_cents / 100;
   const total = d.price_cents / 100;
   return (
@@ -1113,7 +1114,7 @@ export default function MyBookingScreen({ bookingId, myId, onBack, onQueue, onRe
 
   if (!detail) return <View style={s.screen} />;
   const d = detail;
-  const name = d.barbers?.profiles?.full_name ?? tr('Your barber');
+  const name = nameOrFormer(d.barbers?.profiles, tr('Your barber'), 'barber');
   const pending = d.status === 'pending';
   const declined = isLive && request?.status === 'declined';
   const mine = queue?.find((r) => r.booking_id === d.id) ?? null;

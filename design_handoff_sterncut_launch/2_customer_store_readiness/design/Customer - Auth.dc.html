@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Noto+Kufi+Arabic:wght@400;500;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+html{background:#EBE8E1}
+body{margin:0;background:#EBE8E1;font-family:Inter,system-ui,sans-serif}
+a{color:#E8442E;text-decoration:none}a:hover{color:#C33421}
+.dv-turn{padding:38px 44px 30px;scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#111;color:#fff;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 14px/1.2 Inter,sans-serif;color:#111}
+.dv-note{font:400 12px/1.5 Inter,sans-serif;color:rgba(0,0,0,.55);max-width:760px;margin:0 0 26px}
+.dv-src{font:400 10.5px/1.4 Inter,sans-serif;color:rgba(0,0,0,.55);opacity:.55;margin:-18px 0 22px}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#111;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 Inter,sans-serif;color:rgba(0,0,0,.55)}
+.dv-opt:target .dv-oid{background:#E8442E;color:#fff}
+.dv-next{flex-basis:100%;margin:24px 0 0;font:12px/1.5 Inter,sans-serif;color:rgba(0,0,0,.55)}
+.dv-nav{display:flex;flex-wrap:wrap;gap:6px;padding:12px 44px 0}
+</style>
+</helmet>
+<div style="padding:32px 44px 0">
+<a href="./Index.dc.html" style="font:600 10px Inter,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:rgba(0,0,0,.55)">← All pages</a>
+<div style="font-family:'Playfair Display',serif;font-weight:700;font-size:27px;letter-spacing:.02em;text-transform:uppercase;color:#111;margin:10px 0 0">Customer · Auth & Onboarding</div>
+<div style="font:400 12px Inter,sans-serif;color:rgba(0,0,0,.55);margin:6px 0 0">14 current</div>
+</div>
+<div class="dv-nav"><a href="./Customer - Auth.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:#E8442E;color:#fff;text-decoration:none">Auth</a><a href="./Customer - Home.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111;text-decoration:none">Home</a><a href="./Customer - Explore.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111;text-decoration:none">Explore</a><a href="./Customer - Booking Flow.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111;text-decoration:none">Booking</a><a href="./Customer - Queue.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111;text-decoration:none">Queue</a><a href="./Customer - My Bookings.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111;text-decoration:none">Bookings</a><a href="./Customer - Wallet.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111;text-decoration:none">Wallet</a><a href="./Customer - Messages.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111;text-decoration:none">Messages</a><a href="./Customer - Reviews.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111;text-decoration:none">Reviews</a><a href="./Customer - Profile.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111;text-decoration:none">Profile</a><a href="./Customer - Notifications.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111;text-decoration:none">Notifs</a><a href="./Customer - System States.dc.html" style="font:600 10.5px Inter,sans-serif;letter-spacing:.03em;padding:6px 11px;border-radius:7px;background:rgba(0,0,0,.08);color:#111;text-decoration:none">System</a></div>
+
+<div style="height:1px;background:rgba(0,0,0,.10);margin:20px 0 0"></div>
+<section class="dv-turn" id="F1">
+<div class="dv-thd"><a class="dv-tid" href="#F1">1</a><span class="dv-tname">First open — what the app is for</span></div>
+<p class="dv-note">Three cards before anyone is asked for anything. The queue card comes second on purpose: walking in is what people already do, and it is the one thing Sterncut does that a phone book cannot.</p>
+<div class="dv-opts">
+<div class="dv-opt" id="AUTH-03"><div class="dv-olabel"><a class="dv-oid" href="#AUTH-03">AUTH-03</a>Onboarding 1 — welcome</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#101010;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="position:absolute;inset:0"><image-slot id="ob-hero1" shape="rect" placeholder="Drop a barbershop photo (dark, moody)"></image-slot></div>
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(16,16,16,.55) 0%,rgba(16,16,16,0) 30%,rgba(16,16,16,0) 45%,rgba(16,16,16,.92) 78%,#101010 100%);pointer-events:none"></div>
+  <div style="position:absolute;top:66px;left:0;right:0;display:flex;justify-content:center;pointer-events:none"><span style="font-family:'Playfair Display',serif;font-weight:800;font-size:20px;letter-spacing:.22em;text-transform:uppercase">Sterncut</span></div>
+  <div style="position:absolute;left:26px;right:26px;bottom:44px;display:flex;flex-direction:column;gap:18px">
+    <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:38px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Your chair<br>is waiting.</div>
+    <div style="font-size:14px;line-height:1.5;color:rgba(255,255,255,.65);max-width:290px">Find the best barbers in Tangier, book a slot or take a queue ticket — no bench time.</div>
+    <div style="display:flex;gap:6px"><span style="width:22px;height:5px;border-radius:3px;background:#E8442E"></span><span style="width:5px;height:5px;border-radius:3px;background:rgba(255,255,255,.3)"></span><span style="width:5px;height:5px;border-radius:3px;background:rgba(255,255,255,.3)"></span></div>
+    <a href="#AUTH-05" style="height:54px;border-radius:999px;background:#fff;color:#111;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.1em;text-decoration:none">GET STARTED</a>
+    <span style="text-align:center;font-size:13px;color:rgba(255,255,255,.6)">Already have an account? <span style="color:#fff;font-weight:700">Sign in</span></span>
+  </div>
+</div>
+</x-import><div style="max-width:392px;font:400 10.5px/1.55 Inter,sans-serif;color:rgba(0,0,0,.45);border-left:2px solid rgba(0,0,0,.10);padding-left:10px"><strong style="font-weight:700">Turn 2 · Sterncut — onboarding + full auth redesign (Google / Apple / email)</strong><br>App renamed to <strong>Sterncut</strong>. New flow: onboarding carousel (<a class="dv-oid" href="#AUTH-03">AUTH-03</a>–<a class="dv-oid" href="#AUTH-04">AUTH-04</a>) → welcome with social sign-in (<a class="dv-oid" href="#AUTH-05">AUTH-05</a>) → email sign-in (<a class="dv-oid" href="#AUTH-06">AUTH-06</a>) → register details, entered from onboarding or after a first social login (<a class="dv-oid" href="#AUTH-07">AUTH-07</a>).</div>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#AUTH-05">GET STARTED</a></div></div>
+
+<div class="dv-opt" id="AUTH-04"><div class="dv-olabel"><a class="dv-oid" href="#AUTH-04">AUTH-04</a>Onboarding 2 — queue mode</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="position:absolute;top:66px;left:26px;right:26px;display:flex;justify-content:space-between;align-items:center">
+    <span style="font-family:'Playfair Display',serif;font-weight:800;font-size:16px;letter-spacing:.22em;text-transform:uppercase">Sterncut</span>
+    <span style="font-size:13px;font-weight:600;color:#8A8A85">Skip</span>
+  </div>
+  <div style="position:absolute;top:130px;left:26px;right:26px;display:flex;flex-direction:column;gap:16px">
+    <div style="background:#101010;border-radius:24px;padding:22px 20px;display:flex;flex-direction:column;gap:14px">
+      <span style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:999px;background:#4ADE80"></span><span style="font-size:10px;letter-spacing:.18em;font-weight:700;color:rgba(255,255,255,.55)">LIVE QUEUE</span></span><span style="font-size:10px;letter-spacing:.12em;font-weight:700;color:#fff;background:rgba(255,255,255,.12);border-radius:999px;padding:5px 10px">TICKET Nº 07</span></span>
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:38px;line-height:1;color:#fff;text-transform:uppercase">3 ahead</span>
+      <span style="font-size:13px;color:rgba(255,255,255,.6)">Estimated wait ~40 min</span>
+      <span style="display:flex;gap:5px"><span style="flex:1;height:4px;border-radius:2px;background:#E8442E"></span><span style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.18)"></span><span style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.18)"></span><span style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.18)"></span></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;background:#fff;border-radius:20px;padding:14px 16px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span style="width:38px;height:38px;border-radius:999px;background:rgba(232,68,46,.1);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#E8442E">04</span>
+      <span style="flex:1"><span style="display:block;font-size:14px;font-weight:700">Mehdi K.</span><span style="display:block;font-size:12px;color:#8A8A85">In the chair</span></span>
+      <span style="font-size:10px;letter-spacing:.1em;font-weight:700;color:#fff;background:#E8442E;border-radius:999px;padding:5px 10px">NOW</span>
+    </div>
+  </div>
+  <div style="position:absolute;left:26px;right:26px;bottom:44px;display:flex;flex-direction:column;gap:18px">
+    <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:30px;line-height:1.12;letter-spacing:.02em;text-transform:uppercase">Skip the bench,<br>keep your spot.</div>
+    <div style="font-size:14px;line-height:1.5;color:#8A8A85;max-width:300px">Take a virtual ticket, see exactly who's ahead, and get a ping when you're next.</div>
+    <div style="display:flex;gap:6px"><span style="width:5px;height:5px;border-radius:3px;background:#C9C5BB"></span><span style="width:22px;height:5px;border-radius:3px;background:#E8442E"></span><span style="width:5px;height:5px;border-radius:3px;background:#C9C5BB"></span></div>
+    <span style="height:54px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.1em">NEXT</span>
+  </div>
+</div>
+</x-import>
+</div>
+
+<div class="dv-opt" id="AUTH-08"><div class="dv-olabel"><a class="dv-oid" href="#AUTH-08">AUTH-08</a>Onboarding 3 — booking</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="position:absolute;top:66px;left:26px;right:26px;display:flex;justify-content:space-between;align-items:center">
+    <span style="font-family:'Playfair Display',serif;font-weight:800;font-size:16px;letter-spacing:.22em;text-transform:uppercase">Sterncut</span>
+    <span style="font-size:13px;font-weight:600;color:#8A8A85">Skip</span>
+  </div>
+  <div style="position:absolute;top:130px;left:26px;right:26px;display:flex;flex-direction:column;gap:14px">
+    <div style="background:#fff;border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 22px rgba(0,0,0,.06)">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="width:44px;height:44px;border-radius:999px;background:rgba(232,68,46,.12);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#E8442E">YE</span>
+        <span style="flex:1"><span style="display:block;font-size:14px;font-weight:700">Youssef El Amrani</span><span style="display:block;font-size:12px;color:#8A8A85">Classic Haircut · 60 DH</span></span>
+        <span style="font-size:12px;color:#8A8A85"><span style="color:#111;font-weight:700">4.9 ★</span></span>
+      </div>
+      <div style="display:flex;justify-content:space-between">
+        <span style="display:flex;flex-direction:column;align-items:center;gap:5px"><span style="font-size:10px;color:#8A8A85">We</span><span style="width:34px;height:34px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">22</span></span>
+        <span style="display:flex;flex-direction:column;align-items:center;gap:5px"><span style="font-size:10px;color:#8A8A85">Th</span><span style="width:34px;height:34px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">23</span></span>
+        <span style="display:flex;flex-direction:column;align-items:center;gap:5px"><span style="font-size:10px;color:#8A8A85">Fr</span><span style="width:34px;height:34px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">24</span></span>
+        <span style="display:flex;flex-direction:column;align-items:center;gap:5px"><span style="font-size:10px;color:#8A8A85">Sa</span><span style="width:34px;height:34px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">25</span></span>
+        <span style="display:flex;flex-direction:column;align-items:center;gap:5px"><span style="font-size:10px;color:#8A8A85">Su</span><span style="width:34px;height:34px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">26</span></span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <span style="flex:1;height:40px;border-radius:12px;background:#F2F0EB;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">10:30</span>
+        <span style="flex:1;height:40px;border-radius:12px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">11:00</span>
+        <span style="flex:1;height:40px;border-radius:12px;background:#F2F0EB;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600">11:30</span>
+      </div>
+    </div>
+    <div style="align-self:center;display:flex;align-items:center;gap:8px;background:#101010;border-radius:999px;padding:10px 18px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.4"><path d="M5 12l5 5L20 7"></path></svg><span style="font-size:12px;font-weight:700;color:#fff">Booked — pay at the shop</span></div>
+  </div>
+  <div style="position:absolute;left:26px;right:26px;bottom:44px;display:flex;flex-direction:column;gap:18px">
+    <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:30px;line-height:1.12;letter-spacing:.02em;text-transform:uppercase">Book in three<br>taps. Pay at<br>the shop.</div>
+    <div style="font-size:14px;line-height:1.5;color:#8A8A85;max-width:300px">Pick a service, a specialist and a time — no card needed, cash at the counter.</div>
+    <div style="display:flex;gap:6px"><span style="width:5px;height:5px;border-radius:3px;background:#C9C5BB"></span><span style="width:5px;height:5px;border-radius:3px;background:#C9C5BB"></span><span style="width:22px;height:5px;border-radius:3px;background:#E8442E"></span></div>
+    <a href="#AUTH-05" style="height:54px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.1em;text-decoration:none">GET STARTED</a>
+  </div>
+</div>
+</x-import><div style="max-width:392px;font:400 10.5px/1.55 Inter,sans-serif;color:rgba(0,0,0,.45);border-left:2px solid rgba(0,0,0,.10);padding-left:10px"><strong style="font-weight:700">Turn 3 · Onboarding slide 3 + phone OTP verification</strong><br>Customer-only app: <a class="dv-oid" href="#AUTH-07">AUTH-07</a> lost the barber role picker and now leads into OTP (<a class="dv-oid" href="#AUTH-09">AUTH-09</a>). New booking slide <a class="dv-oid" href="#AUTH-08">AUTH-08</a> completes the onboarding trio.</div>
+</div>
+
+</div>
+</section>
+
+<section class="dv-turn" id="F2">
+<div class="dv-thd"><a class="dv-tid" href="#F2">2</a><span class="dv-tname">Getting in</span></div>
+<p class="dv-note">Phone-first, because a Tangier customer has a number long before he has an email he checks. Email and social are the fallback, not the front door.</p>
+<div class="dv-opts">
+<div class="dv-opt" id="AUTH-05"><div class="dv-olabel"><a class="dv-oid" href="#AUTH-05">AUTH-05</a>Welcome — social sign-in · replaced by <a class="dv-oid" href="./Customer - Store Readiness.dc.html#SGN-01">SGN-01</a></div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#101010;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:46%"><image-slot id="auth-hero" shape="rect" placeholder="Drop a barber-at-work photo"></image-slot></div>
+  <div style="position:absolute;top:0;left:0;right:0;height:48%;background:linear-gradient(180deg,rgba(16,16,16,.35) 0%,rgba(16,16,16,0) 40%,rgba(16,16,16,.6) 82%,#101010 100%);pointer-events:none"></div>
+  <div style="position:absolute;left:26px;right:26px;bottom:44px;display:flex;flex-direction:column;gap:12px">
+    <div style="text-align:center;margin-bottom:10px">
+      <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:38px;letter-spacing:.14em;text-transform:uppercase">Sterncut</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:6px">Book your barber in Tangier</div>
+    </div>
+    <span style="height:54px;border-radius:999px;background:#fff;color:#111;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:600"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.2H12v4.1h6.5c-.1 1.1-.8 2.7-2.4 3.8l3.7 2.9c2.3-2.1 3.7-5.1 3.7-8.6z"></path><path fill="#34A853" d="M12 24c3.2 0 6-1.1 7.9-2.9l-3.7-2.9c-1 .7-2.4 1.2-4.2 1.2-3.2 0-6-2.2-6.9-5.2L1.2 17c1.9 4.1 6 7 10.8 7z"></path><path fill="#FBBC05" d="M5.1 14.2a7 7 0 0 1 0-4.4L1.2 6.8a12 12 0 0 0 0 10.4l3.9-3z"></path><path fill="#EA4335" d="M12 4.7c1.8 0 3 .8 3.7 1.4l3.3-3.2C17.9 1.1 15.2 0 12 0 7.2 0 3.1 2.9 1.2 6.8l3.9 3c.9-3 3.7-5.1 6.9-5.1z"></path></svg>Continue with Google</span>
+    <span style="height:54px;border-radius:999px;background:#1E1E1C;border:1px solid rgba(255,255,255,.16);color:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:600"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M16.7 12.9c0-2.9 2.4-4.3 2.5-4.4-1.4-2-3.5-2.2-4.2-2.3-1.8-.2-3.5 1.1-4.4 1.1-.9 0-2.3-1-3.8-1-2 0-3.8 1.1-4.8 2.9-2 3.5-.5 8.7 1.5 11.6 1 1.4 2.1 3 3.6 2.9 1.4-.1 2-.9 3.7-.9s2.2.9 3.8.9c1.6 0 2.6-1.4 3.5-2.8 1.1-1.6 1.6-3.2 1.6-3.3-.1-.1-3-1.2-3-4.7zM13.9 4.2c.8-.9 1.3-2.2 1.2-3.5-1.1 0-2.5.8-3.3 1.7-.7.8-1.4 2.1-1.2 3.4 1.3.1 2.5-.7 3.3-1.6z"></path></svg>Continue with Apple</span>
+    <div style="display:flex;align-items:center;gap:14px;margin:6px 0"><span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span><span style="font-size:11px;letter-spacing:.15em;font-weight:600;color:rgba(255,255,255,.45)">OR</span><span style="flex:1;height:1px;background:rgba(255,255,255,.14)"></span></div>
+    <span style="height:54px;border-radius:999px;border:1px solid rgba(255,255,255,.25);color:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:600"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="m4 7 8 6 8-6"></path></svg>Continue with email</span>
+    <span style="text-align:center;font-size:11px;line-height:1.6;color:rgba(255,255,255,.4);margin-top:8px">By continuing you agree to Sterncut's <span style="color:rgba(255,255,255,.7)">Terms</span> &amp; <span style="color:rgba(255,255,255,.7)">Privacy Policy</span></span>
+  </div>
+</div>
+</x-import>
+</div>
+
+<div class="dv-opt" id="AUTH-06"><div class="dv-olabel"><a class="dv-oid" href="#AUTH-06">AUTH-06</a>Sign in — email</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:66px 26px 0;display:flex;flex-direction:column;gap:16px">
+    <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+    <div style="margin-top:14px">
+      <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:32px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Welcome<br>back.</div>
+      <div style="font-size:14px;color:#8A8A85;margin-top:10px">Sign in to your Sterncut account.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px">
+      <div style="background:#fff;border-radius:16px;padding:10px 18px;box-shadow:0 4px 12px rgba(0,0,0,.04)"><span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#B9B6AD">EMAIL</span><span style="display:block;font-size:14px;font-weight:500;margin-top:3px">amine@gmail.com</span></div>
+      <div style="display:flex;align-items:center;background:#fff;border-radius:16px;padding:10px 18px;box-shadow:0 4px 12px rgba(0,0,0,.04)"><span style="flex:1"><span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#B9B6AD">PASSWORD</span><span style="display:block;font-size:14px;font-weight:500;letter-spacing:.2em;margin-top:3px">••••••••</span></span><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#B9B6AD" stroke-width="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg></div>
+      <a href="#AUTH-12" style="align-self:flex-end;font-size:12px;font-weight:600;color:#E8442E;text-decoration:none">Forgot password?</a>
+    </div>
+    <a href="./Customer - Home.dc.html#HOME-01" style="height:54px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.1em;text-decoration:none">SIGN IN</a>
+    <div style="display:flex;align-items:center;gap:14px"><span style="flex:1;height:1px;background:#E5E2DB"></span><span style="font-size:11px;letter-spacing:.15em;font-weight:600;color:#B9B6AD">OR</span><span style="flex:1;height:1px;background:#E5E2DB"></span></div>
+    <div style="display:flex;gap:12px">
+      <span style="flex:1;height:52px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;gap:9px;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.05)"><svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.2H12v4.1h6.5c-.1 1.1-.8 2.7-2.4 3.8l3.7 2.9c2.3-2.1 3.7-5.1 3.7-8.6z"></path><path fill="#34A853" d="M12 24c3.2 0 6-1.1 7.9-2.9l-3.7-2.9c-1 .7-2.4 1.2-4.2 1.2-3.2 0-6-2.2-6.9-5.2L1.2 17c1.9 4.1 6 7 10.8 7z"></path><path fill="#FBBC05" d="M5.1 14.2a7 7 0 0 1 0-4.4L1.2 6.8a12 12 0 0 0 0 10.4l3.9-3z"></path><path fill="#EA4335" d="M12 4.7c1.8 0 3 .8 3.7 1.4l3.3-3.2C17.9 1.1 15.2 0 12 0 7.2 0 3.1 2.9 1.2 6.8l3.9 3c.9-3 3.7-5.1 6.9-5.1z"></path></svg>Google</span>
+      <span style="flex:1;height:52px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;gap:9px;font-size:13px;font-weight:600"><svg width="17" height="17" viewBox="0 0 24 24" fill="#fff"><path d="M16.7 12.9c0-2.9 2.4-4.3 2.5-4.4-1.4-2-3.5-2.2-4.2-2.3-1.8-.2-3.5 1.1-4.4 1.1-.9 0-2.3-1-3.8-1-2 0-3.8 1.1-4.8 2.9-2 3.5-.5 8.7 1.5 11.6 1 1.4 2.1 3 3.6 2.9 1.4-.1 2-.9 3.7-.9s2.2.9 3.8.9c1.6 0 2.6-1.4 3.5-2.8 1.1-1.6 1.6-3.2 1.6-3.3-.1-.1-3-1.2-3-4.7zM13.9 4.2c.8-.9 1.3-2.2 1.2-3.5-1.1 0-2.5.8-3.3 1.7-.7.8-1.4 2.1-1.2 3.4 1.3.1 2.5-.7 3.3-1.6z"></path></svg>Apple</span>
+    </div>
+    <span style="text-align:center;font-size:12px;color:#8A8A85;margin-top:6px">New to Sterncut? <span style="color:#E8442E;font-weight:600">Create an account</span></span>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="./Customer - Home.dc.html#HOME-01">SIGN IN</a></div></div>
+
+<div class="dv-opt" id="AUTH-07"><div class="dv-olabel"><a class="dv-oid" href="#AUTH-07">AUTH-07</a>Register — your details · replaced by <a class="dv-oid" href="./Customer - Store Readiness.dc.html#SGN-02">SGN-02</a></div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:66px 26px 0;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#8A8A85">STEP 2 OF 3</span>
+    </div>
+    <div style="display:flex;gap:6px"><span style="flex:1;height:4px;border-radius:2px;background:#E8442E"></span><span style="flex:1;height:4px;border-radius:2px;background:#E8442E"></span><span style="flex:1;height:4px;border-radius:2px;background:#DDD9CF"></span></div>
+    <div style="margin-top:6px">
+      <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:32px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Tell us about<br>yourself.</div>
+      <div style="font-size:14px;color:#8A8A85;margin-top:10px">Signed in with Google as <span style="color:#111;font-weight:600">amine@gmail.com</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:6px">
+      <div style="background:#fff;border-radius:16px;padding:10px 18px;box-shadow:0 4px 12px rgba(0,0,0,.04)"><span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#B9B6AD">FULL NAME</span><span style="display:block;font-size:14px;font-weight:500;margin-top:3px">Amine Berrada</span></div>
+      <div style="background:#fff;border-radius:16px;padding:10px 18px;box-shadow:0 4px 12px rgba(0,0,0,.04)"><span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#B9B6AD">PHONE</span><span style="display:block;font-size:14px;font-weight:500;margin-top:3px;color:#B9B6AD">+212 6…</span></div>
+    </div>
+    <div style="font-size:12px;line-height:1.5;color:#B9B6AD">We'll text a verification code to this number.</div>
+    <a href="#AUTH-09" style="height:54px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.1em;margin-top:8px;text-decoration:none">CONTINUE</a>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#AUTH-09">CONTINUE</a></div></div>
+
+<div class="dv-opt" id="AUTH-09"><div class="dv-olabel"><a class="dv-oid" href="#AUTH-09">AUTH-09</a>Verify phone — OTP</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" keyboard="{{ true }}" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:66px 26px 0;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#8A8A85">STEP 3 OF 3</span>
+    </div>
+    <div style="display:flex;gap:6px"><span style="flex:1;height:4px;border-radius:2px;background:#E8442E"></span><span style="flex:1;height:4px;border-radius:2px;background:#E8442E"></span><span style="flex:1;height:4px;border-radius:2px;background:#E8442E"></span></div>
+    <div style="margin-top:6px">
+      <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:32px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Check your<br>phone.</div>
+      <div style="font-size:14px;color:#8A8A85;margin-top:10px;line-height:1.5">We sent a 4-digit code to <span style="color:#111;font-weight:600">+212 661 234 567</span> <span style="color:#E8442E;font-weight:600">Edit</span></div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:10px">
+      <span style="width:64px;height:72px;border-radius:18px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;box-shadow:0 4px 12px rgba(0,0,0,.05);font-variant-numeric:tabular-nums">7</span>
+      <span style="width:64px;height:72px;border-radius:18px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;box-shadow:0 4px 12px rgba(0,0,0,.05);font-variant-numeric:tabular-nums">4</span>
+      <span style="width:64px;height:72px;border-radius:18px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;box-shadow:0 4px 12px rgba(0,0,0,.05);outline:2px solid #101010;outline-offset:-2px"><span style="width:2px;height:28px;background:#111"></span></span>
+      <span style="width:64px;height:72px;border-radius:18px;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.05)"></span>
+    </div>
+    <div style="text-align:center;font-size:13px;color:#8A8A85;margin-top:4px">Resend code in <span style="color:#111;font-weight:700;font-variant-numeric:tabular-nums">0:42</span></div>
+    <a href="#AUTH-11" style="height:54px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.1em;margin-top:6px;opacity:.45;text-decoration:none">VERIFY</a>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#AUTH-11">VERIFY</a></div></div>
+
+<div class="dv-opt" id="AUTH-11"><div class="dv-olabel"><a class="dv-oid" href="#AUTH-11">AUTH-11</a>Set a password</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:66px 24px 0;display:flex;flex-direction:column;gap:15px">
+    <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+    <div style="margin-top:8px">
+      <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:30px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Set a<br>password.</div>
+      <div style="font-size:13px;color:#8A8A85;margin-top:10px;line-height:1.5">So you can sign in without Google. Your Google link stays connected.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px;margin-top:4px">
+      <div style="display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:11px 18px;box-shadow:0 4px 12px rgba(0,0,0,.04);outline:2px solid #101010;outline-offset:-2px">
+        <span style="flex:1"><span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#B9B6AD">NEW PASSWORD</span><span style="display:block;font-size:14px;font-weight:500;letter-spacing:.2em;margin-top:3px">•••••••••<span style="display:inline-block;width:2px;height:15px;background:#111;vertical-align:-3px;margin-left:2px;letter-spacing:0"></span></span></span>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#B9B6AD" stroke-width="1.8" style="flex:none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:11px 18px;box-shadow:0 4px 12px rgba(0,0,0,.04)">
+        <span style="flex:1"><span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#B9B6AD">CONFIRM PASSWORD</span><span style="display:block;font-size:14px;font-weight:500;margin-top:3px;color:#B9B6AD;letter-spacing:0">Repeat it</span></span>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#B9B6AD" stroke-width="1.8" style="flex:none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="flex:1;height:5px;border-radius:3px;background:#E8442E"></span>
+      <span style="flex:1;height:5px;border-radius:3px;background:#E8442E"></span>
+      <span style="flex:1;height:5px;border-radius:3px;background:#DDD9CF"></span>
+      <span style="font-size:11px;font-weight:700;color:#E8442E;flex:none">Fair</span>
+    </div>
+    <div style="background:#fff;border-radius:20px;padding:15px 18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,.04)">
+      <span style="display:flex;align-items:center;gap:9px"><span style="width:18px;height:18px;border-radius:999px;background:rgba(74,222,128,.2);display:flex;align-items:center;justify-content:center;flex:none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="3.4"><path d="M5 12l5 5L20 7"></path></svg></span><span style="font-size:12px;color:#5c5c58">At least 8 characters</span></span>
+      <span style="display:flex;align-items:center;gap:9px"><span style="width:18px;height:18px;border-radius:999px;background:rgba(74,222,128,.2);display:flex;align-items:center;justify-content:center;flex:none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="3.4"><path d="M5 12l5 5L20 7"></path></svg></span><span style="font-size:12px;color:#5c5c58">One number</span></span>
+      <span style="display:flex;align-items:center;gap:9px"><span style="width:18px;height:18px;border-radius:999px;border:1.5px solid #D8D4CA;flex:none"></span><span style="font-size:12px;color:#B9B6AD">One capital letter</span></span>
+    </div>
+    <a href="./Customer - Home.dc.html#HOME-01" style="height:54px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.1em;opacity:.45;text-decoration:none">SAVE PASSWORD</a>
+  </div>
+</div>
+</x-import><div style="max-width:392px;font:400 10.5px/1.55 Inter,sans-serif;color:rgba(0,0,0,.45);border-left:2px solid rgba(0,0,0,.10);padding-left:10px"><strong style="font-weight:700">Turn 5 · Set a password · Help article · Arabic RTL</strong><br>The three open threads closed out: <a class="dv-oid" href="#AUTH-11">AUTH-11</a> set-password from <a class="dv-oid" href="#AUTH-10">AUTH-10</a>, <a class="dv-oid" href="./Customer - Profile.dc.html#PRO-11">PRO-11</a> the deposits article from <a class="dv-oid" href="./Owner - Services.dc.html#OSV-05">OSV-05</a>, and <a class="dv-oid" href="./Customer - Home.dc.html#HOME-02">HOME-02</a> Home mirrored right-to-left per the note in <a class="dv-oid" href="./Barber - Clients.dc.html#BCL-04">BCL-04</a> — Noto Kufi Arabic replaces Playfair for display type, prices stay in DH.</div>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="./Customer - Home.dc.html#HOME-01">SAVE PASSWORD</a></div></div>
+
+</div>
+</section>
+
+<section class="dv-turn" id="F3">
+<div class="dv-thd"><a class="dv-tid" href="#F3">3</a><span class="dv-tname">When the password goes wrong</span></div>
+<div class="dv-opts">
+<div class="dv-opt" id="AUTH-12"><div class="dv-olabel"><a class="dv-oid" href="#AUTH-12">AUTH-12</a>Forgot password</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:66px 24px 0;display:flex;flex-direction:column;gap:15px">
+    <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+    <div style="margin-top:10px">
+      <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:32px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Forgot your<br>password?</div>
+      <div style="font-size:13px;color:#8A8A85;margin-top:10px;line-height:1.5">Enter the email on your Sterncut account and we'll send a reset link.</div>
+    </div>
+    <div style="background:#fff;border-radius:16px;padding:11px 18px;box-shadow:0 4px 12px rgba(0,0,0,.04);outline:2px solid #101010;outline-offset:-2px;margin-top:6px">
+      <span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#B9B6AD">EMAIL</span>
+      <span style="display:block;font-size:14px;font-weight:500;margin-top:3px">amine@gmail.com<span style="display:inline-block;width:2px;height:15px;background:#111;vertical-align:-3px;margin-left:2px"></span></span>
+    </div>
+    <a href="#AUTH-13" style="height:54px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.1em;text-decoration:none">SEND RESET LINK</a>
+    <div style="display:flex;align-items:center;gap:14px;margin:2px 0"><span style="flex:1;height:1px;background:#E5E2DB"></span><span style="font-size:11px;letter-spacing:.15em;font-weight:600;color:#B9B6AD">OR</span><span style="flex:1;height:1px;background:#E5E2DB"></span></div>
+    <span style="height:52px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.05)"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.2H12v4.1h6.5c-.1 1.1-.8 2.7-2.4 3.8l3.7 2.9c2.3-2.1 3.7-5.1 3.7-8.6z"></path><path fill="#34A853" d="M12 24c3.2 0 6-1.1 7.9-2.9l-3.7-2.9c-1 .7-2.4 1.2-4.2 1.2-3.2 0-6-2.2-6.9-5.2L1.2 17c1.9 4.1 6 7 10.8 7z"></path><path fill="#FBBC05" d="M5.1 14.2a7 7 0 0 1 0-4.4L1.2 6.8a12 12 0 0 0 0 10.4l3.9-3z"></path><path fill="#EA4335" d="M12 4.7c1.8 0 3 .8 3.7 1.4l3.3-3.2C17.9 1.1 15.2 0 12 0 7.2 0 3.1 2.9 1.2 6.8l3.9 3c.9-3 3.7-5.1 6.9-5.1z"></path></svg>Sign in with Google instead</span>
+    <div style="display:flex;align-items:flex-start;gap:9px;background:#fff;border-radius:16px;padding:13px 15px;box-shadow:0 4px 12px rgba(0,0,0,.04);margin-top:2px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8A8A85" stroke-width="2" style="margin-top:1px;flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+      <span style="font-size:12px;line-height:1.5;color:#5c5c58">No email on your account? Contact support and we'll verify you by phone.</span>
+    </div>
+  </div>
+</div>
+</x-import><div style="max-width:392px;font:400 10.5px/1.55 Inter,sans-serif;color:rgba(0,0,0,.45);border-left:2px solid rgba(0,0,0,.10);padding-left:10px"><strong style="font-weight:700">Turn 6 · Forgot password — three steps</strong><br>From the "Forgot password?" link in <a class="dv-oid" href="./Owner - Barbers.dc.html#OBR-02">OBR-02</a>: <a class="dv-oid" href="#AUTH-12">AUTH-12</a> ask for the email (offers the Google shortcut instead), <a class="dv-oid" href="#AUTH-13">AUTH-13</a> the check-your-inbox wait state, <a class="dv-oid" href="#AUTH-14">AUTH-14</a> choose a new password, reusing the meter from <a class="dv-oid" href="#AUTH-11">AUTH-11</a>.</div>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#AUTH-13">SEND RESET LINK</a></div></div>
+
+<div class="dv-opt" id="AUTH-13"><div class="dv-olabel"><a class="dv-oid" href="#AUTH-13">AUTH-13</a>Check your inbox</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:0 26px;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:18px;text-align:center">
+    <span style="width:72px;height:72px;border-radius:999px;background:rgba(232,68,46,.12);display:flex;align-items:center;justify-content:center"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="m4 7 8 6 8-6"></path></svg></span>
+    <div>
+      <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:28px;letter-spacing:.02em;text-transform:uppercase">Check your<br>inbox</div>
+      <div style="font-size:13px;color:#8A8A85;margin-top:10px;max-width:280px;line-height:1.5">We sent a reset link to <span style="color:#111;font-weight:600">amine@gmail.com</span>. It expires in 30 minutes.</div>
+    </div>
+    <div style="width:100%;background:#fff;border-radius:20px;padding:16px 18px;display:flex;flex-direction:column;gap:11px;box-shadow:0 4px 12px rgba(0,0,0,.05);text-align:left">
+      <span style="display:flex;align-items:center;gap:10px"><span style="width:22px;height:22px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">1</span><span style="font-size:12px;color:#5c5c58">Open the mail from Sterncut</span></span>
+      <span style="display:flex;align-items:center;gap:10px"><span style="width:22px;height:22px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">2</span><span style="font-size:12px;color:#5c5c58">Tap the reset link</span></span>
+      <span style="display:flex;align-items:center;gap:10px"><span style="width:22px;height:22px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">3</span><span style="font-size:12px;color:#5c5c58">Choose a new password</span></span>
+    </div>
+    <a href="#AUTH-14" style="width:100%;height:54px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.1em;text-decoration:none">OPEN MAIL APP</a>
+    <span style="font-size:13px;color:#8A8A85">Didn't get it? <span style="color:#B9B6AD;font-weight:600">Resend in 0:42</span></span>
+    <span style="font-size:13px;font-weight:600;color:#E8442E">Use a different email</span>
+  </div>
+</div>
+</x-import>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="#AUTH-14">OPEN MAIL APP</a></div></div>
+
+<div class="dv-opt" id="AUTH-14"><div class="dv-olabel"><a class="dv-oid" href="#AUTH-14">AUTH-14</a>New password</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:66px 24px 0;display:flex;flex-direction:column;gap:15px">
+    <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.8"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></span>
+    <div style="margin-top:8px">
+      <div style="font-family:'Playfair Display',serif;font-weight:700;font-size:30px;line-height:1.1;letter-spacing:.02em;text-transform:uppercase">Choose a new<br>password.</div>
+      <div style="font-size:13px;color:#8A8A85;margin-top:10px;line-height:1.5">Resetting for <span style="color:#111;font-weight:600">amine@gmail.com</span>. You'll be signed out on other devices.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px;margin-top:4px">
+      <div style="display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:11px 18px;box-shadow:0 4px 12px rgba(0,0,0,.04)">
+        <span style="flex:1"><span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#B9B6AD">NEW PASSWORD</span><span style="display:block;font-size:14px;font-weight:500;letter-spacing:.2em;margin-top:3px">••••••••••••</span></span>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#B9B6AD" stroke-width="1.8" style="flex:none"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:11px 18px;box-shadow:0 4px 12px rgba(0,0,0,.04);outline:2px solid #101010;outline-offset:-2px">
+        <span style="flex:1"><span style="display:block;font-size:10px;letter-spacing:.12em;font-weight:700;color:#B9B6AD">CONFIRM PASSWORD</span><span style="display:block;font-size:14px;font-weight:500;letter-spacing:.2em;margin-top:3px">••••••••••••<span style="display:inline-block;width:2px;height:15px;background:#111;vertical-align:-3px;margin-left:2px;letter-spacing:0"></span></span></span>
+        <span style="width:22px;height:22px;border-radius:999px;background:rgba(74,222,128,.2);display:flex;align-items:center;justify-content:center;flex:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="flex:1;height:5px;border-radius:3px;background:#16A34A"></span>
+      <span style="flex:1;height:5px;border-radius:3px;background:#16A34A"></span>
+      <span style="flex:1;height:5px;border-radius:3px;background:#16A34A"></span>
+      <span style="font-size:11px;font-weight:700;color:#16A34A;flex:none">Strong</span>
+    </div>
+    <div style="background:#fff;border-radius:20px;padding:15px 18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 4px 12px rgba(0,0,0,.04)">
+      <span style="display:flex;align-items:center;gap:9px"><span style="width:18px;height:18px;border-radius:999px;background:rgba(74,222,128,.2);display:flex;align-items:center;justify-content:center;flex:none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="3.4"><path d="M5 12l5 5L20 7"></path></svg></span><span style="font-size:12px;color:#5c5c58">At least 8 characters</span></span>
+      <span style="display:flex;align-items:center;gap:9px"><span style="width:18px;height:18px;border-radius:999px;background:rgba(74,222,128,.2);display:flex;align-items:center;justify-content:center;flex:none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="3.4"><path d="M5 12l5 5L20 7"></path></svg></span><span style="font-size:12px;color:#5c5c58">One number</span></span>
+      <span style="display:flex;align-items:center;gap:9px"><span style="width:18px;height:18px;border-radius:999px;background:rgba(74,222,128,.2);display:flex;align-items:center;justify-content:center;flex:none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="3.4"><path d="M5 12l5 5L20 7"></path></svg></span><span style="font-size:12px;color:#5c5c58">One capital letter</span></span>
+    </div>
+    <a href="./Customer - Home.dc.html#HOME-01" style="height:54px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.1em;text-decoration:none">RESET &amp; SIGN IN</a>
+  </div>
+</div>
+</x-import><div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="./Customer - Home.dc.html#HOME-01">RESET &amp; SIGN …</a></div></div>
+
+<div class="dv-opt" id="AUTH-10"><div class="dv-olabel"><a class="dv-oid" href="#AUTH-10">AUTH-10</a>Linked accounts</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;overflow:hidden">
+  <div style="padding:66px 20px 0;display:flex;flex-direction:column;gap:13px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:40px;height:40px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.06)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-family:'Playfair Display',serif;font-weight:700;font-size:18px;letter-spacing:.04em;text-transform:uppercase">Linked accounts</span>
+      <span style="width:40px"></span>
+    </div>
+    <span style="font-size:12px;line-height:1.5;color:#8A8A85">Sign in to Sterncut with any of these. Keep at least one connected.</span>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:2px">
+      <div style="display:flex;align-items:center;gap:13px;background:#fff;border-radius:20px;padding:15px 16px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+        <span style="width:40px;height:40px;border-radius:11px;background:#F2F0EB;display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.2H12v4.1h6.5c-.1 1.1-.8 2.7-2.4 3.8l3.7 2.9c2.3-2.1 3.7-5.1 3.7-8.6z"></path><path fill="#34A853" d="M12 24c3.2 0 6-1.1 7.9-2.9l-3.7-2.9c-1 .7-2.4 1.2-4.2 1.2-3.2 0-6-2.2-6.9-5.2L1.2 17c1.9 4.1 6 7 10.8 7z"></path><path fill="#FBBC05" d="M5.1 14.2a7 7 0 0 1 0-4.4L1.2 6.8a12 12 0 0 0 0 10.4l3.9-3z"></path><path fill="#EA4335" d="M12 4.7c1.8 0 3 .8 3.7 1.4l3.3-3.2C17.9 1.1 15.2 0 12 0 7.2 0 3.1 2.9 1.2 6.8l3.9 3c.9-3 3.7-5.1 6.9-5.1z"></path></svg></span>
+        <span style="flex:1"><span style="display:flex;align-items:center;gap:7px"><span style="font-size:14px;font-weight:700">Google</span><span style="font-size:9px;letter-spacing:.1em;font-weight:700;color:#15803D;background:rgba(74,222,128,.18);border-radius:6px;padding:3px 7px">PRIMARY</span></span><span style="display:block;font-size:11px;color:#8A8A85;margin-top:3px">amine@gmail.com · since Jul 2026</span></span>
+        <span style="font-size:12px;font-weight:600;color:#B9B6AD;flex:none">Unlink</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:13px;background:#fff;border-radius:20px;padding:15px 16px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+        <span style="width:40px;height:40px;border-radius:11px;background:#101010;display:flex;align-items:center;justify-content:center;flex:none"><svg width="19" height="19" viewBox="0 0 24 24" fill="#fff"><path d="M16.7 12.9c0-2.9 2.4-4.3 2.5-4.4-1.4-2-3.5-2.2-4.2-2.3-1.8-.2-3.5 1.1-4.4 1.1-.9 0-2.3-1-3.8-1-2 0-3.8 1.1-4.8 2.9-2 3.5-.5 8.7 1.5 11.6 1 1.4 2.1 3 3.6 2.9 1.4-.1 2-.9 3.7-.9s2.2.9 3.8.9c1.6 0 2.6-1.4 3.5-2.8 1.1-1.6 1.6-3.2 1.6-3.3-.1-.1-3-1.2-3-4.7zM13.9 4.2c.8-.9 1.3-2.2 1.2-3.5-1.1 0-2.5.8-3.3 1.7-.7.8-1.4 2.1-1.2 3.4 1.3.1 2.5-.7 3.3-1.6z"></path></svg></span>
+        <span style="flex:1"><span style="display:block;font-size:14px;font-weight:700">Apple</span><span style="display:block;font-size:11px;color:#8A8A85;margin-top:3px">Not connected</span></span>
+        <a href="./Customer - Home.dc.html#HOME-01" style="height:36px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;padding:0 15px;font-size:11px;font-weight:700;letter-spacing:.06em;flex:none;text-decoration:none">CONNECT</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:13px;background:#fff;border-radius:20px;padding:15px 16px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+        <span style="width:40px;height:40px;border-radius:11px;background:#F2F0EB;display:flex;align-items:center;justify-content:center;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.8"><rect x="7" y="2" width="10" height="20" rx="3"></rect><path d="M11 18h2"></path></svg></span>
+        <span style="flex:1"><span style="display:flex;align-items:center;gap:7px"><span style="font-size:14px;font-weight:700">Phone</span><span style="display:flex;align-items:center;gap:4px;background:rgba(74,222,128,.16);border-radius:6px;padding:3px 7px"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg><span style="font-size:9px;letter-spacing:.08em;font-weight:700;color:#15803D">VERIFIED</span></span></span><span style="display:block;font-size:11px;color:#8A8A85;margin-top:3px">+212 661 234 567</span></span>
+        <span style="font-size:12px;font-weight:600;color:#E8442E;flex:none">Change</span>
+      </div>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#8A8A85;margin-top:4px">SIGN-IN SECURITY</span>
+    <div style="background:#fff;border-radius:24px;padding:4px 18px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #EFECE4"><span style="flex:1"><span style="display:block;font-size:14px;font-weight:600">Set a password</span><span style="display:block;font-size:11px;color:#8A8A85;margin-top:2px">So you can sign in without Google</span></span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B9B6AD" stroke-width="2"><path d="M9 6l6 6-6 6"></path></svg></div>
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 0"><span style="flex:1"><span style="display:block;font-size:14px;font-weight:600">Face ID to open Sterncut</span><span style="display:block;font-size:11px;color:#8A8A85;margin-top:2px">Protects your wallet and bookings</span></span><span style="width:42px;height:26px;border-radius:999px;background:#DDD9CF;display:flex;align-items:center;padding:0 3px;flex:none"><span style="width:20px;height:20px;border-radius:999px;background:#fff"></span></span></div>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#8A8A85;margin-top:4px">WHERE YOU'RE SIGNED IN</span>
+    <div style="background:#fff;border-radius:24px;padding:4px 18px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #EFECE4"><span style="flex:1"><span style="display:block;font-size:14px;font-weight:600">iPhone 15 · Tangier</span><span style="display:block;font-size:11px;color:#8A8A85;margin-top:2px">This device · active now</span></span><span style="width:8px;height:8px;border-radius:999px;background:#4ADE80;flex:none"></span></div>
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 0"><span style="flex:1"><span style="display:block;font-size:14px;font-weight:600">iPad · Tangier</span><span style="display:block;font-size:11px;color:#8A8A85;margin-top:2px">Last active Jul 12</span></span><span style="font-size:12px;font-weight:600;color:#E8442E;flex:none">Sign out</span></div>
+    </div>
+  </div>
+</div>
+</x-import><div style="max-width:392px;font:400 10.5px/1.55 Inter,sans-serif;color:rgba(0,0,0,.45);border-left:2px solid rgba(0,0,0,.10);padding-left:10px"><strong style="font-weight:700">Turn 4 · Linked accounts</strong><br>Behind the Linked accounts row in <a class="dv-oid" href="./Owner - Services.dc.html#OSV-06">OSV-06</a> — Google connected as the sign-in method (so it can't be unlinked alone), Apple and phone available, plus password setup and session list.</div>
+<div style="font:400 10.5px/1.5 Inter,sans-serif;color:rgba(0,0,0,.45);max-width:392px;padding-top:2px">Leads to · <a class="dv-oid" href="./Customer - Home.dc.html#HOME-01">CONNECT</a></div></div>
+
+</div>
+</section>
+
+<section class="dv-turn" id="ARCHIVE" style="opacity:.62;border-top:1px solid rgba(0,0,0,.10);margin-top:14px">
+<div class="dv-thd"><a class="dv-tid" href="#ARCHIVE">◦</a><span class="dv-tname">Earlier versions · replaced by the screens above</span></div>
+<p class="dv-note">Kept for the record. Each of these was superseded by a later screen on this page &mdash; the replacement is named on each one. Nothing here is current.</p>
+<div class="dv-opts">
+<div class="dv-opt" id="AUTH-01"><div class="dv-olabel"><span style="font:700 9px Inter,sans-serif;letter-spacing:.1em;background:rgba(0,0,0,.10);color:inherit;border-radius:4px;padding:3px 6px">REPLACED BY AUTH-06</span><a class="dv-oid" href="#AUTH-01">AUTH-01</a>Sign in</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;display:flex;flex-direction:column;justify-content:center;overflow:hidden">
+  <div style="padding:0 26px;display:flex;flex-direction:column;gap:14px">
+    <div style="text-align:center;margin-bottom:12px">
+      <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:38px;letter-spacing:.12em;text-transform:uppercase">Sterncut</div>
+      <div style="font-size:14px;color:#8A8A85;margin-top:6px">Book your barber in Tangier</div>
+    </div>
+    <div style="display:flex;background:#fff;border-radius:999px;padding:4px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span style="flex:1;text-align:center;padding:11px 0;border-radius:999px;background:#101010;color:#fff;font-size:13px;font-weight:700">Sign in</span>
+      <span style="flex:1;text-align:center;padding:11px 0;border-radius:999px;color:#8A8A85;font-size:13px;font-weight:600">Create account</span>
+    </div>
+    <span style="display:flex;align-items:center;background:#fff;border-radius:16px;height:52px;padding:0 18px;font-size:14px;color:#8A8A85;box-shadow:0 4px 12px rgba(0,0,0,.04)">Email</span>
+    <span style="display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:16px;height:52px;padding:0 18px;font-size:14px;color:#8A8A85;box-shadow:0 4px 12px rgba(0,0,0,.04)">Password<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#B9B6AD" stroke-width="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+    <span style="align-self:flex-end;font-size:12px;font-weight:600;color:#E8442E">Forgot password?</span>
+    <span style="height:54px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.1em">SIGN IN</span>
+    <span style="text-align:center;font-size:12px;color:#8A8A85;margin-top:8px">New here? <span style="color:#E8442E;font-weight:600">Create an account</span></span>
+  </div>
+</div>
+</x-import></div>
+
+<div class="dv-opt" id="AUTH-02"><div class="dv-olabel"><span style="font:700 9px Inter,sans-serif;letter-spacing:.1em;background:rgba(0,0,0,.10);color:inherit;border-radius:4px;padding:3px 6px">REPLACED BY AUTH-07</span><a class="dv-oid" href="#AUTH-02">AUTH-02</a>Create account</div>
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="422px,894px">
+<div style="position:relative;width:100%;height:100%;background:#F2F0EB;font-family:Inter,sans-serif;color:#111;display:flex;flex-direction:column;justify-content:center;overflow:hidden">
+  <div style="padding:0 26px;display:flex;flex-direction:column;gap:13px">
+    <div style="text-align:center;margin-bottom:10px">
+      <div style="font-family:'Playfair Display',serif;font-weight:800;font-size:38px;letter-spacing:.12em;text-transform:uppercase">Sterncut</div>
+      <div style="font-size:14px;color:#8A8A85;margin-top:6px">Book your barber in Tangier</div>
+    </div>
+    <div style="display:flex;background:#fff;border-radius:999px;padding:4px;box-shadow:0 4px 12px rgba(0,0,0,.05)">
+      <span style="flex:1;text-align:center;padding:11px 0;border-radius:999px;color:#8A8A85;font-size:13px;font-weight:600">Sign in</span>
+      <span style="flex:1;text-align:center;padding:11px 0;border-radius:999px;background:#101010;color:#fff;font-size:13px;font-weight:700">Create account</span>
+    </div>
+    <span style="display:flex;align-items:center;background:#fff;border-radius:16px;height:50px;padding:0 18px;font-size:14px;color:#111;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,.04)">amine@gmail.com</span>
+    <span style="display:flex;align-items:center;background:#fff;border-radius:16px;height:50px;padding:0 18px;font-size:14px;color:#111;font-weight:500;letter-spacing:.2em;box-shadow:0 4px 12px rgba(0,0,0,.04)">••••••••</span>
+    <span style="display:flex;align-items:center;background:#fff;border-radius:16px;height:50px;padding:0 18px;font-size:14px;color:#111;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,.04)">Amine Berrada</span>
+    <span style="display:flex;align-items:center;background:#fff;border-radius:16px;height:50px;padding:0 18px;font-size:14px;color:#8A8A85;box-shadow:0 4px 12px rgba(0,0,0,.04)">Phone</span>
+    <span style="text-align:center;font-size:11px;letter-spacing:.15em;font-weight:700;color:#8A8A85;margin-top:4px">I AM A…</span>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <span style="border-radius:999px;background:#101010;color:#fff;font-size:13px;font-weight:600;padding:10px 22px">Customer</span>
+      <span style="border-radius:999px;background:#fff;color:#5c5c58;font-size:13px;font-weight:600;padding:10px 22px">Barber</span>
+    </div>
+    <span style="height:54px;border-radius:999px;background:#101010;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.1em;margin-top:4px">CREATE ACCOUNT</span>
+  </div>
+</div>
+</x-import></div>
+
+</div>
+</section>
+
+
+
+</x-dc>
+</body>
+</html>

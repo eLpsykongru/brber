@@ -6,9 +6,11 @@ import { Note, Serif, TAB_INSET } from '../components/dark';
 import { CapHitSheet, FloatCapMeter, askCollection, isCapError, useFloatStatus } from '../components/FloatCap';
 import { TopUpAttempt, TopUpFailedSheet } from '../components/Trouble';
 import { OPS_PHONE } from './BarberSupportScreens';
+import ExportSheet from '../components/ExportSheet';
+import { fileRange, walletActivityHtml } from '../lib/exportPdf';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, font, inter, radius, sp, TOP_INSET } from '../theme';
-import { loc, tr, lang } from '../lib/i18n';
+import { colors, dark as D, inter, radius, sp, TOP_INSET } from '../theme';
+import { loc, tr, lang, trn, ltr } from '../lib/i18n';
 
 // REAL since 0022: float + activity read wallet_transactions; Top-up calls the
 // agent_cash_topup RPC (owner-only, phone lookup, no commission — decided 2026-07-19).
@@ -69,6 +71,7 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
   const [hidden, setHidden] = useState(false);
   const [txs, setTxs] = useState<Tx[] | null>(null);
   const [sheet, setSheet] = useState(false);
+  const [exporting, setExporting] = useState(false);   // EXP-01
   // 10c — the last attempt, kept only long enough to tell him nothing moved
   const [failed, setFailed] = useState<TopUpAttempt | null>(null);
   // §6.1 — the key is minted once per attempt and reused by every retry of it,
@@ -181,11 +184,13 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
         <View style={s.rowCenter}>
           <Text style={s.section}>{tr('Activity')}</Text>
           <View style={s.grow} />
-          <Pressable onPress={() => Alert.alert(tr('Export'), tr('Coming soon — see BACKLOG.md'))} accessibilityLabel={tr('Export')}
-            style={({ pressed }) => [s.rowCenter, pressed && s.pressed]}>
-            <Ionicons name="funnel-outline" size={14} color={D.sub} />
-            <Text style={s.exportText}>{tr('Export')}</Text>
-          </Pressable>
+          {!!txs?.length && (
+            <Pressable onPress={() => setExporting(true)} accessibilityRole="button" accessibilityLabel={tr('Export')}
+              hitSlop={10} style={({ pressed }) => [s.rowCenter, pressed && s.pressed]}>
+              <Ionicons name="share-outline" size={14} color={D.sub} />
+              <Text style={s.exportText}>{tr('Export')}</Text>
+            </Pressable>
+          )}
         </View>
         {txs === null && <ActivityIndicator style={s.spinner} />}
         {txs?.length === 0 && <Text style={s.empty}>{tr('No top-ups yet — take the first one.')}</Text>}
@@ -213,6 +218,17 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
       </ScrollView>
 
       {sheet && <TopupSheet onClose={() => setSheet(false)} onConfirm={topup} />}
+      {/* EXP-02: the same rows as the Activity list, for the period picked */}
+      <ExportSheet visible={exporting} onClose={() => setExporting(false)} kind="wallet"
+        build={async (from, to) => {
+          const rows = (txs ?? []).filter((t) => { const d = new Date(t.created_at); return d >= from && d < to; })
+            .sort((a, b) => a.created_at.localeCompare(b.created_at));
+          return {
+            html: walletActivityHtml({ shop: salon ?? '', from, to, rows, mask }),
+            entries: rows.length,
+            fileName: `sterncut-wallet-${fileRange(from, to)}.pdf`,
+          };
+        }} />
 
       {/* 10c — the top-up that didn't land, and the two things he can do while
           holding somebody's cash */}
@@ -233,18 +249,24 @@ export default function AgentWalletScreen({ barberId }: { barberId: string }) {
 function TopupSheet({ onClose, onConfirm }: {
   onClose: () => void; onConfirm: (phone: string, amountDh: number) => Promise<void>;
 }) {
-  const [mode, setMode] = useState<'phone' | 'qr'>('phone');
   const [phone, setPhone] = useState('');
   const [amount, setAmount] = useState('');
   const [busy, setBusy] = useState(false);
+  // BCF-02b — the customer the number belongs to, before the cash is taken (0131)
+  const [match, setMatch] = useState<{ name: string; wallet_cents: number; visits: number } | null>(null);
+  useEffect(() => {
+    let live = true;
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length < 9) { setMatch(null); return; }
+    supabase.rpc('agent_find_customer', { p_phone: phone })
+      .then(({ data }) => { if (live) setMatch((data as typeof match) ?? null); });
+    return () => { live = false; };
+  }, [phone]);
   const n = parseInt(amount, 10) || 0;
-  const valid = n > 0 && mode === 'phone' && phone.trim().length >= 6;
+  const valid = n > 0 && phone.trim().length >= 6;
+  const first = match?.name.split(' ')[0] ?? '';
 
   async function confirm() {
-    if (mode === 'qr') {
-      Alert.alert(tr('Scan QR'), tr('Coming soon — see BACKLOG.md'));
-      return;
-    }
     if (!valid || busy) return;
     setBusy(true);
     try { await onConfirm(phone.trim(), n); } finally { setBusy(false); }
@@ -260,40 +282,36 @@ function TopupSheet({ onClose, onConfirm }: {
           <View style={s.rowCenter}>
             <Text style={s.sheetTitle}>{tr('Cash top-up')}</Text>
             <View style={s.grow} />
-            <Pressable onPress={onClose} hitSlop={8} accessibilityLabel={tr('Close')}
-              style={({ pressed }) => [s.closeBtn, pressed && s.pressed]}>
+            <Pressable onPress={onClose} accessibilityLabel={tr('Close')}
+              style={({ pressed }) => [s.closeBtn, s.close44, pressed && s.pressed]}>
               <Ionicons name="close" size={18} color={D.text} />
             </Pressable>
           </View>
 
-          <View style={s.segment}>
-            <Pressable onPress={() => setMode('phone')} accessibilityState={{ selected: mode === 'phone' }}
-              style={[s.segItem, mode === 'phone' && s.segItemOn]}>
-              <Ionicons name="call-outline" size={15} color={mode === 'phone' ? colors.onAccent : D.sub} />
-              <Text style={[s.segText, mode === 'phone' && s.segTextOn]}>{tr('Phone')}</Text>
-            </Pressable>
-            <Pressable onPress={() => setMode('qr')} accessibilityState={{ selected: mode === 'qr' }}
-              style={[s.segItem, mode === 'qr' && s.segItemOn]}>
-              <Ionicons name="scan-outline" size={15} color={mode === 'qr' ? colors.onAccent : D.sub} />
-              <Text style={[s.segText, mode === 'qr' && s.segTextOn]}>{tr('Scan QR')}</Text>
-            </Pressable>
+          {/* by phone only: the Scan QR tab was a mock — no customer QR exists yet
+              (BACKLOG, Agent wallet) */}
+          <Text style={s.fieldLabel}>{tr('CUSTOMER PHONE')}</Text>
+          <View style={s.inputRow}>
+            <Ionicons name="search" size={16} color={D.sub} />
+            <TextInput value={phone} onChangeText={setPhone} keyboardType="phone-pad"
+              placeholder="+212 6•• ••• •••" placeholderTextColor={D.sub}
+              style={s.input} accessibilityLabel={tr('Customer phone')} />
           </View>
-
-          {mode === 'phone' ? (
-            <>
-              <Text style={s.fieldLabel}>{tr('CUSTOMER PHONE')}</Text>
-              <View style={s.inputRow}>
-                <Ionicons name="search" size={16} color={D.sub} />
-                <TextInput value={phone} onChangeText={setPhone} keyboardType="phone-pad"
-                  placeholder="+212 6•• ••• •••" placeholderTextColor={D.sub}
-                  style={s.input} accessibilityLabel={tr('Customer phone')} />
+          {match && (
+            <View style={s.matchCard}>
+              <View style={s.matchInitials}>
+                <Text style={s.matchInitialsText}>
+                  {match.name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
+                </Text>
               </View>
-            </>
-          ) : (
-            // TODO(backlog): no customer QR exists yet; needs expo-camera + a QR payload when real
-            <View style={s.qrBox}>
-              <Ionicons name="qr-code" size={72} color={D.sub} />
-              <Text style={s.qrText}>{tr('Point camera at customer\'s brber QR')}</Text>
+              <View style={s.grow}>
+                <Text style={s.matchName}>{match.name}</Text>
+                <Text style={s.matchSub}>
+                  {trn(match.visits, 'Wallet {amount} · {n} visit with you', 'Wallet {amount} · {n} visits with you',
+                    { amount: ltr(dh(Math.round(match.wallet_cents / 100))) })}
+                </Text>
+              </View>
+              <Ionicons name="checkmark" size={16} color={D.green} />
             </View>
           )}
 
@@ -304,22 +322,25 @@ function TopupSheet({ onClose, onConfirm }: {
           <View style={s.quickRow}>
             {[50, 100, 200, 500].map((q) => (
               <Pressable key={q} onPress={() => setAmount(String(n + q))} accessibilityLabel={tr('Add {q} dirhams', { q })}
-                style={({ pressed }) => [s.quickChip, pressed && s.pressed]}>
+                style={({ pressed }) => [s.quickChip, s.chip44, pressed && s.pressed]}>
                 <Text style={s.quickText}>+{q}</Text>
               </Pressable>
             ))}
           </View>
 
+          {/* the three BCF-02b fixes: 44px close, 44px chips, and the balance named */}
           <View style={s.afterRow}>
-            <Text style={s.afterLabel}>{tr('Amount to credit')}</Text>
-            <Text style={s.afterValue}>{tr('{n} DH', { n })}</Text>
+            <Text style={s.afterLabel}>
+              {match ? tr('{name}\'s wallet after', { name: first }) : tr('Amount to credit')}
+            </Text>
+            <Text style={s.afterValue}>{ltr(dh((match ? Math.round(match.wallet_cents / 100) : 0) + n))}</Text>
           </View>
 
-          <Pressable disabled={busy || (mode === 'phone' && !valid)} onPress={confirm}
+          <Pressable disabled={busy || !valid} onPress={confirm}
             accessibilityLabel={tr('Confirm cash received')}
-            style={({ pressed }) => [s.cta, (busy || (mode === 'phone' && !valid)) && s.ctaDisabled, pressed && s.pressed]}>
+            style={({ pressed }) => [s.cta, (busy || !valid) && s.ctaDisabled, pressed && s.pressed]}>
             {busy ? <ActivityIndicator color={colors.onAccent} />
-              : <Text style={[s.ctaText, mode === 'phone' && !valid && s.ctaTextDisabled]}>{tr('Confirm cash received')}</Text>}
+              : <Text style={[s.ctaText, !valid && s.ctaTextDisabled]}>{tr('Confirm cash received')}</Text>}
           </Pressable>
           <View style={s.footNote}>
             <Ionicons name="information-circle-outline" size={13} color={D.sub} />
@@ -332,6 +353,14 @@ function TopupSheet({ onClose, onConfirm }: {
 }
 
 const s = StyleSheet.create({
+  exportText: { fontFamily: inter.r, fontSize: 12, color: D.sub, marginStart: 4 },
+  close44: { width: 44, height: 44 },
+  chip44: { height: 44, justifyContent: 'center' },
+  matchCard: { flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: D.card, borderRadius: 16, paddingVertical: 12, paddingHorizontal: 14, marginTop: 2 },
+  matchInitials: { width: 36, height: 36, borderRadius: 999, backgroundColor: D.accentSoft, alignItems: 'center', justifyContent: 'center' },
+  matchInitialsText: { fontFamily: inter.b, fontSize: 11, color: D.accent },
+  matchName: { fontFamily: inter.b, fontSize: 13, color: D.text },
+  matchSub: { fontFamily: inter.r, fontSize: 11, color: D.sub, marginTop: 2 },
   screen: { flex: 1, backgroundColor: D.bg },
   content: { paddingTop: TOP_INSET, paddingHorizontal: 20, gap: 14, paddingBottom: TAB_INSET },
   pressed: { opacity: 0.7 },
@@ -371,7 +400,6 @@ const s = StyleSheet.create({
   topupText: { fontFamily: inter.b, fontSize: 14, color: colors.onAccent },
 
   section: { fontFamily: inter.b, fontSize: 15, color: D.text, marginTop: 2 },
-  exportText: { fontFamily: inter.r, fontSize: 12, color: D.sub },
   spinner: { marginTop: sp(6) },
   empty: { fontFamily: inter.r, fontSize: 13, color: D.sub, paddingVertical: sp(2) },
 
@@ -406,15 +434,6 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
 
-  segment: { flexDirection: 'row', backgroundColor: D.card2, borderRadius: radius.pill, padding: 4, gap: 4 },
-  segItem: {
-    flex: 1, height: 40, borderRadius: radius.pill, flexDirection: 'row',
-    alignItems: 'center', justifyContent: 'center', gap: 6,
-  },
-  segItemOn: { backgroundColor: colors.accent },
-  segText: { fontFamily: inter.b, fontSize: 13, color: D.sub },
-  segTextOn: { color: colors.onAccent },
-
   fieldLabel: { fontFamily: inter.b, fontSize: 10, color: D.sub, letterSpacing: 1.4 },
   inputRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
@@ -432,11 +451,6 @@ const s = StyleSheet.create({
   },
   quickText: { fontFamily: inter.b, fontSize: 12, color: D.text },
 
-  qrBox: {
-    borderWidth: 1, borderColor: '#3A3A40', borderStyle: 'dashed', borderRadius: radius.lg,
-    alignItems: 'center', justifyContent: 'center', gap: sp(3), paddingVertical: sp(8),
-  },
-  qrText: { fontSize: font.small, color: D.sub },
 
   cta: {
     height: 52, borderRadius: 999, backgroundColor: colors.accent,

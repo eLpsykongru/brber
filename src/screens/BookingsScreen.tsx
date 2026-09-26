@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import {
   ActivityIndicator, Alert, Image, Linking, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View,
 } from 'react-native';
@@ -43,6 +43,7 @@ import RescheduleAskScreen from './RescheduleAskScreen';
 import OfferDayScreen, { OfferFor } from './OfferDayScreen';
 import { countWord } from '../lib/inboxRules';
 import { loc, tr } from '../lib/i18n';
+import { nameOrFormer } from '../lib/deletion';
 
 // ADDENDUM-app-first, turn B11: Home is THE CHAIR (BTD-20). NEXT UP and the live queue
 // were the same list shown twice with two sets of verbs; now bookings and walk-ins are
@@ -93,7 +94,7 @@ const isoDay = (d: Date) =>
 const HELD_SEEN_KEY = 'held_seen_cut';
 
 const nameOf = (b: BookingRow, barberId: string) =>
-  b.walk_in_name ?? (b.customer_id === barberId ? tr('Walk-in') : b.customer?.full_name ?? tr('Client'));
+  b.walk_in_name ?? (b.customer_id === barberId ? tr('Walk-in') : nameOrFormer(b.customer, tr('Client'), 'customer'));
 const initialsOf = (name: string) =>
   name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
@@ -115,7 +116,7 @@ function Badge({ b, barberId, no, tone, size = 40 }: {
   );
 }
 
-export default function BookingsScreen({ barber, profile, phone, onProfileChanged, onChromeHidden, goSchedule, onOpenGap }: {
+export default function BookingsScreen({ barber, profile, phone, onProfileChanged, onChromeHidden, goSchedule, onOpenGap, banner }: {
   barber: Barber;
   profile: Profile;
   phone: string | null;
@@ -124,6 +125,8 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   goSchedule: () => void;
   /** BDY-06 — a cancellation opens the day it left a hole in; HomeScreen owns the day */
   onOpenGap: (bookingId: string) => void;
+  /** a tapped push banner, routed the way the inbox routes the same row */
+  banner?: { kind: string; bookingId: string; at: number };
 }) {
   const barberId = barber.id;
   const [bookings, setBookings] = useState<BookingRow[] | null>(null); // null = first load in flight
@@ -157,6 +160,20 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
   const [showQueue, setShowQueue] = useState(false);
   const [panel, setPanel] = useState<BookingRow | null>(null);      // BTD-21
   const [request, setRequest] = useState<BookingRow | null>(null);  // 3d
+  // once per banner, and only when the day's rows are in — a request opens its sheet
+  const routed = useRef<number | null>(null);
+  useEffect(() => {
+    if (!banner || routed.current === banner.at) return;
+    const id = banner.bookingId;
+    if (banner.kind === 'reschedule') { routed.current = banner.at; setAskFor(id); onChromeHidden?.(true); return; }
+    if (banner.kind === 'review') { routed.current = banner.at; setReviewFor(id); onChromeHidden?.(true); return; }
+    if (bookings === null) return;
+    routed.current = banner.at;
+    const row = bookings.find((x) => x.id === id);
+    // outside the loaded window: the day timeline on that booking's day still shows it
+    if (row) (row.status === 'pending' ? setRequest : setPanel)(row);
+    else onOpenGap(id);
+  }, [banner, bookings]);
   // BTD-20 — the line's switch rides on the money card; a web name carries whether he tapped
   const [lineOpen, setLineOpen] = useState(true);
   const [guests, setGuests] = useState<Record<string, Guest>>({});
@@ -175,7 +192,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
     const to = new Date(from); to.setDate(to.getDate() + 14);
     const [book, me, guestRows] = await Promise.all([
       supabase.from('bookings')
-        .select('id, starts_at, ends_at, created_at, status, price_cents, deposit_cents, walk_in_name, walk_in_phone, customer_id, checked_in_at, started_at, completed_at, dropped_at, joined_line, notes, services(name, duration_min), customer:profiles!customer_id(full_name, avatar_url, phone)')
+        .select('id, starts_at, ends_at, created_at, status, price_cents, deposit_cents, walk_in_name, walk_in_phone, customer_id, checked_in_at, started_at, completed_at, dropped_at, joined_line, notes, services(name, duration_min), customer:profiles!customer_id(full_name, deleted_at, avatar_url, phone)')
         .eq('barber_id', barberId)
         .gte('starts_at', from.toISOString()).lt('starts_at', to.toISOString())
         .in('status', ['pending', 'confirmed'])

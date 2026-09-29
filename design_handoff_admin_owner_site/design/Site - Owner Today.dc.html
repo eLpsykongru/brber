@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="height:100%;overflow:auto;box-sizing:border-box;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif">
+<div style="padding:20px 24px 32px;display:flex;flex-wrap:wrap;align-items:flex-start;gap:18px;box-sizing:border-box">
+  <div style="flex:999 1 600px;min-width:0;display:flex;flex-direction:column;gap:18px">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:11px">
+      <div onClick="{{ toReports }}" style="background:#17171A;border:1px solid #1E1E22;border-radius:13px;padding:14px 15px;display:flex;flex-direction:column;gap:5px;cursor:pointer" style-hover="border-color:#34343A"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">SHOP TAKE TODAY</span><span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">840 DH</span><span style="font-size:10px;color:#9A9CA3">13 bookings · 168 DH commission</span></div>
+      <div style="background:#17171A;border:1px solid #1E1E22;border-radius:13px;padding:14px 15px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">OCCUPANCY</span><span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">78%</span><span style="font-size:10px;color:#9A9CA3">2 of 3 chairs working</span></div>
+      <div style="background:#17171A;border:1px solid #1E1E22;border-radius:13px;padding:14px 15px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">WAITING</span><span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">4</span><span style="font-size:10px;color:#E8A100">longest ~55 min</span></div>
+      <div style="background:#17171A;border:1px solid #1E1E22;border-radius:13px;padding:14px 15px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">NO-SHOWS</span><span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">1</span><span style="font-size:10px;color:#9A9CA3">Youssef’s 14:30</span></div>
+    </div>
+    <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:15px 16px 12px">
+        <span style="font-size:12.5px;font-weight:700">The chairs · right now</span>
+        <span style="font-size:10.5px;color:#6B6B72">Open a chair to work its line</span>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(140px,1.1fr) minmax(150px,1.4fr) minmax(110px,1fr) minmax(90px,.8fr) 14px;gap:12px;padding:8px 16px;border-top:1px solid #1E1E22;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">
+        <span>BARBER</span><span>RIGHT NOW</span><span>LINE</span><span>TODAY</span><span></span>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(140px,1.1fr) minmax(150px,1.4fr) minmax(110px,1fr) minmax(90px,.8fr) 14px;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid #1E1E22">
+        <span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="position:relative;width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">YA<span style="position:absolute;right:-1px;bottom:-1px;width:9px;height:9px;border-radius:999px;background:#E8442E;border:2px solid #17171A"></span></span><span style="font-size:12.5px;font-weight:700">Youssef</span><span style="font-size:8.5px;letter-spacing:.12em;font-weight:700;color:#9A9CA3;background:#26262B;border-radius:5px;padding:3px 5px">YOU</span></span>
+        <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:12px;font-weight:600">Cutting Mehdi</span><span style="font-size:10.5px;color:#9A9CA3">free 11:50</span></span>
+        <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:700;color:#E8A100">~55 min</span><span style="font-size:10.5px;color:#9A9CA3">1 unconfirmed</span></span>
+        <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:700;font-variant-numeric:tabular-nums">460 DH</span><span style="font-size:10.5px;color:#9A9CA3">7 bookings</span></span>
+        <span></span>
+      </div>
+      <div onClick="{{ toHamza }}" style="display:grid;grid-template-columns:minmax(140px,1.1fr) minmax(150px,1.4fr) minmax(110px,1fr) minmax(90px,.8fr) 14px;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid #1E1E22;cursor:pointer" style-hover="background:#1C1C20">
+        <span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="position:relative;width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">HB<span style="position:absolute;right:-1px;bottom:-1px;width:9px;height:9px;border-radius:999px;background:#5B8DEF;border:2px solid #17171A"></span></span><span style="font-size:12.5px;font-weight:700">Hamza</span></span>
+        <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:12px;font-weight:600">Cutting a walk-in</span><span style="font-size:10.5px;color:#9A9CA3">free 12:20</span></span>
+        <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:700">~15 min</span><span style="font-size:10.5px;color:#9A9CA3">1 unconfirmed</span></span>
+        <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:700;font-variant-numeric:tabular-nums">380 DH</span><span style="font-size:10.5px;color:#9A9CA3">6 bookings</span></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(140px,1.1fr) minmax(150px,1.4fr) minmax(110px,1fr) minmax(90px,.8fr) 14px;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid #1E1E22;opacity:.55">
+        <span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="position:relative;width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">SA<span style="position:absolute;right:-1px;bottom:-1px;width:9px;height:9px;border-radius:999px;background:#3A3A40;border:2px solid #17171A"></span></span><span style="font-size:12.5px;font-weight:700">Salim</span></span>
+        <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:12px;font-weight:600">Day off</span><span style="font-size:10.5px;color:#9A9CA3">back Friday 10:00</span></span>
+        <span style="font-size:12px;color:#6B6B72">—</span>
+        <span style="font-size:12px;color:#6B6B72">—</span>
+        <span></span>
+      </div>
+    </div>
+    <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px 17px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+        <span style="font-size:12.5px;font-weight:700">Day view</span>
+        <span style="font-size:10.5px;color:#6B6B72">Thu 3 September · 78% full</span>
+      </div>
+      <div style="display:flex;gap:12px">
+        <span style="width:80px;flex:none"></span>
+        <div style="flex:1;min-width:0;display:flex;font-size:10px;color:#6B6B72;font-variant-numeric:tabular-nums">
+          <span style="flex:1">09:30</span><span style="flex:1">10:30</span><span style="flex:1">11:30</span><span style="flex:1">12:30</span><span style="flex:1">13:30</span><span style="flex:1">14:30</span><span style="flex:1">15:30</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="width:80px;flex:none;display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700"><span style="width:7px;height:7px;border-radius:999px;background:#E8442E;flex:none"></span>Youssef</span>
+        <div style="flex:1;min-width:0;position:relative;height:42px;background:#141416;border-radius:10px;overflow:hidden">
+          <span style="position:absolute;top:0;bottom:0;left:14.2857%;width:1px;background:#1E1E22"></span><span style="position:absolute;top:0;bottom:0;left:28.5714%;width:1px;background:#1E1E22"></span><span style="position:absolute;top:0;bottom:0;left:42.8571%;width:1px;background:#1E1E22"></span><span style="position:absolute;top:0;bottom:0;left:57.1429%;width:1px;background:#1E1E22"></span><span style="position:absolute;top:0;bottom:0;left:71.4286%;width:1px;background:#1E1E22"></span><span style="position:absolute;top:0;bottom:0;left:85.7143%;width:1px;background:#1E1E22"></span>
+          <span style="position:absolute;top:4px;bottom:4px;left:0.4%;width:12.7%;border-radius:7px;background:rgba(232,68,46,.9);padding:0 7px;display:flex;flex-direction:column;justify-content:center;overflow:hidden;box-sizing:border-box"><span style="font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Karim I.</span><span style="font-size:9px;color:rgba(255,255,255,.75);white-space:nowrap">Kids · 40</span></span>
+          <span style="position:absolute;top:4px;bottom:4px;left:14.3%;width:11.2%;border-radius:7px;background:rgba(74,222,128,.9);color:#0D0D0F;padding:0 7px;display:flex;flex-direction:column;justify-content:center;overflow:hidden;box-sizing:border-box"><span style="font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Mehdi K.</span><span style="font-size:9px;color:rgba(13,13,15,.7);white-space:nowrap">In chair</span></span>
+          <span style="position:absolute;top:4px;bottom:4px;left:26.4%;width:7.1%;border-radius:7px;background:rgba(232,68,46,.9);padding:0 7px;display:flex;align-items:center;overflow:hidden;box-sizing:border-box"><span style="font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Amine B.</span></span>
+          <span style="position:absolute;top:4px;bottom:4px;left:42.9%;width:6.2%;border-radius:7px;background:rgba(232,161,0,.5);color:#0D0D0F;padding:0 7px;display:flex;align-items:center;overflow:hidden;box-sizing:border-box"><span style="font-size:9px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Break</span></span>
+          <span style="position:absolute;top:4px;bottom:4px;left:50%;width:7.1%;border-radius:7px;background:rgba(232,68,46,.9);padding:0 7px;display:flex;align-items:center;overflow:hidden;box-sizing:border-box"><span style="font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Walk-in</span></span>
+          <span style="position:absolute;top:4px;bottom:4px;left:71.4%;width:9.3%;border-radius:7px;background:rgba(248,113,113,.28);border:1px dashed rgba(248,113,113,.7);color:#F87171;padding:0 7px;display:flex;align-items:center;overflow:hidden;box-sizing:border-box"><span style="font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">No-show</span></span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="width:80px;flex:none;display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700"><span style="width:7px;height:7px;border-radius:999px;background:#5B8DEF;flex:none"></span>Hamza</span>
+        <div style="flex:1;min-width:0;position:relative;height:42px;background:#141416;border-radius:10px;overflow:hidden">
+          <span style="position:absolute;top:0;bottom:0;left:14.2857%;width:1px;background:#1E1E22"></span><span style="position:absolute;top:0;bottom:0;left:28.5714%;width:1px;background:#1E1E22"></span><span style="position:absolute;top:0;bottom:0;left:42.8571%;width:1px;background:#1E1E22"></span><span style="position:absolute;top:0;bottom:0;left:57.1429%;width:1px;background:#1E1E22"></span><span style="position:absolute;top:0;bottom:0;left:71.4286%;width:1px;background:#1E1E22"></span><span style="position:absolute;top:0;bottom:0;left:85.7143%;width:1px;background:#1E1E22"></span>
+          <span style="position:absolute;top:4px;bottom:4px;left:5%;width:11.2%;border-radius:7px;background:rgba(91,141,239,.9);padding:0 7px;display:flex;flex-direction:column;justify-content:center;overflow:hidden;box-sizing:border-box"><span style="font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Rachid T.</span><span style="font-size:9px;color:rgba(255,255,255,.75);white-space:nowrap">Shave · 50</span></span>
+          <span style="position:absolute;top:4px;bottom:4px;left:17.4%;width:13.3%;border-radius:7px;background:rgba(74,222,128,.9);color:#0D0D0F;padding:0 7px;display:flex;flex-direction:column;justify-content:center;overflow:hidden;box-sizing:border-box"><span style="font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Walk-in</span><span style="font-size:9px;color:rgba(13,13,15,.7);white-space:nowrap">In chair</span></span>
+          <span style="position:absolute;top:4px;bottom:4px;left:31.7%;width:9%;border-radius:7px;background:rgba(91,141,239,.9);padding:0 7px;display:flex;align-items:center;overflow:hidden;box-sizing:border-box"><span style="font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Yassine B.</span></span>
+          <span style="position:absolute;top:4px;bottom:4px;left:42.9%;width:6.2%;border-radius:7px;background:rgba(232,161,0,.5);color:#0D0D0F;padding:0 7px;display:flex;align-items:center;overflow:hidden;box-sizing:border-box"><span style="font-size:9px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Break</span></span>
+          <span style="position:absolute;top:4px;bottom:4px;left:57.1%;width:13.3%;border-radius:7px;background:rgba(91,141,239,.9);padding:0 7px;display:flex;flex-direction:column;justify-content:center;overflow:hidden;box-sizing:border-box"><span style="font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Anas B.</span><span style="font-size:9px;color:rgba(255,255,255,.75);white-space:nowrap">Cut+beard</span></span>
+          <span style="position:absolute;top:4px;bottom:4px;left:79.5%;width:11.2%;border-radius:7px;background:rgba(91,141,239,.9);padding:0 7px;display:flex;align-items:center;overflow:hidden;box-sizing:border-box"><span style="font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Hicham</span></span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;opacity:.55">
+        <span style="width:80px;flex:none;display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700"><span style="width:7px;height:7px;border-radius:999px;background:#3A3A40;flex:none"></span>Salim</span>
+        <div style="flex:1;min-width:0;height:42px;border-radius:10px;border:1px dashed #3A3A40;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">DAY OFF · BACK FRIDAY 10:00</div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:16px;padding-left:92px;font-size:10px;color:#9A9CA3">
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:rgba(74,222,128,.9)"></span>In chair</span>
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:rgba(232,161,0,.5)"></span>Break</span>
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:rgba(248,113,113,.28);border:1px dashed rgba(248,113,113,.7);box-sizing:border-box"></span>No-show</span>
+      </div>
+    </div>
+  </div>
+  <div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:14px">
+    <sc-if value="{{ open }}" hint-placeholder-val="{{ true }}">
+      <div style="background:#17171A;border:1px solid rgba(232,161,0,.28);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:11px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <span style="font-size:12.5px;font-weight:700">Walk-ins</span>
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#4ADE80;background:rgba(74,222,128,.12);border-radius:999px;padding:3px 8px">LIVE</span>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:8px"><span style="font-size:26px;font-weight:800;font-variant-numeric:tabular-nums">4</span><span style="font-size:11px;color:#9A9CA3">waiting in the shop</span></div>
+        <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Longest wait is ~55 min at your chair. Hamza could take two of them.</span>
+        <span style="font-size:10.5px;font-weight:600;color:#E8A100">2 names never confirmed</span>
+        <span onClick="{{ pause }}" style="height:38px;border-radius:9px;background:#212125;border:1px solid #3A3A40;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="background:#26262B">Pause walk-ins, whole shop</span>
+      </div>
+    </sc-if>
+    <sc-if value="{{ paused }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#17171A;border:1px solid #26262B;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:11px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <span style="font-size:12.5px;font-weight:700">Walk-ins</span>
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#E8A100;background:rgba(232,161,0,.12);border-radius:999px;padding:3px 8px">PAUSED</span>
+        </div>
+        <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Paused for the whole shop. Barbers still cut their bookings.</span>
+        <span onClick="{{ resume }}" style="height:38px;border-radius:9px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="background:#F0533D">Resume walk-ins</span>
+      </div>
+    </sc-if>
+    <div onClick="{{ toPayouts }}" style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:7px;cursor:pointer" style-hover="border-color:#34343A">
+      <span style="font-size:12.5px;font-weight:700">Weekly settlement due</span>
+      <span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">1 566 DH</span>
+      <span style="font-size:11px;color:#9A9CA3">Week 36 · Hicham collects Friday 17:00–20:00</span>
+      <span style="font-size:11px;font-weight:700;color:#E8442E;margin-top:3px">Open the statement</span>
+    </div>
+    <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+        <span style="display:flex;align-items:center;gap:8px"><span style="font-size:12.5px;font-weight:700">Needs a reply</span><span style="font-size:10px;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:999px;padding:2px 7px">2</span></span>
+        <span onClick="{{ toReviews }}" style="font-size:10.5px;font-weight:600;color:#6B6B72;cursor:pointer" style-hover="color:#fff">All reviews</span>
+      </div>
+      <div onClick="{{ toReviews }}" style="display:flex;flex-direction:column;gap:5px;padding:10px;margin:0 -10px;border-radius:10px;cursor:pointer" style-hover="background:#1E1E22">
+        <span style="display:flex;align-items:center;gap:8px;font-size:11.5px"><span style="font-weight:700">Anas Bouzid</span><span style="letter-spacing:1px"><span style="color:#E8A100">★★</span><span style="color:#3A3A40">★★★</span></span></span>
+        <span style="font-size:11px;line-height:1.5;color:#C9CAD0;text-wrap:pretty">Waited 25 minutes past my slot and nobody told me anything.</span>
+        <span style="font-size:10px;color:#6B6B72">Hamza · 1 Sep</span>
+      </div>
+      <div onClick="{{ toReviews }}" style="display:flex;flex-direction:column;gap:5px;padding:10px;margin:0 -10px;border-radius:10px;border-top:1px solid #26262B;cursor:pointer" style-hover="background:#1E1E22">
+        <span style="display:flex;align-items:center;gap:8px;font-size:11.5px"><span style="font-weight:700">Yassine Bennis</span><span style="letter-spacing:1px"><span style="color:#E8A100">★★★★</span><span style="color:#3A3A40">★</span></span></span>
+        <span style="font-size:11px;line-height:1.5;color:#C9CAD0;text-wrap:pretty">Good shave, shop was a bit loud on a Saturday.</span>
+        <span style="font-size:10px;color:#6B6B72">Salim · 29 Aug</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1180,&quot;height&quot;:820},&quot;who&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;go&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(path: string) =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { paused: false };
+  renderVals() {
+    const go = this.props.go || (() => {});
+    const base = '/' + ((this.props.who && this.props.who.shopSlug) || 'le-fade-tanger');
+    const to = p => () => go(base + p);
+    return {
+      open: !this.state.paused, paused: this.state.paused,
+      pause: () => this.setState({ paused: true }), resume: () => this.setState({ paused: false }),
+      toHamza: to('/chairs/hamza-bennani'), toPayouts: to('/payouts/2026-W36'), toReviews: to('/reviews'), toReports: to('/reports'),
+    };
+  }
+}
+</script>
+</body>
+</html>

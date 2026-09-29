@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:relative;height:100%;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="padding:20px 24px 32px;display:flex;flex-direction:column;gap:18px;box-sizing:border-box">
+  <sc-if value="{{ hasTiles }}" hint-placeholder-val="{{ true }}">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:11px">
+      <sc-for list="{{ tiles }}" as="t" hint-placeholder-count="4">
+        <div onClick="{{ t.go }}" style="background:#17171A;border:1px solid #1E1E22;border-radius:13px;padding:14px 15px;display:flex;flex-direction:column;gap:5px;cursor:{{ t.cursor }}" style-hover="border-color:#34343A">
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">{{ t.label }}</span>
+          <span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">{{ t.value }}</span>
+          <span style="font-size:10px;line-height:1.4;color:{{ t.subColor }}">{{ t.sub }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+  <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:18px">
+    <div style="flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:18px">
+
+      <sc-if value="{{ hasTable }}" hint-placeholder-val="{{ true }}">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:15px 16px 12px">
+            <span style="font-size:12.5px;font-weight:700">{{ table.title }}</span>
+            <span style="font-size:10.5px;color:#6B6B72">{{ table.note }}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:minmax(170px,1.3fr) minmax(130px,1.2fr) minmax(100px,1fr) 90px;gap:12px;padding:8px 16px;border-top:1px solid #1E1E22;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">
+            <span>{{ table.c1 }}</span><span>{{ table.c2 }}</span><span>{{ table.c3 }}</span><span style="text-align:right">{{ table.c4 }}</span>
+          </div>
+          <sc-for list="{{ table.rows }}" as="r" hint-placeholder-count="4">
+            <div onClick="{{ r.go }}" style="display:grid;grid-template-columns:minmax(170px,1.3fr) minmax(130px,1.2fr) minmax(100px,1fr) 90px;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid #1E1E22;cursor:{{ r.cursor }}" style-hover="background:#1C1C20">
+              <span style="display:flex;align-items:center;gap:10px;min-width:0;opacity:{{ r.opacity }}">
+                <sc-if value="{{ r.person }}"><span style="position:relative;width:30px;height:30px;border-radius:999px;background:#212125;border:1px {{ r.avBorder }} #3A3A40;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">{{ r.initials }}<span style="position:absolute;right:-2px;bottom:-2px;width:9px;height:9px;border-radius:999px;background:{{ r.dot }};border:2px solid #17171A"></span></span></sc-if>
+                <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="display:flex;align-items:center;gap:7px"><span style="font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><sc-if value="{{ r.you }}"><span style="font-size:8.5px;letter-spacing:.12em;font-weight:700;color:#9A9CA3;background:#26262B;border-radius:5px;padding:3px 5px">YOU</span></sc-if></span><span style="font-size:10.5px;color:#6B6B72">{{ r.sub }}</span></span>
+              </span>
+              <span style="display:flex;flex-direction:column;gap:2px;min-width:0;opacity:{{ r.opacity }}"><span style="font-size:12px;font-weight:600">{{ r.a }}</span><span style="font-size:10.5px;color:{{ r.aSubColor }}">{{ r.aSub }}</span></span>
+              <span style="display:flex;flex-direction:column;gap:2px;opacity:{{ r.opacity }}"><span style="font-size:12px;font-weight:700;font-variant-numeric:tabular-nums">{{ r.b }}</span><span style="font-size:10.5px;color:#9A9CA3">{{ r.bSub }}</span></span>
+              <span style="font-size:12px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;opacity:{{ r.opacity }}">{{ r.c }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasReviews }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:4px">
+          <span style="font-size:12.5px;font-weight:700;padding-bottom:8px">{{ reviewsTitle }}</span>
+          <sc-for list="{{ reviews }}" as="rv" hint-placeholder-count="3">
+            <div style="display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-top:1px solid #26262B">
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+                <span style="display:flex;align-items:center;gap:8px;font-size:11.5px"><span style="font-weight:700">{{ rv.name }}</span><span style="letter-spacing:1px"><span style="color:#E8A100">{{ rv.on }}</span><span style="color:#3A3A40">{{ rv.off }}</span></span></span>
+                <span style="font-size:12px;line-height:1.5;color:#C9CAD0;text-wrap:pretty">{{ rv.text }}</span>
+                <span style="font-size:10px;color:#6B6B72">{{ rv.meta }}</span>
+              </span>
+              <span onClick="{{ rv.reply }}" style="flex:none;height:30px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:11px;font-weight:700;white-space:nowrap;cursor:{{ rv.cursor }};background:{{ rv.btnBg }};color:{{ rv.btnFg }}">{{ rv.action }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasStatement }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:18px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">{{ st.label }}</span><span style="font-size:8.5px;letter-spacing:.12em;font-weight:700;color:#E8A100;background:rgba(232,161,0,.12);border-radius:999px;padding:3px 7px">{{ st.pill }}</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px"><span style="font-size:34px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums">{{ st.amount }}</span><span style="font-size:13px;line-height:1.55;color:#C9CAD0;max-width:540px;text-wrap:pretty">{{ st.para }}</span></div>
+          <div style="display:flex;flex-direction:column">
+            <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72;padding-bottom:6px">HOW IT ADDS UP</span>
+            <sc-for list="{{ st.lines }}" as="ln" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid #26262B">
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:12.5px;font-weight:600">{{ ln.title }}</span><span style="font-size:10.5px;color:#9A9CA3">{{ ln.sub }}</span></span>
+                <span style="flex:none;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">{{ ln.amount }}</span>
+              </div>
+            </sc-for>
+            <div style="display:flex;align-items:center;gap:14px;padding:14px 0 0;border-top:1px solid #3A3A40"><span style="flex:1;font-size:13.5px;font-weight:800">{{ st.totalLabel }}</span><span style="flex:none;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums">{{ st.total }}</span></div>
+          </div>
+          <span style="font-size:11px;color:#6B6B72">{{ st.foot }}</span>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasRows }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:6px 16px;display:flex;flex-direction:column">
+          <sc-for list="{{ rows }}" as="kv" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:14px;padding:13px 0;border-top:1px solid {{ kv.line }}">
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:12.5px;font-weight:600">{{ kv.k }}</span><sc-if value="{{ kv.sub }}"><span style="font-size:10.5px;color:#9A9CA3">{{ kv.sub }}</span></sc-if></span>
+              <span style="flex:none;font-size:13px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums">{{ kv.v }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-for list="{{ charts }}" as="ch" hint-placeholder-count="0">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px 17px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><span style="font-size:12.5px;font-weight:700">{{ ch.title }}</span><span style="font-size:10.5px;color:#6B6B72">{{ ch.note }}</span></div>
+          <sc-for list="{{ ch.bars }}" as="b" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="width:150px;flex:none;font-size:11.5px;color:#C9CAD0">{{ b.label }}</span>
+              <span style="flex:1;min-width:0;height:10px;border-radius:5px;background:#26262B;overflow:hidden"><span style="display:block;height:100%;width:{{ b.pct }};background:{{ b.color }};border-radius:5px"></span></span>
+              <span style="width:70px;flex:none;text-align:right;font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums">{{ b.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="flex:1 1 290px;min-width:0;display:flex;flex-direction:column;gap:14px">
+      <sc-for list="{{ cards }}" as="c" hint-placeholder-count="2">
+        <div style="background:#17171A;border:1px solid {{ c.border }};border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:12.5px;font-weight:700;color:{{ c.titleColor }}">{{ c.title }}</span>
+          <sc-if value="{{ c.big }}"><span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">{{ c.big }}</span></sc-if>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">{{ c.body }}</span>
+          <sc-if value="{{ c.action }}"><span onClick="{{ c.go }}" style="align-self:flex-start;font-size:11px;font-weight:700;color:#E8442E;cursor:pointer;margin-top:2px" style-hover="color:#FF6B57">{{ c.action }}</span></sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1180,&quot;height&quot;:800},&quot;path&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;/marina-barber-club/today&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;who&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;go&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(path: string) =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { replied: {} };
+  data(slug) {
+    const T = (label, value, sub, extra) => ({ label, value, sub, subColor: '#9A9CA3', ...extra });
+    const R = (initials, name, sub, a, aSub, b, bSub, c, extra) => ({ initials, name, sub, a, aSub, b, bSub, c, ...extra });
+    const C = (title, body, action, to, extra) => ({ title, body, action, to, ...extra });
+    const rev = (name, stars, text, meta, needsReply) => ({ name, stars, text, meta, needsReply });
+    const M = {
+      today: {
+        tiles: [T('CHAIR-HOURS SOLD', '148', 'of 216 open this week'), T('EMPTY', '68 h', '54 of them before noon', { subColor: '#E8A100' }), T('YOUR SHARE', '2 220 DH', 'this week · paid Monday'), T('PASS CUTS STILL OWED', '46', 'of 55 from before you reopened', { to: '/payouts' })],
+        table: { title: 'The chairs · right now', note: 'Four chairs', c1: 'CHAIR', c2: 'RIGHT NOW', c3: 'THIS WEEK', c4: 'YOUR SHARE', rows: [
+          R('ZB', 'Zakaria Boukhris', 'Chair 1 · six days', 'Cutting', 'free 11:40', '51 h sold', '9 h empty', '765 DH', { dot: '#5B8DEF' }),
+          R('OS', 'Omar Sabri', 'Chair 2 · afternoons', 'In from 13:00', 'afternoons only', '44 h sold', '11 h empty', '660 DH', { dot: '#3A3A40' }),
+          R('KI', 'Karim Idrissi', 'Chair 3', '2 of 6 bookings today', 'limited until 4 December', '31 h sold', '29 h empty', '465 DH', { dot: '#E8442E', you: true, aSubColor: '#E8A100' }),
+          R('—', 'Nobody', 'Chair 4', 'Vacant since August', 'not shown to customers', '22 h sold', '19 h empty', '330 DH', { dot: '#3A3A40', dim: true, dashed: true }),
+        ] },
+        cards: [C('Friday payout', 'Paid tomorrow at 09:00. 1 056 DH stays held against the pass cuts still owed — yours, not spent.', 'Open the statement', '/payouts', { big: '1 514 DH' }),
+          C('Chair 3 is limited to 6 a day', 'Your own chair, until the review on 4 December. 54 of your 68 empty hours this week were mornings.', 'See the chairs', '/chairs'),
+          C('One review about the shop needs a reply', '“Came at 11 for my booking and the shop was shut.” — Leila B., 18 Nov', 'Reply', '/reviews', { border: 'rgba(232,161,0,.28)' })],
+      },
+      services: {
+        table: { title: 'What you sell', note: 'Prices customers see', c1: 'SERVICE', c2: 'WHO DOES IT', c3: 'LENGTH', c4: 'PRICE', rows: [
+          R('C', 'Cut', 'Most booked', 'Zakaria, Omar, Karim', '', '30 min', '', '60 DH', { dot: '#E8442E' }),
+          R('CB', 'Cut & beard', '', 'Zakaria, Omar', '', '45 min', '', '85 DH', { dot: '#E8442E' }),
+          R('B', 'Beard', '', 'All three', '', '20 min', '', '35 DH', { dot: '#E8442E' }),
+          R('K', 'Kids, under 12', '', 'Zakaria', '', '25 min', '', '45 DH', { dot: '#E8442E' }),
+        ] },
+        cards: [C('Passes', '46 pass cuts are still owed from before you reopened. No new passes are sold. The 1 056 DH held on Friday comes back as they are done.', 'Open the statement', '/payouts'),
+          C('Opening hours', '08:00 – 20:00 today.', 'Your shop', '/shop')],
+      },
+      reviews: {
+        tiles: [T('ZAKARIA', '4.9 ★', 'public rating'), T('OMAR', '4.6 ★', 'public rating'), T('KARIM · YOU', '3.8 ★', 'was 4.4 six weeks ago', { subColor: '#E8A100' })],
+        reviewsTitle: 'About the shop',
+        reviews: [rev('Leila B.', 2, 'Came at 11 for my booking and the shop was shut.', '18 Nov · refunded the same hour · STC-4602', true), rev('Hamid R.', 4, 'Zakaria is the reason I come back. Busy on Saturdays.', '20 Nov', false)],
+        cards: [C('Ratings are public. The words are not yours.', 'You see what customers wrote about the shop. What they wrote about each barber belongs to that barber.', null, null)],
+      },
+      subscription: {
+        rows: [['Plan', 'Monthly', '55 DH a chair'], ['Chairs', '4', 'Chair 4 is vacant'], ['Next charge', '220 DH', 'Monday 1 December'], ['Reminder SMS', '61 of 200', 'used this month']],
+        cards: [C('How it is paid', 'Taken from your Friday payout. Never from the till.', 'Open the statement', '/payouts')],
+      },
+      reports: {
+        tiles: [T('CHAIR-HOURS SOLD', '148', 'this week, of 216'), T('EMPTY BEFORE NOON', '54 h', 'of 68 empty', { subColor: '#E8A100' }), T('YOUR SHARE', '2 220 DH', 'this week')],
+        charts: [{ title: 'Empty chair-hours this week', note: 'When the chairs sit empty', bars: [['Before noon', 54, 68, '#E8A100'], ['12:00 – 16:00', 9, 68, '#3A3A40'], ['16:00 – 20:00', 5, 68, '#3A3A40']] },
+          { title: 'Chair-hours sold, per chair', note: 'Mon 24 – Sun 30 November', bars: [['Zakaria · chair 1', 51, 60, '#5B8DEF'], ['Omar · chair 2', 44, 60, '#5B8DEF'], ['You · chair 3', 31, 60, '#E8442E'], ['Chair 4 · vacant', 22, 60, '#3A3A40']] }],
+        cards: [C('What this page will not show you', 'Which customers complained, or whose bookings were cancelled. You see the hours, not the names.', 'See the chairs', '/chairs')],
+      },
+    };
+    const N = {
+      today: {
+        tiles: [T('SATURDAY RATING', '4.6 ★', 'was 3.5 before 35-minute slots', { subColor: '#4ADE80', to: '/reviews' }), T('LATE BY 18:00, SATURDAYS', '0 min', 'was 2 h 10 in the autumn'), T('SATURDAY REGULARS BACK', '78%', 'within 6 weeks · was 61%'), T('CHAIR 4', 'Monday', 'Younes Bouzid’s first cut', { to: '/chairs' })],
+        table: { title: 'The chairs · right now', note: 'Three working, one from Monday', c1: 'CHAIR', c2: 'RIGHT NOW', c3: 'TODAY', c4: 'RATING', rows: [
+          R('NA', 'Nabil Amrani', 'Chair 1', 'Cutting', 'free 12:10', '7 bookings', '', '4.7 ★', { dot: '#E8442E', you: true }),
+          R('IT', 'Ilyas Tahiri', 'Chair 2', 'Cutting', 'free 11:55', '6 bookings', '', '4.6 ★', { dot: '#5B8DEF' }),
+          R('SM', 'Soufiane Mrabet', 'Chair 3', 'Free now', 'next at 11:30', '5 bookings', '', '4.8 ★', { dot: '#4ADE80' }),
+          R('YB', 'Younes Bouzid', 'Chair 4', 'Starts Monday 2 February', 'sets his own hours inside yours', '—', '', '4.7 ★', { dot: '#3A3A40', dim: true, dashed: true, to: '/chairs' }),
+        ] },
+        cards: [C('Younes starts Monday', '31 of his old customers from Barbershop Nour are told once. No opening offer, no discount.', 'Open chair 4', '/chairs'),
+          C('Saturdays stay at 35 minutes in February', '28 slots at 35 minutes only works if Younes is in every Saturday. If he misses one you are back to the autumn.', 'See the six Saturdays', '/shop/slots?review=6wk', { border: 'rgba(232,161,0,.28)' }),
+          C('Friday payout', 'Paid tomorrow at 09:00 to your account.', 'Open the statement', '/payouts', { big: '2 369 DH' })],
+      },
+      services: {
+        table: { title: 'What you sell', note: 'Saturday slots are 35 minutes since 6 December', c1: 'SERVICE', c2: 'WHO DOES IT', c3: 'LENGTH', c4: 'PRICE', rows: [
+          R('C', 'Cut', 'Most booked', 'All three', '', '25 min', 'Saturdays 35 min', '60 DH', { dot: '#E8442E' }),
+          R('CB', 'Cut & beard', '', 'Nabil, Soufiane', '', '40 min', 'Saturdays 50 min', '80 DH', { dot: '#E8442E' }),
+          R('B', 'Beard', '', 'All three', '', '15 min', '', '30 DH', { dot: '#E8442E' }),
+          R('S', 'Hot towel shave', '', 'Nabil', '', '30 min', '', '50 DH', { dot: '#E8442E' }),
+        ] },
+        cards: [C('Why Saturdays are longer', 'Your Saturday cuts took 34 minutes and were sold in 25. Nobody asked you to cut faster.', 'See the Saturday slots', '/shop')],
+      },
+      reviews: {
+        tiles: [T('SATURDAYS', '4.6 ★', 'was 3.5', { subColor: '#4ADE80' }), T('WEEKDAYS', '4.7 ★', 'unchanged'), T('“WAITED” REVIEWS', '0', 'six Saturdays running · nine the quarter before')],
+        reviewsTitle: 'Latest',
+        reviews: [rev('Mehdi A.', 5, 'Booked 14:00 on Saturday, sat down at 14:00.', '24 Jan · Ilyas', true), rev('Othmane L.', 4, 'Good fade from Soufiane. Worth the wait list.', '21 Jan · Soufiane', false)],
+        cards: [C('Six Saturdays at 35 minutes', 'Twenty-one slots, twenty-one cuts, six weeks in a row.', 'See the numbers', '/shop/slots?review=6wk')],
+      },
+      payouts: {
+        statement: { label: 'FRIDAY 30 JANUARY · WE PAY YOU', pill: 'PAYS TOMORROW 09:00', amount: '2 369 DH', para: 'Paid to your account. Every deduction names a booking or a date you agreed to.',
+          lines: [['Deposits you earned', '44 cuts · Monday to Thursday', '2 640 DH'], ['Sterncut fee · 8%', 'The rate in your agreement, unchanged since you joined', '− 211 DH'], ['Refund · deposit given back', 'STC-6120 · Sat 24 Jan · he was not seen by 14:30', '− 60 DH']],
+          totalLabel: 'Paid to your account', total: '2 369 DH', foot: 'Your barbers see none of this.' },
+        cards: [C('Chair 4 from Monday', 'Younes’s cuts show here from next Friday’s statement.', 'Open chair 4', '/chairs')],
+      },
+      subscription: {
+        rows: [['Plan', 'Monthly', '55 DH a chair'], ['Chairs', '3 → 4', 'Chair 4 from Monday 2 February'], ['Next charge', '220 DH', 'Sunday 1 February · was 165 DH'], ['Reminder SMS', '88 of 200', 'used this month']],
+        cards: [C('How it is paid', 'Taken from your Friday payout. Never from the till.', 'Open the statement', '/payouts')],
+      },
+      reports: {
+        tiles: [T('RUNNING LATE, SATURDAYS', '0 min', 'six Saturdays running'), T('NO-SHOWS A SATURDAY', '0.7', 'was 3'), T('GROSS', '− 84 DH', 'a Saturday · we said 120')],
+        charts: [{ title: 'Saturdays, the three versions', note: 'Slots sold → cuts done', bars: [['Autumn · 3 chairs, 25 min', 23, 28, '#E8A100'], ['Now · 3 chairs, 35 min', 21, 28, '#4ADE80'], ['March · 4 chairs, 35 min', 28, 28, '#5B8DEF']], values: ['28 → 23', '21 → 21', '28 → 28'] },
+          { title: 'Saturday regulars who came back within 6 weeks', note: 'This is where it shows', bars: [['Before', 61, 100, '#3A3A40'], ['Six weeks at 35 min', 78, 100, '#4ADE80']], values: ['61%', '78%'] }],
+        cards: [C('A repair, not a growth move', 'Your takings are lower and will stay lower. New customers on Saturdays: six before, six after.', null, null)],
+      },
+    };
+    return slug === 'coiffure-rif' ? N : M;
+  }
+  renderVals() {
+    const go = this.props.go || (() => {});
+    const path = this.props.path || '/marina-barber-club/today';
+    const seg = path.split('?')[0].split('/').filter(Boolean);
+    const slug = seg[0] || 'marina-barber-club', key = seg[1] || 'today';
+    const D = this.data(slug)[key] || {};
+    const nav = to => to ? () => go('/' + slug + to) : () => {};
+    const tiles = (D.tiles || []).map(t => ({ ...t, go: nav(t.to), cursor: t.to ? 'pointer' : 'default' }));
+    const tb = D.table;
+    const table = tb ? { ...tb, rows: tb.rows.map(r => ({ ...r, aSubColor: r.aSubColor || '#9A9CA3', opacity: r.dim ? 0.6 : 1, avBorder: r.dashed ? 'dashed' : 'solid', you: !!r.you, person: key !== 'services', go: nav(r.to), cursor: r.to ? 'pointer' : 'default' })) } : { rows: [] };
+    const replied = this.state.replied;
+    const reviews = (D.reviews || []).map((r, i) => {
+      const k = slug + i, open = r.needsReply && !replied[k];
+      return { name: r.name, on: '★'.repeat(r.stars), off: '★'.repeat(5 - r.stars), text: r.text, meta: r.meta, action: open ? 'Reply' : replied[k] ? 'Replied just now' : 'Replied', cursor: open ? 'pointer' : 'default', btnBg: open ? '#E8442E' : 'transparent', btnFg: open ? '#fff' : '#6B6B72', reply: () => { if (open) this.setState(s => ({ replied: { ...s.replied, [k]: true } })); } };
+    });
+    const st = D.statement ? { ...D.statement, lines: D.statement.lines.map(([title, sub, amount]) => ({ title, sub, amount })) } : { lines: [] };
+    const rows = (D.rows || []).map(([k, v, sub], i) => ({ k, v, sub, line: i ? '#26262B' : 'transparent' }));
+    const charts = (D.charts || []).map(ch => ({ title: ch.title, note: ch.note, bars: ch.bars.map(([label, v, max, color], i) => ({ label, pct: Math.round(v / max * 100) + '%', value: ch.values ? ch.values[i] : v + ' h', color })) }));
+    const cards = (D.cards || []).map(c => ({ ...c, big: c.big || null, action: c.action || null, go: nav(c.to), border: c.border || '#1E1E22', titleColor: '#fff' }));
+    return { hasTiles: tiles.length > 0, tiles, hasTable: !!tb, table, hasReviews: reviews.length > 0, reviewsTitle: D.reviewsTitle || '', reviews, hasStatement: !!D.statement, st, hasRows: rows.length > 0, rows, charts, cards };
+  }
+}
+</script>
+</body>
+</html>

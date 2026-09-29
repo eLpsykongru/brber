@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:relative;height:100%;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="padding:20px 24px 32px;display:flex;flex-wrap:wrap;align-items:flex-start;gap:18px;box-sizing:border-box">
+  <div style="flex:1 1 220px;max-width:260px;min-width:200px;display:flex;flex-direction:column;gap:8px">
+    <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72;padding:0 2px 4px">FRIDAY STATEMENTS</span>
+    <div onClick="{{ toW36 }}" style="display:flex;flex-direction:column;gap:5px;padding:13px 14px;border-radius:12px;cursor:pointer;background:{{ w36Bg }};border:1px solid {{ w36Border }}" style-hover="border-color:#3A3A40">
+      <span style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font-size:12.5px;font-weight:700">Week 36</span><span style="font-size:8.5px;letter-spacing:.12em;font-weight:700;color:#E8A100;background:rgba(232,161,0,.12);border-radius:999px;padding:3px 7px">DUE FRIDAY</span></span>
+      <span style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums">1 566 DH</span>
+      <span style="font-size:10.5px;color:#9A9CA3">You are holding ours</span>
+    </div>
+    <div onClick="{{ toW35 }}" style="display:flex;flex-direction:column;gap:5px;padding:13px 14px;border-radius:12px;cursor:pointer;background:{{ w35Bg }};border:1px solid {{ w35Border }}" style-hover="border-color:#3A3A40">
+      <span style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font-size:12.5px;font-weight:700">Week 35</span><span style="font-size:8.5px;letter-spacing:.12em;font-weight:700;color:#4ADE80;background:rgba(74,222,128,.12);border-radius:999px;padding:3px 7px">PAID</span></span>
+      <span style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums">1 720 DH</span>
+      <span style="font-size:10.5px;color:#9A9CA3">We handed you</span>
+    </div>
+  </div>
+
+  <div style="flex:999 1 480px;min-width:0">
+    <sc-if value="{{ is36 }}" hint-placeholder-val="{{ true }}">
+      <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">WEEK 36 · YOU ARE HOLDING OURS</span><span style="font-size:8.5px;letter-spacing:.12em;font-weight:700;color:#E8A100;background:rgba(232,161,0,.12);border-radius:999px;padding:3px 7px">DUE FRIDAY</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:34px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums">1 566 DH</span>
+          <span style="font-size:13px;line-height:1.55;color:#C9CAD0;max-width:540px;text-wrap:pretty">Have it ready in the till. <span style="color:#fff;font-weight:700">Hicham comes Friday between 17:00 and 20:00</span>, counts it with you and leaves a receipt.</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:11px;color:#9A9CA3">
+          <span style="background:#111113;border:1px solid #26262B;border-radius:7px;padding:5px 9px">Covers Fri 28 Aug 21:00 → Fri 4 Sep 21:00</span>
+          <span>This is not a bill.</span>
+        </div>
+        <div style="display:flex;flex-direction:column">
+          <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72;padding-bottom:6px">HOW IT ADDS UP</span>
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid #26262B">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:12.5px;font-weight:600">Our cash in your till</span><span style="font-size:10.5px;color:#9A9CA3">4 top-ups · WLT-8841, 8877, 8902, 8930</span></span>
+            <span style="flex:none;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">+ 2 910 DH</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid #26262B">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:12.5px;font-weight:600">Deposits you earned</span><span style="font-size:10.5px;color:#9A9CA3">38 cuts · STC-5102 → 5188</span></span>
+            <span style="flex:none;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">− 1 456 DH</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid #26262B">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:12.5px;font-weight:600">Refund · deposit given back</span><span style="font-size:10.5px;color:#9A9CA3">STC-5140 · cut Mon 31 Aug 12:10 · refunded Tue 1 Sep 18:20</span></span>
+            <span style="flex:none;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">+ 60 DH</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid #3A3A40">
+            <span style="flex:1;font-size:12.5px;font-weight:700">This week</span>
+            <span style="flex:none;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums">1 514 DH</span>
+          </div>
+          <div onClick="{{ openLate }}" style="display:flex;align-items:center;gap:14px;padding:12px 10px;margin:0 -10px;border-radius:10px;border-top:1px solid #26262B;cursor:pointer;background:{{ lateBg }}" style-hover="background:#1E1E22">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:12.5px;font-weight:600">From last week · a refund</span><span style="font-size:10.5px;color:#9A9CA3">STC-4471 · cut Thu 27 Aug 18:20 · refunded Tue 1 Sep 14:06</span><span style="font-size:10.5px;font-weight:700;color:#E8442E">Why is it on this week?</span></span>
+            <span style="flex:none;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">+ 52 DH</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:14px 0 0;border-top:1px solid #3A3A40">
+            <span style="flex:1;font-size:13.5px;font-weight:800">You put on the counter</span>
+            <span style="flex:none;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums">1 566 DH</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span onClick="{{ copy36 }}" style="height:36px;border-radius:9px;background:#212125;display:flex;align-items:center;padding:0 14px;font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer" style-hover="background:#2A2A30">{{ copy36Label }}</span>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ is35 }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">WEEK 35 · WE OWE YOU</span><span style="font-size:8.5px;letter-spacing:.12em;font-weight:700;color:#4ADE80;background:rgba(74,222,128,.12);border-radius:999px;padding:3px 7px">PAID</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:34px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums">1 720 DH</span>
+          <span style="font-size:13px;line-height:1.55;color:#C9CAD0;max-width:540px;text-wrap:pretty"><span style="color:#fff;font-weight:700">Hicham brought it on Saturday at 12:40.</span> You counted it with him and signed. Receipt SR-1104.</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:11px;color:#9A9CA3">
+          <span style="background:#111113;border:1px solid #26262B;border-radius:7px;padding:5px 9px">Covers Fri 21 Aug 21:00 → Fri 28 Aug 21:00</span>
+        </div>
+        <div style="display:flex;flex-direction:column">
+          <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72;padding-bottom:6px">HOW IT ADDS UP</span>
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid #26262B">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:12.5px;font-weight:600">Deposits you earned</span><span style="font-size:10.5px;color:#9A9CA3">41 cuts · STC-4402 → 4488</span></span>
+            <span style="flex:none;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">3 240 DH</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid #26262B">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:12.5px;font-weight:600">Cash top-up · Youssef</span><span style="font-size:10.5px;color:#9A9CA3">WLT-8712 · Sat 22 Aug 10:40</span></span>
+            <span style="flex:none;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">− 300 DH</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid #26262B">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:12.5px;font-weight:600">Cash top-up · Hamza</span><span style="font-size:10.5px;color:#9A9CA3">WLT-8748 · Mon 24 Aug 17:15</span></span>
+            <span style="flex:none;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">− 560 DH</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid #26262B">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:12.5px;font-weight:600">Cash top-up · Youssef</span><span style="font-size:10.5px;color:#9A9CA3">WLT-8790 · Thu 27 Aug 19:02</span></span>
+            <span style="flex:none;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">− 600 DH</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid #26262B">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:12.5px;font-weight:600">Refund · deposit given back</span><span style="font-size:10.5px;color:#9A9CA3">STC-5040 · cut Tue 25 Aug 15:30 · refunded Wed 26 Aug 09:12</span></span>
+            <span style="flex:none;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums">− 60 DH</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;padding:14px 0 0;border-top:1px solid #3A3A40">
+            <span style="flex:1;font-size:13.5px;font-weight:800">We handed you</span>
+            <span style="flex:none;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums">1 720 DH</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <span onClick="{{ copy35 }}" style="height:36px;border-radius:9px;background:#212125;display:flex;align-items:center;padding:0 14px;font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer" style-hover="background:#2A2A30">{{ copy35Label }}</span>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+
+  
+</div>
+</div>
+<sc-if value="{{ late }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeLate }}" style="position:absolute;inset:0;z-index:6;background:rgba(5,5,6,.45);cursor:pointer"></div>
+  <div style="position:absolute;top:0;right:0;bottom:0;z-index:7;width:min(380px,100%);overflow:auto;border-left:1px solid #26262B;box-shadow:-24px 0 60px rgba(0,0,0,.45)">
+    <div style="min-height:100%;background:#17171A;padding:20px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <span style="font-size:14px;font-weight:800">One line explained</span>
+        <span onClick="{{ closeLate }}" style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9A9CA3;cursor:pointer" style-hover="background:#26262B;color:#fff"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">ON WEEK 36 · CARRIED FROM WEEK 35</span><span style="font-size:26px;font-weight:800;font-variant-numeric:tabular-nums">+ 52 DH</span></div>
+      <div style="display:flex;flex-direction:column;background:#111113;border:1px solid #1E1E22;border-radius:12px;padding:2px 13px">
+        <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;font-size:11.5px"><span style="color:#9A9CA3">Booking</span><span style="font-weight:700">STC-4471</span></div>
+        <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #1E1E22;font-size:11.5px"><span style="color:#9A9CA3">The cut</span><span style="font-weight:700;text-align:right">Thu 27 Aug 18:20 · Hamza</span></div>
+        <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #1E1E22;font-size:11.5px"><span style="color:#9A9CA3">Refunded</span><span style="font-weight:700">Tue 1 Sep 14:06</span></div>
+        <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid #1E1E22;font-size:11.5px"><span style="color:#9A9CA3;flex:none">Why</span><span style="font-weight:700;text-align:right;text-wrap:pretty">Wrong length. Hamza agreed at the time · case SUP-3312</span></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <span style="font-size:12.5px;font-weight:700">Why it is on this week and not last week</span>
+        <span style="font-size:12px;line-height:1.6;color:#C9CAD0;text-wrap:pretty">Your week 35 statement is closed and the 1 720 DH you counted with Hicham on Saturday was right when you counted it. We do not go back and change a week you have already been paid for — you would be holding a receipt that no longer matches. Money that moves late arrives as its own line on the next statement, with the old booking on it.</span>
+      </div>
+      <div onClick="{{ toW35 }}" style="display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:11px;background:#111113;border:1px solid #1E1E22;cursor:pointer" style-hover="border-color:#3A3A40">
+        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:700">Week 35 · 1 720 DH</span><span style="font-size:10.5px;color:#9A9CA3">Paid Sat 29 Aug 12:40 · unchanged</span></span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+      </div>
+      <span onClick="{{ dispute }}" style="height:40px;border-radius:10px;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;letter-spacing:.08em;color:#C9CAD0;cursor:pointer" style-hover="color:#fff;border-color:#3A3A40">THIS ISN’T RIGHT</span>
+    </div>
+  </div>
+</sc-if>
+<sc-if value="{{ toastOn }}"><div style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:9px;background:#fff;color:#0D0D0F;border-radius:10px;padding:10px 14px;font-family:Inter,sans-serif;font-size:12px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.45);pointer-events:none;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>{{ toastMsg }}</div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1180,&quot;height&quot;:820},&quot;path&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;/le-fade-tanger/payouts/2026-W36?late=52&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;who&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;go&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(path: string) =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { toast: null, copied35: false, copied36: false };
+  _toast(msg) { this.setState({ toast: msg }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: null }), 2200); }
+  componentWillUnmount() { clearTimeout(this._tt); }
+
+  renderVals() {
+    const s = this.state, go = this.props.go || (() => {});
+    const path = this.props.path || '/le-fade-tanger/payouts/2026-W36';
+    const [p, qs] = path.split('?');
+    const seg = p.split('/').filter(Boolean);
+    const base = '/' + (seg[0] || 'le-fade-tanger');
+    const is35 = seg[2] === '2026-W35', is36 = !is35;
+    const late = is36 && /(^|&)late=52(&|$)/.test(qs || '');
+    const pick = on => ({ bg: on ? '#17171A' : 'transparent', border: on ? '#3A3A40' : '#1E1E22' });
+    const a = pick(is36), b = pick(is35);
+    return {
+      toastOn: !!this.state.toast, toastMsg: this.state.toast || '', dispute: () => this._toast('Sent to Sterncut — they reply within a day'),
+      is35, is36, late,
+      w36Bg: a.bg, w36Border: a.border, w35Bg: b.bg, w35Border: b.border,
+      toW36: () => go(base + '/payouts/2026-W36'), toW35: () => go(base + '/payouts/2026-W35'),
+      openLate: () => go(base + '/payouts/2026-W36' + (late ? '' : '?late=52')), closeLate: () => go(base + '/payouts/2026-W36'),
+      lateBg: late ? '#1E1E22' : 'transparent',
+      copy36: () => this.setState({ copied36: true }), copy35: () => this.setState({ copied35: true }),
+      copy36Label: s.copied36 ? 'COPY SENT TO YOUR PHONE' : 'SEND ME A COPY',
+      copy35Label: s.copied35 ? 'COPY SENT TO YOUR PHONE' : 'SEND ME A COPY',
+    };
+  }
+}
+</script>
+</body>
+</html>

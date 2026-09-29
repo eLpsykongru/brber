@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:relative;height:100%;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="padding:20px 24px 32px;display:flex;flex-wrap:wrap;align-items:flex-start;gap:18px;box-sizing:border-box">
+  <div style="flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:18px">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span onClick="{{ toCash }}" style="height:32px;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:600;color:#C9CAD0;cursor:pointer;white-space:nowrap" style-hover="color:#fff;border-color:#3A3A40">Cash in the till</span>
+      <span onClick="{{ toHandOver }}" style="height:32px;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:600;color:#C9CAD0;cursor:pointer;white-space:nowrap" style-hover="color:#fff;border-color:#3A3A40">Hand the shop over</span>
+      <span onClick="{{ toStandIn }}" style="height:32px;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:600;color:#C9CAD0;cursor:pointer;white-space:nowrap" style-hover="color:#fff;border-color:#3A3A40">Standing in</span>
+      <span style="flex:1"></span>
+      <span onClick="{{ openInvite }}" style="height:32px;border-radius:8px;background:#E8442E;display:flex;align-items:center;gap:7px;padding:0 14px;font-size:11.5px;font-weight:700;color:#fff;cursor:pointer;white-space:nowrap" style-hover="background:#F0533D"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Invite a barber</span>
+    </div>
+    <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:15px 16px 12px">
+        <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">WORKING · 3</span>
+        <span style="font-size:10.5px;color:#6B6B72">Shop code FADE·71</span>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(170px,1.3fr) minmax(140px,1.2fr) 88px 96px 14px;gap:12px;padding:8px 16px;border-top:1px solid #1E1E22;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">
+        <span>BARBER</span><span>RIGHT NOW</span><span>RATING</span><span>COMMISSION</span><span></span>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(170px,1.3fr) minmax(140px,1.2fr) 88px 96px 14px;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid #1E1E22">
+        <span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="position:relative;width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">YA<span style="position:absolute;right:-1px;bottom:-1px;width:9px;height:9px;border-radius:999px;background:#E8442E;border:2px solid #17171A"></span></span><span style="font-size:12.5px;font-weight:700;white-space:nowrap">Youssef Alami</span><span style="font-size:8.5px;letter-spacing:.12em;font-weight:700;color:#9A9CA3;background:#26262B;border-radius:5px;padding:3px 5px">YOU</span></span>
+        <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:12px;font-weight:600">Cutting Mehdi</span><span style="font-size:10.5px;color:#9A9CA3">free 11:50</span></span>
+        <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:700">4.86 ★</span><span style="font-size:10.5px;color:#9A9CA3">142 cuts</span></span>
+        <span style="font-size:12px;color:#9A9CA3">Owner</span>
+        <span></span>
+      </div>
+      <div onClick="{{ toHamza }}" style="display:grid;grid-template-columns:minmax(170px,1.3fr) minmax(140px,1.2fr) 88px 96px 14px;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid #1E1E22;cursor:pointer;background:{{ hamzaBg }}" style-hover="background:#1C1C20">
+        <span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="position:relative;width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">HB<span style="position:absolute;right:-1px;bottom:-1px;width:9px;height:9px;border-radius:999px;background:#5B8DEF;border:2px solid #17171A"></span></span><span style="font-size:12.5px;font-weight:700;white-space:nowrap">Hamza Bennani</span></span>
+        <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:12px;font-weight:600">Cutting a walk-in</span><span style="font-size:10.5px;color:#9A9CA3">free 12:20</span></span>
+        <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:700">4.8 ★</span><span style="font-size:10.5px;color:#9A9CA3">41 reviews</span></span>
+        <span style="font-size:12px;font-weight:700">20%</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(170px,1.3fr) minmax(140px,1.2fr) 88px 96px 14px;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid #1E1E22;cursor:pointer" onClick="{{ toSalim }}" style-hover="background:#1C1C20">
+        <span style="display:flex;align-items:center;gap:10px;min-width:0;opacity:.6"><span style="position:relative;width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">SA<span style="position:absolute;right:-1px;bottom:-1px;width:9px;height:9px;border-radius:999px;background:#3A3A40;border:2px solid #17171A"></span></span><span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-size:12.5px;font-weight:700;white-space:nowrap">Salim Alaoui</span></span></span>
+        <span style="display:flex;flex-direction:column;gap:2px;min-width:0;opacity:.6"><span style="font-size:12px;font-weight:600">Day off</span><span style="font-size:10.5px;color:#9A9CA3">back Friday 10:00</span></span>
+        <span style="font-size:10.5px;line-height:1.35;font-weight:600;color:#E8A100">No login of his own</span>
+        <span style="font-size:12px;font-weight:700;opacity:.6">20%</span>
+        <span></span>
+      </div>
+    </div>
+    <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
+      <div style="padding:15px 16px 12px"><span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">INVITED · {{ invitedCount }}</span></div>
+      <sc-for list="{{ invites }}" as="inv" hint-placeholder-count="2">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid #1E1E22">
+          <span style="width:30px;height:30px;border-radius:999px;border:1px dashed #3A3A40;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#C9CAD0;flex:none">
+            <sc-if value="{{ inv.initials }}">{{ inv.initials }}</sc-if>
+            <sc-if value="{{ inv.phoneOnly }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"></path></svg></sc-if>
+          </span>
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">{{ inv.title }}</span><span style="font-size:10.5px;color:{{ inv.subColor }}">{{ inv.sub }}</span></span>
+          <span onClick="{{ inv.act }}" style="height:30px;border-radius:8px;display:flex;align-items:center;padding:0 12px;font-size:11px;font-weight:700;white-space:nowrap;cursor:{{ inv.cursor }};background:{{ inv.btnBg }};color:{{ inv.btnFg }};border:1px solid {{ inv.btnBorder }}">{{ inv.action }}</span>
+        </div>
+      </sc-for>
+      <sc-if value="{{ noInvites }}"><div style="padding:12px 16px 16px;border-top:1px solid #1E1E22;font-size:11.5px;color:#6B6B72">No invites out.</div></sc-if>
+    </div>
+  </div>
+  
+</div>
+</div>
+
+<sc-if value="{{ detail }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeDetail }}" style="position:absolute;inset:0;z-index:6;background:rgba(5,5,6,.45);cursor:pointer"></div>
+  <div style="position:absolute;top:0;right:0;bottom:0;z-index:7;width:min(380px,100%);overflow:auto;border-left:1px solid #26262B;box-shadow:-24px 0 60px rgba(0,0,0,.45)">
+    <div style="min-height:100%;background:#17171A;padding:20px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <span style="width:44px;height:44px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none">HB</span>
+        <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+          <span style="font-size:16px;font-weight:800">Hamza Bennani</span>
+          <span style="font-size:11px;color:#9A9CA3">Barber · joined Mar 2026</span>
+          <span style="display:flex;align-items:center;gap:6px;font-size:11px"><span style="color:#E8A100;letter-spacing:1px">★★★★★</span><span style="font-weight:700">4.8</span><span style="color:#6B6B72">(41)</span></span>
+        </span>
+        <span onClick="{{ closeDetail }}" style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9A9CA3;cursor:pointer;flex:none" style-hover="background:#26262B;color:#fff"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+        <span style="height:34px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11.5px;font-weight:600;cursor:pointer" onClick="{{ callHamza }}" style-hover="filter:brightness(1.2)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"></path></svg>Call</span>
+        <span style="height:34px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11.5px;font-weight:600;cursor:pointer" onClick="{{ chatHamza }}" style-hover="filter:brightness(1.2)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z"></path></svg>Chat</span>
+        <span onClick="{{ toToday }}" style="height:34px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11.5px;font-weight:600;cursor:pointer" style-hover="background:#2A2A30"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5h12a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3zM3 9.5h18M8 3v4M16 3v4"></path></svg>Schedule</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">THIS WEEK</span>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+          <div style="background:#141416;border-radius:10px;padding:11px 12px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.12em;font-weight:700;color:#6B6B72">BOOKED VALUE</span><span style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums">2 100 DH</span></div>
+          <div style="background:#141416;border-radius:10px;padding:11px 12px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.12em;font-weight:700;color:#6B6B72">SHOP CUT · 20%</span><span style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums">420 DH</span></div>
+          <div style="background:#141416;border-radius:10px;padding:11px 12px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.12em;font-weight:700;color:#6B6B72">CLIENTS</span><span style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums">31</span></div>
+          <div style="background:#141416;border-radius:10px;padding:11px 12px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.12em;font-weight:700;color:#6B6B72">OCCUPANCY</span><span style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums">71%</span></div>
+          <div style="background:#141416;border-radius:10px;padding:11px 12px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.12em;font-weight:700;color:#6B6B72">NO-SHOWS</span><span style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums">2</span></div>
+          <div style="background:#141416;border-radius:10px;padding:11px 12px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.12em;font-weight:700;color:#6B6B72">AVG TICKET</span><span style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums">68 DH</span></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column">
+        <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72;padding-bottom:6px">ACCESS</span>
+        <sc-for list="{{ toggles }}" as="t" hint-placeholder-count="3">
+          <div onClick="{{ t.flip }}" style="display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid #26262B;cursor:pointer">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:600">{{ t.label }}</span><sc-if value="{{ t.sub }}"><span style="font-size:10.5px;color:#9A9CA3">{{ t.sub }}</span></sc-if></span>
+            <span style="position:relative;width:36px;height:20px;border-radius:999px;background:{{ t.bg }};flex:none;transition:background .15s"><span style="position:absolute;top:2px;left:{{ t.knob }};width:16px;height:16px;border-radius:999px;background:#fff;transition:left .15s"></span></span>
+          </div>
+        </sc-for>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #26262B">
+          <span style="flex:1;font-size:12px;font-weight:600">Commission rate</span>
+          <span style="font-size:13px;font-weight:800">20%</span>
+        </div>
+      </div>
+      <span style="height:38px;border-radius:9px;border:1px solid rgba(248,113,113,.35);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;letter-spacing:.08em;color:#F87171;cursor:pointer" onClick="{{ askRemove }}" style-hover="filter:brightness(1.2)">REMOVE FROM SHOP</span>
+    </div>
+  </div>
+</sc-if>
+<sc-if value="{{ inviteOpen }}">
+<div onClick="{{ closeModal }}" style="position:absolute;inset:0;z-index:10;background:rgba(5,5,6,.62);display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box">
+  <div onClick="{{ stop }}" style="width:100%;max-width:460px;max-height:100%;overflow:auto;background:#17171A;border:1px solid #2A2A30;border-radius:18px;padding:22px;box-sizing:border-box;display:grid;gap:18px;align-content:start;box-shadow:0 30px 80px rgba(0,0,0,.55)">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <span style="font-size:18px;font-weight:800">Invite a barber</span>
+      <span onClick="{{ closeModal }}" style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9A9CA3;cursor:pointer" style-hover="background:#26262B;color:#fff"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">SHOP CODE</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="flex:1;height:48px;border-radius:11px;background:#111113;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:21px;font-weight:800;letter-spacing:.12em">FADE·71</span>
+        <span onClick="{{ copyCode }}" style="height:48px;border-radius:11px;background:#212125;display:flex;align-items:center;padding:0 15px;font-size:12px;font-weight:700;cursor:pointer" style-hover="background:#2A2A30">{{ copyLabel }}</span>
+        <span style="height:48px;border-radius:11px;background:#212125;display:flex;align-items:center;padding:0 15px;font-size:12px;font-weight:700">Share</span>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">OR BY PHONE</span>
+      <input value="{{ phone }}" onChange="{{ onPhone }}" onKeyDown="{{ onPhoneKey }}" placeholder="+212 6•• ••• •••" autoComplete="off" style="height:46px;box-sizing:border-box;border-radius:11px;background:#111113;border:1px solid {{ phoneBorder }};padding:0 14px;color:#fff;font-size:14px;font-family:Inter,sans-serif;outline:none" style-focus="border-color:#E8442E">
+      <sc-if value="{{ phoneErr }}"><span style="font-size:11.5px;color:#F87171">Enter his number, or share the code instead.</span></sc-if>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">STARTING COMMISSION</span>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px">
+        <sc-for list="{{ cuts }}" as="c" hint-placeholder-count="4">
+          <span onClick="{{ c.pick }}" style="height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};border:1px solid {{ c.border }}">{{ c.label }}</span>
+        </sc-for>
+      </div>
+    </div>
+    <span onClick="{{ sendInvite }}" style="height:46px;border-radius:11px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;letter-spacing:.1em;cursor:pointer" style-hover="background:#F0533D">SEND INVITE</span>
+    <div style="display:flex;align-items:center;gap:11px;padding-top:14px;border-top:1px solid #26262B">
+      <span style="width:30px;height:30px;border-radius:999px;border:1px dashed #3A3A40;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#C9CAD0;flex:none">OT</span>
+      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">Omar Tazi</span><span style="font-size:10.5px;color:#9A9CA3">{{ omarLine }}</span></span>
+      <span onClick="{{ resendOmar }}" style="font-size:11.5px;font-weight:700;cursor:pointer;color:{{ omarResendColor }}">{{ omarResend }}</span>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ expiredOpen }}">
+<div onClick="{{ closeModal }}" style="position:absolute;inset:0;z-index:10;background:rgba(5,5,6,.62);display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box">
+  <div onClick="{{ stop }}" style="width:100%;max-width:440px;max-height:100%;overflow:auto;background:#17171A;border:1px solid #2A2A30;border-radius:18px;padding:22px;box-sizing:border-box;display:grid;gap:16px;align-content:start;box-shadow:0 30px 80px rgba(0,0,0,.55)">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+      <span style="display:flex;flex-direction:column;gap:6px"><span style="font-size:18px;font-weight:800">Nobody claimed it</span><span style="font-size:12.5px;line-height:1.55;color:#9A9CA3;text-wrap:pretty">Sent to 0655 •• 09 74 nine days ago. The link died after seven.</span></span>
+      <span onClick="{{ closeModal }}" style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9A9CA3;cursor:pointer;flex:none" style-hover="background:#26262B;color:#fff"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+    </div>
+    <div style="display:flex;flex-direction:column;background:#111113;border:1px solid #1E1E22;border-radius:12px;padding:2px 14px">
+      <div style="display:flex;justify-content:space-between;gap:12px;padding:11px 0;font-size:12px"><span style="color:#9A9CA3">Link opened</span><span style="font-weight:700">Never</span></div>
+      <div style="display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid #1E1E22;font-size:12px"><span style="color:#9A9CA3">Commission offered</span><span style="font-weight:700">20%</span></div>
+      <div style="display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid #1E1E22;font-size:12px"><span style="color:#9A9CA3">Chair held for him</span><span style="font-weight:700;text-align:right">None — nothing was reserved</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;height:46px;border-radius:11px;background:#111113;border:1px solid #26262B;padding:0 8px 0 14px;box-sizing:border-box">
+      <span style="flex:1;font-size:14px;font-weight:600">0655 •• 09 74</span>
+      <span style="font-size:11px;font-weight:700;letter-spacing:.08em;color:#9A9CA3;padding:0 8px">CHANGE</span>
+    </div>
+    <span onClick="{{ sendAgain }}" style="height:46px;border-radius:11px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;letter-spacing:.1em;cursor:pointer" style-hover="background:#F0533D">SEND AGAIN AT 20%</span>
+    <span onClick="{{ withdraw }}" style="height:46px;border-radius:11px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;letter-spacing:.1em;cursor:pointer" style-hover="background:#2A2A30">WITHDRAW THE INVITE</span>
+    <span style="font-size:11px;line-height:1.5;color:#6B6B72;text-align:center">Sending again kills the old link. Only the newest one works.</span>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{ removeOpen }}">
+<div onClick="{{ cancelRemove }}" style="position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;cursor:pointer">
+  <div onClick="{{ stop }}" style="width:100%;max-width:420px;background:#17171A;border:1px solid #26262B;border-radius:18px;padding:24px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px;cursor:default;box-shadow:0 30px 80px rgba(0,0,0,.55)">
+    <span style="font-size:17px;font-weight:800">Remove Hamza from Le Fade?</span>
+    <span style="font-size:12.5px;line-height:1.55;color:#9A9CA3;text-wrap:pretty">His 3 bookings still to come are offered to your other chairs first. Customers who can’t move get their deposit back. He keeps his Sterncut account and his reviews.</span>
+    <div style="display:flex;gap:10px">
+      <span onClick="{{ cancelRemove }}" style="flex:1;height:44px;border-radius:10px;background:#212125;border:1px solid #3A3A40;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.08em;cursor:pointer" style-hover="background:#26262B">KEEP HIM</span>
+      <span onClick="{{ confirmRemove }}" style="flex:1;height:44px;border-radius:10px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.08em;cursor:pointer" style-hover="background:#F0533D">REMOVE HIM</span>
+    </div>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{ toastOn }}"><div style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:9px;background:#fff;color:#0D0D0F;border-radius:10px;padding:10px 14px;font-family:Inter,sans-serif;font-size:12px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.45);pointer-events:none;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>{{ toastMsg }}</div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1180,&quot;height&quot;:760},&quot;path&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;/le-fade-tanger/chairs/hamza-bennani&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;who&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;go&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(path: string) =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { toast: null, access: { cash: true, prices: false, reports: false }, nudged: false, expired: 'open', omarResent: false, copied: false, phone: '', phoneErr: false, cut: '20%', sent: [] };
+  _toast(msg) { this.setState({ toast: msg }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: null }), 2200); }
+  componentWillUnmount() { clearTimeout(this._tt); }
+
+  renderVals() {
+    const s = this.state, go = this.props.go || (() => {});
+    const path = this.props.path || '/le-fade-tanger/chairs';
+    const [p, qs] = path.split('?');
+    const seg = p.split('/').filter(Boolean);
+    const base = '/' + (seg[0] || 'le-fade-tanger');
+    const q = {}; (qs || '').split('&').filter(Boolean).forEach(kv => { const i = kv.indexOf('='); q[i < 0 ? kv : kv.slice(0, i)] = i < 0 ? '1' : decodeURIComponent(kv.slice(i + 1)); });
+    const detail = seg[2] === 'hamza-bennani';
+    const here = base + (detail ? '/chairs/hamza-bennani' : '/chairs');
+    const nav = x => () => go(base + x);
+    const close = () => go(here);
+    const live = { btnBg: '#212125', btnFg: '#fff', btnBorder: '#3A3A40', cursor: 'pointer' };
+    const done = { btnBg: 'transparent', btnFg: '#6B6B72', btnBorder: 'transparent', cursor: 'default' };
+    const invites = s.sent.map(x => ({ initials: null, phoneOnly: true, title: x.phone, sub: `Sent just now · ${x.cut} commission · waiting`, subColor: '#9A9CA3', action: 'Sent', act: () => {}, ...done }));
+    invites.push(s.nudged
+      ? { initials: 'OT', phoneOnly: false, title: 'Omar Tazi', sub: '0661 •• 42 18 · nudged just now', subColor: '#9A9CA3', action: 'Nudged', act: () => {}, ...done }
+      : { initials: 'OT', phoneOnly: false, title: 'Omar Tazi', sub: '0661 •• 42 18 · sent 2 days ago · opened, not finished', subColor: '#9A9CA3', action: 'Nudge', act: () => this.setState({ nudged: true }), ...live });
+    if (s.expired === 'open') invites.push({ initials: null, phoneOnly: true, title: '0655 •• 09 74', sub: 'Sent 9 days ago · expired', subColor: '#F87171', action: 'Sort out', act: () => go(here + '?invite=expired'), ...live });
+    if (s.expired === 'resent') invites.push({ initials: null, phoneOnly: true, title: '0655 •• 09 74', sub: 'Sent again just now · 20% commission · waiting', subColor: '#9A9CA3', action: 'Resent', act: () => {}, ...done });
+    const T = [{ k: 'cash', label: 'Take cash top-ups', sub: 'Acts as an agent for the shop float' }, { k: 'prices', label: 'Edit his own prices', sub: null }, { k: 'reports', label: 'See shop reports', sub: null }];
+    const toggles = T.map(t => { const on = !!s.access[t.k]; return { label: t.label, sub: t.sub, bg: on ? '#E8442E' : '#3A3A40', knob: on ? '18px' : '2px', flip: () => this.setState(st => ({ access: { ...st.access, [t.k]: !st.access[t.k] } })) }; });
+    const cuts = ['15%', '20%', '25%', 'Custom'].map(c => { const on = c === s.cut; return { label: c, bg: on ? '#fff' : '#141416', fg: on ? '#0D0D0F' : '#9A9CA3', border: on ? '#fff' : '#26262B', pick: () => this.setState({ cut: c }) }; });
+    const sendInvite = () => {
+      const digits = s.phone.replace(/\D/g, '');
+      if (digits.length < 9) { this.setState({ phoneErr: true }); return; }
+      this.setState(st => ({ sent: [{ phone: st.phone.trim(), cut: st.cut === 'Custom' ? 'custom' : st.cut }, ...st.sent], phone: '', phoneErr: false }));
+      close();
+    };
+    const toSalim = () => go(base + '/chairs/salim-alaoui');
+    return { toSalim, toastOn: !!s.toast, toastMsg: s.toast || '', removeOpen: !!s.removeAsk, stop: e => e.stopPropagation(),
+      callHamza: () => this._toast('Calling Hamza…'), chatHamza: () => this._toast('Chat opens in the Sterncut app'),
+      askRemove: () => this.setState({ removeAsk: true }), cancelRemove: () => this.setState({ removeAsk: false }),
+      confirmRemove: () => { this.setState({ removeAsk: false }); this._toast('Hamza removed — his bookings are being offered to your chairs'); },
+      detail, hamzaBg: detail ? '#1E1E22' : 'transparent',
+      toHamza: nav('/chairs/hamza-bennani'), closeDetail: nav('/chairs'), toToday: nav('/today'),
+      toCash: nav('/chairs/cash'), toHandOver: nav('/chairs/hand-over'), toStandIn: nav('/chairs/stand-in'),
+      openInvite: () => go(here + '?invite=1'),
+      invites, invitedCount: invites.length, noInvites: invites.length === 0,
+      toggles,
+      inviteOpen: q.invite === '1', expiredOpen: q.invite === 'expired' && s.expired === 'open',
+      closeModal: close, stop: e => e.stopPropagation(),
+      copyLabel: s.copied ? 'Copied' : 'Copy',
+      copyCode: () => { try { navigator.clipboard && navigator.clipboard.writeText('FADE·71'); } catch (e) {} this.setState({ copied: true }); },
+      phone: s.phone, phoneErr: s.phoneErr, phoneBorder: s.phoneErr ? '#F87171' : '#26262B',
+      onPhone: e => this.setState({ phone: e.target.value, phoneErr: false }),
+      onPhoneKey: e => { if (e.key === 'Enter') sendInvite(); },
+      cuts, sendInvite,
+      omarLine: s.omarResent ? 'Sent again just now · waiting' : 'Invite sent · waiting 2 days',
+      omarResend: s.omarResent ? 'Resent' : 'Resend', omarResendColor: s.omarResent ? '#6B6B72' : '#E8442E',
+      resendOmar: () => this.setState({ omarResent: true, nudged: true }),
+      sendAgain: () => { this.setState({ expired: 'resent' }); close(); },
+      withdraw: () => { this.setState({ expired: 'withdrawn' }); close(); },
+    };
+  }
+}
+</script>
+</body>
+</html>

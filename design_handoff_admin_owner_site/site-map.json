@@ -1,0 +1,2188 @@
+{
+ "about": "Every current canvas screen and the site section it folds into. s = section (o- = owner). at/as filled in as each section is built.",
+ "screens": [
+  {
+   "id": "OVW-02",
+   "t": "The morning screen — nine things and yesterday",
+   "f": "Sterncut Ops - Overview.dc.html",
+   "k": "W",
+   "at": "/overview",
+   "as": "page",
+   "s": "overview"
+  },
+  {
+   "id": "OVW-03",
+   "t": "Sign in — no sign-up, no reset",
+   "f": "Sterncut Ops - Overview.dc.html",
+   "k": "W",
+   "at": "/sign-in",
+   "as": "page",
+   "s": "overview"
+  },
+  {
+   "id": "OVW-04",
+   "t": "Two-factor — and no emailed codes",
+   "f": "Sterncut Ops - Overview.dc.html",
+   "k": "W",
+   "at": "/sign-in/code",
+   "as": "page",
+   "s": "overview"
+  },
+  {
+   "id": "OVW-05",
+   "t": "Locked at 30 minutes — the draft survived",
+   "f": "Sterncut Ops - Overview.dc.html",
+   "k": "W",
+   "at": "any page · account menu → Lock screen",
+   "as": "state",
+   "s": "overview"
+  },
+  {
+   "id": "OVW-06",
+   "t": "⌘K — one shop, its barbers, and what can be done to it",
+   "f": "Sterncut Ops - Overview.dc.html",
+   "k": "W",
+   "at": "any page · ⌘K or the search box",
+   "as": "modal",
+   "s": "overview"
+  },
+  {
+   "id": "DMD-01",
+   "t": "Demand map · Tangier",
+   "f": "Sterncut Ops - Demand.dc.html",
+   "k": "W",
+   "s": "demand",
+   "at": "/demand",
+   "as": "page"
+  },
+  {
+   "id": "DMD-02",
+   "t": "Demand · the list behind the map",
+   "f": "Sterncut Ops - Demand.dc.html",
+   "k": "W",
+   "s": "demand",
+   "at": "/demand?view=list",
+   "as": "tab"
+  },
+  {
+   "id": "DMD-03",
+   "t": "Malabata · the 118, one by one",
+   "f": "Sterncut Ops - Demand.dc.html",
+   "k": "W",
+   "s": "demand",
+   "at": "/demand/tangier/malabata",
+   "as": "page"
+  },
+  {
+   "id": "DMD-04",
+   "t": "One ask · and it is not a supply problem",
+   "f": "Sterncut Ops - Demand.dc.html",
+   "k": "W",
+   "s": "demand",
+   "at": "/demand/tangier/malabata?ask=WR-4471",
+   "as": "state"
+  },
+  {
+   "id": "DMD-05",
+   "t": "Tell them when it opens — with no date to give",
+   "f": "Sterncut Ops - Demand.dc.html",
+   "k": "W",
+   "s": "demand",
+   "at": "/demand/tangier/malabata?notify=1",
+   "as": "modal"
+  },
+  {
+   "id": "DMD-06",
+   "t": "Kasbah · nothing to recruit, only hours",
+   "f": "Sterncut Ops - Demand.dc.html",
+   "k": "W",
+   "s": "demand",
+   "at": "/demand/tangier/kasbah",
+   "as": "page"
+  },
+  {
+   "id": "DMD-07",
+   "t": "A city with nothing in it",
+   "f": "Sterncut Ops - Demand.dc.html",
+   "k": "W",
+   "s": "demand",
+   "at": "/demand/tetouan",
+   "as": "page"
+  },
+  {
+   "id": "DMD-08",
+   "t": "Ask the two Kasbah shops",
+   "f": "Sterncut Ops - Demand.dc.html",
+   "k": "W",
+   "s": "demand",
+   "at": "/demand/tangier/kasbah?ask=hours",
+   "as": "modal"
+  },
+  {
+   "id": "DMD-09",
+   "t": "Tell him where Rachid is",
+   "f": "Sterncut Ops - Demand.dc.html",
+   "k": "W",
+   "s": "demand",
+   "at": "/demand/tangier/malabata?ask=WR-4471&tell=1",
+   "as": "modal"
+  },
+  {
+   "id": "DMD-10",
+   "t": "Districts with no supply at all",
+   "f": "Sterncut Ops - Demand.dc.html",
+   "k": "W",
+   "s": "demand",
+   "at": "/demand/tangier?filter=no-supply",
+   "as": "page"
+  },
+  {
+   "id": "DMD-11",
+   "t": "Hicham's recruiting queue",
+   "f": "Sterncut Ops - Demand.dc.html",
+   "k": "W",
+   "s": "demand",
+   "at": "/salons/recruiting/asks",
+   "as": "page"
+  },
+  {
+   "id": "DMD-12",
+   "t": "Barbier Mesnana · the June refusal reopened",
+   "f": "Sterncut Ops - Demand.dc.html",
+   "k": "W",
+   "s": "demand",
+   "at": "/salons/applications/barbier-mesnana",
+   "as": "page"
+  },
+  {
+   "id": "DMD-13",
+   "t": "Al Mansour · cold visit, 14 January",
+   "f": "Sterncut Ops - Demand.dc.html",
+   "k": "W",
+   "s": "demand",
+   "at": "/salons/recruiting/visits/al-mansour",
+   "as": "page"
+  },
+  {
+   "id": "DMD-14",
+   "t": "Refusals with a date on them",
+   "f": "Sterncut Ops - Demand.dc.html",
+   "k": "W",
+   "s": "demand",
+   "at": "/salons/applications?filter=refused-fixable",
+   "as": "page"
+  },
+  {
+   "id": "DMD-15",
+   "t": "The Arabic walkthrough nobody owns",
+   "f": "Sterncut Ops - Demand.dc.html",
+   "k": "W",
+   "s": "demand",
+   "at": "/overview/blockers/onboarding-language",
+   "as": "page"
+  },
+  {
+   "id": "DMD-16",
+   "t": "Dradeb · seventeen and nothing to say",
+   "f": "Sterncut Ops - Demand.dc.html",
+   "k": "W",
+   "s": "demand",
+   "at": "/demand/tangier/dradeb",
+   "as": "page"
+  },
+  {
+   "id": "SAL-02",
+   "t": "Approval queue · reviewing a shop — AP-0182 now arrives from PUB-02",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/pending/tetouan-barbershop",
+   "as": "page"
+  },
+  {
+   "id": "SAL-03",
+   "t": "Wallets & float settlement",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "wallets",
+   "at": "/wallets",
+   "as": "page"
+  },
+  {
+   "id": "SAL-04",
+   "t": "Salon detail · Marina, hidden",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/marina-barber-club · while only hidden",
+   "as": "state"
+  },
+  {
+   "id": "SAL-05",
+   "t": "Add salon · the four things ops knows",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/new",
+   "as": "page"
+  },
+  {
+   "id": "SAL-06",
+   "t": "Invited · waiting on Brahim",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?created=coiffure-atlas",
+   "as": "state"
+  },
+  {
+   "id": "SAL-07",
+   "t": "Suspend the shop",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/marina-barber-club?suspend=1",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-08",
+   "t": "Message the owner",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/marina-barber-club?message=1",
+   "as": "drawer"
+  },
+  {
+   "id": "SAL-09",
+   "t": "Suspended · the way back",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/marina-barber-club",
+   "as": "page"
+  },
+  {
+   "id": "SAL-10",
+   "t": "Le Fade Tanger · nothing wrong",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/le-fade-tanger",
+   "as": "page"
+  },
+  {
+   "id": "SAL-11",
+   "t": "All · row menu",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons",
+   "as": "page"
+  },
+  {
+   "id": "SAL-12",
+   "t": "All · 3 selected",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?select=3",
+   "as": "state"
+  },
+  {
+   "id": "SAL-13",
+   "t": "Bulk suspend · refused",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?select=3&bulk=suspend",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-14",
+   "t": "Live · 42 shops",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?state=live",
+   "as": "tab"
+  },
+  {
+   "id": "SAL-15",
+   "t": "Pending · drop an invite",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?state=pending&drop=AP-0183",
+   "as": "state"
+  },
+  {
+   "id": "SAL-16",
+   "t": "Suspended · one shop",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?state=suspended",
+   "as": "tab"
+  },
+  {
+   "id": "SAL-17",
+   "t": "Set float cap · one shop",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?cap=marina-barber-club",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-18",
+   "t": "Message the owners",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?select=3&bulk=message",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-19",
+   "t": "Set float cap · bulk",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?select=3&bulk=cap",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-20",
+   "t": "Settle float · 2 of 3",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?select=3&bulk=settle",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-21",
+   "t": "Raise the cap",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?state=live&raise=le-fade-tanger",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-22",
+   "t": "Chase all three",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?state=suspended&chase=marina-barber-club",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-23",
+   "t": "Lift it · override",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?state=suspended&lift=marina-barber-club",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-24",
+   "t": "Lift it · the commit",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?state=suspended&lift=marina-barber-club&confirm=1",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-25",
+   "t": "Lifted · on a 22-hour clock",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/marina-barber-club · after lifting",
+   "as": "state"
+  },
+  {
+   "id": "SAL-26",
+   "t": "Approve · what actually goes live",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/pending/tetouan-barbershop?approve=1",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-27",
+   "t": "Approved · live with nothing to sell",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/tetouan-barbershop",
+   "as": "page"
+  },
+  {
+   "id": "SAL-28",
+   "t": "Reject · sent back, not killed",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/pending/tetouan-barbershop?reject=1",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-29",
+   "t": "Pending · table, with the view switch",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?state=pending",
+   "as": "tab"
+  },
+  {
+   "id": "SAL-30",
+   "t": "READ IT · ready for you",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?state=pending&peek=AP-0182",
+   "as": "drawer"
+  },
+  {
+   "id": "SAL-31",
+   "t": "READ IT · waiting on them",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons?state=pending&peek=AP-0183",
+   "as": "drawer"
+  },
+  {
+   "id": "SAL-32",
+   "t": "View · identity",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/pending/tetouan-barbershop?doc=cin",
+   "as": "drawer"
+  },
+  {
+   "id": "SAL-33",
+   "t": "View · services and prices",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/pending/tetouan-barbershop?doc=services",
+   "as": "drawer"
+  },
+  {
+   "id": "SAL-34",
+   "t": "FIX PIN · where the shop is",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/pending/tetouan-barbershop?fix=pin",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-35",
+   "t": "REQUEST CHANGES",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/pending/tetouan-barbershop?changes=1",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-36",
+   "t": "Cash top-ups on, on day one",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/pending/tetouan-barbershop?set=agent",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-37",
+   "t": "Walk-ins by QR, off",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/pending/tetouan-barbershop?set=qr",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-38",
+   "t": "Show in Explore, off",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "salons",
+   "at": "/salons/pending/tetouan-barbershop?set=explore",
+   "as": "modal"
+  },
+  {
+   "id": "SAL-39",
+   "t": "Marina · pass liability against float",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "coupons",
+   "held": true,
+   "at": "/coupons/passes/marina-barber-club",
+   "as": "page"
+  },
+  {
+   "id": "SAL-40",
+   "t": "Marina reopening · the second condition",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "coupons",
+   "held": true,
+   "at": "/coupons/passes/marina-barber-club/reinstate",
+   "as": "page"
+  },
+  {
+   "id": "SAL-41",
+   "t": "Hamza, eleven minutes later",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "W",
+   "s": "compliance",
+   "at": "/compliance/countersign/barbershop-nour?day=2",
+   "as": "state"
+  },
+  {
+   "id": "SAL-42",
+   "t": "What the six were sent at 21:04",
+   "f": "Sterncut Ops - Salons.dc.html",
+   "k": "P",
+   "s": "messages-out"
+  },
+  {
+   "id": "BRB-02",
+   "t": "Barbers · ranked by harm",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers?filter=cancels",
+   "as": "tab"
+  },
+  {
+   "id": "BRB-03",
+   "t": "Karim Idrissi · his file",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/karim-idrissi",
+   "as": "page"
+  },
+  {
+   "id": "BRB-04",
+   "t": "Suspend a barber who owns his shop",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/karim-idrissi?suspend=1",
+   "as": "modal"
+  },
+  {
+   "id": "BRB-05",
+   "t": "His 11 cancellations",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/karim-idrissi/cancellations",
+   "as": "page"
+  },
+  {
+   "id": "BRB-06",
+   "t": "Task AUD-118 · ten days late",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "compliance",
+   "at": "/compliance/tasks/AUD-118",
+   "as": "page"
+  },
+  {
+   "id": "BRB-07",
+   "t": "Cap his day",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/karim-idrissi?cap=1",
+   "as": "modal"
+  },
+  {
+   "id": "BRB-08",
+   "t": "Hide him from search",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/karim-idrissi?hide=1",
+   "as": "modal"
+  },
+  {
+   "id": "BRB-09",
+   "t": "All · the roster",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers",
+   "as": "page"
+  },
+  {
+   "id": "BRB-10",
+   "t": "Click a row · the peek",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers?peek=hamza-sabri",
+   "as": "drawer"
+  },
+  {
+   "id": "BRB-11",
+   "t": "All · the row menu",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers?menu=zakaria-boukhris",
+   "as": "state"
+  },
+  {
+   "id": "BRB-12",
+   "t": "Rated under 4.0 · sample size decides",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers?filter=rating",
+   "as": "tab"
+  },
+  {
+   "id": "BRB-13",
+   "t": "Never turns on the queue · 7",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers?filter=queue",
+   "as": "tab"
+  },
+  {
+   "id": "BRB-14",
+   "t": "MESSAGE HIM · Hamza",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/hamza-sabri?message=1",
+   "as": "modal"
+  },
+  {
+   "id": "BRB-15",
+   "t": "OPEN HIS FILE · a man with nothing wrong",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/hamza-sabri",
+   "as": "page"
+  },
+  {
+   "id": "BRB-16",
+   "t": "SEE HIS DAY · Zakaria, three days at zero",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/zakaria-boukhris/day",
+   "as": "page"
+  },
+  {
+   "id": "BRB-17",
+   "t": "MOVE HIM · what admin cannot actually do",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/zakaria-boukhris?move=1",
+   "as": "modal"
+  },
+  {
+   "id": "BRB-18",
+   "t": "Bilal's 122 reviews · the pattern",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/bilal-sekkat/reviews",
+   "as": "page"
+  },
+  {
+   "id": "BRB-19",
+   "t": "CLOSE THE ACCOUNT · Omar",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers?filter=queue&close=omar-mansouri",
+   "as": "modal"
+  },
+  {
+   "id": "BRB-20",
+   "t": "ASK HIM WHY · Fouad, walk-ins only",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers?filter=queue&ask=fouad-zniber",
+   "as": "modal"
+  },
+  {
+   "id": "BRB-21",
+   "t": "ASK YOUSSEF · a man who never agreed",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers?filter=queue&ask=youssef-alami",
+   "as": "modal"
+  },
+  {
+   "id": "BRB-22",
+   "t": "Youssef answers both questions",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "support",
+   "at": "/support/threads/youssef-alami",
+   "as": "page"
+  },
+  {
+   "id": "BRB-23",
+   "t": "The ticket his question became",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "support",
+   "at": "/support/tickets/PT-014",
+   "as": "page"
+  },
+  {
+   "id": "BRB-24",
+   "t": "Bilal, fourteen days later",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/bilal-sekkat",
+   "as": "page"
+  },
+  {
+   "id": "BRB-25",
+   "t": "Move Zakaria and Tarik",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers?move=zakaria-tarik",
+   "as": "modal"
+  },
+  {
+   "id": "BRB-26",
+   "t": "Karim Idrissi · cap review, 4 December",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/karim-idrissi/cap-review",
+   "as": "page"
+  },
+  {
+   "id": "BRB-27",
+   "t": "March · the second cap, recommended against",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/karim-idrissi/cap-proposal",
+   "as": "page"
+  },
+  {
+   "id": "BRB-28",
+   "t": "What Marina's owner was told",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/karim-idrissi/notices",
+   "as": "page"
+  },
+  {
+   "id": "BRB-29",
+   "t": "The reason list, and why it is only three",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/settings/cancellation-reasons",
+   "as": "page"
+  },
+  {
+   "id": "BRB-30",
+   "t": "Rachid's empty chair, as he sees it",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "url": "owner.sterncut.ma/marina-barber-club/chairs",
+   "s": "o-chairs",
+   "at": "/marina-barber-club/chairs",
+   "as": "page"
+  },
+  {
+   "id": "BRB-31",
+   "t": "The ninth request for a fourth reason",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/requests/REQ-119",
+   "as": "page"
+  },
+  {
+   "id": "BRB-32",
+   "t": "Marina opens at ten now",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "url": "owner.sterncut.ma/marina-barber-club/hours",
+   "s": "o-shop",
+   "at": "/marina-barber-club/shop/hours",
+   "as": "page"
+  },
+  {
+   "id": "BRB-33",
+   "t": "Refusals — nine identical reasons is a different problem",
+   "f": "Sterncut Ops - Barbers.dc.html",
+   "k": "W",
+   "s": "barbers",
+   "at": "/barbers/refusals",
+   "as": "page"
+  },
+  {
+   "id": "CUS-02",
+   "t": "Customers · who needs something",
+   "f": "Sterncut Ops - Customers.dc.html",
+   "k": "W",
+   "s": "customers",
+   "at": "/customers",
+   "as": "page"
+  },
+  {
+   "id": "CUS-03",
+   "t": "Customer detail · Anas",
+   "f": "Sterncut Ops - Customers.dc.html",
+   "k": "W",
+   "s": "customers",
+   "at": "/customers/anas-bouzid",
+   "as": "page"
+  },
+  {
+   "id": "CUS-04",
+   "t": "Credit a wallet · Rachid's 300 DH",
+   "f": "Sterncut Ops - Customers.dc.html",
+   "k": "W",
+   "s": "customers",
+   "at": "/customers/rachid-tahiri?credit=300",
+   "as": "modal"
+  },
+  {
+   "id": "CUS-05",
+   "t": "Clear the flag",
+   "f": "Sterncut Ops - Customers.dc.html",
+   "k": "W",
+   "s": "customers",
+   "at": "/customers/anas-bouzid?clear-flag=1",
+   "as": "modal"
+  },
+  {
+   "id": "CUS-06",
+   "t": "Refund a booking — deposit is the default",
+   "f": "Sterncut Ops - Customers.dc.html",
+   "k": "W",
+   "s": "bookings",
+   "at": "/bookings/STC-4502/refund",
+   "as": "modal"
+  },
+  {
+   "id": "CUS-07",
+   "t": "Ban a customer — with the smaller options first",
+   "f": "Sterncut Ops - Customers.dc.html",
+   "k": "W",
+   "s": "customers",
+   "at": "/customers/mehdi-sabri/sanction",
+   "as": "page"
+  },
+  {
+   "id": "CUS-08",
+   "t": "Erasure requests — what survives a deletion",
+   "f": "Sterncut Ops - Customers.dc.html",
+   "k": "W",
+   "s": "customers",
+   "at": "/customers/erasure",
+   "as": "page"
+  },
+  {
+   "id": "BKN-01",
+   "t": "Bookings · the day's list",
+   "f": "Sterncut Ops - Bookings.dc.html",
+   "k": "W",
+   "s": "bookings",
+   "at": "/bookings",
+   "as": "page"
+  },
+  {
+   "id": "BKN-02",
+   "t": "Booking detail · STC-4471",
+   "f": "Sterncut Ops - Bookings.dc.html",
+   "k": "W",
+   "s": "bookings",
+   "at": "/bookings/STC-4471",
+   "as": "page"
+  },
+  {
+   "id": "BKN-03",
+   "t": "Exceptions · 12 of 214",
+   "f": "Sterncut Ops - Bookings.dc.html",
+   "k": "W",
+   "s": "bookings",
+   "at": "/bookings?view=exceptions",
+   "as": "tab"
+  },
+  {
+   "id": "BKN-04",
+   "t": "Refunds · November, by who bore it",
+   "f": "Sterncut Ops - Bookings.dc.html",
+   "k": "W",
+   "s": "bookings",
+   "at": "/bookings/refunds?month=11",
+   "as": "tab"
+  },
+  {
+   "id": "BKN-05",
+   "t": "Friday settlement · what Rachid receives",
+   "f": "Sterncut Ops - Bookings.dc.html",
+   "k": "W",
+   "url": "owner.sterncut.ma/marina-barber-club/settlements/2026-W48",
+   "s": "o-payouts",
+   "at": "/marina-barber-club/payouts/2026-W48",
+   "as": "page"
+  },
+  {
+   "id": "BKN-06",
+   "t": "Booking detail · the disputed one",
+   "f": "Sterncut Ops - Bookings.dc.html",
+   "k": "W",
+   "s": "bookings",
+   "at": "/bookings/A3F29B71",
+   "as": "page"
+  },
+  {
+   "id": "FIN-18b",
+   "t": "Write off 240 DH — the confirm box",
+   "f": "Sterncut Ops - Finance.dc.html",
+   "k": "W",
+   "s": "finance",
+   "at": "/finance/float/transfers/TRF-118/write-off"
+  },
+  {
+   "id": "FIN-19",
+   "t": "Written off this month — beside the float",
+   "f": "Sterncut Ops - Finance.dc.html",
+   "k": "W",
+   "s": "finance",
+   "at": "/finance/float"
+  },
+  {
+   "id": "FIN-18",
+   "t": "A handover that doesn't add up — 240 DH unaccounted",
+   "f": "Sterncut Ops - Finance.dc.html",
+   "k": "W",
+   "s": "finance",
+   "at": "/finance/float/transfers/TRF-118"
+  },
+  {
+   "id": "FIN-14",
+   "t": "The run — week 36, draft, before anyone presses anything",
+   "f": "Sterncut Ops - Finance.dc.html",
+   "k": "W",
+   "s": "finance",
+   "at": "/finance/settlement/2026-W36 · draft"
+  },
+  {
+   "id": "FIN-15",
+   "t": "The same run, released — 38 statements out, 26 visits to make",
+   "f": "Sterncut Ops - Finance.dc.html",
+   "k": "W",
+   "s": "finance",
+   "at": "/finance/settlement/2026-W36 · after release"
+  },
+  {
+   "id": "FIN-16",
+   "t": "One shop’s statement — ops side, with every reference on it",
+   "f": "Sterncut Ops - Finance.dc.html",
+   "k": "W",
+   "s": "finance",
+   "at": "/finance/statements/2026-W36-014"
+  },
+  {
+   "id": "FIN-17",
+   "t": "The correction — a refund that arrived after the week was settled",
+   "f": "Sterncut Ops - Finance.dc.html",
+   "k": "W",
+   "s": "finance",
+   "at": "/finance/corrections/new?refund=STC-4471"
+  },
+  {
+   "id": "FIN-13",
+   "t": "Tips — routed, earmarked, confirmed",
+   "f": "Sterncut Ops - Finance.dc.html",
+   "k": "W",
+   "s": "finance",
+   "at": "/finance/tips/2026-W42"
+  },
+  {
+   "id": "FIN-11",
+   "t": "Charge run — October, closed",
+   "f": "Sterncut Ops - Finance.dc.html",
+   "k": "W",
+   "s": "finance",
+   "at": "/finance/charges/2026-10"
+  },
+  {
+   "id": "FIN-12",
+   "t": "To collect — the two shops holding no deposits",
+   "f": "Sterncut Ops - Finance.dc.html",
+   "k": "W",
+   "s": "finance",
+   "at": "/finance/charges/2026-10/collect"
+  },
+  {
+   "id": "FIN-01",
+   "t": "Payout run — 39 of 42 shops",
+   "f": "Sterncut Ops - Finance.dc.html",
+   "k": "W",
+   "s": "finance",
+   "at": "/finance/payouts/2026-W25"
+  },
+  {
+   "id": "FIN-02",
+   "t": "Commission & fees — and what we refuse to charge for",
+   "f": "Sterncut Ops - Finance.dc.html",
+   "k": "W",
+   "s": "finance",
+   "at": "/finance/commission"
+  },
+  {
+   "id": "FIN-03",
+   "t": "VAT — the line that is zero on purpose",
+   "f": "Sterncut Ops - Finance.dc.html",
+   "k": "W",
+   "s": "finance",
+   "at": "/finance/vat?month=10"
+  },
+  {
+   "id": "SUP-01",
+   "t": "Support queue · dispute open",
+   "f": "Sterncut Ops - Support.dc.html",
+   "k": "W",
+   "s": "support",
+   "at": "/support/CS-4471",
+   "as": "page"
+  },
+  {
+   "id": "SUP-02",
+   "t": "Payments are down",
+   "f": "Sterncut Ops - Support.dc.html",
+   "k": "W",
+   "s": "support",
+   "at": "/support/incidents/INC-77",
+   "as": "page"
+  },
+  {
+   "id": "SUP-03",
+   "t": "Someone else got there first",
+   "f": "Sterncut Ops - Support.dc.html",
+   "k": "W",
+   "s": "reviews",
+   "at": "/reviews/flagged/RV-2291?taken=1",
+   "as": "state"
+  },
+  {
+   "id": "SUP-04",
+   "t": "Live presence · before the collision",
+   "f": "Sterncut Ops - Support.dc.html",
+   "k": "W",
+   "s": "support",
+   "at": "/support",
+   "as": "page"
+  },
+  {
+   "id": "SUP-05",
+   "t": "Support · filtered to money",
+   "f": "Sterncut Ops - Support.dc.html",
+   "k": "W",
+   "s": "support",
+   "at": "/support?about=money",
+   "as": "tab"
+  },
+  {
+   "id": "SUP-06",
+   "t": "Bell open · split by whether it needs a person",
+   "f": "Sterncut Ops - Support.dc.html",
+   "k": "W",
+   "s": "support",
+   "at": "/support?bell=1",
+   "as": "state"
+  },
+  {
+   "id": "SUP-07",
+   "t": "Rida got there first",
+   "f": "Sterncut Ops - Support.dc.html",
+   "k": "W",
+   "s": "support",
+   "at": "/support/CS-4468",
+   "as": "page"
+  },
+  {
+   "id": "RVW-01",
+   "t": "Flagged review · barber disputed it",
+   "f": "Sterncut Ops - Reviews.dc.html",
+   "k": "W",
+   "s": "reviews",
+   "at": "/reviews/flagged/RV-2291",
+   "as": "page"
+  },
+  {
+   "id": "RVW-03",
+   "t": "Removal reason · on the record",
+   "f": "Sterncut Ops - Reviews.dc.html",
+   "k": "W",
+   "s": "reviews",
+   "at": "/reviews/flagged/RV-2291?remove=1",
+   "as": "modal"
+  },
+  {
+   "id": "RVW-04",
+   "t": "Appeal · second reviewer",
+   "f": "Sterncut Ops - Reviews.dc.html",
+   "k": "W",
+   "s": "reviews",
+   "at": "/reviews/appeals/RV-2291",
+   "as": "page"
+  },
+  {
+   "id": "RVW-05",
+   "t": "Reviews · tagged and filtered",
+   "f": "Sterncut Ops - Reviews.dc.html",
+   "k": "W",
+   "s": "reviews",
+   "at": "/reviews?tag=waited",
+   "as": "page"
+  },
+  {
+   "id": "RVW-06",
+   "t": "Her review was hidden",
+   "f": "Sterncut Ops - Reviews.dc.html",
+   "k": "P",
+   "s": "app-screens"
+  },
+  {
+   "id": "RVW-07",
+   "t": "Appeal · the desk cannot prove it either",
+   "f": "Sterncut Ops - Reviews.dc.html",
+   "k": "W",
+   "s": "reviews",
+   "at": "/reviews/appeals/A-207",
+   "as": "page"
+  },
+  {
+   "id": "RVW-08",
+   "t": "Nabil changes the Saturday number",
+   "f": "Sterncut Ops - Reviews.dc.html",
+   "k": "W",
+   "url": "owner.sterncut.ma/coiffure-rif/slots?day=sat",
+   "s": "o-shop",
+   "at": "/coiffure-rif/shop/slots?day=sat",
+   "as": "page"
+  },
+  {
+   "id": "RVW-09",
+   "t": "Six Saturdays later",
+   "f": "Sterncut Ops - Reviews.dc.html",
+   "k": "W",
+   "url": "owner.sterncut.ma/coiffure-rif/slots?review=6wk",
+   "s": "o-shop",
+   "at": "/coiffure-rif/shop/slots?review=6wk",
+   "as": "state"
+  },
+  {
+   "id": "RVW-10",
+   "t": "The fourth chair, as a barber sees it",
+   "f": "Sterncut Ops - Reviews.dc.html",
+   "k": "P",
+   "s": "app-screens"
+  },
+  {
+   "id": "RVW-11",
+   "t": "A shop that hides its numbers",
+   "f": "Sterncut Ops - Reviews.dc.html",
+   "k": "P",
+   "s": "app-screens"
+  },
+  {
+   "id": "RVW-12",
+   "t": "The chair filled · and the trap in it",
+   "f": "Sterncut Ops - Reviews.dc.html",
+   "k": "W",
+   "url": "owner.sterncut.ma/coiffure-rif/chairs/4",
+   "s": "o-chairs",
+   "at": "/coiffure-rif/chairs/4",
+   "as": "page"
+  },
+  {
+   "id": "RVW-13",
+   "t": "Appeal RV-2291 · the record",
+   "f": "Sterncut Ops - Reviews.dc.html",
+   "k": "W",
+   "s": "reviews",
+   "at": "/reviews/RV-2291",
+   "as": "page"
+  },
+  {
+   "id": "CMP-01",
+   "t": "Follow-ups · one overdue",
+   "f": "Sterncut Ops - Compliance.dc.html",
+   "k": "W",
+   "s": "compliance",
+   "at": "/compliance",
+   "as": "page"
+  },
+  {
+   "id": "CPN-01",
+   "t": "New campaign · who pays",
+   "f": "Sterncut Ops - Coupons.dc.html",
+   "k": "W",
+   "held": true,
+   "s": "coupons",
+   "at": "/coupons/new",
+   "as": "page"
+  },
+  {
+   "id": "CPN-02",
+   "t": "Campaigns · one overspending",
+   "f": "Sterncut Ops - Coupons.dc.html",
+   "k": "W",
+   "held": true,
+   "s": "coupons",
+   "at": "/coupons",
+   "as": "page"
+  },
+  {
+   "id": "CPN-03",
+   "t": "The 43 · a campaign that probably should not run",
+   "f": "Sterncut Ops - Coupons.dc.html",
+   "k": "W",
+   "held": true,
+   "s": "coupons",
+   "at": "/coupons/new?from=demand-malabata",
+   "as": "state"
+  },
+  {
+   "id": "CPN-04",
+   "t": "The armed trigger fires",
+   "f": "Sterncut Ops - Coupons.dc.html",
+   "k": "W",
+   "held": true,
+   "s": "coupons",
+   "at": "/coupons/malabata-chair/fired",
+   "as": "page"
+  },
+  {
+   "id": "CPN-05",
+   "t": "Keeper rate · sixty days on",
+   "f": "Sterncut Ops - Coupons.dc.html",
+   "k": "W",
+   "held": true,
+   "s": "coupons",
+   "at": "/coupons/malabata-chair?window=60d",
+   "as": "page"
+  },
+  {
+   "id": "CPN-06",
+   "t": "Arm Beni Makada · the finding applied",
+   "f": "Sterncut Ops - Coupons.dc.html",
+   "k": "W",
+   "held": true,
+   "s": "coupons",
+   "at": "/coupons/new?district=beni-makada",
+   "as": "state"
+  },
+  {
+   "id": "CPN-07",
+   "t": "The board export",
+   "f": "Sterncut Ops - Coupons.dc.html",
+   "k": "W",
+   "held": true,
+   "s": "coupons",
+   "at": "/coupons/report?q=2026-q3",
+   "as": "page"
+  },
+  {
+   "id": "CPN-08",
+   "t": "June win-back · closed",
+   "f": "Sterncut Ops - Coupons.dc.html",
+   "k": "W",
+   "held": true,
+   "s": "coupons",
+   "at": "/coupons/june-winback?state=closed",
+   "as": "page"
+  },
+  {
+   "id": "CPN-09",
+   "t": "January · someone tries to run it again",
+   "f": "Sterncut Ops - Coupons.dc.html",
+   "k": "W",
+   "held": true,
+   "s": "coupons",
+   "at": "/coupons/new?duplicate=june-winback",
+   "as": "state"
+  },
+  {
+   "id": "CPN-10",
+   "t": "Yassine · request refused",
+   "f": "Sterncut Ops - Coupons.dc.html",
+   "k": "W",
+   "held": true,
+   "s": "coupons",
+   "at": "/coupons/overrides/OVR-004",
+   "as": "page"
+  },
+  {
+   "id": "CPN-11",
+   "t": "Q1 board pack · one line for the override",
+   "f": "Sterncut Ops - Coupons.dc.html",
+   "k": "W",
+   "held": true,
+   "s": "coupons",
+   "at": "/coupons/report?q=2027-q1",
+   "as": "page"
+  },
+  {
+   "id": "CPN-12",
+   "t": "17 March · a chair opens in Mghogha",
+   "f": "Sterncut Ops - Coupons.dc.html",
+   "k": "W",
+   "held": true,
+   "s": "coupons",
+   "at": "/coupons/mghogha-chair?state=fired",
+   "as": "page"
+  },
+  {
+   "id": "CPN-13",
+   "t": "2 February · Mehdi rejoins, 0 DH",
+   "f": "Sterncut Ops - Coupons.dc.html",
+   "k": "W",
+   "held": true,
+   "s": "coupons",
+   "at": "/coupons/barber-return/mehdi-chraibi",
+   "as": "page"
+  },
+  {
+   "id": "CPN-14",
+   "t": "16 May · the nine, sixty days on",
+   "f": "Sterncut Ops - Coupons.dc.html",
+   "k": "W",
+   "held": true,
+   "s": "coupons",
+   "at": "/coupons/mghogha-chair?state=measured",
+   "as": "page"
+  },
+  {
+   "id": "CPN-15",
+   "t": "Barbers who left · five armed, one fired",
+   "f": "Sterncut Ops - Coupons.dc.html",
+   "k": "W",
+   "held": true,
+   "s": "coupons",
+   "at": "/coupons/triggers?type=barber-return",
+   "as": "page"
+  },
+  {
+   "id": "SET-17",
+   "t": "Pricing at rest — accruing, nobody billed",
+   "f": "Sterncut Ops - Settings.dc.html",
+   "k": "W",
+   "s": "settings",
+   "at": "/settings/pricing",
+   "as": "section"
+  },
+  {
+   "id": "SET-18",
+   "t": "October — the first six shops out of the free period",
+   "f": "Sterncut Ops - Settings.dc.html",
+   "k": "W",
+   "s": "settings",
+   "at": "/settings/pricing?month=october",
+   "as": "state"
+  },
+  {
+   "id": "SET-14",
+   "t": "Model A — a cut of the deposit",
+   "f": "Sterncut Ops - Settings.dc.html",
+   "k": "W",
+   "s": "settings",
+   "at": "/settings/what-sterncut-takes?model=a",
+   "as": "state"
+  },
+  {
+   "id": "SET-15",
+   "t": "Model B — a cut of the full price",
+   "f": "Sterncut Ops - Settings.dc.html",
+   "k": "W",
+   "s": "settings",
+   "at": "/settings/what-sterncut-takes?model=b",
+   "as": "state"
+  },
+  {
+   "id": "SET-16",
+   "t": "Model C — one dirham a cut · recommended",
+   "f": "Sterncut Ops - Settings.dc.html",
+   "k": "W",
+   "s": "settings",
+   "at": "/settings/what-sterncut-takes",
+   "as": "section"
+  },
+  {
+   "id": "SET-11",
+   "t": "Deposit floor & ceiling — the row at rest",
+   "f": "Sterncut Ops - Settings.dc.html",
+   "k": "W",
+   "s": "settings",
+   "at": "/settings/deposit-bounds",
+   "as": "section"
+  },
+  {
+   "id": "SET-12",
+   "t": "Raising the floor — 5 shops now below it",
+   "f": "Sterncut Ops - Settings.dc.html",
+   "k": "W",
+   "s": "settings",
+   "at": "/settings/deposit-bounds?edit=raise",
+   "as": "state"
+  },
+  {
+   "id": "SET-13",
+   "t": "The narrowing that strands the network",
+   "f": "Sterncut Ops - Settings.dc.html",
+   "k": "W",
+   "s": "settings",
+   "at": "/settings/deposit-bounds?edit=narrow",
+   "as": "state"
+  },
+  {
+   "id": "SET-05",
+   "t": "Message templates — what the product says on our behalf",
+   "f": "Sterncut Ops - Settings.dc.html",
+   "k": "W",
+   "s": "settings",
+   "at": "/settings/templates",
+   "as": "page"
+  },
+  {
+   "id": "SET-06",
+   "t": "Districts — including the one with no shops",
+   "f": "Sterncut Ops - Settings.dc.html",
+   "k": "W",
+   "s": "settings",
+   "at": "/settings/districts",
+   "as": "page"
+  },
+  {
+   "id": "SET-01",
+   "t": "Settings — the dials, with their blast radius",
+   "f": "Sterncut Ops - Settings.dc.html",
+   "k": "W",
+   "s": "settings",
+   "at": "/settings",
+   "as": "page"
+  },
+  {
+   "id": "SET-02",
+   "t": "Team & roles — the three people who exist",
+   "f": "Sterncut Ops - Settings.dc.html",
+   "k": "W",
+   "s": "settings",
+   "at": "/settings/team",
+   "as": "page"
+  },
+  {
+   "id": "SET-03",
+   "t": "Permissions — and Hicham hitting the wall",
+   "f": "Sterncut Ops - Settings.dc.html",
+   "k": "W",
+   "s": "settings",
+   "at": "/settings/permissions",
+   "as": "page"
+  },
+  {
+   "id": "SET-04",
+   "t": "Audit log — decisions, and the asks that were refused",
+   "f": "Sterncut Ops - Settings.dc.html",
+   "k": "W",
+   "s": "settings",
+   "at": "/settings/audit",
+   "as": "page"
+  },
+  {
+   "id": "HOP-01",
+   "t": "Reliability rules · the numbers exposed",
+   "f": "Sterncut Head of Ops.dc.html",
+   "k": "W",
+   "s": "settings",
+   "at": "/settings/reliability",
+   "as": "page"
+  },
+  {
+   "id": "HOP-02",
+   "t": "Override request · Karima's desk",
+   "f": "Sterncut Head of Ops.dc.html",
+   "k": "W",
+   "s": "compliance",
+   "at": "/compliance/overrides/OVR-004",
+   "as": "page"
+  },
+  {
+   "id": "HOP-03",
+   "t": "Scoped, and made stricter",
+   "f": "Sterncut Head of Ops.dc.html",
+   "k": "W",
+   "s": "compliance",
+   "at": "/compliance/policy/arabic",
+   "as": "page"
+  },
+  {
+   "id": "HOP-04",
+   "t": "The screen · what flips and what does not",
+   "f": "Sterncut Head of Ops.dc.html",
+   "k": "P",
+   "s": "app-screens"
+  },
+  {
+   "id": "HOP-05",
+   "t": "The withholding number · who carries it",
+   "f": "Sterncut Head of Ops.dc.html",
+   "k": "W",
+   "s": "coupons",
+   "at": "/compliance/policy/pass-withholding",
+   "as": "page",
+   "held": true
+  },
+  {
+   "id": "HOP-06",
+   "t": "Countersign · 22 hours left",
+   "f": "Sterncut Head of Ops.dc.html",
+   "k": "W",
+   "s": "compliance",
+   "at": "/compliance/countersign/barbershop-nour",
+   "as": "page"
+  },
+  {
+   "id": "HOP-07",
+   "t": "Refuse permanently · Compliance only",
+   "f": "Sterncut Head of Ops.dc.html",
+   "k": "W",
+   "s": "compliance",
+   "at": "/compliance/applications/APP-338/refuse",
+   "as": "page"
+  },
+  {
+   "id": "HOP-08",
+   "t": "Day two · the rule working",
+   "f": "Sterncut Head of Ops.dc.html",
+   "k": "W",
+   "s": "compliance",
+   "at": "/salons/coiffure-atlas?silent=2",
+   "as": "page"
+  },
+  {
+   "id": "OSH-19",
+   "t": "All chairs — the live lines",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-today",
+   "at": "/le-fade-tanger/today",
+   "as": "merged into the web Today page"
+  },
+  {
+   "id": "OSH-16",
+   "t": "Week 35 — Sterncut hands him cash",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-payouts",
+   "at": "/le-fade-tanger/payouts/2026-W35",
+   "as": "page"
+  },
+  {
+   "id": "OSH-17",
+   "t": "Week 36 — he hands the cash back",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-payouts",
+   "at": "/le-fade-tanger/payouts/2026-W36",
+   "as": "page"
+  },
+  {
+   "id": "OSH-18",
+   "t": "The 52 DH from a week he was already paid for",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-payouts",
+   "at": "/le-fade-tanger/payouts/2026-W36?late=52",
+   "as": "side panel"
+  },
+  {
+   "id": "OSH-14",
+   "t": "Free month — the bill he does not pay",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-subscription",
+   "at": "/le-fade-tanger/subscription/free-month",
+   "as": "page"
+  },
+  {
+   "id": "OSH-15",
+   "t": "October — the first month that costs him",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-subscription",
+   "at": "/le-fade-tanger/subscription/2026-10",
+   "as": "page"
+  },
+  {
+   "id": "OSH-11",
+   "t": "Set your deposit",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-shop",
+   "at": "/le-fade-tanger/shop/deposit",
+   "as": "page"
+  },
+  {
+   "id": "OSH-12",
+   "t": "Confirm · from today, forward only",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-shop",
+   "at": "/le-fade-tanger/shop/deposit?confirm=1",
+   "as": "modal"
+  },
+  {
+   "id": "OSH-13",
+   "t": "No deposit — a legitimate answer",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-shop",
+   "at": "/le-fade-tanger/shop/deposit?none=1",
+   "as": "state"
+  },
+  {
+   "id": "OSH-01",
+   "t": "Salon management",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-shop",
+   "at": "/le-fade-tanger/shop",
+   "as": "page"
+  },
+  {
+   "id": "OSH-02",
+   "t": "Owner dashboard",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-today",
+   "at": "/le-fade-tanger/today",
+   "as": "merged into the web Today page"
+  },
+  {
+   "id": "OSH-03",
+   "t": "All chairs — day view",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-today",
+   "at": "/le-fade-tanger/today",
+   "as": "merged into the web Today page"
+  },
+  {
+   "id": "OSH-04",
+   "t": "Shop listing — customer preview",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-shop",
+   "at": "/le-fade-tanger/shop/listing",
+   "as": "page"
+  },
+  {
+   "id": "OSH-05",
+   "t": "Poster — print & share",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-shop",
+   "at": "/le-fade-tanger/shop/poster",
+   "as": "page"
+  },
+  {
+   "id": "OSH-06",
+   "t": "The printed sheet · A4",
+   "f": "Owner - Shop.dc.html",
+   "k": "?",
+   "s": "o-shop",
+   "at": "/le-fade-tanger/shop/poster?print=a4",
+   "as": "state"
+  },
+  {
+   "id": "OSH-07",
+   "t": "Wall display · 1280×800",
+   "f": "Owner - Shop.dc.html",
+   "k": "?",
+   "s": "o-shop",
+   "at": "/le-fade-tanger/shop/poster?wall=1",
+   "as": "state"
+  },
+  {
+   "id": "OSH-08",
+   "t": "Hidden from search",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-shop",
+   "at": "/le-fade-tanger/shop/visibility",
+   "as": "page"
+  },
+  {
+   "id": "OSH-09",
+   "t": "Pause the shop · what it covers",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-shop",
+   "at": "/le-fade-tanger/shop/pause",
+   "as": "page"
+  },
+  {
+   "id": "OSH-10",
+   "t": "Standing in · first job",
+   "f": "Owner - Shop.dc.html",
+   "k": "P",
+   "s": "o-chairs",
+   "at": "/le-fade-tanger/chairs/stand-in?day=1",
+   "as": "state"
+  },
+  {
+   "id": "OBR-01",
+   "t": "Barber detail — owner view",
+   "f": "Owner - Barbers.dc.html",
+   "k": "P",
+   "s": "o-chairs",
+   "at": "/le-fade-tanger/chairs/hamza-bennani",
+   "as": "side panel on the web Chairs page"
+  },
+  {
+   "id": "OBR-02",
+   "t": "Invite a barber",
+   "f": "Owner - Barbers.dc.html",
+   "k": "P",
+   "s": "o-chairs",
+   "at": "/le-fade-tanger/chairs?invite=1",
+   "as": "modal"
+  },
+  {
+   "id": "OBR-03",
+   "t": "Hand the shop to Zakaria",
+   "f": "Owner - Barbers.dc.html",
+   "k": "P",
+   "s": "o-chairs",
+   "at": "/le-fade-tanger/chairs/hand-over",
+   "as": "page"
+  },
+  {
+   "id": "OBR-04",
+   "t": "Karim is asking you to stand in",
+   "f": "Owner - Barbers.dc.html",
+   "k": "P",
+   "s": "o-chairs",
+   "at": "/le-fade-tanger/chairs/stand-in",
+   "as": "page"
+  },
+  {
+   "id": "OBR-05",
+   "t": "Pending invites sit in the team list",
+   "f": "Owner - Barbers.dc.html",
+   "k": "P",
+   "s": "o-chairs",
+   "at": "/le-fade-tanger/chairs",
+   "as": "merged into the web Chairs page"
+  },
+  {
+   "id": "OBR-06",
+   "t": "Expired — resend, or let it go",
+   "f": "Owner - Barbers.dc.html",
+   "k": "P",
+   "s": "o-chairs",
+   "at": "/le-fade-tanger/chairs?invite=expired",
+   "as": "modal"
+  },
+  {
+   "id": "OBR-07",
+   "t": "Who holds the cash",
+   "f": "Owner - Barbers.dc.html",
+   "k": "P",
+   "s": "o-chairs",
+   "at": "/le-fade-tanger/chairs/cash",
+   "as": "page"
+  },
+  {
+   "id": "OBR-08",
+   "t": "Blocked — there's cash attached to the old agent",
+   "f": "Owner - Barbers.dc.html",
+   "k": "P",
+   "s": "o-chairs",
+   "at": "/le-fade-tanger/chairs/cash?change=1",
+   "as": "modal"
+  },
+  {
+   "id": "OBR-09",
+   "t": "Hamza counts it in — his phone",
+   "f": "Owner - Barbers.dc.html",
+   "k": "P",
+   "s": "app-screens"
+  },
+  {
+   "id": "ORP-01",
+   "t": "Shop report · Export opens EXP-01",
+   "f": "Owner - Reports.dc.html",
+   "k": "P",
+   "s": "o-reports",
+   "at": "/le-fade-tanger/reports",
+   "as": "page"
+  },
+  {
+   "id": "ORV-01",
+   "t": "Reviews inbox",
+   "f": "Owner - Reviews.dc.html",
+   "k": "P",
+   "s": "o-reviews",
+   "at": "/le-fade-tanger/reviews",
+   "as": "page"
+  },
+  {
+   "id": "OSV-01",
+   "t": "My bundles",
+   "f": "Owner - Services.dc.html",
+   "k": "P",
+   "s": "o-services",
+   "at": "/le-fade-tanger/services",
+   "as": "page"
+  },
+  {
+   "id": "OSV-02",
+   "t": "Editing The Groom",
+   "f": "Owner - Services.dc.html",
+   "k": "P",
+   "s": "o-services",
+   "at": "/le-fade-tanger/services/the-groom",
+   "as": "page"
+  },
+  {
+   "id": "OSV-03",
+   "t": "What it does to his day",
+   "f": "Owner - Services.dc.html",
+   "k": "P",
+   "s": "o-services",
+   "at": "/le-fade-tanger/services/the-groom?impact=1",
+   "as": "state"
+  },
+  {
+   "id": "OSV-04",
+   "t": "Services · how long each really takes",
+   "f": "Owner - Services.dc.html",
+   "k": "P",
+   "s": "o-services",
+   "at": "/le-fade-tanger/services/durations",
+   "as": "page"
+  },
+  {
+   "id": "OSV-05",
+   "t": "Cut · a number per pair of hands",
+   "f": "Owner - Services.dc.html",
+   "k": "P",
+   "s": "o-services",
+   "at": "/le-fade-tanger/services/durations/cut",
+   "as": "page"
+  },
+  {
+   "id": "OSV-06",
+   "t": "Keeping 30, with the reason and a date",
+   "f": "Owner - Services.dc.html",
+   "k": "P",
+   "s": "o-services",
+   "at": "/le-fade-tanger/services/durations/cut?keep=30",
+   "as": "state"
+  },
+  {
+   "id": "OSV-07",
+   "t": "His schedule, half an hour earlier",
+   "f": "Owner - Services.dc.html",
+   "k": "P",
+   "s": "o-services",
+   "at": "/le-fade-tanger/services/durations/cut?schedule=1",
+   "as": "state"
+  },
+  {
+   "id": "OSV-08",
+   "t": "What the shop does with too long and rushed",
+   "f": "Owner - Services.dc.html",
+   "k": "P",
+   "s": "o-services",
+   "at": "/le-fade-tanger/services/durations/policy",
+   "as": "page"
+  },
+  {
+   "id": "OSV-09",
+   "t": "My passes",
+   "f": "Owner - Services.dc.html",
+   "k": "P",
+   "held": true,
+   "s": "o-services",
+   "at": "/le-fade-tanger/services/passes",
+   "as": "page"
+  },
+  {
+   "id": "OSV-10",
+   "t": "Edit pass · the debt appears as you type",
+   "f": "Owner - Services.dc.html",
+   "k": "P",
+   "held": true,
+   "s": "o-services",
+   "at": "/le-fade-tanger/services/passes/ten-cuts",
+   "as": "page"
+  },
+  {
+   "id": "OSB-01",
+   "t": "What you pay on the 1st",
+   "f": "Owner - Subscription.dc.html",
+   "k": "P",
+   "s": "o-subscription",
+   "at": "/le-fade-tanger/subscription",
+   "as": "page"
+  },
+  {
+   "id": "OSB-02",
+   "t": "Monthly or yearly — the arithmetic in full",
+   "f": "Owner - Subscription.dc.html",
+   "k": "P",
+   "s": "o-subscription",
+   "at": "/le-fade-tanger/subscription/plans",
+   "as": "page"
+  },
+  {
+   "id": "OSB-03",
+   "t": "How it gets paid — netted off Friday's float",
+   "f": "Owner - Subscription.dc.html",
+   "k": "P",
+   "s": "o-subscription",
+   "at": "/le-fade-tanger/subscription/how-it-is-paid",
+   "as": "page"
+  },
+  {
+   "id": "OSB-04",
+   "t": "August, closed — 214 bookings",
+   "f": "Owner - Subscription.dc.html",
+   "k": "P",
+   "s": "o-subscription",
+   "at": "/le-fade-tanger/subscription/2026-08",
+   "as": "page"
+  },
+  {
+   "id": "OSB-05",
+   "t": "Unpaid — what we will and won't do",
+   "f": "Owner - Subscription.dc.html",
+   "k": "P",
+   "s": "o-subscription",
+   "at": "/le-fade-tanger/subscription/unpaid",
+   "as": "page"
+  },
+  {
+   "id": "AGT-13",
+   "t": "The round with no signal — said in words, per shop",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  },
+  {
+   "id": "AGT-14",
+   "t": "He still asks for the four digits",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  },
+  {
+   "id": "AGT-15",
+   "t": "The confirm — final, and not yet checked",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  },
+  {
+   "id": "AGT-16",
+   "t": "The receipt — provisional, not wrong",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  },
+  {
+   "id": "AGT-17",
+   "t": "Sync landing — two matched, quietly",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  },
+  {
+   "id": "AGT-18",
+   "t": "The code didn’t match — he’s already driven away",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  },
+  {
+   "id": "AGT-19",
+   "t": "The owner’s side of the same failure",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  },
+  {
+   "id": "AGT-20",
+   "t": "Ops — unchecked as a column on a released week",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "W",
+   "s": "wallets",
+   "at": "/wallets/unchecked",
+   "as": "page"
+  },
+  {
+   "id": "AGT-06",
+   "t": "The ladder — three things to try before the phone call",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  },
+  {
+   "id": "AGT-07",
+   "t": "Leaving — allowed, recorded, and not free",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  },
+  {
+   "id": "AGT-08",
+   "t": "Ops duty — the owner still vouches, ops is the witness",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "W",
+   "s": "wallets",
+   "at": "/wallets/witnessed",
+   "as": "page"
+  },
+  {
+   "id": "AGT-09",
+   "t": "The confirm, authorised — six digits, and hers not his",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  },
+  {
+   "id": "AGT-10",
+   "t": "The receipt — the same money, a named weaker proof",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  },
+  {
+   "id": "AGT-11",
+   "t": "Youssef’s statement — the two grades side by side",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  },
+  {
+   "id": "AGT-12",
+   "t": "Head of Ops — a rate per agent, not a list of incidents",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "W",
+   "s": "wallets",
+   "at": "/wallets/agents",
+   "as": "page"
+  },
+  {
+   "id": "AGT-01",
+   "t": "His round — oldest money first",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  },
+  {
+   "id": "AGT-02",
+   "t": "Collecting — counting it with the owner",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  },
+  {
+   "id": "AGT-03",
+   "t": "The confirm — his code, and no undo after it",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  },
+  {
+   "id": "AGT-04",
+   "t": "The receipt — a partial, and what happens to the rest",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  },
+  {
+   "id": "AGT-05",
+   "t": "Handing over — the owner counts it and signs",
+   "f": "Ops Agent - Collection.dc.html",
+   "k": "P",
+   "s": "agent-app",
+   "at": "Prototype - Agent App",
+   "as": "phone prototype"
+  }
+ ],
+ "newPages": [
+  "/marina-barber-club/{today,services,reviews,subscription,reports}",
+  "/coiffure-rif/{today,services,reviews,payouts,subscription,reports}"
+ ]
+}

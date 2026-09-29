@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="height:100%;overflow:auto;box-sizing:border-box;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif">
+<div style="max-width:900px;padding:22px 24px 44px;display:flex;flex-direction:column;gap:24px;box-sizing:border-box">
+  <span style="font-size:12.5px;line-height:1.6;color:#9A9CA3;max-width:620px;text-wrap:pretty">{{ lede }}</span>
+  <sc-for list="{{ groups }}" as="g" hint-placeholder-count="2">
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">{{ g.label }}</span>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="3">
+          <div onClick="{{ r.open }}" style="display:flex;align-items:center;gap:12px;background:#17171A;border:1px solid {{ r.border }};border-radius:12px;padding:13px 15px;cursor:{{ r.cursor }}" style-hover="background:#1C1C20">
+            <span style="width:6px;height:30px;border-radius:3px;background:{{ r.bar }};flex:none"></span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">{{ r.title }}</span><span style="font-size:10.5px;color:#9A9CA3">{{ r.sub }}</span></span>
+            <span style="width:104px;flex:none;font-size:11px;color:#9A9CA3">{{ r.where }}</span>
+            <span style="width:44px;flex:none;text-align:right;font-size:11px;color:#6B6B72">{{ r.age }}</span>
+            <span style="width:84px;flex:none;text-align:right;font-size:11px;font-weight:700;color:{{ r.actionColor }}">{{ r.action }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1000,&quot;height&quot;:640},&quot;who&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;go&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(path: string) =&gt; void&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const who = this.props.who || { id: 'karima', role: 'head' };
+    const go = this.props.go || (() => {});
+    const head = who.role === 'head';
+    const T = { red: ['rgba(248,113,113,.3)', '#F87171'], amber: ['rgba(232,161,0,.28)', '#E8A100'], grey: ['#1E1E22', '#3A3A40'] };
+    const row = r => {
+      const [border, bar] = T[r.tone || 'grey'];
+      return { title: r.title, sub: r.sub, where: r.where, age: r.age || '', action: r.action, border, bar, cursor: r.to ? 'pointer' : 'default', actionColor: r.muted ? '#9A9CA3' : '#E8442E', open: () => { if (r.to) go(r.to); } };
+    };
+    const fadeSub = who.id === 'hicham' ? 'You asked · Karima is in at 10:00' : 'Hicham asked · nothing has happened to the shop yet';
+    const asks = [
+      { title: 'Countersign Barbershop Nour', sub: '22 hours left · six people not yet told', where: 'Compliance', age: '50h', tone: 'red', desk: '/compliance/countersign/barbershop-nour', deskAction: 'Decide' },
+      { title: 'Override OVR-004', sub: 'Grant the nine, grant it all, or refuse · 180 DH at risk', where: 'Compliance', age: '2d', tone: 'amber', desk: '/compliance/overrides/OVR-004', deskAction: 'Decide' },
+      { title: 'Refuse APP-338 permanently', sub: 'Escalated by ops · removed 2 Feb for harm', where: 'Compliance', tone: 'amber', desk: '/compliance/applications/APP-338/refuse', deskAction: 'Sign' },
+      { title: 'Suspend Le Fade Tanger', sub: fadeSub, where: 'Salons', age: '40m', tone: 'amber', desk: '/salons/le-fade-tanger', deskAction: 'Open', open: '/salons/le-fade-tanger' },
+    ];
+    const pending = asks.map(a => row(head
+      ? { ...a, to: a.desk, action: a.deskAction }
+      : { ...a, tone: a.open ? a.tone : 'grey', to: a.open || null, action: 'With Karima', muted: true }));
+    const decided = [row({ title: 'Arabic onboarding — scoped, and made stricter', sub: 'Decided 3 Feb · owned by ops', where: 'Compliance', to: '/compliance/policy/arabic', action: 'Read', muted: true })];
+    return {
+      lede: head
+        ? 'Asks from the team that only you can decide. Nothing on this list has happened yet.'
+        : 'Some actions need Karima. When you ask, it lands here — and nothing happens to the shop, barber or customer until she decides.',
+      groups: [{ label: head ? `WAITING ON YOU · ${pending.length}` : `WITH KARIMA · ${pending.length}`, rows: pending }, { label: 'DECIDED', rows: decided }],
+    };
+  }
+}
+</script>
+</body>
+</html>

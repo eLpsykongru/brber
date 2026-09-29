@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:#161618;-webkit-font-smoothing:antialiased}
+a{color:#E8442E;text-decoration:none}
+a:hover{color:#FF6B57}
+</style>
+</helmet>
+<div style="min-height:100vh;box-sizing:border-box;background:#161618;color:#fff;font-family:Inter,sans-serif;display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:44px;padding:36px 32px">
+  <div style="width:300px;max-width:100%;display:flex;flex-direction:column;gap:22px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:9.5px;letter-spacing:.16em;font-weight:700;color:#E8917F">STERNCUT · COLLECTION AGENT</span>
+      <span style="font-size:22px;font-weight:800;letter-spacing:-.01em">Hicham’s Friday round</span>
+      <span style="font-size:12.5px;line-height:1.55;color:#9A9CA3;text-wrap:pretty">A phone app of its own — not part of the admin site. Tap through the screens, or jump to a moment.</span>
+    </div>
+    <sc-for list="{{ groups }}" as="g" hint-placeholder-count="4">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72;padding:0 10px 6px">{{ g.label }}</span>
+        <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4">
+          <div onClick="{{ it.go }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;cursor:pointer;background:{{ it.bg }}" style-hover="background:#1E1E22">
+            <span style="width:52px;flex:none;font-family:ui-monospace,Menlo,monospace;font-size:10px;font-weight:700;color:{{ it.idColor }}">{{ it.id }}</span>
+            <span style="flex:1;min-width:0;font-size:12.5px;line-height:1.35;color:{{ it.fg }}">{{ it.title }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-for>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span onClick="{{ restart }}" style="height:34px;border-radius:9px;background:#212125;display:flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:700;cursor:pointer" style-hover="background:#2A2A30">Start the round again</span>
+      <a href="./Sterncut Site.dc.html" style="height:34px;border-radius:9px;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:11.5px;font-weight:600;color:#9A9CA3">Ops side, in the site</a>
+    </div>
+  </div>
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="422px,894px">
+    <dc-import name="Agent App - Screens" path="{{ path }}" go="{{ go }}" style="width:100%;height:100%" hint-size="100%,100%"></dc-import>
+  </x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  KEY = 'sterncut-agent-proto-v1';
+  FLOWS = [
+    { label: 'THE ROUND', items: [['AGT-01', 'His round — oldest money first', '/round'], ['AGT-02', 'Counting it with Youssef', '/round/le-fade-tanger/count'], ['AGT-03', 'The confirm — his code', '/round/le-fade-tanger/confirm'], ['AGT-04', 'The receipt — a partial', '/round/le-fade-tanger/receipt'], ['AGT-05', 'Handing over at Marina', '/round/marina-barber-club/hand-over']] },
+    { label: 'WHEN THE CODE WON’T COME', items: [['AGT-06', 'The ladder — three things first', '/round/le-fade-tanger/no-code'], ['AGT-09', 'Authorised by ops duty', '/round/le-fade-tanger/ops-call'], ['AGT-10', 'Receipt — proved by ops call', '/round/le-fade-tanger/ops-receipt'], ['AGT-07', 'Leaving without it', '/round/le-fade-tanger/leave']] },
+    { label: 'NO SIGNAL', items: [['AGT-13', 'The round, offline', '/offline/round'], ['AGT-14', 'He still asks for the digits', '/offline/le-fade-tanger/code'], ['AGT-15', 'The confirm — not yet checked', '/offline/le-fade-tanger/confirm'], ['AGT-16', 'Provisional receipt', '/offline/le-fade-tanger/receipt'], ['AGT-17', 'Back on signal', '/offline/synced'], ['AGT-18', 'The code didn’t match', '/offline/SR-1204/failed']] },
+    { label: 'YOUSSEF’S SIDE', items: [['AGT-11', 'His statement — two grades of proof', '/owner/statement'], ['AGT-19', 'The same failure, as he sees it', '/owner/statement-failed']] },
+  ];
+  state = { path: '/round' };
+  componentDidMount() { try { const p = localStorage.getItem(this.KEY); if (p) this.setState({ path: p }); } catch (e) {} }
+  go = p => { this.setState({ path: p }); try { localStorage.setItem(this.KEY, p); } catch (e) {} };
+  renderVals() {
+    const cur = this.state.path;
+    const groups = this.FLOWS.map(g => ({ label: g.label, items: g.items.map(([id, title, p]) => { const on = p === cur; return { id, title, go: () => this.go(p), bg: on ? '#212125' : 'transparent', fg: on ? '#fff' : '#C9CAD0', idColor: on ? '#E8442E' : '#6B6B72' }; }) }));
+    return { groups, path: cur, go: this.go, restart: () => this.go('/round') };
+  }
+}
+</script>
+</body>
+</html>

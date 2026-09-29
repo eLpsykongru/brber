@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:relative;width:100%;height:100%;overflow:hidden;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif">
+<sc-if value="{{ v.OSV_09 }}">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="display:flex;align-items:flex-start;gap:28px;padding:0 24px;box-sizing:border-box;min-height:100%"><div style="flex:0 0 196px;position:sticky;top:0;display:flex;flex-direction:column;gap:2px;padding-top:20px"><span onClick="{{ h.a1 }}" style="min-height:36px;display:flex;align-items:center;gap:8px;padding:8px 12px;box-sizing:border-box;border-radius:9px;font-size:12.5px;line-height:1.3;cursor:pointer;font-weight:500;color:#9A9CA3" style-hover="background:#17171A;color:#fff">Bundles</span><span onClick="{{ h.a2 }}" style="min-height:36px;display:flex;align-items:center;gap:8px;padding:8px 12px;box-sizing:border-box;border-radius:9px;font-size:12.5px;line-height:1.3;cursor:pointer;font-weight:500;color:#9A9CA3" style-hover="background:#17171A;color:#fff">How long each takes</span><span onClick="{{ h.a3 }}" style="min-height:36px;display:flex;align-items:center;gap:8px;padding:8px 12px;box-sizing:border-box;border-radius:9px;font-size:12.5px;line-height:1.3;cursor:pointer;font-weight:500;color:#9A9CA3" style-hover="background:#17171A;color:#fff">Too long or rushed</span><span onClick="{{ h.a4 }}" style="min-height:36px;display:flex;align-items:center;gap:8px;padding:8px 12px;box-sizing:border-box;border-radius:9px;font-size:12.5px;line-height:1.3;cursor:pointer;font-weight:700;background:#1E1E22;color:#fff" style-hover="background:#17171A;color:#fff">Passes<span style="font-size:8.5px;letter-spacing:.12em;font-weight:700;color:#C9CAD0;background:#26262B;border-radius:5px;padding:2px 5px">LATER</span></span></div><div style="position:relative;width:100%;max-width:720px;flex:1 1 0;min-width:0;box-sizing:border-box;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;padding-bottom:48px"><div style="margin:20px 20px 0;display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;background:#141416;border:1px solid #26262B;font-size:11.5px;color:#9A9CA3"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#C9CAD0;background:#26262B;border-radius:5px;padding:3px 6px">LATER</span><span>Passes are held from v1. This page is the spec — nothing here is live.</span></div>
+  <div style="padding:24px 20px 0;display:flex;flex-direction:column;gap:11px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:17px;font-weight:700">My passes</span>
+      <span style="width:38px"></span>
+    </div>
+    <div style="background:#111113;border:1px solid #1E1E22;border-radius:20px;padding:15px 16px;display:flex;flex-direction:column;gap:11px">
+      <span style="font-size:10px;letter-spacing:.15em;font-weight:700;color:#6B6B72">WHAT YOU OWE</span>
+      <span style="font-family:'Playfair Display',serif;font-size:21px;font-weight:700;line-height:1.25;text-wrap:pretty">155 cuts, already paid for.</span>
+      <div style="display:flex;gap:9px;border-top:1px solid #1E1E22;padding-top:11px">
+        <span style="flex:1"><span style="display:block;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">8 200</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:1px;line-height:1.35">DH taken since June</span></span>
+        <span style="flex:1"><span style="display:block;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">247</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:1px;line-height:1.35">cuts redeemed</span></span>
+        <span style="flex:1"><span style="display:block;font-size:15px;font-weight:700;color:#E8A100;font-variant-numeric:tabular-nums">90 h</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:1px;line-height:1.35">chair time still owed</span></span>
+      </div>
+    </div>
+    <div style="background:rgba(232,161,0,.09);border:1px solid rgba(232,161,0,.3);border-radius:18px;padding:14px 15px;display:flex;align-items:flex-start;gap:10px">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2.1" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#E8A100">Bilal&#39;s cut went to 35 minutes on 6 October</span><span style="display:block;font-size:11.5px;line-height:1.5;color:#D8D8DC;margin-top:3px;text-wrap:pretty">Every one of these was sold at 30. The 62 cuts owed on his chair now cost you <strong style="color:#fff">five hours more</strong> than when the money came in. Nothing to fix here — but do not price the next one at 30.</span></span>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3">PASSES · DRAG TO REORDER</span>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div style="background:#17171A;border-radius:18px;padding:14px 15px;display:flex;flex-direction:column;gap:11px">
+        <div style="display:flex;align-items:center;gap:12px;cursor:pointer" onClick="{{ h.a0 }}" style-hover="background:#17171B">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2" style="flex:none"><path d="M4 8h16M4 16h16"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:700">Ten cuts</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">540 DH · 54 a cut · saves 60</span></span>
+          <span style="width:38px;height:22px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:flex-end;padding:0 3px;flex:none"><span style="width:16px;height:16px;border-radius:999px;background:#fff"></span></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;border-top:1px solid #26262B;padding-top:11px">
+          <span style="font-size:11px;color:#9A9CA3">34 sold</span>
+          <span style="width:1px;height:11px;background:#26262B"></span>
+          <span style="font-size:11px;font-weight:700;color:#E8A100">124 cuts owed</span>
+          <span style="flex:1"></span>
+          <span style="font-size:11px;color:#6B6B72;flex:none">9 people hold 2+</span>
+        </div>
+      </div>
+      <div style="background:#17171A;border-radius:18px;padding:14px 15px;display:flex;flex-direction:column;gap:11px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2" style="flex:none"><path d="M4 8h16M4 16h16"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:14px;font-weight:700">Five cuts</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">285 DH · 57 a cut · saves 15</span></span>
+          <span style="width:38px;height:22px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:flex-end;padding:0 3px;flex:none"><span style="width:16px;height:16px;border-radius:999px;background:#fff"></span></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;border-top:1px solid #26262B;padding-top:11px">
+          <span style="font-size:11px;color:#9A9CA3">12 sold</span>
+          <span style="width:1px;height:11px;background:#26262B"></span>
+          <span style="font-size:11px;font-weight:700;color:#E8A100">31 cuts owed</span>
+          <span style="flex:1"></span>
+          <span style="font-size:11px;color:#6B6B72;flex:none">barely worth it at 5%</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px dashed #3A3A40;border-radius:16px;padding:13px">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.2"><path d="M12 5v14M5 12h14"></path></svg>
+      <span style="font-size:13px;font-weight:600;color:#9A9CA3;cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">New pass</span>
+    </div>
+  </div>
+</div></div>
+</div>
+</sc-if>
+<sc-if value="{{ v.OSV_10 }}">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="display:flex;align-items:flex-start;gap:28px;padding:0 24px;box-sizing:border-box;min-height:100%"><div style="flex:0 0 196px;position:sticky;top:0;display:flex;flex-direction:column;gap:2px;padding-top:20px"><span onClick="{{ h.a1 }}" style="min-height:36px;display:flex;align-items:center;gap:8px;padding:8px 12px;box-sizing:border-box;border-radius:9px;font-size:12.5px;line-height:1.3;cursor:pointer;font-weight:500;color:#9A9CA3" style-hover="background:#17171A;color:#fff">Bundles</span><span onClick="{{ h.a2 }}" style="min-height:36px;display:flex;align-items:center;gap:8px;padding:8px 12px;box-sizing:border-box;border-radius:9px;font-size:12.5px;line-height:1.3;cursor:pointer;font-weight:500;color:#9A9CA3" style-hover="background:#17171A;color:#fff">How long each takes</span><span onClick="{{ h.a3 }}" style="min-height:36px;display:flex;align-items:center;gap:8px;padding:8px 12px;box-sizing:border-box;border-radius:9px;font-size:12.5px;line-height:1.3;cursor:pointer;font-weight:500;color:#9A9CA3" style-hover="background:#17171A;color:#fff">Too long or rushed</span><span onClick="{{ h.a4 }}" style="min-height:36px;display:flex;align-items:center;gap:8px;padding:8px 12px;box-sizing:border-box;border-radius:9px;font-size:12.5px;line-height:1.3;cursor:pointer;font-weight:700;background:#1E1E22;color:#fff" style-hover="background:#17171A;color:#fff">Passes<span style="font-size:8.5px;letter-spacing:.12em;font-weight:700;color:#C9CAD0;background:#26262B;border-radius:5px;padding:2px 5px">LATER</span></span></div><div style="position:relative;width:100%;max-width:720px;flex:1 1 0;min-width:0;box-sizing:border-box;background:#0D0D0F;font-family:Inter,sans-serif;color:#fff;padding-bottom:48px"><div style="margin:20px 20px 0;display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;background:#141416;border:1px solid #26262B;font-size:11.5px;color:#9A9CA3"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#C9CAD0;background:#26262B;border-radius:5px;padding:3px 6px">LATER</span><span>Passes are held from v1. This page is the spec — nothing here is live.</span></div>
+  <div style="padding:24px 20px 0;display:flex;flex-direction:column;gap:11px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:38px;height:38px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+      <span style="flex:1;text-align:center;font-size:17px;font-weight:700;cursor:pointer" onClick="{{ h.a4 }}" style-hover="filter:brightness(1.18)">Edit pass</span>
+      <span style="font-size:13px;font-weight:700;color:#E8442E;cursor:pointer" onClick="{{ h.a4 }}" style-hover="filter:brightness(1.18)">Save</span>
+    </div>
+    <div style="background:#17171A;border-radius:18px;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid #26262B">
+        <span style="flex:1;min-width:0;font-size:12.5px;color:#9A9CA3">Name</span>
+        <span style="font-size:13px;font-weight:700">Ten cuts</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 15px;border-bottom:1px solid #26262B">
+        <span style="flex:1;min-width:0;font-size:12.5px;color:#9A9CA3">Cuts</span>
+        <span style="display:flex;align-items:center;gap:11px;flex:none">
+          <span style="width:26px;height:26px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.4"><path d="M5 12h14"></path></svg></span>
+          <span style="font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">10</span>
+          <span style="width:26px;height:26px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.4"><path d="M12 5v14M5 12h14"></path></svg></span>
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:13px 15px">
+        <span style="flex:1;min-width:0;font-size:12.5px;color:#9A9CA3">Price</span>
+        <span style="display:flex;align-items:baseline;gap:6px;flex:none"><span style="font-size:17px;font-weight:700;font-variant-numeric:tabular-nums">540</span><span style="font-size:11px;color:#6B6B72">DH · 10% off 600</span></span>
+      </div>
+    </div>
+    <div style="background:rgba(232,161,0,.09);border:1px solid rgba(232,161,0,.3);border-radius:18px;padding:14px 15px;display:flex;flex-direction:column;gap:10px">
+      <span style="font-size:10px;letter-spacing:.14em;font-weight:700;color:#E8A100">WHAT ONE SALE COMMITS YOU TO</span>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:12px;color:#D8D8DC">You receive, today</span><span style="font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums">540 DH</span></span>
+        <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:12px;color:#D8D8DC">You owe</span><span style="font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums">10 cuts</span></span>
+        <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:12px;color:#D8D8DC">Chair time · Bilal at 35 min</span><span style="font-size:12.5px;font-weight:700;color:#E8A100;font-variant-numeric:tabular-nums">5 h 50</span></span>
+        <span style="display:flex;align-items:baseline;gap:8px;border-top:1px solid rgba(232,161,0,.2);padding-top:7px"><span style="flex:1;font-size:12px;color:#D8D8DC">Effective rate an hour</span><span style="font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums">92 DH</span></span>
+      </div>
+      <span style="font-size:11px;line-height:1.45;color:#9A9CA3;text-wrap:pretty">A walk-in on the same chair is 103 DH an hour. That gap is what you are paying for the money arriving early.</span>
+    </div>
+    <span style="font-size:11px;letter-spacing:.15em;font-weight:700;color:#9A9CA3">THREE THINGS YOU CANNOT SET</span>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="display:flex;align-items:flex-start;gap:10px;background:#17171A;border-radius:14px;padding:11px 13px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.1" style="flex:none;margin-top:1px"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">No expiry date</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px;line-height:1.4">An expired cut is money you kept for work you never did</span></span></span>
+      <span style="display:flex;align-items:flex-start;gap:10px;background:#17171A;border-radius:14px;padding:11px 13px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.1" style="flex:none;margin-top:1px"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Valid at the shop, not with one barber</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px;line-height:1.4">If Bilal leaves, the cuts are still yours to honour</span></span></span>
+      <span style="display:flex;align-items:flex-start;gap:10px;background:#17171A;border-radius:14px;padding:11px 13px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.1" style="flex:none;margin-top:1px"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">200 cuts owed, at most</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px;line-height:1.4">155 now. Selling next month&#39;s chair to pay this month&#39;s rent ends one way</span></span></span>
+    </div>
+    <span style="font-size:10.5px;line-height:1.5;color:#6B6B72;text-wrap:pretty">Raising the price does not touch a pass somebody already bought. The 34 outstanding stay at 54 a cut.</span>
+  </div>
+</div></div>
+</div>
+</sc-if>
+<sc-if value="{{ none }}"><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:40px"><span style="font-size:15px;font-weight:700">No screen is designed for this yet</span><span style="font-size:12.5px;color:#9A9CA3;max-width:440px;line-height:1.55">The canvases have no screen at this address.</span><span onClick="{{ backHome }}" style="margin-top:4px;font-size:12px;font-weight:700;color:#E8442E;cursor:pointer">Back to Passes</span></div></sc-if>
+<sc-if value="{{ specOn }}"><div style="position:absolute;right:12px;bottom:12px;z-index:40;background:#E8442E;color:#fff;border-radius:8px;padding:6px 10px;font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.4);pointer-events:none">{{ specId }}</div></sc-if>
+<sc-if value="{{ toastOn }}"><div style="position:absolute;left:50%;bottom:24px;transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:9px;background:#fff;color:#0D0D0F;border-radius:10px;padding:10px 14px;font-family:Inter,sans-serif;font-size:12px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.45);pointer-events:none;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>{{ toastMsg }}</div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1184,&quot;height&quot;:852},&quot;path&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;/le-fade-tanger/services/passes&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;specOn&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;world&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;go&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(path: string) =&gt; void&quot;},&quot;setWorld&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(patch: object) =&gt; void&quot;},&quot;openPal&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { toast: null };
+  _toast(msg) { this.setState({ toast: msg }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: null }), 2200); }
+  componentWillUnmount() { clearTimeout(this._tt); }
+  chip = e => { if (e && e.stopPropagation) e.stopPropagation(); const el = e.currentTarget, p = el && el.parentElement; if (!p) return; const sel = [...p.children].find(k => k.getAttribute('data-chip-sel')); if (!sel || sel === el) return; const a = el.getAttribute('style'); el.setAttribute('style', sel.getAttribute('style')); sel.setAttribute('style', a); sel.removeAttribute('data-chip-sel'); el.setAttribute('data-chip-sel', '1'); };
+  A = [{"to":"/le-fade-tanger/services/passes/ten-cuts"},{"to":"/le-fade-tanger/services"},{"to":"/le-fade-tanger/services/durations"},{"to":"/le-fade-tanger/services/durations/policy"},{"to":"/le-fade-tanger/services/passes"}];
+  IDS = ["OSV-09","OSV-10"];
+  T = [["OSV-09","/le-fade-tanger/services/passes"],["OSV-10","/le-fade-tanger/services/passes/ten-cuts"]];
+  U = {};
+  norm(p) { const [path, qs] = (p || '/le-fade-tanger/services/passes').split('#')[0].split('?'); const q = (qs || '').split('&').filter(Boolean).sort().join('&'); return (path.replace(/\/+$/, '') || '/le-fade-tanger/services/passes') + (q ? '?' + q : ''); }
+  screenFor(path, world) {
+    const n = this.norm(path), base = n.split('?')[0], q = {}; (n.split('?')[1] || '').split('&').filter(Boolean).forEach(kv => { const i = kv.indexOf('='); q[i < 0 ? kv : kv.slice(0, i)] = i < 0 ? '1' : decodeURIComponent(kv.slice(i + 1)); });
+
+    const hit = this.T.find(r => this.norm(r[1]) === n); if (hit) return hit[0];
+    const b = this.T.find(r => this.norm(r[1]) === base); if (b) return b[0];
+    return null;
+  }
+  renderVals() {
+    const path = this.props.path || '/le-fade-tanger/services/passes', world = this.props.world || {}, go = this.props.go || (() => {}), setWorld = this.props.setWorld || (() => {}), openPal = this.props.openPal || (() => {});
+    const id = this.screenFor(path, world);
+    const v = {}; this.IDS.forEach(k => { v[k.replace(/-/g, '_')] = k === id; }); if (id && this.U[id]) v[this.U[id].replace(/-/g, '_')] = true;
+    const h = {}; this.A.forEach((a, i) => { h['a' + i] = e => { if (e && e.stopPropagation) e.stopPropagation(); if (a.pal) { openPal(); return; } if (a.toast) { this._toast(a.toast); return; } if (a.world) setWorld(a.world); if (a.to) go(a.to); }; });
+    return { v, h, toastOn: !!(this.state && this.state.toast), toastMsg: (this.state && this.state.toast) || '', chip: this.chip, none: !id, backHome: () => go('/le-fade-tanger/services/passes'), specOn: !!this.props.specOn, specId: (id || 'no screen') + ' · ' + path };
+  }
+}
+</script>
+</body>
+</html>

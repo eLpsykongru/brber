@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:relative;height:100%;overflow:auto;box-sizing:border-box;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif">
+  <sc-if value="{{ showTop }}" hint-placeholder-val="{{ true }}">
+    <div style="position:sticky;top:0;z-index:3;height:62px;box-sizing:border-box;background:#0D0D0F;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72;min-width:0">
+        <sc-for list="{{ crumbs }}" as="c" hint-placeholder-count="2">
+          <sc-if value="{{ c.sep }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg></sc-if>
+          <span onClick="{{ c.go }}" style="white-space:nowrap;color:{{ c.color }};font-weight:{{ c.weight }};cursor:{{ c.cursor }}">{{ c.label }}</span>
+        </sc-for>
+      </span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;height:30px;box-sizing:border-box;padding:0 11px;border-radius:8px;background:{{ pill.bg }};border:1px solid {{ pill.border }}"><span style="width:6px;height:6px;border-radius:999px;background:{{ pill.fg }}"></span><span style="font-size:11px;font-weight:700;color:{{ pill.fg }};white-space:nowrap">{{ pill.label }}</span></span>
+      <sc-for list="{{ topActions }}" as="a" hint-placeholder-count="0">
+        <span onClick="{{ a.go }}" style="height:32px;box-sizing:border-box;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:600;color:#9A9CA3;white-space:nowrap;cursor:pointer" style-hover="color:#fff">{{ a.label }}</span>
+      </sc-for>
+    </div>
+  </sc-if>
+  <div style="padding:20px 22px 44px;display:flex;flex-direction:column;gap:14px;max-width:1180px;box-sizing:border-box">
+    <sc-if value="{{ showBack }}" hint-placeholder-val="{{ false }}">
+      <span onClick="{{ back.go }}" style="align-self:flex-start;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#9A9CA3;cursor:pointer" style-hover="color:#fff"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>{{ back.label }}</span>
+    </sc-if>
+    <div style="display:flex;align-items:center;gap:14px">
+      <span style="width:54px;height:54px;border-radius:14px;background:{{ tile.bg }};display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:{{ tile.fg }};flex:none">{{ initials }}</span>
+      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+        <sc-if value="{{ isShop }}" hint-placeholder-val="{{ false }}">
+          <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:21px;letter-spacing:.02em;text-transform:uppercase">{{ name }}</span>
+        </sc-if>
+        <sc-if value="{{ isPerson }}" hint-placeholder-val="{{ true }}">
+          <span style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><span style="font-size:18px;font-weight:700">{{ name }}</span><sc-if value="{{ hasTag }}"><span style="display:flex;align-items:center;gap:5px;font-size:9px;letter-spacing:.08em;font-weight:700;border-radius:5px;padding:3px 7px;color:{{ tag.fg }};background:{{ tag.bg }}"><span style="width:5px;height:5px;border-radius:999px;background:{{ tag.fg }}"></span>{{ tag.label }}</span></sc-if></span>
+        </sc-if>
+        <span style="font-size:11.5px;line-height:1.45;color:#9A9CA3">{{ sub }}</span>
+      </span>
+      <sc-if value="{{ hasRating }}">
+        <span style="flex:none;text-align:right"><span style="display:block;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">RATING</span><span style="display:block;font-size:19px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums">{{ rating }}</span></span>
+      </sc-if>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
+      <sc-for list="{{ tiles }}" as="t" hint-placeholder-count="3">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:13px 14px;display:flex;flex-direction:column;gap:4px">
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">{{ t.label }}</span>
+          <span style="font-size:21px;font-weight:700;font-variant-numeric:tabular-nums;color:{{ t.color }}">{{ t.value }}<span style="font-size:11px;font-weight:400;color:#9A9CA3">{{ t.unit }}</span></span>
+          <span style="font-size:10px;color:{{ t.subColor }}">{{ t.sub }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="border-radius:16px;padding:15px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:{{ call.bg }};border:1px solid {{ call.border }}">
+      <span style="width:30px;height:30px;border-radius:999px;background:{{ call.dotBg }};display:flex;align-items:center;justify-content:center;flex:none"><span style="width:8px;height:8px;border-radius:999px;background:{{ call.fg }}"></span></span>
+      <span style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font-size:12.5px;font-weight:700;color:{{ call.fg }}">{{ call.title }}</span><span style="font-size:11.5px;line-height:1.55;color:#C9CAD0;text-wrap:pretty">{{ call.body }}</span></span>
+      <span style="display:flex;gap:8px;flex-wrap:wrap">
+        <sc-for list="{{ call.actions }}" as="a" hint-placeholder-count="1">
+          <span onClick="{{ a.go }}" style="height:36px;box-sizing:border-box;border-radius:9px;display:flex;align-items:center;padding:0 14px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;cursor:pointer;background:{{ a.bg }};color:{{ a.fg }};border:1px solid {{ a.border }}" style-hover="filter:brightness(1.15)">{{ a.label }}</span>
+        </sc-for>
+      </span>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:14px">
+      <div style="flex:999 1 480px;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <sc-for list="{{ sections }}" as="s" hint-placeholder-count="1">
+          <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
+            <span style="padding:14px 16px 10px;font-size:12.5px;font-weight:700">{{ s.title }}</span>
+            <sc-for list="{{ s.rows }}" as="r" hint-placeholder-count="2">
+              <div onClick="{{ r.go }}" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid #1E1E22;cursor:{{ r.cursor }}" style-hover="background:{{ r.hover }}">
+                <sc-if value="{{ r.hasInitials }}"><span style="width:30px;height:30px;border-radius:{{ r.radius }};background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex:none">{{ r.initials }}</span></sc-if>
+                <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">{{ r.title }}</span><span style="font-size:10.5px;color:#9A9CA3">{{ r.sub }}</span></span>
+                <sc-if value="{{ r.hasMeta }}"><span style="flex:none;font-size:9px;letter-spacing:.12em;font-weight:700;border-radius:6px;padding:4px 7px;color:{{ r.metaFg }};background:{{ r.metaBg }}">{{ r.meta }}</span></sc-if>
+                <sc-if value="{{ r.link }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ hasSide }}">
+        <div style="flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:14px">
+          <sc-for list="{{ side }}" as="s" hint-placeholder-count="1">
+            <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+              <span style="font-size:12.5px;font-weight:700">{{ s.title }}</span>
+              <sc-for list="{{ s.kv }}" as="k" hint-placeholder-count="0">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;font-size:11.5px"><span style="color:#9A9CA3">{{ k.k }}</span><span style="font-weight:700;font-variant-numeric:tabular-nums;color:{{ k.color }}">{{ k.v }}</span></div>
+              </sc-for>
+              <sc-for list="{{ s.rows }}" as="r" hint-placeholder-count="0">
+                <div onClick="{{ r.go }}" style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin:0 -10px;border-radius:9px;cursor:{{ r.cursor }}" style-hover="background:{{ r.hover }}">
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:12px;font-weight:700">{{ r.title }}</span><span style="font-size:10.5px;color:#9A9CA3">{{ r.sub }}</span></span>
+                  <sc-if value="{{ r.hasMeta }}"><span style="flex:none;font-size:10.5px;font-weight:700;color:{{ r.metaFg }}">{{ r.meta }}</span></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+  <sc-if value="{{ toastOn }}">
+    <div style="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:9px;background:#fff;color:#0D0D0F;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.45);pointer-events:none;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>{{ toastMsg }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1184,&quot;height&quot;:820},&quot;path&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;/salons/kasbah-cuts&quot;,&quot;/salons/salon-atlas&quot;,&quot;/salons/marina-bay-cuts&quot;,&quot;/salons/rif-gentlemen&quot;,&quot;/salons/medina-cuts&quot;,&quot;/barbers/youssef-alami&quot;,&quot;/barbers/hamza-bennani&quot;,&quot;/barbers/salim-alaoui&quot;,&quot;/barbers/tarik-lamrani&quot;,&quot;/barbers/mehdi-tazi&quot;,&quot;/customers/yassine-berrada&quot;,&quot;/demand/tangier/branes&quot;,&quot;/le-fade-tanger/chairs/salim-alaoui&quot;],&quot;default&quot;:&quot;/salons/kasbah-cuts&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;go&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(path: string) =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { toast: null };
+  TONE = {
+    red: { fg: '#F87171', bg: 'rgba(248,113,113,.14)', border: 'rgba(248,113,113,.3)', soft: 'rgba(248,113,113,.07)' },
+    amber: { fg: '#E8A100', bg: 'rgba(232,161,0,.14)', border: 'rgba(232,161,0,.28)', soft: 'rgba(232,161,0,.07)' },
+    green: { fg: '#4ADE80', bg: 'rgba(74,222,128,.1)', border: 'rgba(74,222,128,.3)', soft: 'rgba(74,222,128,.05)' },
+    grey: { fg: '#9A9CA3', bg: '#212125', border: '#26262B', soft: '#141416' },
+    brand: { fg: '#E8442E', bg: 'rgba(232,68,46,.14)', border: 'rgba(232,68,46,.3)', soft: 'rgba(232,68,46,.07)' },
+  };
+  DATA = {
+    '/salons/kasbah-cuts': { kind: 'shop', crumbs: [['Salons', '/salons'], ['Kasbah Cuts']], pill: ['Live · float over its limit', 'amber'], initials: 'KC', tone: 'brand', name: 'Kasbah Cuts', sub: 'Kasbah · owner Adil Chakir', rating: '4.8',
+      tiles: [['BARBERS', '2'], ['BOOKINGS 30D', '198', '', '11 880 DH'], ['FLOAT / CAP', '2 180', ' / 3 000', 'held 19 days · cap is 14', 'amber'], ['NEXT TASK', 'In 2 days', '', 'Mon Aug 11']],
+      call: { tone: 'amber', title: 'Float held 19 days — the cap is 14', body: '2 180 DH of cash top-ups is still with the shop. Task FLT-882 asks Adil to settle it by Monday.', actions: [['Settle float', '/wallets', 1], ['Remind Adil', { toast: 'Reminder sent to Adil Chakir' }]] },
+      sections: [{ title: 'Owner', rows: [{ initials: 'AC', title: 'Adil Chakir', sub: 'Owns the shop and cuts here' }] }],
+      side: [{ title: 'Follow-ups', rows: [{ title: 'Settle 2 180 DH float', sub: 'FLT-882 · first task', meta: 'Mon Aug 11', tone: 'amber', to: '/compliance' }] }] },
+    '/salons/salon-atlas': { kind: 'shop', crumbs: [['Salons', '/salons'], ['Salon Atlas']], pill: ['Live · 2nd missed task', 'red'], initials: 'SA', tone: 'brand', name: 'Salon Atlas', sub: 'Medina · owner Driss Ouali', rating: '4.3',
+      tiles: [['BARBERS', '2'], ['BOOKINGS 30D', '96', '', '5 760 DH'], ['FLOAT / CAP', '420', ' / 2 000', 'held 8 days']],
+      call: { tone: 'red', title: 'Second missed task: publish real opening hours', body: 'A customer paid a deposit and found the shop closed (CS-4471). The hours have to be real by Thursday.', actions: [['Open CS-4471', '/support/CS-4471', 1], ['Remind the owner', { toast: 'Reminder sent to the owner' }]] },
+      sections: [{ title: 'Owner', rows: [{ initials: 'DO', title: 'Driss Ouali', sub: 'Owns the shop' }] }],
+      side: [{ title: 'Follow-ups', rows: [{ title: 'Publish real opening hours', sub: 'CS-4471 · 2nd missed task', meta: 'Thu Aug 14', tone: 'red', to: '/compliance' }] }] },
+    '/salons/marina-bay-cuts': { kind: 'shop', crumbs: [['Salons', '/salons'], ['Marina Bay Cuts']], pill: ['Live · trading normally', 'green'], initials: 'MB', tone: 'brand', name: 'Marina Bay Cuts', sub: 'Marina · owner Reda Chraibi', rating: '4.5',
+      tiles: [['BARBERS', '2'], ['BOOKINGS 30D', '154', '', '9 240 DH'], ['FLOAT / CAP', '980', ' / 3 000']],
+      call: { tone: 'grey', title: 'Not Marina Barber Club', body: 'Same district, similar name. Marina Barber Club is the suspended shop — this one is trading normally.', actions: [['Open Marina Barber Club', '/salons/marina-barber-club']] },
+      sections: [{ title: 'Owner', rows: [{ initials: 'RC', title: 'Reda Chraibi', sub: 'Owns the shop' }] }] },
+    '/salons/rif-gentlemen': { kind: 'shop', crumbs: [['Salons', '/salons'], ['Rif Gentlemen']], pill: ['Live · payouts held', 'red'], initials: 'RG', tone: 'brand', name: 'Rif Gentlemen', sub: 'Tangier · 58 bookings in this payout run',
+      tiles: [['TAKEN THIS RUN', '4 410', ' DH', '58 bookings'], ['COMMISSION', '−353', ' DH', '8% to us'], ['TO PAY', '4 057', ' DH', 'held · third Friday', 'red']],
+      call: { tone: 'red', title: 'No RIB on file', body: 'Three Fridays unpaid. 4 057 DH waits until the owner adds a bank account — nobody else can add it for them.', actions: [['Chase the RIB', { toast: 'RIB request sent to the owner' }, 1], ['Open the payout run', '/finance/payouts/2026-W25']] },
+      sections: [], side: [{ title: 'This payout', kv: [['Taken', '4 410 DH'], ['Commission', '−353 DH'], ['To pay', '4 057 DH'], ['Status', 'Held — no RIB', 'red']] }] },
+    '/salons/medina-cuts': { kind: 'shop', crumbs: [['Salons', '/salons'], ['Medina Cuts']], pill: ['Live · licence expired', 'red'], initials: 'MC', tone: 'brand', name: 'Medina Cuts', sub: 'Medina · one barber trading without a licence',
+      tiles: [['LICENCES', '1 expired', '', 'Mehdi Tazi · since Tuesday', 'red']],
+      call: { tone: 'red', title: 'Mehdi Tazi’s licence expired on Tuesday', body: 'He is still taking bookings. Get the renewal photo, or hide him from search until it arrives.', actions: [['Open his file', '/barbers/mehdi-tazi', 1], ['Open Compliance', '/compliance']] },
+      sections: [{ title: 'Barbers', rows: [{ initials: 'MT', title: 'Mehdi Tazi', sub: 'Licence expired Tuesday · still trading', meta: 'LICENCE', tone: 'red', to: '/barbers/mehdi-tazi' }] }] },
+    '/barbers/youssef-alami': { kind: 'person', crumbs: [['Barbers', '/barbers'], ['Youssef Alami']], pill: ['Nothing flagged', 'green'], top: [['Message him', '/support/threads/youssef-alami']], initials: 'YA', tone: 'grey', name: 'Youssef Alami', tag: ['OWNER', 'grey'], sub: 'Owns Le Fade Tanger · also cuts at Marina Barber Club · +212 661 ••• 093',
+      tiles: [['RATING', '4.86'], ['CUT 30D', '142'], ['CANCELS', '1%', '', 'nothing flagged', 'green']],
+      call: { tone: 'green', title: 'Nothing flagged', body: 'Clean record: 1% cancels and no open case against him.', actions: [] },
+      sections: [{ title: 'Where he cuts', rows: [{ initials: 'LF', square: 1, title: 'Le Fade Tanger', sub: 'Owner', to: '/salons/le-fade-tanger' }, { initials: 'MB', square: 1, title: 'Marina Barber Club', sub: 'Also cuts here · shop suspended', meta: 'SUSPENDED', tone: 'red', to: '/salons/marina-barber-club' }] }],
+      side: [{ title: 'Open with support', rows: [{ title: 'His thread with support', sub: 'Replies about durations', to: '/support/threads/youssef-alami' }, { title: 'PT-014', sub: 'Product ticket he started', to: '/support/tickets/PT-014' }] }] },
+    '/barbers/hamza-bennani': { kind: 'person', crumbs: [['Barbers', '/barbers'], ['Hamza Bennani']], pill: ['Nothing flagged', 'green'], initials: 'HB', tone: 'grey', name: 'Hamza Bennani', sub: 'Cuts at Le Fade Tanger',
+      tiles: [['RATING', '4.6'], ['CUT 30D', '104']],
+      call: { tone: 'green', title: 'Nothing flagged', body: 'No cancels worth a look and no open case against him.', actions: [] },
+      sections: [{ title: 'Where he cuts', rows: [{ initials: 'LF', square: 1, title: 'Le Fade Tanger', sub: 'One of three chairs', to: '/salons/le-fade-tanger' }] }] },
+    '/barbers/salim-alaoui': { kind: 'person', crumbs: [['Barbers', '/barbers'], ['Salim Alaoui']], pill: ['No login of his own', 'amber'], initials: 'SA', tone: 'amber', name: 'Salim Alaoui', tag: ['NO LOGIN', 'amber'], sub: 'Cuts at Le Fade Tanger',
+      tiles: [['RATING', '—', '', 'counted under Youssef'], ['CUT 30D', '—', '', 'counted under Youssef'], ['ONBOARDING', 'ONB-197', '', 'open', 'amber']],
+      call: { tone: 'amber', title: 'Cutting under Youssef’s name', body: 'Salim has no login, so his bookings, ratings and cancels land on Youssef’s chair. ONB-197 is waiting on Youssef to invite him.', actions: [['Remind Youssef', { toast: 'Reminder sent to Youssef' }, 1], ['Open Le Fade', '/salons/le-fade-tanger']] },
+      sections: [{ title: 'Where he cuts', rows: [{ initials: 'LF', square: 1, title: 'Le Fade Tanger', sub: 'Chair 3', to: '/salons/le-fade-tanger' }] }] },
+    '/barbers/tarik-lamrani': { kind: 'person', crumbs: [['Barbers', '/barbers'], ['Tarik Lamrani']], pill: ['Shop suspended', 'amber'], initials: 'TL', tone: 'grey', name: 'Tarik Lamrani', tag: ['SHOP SUSPENDED', 'amber'], sub: 'Cuts at Marina Barber Club',
+      tiles: [['RATING', '4.55'], ['CUT 30D', '47'], ['RECORD', 'Clean', '', 'no work for 3 days', 'amber']],
+      call: { tone: 'amber', title: 'No work for 3 days', body: 'His record is clean — Marina Barber Club is suspended, so his chair stopped with it.', actions: [['Move him to another shop', '/barbers?move=zakaria-tarik', 1], ['Open Marina Barber Club', '/salons/marina-barber-club']] },
+      sections: [{ title: 'Where he cuts', rows: [{ initials: 'MB', square: 1, title: 'Marina Barber Club', sub: 'Suspended since Aug 15', meta: 'SUSPENDED', tone: 'red', to: '/salons/marina-barber-club' }] }] },
+    '/barbers/mehdi-tazi': { kind: 'person', crumbs: [['Barbers', '/barbers'], ['Mehdi Tazi']], pill: ['Licence expired', 'red'], initials: 'MT', tone: 'red', name: 'Mehdi Tazi', tag: ['LICENCE EXPIRED', 'red'], sub: 'Cuts at Medina Cuts',
+      tiles: [['LICENCE', 'Expired', '', 'on Tuesday', 'red'], ['STILL TRADING', 'Yes', '', 'for 2 days', 'red']],
+      call: { tone: 'red', title: 'Trading without a valid licence', body: 'His licence expired on Tuesday and he is still taking bookings at Medina Cuts.', actions: [['Hide him from search', { toast: 'Mehdi is hidden from search' }, 1], ['Open Compliance', '/compliance']] },
+      sections: [{ title: 'Where he cuts', rows: [{ initials: 'MC', square: 1, title: 'Medina Cuts', sub: 'Medina', to: '/salons/medina-cuts' }] }] },
+    '/barbers/karim-idrissi/day': { kind: 'person', crumbs: [['Barbers', '/barbers'], ['Karim Idrissi', '/barbers/karim-idrissi'], ['His day']], pill: ['Shop suspended', 'amber'], initials: 'KI', tone: 'red', name: 'Karim Idrissi · today', tag: ['CANCELS A LOT', 'red'], sub: 'Owns Marina Barber Club · 3 chairs',
+      tiles: [['BOOKINGS TODAY', '0', '', 'the shop is suspended', 'amber'], ['CANCELLED BY THE SUSPENSION', '7', '', 'across the three chairs'], ['HIS OWN CANCELS', '11', '', 'in 30 days · 9 inside two hours', 'red']],
+      call: { tone: 'amber', title: 'Nothing to cut today', body: 'Marina Barber Club is suspended until a valid licence comes in, so his chair is empty. His own cancellations still count against him when the shop reopens.', actions: [['Open Marina Barber Club', '/salons/marina-barber-club', 1], ['The 7 cancelled bookings', '/bookings']] },
+      sections: [{ title: 'Where he cuts', rows: [{ initials: 'MB', square: 1, title: 'Marina Barber Club', sub: 'Owner · suspended', meta: 'SUSPENDED', tone: 'red', to: '/salons/marina-barber-club' }] }] },
+    '/finance/settlement/2026-W36/agent-sheets': { kind: 'person', crumbs: [['Finance', '/finance'], ['Settlement runs', '/finance/settlement/2026-W36'], ['Week 36', '/finance/settlement/2026-W36'], ['Agent sheets']], pill: ['Released · locked', 'grey'], top: [['Print agent sheets', { toast: 'Sent to the printer' }]], initials: '38', tone: 'grey', name: 'Agent sheets · week 36', sub: 'One sheet per shop visit · released Fri 4 Sep 21:04 by Karima Bennis',
+      tiles: [['VISITS DONE', '11', ' of 26', '8 940 DH of 21 480 DH collected'], ['PAID OUT', '9 340', ' DH', 'all 12 shops · done Saturday', 'green'], ['STILL WITH THE SHOPS', '12 540', ' DH', '15 shops · oldest dirham day 9 of 14', 'amber']],
+      call: { tone: 'amber', title: 'Kasbah Classics paid 300 of 780 DH', body: 'The other 480 DH stays on the sheet until an agent collects it. Nothing on a released run can be edited — a wrong line is answered by a new line on week 37.', actions: [['Open the run', '/finance/settlement/2026-W36']] },
+      sections: [
+        { title: 'Hicham Rami · 3 shown', rows: [{ initials: 'LF', square: 1, title: 'Le Fade Tanger · collect 1 566 DH', sub: 'Collected Fri 17:42 · receipt SR-1181', meta: 'COLLECTED', tone: 'green', to: '/finance/statements/2026-W36-014' }, { initials: 'AB', square: 1, title: 'Atlas Barbershop · collect 2 240 DH', sub: 'Due Mon 09:00 · oldest dirham day 4 of 14', meta: 'OPEN', tone: 'amber' }, { initials: 'RG', square: 1, title: 'Rif Gentlemen · pay out 2 100 DH', sub: 'Handed over Fri 18:30 · owner signed', meta: 'HANDED OVER', tone: 'green', to: '/salons/rif-gentlemen' }] },
+        { title: 'Yassine Fadli · 1 shown', rows: [{ initials: 'MB', square: 1, title: 'Marina Barber Club · pay out 3 570 DH', sub: 'Handed over Sat 10:12 · owner signed', meta: 'HANDED OVER', tone: 'green', to: '/salons/marina-barber-club' }] },
+        { title: 'Not yet on an agent’s route · 2 shown', rows: [{ initials: 'KC', square: 1, title: 'Kasbah Classics · collect 780 DH', sub: '300 DH taken Fri 19:05 · 480 DH open', meta: 'PART PAID', tone: 'amber' }, { initials: 'MC', square: 1, title: 'Medina Cuts · nil week', sub: 'Statement sent anyway — a nil week is a fact, not a gap', meta: 'NIL', tone: 'grey', to: '/salons/medina-cuts' }] },
+      ] },
+    '/customers/yassine-berrada': { kind: 'person', crumbs: [['Customers', '/customers'], ['Yassine Berrada']], pill: ['Quiet for 11 days', 'amber'], initials: 'YB', tone: 'grey', name: 'Yassine Berrada', sub: 'A customer for fourteen months',
+      tiles: [['CUTS', '11', '', '660 DH in all'], ['COMES', 'Every 5 weeks', '', 'always with Rachid'], ['LAST OPENED', '11 days ago', '', 'after his ask expired', 'amber']],
+      call: { tone: 'amber', title: 'His barber moved and nobody told him', body: 'Rachid moved to Coiffure Riad in July. Yassine asked for a Saturday in Malabata, found nothing, and has not opened the app since.', actions: [['Tell him where Rachid is', '/demand/tangier/malabata?ask=WR-4471&tell=1', 1]] },
+      sections: [{ title: 'His asks', rows: [{ title: 'WR-4471 · Saturday in Malabata', sub: 'Written 12 Aug · expired 17 Aug · nothing opened', meta: 'EXPIRED', tone: 'grey', to: '/demand/tangier/malabata?ask=WR-4471' }] }] },
+    '/demand/tangier/branes': { kind: 'person', crumbs: [['Demand', '/demand'], ['Tangier', '/demand'], ['Branes']], pill: ['No supply', 'amber'], initials: 'BR', tone: 'amber', name: 'Branes', sub: 'Tangier · no shop in the district',
+      tiles: [['UNMET ASKS 30D', '22', '', 'searched and found nothing', 'amber'], ['SHOPS', '0']],
+      call: { tone: 'amber', title: 'People searched and found nothing', body: 'Each of the 22 is a recruiting lead — there is no shop here to send them to.', actions: [['Send to recruiting', '/salons/recruiting/asks', 1], ['Back to the map', '/demand']] },
+      sections: [] },
+    '/le-fade-tanger/chairs/salim-alaoui': { kind: 'person', owner: 1, back: ['Chairs', '/le-fade-tanger/chairs'], initials: 'SA', tone: 'amber', name: 'Salim Alaoui', tag: ['NO LOGIN YET', 'amber'], sub: 'Day off today · back Friday 10:00',
+      tiles: [['HIS BOOKINGS', '—', '', 'go under your name'], ['HIS RATING', '—', '', 'counted on your chair']],
+      call: { tone: 'amber', title: 'Salim cuts under your name', body: 'Until he has his own login, his bookings, ratings and cancels count on your chair. Invite him with his phone number — it takes a minute.', actions: [['Invite Salim', '/le-fade-tanger/chairs?invite=1', 1]] },
+      sections: [] },
+  };
+  componentWillUnmount() { clearTimeout(this._tt); }
+  renderVals() {
+    const go = this.props.go || (() => {});
+    const base = (this.props.path || '/salons/kasbah-cuts').split(/[?#]/)[0];
+    const d = this.DATA[base] || this.DATA['/salons/kasbah-cuts'];
+    const T = this.TONE;
+    const act = x => () => { if (!x) return; if (typeof x === 'string') { go(x); return; } if (x.toast) { this.setState({ toast: x.toast }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: null }), 2200); } };
+    const row = r => {
+      const t = T[r.tone || 'grey'];
+      return { initials: r.initials || '', hasInitials: !!r.initials, radius: r.square ? '8px' : '999px', title: r.title, sub: r.sub || '', meta: r.meta || '', hasMeta: !!r.meta, metaFg: t.fg, metaBg: t.bg, link: !!r.to, cursor: r.to ? 'pointer' : 'default', hover: r.to ? '#1C1C20' : 'transparent', go: act(r.to) };
+    };
+    const pt = T[(d.pill || [])[1] || 'grey'], tt = T[d.tone || 'grey'], ct = T[d.call.tone || 'grey'];
+    const crumbs = (d.crumbs || []).map((c, i, all) => {
+      const last = i === all.length - 1;
+      return { label: c[0], sep: i > 0, color: last ? '#fff' : '#6B6B72', weight: last ? '600' : '400', cursor: c[1] ? 'pointer' : 'default', go: act(c[1]) };
+    });
+    return {
+      showTop: !d.owner, showBack: !!d.back, back: d.back ? { label: d.back[0], go: act(d.back[1]) } : { label: '', go: () => {} },
+      crumbs, pill: { label: (d.pill || [''])[0], fg: pt.fg, bg: pt.bg, border: pt.border },
+      topActions: (d.top || []).map(a => ({ label: a[0], go: act(a[1]) })),
+      initials: d.initials, tile: { bg: tt.bg, fg: tt.fg }, isShop: d.kind === 'shop', isPerson: d.kind !== 'shop', name: d.name, sub: d.sub,
+      hasTag: !!d.tag, tag: d.tag ? { label: d.tag[0], fg: T[d.tag[1]].fg, bg: T[d.tag[1]].bg } : { label: '', fg: '', bg: '' },
+      hasRating: !!d.rating, rating: d.rating || '',
+      tiles: d.tiles.map(t => ({ label: t[0], value: t[1], unit: t[2] || '', sub: t[3] || '', color: t[4] ? T[t[4]].fg : '#fff', subColor: t[4] ? T[t[4]].fg : '#9A9CA3' })),
+      call: { title: d.call.title, body: d.call.body, fg: d.call.tone === 'grey' ? '#fff' : ct.fg, bg: ct.soft, border: ct.border, dotBg: ct.bg,
+        actions: d.call.actions.map(a => ({ label: a[0], go: act(a[1]), bg: a[2] ? '#E8442E' : '#17171A', fg: a[2] ? '#fff' : '#C9CAD0', border: a[2] ? '#E8442E' : '#26262B' })) },
+      sections: (d.sections || []).map(s => ({ title: s.title, rows: s.rows.map(row) })),
+      hasSide: !!(d.side && d.side.length), side: (d.side || []).map(s => ({ title: s.title, kv: (s.kv || []).map(k => ({ k: k[0], v: k[1], color: k[2] ? T[k[2]].fg : '#fff' })), rows: (s.rows || []).map(row) })),
+      toastOn: !!this.state.toast, toastMsg: this.state.toast || '',
+    };
+  }
+}
+</script>
+</body>
+</html>

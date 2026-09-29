@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:#202124;overflow:hidden;-webkit-font-smoothing:antialiased}
+a{color:#E8442E;text-decoration:none}
+a:hover{color:#FF6B57}
+input::placeholder{color:#6B6B72}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#26262B;border-radius:10px;border:2px solid #0D0D0F}
+::-webkit-scrollbar-track{background:transparent}
+</style>
+</helmet>
+<div style="width:100vw;height:100vh;display:flex;flex-direction:column;background:#35363a;font-family:Inter,sans-serif;color:#fff;overflow:hidden">
+<div style="height:40px;flex:none;background:#202124;display:flex;align-items:flex-end;gap:10px;padding-right:10px">
+  <div style="align-self:center;display:flex;gap:8px;padding:0 6px 0 14px">
+    <span style="width:12px;height:12px;border-radius:50%;background:#ff5f57"></span>
+    <span style="width:12px;height:12px;border-radius:50%;background:#febc2e"></span>
+    <span style="width:12px;height:12px;border-radius:50%;background:#28c840"></span>
+  </div>
+  <div style="position:relative;height:32px;width:240px;flex:none;display:flex;align-items:center;gap:8px;padding:0 8px 0 12px;box-sizing:border-box;background:#35363a;border-radius:8px 8px 0 0;font-family:system-ui,-apple-system,sans-serif;font-size:12px;color:#e8eaed">
+    <svg width="8" height="10" viewBox="0 0 8 10" style="position:absolute;bottom:0;left:-8px"><path d="M0 10C2 9 6 8 8 0V10H0Z" fill="#35363a"></path></svg>
+    <svg width="8" height="10" viewBox="0 0 8 10" style="position:absolute;bottom:0;right:-8px;transform:scaleX(-1)"><path d="M0 10C2 9 6 8 8 0V10H0Z" fill="#35363a"></path></svg>
+    <span style="width:16px;height:16px;border-radius:4px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+    <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ tabTitle }}</span>
+    <span style="width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;color:#9aa0a6"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 6l12 12M18 6 6 18"></path></svg></span>
+  </div>
+  <span style="align-self:center;width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:#9aa0a6;margin-left:4px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"></path></svg></span>
+</div>
+<div style="height:40px;flex:none;background:#35363a;display:flex;align-items:center;gap:2px;padding:0 8px;box-sizing:border-box;border-bottom:1px solid #202124">
+  <span onClick="{{ back }}" style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;color:{{ backColor }}" style-hover="background:#45464a"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg></span>
+  <span onClick="{{ forward }}" style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;color:{{ fwdColor }}" style-hover="background:#45464a"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span>
+  <span onClick="{{ reload }}" style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer;color:#e8eaed" style-hover="background:#45464a"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"></path></svg></span>
+  <div onClick="{{ editUrl }}" style="flex:1;min-width:0;height:30px;border-radius:15px;background:#282a2d;display:flex;align-items:center;gap:10px;padding:0 6px 0 5px;margin:0 6px;box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif;font-size:13.5px;cursor:text">
+    <span style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#e8eaed;flex:none;background:#3c3d41"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 8h9M17 8h3M4 16h3M11 16h9M15 5.5v5M9 13.5v5"></path></svg></span>
+    <sc-if value="{{ urlEditing }}" hint-placeholder-val="{{ false }}">
+      <input ref="{{ urlRef }}" value="{{ urlDraft }}" onChange="{{ onUrlDraft }}" onKeyDown="{{ onUrlKey }}" onBlur="{{ endUrlEdit }}" autoComplete="off" style="flex:1;min-width:0;height:100%;background:transparent;border:0;outline:0;color:#e8eaed;font:inherit;padding:0">
+    </sc-if>
+    <sc-if value="{{ urlShowing }}" hint-placeholder-val="{{ true }}">
+      <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span style="color:#e8eaed">admin.sterncut.ma</span><span style="color:#9aa0a6">{{ urlPath }}</span></span>
+    </sc-if>
+    <span style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#9aa0a6;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z"></path></svg></span>
+  </div>
+  <span style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex:none"><span style="width:24px;height:24px;border-radius:50%;background:#5f6368;display:flex;align-items:center;justify-content:center;color:#e8eaed"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 8a4 4 0 1 0 8 0a4 4 0 1 0-8 0M5 20c1-3.5 3.6-5 7-5s6 1.5 7 5"></path></svg></span></span>
+  <span style="width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex:none;color:#e8eaed"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.7"></circle><circle cx="12" cy="12" r="1.7"></circle><circle cx="12" cy="19" r="1.7"></circle></svg></span>
+</div>
+<div style="flex:1;min-height:0;position:relative;background:#0D0D0F;overflow:hidden">
+
+<sc-if value="{{ showSignIn }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;display:flex;overflow:auto">
+  <div style="flex:1;min-width:380px;display:flex;align-items:center;justify-content:center;padding:48px 40px;box-sizing:border-box">
+    <div style="width:100%;max-width:360px;display:flex;flex-direction:column;gap:24px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="width:32px;height:32px;border-radius:9px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+        <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:16px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:26px;font-weight:800;letter-spacing:-.01em">Sign in</span>
+        <span style="font-size:13px;line-height:1.55;color:#9A9CA3;text-wrap:pretty">{{ si.lede }}</span>
+      </div>
+      <div style="display:flex;gap:4px;padding:4px;background:#141416;border:1px solid #1E1E22;border-radius:11px">
+        <span onClick="{{ modeStaff }}" style="flex:1;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ si.staffBg }};color:{{ si.staffFg }}">Sterncut staff</span>
+        <span onClick="{{ modeOwner }}" style="flex:1;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;cursor:pointer;background:{{ si.ownerBg }};color:{{ si.ownerFg }}">Shop owner</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">{{ si.label }}</span>
+        <div style="position:relative">
+          <input value="{{ si.value }}" onChange="{{ onSiInput }}" onFocus="{{ siFocus }}" onBlur="{{ siBlur }}" onKeyDown="{{ siKey }}" placeholder="{{ si.placeholder }}" autoComplete="off" style="width:100%;height:46px;box-sizing:border-box;border-radius:10px;background:#17171A;border:1px solid {{ si.inputBorder }};padding:0 14px;color:#fff;font-size:14px;font-family:Inter,sans-serif;outline:none" style-focus="border-color:#E8442E">
+          <sc-if value="{{ si.suggestOpen }}">
+            <div style="position:absolute;left:0;right:0;top:50px;z-index:5;background:#292a2d;border-radius:8px;box-shadow:0 10px 28px rgba(0,0,0,.55);padding:6px 0;font-family:system-ui,-apple-system,sans-serif">
+              <sc-for list="{{ si.suggestions }}" as="sg" hint-placeholder-count="2">
+                <div onMouseDown="{{ sg.pick }}" style="display:flex;align-items:center;gap:12px;padding:8px 14px;cursor:pointer" style-hover="background:#3c3d41">
+                  <span style="flex:1;min-width:0;font-size:13px;color:#e8eaed;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sg.value }}</span>
+                  <span style="flex:none;font-size:11.5px;color:#9aa0a6">{{ sg.note }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+        <sc-if value="{{ si.hasError }}"><span style="font-size:12px;line-height:1.5;color:#F87171">{{ si.error }}</span></sc-if>
+      </div>
+      <span onClick="{{ continueSignIn }}" style="height:46px;border-radius:10px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="background:#F0533D">{{ si.button }}</span>
+      <sc-if value="{{ si.isStaff }}">
+        <div style="display:flex;gap:11px;align-items:flex-start;background:#141416;border:1px solid #1E1E22;border-radius:12px;padding:13px 14px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:1px"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"></path></svg>
+          <span style="font-size:11.5px;line-height:1.55;color:#9A9CA3">This console can read every customer’s phone number and move money. Sessions lock after 30 minutes idle.</span>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+  <div style="width:42%;max-width:620px;min-width:320px;flex:none;background:#111113;border-left:1px solid #1E1E22;display:flex;flex-direction:column;justify-content:flex-end;gap:18px;padding:56px;box-sizing:border-box">
+    <span style="font-size:10px;letter-spacing:.18em;font-weight:700;color:#6B6B72">42 SALONS · 118 COIFFEURS</span>
+    <span style="font-family:'Playfair Display',serif;font-size:34px;line-height:1.22;font-weight:700;max-width:460px;text-wrap:pretty">Every number in here belongs to someone who trusted a barber with an afternoon.</span>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showCode }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;inset:0;overflow:auto;display:flex;align-items:center;justify-content:center;padding:48px 24px;box-sizing:border-box">
+  <div style="width:100%;max-width:380px;display:flex;flex-direction:column;gap:24px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span style="width:32px;height:32px;border-radius:9px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span style="font-family:'Playfair Display',serif;font-weight:700;font-size:16px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font-size:26px;font-weight:800;letter-spacing:-.01em">{{ cv.title }}</span>
+      <span style="font-size:13px;color:#9A9CA3">{{ cv.sub }}</span>
+    </div>
+    <div style="position:relative;display:flex;gap:9px">
+      <sc-for list="{{ codeBoxes }}" as="b" hint-placeholder-count="6">
+        <span style="flex:1;height:54px;border-radius:12px;background:#141416;border:1.5px solid {{ b.border }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;font-variant-numeric:tabular-nums">{{ b.ch }}</span>
+      </sc-for>
+      <input ref="{{ codeRef }}" value="{{ code }}" onChange="{{ onCode }}" onKeyDown="{{ onCodeKey }}" autoComplete="one-time-code" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;padding:0;cursor:text;font-size:16px">
+    </div>
+    <sc-if value="{{ cv.isStaff }}">
+      <div onClick="{{ toggleTrust }}" style="display:flex;align-items:flex-start;gap:11px;cursor:pointer">
+        <span style="width:18px;height:18px;border-radius:5px;border:1.5px solid {{ trustBorder }};background:{{ trustBg }};display:flex;align-items:center;justify-content:center;flex:none;margin-top:1px;box-sizing:border-box">
+          <sc-if value="{{ trust }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+        </span>
+        <span style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:600">Trust this computer for 14 days</span><span style="font-size:11px;color:#6B6B72">Never on a shared machine</span></span>
+      </div>
+    </sc-if>
+    <span onClick="{{ submitCode }}" style="height:46px;border-radius:10px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="background:#F0533D">Sign in</span>
+    <div style="display:flex;flex-direction:column;gap:4px;font-size:11.5px;line-height:1.55;color:#9A9CA3"><span style="font-weight:700;color:#fff">{{ cv.helpHead }}</span><span style="text-wrap:pretty">{{ cv.help }}</span></div>
+    <span onClick="{{ backToSignIn }}" style="align-self:flex-start;font-size:12px;font-weight:600;color:#9A9CA3;cursor:pointer" style-hover="color:#fff">← {{ cv.back }}</span>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showApp }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute;inset:0;display:flex">
+  <div style="width:216px;flex:none;background:#111113;border-right:1px solid #1E1E22;display:flex;flex-direction:column;padding:20px 14px 14px;box-sizing:border-box;gap:18px;position:relative;z-index:2">
+    <div style="display:flex;align-items:center;gap:9px;padding:0 8px">
+      <span style="width:28px;height:28px;border-radius:8px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><path d="M8.2 7.5 20 20M8.2 16.5 20 4"></path></svg></span>
+      <span><span style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:14px;letter-spacing:.14em;text-transform:uppercase">Sterncut</span><span style="display:block;font-size:9px;letter-spacing:.16em;font-weight:700;color:#9A9CA3;margin-top:1px">{{ sideSub }}</span></span>
+    </div>
+    <sc-if value="{{ isOwner }}">
+      <div style="display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:10px;background:#17171A;border:1px solid #1E1E22">
+        <span style="font-size:12.5px;font-weight:700">{{ who.shop }}</span>
+        <span style="font-size:10.5px;color:#9A9CA3">{{ who.shopAddr }}</span>
+      </div>
+    </sc-if>
+    <div style="flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:2px">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="13">
+        <sc-if value="{{ n.active }}">
+          <span onClick="{{ n.go }}" style="display:flex;align-items:center;gap:10px;height:38px;flex:none;padding:0 12px;border-radius:10px;background:#212125;font-size:13px;font-weight:700;color:#fff;cursor:pointer">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="{{ n.icon }}"></path></svg>
+            <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ n.label }}</span>
+            <sc-if value="{{ n.badge }}"><span style="font-size:10px;font-weight:700;border-radius:999px;padding:2px 7px;color:{{ n.badgeFg }};background:{{ n.badgeBg }}">{{ n.badge }}</span></sc-if>
+          </span>
+        </sc-if>
+        <sc-if value="{{ n.idle }}" hint-placeholder-val="{{ true }}">
+          <span onClick="{{ n.go }}" style="display:flex;align-items:center;gap:10px;height:38px;flex:none;padding:0 12px;border-radius:10px;font-size:13px;font-weight:500;color:#9A9CA3;cursor:pointer" style-hover="background:#18181B;color:#fff">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="{{ n.icon }}"></path></svg>
+            <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ n.label }}</span>
+            <sc-if value="{{ n.badge }}"><span style="font-size:10px;font-weight:700;border-radius:999px;padding:2px 7px;color:{{ n.badgeFg }};background:{{ n.badgeBg }}">{{ n.badge }}</span></sc-if>
+          </span>
+        </sc-if>
+      </sc-for>
+    </div>
+    <div style="position:relative;flex:none">
+      <sc-if value="{{ acctOpen }}">
+        <div onClick="{{ closeAcct }}" style="position:fixed;inset:0;z-index:14"></div>
+        <div style="position:absolute;left:0;right:0;bottom:62px;z-index:15;background:#1B1B1E;border:1px solid #2A2A30;border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,.5);padding:6px;display:flex;flex-direction:column;gap:2px">
+          <div style="padding:9px 10px 10px;display:flex;flex-direction:column;gap:2px;border-bottom:1px solid #26262B;margin-bottom:4px">
+            <span style="font-size:12.5px;font-weight:700">{{ who.name }}</span>
+            <span style="font-size:11px;color:#9A9CA3">{{ whoContact }}</span>
+          </div>
+          <sc-if value="{{ canLock }}">
+            <span onClick="{{ lock }}" style="display:flex;align-items:center;gap:10px;height:34px;padding:0 10px;border-radius:8px;font-size:12.5px;color:#C9CAD0;cursor:pointer" style-hover="background:#26262B;color:#fff"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1zM8 11V8a4 4 0 0 1 8 0v3"></path></svg>Lock screen</span>
+          </sc-if>
+          <span onClick="{{ signOut }}" style="display:flex;align-items:center;gap:10px;height:34px;padding:0 10px;border-radius:8px;font-size:12.5px;color:#C9CAD0;cursor:pointer" style-hover="background:#26262B;color:#fff"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4"></path></svg>Sign out</span>
+        </div>
+      </sc-if>
+      <div onClick="{{ toggleAcct }}" style="display:flex;align-items:center;gap:9px;padding:10px;border-radius:12px;background:#17171A;cursor:pointer" style-hover="background:#1C1C20">
+        <span style="width:30px;height:30px;border-radius:999px;background:{{ whoAvBg }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">{{ who.initials }}</span>
+        <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ who.name }}</span><span style="display:block;font-size:10px;color:#9A9CA3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ whoSub }}</span></span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M8 10l4-4 4 4M8 14l4 4 4-4"></path></svg>
+      </div>
+    </div>
+  </div>
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <sc-if value="{{ shellTop }}" hint-placeholder-val="{{ true }}">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px;box-sizing:border-box">
+      <span style="font-size:15px;font-weight:700;white-space:nowrap">{{ pageHeading }}</span>
+      <span style="font-size:12px;color:#6B6B72;white-space:nowrap">{{ placeLine }}</span>
+      <span style="flex:1"></span>
+      <span onClick="{{ openPal }}" style="display:flex;align-items:center;gap:9px;height:32px;min-width:200px;box-sizing:border-box;border-radius:9px;background:#17171A;border:1px solid #26262B;padding:0 8px 0 12px;font-size:11.5px;color:#6B6B72;cursor:pointer" style-hover="border-color:#3A3A40;color:#9A9CA3">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 11a7 7 0 1 0 14 0a7 7 0 1 0-14 0M16.5 16.5 21 21"></path></svg>
+        <span style="flex:1">{{ searchLabel }}</span>
+        <span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;background:#26262B;border-radius:4px;padding:2px 5px;color:#9A9CA3">⌘K</span>
+      </span>
+    </div>
+    </sc-if>
+    <div style="flex:1;min-height:0;display:flex;flex-direction:column;opacity:{{ pageOpacity }};transition:opacity .15s">
+      <sc-if value="{{ vOverview }}" hint-placeholder-val="{{ true }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Overview" who="{{ who }}" go="{{ go }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vSalons }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Salons" path="{{ urlPath }}" world="{{ world }}" set-world="{{ setWorld }}" go="{{ go }}" open-pal="{{ openPal }}" spec-on="{{ specOn }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vDemand }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Demand" path="{{ urlPath }}" world="{{ world }}" set-world="{{ setWorld }}" go="{{ go }}" open-pal="{{ openPal }}" spec-on="{{ specOn }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vFinance }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Finance" path="{{ urlPath }}" world="{{ world }}" set-world="{{ setWorld }}" go="{{ go }}" open-pal="{{ openPal }}" spec-on="{{ specOn }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vReviews }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Reviews" path="{{ urlPath }}" world="{{ world }}" set-world="{{ setWorld }}" go="{{ go }}" open-pal="{{ openPal }}" spec-on="{{ specOn }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vSettings }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Settings" path="{{ urlPath }}" world="{{ world }}" set-world="{{ setWorld }}" go="{{ go }}" open-pal="{{ openPal }}" spec-on="{{ specOn }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vSupport }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Support" path="{{ urlPath }}" world="{{ world }}" set-world="{{ setWorld }}" go="{{ go }}" open-pal="{{ openPal }}" spec-on="{{ specOn }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vCustomers }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Customers" path="{{ urlPath }}" world="{{ world }}" set-world="{{ setWorld }}" go="{{ go }}" open-pal="{{ openPal }}" spec-on="{{ specOn }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vBookings }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Bookings" path="{{ urlPath }}" world="{{ world }}" set-world="{{ setWorld }}" go="{{ go }}" open-pal="{{ openPal }}" spec-on="{{ specOn }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vCompliance }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Compliance" path="{{ urlPath }}" world="{{ world }}" set-world="{{ setWorld }}" go="{{ go }}" open-pal="{{ openPal }}" spec-on="{{ specOn }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vRequests }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Requests" who="{{ who }}" go="{{ go }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vOwnerChairs }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Owner Chairs" path="{{ urlPath }}" who="{{ who }}" go="{{ go }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vOwnerPayouts }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Owner Payouts" path="{{ urlPath }}" who="{{ who }}" go="{{ go }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vOwnerOther }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Owner Other" path="{{ urlPath }}" who="{{ who }}" go="{{ go }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vHub }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Section Home" section="{{ hubSection }}" go="{{ go }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vOwnerPreview }}">
+        <div style="position:relative;flex:1;min-height:0;display:flex;flex-direction:column">
+          <div style="height:52px;flex:none;box-sizing:border-box;display:flex;align-items:center;gap:12px;padding:0 24px;background:rgba(232,161,0,.08);border-bottom:1px solid rgba(232,161,0,.28)">
+            <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#0D0D0F;background:#E8A100;border-radius:5px;padding:3px 7px">PREVIEW</span>
+            <span style="font-size:12px;color:#E8C46A">Youssef’s payouts page, exactly as he sees it. Nothing here can be changed from this view.</span>
+            <span style="flex:1"></span>
+            <span onClick="{{ backToStatement }}" style="height:32px;box-sizing:border-box;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:600;color:#C9CAD0;cursor:pointer;white-space:nowrap" style-hover="color:#fff">Back to the statement</span>
+          </div>
+          <div style="position:relative;flex:1;min-height:0">
+            <dc-import name="Site - Owner Payouts" path="{{ previewPath }}" go="{{ previewGo }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vProfile }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Profiles" path="{{ urlPath }}" go="{{ go }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vOwnerPasses }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Owner Passes" path="{{ urlPath }}" world="{{ world }}" set-world="{{ setWorld }}" go="{{ go }}" open-pal="{{ openPal }}" spec-on="{{ specOn }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vOwnerToday }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Owner Today" who="{{ who }}" go="{{ go }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vOwner }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Owner" path="{{ urlPath }}" world="{{ world }}" set-world="{{ setWorld }}" go="{{ go }}" open-pal="{{ openPal }}" spec-on="{{ specOn }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vCoupons }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Coupons" path="{{ urlPath }}" world="{{ world }}" set-world="{{ setWorld }}" go="{{ go }}" open-pal="{{ openPal }}" spec-on="{{ specOn }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vBarbers }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Barbers" path="{{ urlPath }}" world="{{ world }}" set-world="{{ setWorld }}" go="{{ go }}" open-pal="{{ openPal }}" spec-on="{{ specOn }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vWallets }}">
+        <div style="position:relative;flex:1;min-height:0">
+          <dc-import name="Site - Wallets" path="{{ urlPath }}" world="{{ world }}" set-world="{{ setWorld }}" go="{{ go }}" open-pal="{{ openPal }}" spec-on="{{ specOn }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vStub }}">
+        <div style="flex:1;min-height:0;overflow:auto">
+          <div style="max-width:920px;padding:26px 28px 48px;display:flex;flex-direction:column;gap:18px;box-sizing:border-box">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <span style="font-size:22px;font-weight:800;letter-spacing:-.01em">{{ stub.title }}</span>
+              <span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;border-radius:999px;padding:4px 9px;color:{{ stub.pillFg }};background:{{ stub.pillBg }}">{{ stub.pill }}</span>
+            </div>
+            <span style="font-size:13px;line-height:1.6;color:#9A9CA3;max-width:640px;text-wrap:pretty">{{ stub.lede }}</span>
+            <sc-if value="{{ stub.deep }}">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px;color:#9A9CA3">
+                <span>The link you followed is kept and will open the right screen once this is built:</span>
+                <span style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px;color:#fff;background:#17171A;border:1px solid #26262B;border-radius:6px;padding:3px 7px">{{ urlPath }}</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ stub.hasRows }}">
+              <div style="background:#141416;border:1px solid #1E1E22;border-radius:14px;overflow:hidden;display:flex;flex-direction:column">
+                <sc-for list="{{ stub.rows }}" as="r" hint-placeholder-count="6">
+                  <a href="{{ r.href }}" style="display:flex;align-items:center;gap:14px;padding:11px 16px;border-bottom:1px solid #1E1E22;color:#fff;text-decoration:none" style-hover="background:#18181B">
+                    <span style="width:64px;flex:none;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;color:#E8917F">{{ r.id }}</span>
+                    <span style="flex:1;min-width:0;font-size:12.5px;line-height:1.4">{{ r.t }}</span>
+                    <sc-if value="{{ r.tag }}"><span style="flex:none;font-size:9px;letter-spacing:.12em;font-weight:700;color:#9A9CA3;background:#212125;border-radius:5px;padding:3px 6px">{{ r.tag }}</span></sc-if>
+                  </a>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ stub.hasFiles }}">
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:12px;color:#6B6B72">
+                <span>Canvas</span>
+                <sc-for list="{{ stub.files }}" as="cf"><a href="{{ cf.href }}" style="font-weight:600">{{ cf.name }}</a></sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ vMissing }}">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:40px;text-align:center">
+          <span style="font-size:56px;font-weight:800;color:#26262B;letter-spacing:-.02em">404</span>
+          <span style="font-size:15px;font-weight:700">Nothing lives at {{ urlPath }}</span>
+          <span style="font-size:12.5px;color:#9A9CA3;max-width:420px;line-height:1.55">{{ missingNote }}</span>
+          <span onClick="{{ goHome }}" style="margin-top:6px;font-size:12px;font-weight:700;color:#E8442E;cursor:pointer">Back to {{ homeLabel }}</span>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ pal }}">
+<div onClick="{{ closePal }}" style="position:absolute;inset:0;z-index:20;background:rgba(5,5,6,.6);display:flex;justify-content:center;align-items:flex-start;padding:72px 24px 24px;box-sizing:border-box">
+  <div onClick="{{ stop }}" style="width:100%;max-width:620px;max-height:100%;background:#141416;border:1px solid #2A2A30;border-radius:16px;box-shadow:0 30px 90px rgba(0,0,0,.6);overflow:hidden;display:flex;flex-direction:column">
+    <div style="height:54px;flex:none;display:flex;align-items:center;gap:12px;padding:0 16px 0 18px;border-bottom:1px solid #1E1E22">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2" stroke-linecap="round" style="flex:none"><path d="M4 11a7 7 0 1 0 14 0a7 7 0 1 0-14 0M16.5 16.5 21 21"></path></svg>
+      <input ref="{{ palRef }}" value="{{ palQ }}" onChange="{{ onPalQ }}" onKeyDown="{{ onPalKey }}" placeholder="{{ palPlaceholder }}" autoComplete="off" style="flex:1;min-width:0;height:100%;background:transparent;border:0;outline:0;color:#fff;font-size:15px;font-family:Inter,sans-serif">
+      <span style="flex:none;font-family:ui-monospace,Menlo,monospace;font-size:10px;background:#26262B;border-radius:4px;padding:3px 6px;color:#9A9CA3">ESC</span>
+    </div>
+    <sc-if value="{{ palLogged }}">
+      <div style="flex:none;display:flex;align-items:center;gap:9px;padding:9px 18px;background:rgba(232,161,0,.08);border-bottom:1px solid rgba(232,161,0,.2);font-size:11.5px;color:#E8A100">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12zM9 12a3 3 0 1 0 6 0a3 3 0 1 0-6 0"></path></svg>
+        Looking up a phone number is written to the audit trail, with your name.
+      </div>
+    </sc-if>
+    <div style="flex:1;min-height:0;overflow:auto;padding:4px 8px 10px;display:flex;flex-direction:column">
+      <sc-for list="{{ palGroups }}" as="g" hint-placeholder-count="2">
+        <div style="display:flex;flex-direction:column;gap:1px;padding-top:6px">
+          <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72;padding:6px 10px 5px">{{ g.label }}</span>
+          <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="2">
+            <div onClick="{{ it.pick }}" onMouseEnter="{{ it.hover }}" style="display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:10px;cursor:pointer;background:{{ it.bg }}">
+              <span style="width:30px;height:30px;border-radius:{{ it.radius }};background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#C9CAD0;flex:none">
+                <sc-if value="{{ it.initials }}">{{ it.initials }}</sc-if>
+                <sc-if value="{{ it.icon }}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="{{ it.icon }}"></path></svg></sc-if>
+              </span>
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ it.title }}</span><span style="font-size:11px;color:#9A9CA3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ it.sub }}</span></span>
+              <sc-if value="{{ it.tag }}"><span style="flex:none;font-size:9px;letter-spacing:.12em;font-weight:700;border-radius:6px;padding:4px 7px;color:{{ it.tagFg }};background:{{ it.tagBg }}">{{ it.tag }}</span></sc-if>
+              <sc-if value="{{ it.sel }}"><span style="flex:none;font-size:12px;color:#6B6B72">↵</span></sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+      <sc-if value="{{ palEmpty }}"><div style="padding:28px 12px;text-align:center;font-size:12.5px;color:#6B6B72">Nothing matches that. Try a shop, a barber or a phone number.</div></sc-if>
+    </div>
+    <div style="flex:none;display:flex;align-items:center;gap:14px;padding:10px 18px;border-top:1px solid #1E1E22;font-size:10.5px;color:#6B6B72">
+      <span style="display:flex;align-items:center;gap:6px"><span style="font-family:ui-monospace,Menlo,monospace;background:#26262B;border-radius:4px;padding:2px 5px;color:#9A9CA3">↵</span>open</span>
+      <span style="display:flex;align-items:center;gap:6px"><span style="font-family:ui-monospace,Menlo,monospace;background:#26262B;border-radius:4px;padding:2px 5px;color:#9A9CA3">↑↓</span>move</span>
+      <span style="flex:1"></span>
+      <span>{{ palFoot }}</span>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ locked }}">
+<div style="position:absolute;inset:0;z-index:30;background:rgba(13,13,15,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box">
+  <div style="width:100%;max-width:380px;background:#17171A;border:1px solid #26262B;border-radius:18px;padding:28px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px;box-shadow:0 30px 80px rgba(0,0,0,.55)">
+    <span style="width:44px;height:44px;border-radius:999px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;color:#E8442E"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h12a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1zM8 11V8a4 4 0 0 1 8 0v3"></path></svg></span>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <span style="font-size:19px;font-weight:800">Locked after 30 minutes</span>
+      <span style="font-size:12.5px;line-height:1.55;color:#9A9CA3;text-wrap:pretty">{{ lockNote }}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:12px;background:#111113;border:1px solid #1E1E22">
+      <span style="width:32px;height:32px;border-radius:999px;background:{{ whoAvBg }};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex:none">{{ who.initials }}</span>
+      <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">{{ who.name }}</span><span style="font-size:11px;color:#9A9CA3">{{ whoContact }}</span></span>
+    </div>
+    <div style="position:relative;display:flex;gap:8px">
+      <sc-for list="{{ codeBoxes }}" as="b" hint-placeholder-count="6">
+        <span style="flex:1;height:50px;border-radius:11px;background:#111113;border:1.5px solid {{ b.border }};box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;font-variant-numeric:tabular-nums">{{ b.ch }}</span>
+      </sc-for>
+      <input ref="{{ codeRef }}" value="{{ code }}" onChange="{{ onCode }}" onKeyDown="{{ onCodeKey }}" autoComplete="one-time-code" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;padding:0;cursor:text;font-size:16px">
+    </div>
+    <span onClick="{{ unlock }}" style="height:46px;border-radius:10px;background:#E8442E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="background:#F0533D">Unlock with your code</span>
+    <span onClick="{{ signOut }}" style="align-self:center;font-size:12px;font-weight:600;color:#9A9CA3;cursor:pointer" style-hover="color:#fff">Sign out instead</span>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ specShell }}">
+  <div style="position:absolute;right:12px;bottom:12px;z-index:40;background:#E8442E;color:#fff;border-radius:8px;padding:6px 10px;font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.4);pointer-events:none">{{ specLabel }}</div>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;account&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Signed out&quot;,&quot;Nadia · Field ops&quot;,&quot;Hicham · Support&quot;,&quot;Salma · Moderator&quot;,&quot;Karima · Head of Ops&quot;,&quot;Youssef · Owner, Le Fade&quot;,&quot;Karim · Owner, Marina&quot;,&quot;Nabil · Owner, Coiffure Rif&quot;],&quot;default&quot;:&quot;Nadia · Field ops&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Session&quot;},&quot;marinaStart&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Suspended (today)&quot;,&quot;Hidden — before the suspension&quot;],&quot;default&quot;:&quot;Suspended (today)&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Story&quot;},&quot;specIds&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Review&quot;}}">
+class Component extends DCLogic {
+  K = {
+    HOST: 'admin.sterncut.ma',
+    KEY: 'sterncut-site-v1',
+    DEF: 'Nadia · Field ops',
+    ACCOUNTS: { 'Signed out': null, 'Nadia · Field ops': 'nadia', 'Hicham · Support': 'hicham', 'Salma · Moderator': 'salma', 'Karima · Head of Ops': 'karima', 'Youssef · Owner, Le Fade': 'youssef', 'Karim · Owner, Marina': 'karim', 'Nabil · Owner, Coiffure Rif': 'nabil' },
+    PEOPLE: {
+      nadia: { id: 'nadia', name: 'Nadia Lahlou', initials: 'NL', email: 'nadia@sterncut.ma', role: 'field', roleLabel: 'Field ops', city: 'Tangier' },
+      hicham: { id: 'hicham', name: 'Hicham Rami', initials: 'HR', email: 'hicham@sterncut.ma', role: 'support', roleLabel: 'Support', city: 'Tangier, Rabat' },
+      salma: { id: 'salma', name: 'Salma Amrani', initials: 'SA', email: 'salma@sterncut.ma', role: 'mod', roleLabel: 'Moderator', city: 'All cities' },
+      karima: { id: 'karima', name: 'Karima Bennis', initials: 'KB', email: 'karima@sterncut.ma', role: 'head', roleLabel: 'Head of Ops', city: 'All cities' },
+      youssef: { id: 'youssef', name: 'Youssef Alami', initials: 'YA', phone: '+212 6 61 48 20 93', role: 'owner', roleLabel: 'Owner', city: 'Tangier', shop: 'Le Fade Tanger', shopSlug: 'le-fade-tanger', shopAddr: '14 Rue de la Kasbah, Tangier' },
+      karim: { id: 'karim', name: 'Karim Idrissi', initials: 'KI', phone: '+212 6 62 30 15 77', role: 'owner', roleLabel: 'Owner', city: 'Tangier', shop: 'Marina Barber Club', shopSlug: 'marina-barber-club', shopAddr: 'Marina, Tangier', home: '/marina-barber-club/today', today: 'Thursday 27 November' },
+      nabil: { id: 'nabil', name: 'Nabil Amrani', initials: 'NA', phone: '+212 6 64 72 09 31', role: 'owner', roleLabel: 'Owner', city: 'Tangier', shop: 'Coiffure Rif', shopSlug: 'coiffure-rif', shopAddr: 'Tangier', home: '/coiffure-rif/today', today: 'Thursday 29 January' },
+    },
+    IC: {
+      overview: 'M3 5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM14 5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2zM3 16a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM14 16a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2z',
+      requests: 'M3 13h5l1.5 3h5l1.5-3h5M6 4h12l3 9v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z',
+      demand: 'M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10zM10 11a2 2 0 1 0 4 0a2 2 0 1 0-4 0',
+      salons: 'M4 20V9l8-5 8 5v11M9 20v-6h6v6',
+      barbers: 'M6 8a3 3 0 1 0 6 0a3 3 0 1 0-6 0M13.5 9a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0M3 20c.7-3.4 3-5 6-5s5.3 1.6 6 5',
+      customers: 'M8 8a4 4 0 1 0 8 0a4 4 0 1 0-8 0M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5',
+      bookings: 'M6 5h12a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3zM3 9.5h18M8 3v4M16 3v4',
+      wallets: 'M6 7h12a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3v-6a3 3 0 0 1 3-3zM16 13h.01M3 10V7a2 2 0 0 1 2-2h11',
+      finance: 'M12 3v18M5 8h9a3.5 3.5 0 0 1 0 7H5',
+      support: 'M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z',
+      reviews: 'M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z',
+      compliance: 'M9 11l2 2 4-4M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z',
+      settings: 'M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2 2 2 0 1 1-4 0 1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 2.6 15a2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 4.6a2 2 0 1 1 4 0 1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21.4 11a2 2 0 1 1 0 4zM8.8 12a3.2 3.2 0 1 0 6.4 0a3.2 3.2 0 1 0-6.4 0',
+      today: 'M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0M12 7v5l3 2',
+      services: 'M3.5 6a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0M3.5 18a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0M8.2 7.5 20 20M8.2 16.5 20 4',
+      reports: 'M5 20v-7M11 20V5M17 20v-10M3 20h18',
+      subscription: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6',
+      coupons: 'M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4zM10 5v14',
+      phone: 'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2',
+    },
+    STAFF_NAV: [
+      { key: 'overview', label: 'Overview' }, { key: 'requests', label: 'Requests' },
+      { key: 'demand', label: 'Demand', n: 3, tone: 'amber' }, { key: 'salons', label: 'Salons', n: 2, tone: 'amber' },
+      { key: 'barbers', label: 'Barbers', n: 1, tone: 'red' }, { key: 'customers', label: 'Customers', n: 6, tone: 'amber' },
+      { key: 'bookings', label: 'Bookings' }, { key: 'wallets', label: 'Wallets & float' }, { key: 'finance', label: 'Finance' },
+      { key: 'support', label: 'Support', n: 7, tone: 'red' }, { key: 'reviews', label: 'Reviews', n: 3, tone: 'amber' }, { key: 'coupons', label: 'Coupons', n: 'LATER', tone: 'grey' },
+      { key: 'compliance', label: 'Compliance', n: 1, tone: 'red' }, { key: 'settings', label: 'Settings' },
+    ],
+    OWNER_NAV: [
+      { key: 'today', label: 'Today', icon: 'today' }, { key: 'chairs', label: 'Chairs', icon: 'barbers' },
+      { key: 'services', label: 'Services', icon: 'services' }, { key: 'reviews', label: 'Reviews', icon: 'reviews' },
+      { key: 'payouts', label: 'Payouts', icon: 'wallets' }, { key: 'subscription', label: 'Subscription', icon: 'subscription' },
+      { key: 'reports', label: 'Reports', icon: 'reports' }, { key: 'shop', label: 'Your shop', icon: 'salons' },
+    ],
+    SHOPS: [
+      { slug: 'le-fade-tanger', name: 'Le Fade Tanger', initials: 'LF', sub: 'Kasbah · Youssef Alami · live', tag: 'SUSPEND ASKED', tone: 'amber', kw: 'kasbah youssef' },
+      { slug: 'marina-barber-club', name: 'Marina Barber Club', initials: 'MB', sub: 'Marina · Karim Idrissi · no valid licence', tag: 'SUSPENDED', tone: 'red', kw: 'karim idrissi' },
+      { slug: 'rif-gentlemen', name: 'Rif Gentlemen', initials: 'RG', sub: 'Tangier · payout held, no RIB', tag: 'PAYOUT HELD', tone: 'red' },
+      { slug: 'medina-cuts', name: 'Medina Cuts', initials: 'MC', sub: 'Tangier · one barber’s licence expired', tag: 'LICENCE', tone: 'red' },
+      { slug: 'kasbah-cuts', name: 'Kasbah Cuts', initials: 'KC', sub: 'Kasbah · Adil Chakir · float 19 days old', kw: 'adil chakir' },
+      { slug: 'salon-atlas', name: 'Salon Atlas', initials: 'SA', sub: 'Medina · Driss Ouali' },
+      { to: '/salons/pending/tetouan-barbershop', name: 'Tétouan Barbershop', initials: 'TB', sub: 'AP-0182 · Salim Alaoui · ready for you', tag: 'PENDING', tone: 'amber', kw: 'ap-0182 salim tetouan' },
+      { to: '/salons?state=pending&peek=AP-0183', name: 'Coiffure Atlas', initials: 'CA', sub: 'AP-0183 · Brahim Ouazzani · waiting on him', tag: 'PENDING', tone: 'grey', kw: 'ap-0183 brahim malabata' },
+    ],
+    BARBERS: [
+      { slug: 'youssef-alami', name: 'Youssef Alami', initials: 'YA', shop: 'le-fade-tanger', sub: 'Le Fade Tanger · owner · 4.86 ★ · 142 cuts' },
+      { slug: 'hamza-bennani', name: 'Hamza Bennani', initials: 'HB', shop: 'le-fade-tanger', sub: 'Le Fade Tanger · 4.6 ★ · 104 cuts' },
+      { slug: 'salim-alaoui', name: 'Salim Alaoui', initials: 'SA', shop: 'le-fade-tanger', sub: 'Le Fade Tanger · no login of his own', tag: 'ONB-197', tone: 'amber' },
+      { slug: 'zakaria-boukhris', name: 'Zakaria Boukhris', initials: 'ZB', shop: 'marina-barber-club', sub: 'Marina Barber Club · 4.9 ★ · stopped by the suspension' },
+      { slug: 'tarik-lamrani', name: 'Tarik Lamrani', initials: 'TL', shop: 'marina-barber-club', sub: 'Marina Barber Club · 4.6 ★ · stopped by the suspension' },
+      { slug: 'mehdi-tazi', name: 'Mehdi Tazi', initials: 'MT', shop: 'medina-cuts', sub: 'Medina Cuts · licence expired Tuesday', tag: 'LICENCE', tone: 'red' },
+    ],
+    TONE: { red: ['#F87171', 'rgba(248,113,113,.12)'], amber: ['#E8A100', 'rgba(232,161,0,.12)'], grey: ['#9A9CA3', '#212125'] },
+  };
+
+  state = {
+    who: null, hist: ['/sign-in'], hi: 0, next: null, pending: null, code: '', trust: false,
+    si: { mode: 'staff', email: 'nadia@sterncut.ma', phone: '', error: '', suggest: false },
+    urlEditing: false, urlDraft: '', acctOpen: false, locked: false,
+    pal: false, palQ: '', palSel: 0, screens: null, dim: false, world: { marina: 'suspended' },
+  };
+  story() { return (this.props.marinaStart ?? 'Suspended (today)') === 'Hidden — before the suspension' ? 'hidden' : 'suspended'; }
+  setWorld = patch => this.setState(s => ({ world: { ...s.world, ...patch } }));
+  urlRef = React.createRef(); palRef = React.createRef(); codeRef = React.createRef();
+
+  norm(s) { return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+  acct() { return this.props.account ?? this.K.DEF; }
+  home(id) { const p = this.K.PEOPLE[id]; return p && p.home ? p.home : p && p.role === 'owner' ? `/${p.shopSlug}/today` : '/overview'; }
+  sectionPath(who, key) { return who && who.role === 'owner' ? `/${who.shopSlug}/${key}` : `/${key}`; }
+
+  componentDidMount() {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(this.K.KEY) || 'null'); } catch (e) {}
+    if (saved && saved.acct === this.acct() && Array.isArray(saved.hist) && saved.hist.length) this.setState({ who: saved.who || null, hist: saved.hist, hi: Math.min(saved.hi || 0, saved.hist.length - 1) });
+    else this.applyAccount(this.acct());
+    this.setState({ world: saved && saved.story === this.story() && saved.world ? saved.world : { marina: this.story() } });
+    fetch('site-map.json').then(r => r.json()).then(j => this.setState({ screens: j.screens || [] })).catch(() => this.setState({ screens: [] }));
+    this.onKey = e => {
+      const s = this.state;
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+        if (s.who && !s.locked && this.parse(s.hist[s.hi], s.who, s.pending).page !== 'signin') { e.preventDefault(); s.pal ? this.closePal() : this.openPal(); }
+      } else if (e.key === 'Escape') {
+        if (s.pal) this.closePal(); else if (s.acctOpen) this.setState({ acctOpen: false });
+      }
+    };
+    window.addEventListener('keydown', this.onKey);
+    this._prev = { ...this.state };
+    this._prevAcct = this.acct();
+    this._prevStory = this.story();
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this.onKey); clearTimeout(this.cT); clearTimeout(this.rT); clearTimeout(this.bT); }
+  componentDidUpdate() {
+    const s = this.state, ps = this._prev || {}, prevAcct = this._prevAcct ?? this.acct(), prevStory = this._prevStory ?? this.story();
+    this._prev = { ...s };
+    this._prevAcct = this.acct();
+    this._prevStory = this.story();
+    if (prevAcct !== this.acct()) { this.applyAccount(this.acct()); return; }
+    if (prevStory !== this.story()) { this.setState({ world: { marina: this.story() } }); return; }
+    if (s.pal && !ps.pal) setTimeout(() => this.palRef.current && this.palRef.current.focus(), 0);
+    if (s.urlEditing && !ps.urlEditing) setTimeout(() => { const el = this.urlRef.current; if (el) { el.focus(); el.select(); } }, 0);
+    const codeNow = s.locked || this.parse(s.hist[s.hi], s.who, s.pending).page === 'code';
+    const codeWas = !!ps.locked || this.parse((ps.hist || [])[ps.hi || 0], ps.who, ps.pending).page === 'code';
+    if (codeNow && !codeWas) setTimeout(() => this.codeRef.current && this.codeRef.current.focus(), 30);
+    if (s.who !== ps.who || s.hist !== ps.hist || s.hi !== ps.hi || s.world !== ps.world) {
+      try { localStorage.setItem(this.K.KEY, JSON.stringify({ acct: this.acct(), story: this.story(), who: s.who, hist: s.hist, hi: s.hi, world: s.world })); } catch (e) {}
+    }
+  }
+
+  applyAccount(label) {
+    const id = label in this.K.ACCOUNTS ? this.K.ACCOUNTS[label] : 'nadia';
+    this.setState(s => ({ who: id, hist: [id ? this.home(id) : '/sign-in'], hi: 0, next: null, locked: false, pal: false, acctOpen: false, pending: null, code: '', si: { ...s.si, error: '', suggest: false } }));
+  }
+
+  parse(path, whoId, pending) {
+    const raw = path || '/';
+    const seg = raw.split(/[?#]/)[0].split('/').filter(Boolean);
+    const who = whoId ? this.K.PEOPLE[whoId] : null;
+    if (!who) return { page: seg[0] === 'sign-in' && seg[1] === 'code' && pending ? 'code' : 'signin' };
+    const owner = who.role === 'owner';
+    const deep = seg.length > (owner ? 2 : 1) || /[?#]/.test(raw);
+    if (!seg.length || seg[0] === 'sign-in') return { page: 'app', key: owner ? 'today' : 'overview' };
+    if (owner) {
+      if (seg[0] !== who.shopSlug) return { page: 'missing' };
+      const key = seg[1] || 'today';
+      return this.K.OWNER_NAV.some(n => n.key === key) ? { page: 'app', key, deep } : { page: 'missing' };
+    }
+    if (seg[0] === 'coupons') return { page: 'app', key: 'coupons', held: true, deep };
+    return this.K.STAFF_NAV.some(n => n.key === seg[0]) ? { page: 'app', key: seg[0], deep } : { page: 'missing' };
+  }
+
+  normalize(path, whoId) {
+    let p = String(path || '/').trim().replace(/^https?:\/\//, '');
+    if (p.startsWith(this.K.HOST)) p = p.slice(this.K.HOST.length);
+    if (!p.startsWith('/')) p = '/' + p;
+    if (p.length > 1) p = p.replace(/\/+$/, '');
+    if (whoId && (p === '/' || p.startsWith('/sign-in'))) return this.home(whoId);
+    if (!whoId && p === '/') return '/sign-in';
+    return p;
+  }
+
+  go = (path, replace) => {
+    this.setState(s => {
+      let p = this.normalize(path, s.who), next = s.next;
+      if (!s.who && !p.startsWith('/sign-in')) { next = p; p = '/sign-in'; }
+      const hist = s.hist.slice(0, s.hi + 1);
+      if (replace === true) hist[hist.length - 1] = p;
+      else if (hist[hist.length - 1] !== p) hist.push(p);
+      while (hist.length > 60) hist.shift();
+      return { hist, hi: hist.length - 1, next, pal: false, acctOpen: false, urlEditing: false };
+    });
+  };
+  back = () => this.setState(s => (s.hi > 0 ? { hi: s.hi - 1, pal: false, acctOpen: false } : null));
+  forward = () => this.setState(s => (s.hi < s.hist.length - 1 ? { hi: s.hi + 1, pal: false, acctOpen: false } : null));
+  reload = () => { this.setState({ dim: true, pal: false, acctOpen: false }); clearTimeout(this.rT); this.rT = setTimeout(() => this.setState({ dim: false }), 180); };
+  editUrl = () => { if (!this.state.urlEditing) this.setState(s => ({ urlEditing: true, urlDraft: this.K.HOST + (s.hist[s.hi] || '/') })); };
+  onUrlDraft = e => this.setState({ urlDraft: e.target.value });
+  onUrlKey = e => { if (e.key === 'Enter') this.go(this.state.urlDraft); else if (e.key === 'Escape') this.setState({ urlEditing: false }); };
+  endUrlEdit = () => this.setState({ urlEditing: false });
+
+  setSi(patch) { this.setState(s => ({ si: { ...s.si, ...patch } })); }
+  modeStaff = () => this.setSi({ mode: 'staff', error: '', suggest: false });
+  modeOwner = () => this.setSi({ mode: 'owner', error: '', suggest: false });
+  onSiInput = e => { const v = e.target.value; this.setState(s => ({ si: { ...s.si, [s.si.mode === 'staff' ? 'email' : 'phone']: v, error: '', suggest: true } })); };
+  siFocus = () => { clearTimeout(this.bT); this.setSi({ suggest: true }); };
+  siBlur = () => { clearTimeout(this.bT); this.bT = setTimeout(() => this.setSi({ suggest: false }), 120); };
+  siKey = e => { if (e.key === 'Enter') this.continueSignIn(); else if (e.key === 'Escape') this.setSi({ suggest: false }); };
+  continueSignIn = () => {
+    const si = this.state.si, P = this.K.PEOPLE;
+    if (si.mode === 'staff') {
+      const email = si.email.trim().toLowerCase();
+      if (!email) return this.setSi({ error: 'Enter your work email.' });
+      if (!/@sterncut\.ma$/.test(email)) return this.setSi({ error: 'Only @sterncut.ma addresses sign in here. Shop owners sign in with their phone number.' });
+      const p = Object.values(P).find(x => x.email === email);
+      if (!p) return this.setSi({ error: 'Nobody on the team uses that address. Karima adds people on the team page.' });
+      this.setState({ pending: p.id, code: '', si: { ...si, email, suggest: false } }, () => this.go('/sign-in/code'));
+    } else {
+      const d = si.phone.replace(/\D/g, '');
+      if (d.length < 9) return this.setSi({ error: 'Enter the number you use in the Sterncut app.' });
+      const own = Object.values(P).find(x => x.role === 'owner' && x.phone && d.endsWith(x.phone.replace(/\D/g, '').slice(-9)));
+      if (!own) return this.setSi({ error: 'No shop is registered to that number. Owners sign in with the number they use in the app.' });
+      this.setState({ pending: own.id, code: '', si: { ...si, suggest: false } }, () => this.go('/sign-in/code'));
+    }
+  };
+  onCode = e => {
+    const v = e.target.value.replace(/\D/g, '').slice(0, 6);
+    this.setState({ code: v });
+    clearTimeout(this.cT);
+    if (v.length === 6) this.cT = setTimeout(() => (this.state.locked ? this.unlock() : this.submitCode()), 350);
+  };
+  onCodeKey = e => { if (e.key === 'Enter') (this.state.locked ? this.unlock() : this.submitCode()); };
+  toggleTrust = () => this.setState(s => ({ trust: !s.trust }));
+  submitCode = () => {
+    clearTimeout(this.cT);
+    const id = this.state.pending;
+    if (!id) return this.go('/sign-in');
+    const nx = this.state.next, ok = nx && this.parse(nx, id).page === 'app';
+    this.setState({ who: id, pending: null, code: '', next: null, hist: [ok ? nx : this.home(id)], hi: 0 });
+  };
+  backToSignIn = () => this.setState({ pending: null, code: '' }, () => this.go('/sign-in'));
+
+  toggleAcct = () => this.setState(s => ({ acctOpen: !s.acctOpen }));
+  closeAcct = () => this.setState({ acctOpen: false });
+  lock = () => this.setState({ locked: true, code: '', acctOpen: false, pal: false });
+  unlock = () => { clearTimeout(this.cT); this.setState({ locked: false, code: '' }); };
+  signOut = () => this.setState(s => {
+    const p = s.who ? this.K.PEOPLE[s.who] : null;
+    return { who: null, locked: false, pal: false, acctOpen: false, code: '', pending: null, next: null, hist: ['/sign-in'], hi: 0, si: { ...s.si, mode: p && p.role === 'owner' ? 'owner' : 'staff', email: p && p.email ? p.email : s.si.email, error: '', suggest: false } };
+  });
+
+  openPal = () => this.setState({ pal: true, palQ: '', palSel: 0, acctOpen: false });
+  closePal = () => this.setState({ pal: false });
+  stop = e => e.stopPropagation();
+  onPalQ = e => this.setState({ palQ: e.target.value, palSel: 0 });
+  onPalKey = e => {
+    const n = (this.palFlat || []).length;
+    if (e.key === 'ArrowDown') { e.preventDefault(); this.setState(s => ({ palSel: n ? (s.palSel + 1) % n : 0 })); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); this.setState(s => ({ palSel: n ? (s.palSel - 1 + n) % n : 0 })); }
+    else if (e.key === 'Enter') { const it = (this.palFlat || [])[this.state.palSel]; if (it) this.go(it.to); }
+  };
+
+  shopActions(slug, who) {
+    const IC = this.K.IC, r = who.role;
+    if (slug === 'le-fade-tanger') {
+      const a = [{ title: 'Le Fade’s payout · 6 661 DH', sub: 'Finance · Friday’s run', icon: IC.finance, to: '/finance/payouts/le-fade-tanger' }];
+      if (r === 'head') a.push({ title: 'Decide on the suspension', sub: 'Hicham asked 40 minutes ago', icon: IC.requests, tag: 'DECIDE', tone: 'red', to: '/requests/suspend-le-fade-tanger' });
+      else if (r === 'support') a.push({ title: 'Your ask to suspend', sub: 'With Karima · nothing has happened yet', icon: IC.requests, tag: 'WAITING', tone: 'amber', to: '/requests/suspend-le-fade-tanger' });
+      else if (r === 'field') a.push({ title: 'Suspend the shop', sub: 'Hicham already asked — add your reasoning', icon: IC.requests, tag: 'ASK KARIMA', tone: 'amber', to: '/requests/suspend-le-fade-tanger' });
+      return a;
+    }
+    if (slug === 'marina-barber-club') return [
+      { title: 'Chase all three for the licence', sub: 'One photo from any of them reopens the shop', icon: IC.support, to: '/salons?state=suspended&chase=marina-barber-club' },
+      { title: 'Lift the suspension', sub: 'Only with a valid licence — or on your name', icon: IC.compliance, tag: 'OVERRIDE', tone: 'red', to: '/salons?state=suspended&lift=marina-barber-club' },
+    ];
+    if (slug === 'rif-gentlemen') return [{ title: 'Chase the missing RIB', sub: 'Finance · 4 057 DH held', icon: IC.finance, to: '/finance/payouts/rif-gentlemen' }];
+    if (slug === 'medina-cuts') return [{ title: 'Mehdi Tazi’s licence', sub: 'Compliance · expired Tuesday', icon: IC.compliance, tag: r === 'field' || r === 'head' ? 'VERIFY' : null, tone: 'red', to: '/compliance/licences/mehdi-tazi' }];
+    return [];
+  }
+  buildPalette(who, q) {
+    const K = this.K, nq = this.norm(q.trim()), owner = who.role === 'owner';
+    const navDef = owner ? K.OWNER_NAV : K.STAFF_NAV;
+    const pageItem = n => ({ title: n.label, sub: owner ? who.shop : 'Page', icon: K.IC[n.icon || n.key], to: this.sectionPath(who, n.key) });
+    const barberItem = b => ({ title: b.name, sub: b.sub, initials: b.initials, tag: b.tag, tone: b.tone, to: owner ? `/${who.shopSlug}/chairs/${b.slug}` : `/barbers/${b.slug}` });
+    const groups = [];
+    if (!nq) return [{ label: 'JUMP TO', items: navDef.map(pageItem) }];
+    if (owner) {
+      const bs = K.BARBERS.filter(b => b.shop === who.shopSlug && b.slug !== 'youssef-alami' && this.norm(b.name).includes(nq));
+      if (bs.length) groups.push({ label: 'YOUR BARBERS', items: bs.map(barberItem) });
+    } else {
+      const digits = q.replace(/\D/g, '');
+      if (digits.length >= 6) groups.push({ label: 'CUSTOMERS', items: [{ title: `Customer with ${q.trim()}`, sub: 'Bookings, wallet and cases', icon: K.IC.phone, tag: 'LOGGED', tone: 'amber', to: `/customers/lookup?phone=${digits}` }] });
+      const shops = K.SHOPS.filter(s => this.norm(s.name + ' ' + (s.kw || '')).includes(nq));
+      if (shops.length) groups.push({ label: 'SALONS', items: shops.map(s => ({ title: s.name, sub: s.sub, initials: s.initials, tag: s.tag, tone: s.tone, square: true, to: s.to || `/salons/${s.slug}` })) });
+      if (shops.length === 1) {
+        const team = K.BARBERS.filter(b => b.shop === shops[0].slug);
+        if (team.length) groups.push({ label: `BARBERS AT THAT SHOP · ${team.length}`, items: team.map(barberItem) });
+        const acts = this.shopActions(shops[0].slug, who);
+        if (acts.length) groups.push({ label: 'ACTIONS', items: acts });
+      } else {
+        const bs = K.BARBERS.filter(b => this.norm(b.name).includes(nq));
+        if (bs.length) groups.push({ label: 'BARBERS', items: bs.map(barberItem) });
+      }
+    }
+    const pages = navDef.filter(n => this.norm(n.label).includes(nq));
+    if (pages.length) groups.push({ label: 'PAGES', items: pages.map(pageItem) });
+    return groups;
+  }
+
+  stubFor(route, label, owner) {
+    const all = this.state.screens, sec = owner ? 'o-' + route.key : route.key;
+    const rows = (all || []).filter(x => x.s === sec);
+    let pill = 'NOT BUILT YET', tone = 'amber', lede;
+    if (!all) lede = 'Loading the screen map…';
+    else if (route.held) { pill = 'HELD FROM V1'; tone = 'grey'; lede = `Coupons & passes are held from v1, so this page is not in the navigation. Its ${rows.length} canvas screens stay as the spec for later.`; }
+    else if (!rows.length) { pill = 'NO SCREENS'; tone = 'red'; lede = 'No canvas screen exists for this yet — the nav item has nothing behind it. Design it, or take it out of the nav.'; }
+    else lede = `${rows.length} canvas screen${rows.length === 1 ? '' : 's'} fold into this section as its pages, tabs, drawers and modals. Sections are built one at a time — this one is still to come.`;
+    const [pillFg, pillBg] = this.K.TONE[tone];
+    const files = [...new Set(rows.map(r => r.f))];
+    return {
+      title: label, pill, pillFg, pillBg, lede, deep: !!route.deep, hasRows: rows.length > 0,
+      rows: rows.map(r => ({ id: r.id, t: r.t, tag: r.held ? 'HELD' : r.k === 'P' ? (owner ? 'PHONE → WEB' : 'APP SCREEN') : null, href: './' + encodeURI(r.f) + '#' + r.id })),
+      hasFiles: files.length > 0, files: files.map(f => ({ name: f.replace(/\.dc\.html$/, ''), href: './' + encodeURI(f) })),
+    };
+  }
+
+  renderVals() {
+    const K = this.K, s = this.state;
+    const path = s.hist[s.hi] || '/sign-in';
+    const who = s.who ? K.PEOPLE[s.who] : null;
+    const route = this.parse(path, s.who, s.pending);
+    const page = route.page, owner = !!(who && who.role === 'owner'), staff = !!(who && !owner);
+    const navDef = !who ? [] : owner ? K.OWNER_NAV : K.STAFF_NAV;
+    const label = page === 'app' ? (route.key === 'coupons' ? 'Coupons' : (navDef.find(n => n.key === route.key) || {}).label || '') : '';
+    const profBase = path.split(/[?#]/)[0];
+    const vProfile = page === 'app' && ((staff && /^\/(salons\/(kasbah-cuts|salon-atlas|marina-bay-cuts|rif-gentlemen|medina-cuts)|barbers\/(youssef-alami|hamza-bennani|salim-alaoui|tarik-lamrani|mehdi-tazi|karim-idrissi\/day)|customers\/yassine-berrada|demand\/tangier\/branes|finance\/settlement\/2026-W36\/agent-sheets)$/.test(profBase)) || (owner && who.id === 'youssef' && profBase === '/le-fade-tanger/chairs/salim-alaoui'));
+    const vHub = page === 'app' && staff && ['compliance', 'reviews', 'support', 'demand'].includes(route.key) && path === '/' + route.key;
+    const demandLike = !vHub && page === 'app' && staff && /^\/(demand|salons\/(recruiting|applications)|overview\/blockers)(\/|\?|$)/.test(path);
+    const vDemand = demandLike && !vProfile;
+    const vOverview = page === 'app' && staff && route.key === 'overview' && !demandLike;
+    const atlas = /^\/salons\/coiffure-atlas(\/|\?|$)/.test(path);
+    const vSalons = page === 'app' && staff && route.key === 'salons' && !demandLike && !atlas && !vProfile;
+    const vWallets = page === 'app' && staff && route.key === 'wallets';
+    const vBarbers = page === 'app' && staff && route.key === 'barbers' && !vProfile;
+    const vOwnerPreview = page === 'app' && staff && /^\/finance\/statements\/2026-W36-014/.test(path) && /[?&]view=owner/.test(path);
+    const vFinance = page === 'app' && staff && route.key === 'finance' && !vOwnerPreview && !vProfile;
+    const vReviews = page === 'app' && staff && route.key === 'reviews' && !vHub;
+    const vSettings = page === 'app' && staff && route.key === 'settings';
+    const vSupport = page === 'app' && staff && route.key === 'support' && !vHub;
+    const vCustomers = page === 'app' && staff && route.key === 'customers' && !vProfile;
+    const vBookings = page === 'app' && staff && route.key === 'bookings';
+    const vCompliance = page === 'app' && staff && (route.key === 'compliance' || atlas) && !vHub;
+    const vRequests = page === 'app' && staff && route.key === 'requests';
+    const vOwnerToday = page === 'app' && owner && route.key === 'today' && who.id === 'youssef';
+    const vOwnerChairs = page === 'app' && owner && who.id === 'youssef' && /^\/le-fade-tanger\/chairs(\/hamza-bennani)?(\?|$)/.test(path);
+    const vOwnerPayouts = page === 'app' && owner && who.id === 'youssef' && /^\/le-fade-tanger\/payouts(\/2026-W3[56])?(\?|$)/.test(path);
+    const vOwnerOther = page === 'app' && owner && who.id !== 'youssef' && (['today', 'services', 'reviews', 'subscription', 'reports'].includes(route.key) || (who.id === 'nabil' && route.key === 'payouts'));
+    const vOwnerPasses = page === 'app' && owner && who.id === 'youssef' && /^\/le-fade-tanger\/services\/passes(\/|\?|$)/.test(path);
+    const vOwner = page === 'app' && owner && !vOwnerToday && !vOwnerChairs && !vOwnerPayouts && !vOwnerOther && !vOwnerPasses && !vProfile;
+    const vCoupons = page === 'app' && staff && route.key === 'coupons';
+    const vStub = page === 'app' && !vHub && !vProfile && !vOwnerPreview && !vCoupons && !vOwnerOther && !vOwnerPasses && !vOwner && !vOwnerToday && !vOwnerChairs && !vOwnerPayouts && !vOverview && !vSalons && !vWallets && !vBarbers && !vDemand && !vFinance && !vReviews && !vSettings && !vSupport && !vCustomers && !vBookings && !vCompliance && !vRequests;
+    const ownTop = vOwnerPreview || (vProfile && staff) || vSalons || vWallets || vBarbers || vDemand || vFinance || vReviews || vSettings || vSupport || vCustomers || vBookings || vCompliance || vCoupons || (vOwner && (who.id !== 'youssef' || route.key === 'reviews' || route.key === 'reports'));
+    const vMissing = page === 'missing';
+    const isHome = page === 'app' && (route.key === 'overview' || route.key === 'today');
+
+    const nav = navDef.map(n => {
+      let badge = n.n || null, tone = n.tone;
+      if (n.key === 'requests') { badge = who.role === 'head' ? 4 : who.role === 'support' ? 1 : null; tone = who.role === 'head' ? 'red' : 'amber'; }
+      const active = page === 'app' && route.key === n.key;
+      return { label: n.label, icon: K.IC[n.icon || n.key], active, idle: !active, badge, badgeFg: tone === 'red' ? '#fff' : tone === 'grey' ? '#C9CAD0' : '#0D0D0F', badgeBg: tone === 'red' ? '#E8442E' : tone === 'grey' ? '#26262B' : '#E8A100', go: () => this.go(this.sectionPath(who, n.key)) };
+    });
+
+    let tabTitle = 'Sign in · Sterncut';
+    if (s.locked) tabTitle = 'Locked · Sterncut Admin';
+    else if (page === 'app') tabTitle = `${label} · ${owner ? who.shop : 'Sterncut Admin'}`;
+    else if (vMissing) tabTitle = 'Not found · Sterncut';
+
+    const si = s.si, staffMode = si.mode === 'staff';
+    const val = staffMode ? si.email : si.phone;
+    const pool = staffMode ? ['nadia', 'hicham', 'salma', 'karima'].map(id => ({ value: K.PEOPLE[id].email, note: K.PEOPLE[id].name })) : ['youssef', 'karim', 'nabil'].map(id => ({ value: K.PEOPLE[id].phone, note: K.PEOPLE[id].name }));
+    const flat = v => this.norm(v).replace(/\s/g, '');
+    const exact = pool.some(p => flat(p.value) === flat(val));
+    const suggestions = pool.filter(p => exact || !val || flat(p.value).startsWith(flat(val))).map(p => ({ value: p.value, note: p.note, pick: e => { e.preventDefault(); this.setState(st => ({ si: { ...st.si, [st.si.mode === 'staff' ? 'email' : 'phone']: p.value, suggest: false, error: '' } })); } }));
+    const siv = {
+      lede: staffMode ? 'Staff only — @sterncut.ma addresses. There is no sign-up and no password reset; Karima adds people on the team page.' : 'The same account as the Sterncut app on your phone. No password — we text you a code.',
+      staffBg: staffMode ? '#212125' : 'transparent', staffFg: staffMode ? '#fff' : '#9A9CA3',
+      ownerBg: staffMode ? 'transparent' : '#212125', ownerFg: staffMode ? '#9A9CA3' : '#fff',
+      label: staffMode ? 'WORK EMAIL' : 'PHONE NUMBER', placeholder: staffMode ? 'you@sterncut.ma' : '+212 6 …', value: val,
+      button: staffMode ? 'Continue' : 'Send code', error: si.error, hasError: !!si.error, inputBorder: si.error ? '#F87171' : '#26262B',
+      suggestOpen: si.suggest && suggestions.length > 0, suggestions, isStaff: staffMode,
+    };
+
+    const pp = s.pending ? K.PEOPLE[s.pending] : null;
+    const cv = !pp ? {} : pp.role === 'owner'
+      ? { title: 'Six digits we texted you', sub: `Sent to ${pp.phone}`, isStaff: false, back: 'Use a different number', helpHead: 'Didn’t get it?', help: 'You can ask for a new one in 0:42. It is the same code the app would send — one account for both.' }
+      : { title: 'Six digits from your app', sub: `Signing in as ${pp.email}`, isStaff: true, back: 'Use a different address', helpHead: 'Lost your phone?', help: `${pp.id === 'karima' ? 'Re-enrolment happens in person at the office.' : 'Karima re-enrols you in person.'} There are no backup codes by email — an emailed code is a stolen inbox away from every customer’s number.` };
+    const codeBoxes = [0, 1, 2, 3, 4, 5].map(i => ({ ch: s.code[i] || '', border: i === Math.min(s.code.length, 5) ? '#E8442E' : s.code[i] ? '#3A3A40' : '#26262B' }));
+
+    let palGroups = [], palFlat = [];
+    if (s.pal && who) {
+      let i = 0;
+      palGroups = this.buildPalette(who, s.palQ).map(g => ({
+        label: g.label,
+        items: g.items.map(it => {
+          const idx = i++, [fg, bg] = K.TONE[it.tone || 'grey'];
+          const item = { title: it.title, sub: it.sub, to: it.to, initials: it.initials || null, icon: it.initials ? null : it.icon || null, tag: it.tag || null, tagFg: fg, tagBg: bg, sel: idx === s.palSel, bg: idx === s.palSel ? '#212125' : 'transparent', radius: it.square ? '8px' : '999px', pick: () => this.go(it.to), hover: () => { if (this.state.palSel !== idx) this.setState({ palSel: idx }); } };
+          palFlat.push(item);
+          return item;
+        }),
+      }));
+    }
+    this.palFlat = palFlat;
+    const palLogged = staff && s.palQ.replace(/\D/g, '').length >= 6;
+
+    let specLabel = '404';
+    if (s.locked) specLabel = 'OVW-05 · lock state';
+    else if (s.pal) specLabel = 'OVW-06 · ⌘K modal';
+    else if (page === 'signin') specLabel = staffMode ? 'OVW-03 · /sign-in' : 'new · owner sign-in by phone';
+    else if (page === 'code') specLabel = pp && pp.role === 'owner' ? 'new · owner SMS code' : 'OVW-04 · /sign-in/code';
+    else if (vOverview) specLabel = 'OVW-02 · /overview';
+    else if (vOwnerToday) specLabel = 'web · OSH-02 + OSH-19 + OSH-03';
+    else if (vOwnerOther) specLabel = `new · ${label} for ${who.shop}`;
+    else if (vOwnerChairs) specLabel = /invite=expired/.test(path) ? 'web · OBR-06 dialog' : /invite=1/.test(path) ? 'web · OBR-02 dialog' : /hamza-bennani/.test(path) ? 'web · OBR-05 + OBR-01' : 'web · OBR-05';
+    else if (vOwnerPayouts) specLabel = /W35/.test(path) ? 'web · OSH-16' : /late=52/.test(path) ? 'web · OSH-17 + OSH-18' : 'web · OSH-17';
+    else if (vHub) specLabel = `new · ${label} home`;
+    else if (vRequests) specLabel = 'new · requests inbox';
+    else if (vStub) specLabel = `not built · ${label}`;
+
+    return {
+      tabTitle, back: this.back, forward: this.forward, reload: this.reload,
+      backColor: s.hi > 0 ? '#e8eaed' : '#5f6368', fwdColor: s.hi < s.hist.length - 1 ? '#e8eaed' : '#5f6368',
+      editUrl: this.editUrl, urlEditing: s.urlEditing, urlShowing: !s.urlEditing, urlDraft: s.urlDraft, onUrlDraft: this.onUrlDraft, onUrlKey: this.onUrlKey, endUrlEdit: this.endUrlEdit, urlRef: this.urlRef, urlPath: path,
+      showSignIn: page === 'signin', showCode: page === 'code', showApp: page === 'app' || page === 'missing',
+      si: siv, modeStaff: this.modeStaff, modeOwner: this.modeOwner, onSiInput: this.onSiInput, siFocus: this.siFocus, siBlur: this.siBlur, siKey: this.siKey, continueSignIn: this.continueSignIn,
+      cv, codeBoxes, codeRef: this.codeRef, code: s.code, onCode: this.onCode, onCodeKey: this.onCodeKey,
+      trust: s.trust, trustBg: s.trust ? '#E8442E' : 'transparent', trustBorder: s.trust ? '#E8442E' : '#3A3A40', toggleTrust: this.toggleTrust, submitCode: this.submitCode, backToSignIn: this.backToSignIn,
+      who: who || {}, isOwner: owner, sideSub: owner ? 'OWNER' : 'ADMIN',
+      whoSub: !who ? '' : owner ? `Owner · ${who.shop}` : `${who.roleLabel} · ${who.city}`,
+      whoContact: !who ? '' : who.email || who.phone, whoAvBg: who && who.id === 'karima' ? '#E8442E' : '#212125',
+      nav, acctOpen: s.acctOpen, toggleAcct: this.toggleAcct, closeAcct: this.closeAcct, canLock: staff, lock: this.lock, signOut: this.signOut,
+      pageHeading: isHome ? (owner ? (who.today || 'Thursday 3 September') : 'Thursday 19 June') : label || 'Not found', placeLine: !who ? '' : owner ? who.shop : `${who.city} · 08:40`,
+      searchLabel: owner ? 'Search your shop' : 'Search anything', openPal: this.openPal,
+      pageOpacity: s.dim ? 0 : 1, vOverview, vSalons, vWallets, vStub, vMissing, go: this.go,
+      vHub, hubSection: vHub ? route.key : '', vBarbers, vDemand, vFinance, vReviews, vSettings, vSupport, vCustomers, vBookings, vCompliance, vRequests, vOwner, vOwnerToday, vOwnerChairs, vOwnerPayouts, vCoupons, vOwnerOther, vOwnerPasses, vProfile, vOwnerPreview, previewPath: /[?&]week=35/.test(path) ? '/le-fade-tanger/payouts/2026-W35' : '/le-fade-tanger/payouts/2026-W36', previewGo: p => { const m = String(p).match(/payouts\/2026-W(35|36)/); if (m) this.go('/finance/statements/2026-W36-014?view=owner' + (m[1] === '35' ? '&week=35' : '')); }, backToStatement: () => this.go('/finance/statements/2026-W36-014'), shellTop: !ownTop, specShell: !!(this.props.specIds ?? false) && !ownTop, world: s.world, setWorld: this.setWorld,
+      stub: vStub ? this.stubFor(route, label, owner) : {},
+      missingNote: owner ? `Your account only sees ${who.shop}.` : 'Check the address, or search with ⌘K.',
+      homeLabel: owner ? 'Today' : 'Overview', goHome: () => this.go(who ? this.home(who.id) : '/sign-in'),
+      locked: s.locked, unlock: this.unlock, lockNote: `Nothing was lost — whatever you were typing on ${label || 'this page'} is still there, exactly as you left it.`,
+      pal: s.pal, closePal: this.closePal, stop: this.stop, palRef: this.palRef, palQ: s.palQ, onPalQ: this.onPalQ, onPalKey: this.onPalKey,
+      palPlaceholder: owner ? 'Search your barbers and pages…' : 'Search shops, barbers, a customer’s phone…',
+      palLogged, palGroups, palEmpty: s.pal && palGroups.length === 0, palFoot: owner ? 'Only Le Fade Tanger' : 'Phone searches are logged',
+      specOn: !!(this.props.specIds ?? false), specLabel,
+    };
+  }
+}
+</script>
+</body>
+</html>

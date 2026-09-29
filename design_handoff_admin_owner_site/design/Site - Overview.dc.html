@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="height:100%;overflow:auto;box-sizing:border-box;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif">
+<div style="padding:20px 24px 28px;display:flex;flex-wrap:wrap;align-items:flex-start;gap:18px;box-sizing:border-box">
+  <div style="flex:999 1 560px;min-width:0;display:flex;flex-direction:column;gap:15px">
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">WHAT NEEDS A PERSON TODAY · 6</span>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div onClick="{{ toRif }}" style="display:flex;align-items:center;gap:12px;background:#17171A;border:1px solid rgba(248,113,113,.3);border-radius:12px;padding:13px 15px;cursor:pointer" style-hover="background:#1C1C20">
+          <span style="width:6px;height:30px;border-radius:3px;background:#F87171;flex:none"></span>
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">Rif Gentlemen has no RIB</span><span style="font-size:10.5px;color:#9A9CA3">Third Friday unpaid · 4 057 DH held</span></span>
+          <span style="width:104px;flex:none;font-size:11px;color:#9A9CA3">Finance</span>
+          <span style="width:44px;flex:none;text-align:right;font-size:11px;color:#6B6B72">21d</span>
+          <span style="width:66px;flex:none;text-align:right;font-size:11px;font-weight:700;color:#E8442E">Chase</span>
+        </div>
+        <div onClick="{{ toLicence }}" style="display:flex;align-items:center;gap:12px;background:#17171A;border:1px solid rgba(248,113,113,.3);border-radius:12px;padding:13px 15px;cursor:pointer" style-hover="background:#1C1C20">
+          <span style="width:6px;height:30px;border-radius:3px;background:#F87171;flex:none"></span>
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">Barber licence expired</span><span style="font-size:10.5px;color:#9A9CA3">Mehdi Tazi · Medina Cuts · trading since Tuesday</span></span>
+          <span style="width:104px;flex:none;font-size:11px;color:#9A9CA3">Compliance</span>
+          <span style="width:44px;flex:none;text-align:right;font-size:11px;color:#6B6B72">2d</span>
+          <span style="width:66px;flex:none;text-align:right;font-size:11px;font-weight:700;color:#E8442E">Open</span>
+        </div>
+        <div onClick="{{ toApps }}" style="display:flex;align-items:center;gap:12px;background:#17171A;border:1px solid rgba(232,161,0,.28);border-radius:12px;padding:13px 15px;cursor:pointer" style-hover="background:#1C1C20">
+          <span style="width:6px;height:30px;border-radius:3px;background:#E8A100;flex:none"></span>
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">2 shops waiting on a decision</span><span style="font-size:10.5px;color:#9A9CA3">AP-0182 Tétouan · AP-0183 Coiffure Atlas</span></span>
+          <span style="width:104px;flex:none;font-size:11px;color:#9A9CA3">Salons</span>
+          <span style="width:44px;flex:none;text-align:right;font-size:11px;color:#6B6B72">2d</span>
+          <span style="width:66px;flex:none;text-align:right;font-size:11px;font-weight:700;color:#E8442E">Review</span>
+        </div>
+        <div onClick="{{ toAsk }}" style="display:flex;align-items:center;gap:12px;background:#17171A;border:1px solid rgba(232,161,0,.28);border-radius:12px;padding:13px 15px;cursor:pointer" style-hover="background:#1C1C20">
+          <span style="width:6px;height:30px;border-radius:3px;background:#E8A100;flex:none"></span>
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">{{ ask.title }}</span><span style="font-size:10.5px;color:#9A9CA3">{{ ask.sub }}</span></span>
+          <span style="width:104px;flex:none;font-size:11px;color:#9A9CA3">Requests</span>
+          <span style="width:44px;flex:none;text-align:right;font-size:11px;color:#6B6B72">40m</span>
+          <span style="width:66px;flex:none;text-align:right;font-size:11px;font-weight:700;color:{{ ask.actionColor }}">{{ ask.action }}</span>
+        </div>
+        <div onClick="{{ toHeld }}" style="display:flex;align-items:center;gap:12px;background:#17171A;border:1px solid rgba(232,161,0,.28);border-radius:12px;padding:13px 15px;cursor:pointer" style-hover="background:#1C1C20">
+          <span style="width:6px;height:30px;border-radius:3px;background:#E8A100;flex:none"></span>
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">3 reviews held by the language filter</span><span style="font-size:10.5px;color:#9A9CA3">All from the same shop</span></span>
+          <span style="width:104px;flex:none;font-size:11px;color:#9A9CA3">Reviews</span>
+          <span style="width:44px;flex:none;text-align:right;font-size:11px;color:#6B6B72">6h</span>
+          <span style="width:66px;flex:none;text-align:right;font-size:11px;font-weight:700;color:#E8442E">Moderate</span>
+        </div>
+        <div onClick="{{ toFlagged }}" style="display:flex;align-items:center;gap:12px;background:#17171A;border:1px solid #1E1E22;border-radius:12px;padding:13px 15px;cursor:pointer" style-hover="background:#1C1C20">
+          <span style="width:6px;height:30px;border-radius:3px;background:#3A3A40;flex:none"></span>
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">6 customers flagged this week</span><span style="font-size:10.5px;color:#9A9CA3">Above the usual 2 — worth a look at why</span></span>
+          <span style="width:104px;flex:none;font-size:11px;color:#9A9CA3">Customers</span>
+          <span style="width:44px;flex:none;text-align:right;font-size:11px;color:#6B6B72">—</span>
+          <span style="width:66px;flex:none;text-align:right;font-size:11px;font-weight:700;color:#E8442E">See</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">YESTERDAY</span>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:11px">
+        <div onClick="{{ toBookings }}" style="background:#17171A;border:1px solid #1E1E22;border-radius:13px;padding:14px 15px;display:flex;flex-direction:column;gap:5px;cursor:pointer" style-hover="border-color:#34343A"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">BOOKINGS</span><span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">1 284</span><span style="font-size:10px;color:#4ADE80">+6% on last Thursday</span></div>
+        <div onClick="{{ toTaken }}" style="background:#17171A;border:1px solid #1E1E22;border-radius:13px;padding:14px 15px;display:flex;flex-direction:column;gap:5px;cursor:pointer" style-hover="border-color:#34343A"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">TAKEN</span><span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">86 420 DH</span><span style="font-size:10px;color:#9A9CA3">8% to us · 6 913 DH</span></div>
+        <div onClick="{{ toNoShows }}" style="background:#17171A;border:1px solid #1E1E22;border-radius:13px;padding:14px 15px;display:flex;flex-direction:column;gap:5px;cursor:pointer" style-hover="border-color:#34343A"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">NO-SHOW RATE</span><span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">4.1%</span><span style="font-size:10px;color:#4ADE80">was 6.8% before deposits</span></div>
+        <div onClick="{{ toShops }}" style="background:#17171A;border:1px solid #1E1E22;border-radius:13px;padding:14px 15px;display:flex;flex-direction:column;gap:5px;cursor:pointer" style-hover="border-color:#34343A"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">SHOPS TRADING</span><span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">42 / 43</span><span style="font-size:10px;color:#E8A100">Marina Barber Club suspended</span></div>
+      </div>
+    </div>
+    <div style="height:236px;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px 17px;display:flex;flex-direction:column;gap:13px;box-sizing:border-box">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+        <span style="font-size:12.5px;font-weight:700">Bookings by hour</span>
+        <span style="font-size:10.5px;color:#6B6B72">Yesterday · peak 18:00–20:00</span>
+      </div>
+      <div style="flex:1;min-height:0;display:flex;align-items:flex-end;gap:5px">
+        <span style="flex:1;height:14%;background:#26262B;border-radius:3px 3px 0 0"></span>
+        <span style="flex:1;height:22%;background:#26262B;border-radius:3px 3px 0 0"></span>
+        <span style="flex:1;height:31%;background:#26262B;border-radius:3px 3px 0 0"></span>
+        <span style="flex:1;height:38%;background:#26262B;border-radius:3px 3px 0 0"></span>
+        <span style="flex:1;height:34%;background:#26262B;border-radius:3px 3px 0 0"></span>
+        <span style="flex:1;height:29%;background:#26262B;border-radius:3px 3px 0 0"></span>
+        <span style="flex:1;height:41%;background:#26262B;border-radius:3px 3px 0 0"></span>
+        <span style="flex:1;height:52%;background:#3A3A40;border-radius:3px 3px 0 0"></span>
+        <span style="flex:1;height:63%;background:#3A3A40;border-radius:3px 3px 0 0"></span>
+        <span style="flex:1;height:71%;background:#3A3A40;border-radius:3px 3px 0 0"></span>
+        <span style="flex:1;height:84%;background:#E8442E;border-radius:3px 3px 0 0"></span>
+        <span style="flex:1;height:100%;background:#E8442E;border-radius:3px 3px 0 0"></span>
+        <span style="flex:1;height:92%;background:#E8442E;border-radius:3px 3px 0 0"></span>
+        <span style="flex:1;height:57%;background:#3A3A40;border-radius:3px 3px 0 0"></span>
+        <span style="flex:1;height:23%;background:#26262B;border-radius:3px 3px 0 0"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:9.5px;color:#6B6B72"><span>09</span><span>12</span><span>15</span><span>18</span><span>21</span></div>
+    </div>
+  </div>
+  <div style="flex:1 1 296px;min-width:0;display:flex;flex-direction:column;gap:14px">
+    <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+        <span style="font-size:12.5px;font-weight:700">Who is on</span>
+        <span onClick="{{ toTeam }}" style="font-size:10.5px;font-weight:600;color:#6B6B72;cursor:pointer" style-hover="color:#fff">Team</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ team }}" as="m" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;gap:10px;opacity:{{ m.opacity }}">
+            <span style="width:26px;height:26px;border-radius:999px;background:{{ m.avBg }};display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;flex:none">{{ m.initials }}</span>
+            <span style="flex:1;min-width:0;font-size:11.5px">{{ m.line }}</span>
+            <sc-if value="{{ m.you }}"><span style="font-size:10px;color:#6B6B72">you</span></sc-if>
+            <span style="width:6px;height:6px;border-radius:999px;background:{{ m.dot }};flex:none"></span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    <div style="background:#17171A;border:1px solid rgba(232,161,0,.28);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px">
+      <span style="font-size:12.5px;font-weight:700;color:#E8A100">Friday closes in 37 hours</span>
+      <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">39 of 42 shops will be paid. Three are blocked and only one of those has anyone chasing it.</span>
+      <span onClick="{{ toPayouts }}" style="align-self:flex-start;font-size:11px;font-weight:700;color:#E8442E;cursor:pointer" style-hover="color:#FF6B57">Open the payout run</span>
+    </div>
+    <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:11px">
+      <span style="font-size:12.5px;font-weight:700">Where demand has no supply</span>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div onClick="{{ toMalabata }}" style="display:flex;align-items:center;gap:9px;padding:4px 6px;margin:0 -6px;border-radius:7px;cursor:pointer" style-hover="background:#1E1E22"><span style="flex:1;font-size:11.5px">Malabata</span><span style="width:70px;height:4px;border-radius:2px;background:#26262B;flex:none"><span style="display:block;height:100%;width:88%;background:#E8442E;border-radius:2px"></span></span><span style="width:26px;flex:none;text-align:right;font-size:11px;font-weight:700">37</span></div>
+        <div onClick="{{ toBranes }}" style="display:flex;align-items:center;gap:9px;padding:4px 6px;margin:0 -6px;border-radius:7px;cursor:pointer" style-hover="background:#1E1E22"><span style="flex:1;font-size:11.5px">Branes</span><span style="width:70px;height:4px;border-radius:2px;background:#26262B;flex:none"><span style="display:block;height:100%;width:52%;background:#E8A100;border-radius:2px"></span></span><span style="width:26px;flex:none;text-align:right;font-size:11px;font-weight:700">22</span></div>
+        <div onClick="{{ toMesnana }}" style="display:flex;align-items:center;gap:9px;padding:4px 6px;margin:0 -6px;border-radius:7px;cursor:pointer" style-hover="background:#1E1E22"><span style="flex:1;font-size:11.5px">Mesnana</span><span style="width:70px;height:4px;border-radius:2px;background:#26262B;flex:none"><span style="display:block;height:100%;width:31%;background:#6B6B72;border-radius:2px"></span></span><span style="width:26px;flex:none;text-align:right;font-size:11px;font-weight:700">13</span></div>
+      </div>
+      <span style="font-size:10.5px;line-height:1.45;color:#6B6B72;border-top:1px solid #26262B;padding-top:10px">People searched and found nothing. Each one is a recruiting lead.</span>
+    </div>
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1180,&quot;height&quot;:800},&quot;who&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;go&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(path: string) =&gt; void&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const who = this.props.who || { id: 'nadia', role: 'field' };
+    const go = this.props.go || (() => {});
+    const to = p => () => go(p);
+    const r = who.role;
+    const ask = r === 'head'
+      ? { title: 'Hicham asked to suspend Le Fade', sub: 'Waiting on you · nothing has happened to the shop yet', action: 'Decide', actionColor: '#E8442E' }
+      : r === 'support'
+      ? { title: 'You asked to suspend Le Fade', sub: 'With Karima · she is in at 10:00', action: 'View', actionColor: '#9A9CA3' }
+      : { title: 'Hicham asked to suspend Le Fade', sub: 'With Karima · nothing has happened yet', action: 'View', actionColor: '#9A9CA3' };
+    const people = [
+      { id: 'nadia', initials: 'NL', line: 'Nadia · field, Tangier', on: true },
+      { id: 'hicham', initials: 'HR', line: 'Hicham · support', on: true },
+      { id: 'karima', initials: 'KB', line: 'Karima · in at 10:00', alt: 'Karima · head of ops', head: true },
+      { id: 'salma', initials: 'SA', line: 'Salma · off today', alt: 'Salma · moderation' },
+    ];
+    const team = people.map(p => {
+      const you = p.id === who.id, on = p.on || you;
+      return { initials: p.initials, line: you && p.alt ? p.alt : p.line, you, opacity: on ? 1 : 0.55, dot: on ? '#4ADE80' : '#6B6B72', avBg: p.head ? '#E8442E' : '#212125' };
+    }).sort((a, b) => b.opacity - a.opacity);
+    return {
+      ask, team,
+      toRif: to('/finance/payouts/rif-gentlemen'), toLicence: to('/compliance/licences/mehdi-tazi'), toApps: to('/salons?state=pending'),
+      toAsk: to('/requests/suspend-le-fade-tanger'), toHeld: to('/reviews/held'), toFlagged: to('/customers/flagged'),
+      toBookings: to('/bookings?day=2026-06-18'), toTaken: to('/finance/commission?day=2026-06-18'), toNoShows: to('/bookings/no-shows'), toShops: to('/salons'),
+      toPayouts: to('/finance/payouts'), toTeam: to('/settings/team'),
+      toMalabata: to('/demand/tangier/malabata'), toBranes: to('/demand/tangier/branes'), toMesnana: to('/demand/tangier?filter=no-supply'),
+    };
+  }
+}
+</script>
+</body>
+</html>

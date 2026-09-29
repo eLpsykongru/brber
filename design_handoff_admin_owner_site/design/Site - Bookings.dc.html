@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:relative;width:100%;height:100%;overflow:hidden;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif">
+<sc-if value="{{ v.BKN_01 }}">
+<div data-tabroot="1" style="position:absolute;inset:0;overflow:auto">
+<div style="position:relative;display:flex;width:100%;height:max(100%, 852px);min-width:1184px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden;cursor:pointer" onClick="{{ h.a4 }}" style-hover="background:#17171B">
+  
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:14px;padding:0 24px">
+      <span style="font-size:15px;font-weight:700;cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">Bookings</span>
+      <span style="font-size:12px;color:#6B6B72">Thu, 30 Jul · 412 today</span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:8px;height:34px;background:#17171A;border:1px solid #26262B;border-radius:9px;padding:0 12px;width:250px;box-sizing:border-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5 21 21"></path></svg><span style="flex:1;font-size:12px;color:#6B6B72">Booking ID, customer, phone…</span></span>
+      <span style="display:flex;align-items:center;gap:7px;height:34px;background:#17171A;border:1px solid #26262B;border-radius:9px;padding:0 12px;font-size:12px;font-weight:600">Today<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></span>
+    </div>
+
+    <div style="flex:1;padding:18px 24px;display:flex;flex-direction:column;gap:14px;overflow:hidden">
+      <div style="display:flex;gap:12px">
+        <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:13px 16px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">TODAY</span><span style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums">412</span></div>
+        <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:13px 16px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">PENDING</span><span style="font-size:20px;font-weight:700;color:#E8A100;font-variant-numeric:tabular-nums">37</span></div>
+        <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:13px 16px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">COMPLETED</span><span style="font-size:20px;font-weight:700;color:#4ADE80;font-variant-numeric:tabular-nums">286</span></div>
+        <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:13px 16px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">CANCELLED</span><span style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums">21</span></div>
+        <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:13px 16px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">NO-SHOW</span><span style="font-size:20px;font-weight:700;color:#F87171;font-variant-numeric:tabular-nums">14</span></div>
+        <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:13px 16px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">DEPOSITS TAKEN</span><span style="font-size:20px;font-weight:700;color:#E8442E;font-variant-numeric:tabular-nums">6 184 DH</span></div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:9px">
+        <span style="height:32px;border-radius:9px;background:#E8442E;display:flex;align-items:center;padding:0 14px;font-size:12px;font-weight:700;cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)" data-tab-sel="1">All</span>
+        <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:12px;font-weight:600;color:#9A9CA3;cursor:pointer" onClick="{{ tab }}">Pending</span>
+        <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:12px;font-weight:600;color:#9A9CA3;cursor:pointer" onClick="{{ tab }}">Upcoming</span>
+        <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:12px;font-weight:600;color:#9A9CA3;cursor:pointer" onClick="{{ tab }}">Completed</span>
+        <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:12px;font-weight:600;color:#9A9CA3;cursor:pointer" onClick="{{ tab }}">Cancelled</span>
+        <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 14px;font-size:12px;font-weight:600;color:#9A9CA3;cursor:pointer" onClick="{{ h.a3 }}" style-hover="filter:brightness(1.18)">Disputed</span>
+        <span style="width:1px;height:22px;background:#26262B;margin:0 4px"></span>
+        <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;gap:7px;padding:0 13px;font-size:12px;font-weight:600;color:#9A9CA3;cursor:pointer" onClick="{{ h.a1 }}" style-hover="filter:brightness(1.18)">Exceptions<span style="font-size:10px;font-weight:700;color:#E8A100;background:rgba(232,161,0,.14);border-radius:5px;padding:1px 5px">12</span></span>
+        <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;gap:7px;padding:0 13px;font-size:12px;font-weight:600;color:#9A9CA3;cursor:pointer" onClick="{{ h.a2 }}" style-hover="filter:brightness(1.18)">Refunds<span style="font-size:10px;font-weight:700;color:#6B6B72">Nov</span></span>
+        <span style="width:1px;height:22px;background:#26262B;margin:0 4px"></span>
+        <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;gap:7px;padding:0 12px;font-size:12px;font-weight:600;color:#9A9CA3;cursor:pointer">Salon: any<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></span>
+        <span style="height:32px;border-radius:9px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;gap:7px;padding:0 12px;font-size:12px;font-weight:600;color:#9A9CA3;cursor:pointer">Source: any<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></span>
+      </div>
+
+      <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:16px;padding:0 18px;box-sizing:border-box;overflow:hidden">
+        <div style="display:grid;grid-template-columns:1.1fr 1.4fr 1.5fr 1.2fr 1fr 1.1fr 1.1fr 34px;gap:12px;align-items:center;height:42px;border-bottom:1px solid #26262B">
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">ID</span>
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">CUSTOMER</span>
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">SALON · BARBER</span>
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">SERVICE</span>
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">WHEN</span>
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72;text-align:right">PAID / TOTAL</span>
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">STATUS</span>
+          <span></span>
+        </div>
+        <div style="display:grid;grid-template-columns:1.1fr 1.4fr 1.5fr 1.2fr 1fr 1.1fr 1.1fr 34px;gap:12px;align-items:center;height:54px;border-bottom:1px solid #1E1E22">
+          <span style="font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#D8D8DC">#A3F29B71</span>
+          <span style="font-size:12px;font-weight:600">Amine Berrada</span>
+          <span style="font-size:12px;color:#9A9CA3">Le Fade · Youssef</span>
+          <span style="font-size:12px;color:#D8D8DC">Classic Haircut</span>
+          <span style="font-size:12px;color:#9A9CA3;font-variant-numeric:tabular-nums">11:00</span>
+          <span style="font-size:12px;text-align:right;font-variant-numeric:tabular-nums"><span style="font-weight:700;color:#E8442E">24</span><span style="color:#6B6B72"> / 60 DH</span></span>
+          <span><span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#4ADE80;background:rgba(74,222,128,.12);border-radius:7px;padding:4px 8px">IN CHAIR</span></span>
+          <span style="display:flex;justify-content:flex-end"><svg width="15" height="15" viewBox="0 0 24 24" fill="#6B6B72"><circle cx="12" cy="5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="19" r="1.6"></circle></svg></span>
+        </div>
+        <div style="display:grid;grid-template-columns:1.1fr 1.4fr 1.5fr 1.2fr 1fr 1.1fr 1.1fr 34px;gap:12px;align-items:center;height:54px;border-bottom:1px solid #1E1E22">
+          <span style="font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#D8D8DC">#B7E10C39</span>
+          <span style="font-size:12px;font-weight:600">Mehdi Kabbaj</span>
+          <span style="font-size:12px;color:#9A9CA3">Le Fade · Youssef</span>
+          <span style="font-size:12px;color:#D8D8DC">Haircut + Beard</span>
+          <span style="font-size:12px;color:#9A9CA3;font-variant-numeric:tabular-nums">12:00</span>
+          <span style="font-size:12px;text-align:right;font-variant-numeric:tabular-nums"><span style="font-weight:700;color:#E8442E">36</span><span style="color:#6B6B72"> / 90 DH</span></span>
+          <span><span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#E8A100;background:rgba(232,161,0,.12);border-radius:7px;padding:4px 8px">PENDING</span></span>
+          <span style="display:flex;justify-content:flex-end"><svg width="15" height="15" viewBox="0 0 24 24" fill="#6B6B72"><circle cx="12" cy="5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="19" r="1.6"></circle></svg></span>
+        </div>
+        <div style="display:grid;grid-template-columns:1.1fr 1.4fr 1.5fr 1.2fr 1fr 1.1fr 1.1fr 34px;gap:12px;align-items:center;height:54px;border-bottom:1px solid #1E1E22">
+          <span style="font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#D8D8DC">#C81E2A44</span>
+          <span style="font-size:12px;font-weight:600">Yassine Bennis</span>
+          <span style="font-size:12px;color:#9A9CA3">Kasbah · Adil</span>
+          <span style="font-size:12px;color:#D8D8DC">Hot Towel Shave</span>
+          <span style="font-size:12px;color:#9A9CA3;font-variant-numeric:tabular-nums">15:30</span>
+          <span style="font-size:12px;text-align:right;font-variant-numeric:tabular-nums"><span style="color:#6B6B72">0 / 50 DH</span></span>
+          <span><span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#9A9CA3;background:#212125;border-radius:7px;padding:4px 8px">CONFIRMED</span></span>
+          <span style="display:flex;justify-content:flex-end"><svg width="15" height="15" viewBox="0 0 24 24" fill="#6B6B72"><circle cx="12" cy="5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="19" r="1.6"></circle></svg></span>
+        </div>
+        <div style="display:grid;grid-template-columns:1.1fr 1.4fr 1.5fr 1.2fr 1fr 1.1fr 1.1fr 34px;gap:12px;align-items:center;height:54px;border-bottom:1px solid #1E1E22">
+          <span style="font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#D8D8DC">#E44B7C02</span>
+          <span style="font-size:12px;font-weight:600;color:#9A9CA3">Walk-in · Hicham</span>
+          <span style="font-size:12px;color:#9A9CA3">Le Fade · Hamza</span>
+          <span style="font-size:12px;color:#D8D8DC">Beard Trim</span>
+          <span style="font-size:12px;color:#9A9CA3;font-variant-numeric:tabular-nums">12:30</span>
+          <span style="font-size:12px;text-align:right;font-variant-numeric:tabular-nums"><span style="color:#6B6B72">0 / 40 DH</span></span>
+          <span><span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#9A9CA3;background:#212125;border-radius:7px;padding:4px 8px">QUEUED</span></span>
+          <span style="display:flex;justify-content:flex-end"><svg width="15" height="15" viewBox="0 0 24 24" fill="#6B6B72"><circle cx="12" cy="5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="19" r="1.6"></circle></svg></span>
+        </div>
+        <div style="display:grid;grid-template-columns:1.1fr 1.4fr 1.5fr 1.2fr 1fr 1.1fr 1.1fr 34px;gap:12px;align-items:center;height:54px;border-bottom:1px solid #1E1E22">
+          <span style="font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#D8D8DC">#F9022D18</span>
+          <span style="font-size:12px;font-weight:600">Anas Bouzid</span>
+          <span style="font-size:12px;color:#9A9CA3">Le Fade · Youssef</span>
+          <span style="font-size:12px;color:#D8D8DC">Haircut + Beard</span>
+          <span style="font-size:12px;color:#9A9CA3;font-variant-numeric:tabular-nums">14:00</span>
+          <span style="font-size:12px;text-align:right;font-variant-numeric:tabular-nums"><span style="font-weight:700;color:#E8442E">90</span><span style="color:#6B6B72"> / 90 DH</span></span>
+          <span><span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#F87171;background:rgba(248,113,113,.12);border-radius:7px;padding:4px 8px">NO-SHOW</span></span>
+          <span style="display:flex;justify-content:flex-end"><svg width="15" height="15" viewBox="0 0 24 24" fill="#6B6B72"><circle cx="12" cy="5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="19" r="1.6"></circle></svg></span>
+        </div>
+        <div style="display:grid;grid-template-columns:1.1fr 1.4fr 1.5fr 1.2fr 1fr 1.1fr 1.1fr 34px;gap:12px;align-items:center;height:54px;border-bottom:1px solid #1E1E22;background:rgba(232,68,46,.05);margin:0 -18px;padding:0 18px">
+          <span style="font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#D8D8DC">#D02F9911</span>
+          <span style="font-size:12px;font-weight:600">Amine Berrada</span>
+          <span style="font-size:12px;color:#9A9CA3">Salon Atlas · Hamza</span>
+          <span style="font-size:12px;color:#D8D8DC">Hot Towel Shave</span>
+          <span style="font-size:12px;color:#9A9CA3;font-variant-numeric:tabular-nums">Jul 18</span>
+          <span style="font-size:12px;text-align:right;font-variant-numeric:tabular-nums"><span style="font-weight:700;color:#E8442E">20</span><span style="color:#6B6B72"> / 50 DH</span></span>
+          <span><span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#E8442E;background:rgba(232,68,46,.14);border-radius:7px;padding:4px 8px"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#E8442E" stroke-width="2.6"><path d="M12 3 2 20h20L12 3z"></path></svg>DISPUTED</span></span>
+          <span style="display:flex;justify-content:flex-end"><svg width="15" height="15" viewBox="0 0 24 24" fill="#6B6B72"><circle cx="12" cy="5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="19" r="1.6"></circle></svg></span>
+        </div>
+        <div style="display:grid;grid-template-columns:1.1fr 1.4fr 1.5fr 1.2fr 1fr 1.1fr 1.1fr 34px;gap:12px;align-items:center;height:54px">
+          <span style="font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#D8D8DC">#7A5D1B60</span>
+          <span style="font-size:12px;font-weight:600">Rachid Tahiri</span>
+          <span style="font-size:12px;color:#9A9CA3">Marina · Karim</span>
+          <span style="font-size:12px;color:#D8D8DC">Kids Cut</span>
+          <span style="font-size:12px;color:#9A9CA3;font-variant-numeric:tabular-nums">09:30</span>
+          <span style="font-size:12px;text-align:right;font-variant-numeric:tabular-nums"><span style="color:#6B6B72">0 / 40 DH</span></span>
+          <span><span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:#4ADE80;background:rgba(74,222,128,.12);border-radius:7px;padding:4px 8px">COMPLETED</span></span>
+          <span style="display:flex;justify-content:flex-end"><svg width="15" height="15" viewBox="0 0 24 24" fill="#6B6B72"><circle cx="12" cy="5" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="12" cy="19" r="1.6"></circle></svg></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ v.BKN_03 }}">
+<div data-tabroot="1" style="position:absolute;inset:0;overflow:auto">
+<div style="position:relative;display:flex;width:100%;height:max(100%, 852px);min-width:1184px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  
+
+  <div style="flex:1;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:10px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span style="cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">Bookings</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">Exceptions</span></span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;background:#212125;border:1px solid #3A3A40;border-radius:8px;height:30px;padding:0 11px;font-size:11px;font-weight:700;color:#fff;cursor:pointer" data-tab-sel="1">EXCEPTIONS · 12</span>
+      <span style="display:flex;align-items:center;gap:7px;background:#17171A;border:1px solid #26262B;border-radius:8px;height:30px;padding:0 11px;font-size:11px;font-weight:600;color:#6B6B72;cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">All 214</span>
+      <span style="display:flex;align-items:center;gap:7px;background:#17171A;border:1px solid #26262B;border-radius:8px;height:30px;padding:0 11px;font-size:11px;font-weight:600;color:#6B6B72;cursor:pointer">Tuesday 18 Nov</span>
+    </div>
+    <div style="flex:1;min-height:0;display:flex;overflow:hidden">
+      <div style="flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;padding:18px 22px;gap:13px;border-right:1px solid #1E1E22;overflow:hidden">
+        <div style="background:#111113;border:1px solid #1E1E22;border-radius:14px;padding:14px 15px;display:flex;align-items:flex-start;gap:11px;flex:none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.1" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">An exception is somebody let down, not a booking that did not complete</span><span style="display:block;font-size:11.5px;line-height:1.5;color:#9A9CA3;margin-top:4px;text-wrap:pretty">Thirty-one bookings today did not end in a haircut. <strong style="color:#fff">Nineteen of them are fine</strong> — cancelled days ahead, rebooked within the hour, or moved by the customer themselves. Listing those as problems is how a log becomes noise nobody reads.</span></span>
+        </div>
+        <div style="flex:none;background:#111113;border:1px solid #1E1E22;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #1E1E22">
+            <span style="width:42px;flex:none;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">N</span>
+            <span style="flex:1;min-width:0;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">WHAT WENT WRONG</span>
+            <span style="width:120px;flex:none;text-align:right;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">WHOSE</span>
+            <span style="width:130px;flex:none;text-align:right;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">DONE ABOUT IT</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22;border-left:3px solid #F87171;box-sizing:border-box">
+            <span style="width:42px;flex:none;font-size:15px;font-weight:700;color:#F87171;font-variant-numeric:tabular-nums">4</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:700">Cancelled inside three hours</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Two were the same barber at Coiffure Rif, an hour apart</span></span>
+            <span style="width:120px;flex:none;text-align:right;font-size:11px;font-weight:700;color:#F87171">THE SHOP&#39;S</span>
+            <span style="width:130px;flex:none;text-align:right;font-size:11px;color:#9A9CA3">refunded · counted</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22;border-left:3px solid #F87171;box-sizing:border-box">
+            <span style="width:42px;flex:none;font-size:15px;font-weight:700;color:#F87171;font-variant-numeric:tabular-nums">3</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:700">Turned up, no barber there</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Worst thing on the list. Nobody cancelled anything — the shop just was not open</span></span>
+            <span style="width:120px;flex:none;text-align:right;font-size:11px;font-weight:700;color:#F87171">THE SHOP&#39;S</span>
+            <span style="width:130px;flex:none;text-align:right;font-size:11px;color:#E8A100">2 called, 1 waiting</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22;border-left:3px solid #E8A100;box-sizing:border-box">
+            <span style="width:42px;flex:none;font-size:15px;font-weight:700;color:#E8A100;font-variant-numeric:tabular-nums">2</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:700">Refund took longer than an hour</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Both on the same card provider. Ours to chase, not theirs</span></span>
+            <span style="width:120px;flex:none;text-align:right;font-size:11px;font-weight:700;color:#E8A100">OURS</span>
+            <span style="width:130px;flex:none;text-align:right;font-size:11px;color:#4ADE80">paid · apology sent</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22">
+            <span style="width:42px;flex:none;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">2</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Customer did not come</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Barber kept the slot empty. First time for both people</span></span>
+            <span style="width:120px;flex:none;text-align:right;font-size:11px;color:#9A9CA3">NOBODY&#39;S</span>
+            <span style="width:130px;flex:none;text-align:right;font-size:11px;color:#6B6B72">noted, no fee</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px">
+            <span style="width:42px;flex:none;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">1</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Charged 70, price on the page said 60</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Owner changed prices mid-afternoon. The booking held the old one</span></span>
+            <span style="width:120px;flex:none;text-align:right;font-size:11px;font-weight:700;color:#E8A100">OURS</span>
+            <span style="width:130px;flex:none;text-align:right;font-size:11px;color:#4ADE80">10 DH back</span>
+          </div>
+        </div>
+        <div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:14px;padding:14px 15px;display:flex;align-items:flex-start;gap:11px;flex:none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.1" style="flex:none"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#F87171">One person is still waiting and it is 16:40</span><span style="display:block;font-size:11.5px;line-height:1.5;color:#D8D8DC;margin-top:4px;text-wrap:pretty">She stood outside Coiffure Rif at 11:00 and has had a refund and no phone call. <strong style="color:#fff">A refund is not an apology</strong> — the only row on this page with something still owed to a person, and it is why this view exists rather than a weekly count.</span></span>
+        </div>
+        <span style="flex:1"></span>
+      </div>
+      <div style="width:336px;flex:none;min-height:0;padding:18px 20px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box;overflow:hidden">
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">THE NINETEEN THIS FILTER HIDES</span>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:10px">
+          <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Cancelled 2+ days ahead</span><span style="font-size:12px;font-weight:700">9</span></span>
+          <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Rebooked within the hour</span><span style="font-size:12px;font-weight:700">6</span></span>
+          <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Moved by the customer</span><span style="font-size:12px;font-weight:700">4</span></span>
+          <span style="font-size:11px;line-height:1.5;color:#6B6B72;border-top:1px solid #1E1E22;padding-top:10px;text-wrap:pretty">All still in the full log with their trails. Hidden here, never deleted.</span>
+        </div>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:11.5px;font-weight:700">Nothing here is assigned to anybody</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">This is still a log. The three at Coiffure Rif will show up as a pattern in Barbers if they keep happening — one bad Tuesday is not a case.</span>
+        </div>
+        <span style="flex:1"></span>
+        <span style="height:38px;border-radius:10px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;letter-spacing:.03em;color:#fff;cursor:pointer" onClick="{{ h.a5 }}" style-hover="filter:brightness(1.18)">CALL THE ONE STILL WAITING</span>
+        <span style="height:36px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#D8D8DC">SEE COIFFURE RIF&#39;S WEEK</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ v.BKN_04 }}">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="position:relative;display:flex;width:100%;height:max(100%, 852px);min-width:1184px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  
+
+  <div style="flex:1;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span style="cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">Bookings</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">Refunds</span></span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;background:#17171A;border:1px solid #26262B;border-radius:8px;height:30px;padding:0 11px;font-size:11px;font-weight:600;color:#9A9CA3">November · 1 340 DH across 31 refunds</span>
+    </div>
+    <div style="flex:1;min-height:0;display:flex;overflow:hidden">
+      <div style="flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;padding:18px 22px;gap:13px;border-right:1px solid #1E1E22;overflow:hidden">
+        <div style="display:flex;gap:12px;flex:none">
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:14px 15px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">REFUNDED</span><span style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums">1 340</span><span style="font-size:10.5px;color:#9A9CA3">DH · 31 bookings</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:14px 15px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">NEVER PAID OUT</span><span style="font-size:24px;font-weight:700;color:#4ADE80;font-variant-numeric:tabular-nums">908</span><span style="font-size:10.5px;color:#9A9CA3">DH · caught before settlement</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:14px 15px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">RECOVERED FROM SHOPS</span><span style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums">210</span><span style="font-size:10.5px;color:#9A9CA3">DH · 3 deductions</span></div>
+          <div style="flex:1;background:rgba(248,113,113,.09);border:1px solid rgba(248,113,113,.3);border-radius:14px;padding:14px 15px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#F87171">STERNCUT BORE</span><span style="font-size:24px;font-weight:700;color:#F87171;font-variant-numeric:tabular-nums">222</span><span style="font-size:10.5px;color:#9A9CA3">DH · our faults and Marina</span></div>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHERE THE MONEY CAME FROM</span>
+        <div style="flex:none;background:#111113;border:1px solid #1E1E22;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #1E1E22">
+            <span style="flex:1;min-width:0;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">CAUSE</span>
+            <span style="width:56px;flex:none;text-align:right;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">N</span>
+            <span style="width:92px;flex:none;text-align:right;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">VALUE</span>
+            <span style="width:158px;flex:none;text-align:right;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">WHO BORE IT</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22">
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Barber cancelled, more than a day&#39;s notice</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Refunded before the shop was ever paid. No deduction, nothing to recover</span></span>
+            <span style="width:56px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">17</span>
+            <span style="width:92px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">720 DH</span>
+            <span style="width:158px;flex:none;text-align:right;font-size:11px;font-weight:700;color:#4ADE80">NOBODY · NOT YET PAID</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22;border-left:3px solid #E8A100;box-sizing:border-box">
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:700">Shop shut with no notice · 3 people turned up</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Refunded in the hour, recovered from the shop eleven days later on Friday</span></span>
+            <span style="width:56px;flex:none;text-align:right;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums">3</span>
+            <span style="width:92px;flex:none;text-align:right;font-size:12.5px;font-weight:700;font-variant-numeric:tabular-nums">210 DH</span>
+            <span style="width:158px;flex:none;text-align:right;font-size:11px;font-weight:700;color:#E8A100">THE SHOP · IN ARREARS</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22">
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC;cursor:pointer" onClick="{{ h.a6 }}" style-hover="filter:brightness(1.18)">Marina suspended · pass holders</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Float covered 1 782 of it; the excess is ours and stays ours</span></span>
+            <span style="width:56px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">9</span>
+            <span style="width:92px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">2 214 DH</span>
+            <span style="width:158px;flex:none;text-align:right;font-size:11px;font-weight:700;color:#F87171">STERNCUT · 432 DH</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px">
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Our mistake · wrong price, slow refund</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Never charged to a shop, even where a shop&#39;s price change caused it</span></span>
+            <span style="width:56px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">2</span>
+            <span style="width:92px;flex:none;text-align:right;font-size:12.5px;font-variant-numeric:tabular-nums">40 DH</span>
+            <span style="width:158px;flex:none;text-align:right;font-size:11px;font-weight:700;color:#F87171">STERNCUT</span>
+          </div>
+        </div>
+        <div style="background:rgba(232,161,0,.09);border:1px solid rgba(232,161,0,.32);border-radius:14px;padding:14px 15px;display:flex;align-items:flex-start;gap:11px;flex:none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2.1" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#E8A100">We refund in an hour and recover on Friday</span><span style="display:block;font-size:11.5px;line-height:1.5;color:#D8D8DC;margin-top:4px;text-wrap:pretty">The customer promise runs on a clock the settlement cycle does not. For eleven days that 210 DH was <strong style="color:#fff">Sterncut lending a shop money without either side calling it a loan</strong>. It is small and it is fine — and it is the same shape as the pass float, which was also small until it was 38 400 DH.</span></span>
+        </div>
+        <span style="flex:1"></span>
+      </div>
+      <div style="width:336px;flex:none;min-height:0;padding:18px 20px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box;overflow:hidden">
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHAT IS NEVER DEDUCTED</span>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="display:flex;align-items:flex-start;gap:10px;background:#17171A;border:1px solid #26262B;border-radius:11px;padding:11px 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.1" style="flex:none"><path d="M6 6l12 12M18 6 6 18"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;font-weight:600;color:#D8D8DC">A cancellation with real notice</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Nothing was owed yet. Charging for it would be inventing a fee</span></span></span>
+          <span style="display:flex;align-items:flex-start;gap:10px;background:#17171A;border:1px solid #26262B;border-radius:11px;padding:11px 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.1" style="flex:none"><path d="M6 6l12 12M18 6 6 18"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;font-weight:600;color:#D8D8DC">A customer who did not turn up</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">The shop keeps the money. There is no refund to fund</span></span></span>
+          <span style="display:flex;align-items:flex-start;gap:10px;background:#17171A;border:1px solid #26262B;border-radius:11px;padding:11px 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.1" style="flex:none"><path d="M6 6l12 12M18 6 6 18"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;font-weight:600;color:#D8D8DC">Anything we got wrong</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Including when a shop&#39;s action triggered our bug</span></span></span>
+        </div>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:11.5px;font-weight:700">Three deductions, thirty-one refunds</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Most refunds cost a shop nothing, which is worth saying out loud to owners who assume a refund is a fine. The ones that do cost are the ones where somebody stood outside a locked door.</span>
+        </div>
+        <span style="flex:1"></span>
+        <span style="height:38px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#D8D8DC">EXPORT FOR THE MONTH-END</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ v.BKN_02 }}">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="position:relative;display:flex;width:100%;height:max(100%, 852px);min-width:1184px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  
+
+  <div style="flex:1;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span style="cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">Bookings</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">STC-4471</span></span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;background:#17171A;border:1px solid #26262B;border-radius:8px;height:30px;padding:0 11px;font-size:11px;font-weight:600;color:#9A9CA3;cursor:pointer" onClick="{{ h.a7 }}" style-hover="filter:brightness(1.18)">Cited in dispute D-119</span>
+    </div>
+    <div style="flex:1;min-height:0;display:flex;overflow:hidden">
+      <div style="flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;padding:18px 22px;gap:13px;border-right:1px solid #1E1E22;overflow:hidden">
+        <div style="background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:15px 16px;display:flex;align-items:center;gap:14px;flex:none">
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">THURSDAY 6 NOVEMBER · 18:30</span><span style="display:block;font-size:15px;font-weight:700;margin-top:4px">Cut and beard · 70 DH</span><span style="display:block;font-size:11.5px;color:#9A9CA3;margin-top:3px">Karim Idrissi · Marina Barber Club · chair 3</span></span>
+          <span style="width:1px;height:44px;background:#1E1E22;flex:none"></span>
+          <span style="flex:none;text-align:right"><span style="display:block;font-size:9px;letter-spacing:.14em;font-weight:700;color:#F87171">CANCELLED BY BARBER</span><span style="display:block;font-size:15px;font-weight:700;margin-top:4px;color:#F87171">20:14, 5 Nov</span><span style="display:block;font-size:11.5px;color:#9A9CA3;margin-top:3px">22 h 16 m before the slot</span></span>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">THE TRAIL</span>
+        <div style="flex:none;background:#111113;border:1px solid #1E1E22;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #1E1E22">
+            <span style="width:96px;flex:none;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">2 Nov 14:22</span>
+            <span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:#D8D8DC">Booked in the app · 70 DH taken</span>
+            <span style="width:78px;flex:none;text-align:right;font-size:11px;color:#6B6B72">customer</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #1E1E22">
+            <span style="width:96px;flex:none;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">5 Nov 20:14</span>
+            <span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:#D8D8DC">Cancelled · reason given: &ldquo;something personal&rdquo;</span>
+            <span style="width:78px;flex:none;text-align:right;font-size:11px;color:#6B6B72">barber</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #1E1E22">
+            <span style="width:96px;flex:none;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">5 Nov 20:14</span>
+            <span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:#D8D8DC">Customer told · 70 DH refunded in the same second</span>
+            <span style="width:78px;flex:none;text-align:right;font-size:11px;color:#6B6B72">automatic</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #1E1E22">
+            <span style="width:96px;flex:none;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">5 Nov 20:31</span>
+            <span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:#D8D8DC">Rebooked with Zakaria Belhaj, same shop, 6 Nov 19:00</span>
+            <span style="width:78px;flex:none;text-align:right;font-size:11px;color:#6B6B72">customer</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid #1E1E22;border-left:3px solid #E8A100;box-sizing:border-box">
+            <span style="width:96px;flex:none;font-size:11px;font-weight:700;color:#E8A100;font-variant-numeric:tabular-nums">6 Nov 00:05</span>
+            <span style="flex:1;min-width:0;font-size:12px;font-weight:700">Counted as Karim&#39;s 11th cancellation in 30 days</span>
+            <span style="width:78px;flex:none;text-align:right;font-size:11px;color:#6B6B72">system</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 16px">
+            <span style="width:96px;flex:none;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">21 Oct → 4 Dec</span>
+            <span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:#D8D8DC">Cap already in force · this one did not cause it</span>
+            <span style="width:78px;flex:none;text-align:right;font-size:11px;color:#6B6B72">ops</span>
+          </div>
+        </div>
+        <div style="background:rgba(232,161,0,.09);border:1px solid rgba(232,161,0,.32);border-radius:14px;padding:14px 15px;display:flex;align-items:flex-start;gap:11px;flex:none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2.1" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#E8A100">Both things are true and the page will not pick one</span><span style="display:block;font-size:11.5px;line-height:1.5;color:#D8D8DC;margin-top:4px;text-wrap:pretty">He gave more than twenty-two hours&#39; notice, which is inside the window and the reason no fee was charged. <strong style="color:#fff">It still counted, because the count is about how often, not how politely.</strong> Anyone reading this reference in a dispute needs to see both lines together or they will argue the wrong one.</span></span>
+        </div>
+        <span style="flex:1"></span>
+      </div>
+      <div style="width:336px;flex:none;min-height:0;padding:18px 20px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box;overflow:hidden">
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">MONEY</span>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:10px">
+          <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Taken 2 Nov</span><span style="font-size:12px;font-weight:700">70 DH</span></span>
+          <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Refunded 5 Nov</span><span style="font-size:12px;font-weight:700;color:#4ADE80">70 DH</span></span>
+          <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Late-notice fee</span><span style="font-size:12px;font-weight:700">0 DH</span></span>
+          <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Cost to the shop</span><span style="font-size:12px;font-weight:700">0 DH</span></span>
+          <span style="font-size:11px;line-height:1.5;color:#6B6B72;border-top:1px solid #1E1E22;padding-top:10px;text-wrap:pretty">Nothing was withheld and nobody was fined. The consequence was the cap, weeks earlier.</span>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHO CAN SEE WHAT</span>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="display:flex;align-items:center;gap:10px;background:#17171A;border:1px solid #26262B;border-radius:11px;padding:10px 12px"><span style="flex:1;min-width:0;font-size:11.5px;font-weight:600;color:#D8D8DC">The customer</span><span style="flex:none;font-size:10.5px;color:#6B6B72">everything but the count</span></span>
+          <span style="display:flex;align-items:center;gap:10px;background:#17171A;border:1px solid #26262B;border-radius:11px;padding:10px 12px"><span style="flex:1;min-width:0;font-size:11.5px;font-weight:600;color:#D8D8DC">Karim</span><span style="flex:none;font-size:10.5px;color:#6B6B72">everything, including 11/11</span></span>
+          <span style="display:flex;align-items:center;gap:10px;background:#17171A;border:1px solid #26262B;border-radius:11px;padding:10px 12px"><span style="flex:1;min-width:0;font-size:11.5px;font-weight:600;color:#D8D8DC">Rachid, the owner</span><span style="flex:none;font-size:10.5px;color:#6B6B72">the cancellation, not the reason</span></span>
+        </div>
+        <span style="flex:1"></span>
+        <span style="height:38px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#D8D8DC;cursor:pointer" onClick="{{ h.a7 }}" style-hover="filter:brightness(1.18)">OPEN DISPUTE D-119</span>
+        <span style="font-size:10.5px;color:#6B6B72;line-height:1.5;text-wrap:pretty">Nothing on this page can be edited. A booking log that can be corrected is not a log.</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ v.BKN_06 }}">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="position:relative;display:flex;width:100%;height:max(100%, 852px);min-width:1184px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span style="cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">Bookings</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600;font-family:ui-monospace,Menlo,monospace">#A3F29B71</span></span>
+      <span style="flex:1"></span>
+      <span style="font-size:9px;letter-spacing:.08em;font-weight:700;color:#0D0D0F;background:#4ADE80;border-radius:5px;padding:4px 8px">COMPLETED</span>
+      <span style="height:32px;border-radius:8px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;padding:0 13px;font-size:11.5px;font-weight:600;color:#9A9CA3;cursor:pointer" onClick="{{ h.a9 }}" style-hover="filter:brightness(1.2)">Copy ID</span>
+    </div>
+
+    <div style="flex:1;display:flex;overflow:hidden">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;padding:20px 22px;gap:13px;overflow:hidden">
+        <div style="display:flex;gap:12px;flex:none">
+          <div style="flex:1;background:#111113;border:1px solid #1E1E22;border-radius:14px;padding:15px;display:flex;align-items:center;gap:11px">
+            <span style="width:36px;height:36px;border-radius:999px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#E8442E;flex:none">AB</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">CUSTOMER</span><span style="display:block;font-size:13px;font-weight:700;margin-top:3px">Amine Berrada</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">5 visits · wallet 216 DH · no marks</span></span>
+          </div>
+          <div style="flex:1;background:#111113;border:1px solid #1E1E22;border-radius:14px;padding:15px;display:flex;align-items:center;gap:11px">
+            <span style="width:36px;height:36px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#9A9CA3;flex:none">YE</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">BARBER</span><span style="display:block;font-size:13px;font-weight:700;margin-top:3px">Youssef El Amrani</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">Le Fade Tanger · 4.86 ★</span></span>
+          </div>
+        </div>
+
+        <div style="background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:17px;display:flex;flex-direction:column;gap:12px;flex:none">
+          <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">THE MONEY</span>
+          <div style="display:flex;gap:11px">
+            <span style="flex:1;background:#17171A;border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.1em;font-weight:700;color:#6B6B72">SERVICE</span><span style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">60 DH</span><span style="font-size:10px;color:#9A9CA3">Classic Haircut · 30 min</span></span>
+            <span style="flex:1;background:#17171A;border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.1em;font-weight:700;color:#6B6B72">DEPOSIT · 40%</span><span style="font-size:16px;font-weight:700;color:#E8442E;font-variant-numeric:tabular-nums">24 DH</span><span style="font-size:10px;color:#9A9CA3">from wallet, Jul 29</span></span>
+            <span style="flex:1;background:#17171A;border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.1em;font-weight:700;color:#6B6B72">CASH AT SHOP</span><span style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">36 DH</span><span style="font-size:10px;color:#4ADE80">collected 11:34</span></span>
+            <span style="flex:1;background:#17171A;border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.1em;font-weight:700;color:#6B6B72">COUPON</span><span style="font-size:16px;font-weight:700;color:#6B6B72">—</span><span style="font-size:10px;color:#6B6B72">none used</span></span>
+          </div>
+          <span style="font-size:11px;color:#6B6B72;line-height:1.45;border-top:1px solid #1E1E22;padding-top:12px;text-wrap:pretty">Sterncut took no commission. The deposit left Amine's wallet and the barber was paid in full.</span>
+        </div>
+
+        <div style="flex:1;min-height:0;background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:17px;display:flex;flex-direction:column;gap:0;overflow:hidden">
+          <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72;flex:none;margin-bottom:14px">WHAT HAPPENED</span>
+          <div style="display:flex;gap:13px">
+            <span style="width:74px;flex:none;font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums;padding-top:1px">Jul 29 16:02</span>
+            <span style="width:18px;flex:none;display:flex;flex-direction:column;align-items:center"><span style="width:18px;height:18px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span><span style="flex:1;width:2px;background:#26262B"></span></span>
+            <span style="flex:1;min-width:0;padding-bottom:13px"><span style="display:block;font-size:12px;font-weight:600">Booked · 24 DH deposit taken</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Customer app · slot picker</span></span>
+          </div>
+          <div style="display:flex;gap:13px">
+            <span style="width:74px;flex:none;font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums;padding-top:1px">Jul 29 16:04</span>
+            <span style="width:18px;flex:none;display:flex;flex-direction:column;align-items:center"><span style="width:18px;height:18px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span><span style="flex:1;width:2px;background:#26262B"></span></span>
+            <span style="flex:1;min-width:0;padding-bottom:13px"><span style="display:block;font-size:12px;font-weight:600">Note from the customer</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">"Same as last time but leave the top a bit longer"</span></span>
+          </div>
+          <div style="display:flex;gap:13px">
+            <span style="width:74px;flex:none;font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums;padding-top:1px">Jul 30 10:58</span>
+            <span style="width:18px;flex:none;display:flex;flex-direction:column;align-items:center"><span style="width:18px;height:18px;border-radius:999px;background:rgba(74,222,128,.18);display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span><span style="flex:1;width:2px;background:#26262B"></span></span>
+            <span style="flex:1;min-width:0;padding-bottom:13px"><span style="display:block;font-size:12px;font-weight:600">Checked in · 2 min early</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">QR at Le Fade · poster still indoors at this point</span></span>
+          </div>
+          <div style="display:flex;gap:13px">
+            <span style="width:74px;flex:none;font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums;padding-top:1px">Jul 30 11:34</span>
+            <span style="width:18px;flex:none;display:flex;flex-direction:column;align-items:center"><span style="width:18px;height:18px;border-radius:999px;background:rgba(74,222,128,.18);display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="3.2"><path d="M5 12l5 5L20 7"></path></svg></span><span style="flex:1;width:2px;background:#26262B"></span></span>
+            <span style="flex:1;min-width:0;padding-bottom:13px"><span style="display:block;font-size:12px;font-weight:600">Done · 36 DH cash collected</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Barber marked it in the chair</span></span>
+          </div>
+          <div style="display:flex;gap:13px">
+            <span style="width:74px;flex:none;font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums;padding-top:1px">Jul 30 11:36</span>
+            <span style="width:18px;flex:none;display:flex;justify-content:center"><span style="width:18px;height:18px;border-radius:999px;background:rgba(232,161,0,.2);display:flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="#E8A100"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8L12 2z"></path></svg></span></span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Both rated 5★</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Customer review is public · barber's note is private</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:300px;flex:none;border-left:1px solid #1E1E22;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:14px 16px;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:8px">
+          <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">NOTHING TO FIX HERE</span>
+        </div>
+        <div style="padding:16px;border-bottom:1px solid #1E1E22;display:flex;flex-direction:column;gap:12px">
+          <span style="font-size:11.5px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">Paid, completed, rated both ways. Ops only needs this page when something went wrong — the actions stay available anyway.</span>
+          <div style="background:#17171A;border:1px solid #26262B;border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:10px">
+            <span style="display:flex;justify-content:space-between;font-size:11.5px"><span style="color:#9A9CA3">Linked case</span><span style="font-weight:700;color:#6B6B72">None</span></span>
+            <span style="display:flex;justify-content:space-between;font-size:11.5px"><span style="color:#9A9CA3">Review</span><span style="font-weight:700">RV-2288 · public</span></span>
+            <span style="display:flex;justify-content:space-between;font-size:11.5px"><span style="color:#9A9CA3">Refundable</span><span style="font-weight:700">24 DH deposit</span></span>
+          </div>
+        </div>
+        <div style="padding:16px;border-bottom:1px solid #1E1E22;display:flex;flex-direction:column;gap:10px">
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">IF A CUSTOMER COMPLAINS</span>
+          <span style="height:38px;border-radius:10px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#fff;cursor:pointer" onClick="{{ h.a8 }}" style-hover="filter:brightness(1.18)">REFUND THE 24 DH DEPOSIT</span>
+          <span style="height:38px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#9A9CA3;cursor:pointer" onClick="{{ h.a5 }}" style-hover="filter:brightness(1.18)">OPEN A CASE FROM THIS</span>
+          <span style="font-size:10.5px;color:#6B6B72;line-height:1.45;text-wrap:pretty">A refund here credits the wallet and leaves the booking completed.</span>
+        </div>
+        <div style="flex:1"></div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">JUMP TO</span>
+          <span style="display:flex;align-items:center;gap:9px;height:34px;border-radius:9px;background:#17171A;padding:0 12px"><span style="flex:1;min-width:0;font-size:11.5px;color:#D8D8DC">Amine's account</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></span>
+          <span style="display:flex;align-items:center;gap:9px;height:34px;border-radius:9px;background:#17171A;padding:0 12px"><span style="flex:1;min-width:0;font-size:11.5px;color:#D8D8DC">Le Fade Tanger</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></span>
+          <span style="display:flex;align-items:center;gap:9px;height:34px;border-radius:9px;background:#17171A;padding:0 12px"><span style="flex:1;min-width:0;font-size:11.5px;color:#D8D8DC">Review RV-2288</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2" style="flex:none"><path d="M9 6l6 6-6 6"></path></svg></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ v.CUS_06 }}">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="position:relative;display:flex;width:100%;height:max(100%, 852px);min-width:1184px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span style="cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">Bookings</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">STC-4502</span></span>
+      <span style="flex:1"></span>
+      
+    </div>
+    <div style="flex:1;min-height:0;padding:22px 24px;display:flex;gap:20px;box-sizing:border-box;overflow:hidden">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:15px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:13px;font-weight:700">Refund STC-4502</span><span style="font-size:11px;color:#6B6B72">Cancelled 20 min before · 12 June</span></div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <div style="display:flex;align-items:center;gap:12px;background:#111113;border:1.5px solid #E8442E;border-radius:11px;padding:13px 14px">
+              <span style="width:20px;height:20px;border-radius:999px;background:#E8442E;display:flex;align-items:center;justify-content:center;flex:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M4 12.5 9.5 18 20 6.5"></path></svg></span>
+              <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">Deposit only · 24 DH</span><span style="font-size:10.5px;color:#9A9CA3">What the customer actually paid us</span></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;background:#111113;border:1px solid #26262B;border-radius:11px;padding:13px 14px">
+              <span style="width:20px;height:20px;border-radius:999px;border:2px solid #3A3A40;flex:none"></span>
+              <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">Full price · 60 DH</span><span style="font-size:10.5px;color:#E8A100">36 DH was never taken &mdash; this would be a gift</span></span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;background:#111113;border:1px solid #26262B;border-radius:11px;padding:13px 14px">
+              <span style="width:20px;height:20px;border-radius:999px;border:2px solid #3A3A40;flex:none"></span>
+              <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:12.5px;font-weight:700">Part of it</span><span style="font-size:10.5px;color:#9A9CA3">Type an amount up to 24 DH</span></span>
+            </div>
+          </div>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px">
+          <span style="font-size:13px;font-weight:700">Who bears it</span>
+          <div style="display:flex;gap:10px">
+            <div style="flex:1;background:#111113;border:1.5px solid #E8442E;border-radius:11px;padding:14px;display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:12px;font-weight:700">Le Fade Tanger</span>
+              <span style="font-size:10.5px;line-height:1.45;color:#9A9CA3">Comes off Friday&rsquo;s settlement. The shop cancelled.</span>
+            </div>
+            <div style="flex:1;background:#111113;border:1px solid #26262B;border-radius:11px;padding:14px;display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:12px;font-weight:700">Sterncut</span>
+              <span style="font-size:10.5px;line-height:1.45;color:#9A9CA3">We absorb it. Use when the fault is ours.</span>
+            </div>
+            <div style="flex:1;background:#111113;border:1px solid #26262B;border-radius:11px;padding:14px;display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:12px;font-weight:700">Split</span>
+              <span style="font-size:10.5px;line-height:1.45;color:#9A9CA3">Rare. Needs a sentence saying why.</span>
+            </div>
+          </div>
+          <div style="background:#111113;border:1px solid #26262B;border-radius:11px;padding:12px 13px;display:flex;flex-direction:column;gap:7px">
+            <span style="font-size:10px;letter-spacing:.13em;font-weight:700;color:#6B6B72">WHAT THE CUSTOMER WILL READ</span>
+            <span style="font-size:11.5px;line-height:1.5">Your 24 DH deposit is back in your wallet. The shop cancelled and Sterncut asked them to cover it.</span>
+          </div>
+        </div>
+      </div>
+      <div style="width:310px;flex:none;display:flex;flex-direction:column;gap:14px">
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:12px">
+          <span style="font-size:12.5px;font-weight:700">Anas Bouzid</span>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between"><span style="font-size:11.5px;color:#9A9CA3">Refunds this year</span><span style="font-size:11.5px;font-weight:700">2 · 48 DH</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="font-size:11.5px;color:#9A9CA3">Cuts taken</span><span style="font-size:11.5px;font-weight:700">31</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="font-size:11.5px;color:#9A9CA3">No-shows</span><span style="font-size:11.5px;font-weight:700;color:#4ADE80">0</span></div>
+          </div>
+          <span style="font-size:11px;line-height:1.45;color:#6B6B72;border-top:1px solid #26262B;padding-top:11px">Not a pattern. Two refunds in thirty-one cuts is a normal year.</span>
+        </div>
+        <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:17px;display:flex;flex-direction:column;gap:11px"><span style="font-size:12.5px;font-weight:700">Within Nadia&rsquo;s limit</span><span style="font-size:11px;line-height:1.5;color:#9A9CA3">24 DH is under the 200 DH ceiling on <strong>SET-03</strong>, so this goes through without Karima. Above it, the same screen becomes a request.</span></div>
+        <div style="display:flex;flex-direction:column;gap:9px;margin-top:auto">
+          <span style="height:44px;border-radius:10px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.05em;cursor:pointer" onClick="{{ h.a2 }}" style-hover="filter:brightness(1.18)">REFUND 24 DH TO THE WALLET</span>
+          <span style="height:42px;border-radius:10px;border:1px solid #26262B;color:#9A9CA3;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.05em;cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">CANCEL</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ none }}"><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:40px"><span style="font-size:15px;font-weight:700">No screen is designed for this yet</span><span style="font-size:12.5px;color:#9A9CA3;max-width:440px;line-height:1.55">The canvases have no screen at this address.</span><span onClick="{{ backHome }}" style="margin-top:4px;font-size:12px;font-weight:700;color:#E8442E;cursor:pointer">Back to Bookings</span></div></sc-if>
+<sc-if value="{{ specOn }}"><div style="position:absolute;right:12px;bottom:12px;z-index:40;background:#E8442E;color:#fff;border-radius:8px;padding:6px 10px;font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.4);pointer-events:none">{{ specId }}</div></sc-if>
+<sc-if value="{{ toastOn }}"><div style="position:absolute;left:50%;bottom:24px;transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:9px;background:#fff;color:#0D0D0F;border-radius:10px;padding:10px 14px;font-family:Inter,sans-serif;font-size:12px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.45);pointer-events:none;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>{{ toastMsg }}</div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1184,&quot;height&quot;:852},&quot;path&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;/bookings&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;specOn&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;world&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;go&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(path: string) =&gt; void&quot;},&quot;setWorld&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(patch: object) =&gt; void&quot;},&quot;openPal&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { toast: null };
+  _toast(msg) { this.setState({ toast: msg }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: null }), 2200); }
+  componentWillUnmount() { clearTimeout(this._tt); }
+  tab = e => {
+    if (e && e.stopPropagation) e.stopPropagation();
+    const el = e.currentTarget, p = el && el.parentElement; if (!p) return;
+    const sel = [...p.children].find(k => k.getAttribute('data-tab-sel'));
+    if (sel && ![...p.children].some(k => k.getAttribute('data-tab-orig'))) sel.setAttribute('data-tab-orig', '1');
+    if (sel && sel !== el) { const a = el.getAttribute('style'); el.setAttribute('style', sel.getAttribute('style')); sel.setAttribute('style', a); sel.removeAttribute('data-tab-sel'); el.setAttribute('data-tab-sel', '1'); }
+    const root = el.closest('[data-tabroot]'); if (!root) return;
+    const label = (el.textContent || '').replace(/\s+/g, ' ').trim(), rx = this.tabRx(label);
+    const isRow = d => { const st = d.getAttribute('style') || ''; return d.tagName === 'DIV' && /display:\s*(flex|grid)/.test(st) && !/flex-direction:\s*column/.test(st); };
+    const isHead = d => { const st = d.getAttribute('style') || ''; if (/letter-spacing/.test(st) && /font-size:\s*(8|8\.5|9|9\.5)px/.test(st)) return true; const kids = [...d.children]; if (kids.length && kids.every(k => { const ks = k.getAttribute('style') || ''; const tx = (k.textContent || '').trim(); return !tx || (/letter-spacing/.test(ks) && /font-size:\s*(8|8\.5|9|9\.5)px/.test(ks)); })) return true; const tx = (d.textContent || '').replace(/\s+/g, ' ').trim(); return tx.length > 0 && tx === tx.toUpperCase() && /[A-Z]/.test(tx) && !/\d/.test(tx); };
+    const cand = new Map();
+    root.querySelectorAll('div').forEach(d => { if (!isRow(d) || !/border-(top|bottom)/.test(d.getAttribute('style') || '') || d.hasAttribute('data-tab-empty')) return; const par = d.parentElement; if (!par) return; cand.set(par, (cand.get(par) || 0) + 1); });
+    let parent = null, most = 0; cand.forEach((n, par) => { if (n >= 2 && n > most) { most = n; parent = par; } });
+    if (!parent) return;
+    const kids = [...parent.children].filter(d => isRow(d) && !d.hasAttribute('data-tab-empty'));
+    const rows = kids.filter((d, i) => !(i === 0 && isHead(d)) && !isHead(d));
+    let shown = 0;
+    rows.forEach(r => { if (r.dataset.d === undefined) r.dataset.d = r.style.display === 'none' ? '' : r.style.display; const ok = !rx || rx.test(r.textContent || ''); r.removeAttribute('hidden'); if (r.dataset.d) r.style.setProperty('display', ok ? r.dataset.d : 'none'); else r.style.setProperty('display', ok ? 'flex' : 'none'); if (ok) shown++; });
+    let empty = parent.querySelector('[data-tab-empty]');
+    if (!shown) { if (!empty) { empty = document.createElement('div'); empty.setAttribute('data-tab-empty', '1'); empty.setAttribute('style', 'padding:30px 16px;text-align:center;font-size:12px;color:#6B6B72;border-top:1px solid #1E1E22'); parent.appendChild(empty); } empty.textContent = 'None of the rows shown here are “' + label.replace(/[\s·]*[\d\s]+$/, '') + '”.'; empty.style.display = 'block'; }
+    else if (empty) empty.style.display = 'none';
+  };
+  resetTabs() {
+    document.querySelectorAll('[data-tabroot]').forEach(root => {
+      root.querySelectorAll('[data-d]').forEach(r => { if (r.dataset.d) r.style.setProperty('display', r.dataset.d); else r.style.removeProperty('display'); });
+      root.querySelectorAll('[data-tab-empty]').forEach(x => { x.style.display = 'none'; });
+      root.querySelectorAll('[data-tab-orig]').forEach(o => { if (o.getAttribute('data-tab-sel')) return; const p = o.parentElement; const cur = p && [...p.children].find(k => k.getAttribute('data-tab-sel')); if (!cur) return; const a = o.getAttribute('style'); o.setAttribute('style', cur.getAttribute('style')); cur.setAttribute('style', a); cur.removeAttribute('data-tab-sel'); o.setAttribute('data-tab-sel', '1'); });
+    });
+  }
+  tabRx(label) {
+    const l = label.toLowerCase().replace(/[\s·]*[\d\s]+$/, '').trim();
+    if (l === 'wallet over 200 dh') return { test: t => (t.match(/\d[\d ]* DH/g) || []).some(x => parseInt(x.replace(/\D/g, ''), 10) > 200) };
+    const M = { all: null, everything: null, today: null, pending: /pending/i, upcoming: /pending|confirmed|queued/i, completed: /completed|done|paid out/i, cancelled: /cancelled|canceled/i, mine: /\byou\b/i, 'waiting 24h+': /\b\d+ days?\b/i, waiting: /waiting|nobody yet|\b\d+ (days?|hours?)\b/i, bookings: /deposit|booking|charged|no-show/i, closed: /solved|closed/i, 'assigned to me': /\byou\b/i, 'pay-up-front flag': /pay-up-front/i, 'lapsed 60 days': /lapsed/i, money: /DH|refund|payout|float|wallet|top-up|deposit/i, suspensions: /suspen/i, 'refused asks': /refus/i, 'rule changes': /rule|bound|floor|ceiling|setting|changed/i, sanctions: /sanction|ban|flag|suspen/i, untranslated: /untranslated|no arabic|missing/i };
+    if (l in M) return M[l];
+    return new RegExp(l.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+  }
+  chip = e => { if (e && e.stopPropagation) e.stopPropagation(); const el = e.currentTarget, p = el && el.parentElement; if (!p) return; const sel = [...p.children].find(k => k.getAttribute('data-chip-sel')); if (!sel || sel === el) return; const a = el.getAttribute('style'); el.setAttribute('style', sel.getAttribute('style')); sel.setAttribute('style', a); sel.removeAttribute('data-chip-sel'); el.setAttribute('data-chip-sel', '1'); };
+  A = [{"to":"/bookings"},{"to":"/bookings?view=exceptions"},{"to":"/bookings/refunds?month=11"},{"to":"/bookings/STC-4471"},{"to":"/bookings/A3F29B71"},{"to":"/support"},{"to":"/salons/marina-barber-club"},{"to":"/support/CS-4471"},{"to":"/bookings/STC-4502/refund"},{"toast":"ID copied"}];
+  IDS = ["BKN-01","BKN-03","BKN-04","BKN-02","BKN-06","CUS-06"];
+  T = [["BKN-01","/bookings"],["BKN-03","/bookings?view=exceptions"],["BKN-04","/bookings/refunds?month=11"],["BKN-02","/bookings/STC-4471"],["BKN-06","/bookings/A3F29B71"],["CUS-06","/bookings/STC-4502/refund"]];
+  norm(p) { const [path, qs] = (p || '/bookings').split('#')[0].split('?'); const q = (qs || '').split('&').filter(Boolean).sort().join('&'); return (path.replace(/\/+$/, '') || '/bookings') + (q ? '?' + q : ''); }
+  screenFor(path, world) {
+    const n = this.norm(path), base = n.split('?')[0], q = {}; (n.split('?')[1] || '').split('&').filter(Boolean).forEach(kv => { const i = kv.indexOf('='); q[i < 0 ? kv : kv.slice(0, i)] = i < 0 ? '1' : decodeURIComponent(kv.slice(i + 1)); });
+    if (base === '/bookings/no-shows' || q.view === 'exceptions') return 'BKN-03';
+    if (base === '/bookings/refunds') return 'BKN-04';
+    const hit = this.T.find(r => this.norm(r[1]) === n); if (hit) return hit[0];
+    const b = this.T.find(r => this.norm(r[1]) === base); if (b) return b[0];
+    return null;
+  }
+  renderVals() {
+    const path = this.props.path || '/bookings', world = this.props.world || {}, go = this.props.go || (() => {}), setWorld = this.props.setWorld || (() => {}), openPal = this.props.openPal || (() => {});
+    const id = this.screenFor(path, world);
+    const v = {}; this.IDS.forEach(k => { v[k.replace(/-/g, '_')] = k === id; });
+    const h = {}; this.A.forEach((a, i) => { h['a' + i] = e => { if (e && e.stopPropagation) e.stopPropagation(); if (a.pal) { openPal(); return; } if (a.toast) { this._toast(a.toast); return; } if (a.world) setWorld(a.world); if (a.to) { this.resetTabs(); go(a.to); } }; });
+    return { v, h, toastOn: !!(this.state && this.state.toast), toastMsg: (this.state && this.state.toast) || '', chip: this.chip, tab: this.tab, none: !id, backHome: () => go('/bookings'), specOn: !!this.props.specOn, specId: (id || 'no screen') + ' · ' + path };
+  }
+}
+</script>
+</body>
+</html>

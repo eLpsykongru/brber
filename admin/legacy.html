@@ -17,8 +17,12 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
 [data-go]{cursor:pointer}
 [data-go]:hover{filter:brightness(1.3)}
 #modal[hidden]{display:none}
+/* inside the new site (admin/index.html) this console is a frame: the site draws the rail */
+html.embed body{min-width:1184px}
+html.embed .scr > div > div:first-child{display:none!important}
 </style>
-<script src="./config.js"></script>
+<script src="/config.js"></script>
+<script>if (new URLSearchParams(location.search).has('embed')) document.documentElement.classList.add('embed');</script>
 </head>
 <body>
 <!--
@@ -1771,7 +1775,7 @@ body{font-family:Inter,system-ui,sans-serif;min-width:1400px}
     <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
       <span id="bb-sub" style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span>Barbers</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">Tangier · 118</span></span>
       <span style="flex:1"></span>
-      <span style="display:flex;align-items:center;gap:8px;background:#17171A;border:1px solid #26262B;border-radius:8px;height:32px;padding:0 12px;font-size:11.5px;color:#9A9CA3"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5 21 21"></path></svg<input id="bb-q" placeholder="Search name or shop" style="flex:1;min-width:0;background:transparent;border:0;outline:none;color:#fff;font:400 11.5px Inter,sans-serif"></span>
+      <span style="display:flex;align-items:center;gap:8px;background:#17171A;border:1px solid #26262B;border-radius:8px;height:32px;padding:0 12px;font-size:11.5px;color:#9A9CA3"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5 21 21"></path></svg><input id="bb-q" placeholder="Search name or shop" style="flex:1;min-width:0;background:transparent;border:0;outline:none;color:#fff;font:400 11.5px Inter,sans-serif"></span>
       <span style="display:flex;gap:5px;background:#17171A;border:1px solid #26262B;border-radius:9px;padding:3px">
         <span style="height:26px;border-radius:7px;background:#E8442E;display:flex;align-items:center;padding:0 11px;font-size:11px;font-weight:700;cursor:pointer" id="bb-f-look" data-bfilter="look">Needs a look</span>
         <span style="height:26px;border-radius:7px;display:flex;align-items:center;padding:0 11px;font-size:11px;font-weight:600;color:#9A9CA3;cursor:pointer" id="bb-f-all" data-bfilter="all">All</span>
@@ -3453,7 +3457,11 @@ function show(route) {
   // reload the page to find out that money is locked
   loadIncident();
 }
-addEventListener('hashchange', () => show(location.hash.slice(2)));
+addEventListener('hashchange', () => {
+  show(location.hash.slice(2));
+  // framed in the new site: tell it which section this is now, for its rail and URL
+  if (document.documentElement.classList.contains('embed')) parent.postMessage({ sterncut: 'route', route: location.hash.slice(2) }, location.origin);
+});
 
 // The sidebar is the same nine items in the same order on every screen.
 // index 3 is Customers, which turn 3b finally gives somewhere to go
@@ -3574,11 +3582,18 @@ async function api(path, opts = {}) {
 }
 
 // One retry on 401: an ops session sits open far longer than an access token lives.
+const EMBED = document.documentElement.classList.contains('embed');
 async function rpc(fn, args = {}) {
   const call = () => api('/rest/v1/rpc/' + fn, { method: 'POST', body: JSON.stringify(args) });
   try {
     return await call();
   } catch (e) {
+    // 0133: above your role the database refuses with ask:<key> / deny:<key>.
+    // The site owns the ask dialog, so the frame passes the call up to it.
+    if (EMBED && /^(ask|deny):/.test(e.message)) {
+      parent.postMessage({ sterncut: 'gate', rpc: fn, args, message: e.message }, location.origin);
+      throw Object.assign(e, { handled: true });
+    }
     if (e.status !== 401 || !sess?.refresh_token) throw e;
     const token = sess.refresh_token;
     sess = null;
@@ -3589,6 +3604,10 @@ async function rpc(fn, args = {}) {
 }
 
 function fail(e) {
+  if (e.handled) return;
+  if (EMBED && (e.status === 401 || /Admins only/.test(e.message))) {
+    return parent.postMessage({ sterncut: 'signed-out' }, location.origin);
+  }
   // a 3.8s toast is not a trace: a panel that silently stops filling reads as
   // "the console is dead", so every failure leaves something to read afterwards
   console.error('admin:', e);
@@ -5319,6 +5338,9 @@ async function drawReliability() {
     || draft.mark_days !== rules.mark_days
     || draft.clear_after_clean !== rules.clear_after_clean;
 
+  // the rewrite is only the label and the picker; the stats row and the note below it
+  // live in the same card and are filled further down, so they are kept, not wiped
+  const rbKeep = [...$('rb-when').children].slice(2);
   $('rb-when').innerHTML =
     '<span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHEN IS SOMEONE LATE</span>'
     + '<div style="display:flex;align-items:flex-end;gap:16px;margin-top:12px">'
@@ -5330,6 +5352,7 @@ async function drawReliability() {
       '<span data-late="' + m + '" style="cursor:pointer;min-width:44px;text-align:center;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700;'
       + (draft.late_after_min === m ? 'background:#E8442E;color:#fff' : 'background:#212125;color:#9A9CA3') + '">' + m + '</span>').join('')
     + '</span></div>';
+  $('rb-when').append(...rbKeep);
 
   const d = await rpc('admin_reliability_dryrun', {
     p_late_min: draft.late_after_min, p_mark_days: draft.mark_days,
@@ -8243,7 +8266,7 @@ if (!CFG.url || !CFG.key) {
   gate('No Supabase project configured — copy admin/config.example.js to admin/config.js and fill it in.');
   document.querySelector('#gate-form').style.pointerEvents = 'none';
 } else if (!sess) {
-  gate();
+  if (EMBED) parent.postMessage({ sterncut: 'signed-out' }, location.origin); else gate();
 } else {
   whoami();
   // the badge is the whole point of putting a bell on every screen, so it is

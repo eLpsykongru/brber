@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sterncut</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<!--
+  admin.sterncut.ma — staff get the ops console, shop owners get their own shop
+  (design_handoff_admin_owner_site). The shell is app.js; each section is s/<name>.js,
+  loaded on first visit. Sections not rebuilt yet run legacy.html in a frame.
+  Local: npm run admin → http://localhost:5173 (every path serves this file).
+-->
+<style>
+html,body{margin:0;height:100%;background:#0D0D0F;color:#fff;-webkit-font-smoothing:antialiased}
+body{font-family:Inter,system-ui,sans-serif;min-width:1024px;overflow:hidden}
+a{color:#E8442E;text-decoration:none}
+a:hover{color:#FF6B57}
+input,textarea,button{font-family:Inter,sans-serif}
+input::placeholder,textarea::placeholder{color:#6B6B72}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:#26262B;border-radius:10px;border:2px solid #0D0D0F}
+::-webkit-scrollbar-track{background:transparent}
+.num,.tab{font-variant-numeric:tabular-nums}
+[data-go],[data-act]{cursor:pointer}
+.nav-i:hover{background:#18181B;color:#fff}
+.hov:hover{background:#1C1C20}
+.hov2:hover{background:#26262B;color:#fff}
+.btn-p:hover{background:#F0533D}
+.btn-s:hover{border-color:#34343A;background:#26262B}
+.fade{transition:opacity .15s}
+</style>
+<script src="/config.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="module" src="/app.js"></script>
+</body>
+</html>

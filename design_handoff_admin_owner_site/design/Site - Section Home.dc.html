@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="height:100%;overflow:auto;box-sizing:border-box;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif">
+<div style="max-width:1080px;padding:20px 24px 44px;display:flex;flex-direction:column;gap:22px;box-sizing:border-box">
+  <span style="font-size:12.5px;line-height:1.6;color:#9A9CA3;max-width:640px;text-wrap:pretty">{{ lede }}</span>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:11px">
+    <sc-for list="{{ tiles }}" as="t" hint-placeholder-count="4">
+      <div onClick="{{ t.open }}" style="background:#17171A;border:1px solid #1E1E22;border-radius:13px;padding:14px 15px;display:flex;flex-direction:column;gap:5px;cursor:pointer" style-hover="border-color:#34343A">
+        <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">{{ t.label }}</span>
+        <span style="font-size:22px;font-weight:800;font-variant-numeric:tabular-nums">{{ t.value }}</span>
+        <span style="font-size:10px;color:{{ t.noteColor }}">{{ t.note }}</span>
+      </div>
+    </sc-for>
+  </div>
+  <sc-for list="{{ groups }}" as="g" hint-placeholder-count="2">
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">{{ g.label }}</span>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px">
+        <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+          <div onClick="{{ it.open }}" style="display:flex;align-items:flex-start;gap:12px;background:#17171A;border:1px solid {{ it.border }};border-radius:12px;padding:14px 15px;cursor:pointer" style-hover="background:#1C1C20">
+            <span style="width:32px;height:32px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;flex:none;color:#C9CAD0">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="{{ it.icon }}"></path></svg>
+            </span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px">
+              <span style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:13px;font-weight:700">{{ it.title }}</span><sc-if value="{{ it.tag }}"><span style="font-size:9px;letter-spacing:.12em;font-weight:700;border-radius:5px;padding:3px 6px;color:{{ it.tagFg }};background:{{ it.tagBg }}">{{ it.tag }}</span></sc-if></span>
+              <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">{{ it.sub }}</span>
+            </span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:9px"><path d="M9 6l6 6-6 6"></path></svg>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1100,&quot;height&quot;:760},&quot;section&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;compliance&quot;,&quot;reviews&quot;,&quot;support&quot;,&quot;demand&quot;],&quot;default&quot;:&quot;compliance&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;go&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(path: string) =&gt; void&quot;}}">
+class Component extends DCLogic {
+  IC = {
+    list: 'M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01',
+    task: 'M9 11l2 2 4-4M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z',
+    sign: 'M3 17c3-3 5-8 7-8s1 8 3 8 3-4 5-4 3 2 3 2M3 21h18',
+    shield: 'M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z',
+    doc: 'M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6',
+    flag: 'M5 21V4M5 4h11l-2 4 2 4H5',
+    scale: 'M12 4v16M5 8h14M7 8l-3 7h6zM17 8l-3 7h6z',
+    star: 'M12 3l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 18.2 5.9 21.6l1.4-6.8L2.2 10.1l6.9-.8L12 3z',
+    chat: 'M21 12a8 8 0 0 1-8 8H4l1.6-3.2A8 8 0 1 1 21 12z',
+    bolt: 'M13 2 4 14h7l-1 8 9-12h-7z',
+    bell: 'M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4',
+    money: 'M12 3v18M5 8h9a3.5 3.5 0 0 1 0 7H5',
+    ticket: 'M4 7h16v3a2 2 0 0 0 0 4v3H4v-3a2 2 0 0 0 0-4z',
+    pin: 'M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10zM10 11a2 2 0 1 0 4 0a2 2 0 1 0-4 0',
+    clock: 'M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0M12 7v5l3 2',
+    user: 'M8 8a4 4 0 1 0 8 0a4 4 0 1 0-8 0M4 21c1-4.5 4-6.5 8-6.5s7 2 8 6.5',
+    shop: 'M4 20V9l8-5 8 5v11M9 20v-6h6v6',
+  };
+  D = {
+    compliance: {
+      lede: 'What shops and barbers still owe us on paper, and the calls only Karima can make. Anything overdue acts by itself — a shop is hidden, then reviewed — unless someone decides first.',
+      tiles: [['OVERDUE', '1', 'acts by itself tonight', 'red', '/compliance?tab=follow-ups'], ['DUE THIS WEEK', '3', 'reminders already sent', 'grey', '/compliance?tab=follow-ups'], ['DONE ON TIME', '82%', 'last 90 days', 'green', '/compliance?tab=follow-ups'], ['WAITING ON KARIMA', '3', 'countersign, override, refusal', 'amber', '/requests']],
+      groups: [
+        ['WORK THE LIST', [['Open follow-ups', '7 open · licences, IDs, map pins — what each shop still owes us', 'list', '/compliance?tab=follow-ups', '7 OPEN', 'amber'], ['Marina’s licence · AUD-118', 'Trade licence renewal · 10 days late · closure review Fri Aug 21', 'task', '/compliance/tasks/AUD-118', 'LATE', 'red'], ['Coiffure Atlas went quiet', 'Day 2 without an answer · flagged, reopens Thursday if nothing changes', 'shop', '/salons/coiffure-atlas?silent=2']]],
+        ['DECISIONS FOR KARIMA', [['Countersign · Barbershop Nour', '22 hours left · six people not yet told', 'sign', '/compliance/countersign/barbershop-nour', 'DUE', 'red'], ['Override · OVR-004', 'Yassine asks to send June as written · 2 days waiting', 'scale', '/compliance/overrides/OVR-004', 'WAITING', 'amber'], ['Permanent refusal · APP-338', 'Escalated by ops · removed 2 Feb for harm', 'flag', '/compliance/applications/APP-338/refuse']]],
+        ['POLICIES', [['Arabic onboarding', 'Decided 3 Feb · scoped, and made stricter', 'doc', '/compliance/policy/arabic'], ['Pass withholding', 'Held from v1 with passes — the spec stays here', 'doc', '/compliance/policy/pass-withholding', 'LATER', 'grey']]],
+      ],
+    },
+    reviews: {
+      lede: 'Every review customers leave, what they keep saying, and the few that need a person. Removing a review always tells both sides, and the customer can appeal.',
+      tiles: [['ALL REVIEWS', '1 208', 'last 90 days', 'grey', '/reviews?tag=waited'], ['FLAGGED', '3', 'oldest 18 hours', 'amber', '/reviews/flagged/RV-2291'], ['APPEALS', '2', 'first one due tomorrow', 'red', '/reviews/appeals/RV-2291'], ['“WAITED”', '34', 'most common complaint', 'grey', '/reviews?tag=waited']],
+      groups: [
+        ['QUEUES', [['Flagged queue', 'RV-2291 oldest · 1.0 at Le Fade Tanger · barber dispute', 'flag', '/reviews/flagged/RV-2291', '3', 'amber'], ['Appeals', 'RV-2291 due Sun · Anas Bouzid, removed by Nadia', 'scale', '/reviews/appeals/RV-2291', '2', 'red'], ['Second appeal · A-207', 'Restore and refund, or keep it hidden', 'scale', '/reviews/appeals/A-207']]],
+        ['BROWSE', [['What customers said', 'waited · 34 · price wrong · 11 · not the barber booked · 6', 'star', '/reviews?tag=waited'], ['A review’s full record · RV-2291', 'Every flag, removal and appeal on one review', 'doc', '/reviews/RV-2291']]],
+      ],
+    },
+    support: {
+      lede: 'Cases from customers, barbers and owners, and the incidents that touch many of them at once. Money cases are answered first.',
+      tiles: [['OPEN', '7', 'median first reply 42 min', 'grey', '/support?view=cases'], ['ABOUT MONEY', '3', 'refunds, float, deposits', 'amber', '/support?about=money'], ['WAITING ON THEM', '3', 'we replied, they haven’t', 'grey', '/support/CS-4471'], ['INCIDENTS', '1', 'INC-77 · 218 customers', 'red', '/support/incidents/INC-77']],
+      groups: [
+        ['CASES', [['Open cases · live', 'Updates as they land · 2 new since you looked', 'chat', '/support?view=cases', '7', 'amber'], ['Money cases', 'Refunds, float and deposits', 'money', '/support?about=money', '3', 'amber'], ['Assigned to me', 'CS-4471 · deposit not refunded · Amine Berrada', 'user', '/support/CS-4471'], ['Rachid Tahiri · CS-4468', 'Waiting 1 day · 300 DH wallet credit', 'chat', '/support/CS-4468']]],
+        ['BIGGER THAN ONE CASE', [['Incident · INC-77', '218 customers affected · message queued', 'bolt', '/support/incidents/INC-77', 'LIVE', 'red'], ['Thread with Youssef Alami', 'Le Fade’s owner · durations and the queue', 'chat', '/support/threads/youssef-alami'], ['Product ticket · PT-014', 'Sent to product from Youssef’s thread', 'ticket', '/support/tickets/PT-014'], ['Notifications', 'Everything that happened while you were away', 'bell', '/support?bell=1']]],
+      ],
+    },
+    demand: {
+      lede: 'Where people searched for a barber and found nothing — or found one at the wrong hours. Each unmet ask is a recruiting lead.',
+      tiles: [['UNMET ASKS', '412', '+38% vs July', 'red', '/demand?view=list'], ['FILLED FROM ASKS', '96', '23% conversion', 'green', '/demand?view=list'], ['EXPIRED UNFILLED', '316', '≈ 19 000 DH walked away', 'amber', '/demand?view=list'], ['NO SUPPLY AT ALL', '2', 'Mghogha, Mesnana', 'red', '/demand/tangier?filter=no-supply']],
+      groups: [
+        ['TANGIER', [['Map', 'Unmet asks by district · last 30 days', 'pin', '/demand?view=map'], ['All districts', 'Ranked by unmet asks, with why they went unmet', 'list', '/demand?view=list'], ['Malabata', 'Supply short · 118 asks · 5 chairs in the district', 'pin', '/demand/tangier/malabata', 'SHORT', 'red'], ['Kasbah', 'Wrong hours · asks Thu–Sat evenings', 'clock', '/demand/tangier/kasbah', 'HOURS', 'amber'], ['Dradeb', 'A refused application that could fill it', 'pin', '/demand/tangier/dradeb'], ['Districts with no supply', 'Mghogha and Mesnana · nobody within reach', 'pin', '/demand/tangier?filter=no-supply']]],
+        ['TURNING ASKS INTO SHOPS', [['Recruiting asks', 'What Hicham’s team has been asked to recruit', 'shop', '/salons/recruiting/asks'], ['Refused, but fixable', 'Applications we could still say yes to', 'doc', '/salons/applications?filter=refused-fixable'], ['Tétouan', '1 shop applying · demand only, no shops live', 'pin', '/demand/tetouan']]],
+      ],
+    },
+  };
+  renderVals() {
+    const go = this.props.go || (() => {});
+    const d = this.D[this.props.section] || this.D.compliance;
+    const TONE = { red: ['#F87171', 'rgba(248,113,113,.12)', 'rgba(248,113,113,.3)'], amber: ['#E8A100', 'rgba(232,161,0,.12)', 'rgba(232,161,0,.28)'], green: ['#4ADE80', 'rgba(74,222,128,.12)', '#1E1E22'], grey: ['#9A9CA3', '#212125', '#1E1E22'] };
+    return {
+      lede: d.lede,
+      tiles: d.tiles.map(([label, value, note, tone, to]) => ({ label, value, note, noteColor: tone === 'grey' ? '#9A9CA3' : TONE[tone][0], open: () => go(to) })),
+      groups: d.groups.map(([label, items]) => ({ label, items: items.map(([title, sub, icon, to, tag, tone]) => { const t = TONE[tone || 'grey']; return { title, sub, icon: this.IC[icon], tag: tag || null, tagFg: t[0], tagBg: t[1], border: tone && tone !== 'grey' ? t[2] : '#1E1E22', open: () => go(to) }; }) })),
+    };
+  }
+}
+</script>
+</body>
+</html>

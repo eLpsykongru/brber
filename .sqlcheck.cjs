@@ -38,5 +38,20 @@ for (const [, expr] of asserts) {
   } catch { /* not evaluable here */ }
 }
 
+// 4 · 0133 wraps every staff_rpcs function behind the permission gate. A later
+// migration that replaces `admin_x` itself replaces the wrapper and drops the
+// gate without a sound — change `admin_x__direct` instead.
+const num = parseInt(require('path').basename(file), 10);
+if (num > 133) {
+  const src = fs.readFileSync(require('path').join(__dirname, 'supabase/migrations/0133_staff_site.sql'), 'utf8');
+  const gated = [...src.slice(src.indexOf('insert into public.staff_rpcs')).split('on conflict')[0]
+    .matchAll(/'(admin_[a-z_]+)'/g)].map((m) => m[1]);
+  for (const g of gated) {
+    if (new RegExp(`function\\s+public\\.${g}\\s*\\(`).test(raw)) {
+      bad++; console.log(`REPLACES THE GATE: ${g} is wrapped (0133) — change ${g}__direct instead`);
+    }
+  }
+}
+
 console.log(`${file}: ${bad ? bad + ' PROBLEM(S)' : 'clean'} · ${marks} markers · ${checked} arithmetic assertions checked`);
 process.exit(bad ? 1 : 0);

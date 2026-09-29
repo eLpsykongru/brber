@@ -3464,3 +3464,255 @@ Still open:
 - The listing copy goes into App Store Connect and Play Console by hand.
 - BST-06 says "within the hour": that's the default 3600 s JWT expiry. Change the copy
   if the project's expiry differs.
+
+## The admin & owner website — admin.sterncut.ma (0133, 2026-09-28)
+
+From `design_handoff_admin_owner_site/`. One site where the account decides what you
+see: staff get the ops console, shop owners get their own shop at `/{slug}/…`. Plain
+ES modules, no build step: `admin/index.html` + `admin/app.js` (shell) + one
+`admin/s/<section>.js` per section. **Sections not rebuilt yet run the old console**
+(`admin/legacy.html`, the former `admin/index.html`) in a frame on the same session, so
+every menu item works today; a section moves off the frame when its module lands.
+
+**Triggers this pulled:**
+- **0062 "wire `admin_can()` into the writes"** — done for every `admin_*` write, by
+  0133's gate (below), not one RPC at a time.
+- **"Web sign-in (WEB-07…10) — raise when anything on the web needs an account"** —
+  owners now sign in on the web (admin.sterncut.ma, not sterncut.ma).
+- **SMS rail** would be needed for owner phone sign-in as drawn — not built, see below.
+
+**0133 — what the database now enforces (tested in PGlite, twice-applied, 65 checks):**
+- `is_admin()` requires **aal2** (the session passed an authenticator code) **and an
+  @sterncut.ma email**. It guards ~70 policies and RPCs, so a stolen password alone
+  reads nothing.
+- **The SET-03 matrix is real.** `staff_actions` (per decision: `allow` / `ask` caps),
+  `staff_rpcs` (which function is which decision; refunds and salon decisions depend
+  on their arguments, `staff_key()`). Every listed `admin_x` was renamed
+  `admin_x__direct` (execute revoked) and replaced by a same-signature wrapper that
+  calls `staff_gate()` first: allowed → it runs and `staff_audit` gets a row; "ask" →
+  raises `ask:<key>`, nothing changes, the page files `admin_ask()`; "—" → `deny:<key>`.
+  **To change a gated function from now on, replace `admin_x__direct`** —
+  `.sqlcheck.cjs` refuses a later migration that replaces `admin_x`.
+- **Requests** (`staff_asks`): only a `*` holder decides (`admin_decide_ask`), never
+  their own ask; an approved ask re-runs the stored call as the Head via `staff_run`
+  (named arguments, so defaults apply) and the audit row points back at the ask.
+- **Team** (`staff_invites`, `admin_invite_colleague`, `admin_set_role`,
+  `admin_remove_colleague`, `admin_reset_factor`, `admin_team`). No email rail and no
+  sign-up here: the person signs up in the app with the invited address and confirms
+  it; the invite promotes them at their first sign-in (`admin_claim_invite`).
+- **Audit** (`admin_audit`): what was done (`staff_audit`), asked and refused
+  (`staff_asks`), and every **phone lookup** from ⌘K (`admin_find` → `staff_lookups`) —
+  the palette's "written to the audit trail, with your name" is true.
+- **Shop slugs** (`salons.slug`, filled by trigger, unique, never a staff section's
+  name). `owner_shop(slug)` answers `not_found` for any slug that isn't the caller's,
+  whether it exists or not; `my_shops()` is where an owner lands.
+
+**Before 0133 is applied (it locks the old console out on purpose):**
+- Every admin's **auth email must end @sterncut.ma** (Supabase → Authentication →
+  Users → edit). The mailbox doesn't need to exist for a password sign-in.
+- **"Confirm email" must be ON** in Supabase Auth, or anyone can register a
+  @sterncut.ma address in the app and claim an invite.
+- Each admin sets up an authenticator on their first sign-in to the new site (TOTP is
+  on by default in Supabase projects). Nothing admin works on an aal1 session after
+  0133 — including the old console opened on its own.
+- At least one admin must hold `*` (0062 backfilled every admin to `*`; check
+  `admin_caps` for anyone promoted since).
+- **Hosting:** a second Cloudflare Pages project, output directory `admin`, domain
+  admin.sterncut.ma. No `404.html`, so Pages serves `index.html` for every path. Copy
+  `admin/config.example.js` to `admin/config.js` (anon key only).
+
+**Not as drawn, on purpose:**
+- **Owners sign in with their app email + password**, not phone + SMS code: app
+  accounts have no verified phone and nothing sends SMS. Swap in when the SMS rail lands.
+- **Staff give a password before the code** — Supabase's authenticator is a second
+  factor and needs a first. No "Trust this computer for 14 days" (not a Supabase
+  feature; the session lifetime covers most of it). No reset: the Head re-invites or
+  re-enrols.
+- **Customers and barbers are addressed by id** (`/customers/<uuid>`), not by name
+  slug: names end up in history and logs, and two customers share one.
+- **FIN-02 and SET-14…16 ("what Sterncut takes", models A/B/C) are not built** — 0123
+  already decided (a monthly fee per chair, no commission). The Settings "Take" tab is gone.
+- **No sample numbers or demo stories** (the Marina hidden→suspended→lifted world state,
+  the 42/118 counts): pages read the database or aren't built. The sign-in panel's
+  counts come from `site_numbers()`.
+- **The lock screen is a lock on the page**, but unlocking is a real TOTP check.
+- The ask copy names the real Head of Ops and uses no pronoun for them; the matrix adds
+  six domain rows under "The rest of the desk" for writes SET-03 never drew (money
+  settle/release asks the Head from Field ops; the rest are their own capability).
+
+**Built (native):** shell (rail, top bar, account menu), sign-in (both tabs, TOTP
+set-up and code), 404 (owners: "Your account only sees …"), ⌘K, lock (30 min idle),
+Requests (+ the decision bar on the asker's page, `?ask=<id>`), Settings → Team &
+roles, Permissions, Audit log. Coupons shows "Held from v1" unless
+`STERNCUT_FLAGS.coupons` is set in config.js (then the old campaign desk).
+
+**0135 — the desk is Adil's two accounts, for now** (tested in PGlite, three scenarios,
+twice-applied): `adil.boudraa3@gmail.com` (HQ, the first Head of Ops, whom asks name) and
+`adil.boudraa@sterncut.ma`, both full access — two heads, because one head can never
+change or re-enrol their own account. Every other admin steps down, with what they held
+written to `admin_cap_grants` first; that only happens once one of the two holds the desk.
+The staff address rule is now "@sterncut.ma, or on `staff_email_allowlist`" (written by
+migration only). An account that doesn't exist yet is invited and promoted at its first
+sign-in to the site, once its email is confirmed. **A barber or agent account is never
+promoted** — the app decides "barber" from `profiles.role`; the migration says so in a
+NOTICE and leaves it. The site no longer checks the domain before the password; the
+database decides, and the @sterncut.ma message shows only when it says no.
+
+**Overview (OVW-02), native — 0134 `admin_morning()`** (tested in PGlite, 10 checks):
+yesterday in the shop's own day against the same weekday a week before (bookings, taken,
+deposits held, no-shows, bookings by hour), shops trading and which are suspended, when
+Friday's run is cut, and "what needs a person today" — one counted row per kind of waiting
+thing (asks, overdue shop tasks, drawers that don't add up, floats over cap, shops pending,
+held reviews, open cases, customer marks against the usual). The page words them. "Who is
+on" is 0066's admin_desk; demand without supply is 0060's admin_demand. **Not as drawn:**
+TAKEN says what deposits were held, not "8% to us" (there is no commission); the Friday
+card says when the week is cut, not "39 of 42 shops will be paid" (no run exists before
+the cut to count). The old 1a overview is no longer reachable from the menu.
+
+**Barbers and Customers, native — 0136 `admin_barber` / `admin_customer`** (PGlite, 12
+checks). Bookings, wallets, cases and a barber's flags are private to their owners by RLS
+and no admin read gathered one person, so ⌘K and the salon page linked to files with
+nothing behind them. Both reads are admin-only and read-only.
+- `/barbers` (BRB-09): needs a look / all / most cancels / rated under 4.0, search, CSV.
+  `/barbers/<id>` (BRB-03/15): the §5.3 profile template — 30 days, cancellations by the
+  barber (late = inside two hours), reviews, the licence, and what acting would cost.
+- `/customers` (CUS-02): customers a barber flagged; anyone else via ⌘K (logged).
+  `/customers/<id>` (CUS-03): wallet, bookings, flags, marks, cases. Credit a wallet
+  (CUS-04: a case resolved with a refund — it asks above 200 DH), clear a flag (CUS-05),
+  ban or lift (CUS-07 — Support asks). Field ops can't open the case a credit needs
+  (opening a case is Support's), so their credit is refused, not asked.
+- **Not built** (no backend): suspending, capping, hiding or moving a single barber
+  (BRB-04/07/08/17/25), cap reviews and notices (BRB-26…28), the reason settings and
+  refusals (BRB-29/31/33), the queue tab (BRB-13/19…21), the smaller sanctions before a
+  ban and the erasure requests page (CUS-07/08).
+- Barbers and customers are addressed by id (`/barbers/<uuid>`), as decided.
+
+**Salons, native (2026-09-29)** — no migration; the reads the old console had.
+- `/salons` (SAL-11/14/16): tabs by `?state=`, search, CSV, sorted so a person's work is
+  on top (suspended, pending, then the fullest floats). `?state=pending` (SAL-29) is 0072's
+  invites and applications: who is waiting on whom, copy-the-invite (no SMS), drop.
+- `/salons/{slug}` (SAL-10 / SAL-09): admin_salon + admin_salon_money; settle, float cap
+  (SAL-21's projection and trade, reason required to raise), suspend (SAL-07, with what it
+  cancels tonight), lift (SAL-23), message the owner (SAL-08 — a task in the shop's To-do).
+- `/salons/pending/{slug}` (SAL-02): the queue, the checklist, risk & duplicates; approve
+  (SAL-26), request changes (SAL-28/35 — a task in the owner's To-do; "sent back" is not
+  a state of its own), refuse (the Head's alone, per SET-03).
+- `/salons/new` (SAL-05): admin_create_salon; the invite is copied for ops to send.
+- Every write goes through the gate: Support or Field ops suspending files an ask, with the
+  reason they typed carried into it.
+- **Not built** (no backend): choosing where a suspended shop's customers are rebooked,
+  "until when", the go-live settings (SAL-36…38), bulk selection (SAL-12…20), the
+  photo/document viewers (SAL-32/33), fixing a pin from the desk (SAL-34 — the owner
+  confirms it in the app).
+
+**Support and Reviews, native (2026-09-29)** — no migration; the old console's reads.
+- `/support` (SUP-01): open / closed / mine / about money, who else is on the desk
+  (admin_desk), the incident banner and open/close an incident (`?incident=new|close`).
+  `/support/desk` and `/support/held` land here too — presence is the side panel and the
+  held case is the case page's read-only state.
+- `/support/<case_no>` (SUP-02/03): opening claims it (claim_case); someone else in it
+  under 15 minutes means read-only with TAKE IT. Reply, refund the deposit & close, or
+  close. The case detail is not repeated when it is already the thread's first message.
+- `/reviews` (RVW-05): all / held / removed / 2★ or less, search, the month's numbers.
+  "Removed" counts all time — admin_reviews doesn't split it by month.
+- `/reviews/flagged[/<id>]` (RVW-01/13): the visit behind it and both ratings; keep, or
+  `?remove=1` with one of six reasons ("no matching visit" is off when a check-in exists).
+  `/reviews/flagged` opens the oldest held one.
+- `/reviews/appeals[/<id>]` (RVW-04/07): 0068's desk. Your own removal can only be sent
+  back to the queue; anyone else upholds or keeps it removed, with a note and an optional
+  task for the shop (due in six days).
+- Field ops removing a review is refused, not asked — moderation isn't in their ask list.
+- Yes/no steps (close a case, take one) use the browser's confirm(), as the earlier
+  slices do; the drawn modals with URL queries are the ones that take input.
+- The bell (SUP-06) is `/support?bell=1`: 0072's admin_bell split into "needs a person"
+  and "just so you know", mark all read. It lives on Support only, not in every header.
+- **Not built:** the derived tags on the review list ("waited · 34" — nothing stores them,
+  so the list is searched instead).
+
+**Bookings, native (2026-09-29)** — no migration; 0043/0069/0079's reads.
+- `/bookings` (BKN-01): today or the 30 days either side (`?scope=30`), tabs by `?view=`,
+  search, CSV, the day's counts. Capped at 200 rows, as admin_bookings is.
+- `?view=exceptions` (BKN-03) is **not as drawn**: it lists no-shows and bookings with a
+  case open. The drawn causes (cancelled inside three hours, nobody there, slow refund,
+  wrong price) need cancel times and refund times in the list read — admin_bookings has
+  neither.
+- `/bookings/<id>` (BKN-02/06): who, the money, who holds the deposit now
+  (admin_booking_hold), the trail, the case and the review. Read-only. Addressed by id,
+  not the short ref (#A3F29B71) — nothing looks a booking up by its ref. The customer
+  file's booking rows open it; a support case can't yet (admin_support_case has no id).
+- `/bookings/<id>/refund` (CUS-06): up to what is left of the deposit, a reason required;
+  it is a case resolved with a refund, so above 200 DH Support and Field ops ask.
+  `?case=1` opens a case from the booking.
+- `/bookings/refunds` (BKN-04): admin_refund_ledger over 7 / 30 / 90 days, not by month.
+  The "the shop · in arrears" bucket is absent on purpose (0079: nothing claws back).
+
+**Compliance, native (2026-09-29)** — no migration; 0058's admin_compliance, 0061's
+admin_task_action.
+- `/compliance` (CMP-01): open / done, overdue and what acts by itself tonight, due this
+  week, done on time against last month, repeat offenders. Each row carries the one next
+  step (verify when proof came back, hide when overdue, otherwise remind).
+- `/compliance/tasks/<ref>` (BRB-06) is the same list with that task in the side panel:
+  what is on record, what happens if it is missed (hide_shop / block_topups), verify,
+  hide now, remind, and drop (`?drop=1`, reason required).
+- **Not built** (no backend): "give 7 more days" (nothing moves a due date), the full chase
+  history (a task keeps only its last reminder), calling the owner (no phone in the read),
+  the proof photo itself, and HOP-02…08 (overrides, policy, countersign — no tables).
+- admin_compliance doesn't return a task's `action`, so "verify" shows on every open
+  task; the RPC refuses a photo task with nothing sent back, and says so.
+
+**Demand, native (2026-09-29)** — no migration; 0060's admin_demand and admin_set_district.
+- `/demand` (DMD-01 + DMD-02 on one page): unmet / filled / expired asks, unmet by district
+  coloured by the reading (supply short, hours mismatch, healthy), when the asks land
+  (08:00–22:00, the shut-hours share in amber), what to do, the district table, top shops,
+  CSV, 30 / 90 days.
+- `/demand/tangier/<district>` (DMD-03/06): the district's numbers and every shop in it
+  (salons.district), with its unmet asks and when it shuts.
+- `?ask=hours` (DMD-08): ask chosen shops to try later hours — a task (kind other,
+  action none) with no date and no consequence, so it sits in Compliance as a no-date
+  follow-up until someone closes it. The drawn line "we will point them at you first" is
+  left out: nothing ranks a shop for opening late.
+- The Unassigned district's shops get "name the district" (`?district=<salon id>`).
+- **Not as drawn:** no map (no district outlines or ask locations are stored — bars stand
+  in); no per-ask list, one ask, or "tell them when it opens" (DMD-03/04/05/09 — the read
+  only counts); no "≈ DH walked away" (nothing prices an unfilled ask); the recruiting
+  queue, visits and refusals (DMD-11…15) and other cities (DMD-07, §10) aren't built.
+  Tangier is the only city; `/demand/<anything else>` goes back to `/demand`.
+
+**Owner side (2026-09-29): all eight menu items native, on the app's own reads.**
+Nothing new in the database; every page first calls `owner_shop(slug)` (the 404).
+- **Today** (OSH-02 + OSH-19 + OSH-03 merged): salon_team, shop_bookings,
+  shop_lines_today, my_statement, unanswered reviews. **Not as drawn:** "Pause walk-ins,
+  whole shop" is not a switch — the app keeps one shop-wide lever (OSH-09, close_shop,
+  which also stops new bookings), so the card opens that page.
+- **Chairs** (OBR-05, OBR-01 as a side panel, OBR-07 cash): approve/decline join
+  requests, remove (asks first), the cash role through set_cash_agent /
+  start_drawer_transfer. The invite hands over words to send (no SMS); a barber joins by
+  picking the shop in the app. Not built: hand the shop over / standing in (OBR-03/04);
+  chat stays in the app.
+- **Payouts** (OSH-16/17/18): my_statement, the carried line as a drawer (`?late=`),
+  "This isn't right" files a support case. The agent's four digits stay in the app:
+  my_visit_code rotates the code, and minting it on the web would change the one the app
+  is showing.
+- **Reviews** (ORV-01): reply (review_reply) and flag; "needs reply" = unanswered, ≤ 4★.
+- **Subscription** (OSB-01…05, OSH-14/15): my_subscription / my_invoice / my_unpaid, the
+  plan switch, the cash request. No PDF and no SMS price, as in the app.
+- **Reports** (ORP-01): week / month / year, CSV export, mark settled in cash.
+- **Your shop**: listing (a PATCH on the owner's own salon row), deposit (OSH-11/12/13),
+  pause (OSH-09). Not built: the poster (needs a QR generator; the app prints it) and
+  hidden-from-search (OSH-08, no backend).
+- **Services**: bundles and each chair's services, read-only. Not built: editing bundles
+  and durations (OSV-02…08, nothing stores them); passes held from v1.
+- ponytail: owner reads assume one shop per owner, like the app's (`limit 1`). An owner
+  of two shops would see the first one's data under both slugs.
+
+**Still open:**
+- Wallets & float, Finance, Coupons and Settings' reliability pages are still the old
+  console in a frame; their sub-pages keep hash routes inside the frame and the site's
+  URL only tracks the section. Finance's legacy screens already are the FIN-14…19
+  canvases, so it goes last.
+- Two bugs in the old console fixed on the way (both there before this site): the
+  barbers search box was swallowed by a `</svg<input` typo (boot logged "markup is
+  missing bb-q" on every framed page), and the reliability rules page (8a, framed under
+  Settings) wiped its own stats row and note when it redrew, then threw writing to them.
+- §10 of the handoff (period pickers, other cities, Karim's and Nabil's pages) is
+  flagged, not invented.

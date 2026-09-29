@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:relative;width:100%;height:100%;overflow:hidden;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif">
+<sc-if value="{{ v.CMP_01 }}">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="position:relative;display:flex;width:100%;height:max(100%, 852px);min-width:1184px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span style="cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">Compliance</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">Open follow-ups</span></span>
+      <span style="flex:1"></span>
+      <span style="display:flex;gap:5px;background:#17171A;border:1px solid #26262B;border-radius:9px;padding:3px">
+        <span style="height:26px;border-radius:7px;background:#E8442E;display:flex;align-items:center;padding:0 11px;font-size:11px;font-weight:700">Open 7</span>
+        <span style="height:26px;border-radius:7px;display:flex;align-items:center;padding:0 11px;font-size:11px;font-weight:600;color:#9A9CA3">Done 34</span>
+      </span>
+      <span style="display:flex;align-items:center;gap:7px;background:#17171A;border:1px solid #26262B;border-radius:8px;height:32px;padding:0 12px;font-size:11.5px;color:#9A9CA3"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6B6B72" stroke-width="2" style="flex:none"><path d="M4 7h16M7 12h10M10 17h4"></path></svg>Due first</span>
+    </div>
+
+    <div style="flex:1;display:flex;overflow:hidden">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;padding:20px 22px;gap:13px;overflow:hidden">
+        <div style="display:flex;gap:12px;flex:none">
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:14px 15px;display:flex;flex-direction:column;gap:5px">
+            <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">OVERDUE</span>
+            <span style="font-size:24px;font-weight:700;color:#F87171;font-variant-numeric:tabular-nums">1</span>
+            <span style="font-size:10.5px;color:#9A9CA3">acts by itself tonight</span>
+          </div>
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:14px 15px;display:flex;flex-direction:column;gap:5px">
+            <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">DUE THIS WEEK</span>
+            <span style="font-size:24px;font-weight:700;color:#E8A100;font-variant-numeric:tabular-nums">3</span>
+            <span style="font-size:10.5px;color:#9A9CA3">reminders already sent</span>
+          </div>
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:14px 15px;display:flex;flex-direction:column;gap:5px">
+            <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">DONE ON TIME</span>
+            <span style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums">82<span style="font-size:12px;font-weight:400;color:#9A9CA3">%</span></span>
+            <span style="font-size:10.5px;color:#4ADE80">up from 61% in June</span>
+          </div>
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:14px 15px;display:flex;flex-direction:column;gap:5px">
+            <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">REPEAT OFFENDERS</span>
+            <span style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums">2<span style="font-size:12px;font-weight:400;color:#9A9CA3"> / 41</span></span>
+            <span style="font-size:10.5px;color:#9A9CA3">3+ tasks missed</span>
+          </div>
+        </div>
+
+        <div style="flex:1;min-height:0;background:#111113;border:1px solid #1E1E22;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22;flex:none">
+            <span style="width:230px;flex:none;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">SHOP</span>
+            <span style="flex:1;min-width:0;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">OBLIGATION</span>
+            <span style="width:118px;flex:none;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">FROM</span>
+            <span style="width:104px;flex:none;font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">DUE</span>
+            <span style="width:104px;flex:none"></span>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #1E1E22;background:rgba(248,113,113,.06);border-left:3px solid #F87171;box-sizing:border-box;cursor:pointer" onClick="{{ h.a1 }}" style-hover="background:#17171B">
+            <span style="width:230px;flex:none;display:flex;align-items:center;gap:9px;min-width:0">
+              <span style="width:30px;height:30px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">MB</span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">Marina Barber Club</span><span style="display:block;font-size:10px;color:#F87171;margin-top:1px">3rd missed task</span></span>
+            </span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">Re-upload the shop licence</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">Expired document flagged at audit</span></span>
+            <span style="width:118px;flex:none;font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#9A9CA3">AUD-118</span>
+            <span style="width:104px;flex:none"><span style="display:block;font-size:12px;font-weight:700;color:#F87171">4 days late</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:1px">was Aug 5</span></span>
+            <span style="width:104px;flex:none;display:flex;justify-content:flex-end"><span style="height:30px;border-radius:8px;background:#F87171;color:#0D0D0F;display:flex;align-items:center;padding:0 11px;font-size:10.5px;font-weight:800;letter-spacing:.03em;cursor:pointer" onClick="{{ h.a2 }}" style-hover="filter:brightness(1.18)">HIDE SHOP</span></span>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #1E1E22;background:#17171A;border-left:3px solid #E8A100;box-sizing:border-box;cursor:pointer" onClick="{{ h.a3 }}" style-hover="background:#17171B">
+            <span style="width:230px;flex:none;display:flex;align-items:center;gap:9px;min-width:0">
+              <span style="width:30px;height:30px;border-radius:9px;background:rgba(232,68,46,.14);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#E8442E;flex:none">LF</span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">Le Fade Tanger</span><span style="display:block;font-size:10px;color:#9A9CA3;margin-top:1px">first task</span></span>
+            </span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">Move the QR poster outside</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">Indoor QR made scan times unusable as arrivals</span></span>
+            <span style="width:118px;flex:none;font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#E8442E">RV-2291</span>
+            <span style="width:104px;flex:none"><span style="display:block;font-size:12px;font-weight:700;color:#E8A100">In 6 days</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:1px">Fri Aug 15</span></span>
+            <span style="width:104px;flex:none;display:flex;justify-content:flex-end"><span style="height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 11px;font-size:10.5px;font-weight:700;color:#fff;cursor:pointer" onClick="{{ h.a4 }}" style-hover="filter:brightness(1.18)">VERIFY</span></span>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #1E1E22;cursor:pointer" onClick="{{ h.a5 }}" style-hover="background:#17171B">
+            <span style="width:230px;flex:none;display:flex;align-items:center;gap:9px;min-width:0">
+              <span style="width:30px;height:30px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">KC</span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;color:#D8D8DC">Kasbah Cuts</span><span style="display:block;font-size:10px;color:#9A9CA3;margin-top:1px">first task</span></span>
+            </span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;color:#D8D8DC">Settle 2 180 DH float</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">Held 19 days · cap is 14</span></span>
+            <span style="width:118px;flex:none;font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#9A9CA3">FLT-882</span>
+            <span style="width:104px;flex:none"><span style="display:block;font-size:12px;font-weight:700;color:#E8A100">In 2 days</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:1px">Mon Aug 11</span></span>
+            <span style="width:104px;flex:none;display:flex;justify-content:flex-end"><span style="height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 11px;font-size:10.5px;font-weight:700;color:#fff">REMIND</span></span>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #1E1E22;cursor:pointer" onClick="{{ h.a6 }}" style-hover="background:#17171B">
+            <span style="width:230px;flex:none;display:flex;align-items:center;gap:9px;min-width:0">
+              <span style="width:30px;height:30px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">SA</span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;color:#D8D8DC">Salon Atlas</span><span style="display:block;font-size:10px;color:#F87171;margin-top:1px">2nd missed task</span></span>
+            </span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;color:#D8D8DC">Publish real opening hours</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">Closed when a paid booking arrived · CS-4471</span></span>
+            <span style="width:118px;flex:none;font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#9A9CA3">CS-4471</span>
+            <span style="width:104px;flex:none"><span style="display:block;font-size:12px;font-weight:700;color:#E8A100">In 5 days</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:1px">Thu Aug 14</span></span>
+            <span style="width:104px;flex:none;display:flex;justify-content:flex-end"><span style="height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 11px;font-size:10.5px;font-weight:700;color:#fff">REMIND</span></span>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #1E1E22;cursor:pointer" onClick="{{ h.a7 }}" style-hover="background:#17171B">
+            <span style="width:230px;flex:none;display:flex;align-items:center;gap:9px;min-width:0">
+              <span style="width:30px;height:30px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">TB</span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;color:#D8D8DC">Tétouan Barbershop</span><span style="display:block;font-size:10px;color:#9A9CA3;margin-top:1px">onboarding</span></span>
+            </span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;color:#D8D8DC">Confirm the map pin</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">Approval is blocked until it's placed</span></span>
+            <span style="width:118px;flex:none;font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#9A9CA3">ONB-204</span>
+            <span style="width:104px;flex:none"><span style="display:block;font-size:12px;font-weight:700;color:#9A9CA3">In 12 days</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:1px">Thu Aug 21</span></span>
+            <span style="width:104px;flex:none;display:flex;justify-content:flex-end"><span style="height:30px;border-radius:8px;background:#212125;display:flex;align-items:center;padding:0 11px;font-size:10.5px;font-weight:700;color:#9A9CA3;cursor:pointer" onClick="{{ h.a8 }}" style-hover="filter:brightness(1.18)">OPEN</span></span>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;opacity:.5">
+            <span style="width:230px;flex:none;display:flex;align-items:center;gap:9px;min-width:0">
+              <span style="width:30px;height:30px;border-radius:9px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">LF</span>
+              <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;color:#9A9CA3">Le Fade Tanger</span></span>
+            </span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600;color:#9A9CA3">Reply to the restored review</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Optional · posted Aug 8</span></span>
+            <span style="width:118px;flex:none;font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#6B6B72">RV-2291</span>
+            <span style="width:104px;flex:none"><span style="display:block;font-size:12px;font-weight:700;color:#4ADE80">Done</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:1px">Aug 8</span></span>
+            <span style="width:104px;flex:none"></span>
+          </div>
+        </div>
+      </div>
+
+      <div style="width:314px;flex:none;border-left:1px solid #1E1E22;display:flex;flex-direction:column;overflow:hidden">
+        <div style="padding:14px 16px;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:8px">
+          <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">MARINA BARBER CLUB</span>
+          <span style="flex:1"></span>
+          <span style="font-size:9px;letter-spacing:.06em;font-weight:700;color:#0D0D0F;background:#F87171;border-radius:5px;padding:3px 7px">OVERDUE</span>
+        </div>
+
+        <div style="padding:16px;display:flex;flex-direction:column;gap:13px;border-bottom:1px solid #1E1E22">
+          <div>
+            <div style="font-size:13.5px;font-weight:700">Re-upload the shop licence</div>
+            <div style="font-size:11.5px;color:#9A9CA3;margin-top:6px;line-height:1.5;text-wrap:pretty">Issued Jul 22 from audit AUD-118. Due Aug 5. Three reminders sent, no reply from the owner.</div>
+          </div>
+          <div style="background:#111113;border:1px solid #1E1E22;border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:10px">
+            <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">CHASE HISTORY</span>
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:52px;flex:none;font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">Jul 22</span><span style="flex:1;min-width:0;font-size:11px;color:#D8D8DC">Task issued · in-app + SMS</span></div>
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:52px;flex:none;font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">Aug 1</span><span style="flex:1;min-width:0;font-size:11px;color:#D8D8DC">Reminder · opened, no action</span></div>
+            <div style="display:flex;align-items:center;gap:9px"><span style="width:52px;flex:none;font-size:10.5px;color:#6B6B72;font-variant-numeric:tabular-nums">Aug 6</span><span style="flex:1;min-width:0;font-size:11px;color:#F87171">Final notice · not opened</span></div>
+          </div>
+        </div>
+
+        <div style="padding:16px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid #1E1E22">
+          <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHAT HAPPENS TONIGHT</span>
+          <div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.28);border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:9px">
+              <span style="width:20px;height:20px;border-radius:999px;background:rgba(248,113,113,.2);display:flex;align-items:center;justify-content:center;flex:none"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.6"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg></span>
+              <span style="flex:1;min-width:0;font-size:11.5px;font-weight:700;color:#F87171">Auto-hidden from Explore at 23:00</span>
+            </div>
+            <span style="font-size:11px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">Existing bookings are honoured. Nobody new can find them until the licence is uploaded — it un-hides itself the moment it is.</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;background:#111113;border-radius:10px;padding:11px 12px">
+            <span style="flex:1;min-width:0;font-size:11px;color:#9A9CA3">7 bookings in the next 14 days</span>
+            <span style="font-size:11px;font-weight:700;color:#4ADE80;flex:none">unaffected</span>
+          </div>
+        </div>
+
+        <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+          <span style="height:40px;border-radius:10px;background:#F87171;color:#0D0D0F;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;letter-spacing:.04em">HIDE NOW · DON'T WAIT</span>
+          <span style="height:38px;border-radius:10px;background:#212125;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11.5px;font-weight:700;color:#fff;cursor:pointer" onClick="{{ h.a1 }}" style-hover="filter:brightness(1.18)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9"><path d="M5 4h4l2 5-3 2a12 12 0 0 0 5 5l2-3 5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"></path></svg>CALL THE OWNER</span>
+          <span style="height:38px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#9A9CA3;cursor:pointer" onClick="{{ h.a1 }}" style-hover="filter:brightness(1.18)">GIVE 7 MORE DAYS</span>
+          <span style="font-size:10.5px;color:#6B6B72;line-height:1.45;text-align:center">Extending needs a reason and shows on the shop's record.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ v.BRB_06 }}">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="position:relative;display:flex;width:100%;height:max(100%, 852px);min-width:1184px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  
+
+  <div style="flex:1;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+    <div style="flex:none;padding:16px 22px;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px">
+      <span style="font-size:10px;font-family:ui-monospace,Menlo,monospace;font-weight:700;color:#F87171;flex:none">AUD-118</span>
+      <span style="font-size:14px;font-weight:700;min-width:0">Trade licence renewal · Marina Barber Club</span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.32);border-radius:8px;height:30px;padding:0 11px"><span style="width:6px;height:6px;border-radius:999px;background:#F87171"></span><span style="font-size:11px;font-weight:700;color:#F87171">Due Aug 5 · 10 days late</span></span>
+    </div>
+    <div style="flex:1;min-height:0;display:flex;overflow:hidden">
+      <div style="flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;padding:18px 22px;gap:13px;border-right:1px solid #1E1E22;overflow:hidden">
+        <div style="background:rgba(232,161,0,.08);border:1px solid rgba(232,161,0,.3);border-radius:14px;padding:14px 15px;display:flex;align-items:flex-start;gap:11px;flex:none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2" style="flex:none;margin-top:1px"><path d="M12 3a9 9 0 1 0 9 9"></path><path d="M12 7v5l4 2M21 3v6h-6"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#E8A100">The first consequence has already fired, on its own</span><span style="display:block;font-size:11.5px;line-height:1.5;color:#D8D8DC;margin-top:4px;text-wrap:pretty">Marina came out of Explore at midnight on day 4. Nobody clicked it, Karim was told, and his three barbers keep their booked customers — new ones just cannot find the shop.</span></span>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHAT HAPPENS WITHOUT ANYONE DECIDING</span>
+        <div style="display:flex;flex-direction:column;gap:1px;background:#26262B;border:1px solid #26262B;border-radius:13px;overflow:hidden;flex:none">
+          <span style="display:flex;align-items:center;gap:11px;background:#111113;padding:12px 14px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.2" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg><span style="flex:1;min-width:0;font-size:11.5px;color:#9A9CA3">Day 4 · out of Explore and off the map</span><span style="font-size:11.5px;font-weight:700;color:#9A9CA3;flex:none">done Aug 9</span></span>
+          <span style="display:flex;align-items:center;gap:11px;background:#111113;padding:12px 14px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2.2" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span style="flex:1;min-width:0;font-size:11.5px;color:#D8D8DC">Day 14 · shop stops trading, bookings refund themselves</span><span style="font-size:11.5px;font-weight:700;color:#E8A100;flex:none">Aug 19</span></span>
+          <span style="display:flex;align-items:center;gap:11px;background:#111113;padding:12px 14px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.2" style="flex:none"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg><span style="flex:1;min-width:0;font-size:11.5px;color:#D8D8DC">Day 16 · closure review, and Karima signs it off</span><span style="font-size:11.5px;font-weight:700;color:#F87171;flex:none">Fri Aug 21</span></span>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72;margin-top:2px">WHAT WE HAVE ASKED HIM</span>
+        <div style="background:#111113;border:1px solid #1E1E22;border-radius:14px;padding:15px 16px;display:flex;flex-direction:column;flex:none">
+          <div style="display:flex;gap:12px">
+            <span style="display:flex;flex-direction:column;align-items:center;flex:none;width:9px"><span style="width:9px;height:9px;border-radius:999px;background:#3A3A40;margin-top:4px"></span><span style="flex:1;width:1px;background:#26262B;margin:4px 0"></span></span>
+            <span style="flex:1;min-width:0;padding-bottom:14px"><span style="display:block;font-size:10.5px;color:#6B6B72">Jul 22</span><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC;margin-top:3px;line-height:1.45">Renewal due in two weeks · in-app and SMS</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:3px">Read the same day</span></span>
+          </div>
+          <div style="display:flex;gap:12px">
+            <span style="display:flex;flex-direction:column;align-items:center;flex:none;width:9px"><span style="width:9px;height:9px;border-radius:999px;background:#3A3A40;margin-top:4px"></span><span style="flex:1;width:1px;background:#26262B;margin:4px 0"></span></span>
+            <span style="flex:1;min-width:0;padding-bottom:14px"><span style="display:block;font-size:10.5px;color:#6B6B72">Aug 5</span><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC;margin-top:3px;line-height:1.45">Due today. Upload the stamped copy</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:3px">Read Aug 6</span></span>
+          </div>
+          <div style="display:flex;gap:12px">
+            <span style="display:flex;flex-direction:column;align-items:center;flex:none;width:9px"><span style="width:9px;height:9px;border-radius:999px;background:#3A3A40;margin-top:4px"></span><span style="flex:1;width:1px;background:#26262B;margin:4px 0"></span></span>
+            <span style="flex:1;min-width:0;padding-bottom:14px"><span style="display:block;font-size:10.5px;color:#6B6B72">Aug 8</span><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC;margin-top:3px;line-height:1.45">Three days late. Explore listing at risk</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:3px">Read Aug 8</span></span>
+          </div>
+          <div style="display:flex;gap:12px">
+            <span style="display:flex;flex-direction:column;align-items:center;flex:none;width:9px"><span style="width:9px;height:9px;border-radius:999px;background:#F87171;margin-top:4px"></span></span>
+            <span style="flex:1;min-width:0;padding-bottom:0"><span style="display:block;font-size:10.5px;color:#6B6B72">Aug 12</span><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC;margin-top:3px;line-height:1.45">Taken out of Explore. He replied: at the préfecture, receipt in hand</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:3px">Nadia read it · no stamped copy attached</span></span>
+          </div>
+        </div>
+        <span style="flex:1"></span>
+        <span style="font-size:10.5px;color:#6B6B72;line-height:1.5;flex:none;text-wrap:pretty">He is not ignoring us — he answers every time and the paper still is not here. That is the whole difficulty of this task.</span>
+      </div>
+      <div style="width:330px;flex:none;min-height:0;padding:18px 20px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box;overflow:hidden">
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHO IT LANDS ON</span>
+        <div style="background:#111113;border:1px solid #1E1E22;border-radius:13px;padding:14px;display:flex;flex-direction:column;gap:11px">
+          <span style="display:flex;align-items:center;gap:10px"><span style="width:28px;height:28px;border-radius:999px;background:rgba(248,113,113,.14);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:#F87171;flex:none">KI</span><span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;font-weight:600;cursor:pointer" onClick="{{ h.a11 }}" style-hover="filter:brightness(1.18)">Karim Idrissi</span><span style="display:block;font-size:10px;color:#6B6B72">owner · the licence is his</span></span></span>
+          <span style="display:flex;align-items:center;gap:10px;border-top:1px solid #1E1E22;padding-top:11px"><span style="width:28px;height:28px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:#9A9CA3;flex:none">2</span><span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;font-weight:600">Zakaria and Tarik</span><span style="display:block;font-size:10px;color:#E8A100">clean records · they lose the day too</span></span></span>
+          <span style="display:flex;align-items:center;gap:10px;border-top:1px solid #1E1E22;padding-top:11px"><span style="width:28px;height:28px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:#9A9CA3;flex:none">7</span><span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;font-weight:600">Customers booked past Aug 19</span><span style="display:block;font-size:10px;color:#6B6B72">refunded automatically, told nothing else</span></span></span>
+        </div>
+        <div style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.26);border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:12px;font-weight:700;color:#4ADE80">Nothing here is a judgement of him</span>
+          <span style="font-size:11px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">A licence is a document, not behaviour. It runs on dates so that no ops decision — and no opinion about his cancellations — gets mixed into it.</span>
+        </div>
+        <span style="flex:1"></span>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="height:38px;border-radius:10px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;letter-spacing:.03em;color:#fff;cursor:pointer" onClick="{{ h.a9 }}" style-hover="filter:brightness(1.18)">CHASE IT AGAIN</span>
+          <a style="height:36px;border-radius:10px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#fff;text-decoration:none;cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">GIVE HIM TO Aug 21</a>
+          <span style="height:36px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#9A9CA3;cursor:pointer" onClick="{{ h.a10 }}" style-hover="filter:brightness(1.18)">STOP THE SHOP NOW</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ v.HOP_02 }}">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="position:relative;display:flex;width:100%;height:max(100%, 852px);min-width:1184px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  
+
+  <div style="flex:1;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span style="cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">Compliance</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="cursor:pointer" onClick="{{ h.a12 }}" style-hover="filter:brightness(1.18)">Overrides</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">OVR-004</span></span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;background:rgba(232,161,0,.12);border:1px solid rgba(232,161,0,.34);border-radius:8px;height:30px;padding:0 11px;font-size:11px;font-weight:700;color:#E8A100">WAITING ON YOU · 2 DAYS</span>
+    </div>
+    <div style="flex:1;min-height:0;display:flex;overflow:hidden">
+      <div style="flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;padding:18px 22px;gap:13px;border-right:1px solid #1E1E22;overflow:hidden">
+        <div style="background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:15px 16px;display:flex;flex-direction:column;gap:12px;flex:none">
+          <div style="display:flex;align-items:center;gap:11px">
+            <span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#9A9CA3;flex:none">YB</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">Yassine Berrada asks to send June as written</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Growth · joined December · first override request</span></span>
+            <span style="flex:none;font-size:11px;color:#6B6B72">8 January</span>
+          </div>
+          <span style="font-size:12.5px;line-height:1.55;color:#D8D8DC;border-top:1px solid #1E1E22;padding-top:12px;text-wrap:pretty">&ldquo;Q1 is flat and the win-back list is the only warm audience we have. I know the per-keeper number is bad. I would rather spend 1 200 DH and learn something than sit on two triggers that have never fired.&rdquo;</span>
+        </div>
+        <div style="display:flex;gap:12px;flex:none">
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:14px 15px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">HIS ESTIMATE</span><span style="font-size:24px;font-weight:700;color:#F87171;font-variant-numeric:tabular-nums">210</span><span style="font-size:10.5px;color:#9A9CA3">DH per keeper · June&#39;s own result</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:14px 15px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">CEILING</span><span style="font-size:24px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums">100</span><span style="font-size:10.5px;color:#9A9CA3">DH · set by the board in Q4</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:14px 15px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">BUDGET ASKED</span><span style="font-size:24px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums">1 200</span><span style="font-size:10.5px;color:#9A9CA3">DH · Q1 has 1 000</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:14px 15px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">OVERRIDES GRANTED</span><span style="font-size:24px;font-weight:700;color:#9A9CA3;font-variant-numeric:tabular-nums">0</span><span style="font-size:10.5px;color:#9A9CA3">of 3 asked, since May</span></div>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">THE TWO REASONS, AND ONLY ONE OF THEM IS YOURS</span>
+        <div style="flex:none;background:#111113;border:1px solid #1E1E22;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid #1E1E22;border-left:3px solid #E8A100;box-sizing:border-box">
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#E8A100">The money argument · Nadia&#39;s, and it is arguable</span><span style="display:block;font-size:11.5px;color:#9A9CA3;margin-top:4px;line-height:1.5;text-wrap:pretty">210 DH buys a keeper worth about 12 cuts a year at 60 DH. It is not absurd, it is just worse than the free alternative. If you wanted to let a growth hire learn this the expensive way, you could — the ceiling is a policy, not a fact.</span></span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-left:3px solid #F87171;box-sizing:border-box">
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#F87171">The data argument · yours, and it is not arguable</span><span style="display:block;font-size:11.5px;color:#9A9CA3;margin-top:4px;line-height:1.5;text-wrap:pretty">The audience was deleted on 5 November when the campaign closed. Sending it again means building a new list by profiling lapsed customers, including eight who have left the city and 22 who lost a named barber. <strong style="color:#fff">There is no basis on file for re-profiling them for an offer</strong>, and the closure record says so in writing.</span></span>
+          </div>
+        </div>
+        <div style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.26);border-radius:14px;padding:14px 15px;display:flex;align-items:flex-start;gap:11px;flex:none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.1" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#4ADE80">There is a version you can say yes to</span><span style="display:block;font-size:11.5px;line-height:1.5;color:#D8D8DC;margin-top:4px;text-wrap:pretty">The nine who lost only a shop are still a lawful audience and still armed at 20 DH. Granting that costs 180 DH if a chair opens in Mghogha or Mesnana, and nothing if one does not — which gives him something to run in Q1 without reopening the other 31.</span></span>
+        </div>
+        <span style="flex:1"></span>
+      </div>
+      <div style="width:336px;flex:none;min-height:0;padding:18px 20px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box;overflow:hidden">
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">IF YOU GRANT IT AS ASKED</span>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="display:flex;align-items:flex-start;gap:10px;background:#17171A;border:1px solid #26262B;border-radius:11px;padding:11px 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.1" style="flex:none"><path d="M4 6h16M4 12h10M4 18h7"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;font-weight:600;color:#D8D8DC">Your name is on it</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">In the Q1 board pack, beside the 210 DH</span></span></span>
+          <span style="display:flex;align-items:flex-start;gap:10px;background:#17171A;border:1px solid #26262B;border-radius:11px;padding:11px 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.1" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;font-weight:600;color:#D8D8DC">One campaign, 30 days</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">It does not raise the ceiling for anyone else</span></span></span>
+          <span style="display:flex;align-items:flex-start;gap:10px;background:#17171A;border:1px solid #26262B;border-radius:11px;padding:11px 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.1" style="flex:none"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:11.5px;font-weight:600;color:#D8D8DC">A new list has to be built</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Which is the part you cannot sign for</span></span></span>
+        </div>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:11.5px;font-weight:700">He hears the reason, not the verdict</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Whatever you choose is sent to him in full. A refusal without the deletion record would look like ops protecting a number, and he would ask again in April.</span>
+        </div>
+        <span style="flex:1"></span>
+        <span style="height:38px;border-radius:10px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;letter-spacing:.03em;color:#fff;cursor:pointer" onClick="{{ h.a12 }}" style-hover="filter:brightness(1.18)">REFUSE · SEND BOTH REASONS</span>
+        <span style="height:36px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#D8D8DC;cursor:pointer" onClick="{{ h.a12 }}" style-hover="filter:brightness(1.18)">GRANT THE NINE ONLY · 180 DH AT RISK</span>
+        <span style="height:36px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#6B6B72;cursor:pointer" onClick="{{ h.a12 }}" style-hover="filter:brightness(1.18)">GRANT AS ASKED · TYPE A REASON</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ v.HOP_03 }}">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="position:relative;display:flex;width:100%;height:max(100%, 852px);min-width:1184px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  
+
+  <div style="flex:1;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span style="cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">Compliance</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">Arabic</span></span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.32);border-radius:8px;height:30px;padding:0 11px;font-size:11px;font-weight:700;color:#4ADE80">DECIDED 3 FEB · OWNED BY OPS</span>
+    </div>
+    <div style="flex:1;min-height:0;display:flex;overflow:hidden">
+      <div style="flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;padding:18px 22px;gap:13px;border-right:1px solid #1E1E22;overflow:hidden">
+        <div style="background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:15px 16px;display:flex;flex-direction:column;gap:11px;flex:none">
+          <span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;line-height:1.3;text-wrap:pretty">A sign-up form in Arabic and a suspension notice in French is worse than neither.</span>
+          <span style="font-size:12px;line-height:1.55;color:#9A9CA3;border-top:1px solid #1E1E22;padding-top:12px;text-wrap:pretty">You asked for six screens. Six screens gets a man through the door and then hands him a licence-expiry notice, a settlement statement and a closure letter he cannot read. <strong style="color:#fff">The messages come first, and they are the smaller job.</strong></span>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">THE ORDER SHE PUT IT IN</span>
+        <div style="flex:none;background:#111113;border:1px solid #1E1E22;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #1E1E22;border-left:3px solid #4ADE80;box-sizing:border-box">
+            <span style="width:56px;flex:none;font-size:11px;font-weight:700;color:#4ADE80">MARCH</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:700">Every message a shop can be sent, in both</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">Nine templates · suspension, licence expiry, settlement, countersign, closure, cap, reopen, refund recovery, chair advert</span></span>
+            <span style="width:74px;flex:none;text-align:right;font-size:11px;color:#6B6B72">~400 words</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #1E1E22;border-left:3px solid #4ADE80;box-sizing:border-box">
+            <span style="width:56px;flex:none;font-size:11px;font-weight:700;color:#4ADE80">APRIL</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:700">The six sign-up screens</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">What was asked for, second rather than first, and with real right-to-left work</span></span>
+            <span style="width:74px;flex:none;text-align:right;font-size:11px;color:#6B6B72">~900 words</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid #1E1E22">
+            <span style="width:56px;flex:none;font-size:11px;font-weight:700;color:#9A9CA3">LATER</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">The owner console after go-live</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Hours, prices, chairs. Owners use these weekly and learn them; the messages arrive unannounced</span></span>
+            <span style="width:74px;flex:none;text-align:right;font-size:11px;color:#6B6B72">not scoped</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:13px 16px">
+            <span style="width:56px;flex:none;font-size:11px;font-weight:700;color:#6B6B72">NO</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">The customer app</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Nobody has asked. Four owners is a finding; zero customers is not a hunch to spend on</span></span>
+            <span style="width:74px;flex:none;text-align:right;font-size:11px;color:#6B6B72">refused</span>
+          </div>
+        </div>
+        <div style="background:rgba(232,161,0,.09);border:1px solid rgba(232,161,0,.32);border-radius:14px;padding:14px 15px;display:flex;align-items:flex-start;gap:11px;flex:none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2.1" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#E8A100">The rule attached to it, which is the actual output</span><span style="display:block;font-size:11.5px;line-height:1.5;color:#D8D8DC;margin-top:4px;text-wrap:pretty">From March, <strong style="color:#fff">a message that can be sent to a shop does not ship in one language</strong>. Not a translation project — a condition on new work, so this never accumulates again. The nine existing templates are the backlog it creates and the last one it ever creates.</span></span>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHAT IT COSTS, HONESTLY</span>
+        <div style="flex:none;display:flex;gap:10px">
+          <div style="flex:1;background:#17171A;border:1px solid #26262B;border-radius:13px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">1 300</span><span style="font-size:10.5px;line-height:1.4;color:#6B6B72">words, both phases, one translator</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #26262B;border-radius:13px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:16px;font-weight:700;color:#E8A100;font-variant-numeric:tabular-nums">6 wks</span><span style="font-size:10.5px;line-height:1.4;color:#6B6B72">of the right-to-left layout work, not the words</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #26262B;border-radius:13px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:16px;font-weight:700;font-variant-numeric:tabular-nums">4</span><span style="font-size:10.5px;line-height:1.4;color:#6B6B72">owners it would have helped so far</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #26262B;border-radius:13px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:16px;font-weight:700;color:#4ADE80;font-variant-numeric:tabular-nums">~10</span><span style="font-size:10.5px;line-height:1.4;color:#6B6B72">in the next ten shops, on district alone</span></div>
+        </div>
+        <span style="flex:1"></span>
+      </div>
+      <div style="width:336px;flex:none;min-height:0;padding:18px 20px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box;overflow:hidden">
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHO OWNS IT NOW</span>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:11.5px;line-height:1.55;color:#D8D8DC;text-wrap:pretty">Nadia, with the March date in her own plan and the nine templates listed by name. Not &ldquo;ops&rdquo; — a person, a list, and a date.</span>
+          <span style="font-size:11px;line-height:1.5;color:#6B6B72;border-top:1px solid #1E1E22;padding-top:10px;text-wrap:pretty">Four mentions in three teams failed because it was nobody&#39;s. The fix for that is not urgency, it is a name.</span>
+        </div>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:11.5px;font-weight:700">Hicham keeps phoning meanwhile</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Four calls a year is not a system and it is what we have until April. It stays in the process as a written step rather than a favour he does.</span>
+        </div>
+        <span style="flex:1"></span>
+        <span style="height:38px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#D8D8DC;cursor:pointer" onClick="{{ h.a13 }}" style-hover="filter:brightness(1.18)">SIGNED · SEE THE NINE TEMPLATES</span>
+        <span style="font-size:10.5px;color:#6B6B72;line-height:1.5;text-wrap:pretty">Closed as a blocker. It cannot reappear as a note in Support, a go-live comment, or a fifth place.</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ v.HOP_05 }}">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="position:relative;display:flex;width:100%;height:max(100%, 852px);min-width:1184px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  
+
+  <div style="flex:1;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span style="cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">Compliance</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">Pass withholding</span></span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;background:rgba(232,161,0,.12);border:1px solid rgba(232,161,0,.34);border-radius:8px;height:30px;padding:0 11px;font-size:11px;font-weight:700;color:#E8A100">FROM OPS · 3 DAYS OLD</span>
+    </div>
+    <div style="flex:1;min-height:0;display:flex;overflow:hidden">
+      <div style="flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;padding:18px 22px;gap:13px;border-right:1px solid #1E1E22;overflow:hidden">
+        <div style="background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:15px 16px;display:flex;flex-direction:column;gap:11px;flex:none">
+          <span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;line-height:1.3;text-wrap:pretty">This is not a percentage. It is who pays when a shop that sold passes stops trading.</span>
+          <span style="font-size:12px;line-height:1.55;color:#9A9CA3;border-top:1px solid #1E1E22;padding-top:12px;text-wrap:pretty">Fourteen shops have taken money for 1 190 cuts they have not done. One of them shut in November and we covered 432 DH of it out of our own pocket without telling the customer there was a question. <strong style="color:#fff">There is no number on this page where nobody is exposed</strong> — pick who.</span>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">THREE NUMBERS, AND WHO EACH ONE PUTS THE RISK ON</span>
+        <div style="flex:none;background:#111113;border:1px solid #1E1E22;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid #1E1E22;border-left:3px solid #F87171;box-sizing:border-box">
+            <span style="width:56px;flex:none;font-size:19px;font-weight:700;color:#F87171;font-variant-numeric:tabular-nums">15%</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#F87171">Today · we carry it</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px;line-height:1.45">38 400 DH uncovered. Shops get 85% of the money the day it comes in, which they like, and we find out it was too little at the moment a customer asks for a refund.</span></span>
+            <span style="width:96px;flex:none;text-align:right;font-size:11px;font-weight:700;color:#F87171">STERNCUT</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-bottom:1px solid #1E1E22;border-left:3px solid #4ADE80;box-sizing:border-box">
+            <span style="width:56px;flex:none;font-size:19px;font-weight:700;color:#4ADE80;font-variant-numeric:tabular-nums">40%</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#4ADE80">Released over six months · the shop carries it</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:3px;line-height:1.45">Exposure falls to about 9 000 DH. A shop still gets 60% up front, which is most of why it sold the pass. It is harder for a shop with no cushion — and a shop with no cushion is the one that shuts.</span></span>
+            <span style="width:96px;flex:none;text-align:right;font-size:11px;font-weight:700;color:#4ADE80">THE SHOP</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-left:3px solid #3A3A40;box-sizing:border-box">
+            <span style="width:56px;flex:none;font-size:19px;font-weight:700;color:#9A9CA3;font-variant-numeric:tabular-nums">100%</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#9A9CA3">Released per cut · nobody carries it</span><span style="display:block;font-size:11px;color:#6B6B72;margin-top:3px;line-height:1.45">Nothing is exposed because nothing is a pass. Money arriving early is the entire product; hold all of it and the shop is running a loyalty card at its own expense.</span></span>
+            <span style="width:96px;flex:none;text-align:right;font-size:11px;font-weight:700;color:#6B6B72">NOBODY · NO PASS</span>
+          </div>
+        </div>
+        <div style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.26);border-radius:14px;padding:14px 15px;display:flex;align-items:flex-start;gap:11px;flex:none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.1" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#4ADE80">Forty, and a second rule the numbers actually point at</span><span style="display:block;font-size:11.5px;line-height:1.5;color:#D8D8DC;margin-top:4px;text-wrap:pretty">Eleven of the fourteen shops selling passes have been on Sterncut over a year and none has missed a settlement. <strong style="color:#fff">The exposure is concentrated in the three newest</strong>, and Marina — six months old when it started selling — is the one that shut. So: no passes until a shop has traded six months.</span></span>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHAT THE FOURTEEN GET TOLD</span>
+        <div style="flex:none;display:flex;gap:10px">
+          <div style="flex:1;background:#17171A;border:1px solid #26262B;border-radius:13px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:11.5px;font-weight:700;color:#D8D8DC">Eleven established shops</span><span style="font-size:10.5px;line-height:1.4;color:#6B6B72">40% from 1 January, six weeks&#39; notice, existing passes untouched</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #26262B;border-radius:13px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:11.5px;font-weight:700;color:#E8A100">Two under six months</span><span style="font-size:10.5px;line-height:1.4;color:#6B6B72">Cannot sell new ones. They keep honouring what they sold</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #26262B;border-radius:13px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:11.5px;font-weight:700;color:#D8D8DC">Marina</span><span style="font-size:10.5px;line-height:1.4;color:#6B6B72">Already at 40% by agreement. Nothing changes for Rachid</span></div>
+        </div>
+        <span style="flex:1"></span>
+      </div>
+      <div style="width:336px;flex:none;min-height:0;padding:18px 20px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box;overflow:hidden">
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHAT NADIA SENT</span>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:11.5px;line-height:1.55;color:#D8D8DC;text-wrap:pretty">&ldquo;Both options and no recommendation. I can tell you what each costs; I cannot decide that a shop&#39;s cash flow matters less than our balance sheet.&rdquo;</span>
+          <span style="font-size:11px;line-height:1.5;color:#6B6B72;border-top:1px solid #1E1E22;padding-top:10px;text-wrap:pretty">The right escalation. Ops owns the arithmetic and this is not arithmetic.</span>
+        </div>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:11.5px;font-weight:700">The customer promise does not move</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Refunds stay same-hour and no-questions whatever this number is. The withholding decides who is out of pocket while it happens, never whether it happens.</span>
+        </div>
+        <span style="flex:1"></span>
+        <span style="height:38px;border-radius:10px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;letter-spacing:.03em;color:#fff;cursor:pointer" onClick="{{ h.a12 }}" style-hover="filter:brightness(1.18)">SET 40% · AND THE SIX-MONTH RULE</span>
+        <span style="height:36px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#9A9CA3;cursor:pointer" onClick="{{ h.a12 }}" style-hover="filter:brightness(1.18)">LEAVE IT AT 15% · WRITE WHY</span>
+        <span style="font-size:10.5px;color:#6B6B72;line-height:1.5;text-wrap:pretty">Signed with your name and shown to all fourteen owners in full, including the sentence about which of you is carrying it.</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ v.HOP_06 }}">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="position:relative;display:flex;width:100%;height:max(100%, 852px);min-width:1184px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  
+
+  <div style="flex:1;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span style="cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">Compliance</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span>Countersign</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">Barbershop Nour</span></span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.34);border-radius:8px;height:30px;padding:0 11px;font-size:11px;font-weight:700;color:#F87171">22 HOURS LEFT · 6 PEOPLE NOT YET TOLD</span>
+    </div>
+    <div style="flex:1;min-height:0;display:flex;overflow:hidden">
+      <div style="flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;padding:18px 22px;gap:13px;border-right:1px solid #1E1E22;overflow:hidden">
+        <div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:16px;padding:15px 16px;display:flex;flex-direction:column;gap:11px;flex:none">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:13px;font-weight:700;color:#F87171">Nadia is closing Barbershop Nour for good</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Suspended 8 December · owner unreachable 19 days · licence never arrived</span></span>
+            <span style="flex:none;text-align:right"><span style="display:block;font-size:20px;font-weight:700;color:#F87171;font-variant-numeric:tabular-nums">22 h</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:1px">of 72</span></span>
+          </div>
+          <span style="font-size:12px;line-height:1.5;color:#D8D8DC;border-top:1px solid rgba(248,113,113,.2);padding-top:11px;text-wrap:pretty">A permanent closure needs two signatures. Hers is on it. <strong style="color:#fff">Until yours is, nobody with a booking there has been told anything</strong> — that silence is the price of you getting to check her work.</span>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHO IS WAITING ON THIS SIGNATURE</span>
+        <div style="flex:none;background:#111113;border:1px solid #1E1E22;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22;border-left:3px solid #F87171;box-sizing:border-box">
+            <span style="width:34px;flex:none;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">6</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">People with bookings in the next fortnight</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Two are tomorrow morning. They will turn up at a shut door if this waits</span></span>
+            <span style="flex:none;font-size:10.5px;font-weight:700;color:#F87171">TOLD ON SIGNING</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22">
+            <span style="width:34px;flex:none;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">2</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Pass holders · 11 cuts, 594 DH</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Refunded in full the moment closure is signed. Float covers it</span></span>
+            <span style="flex:none;font-size:10.5px;font-weight:700;color:#4ADE80">COVERED</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22">
+            <span style="width:34px;flex:none;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">3</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Barbers who worked there</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Hamza left for Le Fade in September. The other two are looking</span></span>
+            <span style="flex:none;font-size:10.5px;font-weight:700;color:#9A9CA3">ALREADY KNOW</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px">
+            <span style="width:34px;flex:none;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">41</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">People whose regular shop this was</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">No booking, no pass. They get nothing — a shop closing is not news we push</span></span>
+            <span style="flex:none;font-size:10.5px;font-weight:700;color:#6B6B72">NOT TOLD</span>
+          </div>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHAT YOU ARE ACTUALLY CHECKING</span>
+        <div style="flex:none;display:flex;flex-direction:column;gap:8px">
+          <span style="display:flex;align-items:center;gap:11px;background:#17171A;border:1px solid #26262B;border-radius:12px;padding:11px 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.1" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Nine contact attempts across 19 days</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Calls, SMS, one visit. Logged with timestamps</span></span></span>
+          <span style="display:flex;align-items:center;gap:11px;background:#17171A;border:1px solid #26262B;border-radius:12px;padding:11px 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.1" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">The premises are empty · photographed 22 December</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Chairs gone. This is not a shop having a bad month</span></span></span>
+          <span style="display:flex;align-items:center;gap:11px;background:#17171A;border:1px solid #26262B;border-radius:12px;padding:11px 12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2.1" style="flex:none"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg><span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600">Nobody has spoken to Hamza</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">He worked there for four years and would know if the owner is ill</span></span></span>
+        </div>
+        <div style="background:#111113;border:1px solid #1E1E22;border-radius:14px;padding:13px 15px;display:flex;align-items:flex-start;gap:11px;flex:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9A9CA3" stroke-width="2.1" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+          <span style="flex:1;min-width:0;font-size:11.5px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Sending it back for that one call costs the two people booked tomorrow their morning. Signing it costs a man his shop on nine attempts and a photograph. The clock does not resolve this and it is not supposed to.</span>
+        </div>
+        <span style="flex:1"></span>
+      </div>
+      <div style="width:336px;flex:none;min-height:0;padding:18px 20px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box;overflow:hidden">
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHY 72 HOURS AND NOT NONE</span>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Two closures in eighteen months were sent back. One owner was in hospital; one had moved premises and told a barber, not us. <strong style="color:#fff">Both would have been permanent with no second signature.</strong></span>
+          <span style="display:flex;align-items:baseline;gap:8px;border-top:1px solid #1E1E22;padding-top:10px"><span style="flex:1;font-size:11px;color:#9A9CA3">Sent back</span><span style="font-size:12px;font-weight:700">2 of 14</span></span>
+        </div>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:11.5px;font-weight:700">You can do both</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Tell the six now and hold the closure. It is the only button here that helps a customer without deciding anything about the owner.</span>
+        </div>
+        <span style="flex:1"></span>
+        <span style="height:38px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#D8D8DC;cursor:pointer" onClick="{{ h.a15 }}" style-hover="filter:brightness(1.18)">TELL THE SIX NOW · DECIDE TOMORROW</span>
+        <a style="height:38px;border-radius:10px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;letter-spacing:.03em;color:#fff;text-decoration:none;cursor:pointer" onClick="{{ h.a14 }}" style-hover="filter:brightness(1.18)">COUNTERSIGN · CLOSE IT</a>
+        <span style="height:36px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#9A9CA3;cursor:pointer" onClick="{{ h.a12 }}" style-hover="filter:brightness(1.18)">SEND BACK · CALL HAMZA FIRST</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ v.SAL_41 }}">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="position:relative;display:flex;width:100%;height:max(100%, 852px);min-width:1184px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  
+
+  <div style="flex:1;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span style="cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">Compliance</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">Barbershop Nour</span></span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.32);border-radius:8px;height:30px;padding:0 11px;font-size:11px;font-weight:700;color:#4ADE80">SIX TOLD 21:04 · CALL LOGGED 09:11</span>
+    </div>
+    <div style="flex:1;min-height:0;display:flex;overflow:hidden">
+      <div style="flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;padding:18px 22px;gap:13px;border-right:1px solid #1E1E22;overflow:hidden">
+        <div style="background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:15px 16px;display:flex;flex-direction:column;gap:11px;flex:none">
+          <div style="display:flex;align-items:center;gap:11px">
+            <span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#9A9CA3;flex:none">HS</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">Hamza Sellami · four years at Nour, left September</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Called 09:11, spoke for four minutes. Nobody had asked him anything</span></span>
+          </div>
+          <span style="font-size:12.5px;line-height:1.55;color:#D8D8DC;border-top:1px solid #1E1E22;padding-top:12px;text-wrap:pretty">&ldquo;Mustapha sold the chairs in November. He told me himself — his son is in Casablanca and he has gone to live there. He is not ill and nothing has happened to him. He just stopped, and I do not think it crossed his mind that he had to tell you.&rdquo;</span>
+        </div>
+        <div style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.26);border-radius:14px;padding:14px 15px;display:flex;align-items:flex-start;gap:11px;flex:none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.1" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#4ADE80">The closure was right. Getting there took nineteen days it did not need.</span><span style="display:block;font-size:11.5px;line-height:1.5;color:#D8D8DC;margin-top:4px;text-wrap:pretty">Nine attempts to a man who had already gone were never going to return anything. <strong style="color:#fff">One call to somebody who worked there answered it in four minutes</strong> — and it is worth saying plainly that the check Karima held the clock for did not change the decision. It changed how long six people spent not knowing.</span></span>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHAT NINETEEN DAYS OF CALLING THE OWNER PRODUCED</span>
+        <div style="flex:none;background:#111113;border:1px solid #1E1E22;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22">
+            <span style="width:38px;flex:none;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">9</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Calls and messages to Mustapha</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Six calls, two SMS, one visit to a shop with no chairs in it</span></span>
+            <span style="flex:none;font-size:11px;font-weight:700;color:#F87171">NOTHING</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-left:3px solid #4ADE80;box-sizing:border-box">
+            <span style="width:38px;flex:none;font-size:15px;font-weight:700;color:#4ADE80;font-variant-numeric:tabular-nums">1</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:700">Call to a barber who worked there</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">He is on Sterncut, at Le Fade, and his number was already in the file</span></span>
+            <span style="flex:none;font-size:11px;font-weight:700;color:#4ADE80">ANSWERED IT</span>
+          </div>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">THE RULE THIS BECOMES</span>
+        <div style="background:#111113;border:1px solid #1E1E22;border-radius:14px;padding:14px 15px;display:flex;flex-direction:column;gap:10px;flex:none">
+          <span style="font-size:12.5px;font-weight:700;color:#D8D8DC">Before the second unanswered day, call a barber who works there.</span>
+          <span style="font-size:11.5px;line-height:1.5;color:#9A9CA3;border-top:1px solid #1E1E22;padding-top:11px;text-wrap:pretty">Not at day nineteen and not as part of a closure — at day two, as the ordinary next step. Barbers know whether a shop is having a bad week or has stopped existing, and every shop on Sterncut has at least one whose number we already hold. <strong style="color:#fff">Both closures sent back in eighteen months would have been settled by the same call.</strong></span>
+        </div>
+        <div style="background:rgba(232,161,0,.08);border:1px solid rgba(232,161,0,.3);border-radius:14px;padding:13px 15px;display:flex;align-items:flex-start;gap:11px;flex:none">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2.1" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+          <span style="flex:1;min-width:0;font-size:11.5px;line-height:1.5;color:#D8D8DC;text-wrap:pretty">The limit of it: a barber is not a neutral party. Hamza left in September and is not owed anything by Mustapha. Ask what he knows, never whether the shop deserves to stay.</span>
+        </div>
+        <span style="flex:1"></span>
+      </div>
+      <div style="width:336px;flex:none;min-height:0;padding:18px 20px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box;overflow:hidden">
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">SIGNING IT NOW</span>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:10px">
+          <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Six with bookings</span><span style="font-size:12px;font-weight:700;color:#4ADE80">told last night</span></span>
+          <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Two pass holders</span><span style="font-size:12px;font-weight:700">594 DH back today</span></span>
+          <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:11.5px;color:#9A9CA3">41 regulars</span><span style="font-size:12px;font-weight:700;color:#6B6B72">still not told</span></span>
+          <span style="font-size:11px;line-height:1.5;color:#6B6B72;border-top:1px solid #1E1E22;padding-top:10px;text-wrap:pretty">Unchanged by the call. A shop closing is not news we push at people who have no booking and no money with it.</span>
+        </div>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:11.5px;font-weight:700">Mustapha is not told either</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">One letter to the address on file, no reply needed. He closed his shop four months ago; a notification from us is not news to him.</span>
+        </div>
+        <span style="flex:1"></span>
+        <span style="height:38px;border-radius:10px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;letter-spacing:.03em;color:#fff;cursor:pointer" onClick="{{ h.a12 }}" style-hover="filter:brightness(1.18)">COUNTERSIGN · CLOSE IT</span>
+        <span style="height:36px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#D8D8DC;cursor:pointer" onClick="{{ h.a19 }}" style-hover="filter:brightness(1.15)">ADD THE DAY-TWO RULE TO SUSPENSIONS</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ v.HOP_07 }}">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="position:relative;display:flex;width:100%;height:max(100%, 852px);min-width:1184px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  
+
+  <div style="flex:1;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span style="cursor:pointer" onClick="{{ h.a0 }}" style-hover="filter:brightness(1.18)">Compliance</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="cursor:pointer" onClick="{{ h.a16 }}" style-hover="filter:brightness(1.18)">Applications</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">APP-338</span></span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.34);border-radius:8px;height:30px;padding:0 11px;font-size:11px;font-weight:700;color:#F87171">ESCALATED BY OPS · NOTHING TO SEND BACK</span>
+    </div>
+    <div style="flex:1;min-height:0;display:flex;overflow:hidden">
+      <div style="flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;padding:18px 22px;gap:13px;border-right:1px solid #1E1E22;overflow:hidden">
+        <div style="background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:15px 16px;display:flex;flex-direction:column;gap:11px;flex:none">
+          <div style="display:flex;align-items:center;gap:11px">
+            <span style="width:34px;height:34px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#9A9CA3;flex:none">MC</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">Mehdi Chraibi · Salon Chraibi, Mghogha</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:2px">Applied 14 January as owner · two chairs · lease signed December</span></span>
+            <span style="flex:none;height:26px;border-radius:999px;background:rgba(248,113,113,.16);display:flex;align-items:center;padding:0 10px;font-size:10.5px;font-weight:700;color:#F87171">REMOVED 2 FEB · HARM</span>
+          </div>
+          <span style="font-size:12px;line-height:1.55;color:#9A9CA3;border-top:1px solid #1E1E22;padding-top:12px;text-wrap:pretty">Ops checked the paperwork and found no fault in it, which is why it is on your desk rather than in the send-back queue. <strong style="color:#fff">There is no missing document to ask for and no defect to cure.</strong> Refusing this is refusing him.</span>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">THE APPLICATION ITSELF</span>
+        <div style="flex:none;display:flex;gap:10px">
+          <div style="flex:1;background:#17171A;border:1px solid #26262B;border-radius:13px;padding:12px 13px;display:flex;flex-direction:column;gap:5px"><span style="display:flex;align-items:center;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.4"><path d="M5 12l5 5L20 7"></path></svg><span style="font-size:11.5px;font-weight:700;color:#D8D8DC">Licence</span></span><span style="font-size:10.5px;line-height:1.4;color:#6B6B72">Issued 8 December, valid to 2031. Genuine</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #26262B;border-radius:13px;padding:12px 13px;display:flex;flex-direction:column;gap:5px"><span style="display:flex;align-items:center;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.4"><path d="M5 12l5 5L20 7"></path></svg><span style="font-size:11.5px;font-weight:700;color:#D8D8DC">Premises</span></span><span style="font-size:10.5px;line-height:1.4;color:#6B6B72">Visited 20 January. Fitted, clean, two chairs</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #26262B;border-radius:13px;padding:12px 13px;display:flex;flex-direction:column;gap:5px"><span style="display:flex;align-items:center;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.4"><path d="M5 12l5 5L20 7"></path></svg><span style="font-size:11.5px;font-weight:700;color:#D8D8DC">Identity</span></span><span style="font-size:10.5px;line-height:1.4;color:#6B6B72">Own name, own address. He is not hiding</span></div>
+          <div style="flex:1;background:#17171A;border:1px solid #26262B;border-radius:13px;padding:12px 13px;display:flex;flex-direction:column;gap:5px"><span style="display:flex;align-items:center;gap:6px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#E8A100" stroke-width="2.4"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 9v5M12 17h.01"></path></svg><span style="font-size:11.5px;font-weight:700;color:#D8D8DC">District</span></span><span style="font-size:10.5px;line-height:1.4;color:#6B6B72">Mghogha asked for chairs. We want a shop here</span></div>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">THE RECORD THIS TURNS ON — READ, NOT REOPENED</span>
+        <div style="flex:none;background:#111113;border:1px solid #1E1E22;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22;border-left:3px solid #F87171;box-sizing:border-box">
+            <span style="width:34px;flex:none;font-size:15px;font-weight:700;color:#F87171;font-variant-numeric:tabular-nums">3</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Complaints, three separate customers, six weeks</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Two independently described the same conduct. None knew the others</span></span>
+            <span style="flex:none;font-size:10.5px;font-weight:700;color:#6B6B72">DEC – JAN</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22">
+            <span style="width:34px;flex:none;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">1</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Removal, signed by you, 2 February</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">He was told the reason and did not dispute it at the time</span></span>
+            <span style="flex:none;font-size:10.5px;font-weight:700;color:#6B6B72">FINAL</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px">
+            <span style="width:34px;flex:none;font-size:15px;font-weight:700;font-variant-numeric:tabular-nums">0</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">New facts since</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">A lease and a licence are not new facts about what happened</span></span>
+            <span style="flex:none;font-size:10.5px;font-weight:700;color:#6B6B72">NOTHING</span>
+          </div>
+        </div>
+        <div style="background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:14px;padding:14px 15px;display:flex;align-items:flex-start;gap:11px;flex:none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2.1" style="flex:none"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#F87171">A removal follows the person, or it means nothing</span><span style="display:block;font-size:11.5px;line-height:1.5;color:#D8D8DC;margin-top:4px;text-wrap:pretty">He would not be cutting hair here — he would be choosing who does, in a room, unsupervised. <strong style="color:#fff">If owning a shop is a way back in, February was theatre.</strong> Mghogha needing chairs is a real cost and it does not buy this.</span></span>
+        </div>
+        <span style="flex:1"></span>
+      </div>
+      <div style="width:336px;flex:none;min-height:0;padding:18px 20px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box;overflow:hidden">
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHAT HE IS TOLD</span>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:9px">
+          <span style="font-size:11.5px;line-height:1.55;color:#D8D8DC;text-wrap:pretty">&ldquo;Refused, permanently, because of your removal on 2 February. Nothing in your application is wrong and nothing you send will change this.&rdquo;</span>
+          <span style="font-size:11px;line-height:1.5;color:#6B6B72;border-top:1px solid #1E1E22;padding-top:10px;text-wrap:pretty">The true reason, in one sentence, with no detail he could use to work out who complained. He already knows what February was for.</span>
+        </div>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:11.5px;font-weight:700">Nobody else is told</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">Not the three complainants, not Mghogha&#39;s waiting list, not the landlord. He has a shop and a licence and may open it tomorrow — <strong style="color:#fff">it simply will not be on Sterncut</strong>, and we do not warn a district about a man.</span>
+        </div>
+        <span style="flex:1"></span>
+        <span style="height:38px;border-radius:10px;background:#E8442E;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;letter-spacing:.03em;color:#fff;cursor:pointer" onClick="{{ h.a12 }}" style-hover="filter:brightness(1.18)">REFUSE PERMANENTLY · SIGN</span>
+        <span style="height:36px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#9A9CA3;cursor:pointer" onClick="{{ h.a12 }}" style-hover="filter:brightness(1.18)">SEND BACK TO OPS</span>
+        <span style="font-size:10.5px;color:#6B6B72;line-height:1.5;text-wrap:pretty">Ops has no verb for this. Sending it back means it sits until somebody either signs this or quietly lets it through.</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ v.HOP_08 }}">
+<div style="position:absolute;inset:0;overflow:auto">
+<div style="position:relative;display:flex;width:100%;height:max(100%, 852px);min-width:1184px;background:#0D0D0F;color:#fff;font-family:Inter,sans-serif;box-sizing:border-box;overflow:hidden">
+  
+
+  <div style="flex:1;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+    <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px">
+      <span style="display:flex;align-items:center;gap:7px;font-size:12px;color:#6B6B72"><span style="cursor:pointer" onClick="{{ h.a18 }}" style-hover="filter:brightness(1.18)">Salons</span><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#3A3A40" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg><span style="color:#fff;font-weight:600">Coiffure Atlas</span></span>
+      <span style="flex:1"></span>
+      <span style="display:flex;align-items:center;gap:7px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.32);border-radius:8px;height:30px;padding:0 11px;font-size:11px;font-weight:700;color:#4ADE80">RESOLVED IN 11 MINUTES · NOT SUSPENDED</span>
+    </div>
+    <div style="flex:1;min-height:0;display:flex;overflow:hidden">
+      <div style="flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;padding:18px 22px;gap:13px;border-right:1px solid #1E1E22;overflow:hidden">
+        <div style="background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:15px 16px;display:flex;flex-direction:column;gap:11px;flex:none">
+          <span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;line-height:1.3;text-wrap:pretty">Two days of cancelled bookings and no answer from the owner. Seventeen days ago this became a nineteen-day problem.</span>
+          <span style="font-size:12px;line-height:1.55;color:#9A9CA3;border-top:1px solid #1E1E22;padding-top:12px;text-wrap:pretty">Same opening as Barbershop Nour: a shop goes quiet, the owner&#39;s phone rings out, and the queue starts counting. <strong style="color:#fff">The difference is what the second step now is.</strong></span>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">TODAY, IN ORDER</span>
+        <div style="flex:none;background:#111113;border:1px solid #1E1E22;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22">
+            <span style="width:52px;flex:none;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">08:20</span>
+            <span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:#D8D8DC">Second day with no answer · flagged automatically</span>
+            <span style="flex:none;font-size:10.5px;font-weight:700;color:#6B6B72">SYSTEM</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22;border-left:3px solid #4ADE80;box-sizing:border-box">
+            <span style="width:52px;flex:none;font-size:11px;font-weight:700;color:#4ADE80;font-variant-numeric:tabular-nums">09:02</span>
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:700">Called Salma Aouad, who cuts there Tuesdays and Fridays</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">Her number was in the file. Nobody had to look for it</span></span>
+            <span style="flex:none;font-size:10.5px;font-weight:700;color:#4ADE80">DAY-TWO RULE</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px">
+            <span style="width:52px;flex:none;font-size:11px;color:#6B6B72;font-variant-numeric:tabular-nums">09:13</span>
+            <span style="flex:1;min-width:0;font-size:12px;font-weight:600;color:#D8D8DC">Owner in hospital since Sunday · shop reopens Thursday</span>
+            <span style="flex:none;font-size:10.5px;font-weight:700;color:#4ADE80">ANSWERED</span>
+          </div>
+        </div>
+        <div style="background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.26);border-radius:14px;padding:14px 15px;display:flex;align-items:flex-start;gap:11px;flex:none">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="2.1" style="flex:none"><path d="M5 12l5 5L20 7"></path></svg>
+          <span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;color:#4ADE80">Nothing was suspended and nobody was told a shop had closed</span><span style="display:block;font-size:11.5px;line-height:1.5;color:#D8D8DC;margin-top:4px;text-wrap:pretty">Bookings for Tuesday and Wednesday are moved with a real reason. Thursday onward stands. <strong style="color:#fff">Under the old sequence this shop would have spent nineteen days looking abandoned</strong> — and its owner would have come out of hospital to a suspension notice.</span></span>
+        </div>
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">WHAT THE FOUR AFFECTED CUSTOMERS GET</span>
+        <div style="flex:none;background:#111113;border:1px solid #1E1E22;border-radius:16px;display:flex;flex-direction:column;overflow:hidden">
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #1E1E22">
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">&ldquo;Coiffure Atlas is shut until Thursday. Your Tuesday cut is refunded.&rdquo;</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">No reason given for the closure. It is the owner&#39;s health, not ours to pass on</span></span>
+            <span style="flex:none;font-size:10.5px;font-weight:700;color:#4ADE80">SENT 09:30</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px">
+            <span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;color:#D8D8DC">Thursday and after · nothing sent at all</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">Their booking is fine. A message would only make them doubt it</span></span>
+            <span style="flex:none;font-size:10.5px;font-weight:700;color:#6B6B72">7 PEOPLE</span>
+          </div>
+        </div>
+        <span style="flex:1"></span>
+      </div>
+      <div style="width:336px;flex:none;min-height:0;padding:18px 20px;display:flex;flex-direction:column;gap:12px;box-sizing:border-box;overflow:hidden">
+        <span style="font-size:9px;letter-spacing:.16em;font-weight:700;color:#6B6B72">THE RULE SINCE 4 JANUARY</span>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:10px">
+          <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Silent shops flagged</span><span style="font-size:12px;font-weight:700">4</span></span>
+          <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Answered by a barber</span><span style="font-size:12px;font-weight:700;color:#4ADE80">3</span></span>
+          <span style="display:flex;align-items:baseline;gap:8px"><span style="flex:1;font-size:11.5px;color:#9A9CA3">Went to suspension</span><span style="font-size:12px;font-weight:700">1</span></span>
+          <span style="font-size:11px;line-height:1.5;color:#6B6B72;border-top:1px solid #1E1E22;padding-top:10px;text-wrap:pretty">The one that did was right to. A barber saying &ldquo;he has gone&rdquo; is the same call arriving at the opposite answer, seventeen days sooner.</span>
+        </div>
+        <div style="background:#111113;border:1px solid #26262B;border-radius:13px;padding:13px;display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:11.5px;font-weight:700">Salma is not asked to vouch for him</span>
+          <span style="font-size:11px;line-height:1.5;color:#9A9CA3;text-wrap:pretty">One question — do you know why the shop is shut. Nothing about whether it should stay, and nothing she says goes on the owner&#39;s file.</span>
+        </div>
+        <span style="flex:1"></span>
+        <a style="height:38px;border-radius:10px;background:#17171A;border:1px solid #26262B;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#D8D8DC;text-decoration:none;cursor:pointer" onClick="{{ h.a17 }}" style-hover="filter:brightness(1.18)">CLOSE THE FLAG · REOPEN THURSDAY</a>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ none }}"><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:40px"><span style="font-size:15px;font-weight:700">No screen is designed for this yet</span><span style="font-size:12.5px;color:#9A9CA3;max-width:440px;line-height:1.55">The canvases have no screen at this address.</span><span onClick="{{ backHome }}" style="margin-top:4px;font-size:12px;font-weight:700;color:#E8442E;cursor:pointer">Back to Compliance</span></div></sc-if>
+<sc-if value="{{ specOn }}"><div style="position:absolute;right:12px;bottom:12px;z-index:40;background:#E8442E;color:#fff;border-radius:8px;padding:6px 10px;font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.4);pointer-events:none">{{ specId }}</div></sc-if>
+<sc-if value="{{ toastOn }}"><div style="position:absolute;left:50%;bottom:24px;transform:translateX(-50%);z-index:45;display:flex;align-items:center;gap:9px;background:#fff;color:#0D0D0F;border-radius:10px;padding:10px 14px;font-family:Inter,sans-serif;font-size:12px;font-weight:700;box-shadow:0 10px 30px rgba(0,0,0,.45);pointer-events:none;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>{{ toastMsg }}</div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1184,&quot;height&quot;:852},&quot;path&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;/compliance&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;specOn&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;world&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;go&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(path: string) =&gt; void&quot;},&quot;setWorld&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(patch: object) =&gt; void&quot;},&quot;openPal&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { toast: null };
+  _toast(msg) { this.setState({ toast: msg }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: null }), 2200); }
+  componentWillUnmount() { clearTimeout(this._tt); }
+  chip = e => { if (e && e.stopPropagation) e.stopPropagation(); const el = e.currentTarget, p = el && el.parentElement; if (!p) return; const sel = [...p.children].find(k => k.getAttribute('data-chip-sel')); if (!sel || sel === el) return; const a = el.getAttribute('style'); el.setAttribute('style', sel.getAttribute('style')); sel.setAttribute('style', a); sel.removeAttribute('data-chip-sel'); el.setAttribute('data-chip-sel', '1'); };
+  A = [{"to":"/compliance"},{"to":"/compliance/tasks/AUD-118"},{"to":"/salons/marina-barber-club","world":{"marina":"hidden"}},{"to":"/salons/le-fade-tanger"},{"to":"/support?bell=1"},{"to":"/finance/float"},{"to":"/support/CS-4471"},{"to":"/salons/pending/tetouan-barbershop"},{"to":"/salons/pending/tetouan-barbershop?fix=pin"},{"to":"/salons?state=suspended&chase=marina-barber-club"},{"to":"/salons/marina-barber-club?suspend=1"},{"to":"/barbers/karim-idrissi"},{"to":"/requests"},{"to":"/settings/templates"},{"to":"/salons/coiffure-atlas?silent=2"},{"to":"/compliance/countersign/barbershop-nour?day=2"},{"to":"/salons?state=pending"},{"to":"/settings/reliability"},{"to":"/salons"},{"toast":"Added — it applies from the next suspension"}];
+  IDS = ["CMP-01","BRB-06","HOP-02","HOP-03","HOP-05","HOP-06","SAL-41","HOP-07","HOP-08"];
+  T = [["CMP-01","/compliance"],["BRB-06","/compliance/tasks/AUD-118"],["HOP-02","/compliance/overrides/OVR-004"],["HOP-03","/compliance/policy/arabic"],["HOP-05","/compliance/policy/pass-withholding"],["HOP-06","/compliance/countersign/barbershop-nour"],["SAL-41","/compliance/countersign/barbershop-nour?day=2"],["HOP-07","/compliance/applications/APP-338/refuse"],["HOP-08","/salons/coiffure-atlas?silent=2"]];
+  norm(p) { const [path, qs] = (p || '/compliance').split('#')[0].split('?'); const q = (qs || '').split('&').filter(Boolean).sort().join('&'); return (path.replace(/\/+$/, '') || '/compliance') + (q ? '?' + q : ''); }
+  screenFor(path, world) {
+    const n = this.norm(path), base = n.split('?')[0], q = {}; (n.split('?')[1] || '').split('&').filter(Boolean).forEach(kv => { const i = kv.indexOf('='); q[i < 0 ? kv : kv.slice(0, i)] = i < 0 ? '1' : decodeURIComponent(kv.slice(i + 1)); });
+    if (base.startsWith('/compliance/licences')) return 'CMP-01';
+    if (base.startsWith('/compliance/tasks')) return 'BRB-06';
+    if (base === '/salons/coiffure-atlas') return 'HOP-08';
+    const hit = this.T.find(r => this.norm(r[1]) === n); if (hit) return hit[0];
+    const b = this.T.find(r => this.norm(r[1]) === base); if (b) return b[0];
+    return null;
+  }
+  renderVals() {
+    const path = this.props.path || '/compliance', world = this.props.world || {}, go = this.props.go || (() => {}), setWorld = this.props.setWorld || (() => {}), openPal = this.props.openPal || (() => {});
+    const id = this.screenFor(path, world);
+    const v = {}; this.IDS.forEach(k => { v[k.replace(/-/g, '_')] = k === id; });
+    const h = {}; this.A.forEach((a, i) => { h['a' + i] = e => { if (e && e.stopPropagation) e.stopPropagation(); if (a.pal) { openPal(); return; } if (a.toast) { this._toast(a.toast); return; } if (a.world) setWorld(a.world); if (a.to) go(a.to); }; });
+    return { v, h, toastOn: !!(this.state && this.state.toast), toastMsg: (this.state && this.state.toast) || '', chip: this.chip, none: !id, backHome: () => go('/compliance'), specOn: !!this.props.specOn, specId: (id || 'no screen') + ' · ' + path };
+  }
+}
+</script>
+</body>
+</html>

@@ -216,7 +216,8 @@ async function unchecked({ rpc }) {
   const rows = run.lines.flatMap((l) => l.receipts.filter((r) => ['queued', 'failed'].includes(r.verification) || r.incident).map((r) => ({ ...r, salon: l.salon })))
     .sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
   const hours = (at) => Math.max(0, Math.floor((Date.now() - Date.parse(at)) / 36e5));
-  const html = page(pageHead(`Week ${esc(String(run.week).slice(-2))} settlement run`, run.released_at ? `Released ${esc(dayShort(run.released_at))} ${hhmm(run.released_at)}${run.released_by ? ` · ${esc(run.released_by)}` : ''}` : `${esc(run.state)} · not released`), TABS('unchecked'),
+  // pageHead escapes its own text
+  const html = page(pageHead(`Week ${String(run.week).slice(-2)} settlement run`, run.released_at ? `Released ${dayShort(run.released_at)} ${hhmm(run.released_at)}${run.released_by ? ` · ${run.released_by}` : ''}` : `${run.state} · not released`), TABS('unchecked'),
     `<div style="display:flex;gap:12px;flex-wrap:wrap">${kpi('PROVED BY OWNER CODE', DH(pf.code_cents || 0), `${pf.code_n || 0} receipt${pf.code_n === 1 ? '' : 's'}`)}
       ${kpi('PROVED BY OPS CALL', DH(pf.call_cents || 0), `${pf.call_n || 0} receipt${pf.call_n === 1 ? '' : 's'} · audit`)}
       ${kpi('COLLECTED, UNCHECKED', DH(pf.unchecked_cents || 0), `${pf.unchecked_n || 0} receipt${pf.unchecked_n === 1 ? '' : 's'}${pf.failed_n ? ` · ${pf.failed_n} code didn’t match` : ''}`, pf.unchecked_cents ? '#F87171' : '')}</div>

@@ -82,7 +82,7 @@ const OWNER_NAV = [
   ['reports', 'Reports', 'reports'], ['shop', 'Your shop', 'salons'],
 ].map(([key, label, ic]) => ({ key, label, ic }));
 // sections rebuilt on this site; every other staff section is still the old console
-const NATIVE = { overview: 'overview', requests: 'requests', salons: 'salons', barbers: 'barbers', customers: 'customers', support: 'support', reviews: 'reviews', bookings: 'bookings', compliance: 'compliance', demand: 'demand', wallets: 'wallets', finance: 'finance', settings: 'settings' };
+const NATIVE = { overview: 'overview', requests: 'requests', salons: 'salons', barbers: 'barbers', customers: 'customers', support: 'support', reviews: 'reviews', bookings: 'bookings', compliance: 'compliance', demand: 'demand', wallets: 'wallets', finance: 'finance', coupons: 'coupons', settings: 'settings' };
 const OWNER_NATIVE = { today: 'today', payouts: 'payouts', reviews: 'reviews', subscription: 'subscription', reports: 'reports', chairs: 'chairs', shop: 'shop', services: 'services' };
 export const ROLE_LABEL = { head: 'Head of Ops', support: 'Support', mod: 'Moderator', field: 'Field ops' };
 
@@ -396,15 +396,10 @@ function notBuilt(key, owner) {
 // ------------------------------------------------- the old console, framed --
 // Path → the legacy hash route that draws it. Replaced section by section.
 const LEGACY = [
-  [/^\/finance\/statements/, 'finance/statement'], [/^\/finance\/corrections/, 'finance/corrections'],
-  [/^\/finance\/calls/, 'finance/calls'], [/^\/finance\/float\/transfers/, 'finance/handovers'],
-  [/^\/finance\/float/, 'finance/float'], [/^\/finance/, 'finance'],
-  [/^\/coupons/, 'coupons'],
   [/^\/settings\/deposit-bounds/, 'reliability/deposit'], [/^\/settings/, 'reliability'],
 ];
 // the reverse of LEGACY, for the routes a native section still frames
-const FRAME_PATH = { finance: '/finance', 'finance/statement': '/finance/statements', 'finance/corrections': '/finance/corrections', 'finance/calls': '/finance/calls',
-  'finance/handovers': '/finance/float/transfers', 'finance/float': '/finance/float', reliability: '/settings', 'reliability/deposit': '/settings/deposit-bounds' };
+const FRAME_PATH = { reliability: '/settings', 'reliability/deposit': '/settings/deposit-bounds' };
 const LEGACY_SECTION = { appeals: 'reviews', reliability: 'settings', desk: 'support', invites: 'salons', salon: 'salons', booking: 'bookings' };
 export function framed(path) { return { frame: (LEGACY.find(([re]) => re.test(path)) || [, 'overview'])[1] }; }
 
@@ -661,6 +656,16 @@ async function continueSignIn() {
   } catch (e) { say(e.message); }
 }
 
+// Supabase hands the QR back as raw SVG inside a data: URL — not percent-encoded, and on some
+// auth versions typed img/svg+xml — which a browser can refuse to draw. Re-wrap it properly.
+export function qrSrc(q) {
+  const i = String(q || '').indexOf(','), head = q.slice(0, i), body = q.slice(i + 1);
+  if (/;base64$/i.test(head)) return 'data:image/svg+xml;base64,' + body;
+  let svg = body;
+  if (!svg.trimStart().startsWith('<')) { try { svg = decodeURIComponent(svg); } catch { /* keep it as it came */ } }
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
 function codePage(error) {
   const email = claims().email || si.email;
   const en = pending?.enroll;
@@ -676,7 +681,7 @@ function codePage(error) {
         <span style="font-size:13px;color:#9A9CA3;line-height:1.55">${en ? 'Once, on this sign-in. Scan the code with Google Authenticator, 1Password or Authy, then type the six digits it shows.' : `Signing in as ${esc(email)}`}</span>
       </div>
       ${en ? `<div style="display:flex;gap:16px;align-items:center;background:#141416;border:1px solid #1E1E22;border-radius:14px;padding:14px">
-        <img src="${esc(en.qr)}" alt="QR code for your authenticator" width="132" height="132" style="background:#fff;border-radius:8px;padding:6px;flex:none">
+        <img src="${esc(qrSrc(en.qr))}" alt="QR code for your authenticator" width="132" height="132" style="background:#fff;border-radius:8px;padding:6px;flex:none">
         <span style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font-size:9.5px;letter-spacing:.15em;font-weight:700;color:#6B6B72">OR TYPE THIS KEY</span>
           <span style="font-family:ui-monospace,Menlo,monospace;font-size:11.5px;word-break:break-all;color:#C9CAD0">${esc(en.secret)}</span></span>
       </div>` : ''}

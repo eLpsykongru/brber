@@ -3611,8 +3611,14 @@ nothing behind them. Both reads are admin-only and read-only.
   `/support/desk` and `/support/held` land here too — presence is the side panel and the
   held case is the case page's read-only state.
 - `/support/<case_no>` (SUP-02/03): opening claims it (claim_case); someone else in it
-  under 15 minutes means read-only with TAKE IT. Reply, refund the deposit & close, or
+  under 15 minutes means read-only with TAKE IT. Reply, refund & close (`?refund=1`, any
+  amount, on every case — it defaults to the amount in dispute, else the deposit left), or
   close. The case detail is not repeated when it is already the thread's first message.
+  (2026-10-01: the refund used to appear only on cases with a booking and deposit left, so
+  a "charged the wrong amount" case could only be closed — found on the live site.)
+- The Refunds ledger (0079) predates carried refunds (0084/0087): a refund on a deposit the
+  shop already earned is netted off its statement but still reads "Sterncut" there. The
+  page says so. Fix the attribution in a new read if the bucket ever matters.
 - `/reviews` (RVW-05): all / held / removed / 2★ or less, search, the month's numbers.
   "Removed" counts all time — admin_reviews doesn't split it by month.
 - `/reviews/flagged[/<id>]` (RVW-01/13): the visit behind it and both ratings; keep, or
@@ -3706,10 +3712,59 @@ admin_task_action.
   one subscription per shop, netted off the Friday statement. The page shows what is
   billed, not the drawing. FIN-01 (payout run — superseded by the settlement run),
   FIN-02 (commission — there is none), FIN-03 (VAT) and FIN-13 (tips) have no backend.
-- The run, statements, corrections and the float (FIN-14…19) stay the old console in a
-  frame — its screens already are those canvases. The shell now keeps the site URL in
-  step as the frame moves between them (`/finance/corrections`, `/finance/float`, …),
-  and the frame's own tab strip gained a Charges tab that leaves the frame.
+- **2026-10-01: the run, statements, corrections and the float are native too** — ported
+  from the old console (its screens were already FIN-14…19), no redraw. Every action that
+  takes input is now a dialog on a URL query instead of a `prompt()`:
+  - `/finance` and `/finance/settlement/<2026-W38>` (FIN-14/15): earlier weeks are
+    addressable (settlement_runs is readable by admins; the label is computed the way
+    settlement_week_label does). Release (`?release=1`) spells out the unchecked cash and
+    refuses when a statement disagrees with its lines; plan the round (`?plan=1`) picks the
+    agent and a visit window in Tangier time and warns when it takes them over the bag cap;
+    record a collection or handover (`?settle=<line>`, part payments allowed); cut asks.
+    Each shop's visit gets its own line under the numbers.
+  - `/finance/statements/<2026-W38-001>` (FIN-16) — admin_statement, the owner's builder.
+  - `/finance/corrections` (FIN-17) — carry onto the draft week (needs 0137, below).
+  - `/finance/float` (FIN-19) — cash in the shops and the month's write-offs; a row opens
+    the write-off (`?writeoff=<id>`, with reverse); the monthly alert (`?alert=1`).
+  - `/finance/float/transfers[/<TRF-…>[/write-off]]` (FIN-18/18b) — settle the handover,
+    send the collection agent to count, write off (bearer + a 20-character reason, the
+    database's own messages shown in each person's language).
+  - Old paths still land: `/finance/handovers` → transfers, `/finance/calls` → the duty
+    desk under Wallets. Copy that said "he" now says "they".
+- **0137_week_of_a_moment — NOT APPLIED.** Two bugs under FIN-17, both there since 0084/0087:
+  - **Wrong week named.** `settlement_cut(t)` is the last cut at or before `t`; 0084/0087/0128
+    used it as "the week `t` is in", which is the cut *after* it. A deposit earned Thu 27 Aug
+    (week 35) was carried "from week 34" (FIN-17 draws 35), the desk told its story with week
+    34's release and collection, listed refunds whose own week was still a draft, and missed
+    ones whose previous week was never cut. Amounts and which statement they come off were
+    always right. 0137 adds `settlement_week_end(t)` and re-emits settlement_items_for,
+    admin_corrections and admin_carry_correction__direct with it (bodies otherwise verbatim).
+    Lines already on statements keep their old week label (append-only).
+  - **The hand carry could never run**: it assigned a text CASE to the enum `direction`
+    column. 0137 casts it. Tested in PGlite (13 checks, FIN-17's own example); walked in
+    the mock: listed, carried onto the draft, released.
+
+**Coupons, native behind the flag (2026-10-01)** — no migration; 0059's campaign desk.
+- With `STERNCUT_FLAGS.coupons` off (the default) nothing changes: the rail says LATER and
+  the page is the held stub. On: `/coupons` (CPN-02 — running / drafts / ended, spent,
+  committed, cuts bought, redemption; send a draft at `?send=<id>`, stop a running one)
+  and `/coupons/new` (CPN-01 — who pays, the offer, who gets it with the full-shops
+  exclusion said out loud, the cap as "at most N cuts", what the customer sees).
+  Shop-funded campaigns can be saved but not sent until their 14 days' notice has run.
+- **Not built** (no backend): "came back after" and cost per keeper (nothing links a
+  redeemed coupon to the bookings after it), topping up a cap, "send to me first", and
+  CPN-03…15 / SAL-39/40 (armed triggers, barber returns, board reports, overrides, passes).
+
+**Morocco is on GMT since 20 Sep 2026 — check the database's clock (found 2026-10-01).**
+Morocco moved permanently to UTC+0 on 20 September 2026; Chrome 154 already knows (it
+shows a Friday 21:00+01 cut as 20:00), older time-zone data still says UTC+1. 52
+migrations do their local-time arithmetic `at time zone 'Africa/Casablanca'`, so on a
+server with old data every cut lands at 20:00 real time and every "day" turns at 23:00 the
+evening before. The app's own code names no time zone (phones follow their OS). Check:
+`select now() at time zone 'Africa/Casablanca' - now() at time zone 'UTC';` in the Supabase
+SQL editor — `00:00:00` is right, `01:00:00` means its time-zone data is out of date.
+Trigger: that query returns 01:00 — then decide between waiting for Supabase's update and
+pinning the arithmetic to UTC from 20 Sep (history before it stays +01).
 
 **Settings: Districts and Pricing (2026-09-30)** — no migration.
 - `/settings/districts` (SET-06): every district with its live shops, asks and unmet asks
@@ -3756,10 +3811,8 @@ Nothing new in the database; every page first calls `owner_shop(slug)` (the 404)
   of two shops would see the first one's data under both slugs.
 
 **Still open:**
-- Still the old console in a frame: Finance's run / statements / corrections / float
-  (FIN-14…19, already the canvases), Coupons (flagged off), and Settings' reliability and
-  deposit-bounds pages. Those routes keep the site URL in step with the frame; a
-  reload of a sub-page that needs in-memory state (a statement) falls back to its list.
+- Still the old console in a frame: only Settings' reliability and deposit-bounds pages
+  (8a, G4). The shell keeps the site URL in step with the frame.
 - Two bugs in the old console fixed on the way (both there before this site): the
   barbers search box was swallowed by a `</svg<input` typo (boot logged "markup is
   missing bb-q" on every framed page), and the reliability rules page (8a, framed under

@@ -10,7 +10,7 @@
 import { esc, DH, initials, first, ago, dayShort, hhmm, icon, rpc as call } from '/app.js';
 import { pageHead, chips, label9, btnS, btnP } from '/s/ui.js';
 
-const REASON = { no_show: 'Barber never showed', wrong_amount: 'Wrong amount credited', wrong_service: 'Not the service booked',
+const REASON = { no_show: 'Barber never showed', wrong_amount: 'Charged the wrong amount', wrong_service: 'Not the service booked',
   hygiene: 'Hygiene complaint', other: 'Something else', unpaid_leaver: 'Left a shop that still owes them',
   // a barber's own help topics (5c)
   booking: 'A booking', money: 'Money or float', client: 'A client’s behaviour', app: 'The app is broken', review: 'A review' };
@@ -113,7 +113,7 @@ async function queue({ rpc, act, q, go, toast, dialog, closeDialog }) {
   };
 }
 
-async function caseView({ rpc, act, go, toast }, ref) {
+async function caseView({ rpc, act, go, toast, q, dialog, closeDialog }, ref) {
   // the case number is the address; its id comes from the list it is in
   let hit = null;
   for (const st of ['open', 'resolved']) {
@@ -125,15 +125,16 @@ async function caseView({ rpc, act, go, toast }, ref) {
   const claim = hit.status === 'open' ? await rpc('claim_case', { p_ref: ref }).catch(() => ({ mine: true })) : { mine: true };
   const [c, inc] = await Promise.all([rpc('admin_support_case', { p_case: hit.id }), incidentBar(rpc)]);
   const open = c.case.status === 'open';
-  const refund = c.booking ? Math.max(0, (c.booking.deposit_cents || 0) - (c.booking.refunded_cents || 0)) : 0;
+  // what is left of the deposit, if there is a booking; the case's own disputed amount otherwise
+  const depositLeft = c.booking ? Math.max(0, (c.booking.deposit_cents || 0) - (c.booking.refunded_cents || 0)) : 0;
+  const suggest = c.case.amount_cents || depositLeft;
   const readOnly = open && !claim.mine;
   const line = (l, v, color) => `<span style="display:flex;justify-content:space-between;gap:10px;font-size:12px"><span style="color:#9A9CA3">${l}</span><span style="font-weight:600;text-align:right;${color ? `color:${color}` : ''}">${esc(v)}</span></span>`;
   const html = `<div style="height:100%;display:flex;flex-direction:column">
     <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px;font-size:13px">
       <a href="/support" style="color:#9A9CA3;font-weight:600">Support</a><span style="color:#3A3A40">›</span><span style="font-weight:700">${esc(ref)}</span><span style="flex:1"></span>
-      ${open ? (readOnly ? '' : refund ? `<span id="cs-refund" style="height:32px;border-radius:9px;background:#4ADE80;color:#0D0D0F;display:flex;align-items:center;padding:0 14px;font-size:11px;font-weight:800;cursor:pointer">REFUND ${DH(refund)} &amp; CLOSE</span>
-        <span id="cs-close" class="btn-s" style="height:32px;border-radius:9px;background:#212125;border:1px solid #3A3A40;display:flex;align-items:center;padding:0 12px;font-size:11px;font-weight:700;cursor:pointer">CLOSE WITHOUT A REFUND</span>`
-        : '<span id="cs-close" style="height:32px;border-radius:9px;background:#4ADE80;color:#0D0D0F;display:flex;align-items:center;padding:0 14px;font-size:11px;font-weight:800;cursor:pointer">CLOSE THE CASE</span>')
+      ${open ? (readOnly ? '' : `<a href="/support/${esc(ref)}?refund=1" style="height:32px;border-radius:9px;background:#4ADE80;color:#0D0D0F;display:flex;align-items:center;padding:0 14px;font-size:11px;font-weight:800">${suggest ? `REFUND ${DH(suggest)} &amp; CLOSE` : 'REFUND &amp; CLOSE'}</a>
+        <span id="cs-close" class="btn-s" style="height:32px;border-radius:9px;background:#212125;border:1px solid #3A3A40;display:flex;align-items:center;padding:0 12px;font-size:11px;font-weight:700;cursor:pointer">CLOSE WITHOUT A REFUND</span>`)
         : `<span style="font-size:11px;font-weight:700;color:#4ADE80">Closed ${c.case.resolved_at ? esc(dayShort(c.case.resolved_at)) : ''}${c.case.refund_cents ? ` · ${DH(c.case.refund_cents)} refunded` : ''}</span>`}
     </div>
     ${inc.html}
@@ -144,7 +145,7 @@ async function caseView({ rpc, act, go, toast }, ref) {
     <div style="flex:1;min-height:0;display:flex">
       <div style="flex:1;min-width:0;display:flex;flex-direction:column">
         <div style="flex:1;overflow:auto;padding:20px 24px;display:flex;flex-direction:column;gap:12px">
-          <div><span style="display:block;font-size:17px;font-weight:800">${esc(REASON[c.case.reason] || c.case.reason)}</span><span style="display:block;font-size:11.5px;color:#9A9CA3;margin-top:4px">Opened ${esc(dayShort(c.case.created_at))} ${hhmm(c.case.created_at)}${c.booking ? ` · booking ${esc(c.booking.ref)}` : ''}${c.salon ? ` · ${esc(c.salon.name)}${c.salon.status !== 'live' ? ` (${esc(c.salon.status)})` : ''}` : ''}</span></div>
+          <div><span style="display:block;font-size:17px;font-weight:800">${esc(REASON[c.case.reason] || c.case.reason)}</span><span style="display:block;font-size:11.5px;color:#9A9CA3;margin-top:4px">Opened ${esc(dayShort(c.case.created_at))} ${hhmm(c.case.created_at)}${c.case.amount_cents ? ` · <b style="color:#E8442E">${DH(c.case.amount_cents)} in dispute</b>` : ''}${c.booking ? ` · booking ${esc(c.booking.ref)}` : ''}${c.salon ? ` · ${esc(c.salon.name)}${c.salon.status !== 'live' ? ` (${esc(c.salon.status)})` : ''}` : ''}</span></div>
           ${c.case.detail && c.messages[0]?.body !== c.case.detail ? `<div style="background:#17171A;border-radius:12px;padding:13px 15px;font-size:12.5px;line-height:1.55;color:#D8D8DC">“${esc(c.case.detail)}”</div>` : ''}
           ${c.messages.map((m) => `<div style="background:${m.from_us ? '#212125' : '#17171A'};border-radius:12px;padding:13px 15px;${m.from_us ? 'margin-left:40px' : 'margin-right:40px'}">
             <div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;font-weight:700">${esc(m.author)}</span><span style="font-size:10px;color:#6B6B72">${esc(dayShort(m.at))} · ${hhmm(m.at)}</span></div>
@@ -188,8 +189,28 @@ async function caseView({ rpc, act, go, toast }, ref) {
         try { await act('admin_support_resolve', { p_case: hit.id, p_refund_cents: cents || null }, { title: cents ? `Refund ${DH(cents)} on ${ref}` : `Close ${ref}` }); toast(cents ? `Refunded ${DH(cents)} · closed` : 'Closed'); go('/support'); }
         catch (e) { if (!e.handled) toast(e.message, false); }
       };
-      root.querySelector('#cs-refund')?.addEventListener('click', () => resolve(refund));
       root.querySelector('#cs-close')?.addEventListener('click', () => resolve(0));
+      if (q.get('refund') && open && !readOnly) {
+        const who = first(c.customer?.name || 'the customer');
+        const ctxLine = (l, v) => `<span style="display:flex;justify-content:space-between;font-size:12px"><span style="color:#9A9CA3">${l}</span><span class="num" style="font-weight:700">${v}</span></span>`;
+        const dl = dialog(`<div style="padding:22px;display:flex;flex-direction:column;gap:14px">
+          <span style="font-size:17px;font-weight:800">Refund and close ${esc(ref)}</span>
+          <div style="background:#111113;border:1px solid #26262B;border-radius:11px;padding:11px 13px;display:flex;flex-direction:column;gap:7px">
+            ${ctxLine('In dispute', c.case.amount_cents ? DH(c.case.amount_cents) : 'no amount given')}
+            ${c.booking ? ctxLine(`Deposit on ${esc(c.booking.ref)} not yet refunded`, DH(depositLeft)) : ''}
+            ${ctxLine(`${esc(who)}’s wallet now`, DH(c.customer?.wallet_cents ?? 0))}</div>
+          <label style="display:flex;flex-direction:column;gap:6px">${label9('AMOUNT · DH', '#6B6B72')}<input id="rf-dh" inputmode="numeric" value="${suggest ? suggest / 100 : ''}" style="height:42px;border-radius:10px;background:#111113;border:1px solid #26262B;padding:0 12px;color:#fff;font-size:14px;outline:none"></label>
+          <span style="font-size:11.5px;color:#9A9CA3;line-height:1.55">It lands in ${esc(who)}’s wallet straight away, they’re told, and the case closes. If the booking’s deposit was already paid to the shop, the refund comes off that shop’s next statement; otherwise Sterncut bears it. Above 200 DH, Support and Field ops ask the Head first.</span>
+          ${errBox}<div style="display:flex;gap:10px;justify-content:flex-end">${btnS('Cancel', 'data-dlg-close="1"')}${btnP('REFUND &amp; CLOSE', 'id="rf-go"')}</div></div>`, { onClose: () => go(`/support/${ref}`), width: 460 });
+        dl.querySelector('#rf-go').onclick = async () => {
+          const cents = Math.round(Number(dl.querySelector('#rf-dh').value.replace(/\s/g, '').replace(',', '.')) * 100);
+          if (!(cents > 0)) return showErr(dl, new Error('Say how much.'));
+          try {
+            await act('admin_support_resolve', { p_case: hit.id, p_refund_cents: cents }, { title: `Refund ${DH(cents)} on ${ref}` });
+            closeDialog(); toast(`${DH(cents)} back in ${who}’s wallet · closed`); go('/support');
+          } catch (e) { showErr(dl, e); }
+        };
+      }
     },
   };
 }

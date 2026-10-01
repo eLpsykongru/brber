@@ -1,7 +1,7 @@
 // /settings — Team & roles (SET-02), Permissions (SET-03) and the Audit log
 // (SET-04) are drawn here from 0133's tables. Rules, Deposits and Reliability
-// are still the old console's screens; Pricing, Message templates and Districts
-// are not on the website yet. "Take" (SET-14…16) is not built: the billing rail
+// are still the old console's screens; Districts (SET-06) and Pricing (SET-17, read-only)
+// are drawn here too; Message templates are not on the website yet (nothing stores them). "Take" (SET-14…16) is not built: the billing rail
 // (0123) already decided what Sterncut takes.
 import { esc, first, initials, dayShort, ROLE_LABEL, framed } from '/app.js';
 import { pageHead, subTabs, chips, btnP, btnS, plus, avatar, label9, csv } from '/s/ui.js';
@@ -31,11 +31,13 @@ export default async function (ctx) {
   if (page === 'team') return team(ctx);
   if (page === 'permissions') return permissions(ctx);
   if (page === 'audit') return audit(ctx);
-  if (['pricing', 'templates', 'districts'].includes(page)) {
+  if (page === 'districts') return districts(ctx);
+  if (page === 'pricing') return pricing(ctx);
+  if (page === 'templates') {
     const t = TABS.find(([, h]) => h === '/settings/' + page)[0];
     return { top: false, html: frame(`<div style="padding:26px 24px;max-width:640px;display:flex;flex-direction:column;gap:10px">
       <span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;border-radius:999px;padding:4px 9px;color:#E8A100;background:rgba(232,161,0,.12);align-self:flex-start">NOT BUILT YET</span>
-      <span style="font-size:13px;line-height:1.6;color:#9A9CA3">${esc(t)} isn’t on the website yet.${page === 'pricing' ? ' The price list lives in platform_settings, which the public site already reads.' : ''}</span></div>`, t, '') };
+      <span style="font-size:13px;line-height:1.6;color:#9A9CA3">${esc(t)} isn’t on the website yet: nothing stores the product’s messages as templates — each one is written where it is sent.</span></div>`, t, '') };
   }
   return framed(ctx.path);
 }
@@ -243,4 +245,97 @@ async function audit({ rpc, q, go, toast, me }) {
       };
     },
   };
+}
+
+// ---------------------------------------------------------------- SET-06 --
+// A district is what people call the place: the name on salons.district, nothing more.
+// So a district exists once a shop is in it, and renaming one renames it on every shop
+// (0060's admin_set_district, through the gate). "Add a district" with no shop in it —
+// the drawn Malabata row — needs a list of districts that doesn't exist yet.
+const dslug = (d) => String(d || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'unassigned';
+async function districts({ rest, rpc, act, q, go, toast, dialog, closeDialog }) {
+  const [salons, dem] = await Promise.all([rest('salons?select=id,name,status,district'), rpc('admin_demand', { p_days: 30 }).catch(() => ({ districts: [] }))]);
+  const ask = Object.fromEntries(dem.districts.map((x) => [x.district, x]));
+  const names = [...new Set([...salons.map((s) => s.district || 'Unassigned'), ...dem.districts.map((x) => x.district)])];
+  const rows = names.map((n) => {
+    const here = salons.filter((s) => (s.district || 'Unassigned') === n);
+    return { n, live: here.filter((s) => s.status === 'live').length, other: here.filter((s) => s.status !== 'live').length, shops: here, a: ask[n] };
+  }).sort((a, b) => (a.n === 'Unassigned') - (b.n === 'Unassigned') || b.live - a.live || a.n.localeCompare(b.n));
+  const named = rows.filter((r) => r.n !== 'Unassigned').length;
+  const gap = rows.filter((r) => r.a && r.n !== 'Unassigned').sort((a, b) => b.a.unmet - a.a.unmet)[0];
+  const row = (r) => `<div style="display:grid;grid-template-columns:1.6fr 90px 110px 110px 150px;gap:12px;align-items:center;padding:13px 18px;border-bottom:1px solid #1E1E22">
+    <a href="/demand/tangier/${dslug(r.n)}" style="color:#fff;min-width:0"><span style="display:block;font-size:13px;font-weight:700">${esc(r.n)}</span><span style="display:block;font-size:11px;color:#6B6B72;margin-top:2px">${r.n === 'Unassigned' ? 'Shops nobody has placed yet' : r.live ? `${r.live} live${r.other ? ` · ${r.other} not live` : ''}` : r.other ? `${r.other} waiting to go live` : 'No shop yet'}</span></a>
+    <span class="num" style="font-size:12.5px;font-weight:700">${r.live}</span>
+    <span class="num" style="font-size:12.5px">${r.a ? r.a.asks : 0}</span>
+    <span class="num" style="font-size:12.5px;color:${r.a?.unmet ? '#E8A100' : '#6B6B72'}">${r.a ? r.a.unmet : 0}</span>
+    <span style="text-align:right">${r.n === 'Unassigned' ? '<a href="/demand/tangier/unassigned" style="font-size:10px;font-weight:800;letter-spacing:.06em;background:#212125;border-radius:7px;padding:7px 10px;color:#fff">PLACE THEM</a>'
+      : r.shops.length ? `<a href="/settings/districts?rename=${encodeURIComponent(r.n)}" style="font-size:10px;font-weight:800;letter-spacing:.06em;background:#212125;border-radius:7px;padding:7px 10px;color:#fff">RENAME</a>` : ''}</span></div>`;
+  const note = (b, t) => `<div style="flex:1 1 300px;background:#111113;border:1px solid #26262B;border-radius:12px;padding:13px 15px;font-size:11.5px;color:#9A9CA3;line-height:1.6"><b style="color:#fff">${b}</b> ${t}</div>`;
+  const html = frame(`<div style="flex:1;overflow:auto;padding:20px 24px 32px;display:flex;flex-direction:column;gap:14px;max-width:1000px">
+    ${gap && gap.a.unmet ? `<div style="background:#17171A;border:1px solid rgba(232,161,0,.35);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#E8A100">WORST GAP</span><span style="flex:1;min-width:220px;font-size:12.5px"><b>${esc(gap.n)}</b> <span style="color:#9A9CA3">· ${gap.a.unmet} unmet ask${gap.a.unmet === 1 ? '' : 's'} this month with ${gap.live} live shop${gap.live === 1 ? '' : 's'}</span></span><a href="/demand/tangier/${dslug(gap.n)}" style="font-size:11px;font-weight:700">Open it in Demand</a></div>` : ''}
+    <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;overflow:auto">
+      <div style="display:grid;grid-template-columns:1.6fr 90px 110px 110px 150px;gap:12px;padding:11px 18px;border-bottom:1px solid #1E1E22;font-size:9px;letter-spacing:.13em;font-weight:700;color:#6B6B72;min-width:620px"><span>DISTRICT</span><span>LIVE SHOPS</span><span>ASKED · 30D</span><span>UNMET</span><span></span></div>
+      <div style="min-width:620px">${rows.map(row).join('') || '<div style="padding:22px 18px;font-size:12px;color:#6B6B72">No shop has a district yet.</div>'}</div></div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap">
+      ${note('Names, not polygons.', 'A district is what people call the place, not what the census calls it — the name each shop carries. Renaming one renames it on every shop in it; renaming it to a name that already exists merges the two.')}
+      ${note('A district with no shop can’t be added yet.', 'Districts live on shops, so one exists once a shop is in it. Holding an empty one open for searches — the drawn Malabata row — needs a list of districts of its own.')}</div>
+  </div>`, 'Districts', `Tangier · ${named} district${named === 1 ? '' : 's'}`);
+  return {
+    top: false, html,
+    ready() {
+      const r = rows.find((x) => x.n === q.get('rename'));
+      if (!r || !r.shops.length || r.n === 'Unassigned') return;
+      const d = dialog(`<div style="padding:22px;display:flex;flex-direction:column;gap:13px">
+        <span style="font-size:17px;font-weight:800">Rename ${esc(r.n)}</span>
+        <span style="font-size:12px;color:#9A9CA3;line-height:1.55">${r.shops.length === 1 ? 'One shop carries' : `${r.shops.length} shops carry`} this name: ${r.shops.map((s) => esc(s.name)).join(', ')}. Customers pick from these names, so use the one people actually say.</span>
+        <input id="dr-name" list="dr-known" value="${esc(r.n)}" style="height:42px;border-radius:10px;background:#111113;border:1px solid #26262B;padding:0 12px;color:#fff;font-size:13px;outline:none">
+        <datalist id="dr-known">${names.filter((n) => n !== 'Unassigned' && n !== r.n).map((n) => `<option value="${esc(n)}">`).join('')}</datalist>
+        <span class="dlg-err" style="font-size:12px;color:#F87171;display:none"></span>
+        <div style="display:flex;gap:10px;justify-content:flex-end">${btnS('Cancel', 'data-dlg-close="1"')}${btnP('RENAME IT', 'id="dr-go"')}</div></div>`, { onClose: () => go('/settings/districts'), width: 460 });
+      d.querySelector('#dr-go').onclick = async () => {
+        const v = d.querySelector('#dr-name').value.trim(), err = d.querySelector('.dlg-err');
+        if (!v || v === r.n) { err.textContent = 'Type the new name.'; err.style.display = 'block'; return; }
+        try {
+          for (const s of r.shops) await act('admin_set_district', { p_salon: s.id, p_district: v }, { title: `Move ${s.name} from ${r.n} to ${v}` });
+          closeDialog(); toast(`${r.n} is now ${v}${names.includes(v) ? ' · merged' : ''}`);
+        } catch (e) { if (!e.handled) { err.textContent = e.message; err.style.display = 'block'; } }
+      };
+    },
+  };
+}
+
+// ---------------------------------------------------------------- SET-17 --
+// What Sterncut actually bills (0123), read-only. The drawing prices 40 DH a barber + 1 DH a
+// cut with free months; what is built is one list price per chair, snapshotted onto each
+// subscription. Changing a price isn't offered: platform_settings has no audited setter, and
+// a raw write from here would skip both the gate and the audit log.
+async function pricing({ rest, rpc }) {
+  const [ps, subs, live, open] = await Promise.all([
+    rest('platform_settings?select=sub_monthly_cents,sub_yearly_cents,sub_chair_cap,sub_sms_included,sub_sms_unit_cents&limit=1'),
+    rest('subscriptions?select=salon_id,cycle,unit_price_cents,started_on'), rest('salons?select=id&status=eq.live'), rpc('admin_subscription_ledger').catch(() => [])]);
+  const p = ps[0] || {};
+  const dh = (c) => (c == null ? '—' : String(Math.round(c / 100)));
+  const today = new Date().toISOString().slice(0, 10);
+  const yearly = subs.filter((x) => x.cycle === 'yearly').length, starting = subs.filter((x) => x.started_on > today).length;
+  const stale = subs.filter((x) => x.cycle === 'monthly' && x.unit_price_cents !== p.sub_monthly_cents).length;
+  const bal = open.reduce((n, r) => n + r.balance_cents, 0);
+  const price = (l, v, unit, sub) => `<div style="flex:1 1 170px;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:15px 16px;display:flex;flex-direction:column;gap:6px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">${l}</span><span><span class="num" style="font-family:'Playfair Display',serif;font-weight:700;font-size:30px">${v}</span> <span style="font-size:12px;color:#9A9CA3">${unit}</span></span><span style="font-size:10.5px;color:#6B6B72;line-height:1.45">${sub}</span></div>`;
+  const stat = (l, v, s) => `<div style="flex:1 1 170px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#6B6B72">${l}</span><span class="num" style="font-size:20px;font-weight:800">${v}</span><span style="font-size:10.5px;color:#9A9CA3">${s}</span></div>`;
+  const note = (b, t) => `<div style="flex:1 1 300px;background:#111113;border:1px solid #26262B;border-radius:12px;padding:13px 15px;font-size:11.5px;color:#9A9CA3;line-height:1.6"><b style="color:#fff">${b}</b> ${t}</div>`;
+  const html = frame(`<div style="flex:1;overflow:auto;padding:20px 24px 32px;display:flex;flex-direction:column;gap:14px;max-width:1000px">
+    ${label9('WHAT A NEW SUBSCRIPTION IS CHARGED')}
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      ${price('PER CHAIR, PER MONTH', dh(p.sub_monthly_cents), 'DH', 'A chair with a bookable barber on it, not an empty one')}
+      ${price('PAID FOR A YEAR', dh(p.sub_yearly_cents), 'DH a chair a month', 'The same chairs, billed for twelve months at once')}
+      ${price('CHAIRS BILLED', `up to ${p.sub_chair_cap ?? '—'}`, 'a shop', 'The owner first, then by the order they joined. Past that, free')}
+      ${price('TEXT MESSAGES', p.sub_sms_included ?? '—', 'a month included', p.sub_sms_unit_cents ? `then ${dh(p.sub_sms_unit_cents)} DH each` : 'Nothing is charged past that until the SMS rate is confirmed')}</div>
+    <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;gap:14px;flex-wrap:wrap">
+      ${stat('SHOPS ON A SUBSCRIPTION', `${subs.length} of ${live.length}`, `${yearly} paying yearly${starting ? ` · ${starting} not started yet` : ''}`)}
+      ${stat('ON AN OLDER PRICE', stale, 'monthly subscriptions that started on a different list price')}
+      ${stat('OPEN INVOICES', open.length, bal ? `${Math.round(bal / 100)} DH still to reach us` : 'nothing open')}</div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap">
+      ${note('A price here reprices nobody.', 'Each subscription keeps the price it started on; these numbers are for the next shop that starts. It reaches us by netting off the deposits we already hold for the shop, on the Friday statement.')}
+      ${note('Not editable here yet.', 'There is no audited setter for the list price, and a direct write would skip the permission check and the audit log. Billing itself runs from <a href="/finance/charges" style="font-weight:700">Finance · Charges</a>.')}</div>
+  </div>`, 'Pricing', 'What Sterncut charges a shop');
+  return { top: false, html };
 }

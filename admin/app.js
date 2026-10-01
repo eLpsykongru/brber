@@ -82,7 +82,7 @@ const OWNER_NAV = [
   ['reports', 'Reports', 'reports'], ['shop', 'Your shop', 'salons'],
 ].map(([key, label, ic]) => ({ key, label, ic }));
 // sections rebuilt on this site; every other staff section is still the old console
-const NATIVE = { overview: 'overview', requests: 'requests', salons: 'salons', barbers: 'barbers', customers: 'customers', support: 'support', reviews: 'reviews', bookings: 'bookings', compliance: 'compliance', demand: 'demand', settings: 'settings' };
+const NATIVE = { overview: 'overview', requests: 'requests', salons: 'salons', barbers: 'barbers', customers: 'customers', support: 'support', reviews: 'reviews', bookings: 'bookings', compliance: 'compliance', demand: 'demand', wallets: 'wallets', finance: 'finance', settings: 'settings' };
 const OWNER_NATIVE = { today: 'today', payouts: 'payouts', reviews: 'reviews', subscription: 'subscription', reports: 'reports', chairs: 'chairs', shop: 'shop', services: 'services' };
 export const ROLE_LABEL = { head: 'Head of Ops', support: 'Support', mod: 'Moderator', field: 'Field ops' };
 
@@ -396,13 +396,15 @@ function notBuilt(key, owner) {
 // ------------------------------------------------- the old console, framed --
 // Path → the legacy hash route that draws it. Replaced section by section.
 const LEGACY = [
-  [/^\/wallets/, 'wallets'],
   [/^\/finance\/statements/, 'finance/statement'], [/^\/finance\/corrections/, 'finance/corrections'],
   [/^\/finance\/calls/, 'finance/calls'], [/^\/finance\/float\/transfers/, 'finance/handovers'],
   [/^\/finance\/float/, 'finance/float'], [/^\/finance/, 'finance'],
   [/^\/coupons/, 'coupons'],
   [/^\/settings\/deposit-bounds/, 'reliability/deposit'], [/^\/settings/, 'reliability'],
 ];
+// the reverse of LEGACY, for the routes a native section still frames
+const FRAME_PATH = { finance: '/finance', 'finance/statement': '/finance/statements', 'finance/corrections': '/finance/corrections', 'finance/calls': '/finance/calls',
+  'finance/handovers': '/finance/float/transfers', 'finance/float': '/finance/float', reliability: '/settings', 'reliability/deposit': '/settings/deposit-bounds' };
 const LEGACY_SECTION = { appeals: 'reviews', reliability: 'settings', desk: 'support', invites: 'salons', salon: 'salons', booking: 'bookings' };
 export function framed(path) { return { frame: (LEGACY.find(([re]) => re.test(path)) || [, 'overview'])[1] }; }
 
@@ -413,6 +415,8 @@ addEventListener('message', (e) => {
   if (d.sterncut === 'signed-out') return signOut();
   if (d.sterncut === 'route') {
     const r = String(d.route || '');
+    // a framed page walking between its own sub-pages: the site URL follows it, nothing reloads
+    if (me?.kind === 'staff' && FRAME_PATH[r]) { if (location.pathname !== FRAME_PATH[r]) history.replaceState(null, '', FRAME_PATH[r]); return; }
     const key = LEGACY_SECTION[r.split('/')[0]] || r.split('/')[0];
     // a frame that walks into a section rebuilt here hands over to the native page
     if (me?.kind === 'staff' && NATIVE[key]) return go('/' + key);

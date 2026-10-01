@@ -3678,6 +3678,56 @@ admin_task_action.
   queue, visits and refusals (DMD-11…15) and other cities (DMD-07, §10) aren't built.
   Tangier is the only city; `/demand/<anything else>` goes back to `/demand`.
 
+**Wallets & float, native (2026-09-29)** — no migration; the agent-collection reads.
+- `/wallets` (SAL-03): customer wallet liability, agent cash in hand, unreconciled, the
+  float by shop (0044's admin_wallets), the first mismatch, the recent ledger (CSV).
+  A banner when an agent is waiting on the duty desk. "Run settlement" opens Finance.
+- `/wallets/witnessed` (AGT-08): 0102's queue; `?visit=` opens the call (0100) — four
+  numbered steps, owner's figure before the agent's, six digits shown once, or "two
+  different amounts — nothing issued". Opening the page opens a call row, as the old
+  desk did; a call abandoned half-way is left unused.
+- `/wallets/agents` (AGT-12): 0101's audit as a rate, 30 / 90 days, both thresholds
+  printed; `?agent=` offers the three actions. Suspending is shown as not offered.
+- `/wallets/unchecked` (AGT-20): the latest run's three siblings (code / ops call /
+  unchecked) and every queued, failed or incident receipt with its age and state.
+- **Not built** (no backend): "hold payouts" and "call the owner" on a float mismatch
+  (the float read carries no phone), "push all agents to sync". The old `#/finance/calls`
+  desk is still reachable inside the framed Finance section.
+
+**Finance (2026-09-29): billing native, the rest still framed on purpose.**
+- `/finance/charges` (FIN-12 on the real invoices) — 0123/0124's billing had no screen
+  anywhere, not even in the old console. Open invoices with their age, short Fridays and
+  rung; log the call (`?call=`), record cash (`?cash=`), waive with a reason (`?waive=`),
+  raise this month's invoices, start billing for live shops with no subscription
+  (`?start=1`). **The call dialog says what logging it does**: past day 14 it hides the
+  shop from search at once, past day 30 it closes new appointments — 0124's ladder only
+  moves after a call.
+- **Not as drawn:** FIN-11 prices 40 DH a barber + 1 DH a cut with free months; 0123 bills
+  one subscription per shop, netted off the Friday statement. The page shows what is
+  billed, not the drawing. FIN-01 (payout run — superseded by the settlement run),
+  FIN-02 (commission — there is none), FIN-03 (VAT) and FIN-13 (tips) have no backend.
+- The run, statements, corrections and the float (FIN-14…19) stay the old console in a
+  frame — its screens already are those canvases. The shell now keeps the site URL in
+  step as the frame moves between them (`/finance/corrections`, `/finance/float`, …),
+  and the frame's own tab strip gained a Charges tab that leaves the frame.
+
+**Settings: Districts and Pricing (2026-09-30)** — no migration.
+- `/settings/districts` (SET-06): every district with its live shops, asks and unmet asks
+  over 30 days (admin_demand), the worst gap, and rename (`?rename=`) — admin_set_district
+  on each shop in it, through the gate; renaming onto an existing name merges them.
+  Unassigned shops link to Demand to be placed. **Not built:** adding a district with no
+  shop (the drawn Malabata row) — districts are a column on shops, so an empty one needs a
+  districts list of its own.
+- `/settings/pricing` (SET-17) is **read-only and not as drawn**: it shows what 0123
+  actually bills (55 DH a chair a month, 40 on a year, up to 4 chairs, 200 SMS, no SMS
+  overage until the rate is confirmed) and who is on a subscription. The drawing's
+  40 DH a barber + 1 DH a cut with free months isn't the built model. **Not editable:**
+  platform_settings has no audited setter, and a direct write from the site would skip
+  the gate and the audit log. Trigger: the first price change — add
+  `admin_set_pricing__direct` (key `platform_rule`) in a new migration, then an edit here.
+- Message templates (SET-05) stay "not built": nothing stores the product's messages as
+  templates. "Take" (SET-14…16) isn't built — 0123 already decided what Sterncut takes.
+
 **Owner side (2026-09-29): all eight menu items native, on the app's own reads.**
 Nothing new in the database; every page first calls `owner_shop(slug)` (the 404).
 - **Today** (OSH-02 + OSH-19 + OSH-03 merged): salon_team, shop_bookings,
@@ -3706,10 +3756,10 @@ Nothing new in the database; every page first calls `owner_shop(slug)` (the 404)
   of two shops would see the first one's data under both slugs.
 
 **Still open:**
-- Wallets & float, Finance, Coupons and Settings' reliability pages are still the old
-  console in a frame; their sub-pages keep hash routes inside the frame and the site's
-  URL only tracks the section. Finance's legacy screens already are the FIN-14…19
-  canvases, so it goes last.
+- Still the old console in a frame: Finance's run / statements / corrections / float
+  (FIN-14…19, already the canvases), Coupons (flagged off), and Settings' reliability and
+  deposit-bounds pages. Those routes keep the site URL in step with the frame; a
+  reload of a sub-page that needs in-memory state (a statement) falls back to its list.
 - Two bugs in the old console fixed on the way (both there before this site): the
   barbers search box was swallowed by a `</svg<input` typo (boot logged "markup is
   missing bb-q" on every framed page), and the reliability rules page (8a, framed under

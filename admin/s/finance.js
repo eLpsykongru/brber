@@ -176,9 +176,13 @@ async function runPage({ rpc, rest, act, q, go, toast, dialog, closeDialog }, we
   const d = runs.length ? await rpc('admin_run', { p_run: pick ? pick.id : null }) : null;
   const latest = !d || d.id === runs[0].id;
   const draft = d?.state === 'draft';
-  const [prog, open] = await Promise.all([d && !draft ? rpc('admin_run_progress', { p_run: d.id }) : null, latest ? rpc('admin_open_lines').catch(() => []) : []]);
+  const [prog, open, holds] = await Promise.all([d && !draft ? rpc('admin_run_progress', { p_run: d.id }) : null, latest ? rpc('admin_open_lines').catch(() => []) : [],
+    rest('payout_holds?select=salon_id')]);
   const base = latest ? '/finance' : `/finance/settlement/${d.week}`;
-  const needs = d ? d.lines.filter((l) => !settled(l) && !l.on_round).length : 0;
+  // 0141: a held shop's pay-out stays off the round and can't be recorded until the hold lifts
+  const isHeld = (l) => l.direction === 'pay_out' && holds.some((h) => h.salon_id === l.salon_id);
+  const needs = d ? d.lines.filter((l) => !settled(l) && !l.on_round && !isHeld(l)).length : 0;
+  const heldN = d ? d.lines.filter((l) => !settled(l) && isHeld(l)).length : 0;
   const right = !latest ? btnS('Back to the latest week', 'data-go="/finance"') : `<span style="display:flex;gap:10px;align-items:center">${draft
     ? btnP(`RELEASE ${plural(d.shops, 'STATEMENT', 'STATEMENTS')}`, 'data-go="/finance?release=1"')
     : `${btnS('CUT THIS WEEK', 'id="fn-cut"')}${d ? (needs ? btnP(`PLAN ${plural(needs, 'VISIT', 'VISITS')}`, 'data-go="/finance?plan=1"')
@@ -227,7 +231,8 @@ async function runPage({ rpc, rest, act, q, go, toast, dialog, closeDialog }, we
       <span class="num" style="text-align:right;color:${l.subscription_cents ? '#FF7A66' : '#3A3A40'}">${l.subscription_cents ? DH(l.subscription_cents) : '—'}</span>
       <span class="num" style="text-align:right;font-size:12.5px;font-weight:800;color:${col}">${DH(Math.abs(l.amount_cents))}</span>
       <span style="grid-column:1 / -1;display:flex;align-items:center;gap:10px;min-width:0"><span style="font-size:11px;font-weight:700;color:${col};flex:none">${word}</span><span style="flex:1;min-width:0;font-size:10.5px;color:#6B6B72;line-height:1.5">${visit(l)}</span>${late ? '<span style="font-size:10px;font-weight:700;color:#E8A100;flex:none">OVER 14</span>' : ''}
-        ${!draft && !settled(l) ? `<span data-go="${base}?settle=${l.id}" style="flex:none;height:24px;border-radius:7px;background:#212125;display:flex;align-items:center;padding:0 10px;font-size:9.5px;font-weight:800;letter-spacing:.05em">${l.direction === 'collect' ? 'RECORD COLLECTION' : 'RECORD HANDOVER'}</span>` : ''}</span></div>`;
+        ${!draft && !settled(l) ? (isHeld(l) ? '<span data-go="/wallets" style="flex:none;height:24px;border-radius:7px;background:rgba(232,161,0,.12);display:flex;align-items:center;padding:0 10px;font-size:9.5px;font-weight:800;letter-spacing:.05em;color:#E8A100">PAYOUTS HELD</span>'
+          : `<span data-go="${base}?settle=${l.id}" style="flex:none;height:24px;border-radius:7px;background:#212125;display:flex;align-items:center;padding:0 10px;font-size:9.5px;font-weight:800;letter-spacing:.05em">${l.direction === 'collect' ? 'RECORD COLLECTION' : 'RECORD HANDOVER'}</span>`) : ''}</span></div>`;
   };
   const bad = d.imbalance || [];
   const side = [
@@ -271,7 +276,7 @@ async function runPage({ rpc, rest, act, q, go, toast, dialog, closeDialog }, we
         const cap = ps[0]?.agent_bag_cap_cents ?? 1200000;
         const toCollect = d.lines.filter((l) => l.direction === 'collect' && !l.on_round && !settled(l)).reduce((n, l) => n + Math.abs(l.amount_cents) - (l.collected_cents || 0), 0);
         let who = null;
-        const dl = dialog(sheet(`Plan the round · week ${wk(d.week)}`, `Every shop on week ${wk(d.week)} nobody has visited yet goes on one agent’s phone${toCollect ? ` — ${DH(toCollect)} to collect` : ''}.`,
+        const dl = dialog(sheet(`Plan the round · week ${wk(d.week)}`, `Every shop on week ${wk(d.week)} nobody has visited yet goes on one agent’s phone${toCollect ? ` — ${DH(toCollect)} to collect` : ''}.${heldN ? ` ${plural(heldN, 'pay-out is', 'pay-outs are')} on hold and stay${heldN === 1 ? 's' : ''} off it.` : ''}`,
           `${label9('WHO IS DRIVING IT', '#6B6B72')}<div id="pl-list" style="display:flex;flex-direction:column;gap:7px">${agents.map((a) => `<span data-agent="${a.id}" style="display:flex;align-items:center;gap:12px;background:#111113;border:1px solid #26262B;border-radius:11px;padding:11px 13px;cursor:pointer"><span class="dot" style="width:16px;height:16px;border-radius:999px;border:1.5px solid #3A3A40;flex:none"></span><span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">${esc(a.name)}</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">carrying ${DH(a.in_bag_cents)}${a.open_visits ? ` · ${plural(a.open_visits, 'visit', 'visits')} still open` : ''}</span></span></span>`).join('') || '<span style="font-size:12px;color:#F87171">Nobody has the agent role yet.</span>'}</div>
            <span id="pl-warn" style="font-size:11.5px;color:#E8A100;line-height:1.5;display:none"></span>
            ${label9('VISIT WINDOW TODAY · TANGIER TIME', '#6B6B72')}<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><input id="pl-from" type="time" value="17:00" style="height:40px;${input}"><span style="color:#6B6B72">to</span><input id="pl-to" type="time" value="20:00" style="height:40px;${input}"><span style="font-size:11px;color:#6B6B72">empty both for no window</span></div>`,

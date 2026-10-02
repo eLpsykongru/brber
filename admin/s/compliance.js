@@ -2,10 +2,11 @@
 // CMP-01 (open follow-ups: 0058's admin_compliance) with BRB-06's task beside it —
 // the same list, one task open in the side panel. Actions are 0061's admin_task_action
 // (verify / remind / hide the shop / drop), through the gate like everything else.
-// Not built (no backend): "give 7 more days" (nothing extends a due date), the full
-// chase history (a task keeps only its last reminder), countersign / overrides / policy
-// (HOP-02…08), calling the owner from here (the list carries no phone).
-import { esc, initials, dayShort } from '/app.js';
+// "Give 7 more days" (?more=1) is 0141's admin_extend_task: the date moves, the reason is kept
+// per extension and listed with the task, and the owner is told the new date.
+// Not built (no backend): the full chase history (a task keeps only its last reminder),
+// countersign / overrides / policy (HOP-02…08), calling the owner from here (no phone on the list).
+import { esc, first, initials, dayShort, dayWk } from '/app.js';
 import { pageHead, chips, label9, btnS, btnP } from '/s/ui.js';
 
 const due = (t) => {
@@ -32,7 +33,7 @@ const CONFIRM = {
 export default async function (ctx) {
   const [a, ref] = ctx.seg;
   if (a && (a !== 'tasks' || !ref)) throw new Error('not_found');
-  const { rpc, act, q, go, toast, dialog, closeDialog } = ctx;
+  const { rpc, rest, act, q, go, toast, dialog, closeDialog } = ctx;
   const scope = q.get('scope') === 'done' ? 'done' : 'open';
   let d = await rpc('admin_compliance', { p_scope: scope });
   let sel = ref ? d.rows.find((t) => t.ref === ref) : null;
@@ -41,6 +42,9 @@ export default async function (ctx) {
     sel = other.rows.find((t) => t.ref === ref);
     if (!sel) throw new Error('not_found');
   }
+  const ext = sel ? await rest(`shop_task_extensions?select=days,reason,given_at,given_by&task_id=eq.${sel.id}&order=given_at`) : [];
+  const ids = [...new Set(ext.map((x) => x.given_by).filter(Boolean))];
+  const people = ids.length ? Object.fromEntries((await rest(`profiles?select=id,full_name&id=in.(${ids.join(',')})`).catch(() => [])).map((p) => [p.id, p.full_name])) : {};
   const s = d.stats;
   const qs = scope === 'done' ? '?scope=done' : '';
   const kpi = (l, v, sub, col) => `<div style="flex:1 1 150px;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:13px 16px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">${l}</span><span class="num" style="font-size:20px;font-weight:700${col ? ';color:' + col : ''}">${v}</span><span style="font-size:10.5px;color:#9A9CA3">${sub}</span></div>`;
@@ -65,7 +69,7 @@ export default async function (ctx) {
       ${t.body ? `<span style="font-size:12px;color:#9A9CA3;line-height:1.55">${esc(t.body)}</span>` : ''}
       ${label9('WHAT WE HAVE ON IT')}
       <div style="display:flex;flex-direction:column;gap:8px">
-        ${t.due_at ? line(t.due_at, `Due · ${esc(t.ref)}`) : ''}${t.reminded_at ? line(t.reminded_at, 'Last reminder sent') : ''}${t.proof_at ? line(t.proof_at, '<b>Proof sent</b> · check it and verify') : ''}${t.enforced_at ? line(t.enforced_at, 'Shop hidden for it') : ''}
+        ${t.due_at ? line(t.due_at, `Due · ${esc(t.ref)}`) : ''}${ext.map((x) => line(x.given_at, `Given ${x.days} more day${x.days === 1 ? '' : 's'} by ${esc(first(people[x.given_by] || 'ops'))} · “${esc(x.reason)}”`)).join('')}${t.reminded_at ? line(t.reminded_at, 'Last reminder sent') : ''}${t.proof_at ? line(t.proof_at, '<b>Proof sent</b> · check it and verify') : ''}${t.enforced_at ? line(t.enforced_at, 'Shop hidden for it') : ''}
         ${!t.reminded_at && !t.proof_at && !t.enforced_at ? '<span style="font-size:11.5px;color:#6B6B72">No reminder yet, nothing sent back.</span>' : ''}</div>
       ${t.consequence ? `<div style="background:${acts ? 'rgba(248,113,113,.08)' : '#111113'};border:1px solid ${acts ? 'rgba(248,113,113,.3)' : '#26262B'};border-radius:12px;padding:12px 13px;display:flex;flex-direction:column;gap:4px">
         <span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:${acts ? '#F87171' : '#6B6B72'}">${acts ? 'WHAT HAPPENS TONIGHT' : 'IF IT IS MISSED'}</span><span style="font-size:12px;line-height:1.5">${esc(t.consequence)}</span>
@@ -73,7 +77,7 @@ export default async function (ctx) {
       ${open ? `<div style="display:flex;flex-direction:column;gap:8px">
         ${t.proof_at || t.action !== 'photo' ? btn('verify', 'IT’S SORTED · VERIFY', !!t.proof_at) : ''}
         ${t.salon_status === 'live' && t.days_left < 0 ? btn('hide', 'HIDE NOW · DON’T WAIT', true) : ''}
-        ${btn('remind', 'REMIND THE OWNER')}<a href="/compliance/tasks/${esc(t.ref)}?drop=1" style="display:flex;align-items:center;justify-content:center;height:38px;border-radius:10px;font-size:11px;font-weight:800;letter-spacing:.05em;border:1px solid #3A3A40;color:#9A9CA3">DROP THE TASK</a></div>` : `<span style="font-size:11.5px;color:#4ADE80">Closed.</span>`}
+        ${btn('remind', 'REMIND THE OWNER')}${t.due_at && !(t.enforced_at && t.on_overdue === 'hide_shop' && t.salon_status !== 'live') ? `<a href="/compliance/tasks/${esc(t.ref)}?more=1" style="display:flex;align-items:center;justify-content:center;height:38px;border-radius:10px;font-size:11px;font-weight:800;letter-spacing:.05em;background:#212125;border:1px solid #3A3A40;color:#fff">GIVE 7 MORE DAYS</a><span style="font-size:10.5px;color:#6B6B72;text-align:center">Extending needs a reason and shows on the shop’s record.</span>` : ''}<a href="/compliance/tasks/${esc(t.ref)}?drop=1" style="display:flex;align-items:center;justify-content:center;height:38px;border-radius:10px;font-size:11px;font-weight:800;letter-spacing:.05em;border:1px solid #3A3A40;color:#9A9CA3">DROP THE TASK</a></div>` : `<span style="font-size:11.5px;color:#4ADE80">Closed.</span>`}
     </div>`;
   })() : '';
   const html = `<div style="height:100%;display:flex;flex-direction:column">
@@ -107,6 +111,32 @@ export default async function (ctx) {
         try { await run(t, a); go(location.pathname + location.search, { replace: true }); }
         catch (err) { if (!err.handled) toast(err.message, false); }
       }, true);
+      if (q.get('more') && sel && sel.status !== 'done' && sel.due_at) {
+        let days = 7;
+        const from = Math.max(Date.parse(sel.due_at), Date.now());
+        const dl = dialog(`<div style="padding:22px;display:flex;flex-direction:column;gap:14px">
+          <span style="font-size:17px;font-weight:800">More days for ${esc(sel.ref)}</span>
+          <span style="font-size:12px;color:#9A9CA3;line-height:1.55">${esc(sel.salon)} · ${esc(sel.title)}. ${sel.days_left < 0 ? 'It is late, so the days count from today.' : 'The days go on top of its date.'} The owner is told the new date${sel.consequence ? ', and that the same thing happens if it is missed' : ''}.</span>
+          <div id="mo-days" style="display:flex;gap:8px"></div>
+          <span id="mo-new" style="font-size:12px;font-weight:700"></span>
+          <textarea id="mo-why" rows="3" placeholder="Why — it goes on the shop’s record" style="background:#111113;border:1px solid #26262B;border-radius:11px;padding:11px 12px;color:#fff;font-size:12.5px;outline:none;resize:vertical"></textarea>
+          <span class="dlg-err" style="font-size:12px;color:#F87171;display:none"></span>
+          <div style="display:flex;gap:10px;justify-content:flex-end">${btnS('Cancel', 'data-dlg-close="1"')}${btnP('GIVE THE DAYS', 'id="mo-go"')}</div></div>`, { onClose: () => go(`/compliance/tasks/${sel.ref}`), width: 460 });
+        const draw = () => {
+          dl.querySelector('#mo-days').innerHTML = [3, 7, 14].map((n) => `<span data-days="${n}" style="cursor:pointer;padding:8px 13px;border-radius:8px;font-size:12px;font-weight:700;${n === days ? 'background:#E8442E;color:#fff' : 'background:#212125;color:#9A9CA3'}">${n} days</span>`).join('');
+          dl.querySelector('#mo-new').textContent = `Due ${dayWk(from + days * 86400e3)}`;
+        };
+        draw();
+        dl.querySelector('#mo-days').onclick = (e) => { const c = e.target.closest('[data-days]'); if (c) { days = Number(c.dataset.days); draw(); } };
+        dl.querySelector('#mo-go').onclick = async () => {
+          const why = dl.querySelector('#mo-why').value.trim(), err = dl.querySelector('.dlg-err');
+          if (!why) { err.textContent = 'Say why — it goes on the shop’s record.'; err.style.display = 'block'; return; }
+          try {
+            const r = await act('admin_extend_task', { p_task: sel.id, p_days: days, p_reason: why }, { title: `Give ${sel.ref} · ${sel.salon} ${days} more days`, reason: why });
+            closeDialog(); toast(`Due ${dayWk(r.due_at)} · owner told`);
+          } catch (e) { if (!e.handled) { err.textContent = e.message; err.style.display = 'block'; } }
+        };
+      }
       if (q.get('drop') && sel && sel.status !== 'done') {
         const dl = dialog(`<div style="padding:22px;display:flex;flex-direction:column;gap:14px">
           <span style="font-size:17px;font-weight:800">Drop ${esc(sel.ref)}</span>

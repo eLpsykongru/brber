@@ -10,7 +10,7 @@
 import { esc, DH, initials, first, ago, dayShort, hhmm, icon, rpc as call } from '/app.js';
 import { pageHead, chips, label9, btnS, btnP } from '/s/ui.js';
 
-const REASON = { no_show: 'Barber never showed', wrong_amount: 'Charged the wrong amount', wrong_service: 'Not the service booked',
+export const REASON = { no_show: 'Barber never showed', wrong_amount: 'Charged the wrong amount', wrong_service: 'Not the service booked',
   hygiene: 'Hygiene complaint', other: 'Something else', unpaid_leaver: 'Left a shop that still owes them',
   // a barber's own help topics (5c)
   booking: 'A booking', money: 'Money or float', client: 'A client’s behaviour', app: 'The app is broken', review: 'A review' };

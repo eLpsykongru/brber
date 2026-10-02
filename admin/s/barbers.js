@@ -21,8 +21,9 @@ export default async function (ctx) {
 
 async function roster({ rpc, q, toast }) {
   const d = await rpc('admin_barbers');
-  const filter = ['all', 'cancels', 'rating'].includes(q.get('filter')) ? q.get('filter') : 'look';
   const look = d.rows.filter((b) => b.flagged);
+  // opens on who needs a look — or on everyone, when nobody does
+  const filter = ['all', 'cancels', 'rating', 'look'].includes(q.get('filter')) ? q.get('filter') : look.length ? 'look' : 'all';
   const rows = filter === 'look' ? look
     : filter === 'cancels' ? d.rows.filter((b) => b.cancel_pct != null).sort((a, b) => b.cancel_pct - a.cancel_pct)
       : filter === 'rating' ? d.rows.filter((b) => b.rating != null && b.rating < 4).sort((a, b) => a.rating - b.rating)
@@ -39,7 +40,7 @@ async function roster({ rpc, q, toast }) {
     <span style="width:84px;flex:none;text-align:right">${b.action ? `<span style="font-size:10px;font-weight:800;letter-spacing:.06em;color:#0D0D0F;background:#E8A100;border-radius:6px;padding:5px 9px">${ACT[b.action] || 'OPEN'}</span>` : ''}</span></a>`;
   const html = `<div style="height:100%;display:flex;flex-direction:column">
     ${pageHead('Barbers', `Tangier · ${num(d.total)}`, btnS('Export CSV', 'id="bb-csv"'))}
-    ${chips([['Needs a look', '/barbers', filter === 'look', look.length], ['All', '/barbers?filter=all', filter === 'all'], ['Most cancels', '/barbers?filter=cancels', filter === 'cancels'], ['Rated under 4.0', '/barbers?filter=rating', filter === 'rating', d.below_four]],
+    ${chips([['Needs a look', '/barbers?filter=look', filter === 'look', look.length], ['All', '/barbers?filter=all', filter === 'all'], ['Most cancels', '/barbers?filter=cancels', filter === 'cancels'], ['Rated under 4.0', '/barbers?filter=rating', filter === 'rating', d.below_four]],
       `<input id="bb-q" placeholder="Barber or shop" style="height:30px;width:200px;border-radius:8px;background:#17171A;border:1px solid #26262B;padding:0 11px;color:#fff;font-size:11.5px;outline:none">`)}
     <div style="flex:1;overflow:auto;padding:18px 24px;display:flex;flex-direction:column;gap:14px">
       <div style="display:flex;gap:12px">${kpi('CUTTING THIS WEEK', `${d.cutting}<span style="font-size:12px;font-weight:400;color:#9A9CA3"> / ${d.total}</span>`, `${d.idle} idle 14+ days`)}${kpi('MEDIAN RATING', d.median_rating == null ? '—' : d.median_rating + ' ★', `${d.below_four || 0} below 4.0`)}${kpi('CANCEL RATE', `${d.cancel_rate ?? 0} %`, 'shop-side, last 30 days')}${kpi('NEW THIS MONTH', num(d.new_month), 'approved barbers')}</div>

@@ -75,6 +75,7 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
   // 38a - the answer to "location is off" is to let him name where he is
   const [district, setDistrict] = useState<string | null>(null);
+  const [listed, setListed] = useState<string[]>([]);   // 0141: districts ops opened before any shop
   const [reload, setReload] = useState(0);
   const { online } = useOnline();
   const mapRef = useRef<MapView>(null);
@@ -94,6 +95,8 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
           .filter((s) => s.barbers.length > 0);
         setSalons(cards);
       });
+    supabase.from('districts').select('name')
+      .then(({ data }) => setListed((data ?? []).map((d: { name: string }) => d.name)));
     locate(false);
   }, [reload]);
 
@@ -170,8 +173,9 @@ export default function ExploreScreen({ onChromeHidden, onBookings, onHome }: {
   }
 
   const filtersOn = minRating != null || maxKm != null || maxPrice != null || district != null;
-  // whatever the shops actually say they're in - no hardcoded list of Tangier
-  const districts = [...new Set(salons.map((x) => x.district).filter(Boolean))].sort() as string[];
+  // whatever the shops actually say they're in - no hardcoded list of Tangier - plus
+  // the ones ops opened with nothing in them yet: picking one says so (38a)
+  const districts = [...new Set([...salons.map((x) => x.district), ...listed].filter(Boolean))].sort() as string[];
 
   // 25b — Explore is the one tab with nothing useful cached: a map and a salon
   // list are both live queries, so there is nothing honest to show offline.

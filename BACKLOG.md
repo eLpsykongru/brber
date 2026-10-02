@@ -1139,6 +1139,8 @@ They adopt on tools that fix today's business. Priority order:
    image-driven; costs nothing, we already have reviews + ID verification.
 7. **Zero commission on their own clients, stated loudly.** Monetize only
    marketplace-sourced clients + payment fees later. **Trigger:** pricing page.
+   *(2026-10-02: the admin pricing page now changes prices (0141) — trigger reached,
+   raised with the user, not built.)*
 
 ### QUEUE MODE — the one bet that puts us ahead
 Most Moroccan barbershops are **walk-in, not appointment**. An appointment-only app
@@ -1273,14 +1275,14 @@ moment — you tap, you type, and either something comes back or nothing does.
   existing waitlist read lie. The handoff calls the table `SearchMiss`; the name
   here is the one 0060 asked for.
 - **A district is only ever named if a salon already carries it** (`salons.district`,
-  0060). Splitting a free-text query into a place name would put a real district
+  0060) — or, since 0141, if ops put it on the `districts` list. Splitting a free-text query into a place name would put a real district
   next to an invented number — the same rule 0060 set when it refused to guess.
 - Salons/specialists in **one list, not tabs**: in Tangier people search a
   barber's name as often as a shop's, and tabs make them guess which they meant.
 Still open:
-- **The admin end.** `admin_demand` doesn't read `searches`, so 4a's "no shop
-  yet" card is still missing — the data is accruing but nothing shows it. That
-  is the next thing worth building here, and it is now ~10 lines.
+- **The admin end.** Settings → Districts counts the misses per district (one per
+  person, 0141), but `admin_demand` still doesn't read `searches`, so Demand and
+  4a's "no shop yet" card don't show them.
 - **EXPL-14's availability badge** ("Free at 15:30" / "Next: tomorrow") is not
   built: it needs a `daySlots` pass per salon in the result list, which is a
   per-barber availability + bookings + time_blocks load per row. Wrong trade on
@@ -3577,6 +3579,15 @@ nothing behind them. Both reads are admin-only and read-only.
   `/barbers/<id>` (BRB-03/15): the §5.3 profile template — 30 days, cancellations by the
   barber (late = inside two hours), reviews, the licence, and what acting would cost.
 - `/customers` (CUS-02): customers a barber flagged; anyone else via ⌘K (logged).
+  **2026-10-02: that list was empty on the live data (nobody flagged), so CUS-02 is now as
+  drawn — 0140_customer_list (NOT APPLIED), `admin_customers(view, q, limit)`:** every
+  customer with who we owe on top (an open case, a booking at a since-suspended shop,
+  cancelled on twice in 30 days by one barber), views All / Owed something / Pay-up-front
+  flag / Lapsed 60 days / Wallet over 200 DH, search by phone, name or booking ID (a phone
+  search is logged in staff_lookups like ⌘K), phones masked, and the four numbers (owed
+  back, in wallets, booked again within 6 weeks, left after being cancelled on). It opens on
+  "owed" and falls back to everyone when nobody is owed. PGlite: 22 checks. Not built: walk-ins
+  with no account (no profile to list) and the erasure requests page (CUS-08).
   `/customers/<id>` (CUS-03): wallet, bookings, flags, marks, cases. Credit a wallet
   (CUS-04: a case resolved with a refund — it asks above 200 DH), clear a flag (CUS-05),
   ban or lift (CUS-07 — Support asks). Field ops can't open the case a credit needs
@@ -3660,7 +3671,7 @@ admin_task_action.
 - `/compliance/tasks/<ref>` (BRB-06) is the same list with that task in the side panel:
   what is on record, what happens if it is missed (hide_shop / block_topups), verify,
   hide now, remind, and drop (`?drop=1`, reason required).
-- **Not built** (no backend): "give 7 more days" (nothing moves a due date), the full chase
+- "Give 7 more days" is built (0141, below). **Not built** (no backend): the full chase
   history (a task keeps only its last reminder), calling the owner (no phone in the read),
   the proof photo itself, and HOP-02…08 (overrides, policy, countersign — no tables).
 - admin_compliance doesn't return a task's `action`, so "verify" shows on every open
@@ -3696,8 +3707,8 @@ admin_task_action.
   printed; `?agent=` offers the three actions. Suspending is shown as not offered.
 - `/wallets/unchecked` (AGT-20): the latest run's three siblings (code / ops call /
   unchecked) and every queued, failed or incident receipt with its age and state.
-- **Not built** (no backend): "hold payouts" and "call the owner" on a float mismatch
-  (the float read carries no phone), "push all agents to sync". The old `#/finance/calls`
+- "Hold payouts" is built (0141, below). **Not built** (no backend): "call the owner" on a
+  float mismatch (the float read carries no phone), "push all agents to sync". The old `#/finance/calls`
   desk is still reachable inside the framed Finance section.
 
 **Finance (2026-09-29): billing native, the rest still framed on purpose.**
@@ -3731,7 +3742,7 @@ admin_task_action.
     database's own messages shown in each person's language).
   - Old paths still land: `/finance/handovers` → transfers, `/finance/calls` → the duty
     desk under Wallets. Copy that said "he" now says "they".
-- **0137_week_of_a_moment — NOT APPLIED.** Two bugs under FIN-17, both there since 0084/0087:
+- ~~**0137_week_of_a_moment — NOT APPLIED.**~~ Applied 2026-10-02. Two bugs under FIN-17, both there since 0084/0087:
   - **Wrong week named.** `settlement_cut(t)` is the last cut at or before `t`; 0084/0087/0128
     used it as "the week `t` is in", which is the cut *after* it. A deposit earned Thu 27 Aug
     (week 35) was carried "from week 34" (FIN-17 draws 35), the desk told its story with week
@@ -3769,7 +3780,7 @@ pinning the arithmetic to UTC from 20 Sep (history before it stays +01).
   62 functions (notifications and reminders that print a booking's time, "today", whether a
   shop is open, queue estimates, slot offers, the Friday cut) had run an hour fast since
   20 Sep, while phones already had the new rules.
-- **0139_morocco_on_gmt — NOT APPLIED.** `morocco_tz()` is the one place the zone is decided:
+- ~~**0139_morocco_on_gmt — NOT APPLIED.**~~ Applied 2026-10-02 (live `morocco_tz()` = UTC). `morocco_tz()` is the one place the zone is decided:
   'UTC' while the server's data is stale, 'Africa/Casablanca' once Supabase updates it (then
   it is right for every date, so it heals itself — no follow-up migration). The 62 functions
   are re-created from their own live definitions in a loop with only the literal swapped.
@@ -3792,9 +3803,8 @@ pinning the arithmetic to UTC from 20 Sep (history before it stays +01).
 - `/settings/districts` (SET-06): every district with its live shops, asks and unmet asks
   over 30 days (admin_demand), the worst gap, and rename (`?rename=`) — admin_set_district
   on each shop in it, through the gate; renaming onto an existing name merges them.
-  Unassigned shops link to Demand to be placed. **Not built:** adding a district with no
-  shop (the drawn Malabata row) — districts are a column on shops, so an empty one needs a
-  districts list of its own.
+  Unassigned shops link to Demand to be placed. Adding a district with no shop (the drawn
+  Malabata row) came with 0141's districts list, below.
 - `/settings/pricing` (SET-17) is **read-only and not as drawn**: it shows what 0123
   actually bills (55 DH a chair a month, 40 on a year, up to 4 chairs, 200 SMS, no SMS
   overage until the rate is confirmed) and who is on a subscription. The drawing's
@@ -3802,6 +3812,7 @@ pinning the arithmetic to UTC from 20 Sep (history before it stays +01).
   platform_settings has no audited setter, and a direct write from the site would skip
   the gate and the audit log. Trigger: the first price change — add
   `admin_set_pricing__direct` (key `platform_rule`) in a new migration, then an edit here.
+  *(Built on request in 0141, below.)*
 - Message templates (SET-05) stay "not built": nothing stores the product's messages as
   templates. "Take" (SET-14…16) isn't built — 0123 already decided what Sterncut takes.
 
@@ -3844,7 +3855,7 @@ Nothing new in the database; every page first calls `owner_shop(slug)` (the 404)
 - `/settings/deposit-bounds` (SET-11, 0077) with `?edit=1` (SET-12/13): the impact is counted
   before the save, the panel turns red once most of the network would sit outside, and a
   reason is required exactly when a bound narrows.
-- **0138_reliability_saves — NOT APPLIED.** 0066's save could never save: it told customers
+- ~~**0138_reliability_saves — NOT APPLIED.**~~ Applied 2026-10-02. 0066's save could never save: it told customers
   with `select distinct …, 'moderation'`, and DISTINCT types the literal as text before the
   insert can make it the notif_kind enum (an enum since 0032 — so the reliability numbers
   have only ever been the launch defaults). 0138 re-emits 0066's body into
@@ -3853,6 +3864,47 @@ Nothing new in the database; every page first calls `owner_shop(slug)` (the 404)
 - **`admin/legacy.html` is deleted** (8 280 lines): nothing frames it any more, and the
   shell's frame plumbing (the iframe, LEGACY / FRAME_PATH, the frame's postMessage
   listener) went with it. It is in git history (`git show 5713087:admin/legacy.html`).
+
+**Desk writes: pricing, districts, more days, payout holds (2026-10-02) — 0141_desk_writes,
+NOT APPLIED.** Four drawn buttons that had no backend. All seven new functions are
+`admin_x__direct` behind the 0133 gate (wrappers generated by 0133's loop, run for these
+seven only); 0141 also re-emits `admin_audit` so they read as sentences (and a task's
+shop becomes the subject of every task action, the reason typed with a call its note).
+- **Pricing** (SET-17): `admin_set_pricing(monthly, yearly, chairs, texts, text price,
+  reason)` — platform_rule (Head only), reason required, logged in `settings_changes`
+  (so Rules shows "A chair, a month 55 DH → 60 DH" and why). Typo guards: 1–1 000 DH a
+  chair, a year never dearer a month than monthly, 1–50 chairs. Still reprices nobody.
+  `/settings/pricing?edit=1`.
+- **Districts** (SET-06): a `districts` table (anyone signed in reads it) — the list is
+  its names plus every name on a shop. `admin_add_district` / `admin_rename_district` /
+  `admin_remove_district` (key shops). Rename moves every shop in one call (the page used
+  to loop admin_set_district per shop, so a failure could stop half way), merges into an
+  existing name under its spelling, and takes the searches that named it along. Only an
+  empty district can be removed. The page counts each person whose search in the app found
+  nothing in a district (0074's `searches`) as an ask. **App:** Explore's district chips
+  and Search's district matching now include the list, so an empty district can be picked
+  ("No salons match") and a miss there is logged against it. Typecheck clean.
+- **More days** (CMP-01): `admin_extend_task(task, days, reason)` (key shops) — days count
+  from the due date, or from today once it has passed; still due 23:59 Tangier time
+  (`morocco_tz()`); every extension kept in `shop_task_extensions` and listed on the task;
+  the owner is told the new date; the clock resets (`enforced_at` cleared). Refused once
+  the task has already hidden a shop that is still hidden — reopening is its own decision.
+  `/compliance/tasks/<ref>?more=1` (3 / 7 / 14 days).
+- **Payout hold** (SAL-03): `admin_hold_payouts(salon, reason)` / `admin_release_payouts`
+  (key money). `payout_holds` is its own table because an owner can update their salon
+  row. Enforced like 0061's incident lock — a trigger refuses any negative
+  `float_settlements` row for a held shop, so a settled pay-out line, an agent's signed
+  hand-over and the shop page's settle all stop. A second trigger leaves a held pay-out off
+  a planned round (skipped, so the rest of the round still plans). The week is still cut and
+  stated; an unpaid pay-out carries forward on day 14 (0088). The owner is told payouts are
+  paused, not why. Wallets: HOLD PAYOUTS on the mismatch card (`?hold=<salon>`), a
+  "Payouts on hold" list with LIFT; Finance shows PAYOUTS HELD on the line.
+- PGlite: 47 checks (t0141). Walked in the mock: every dialog, the refusals, the audit log.
+- **Message templates (SET-05) are not built, on purpose.** About 105 notification writes in
+  29 migrations are hard-coded, English-only text; only the 16 cash messages (0129's
+  `cash_words`, through `tell_in_lang`) exist in FR/AR/EN. An editor needs those moved
+  into a table and every sender changed to read it — a project, not a screen. Waiting on
+  the user: start with the 16 cash messages, or the booking messages the design shows.
 
 **Still open:**
 - Two bugs in the old console were fixed while it was still framed (both there before this

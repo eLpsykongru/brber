@@ -4,8 +4,10 @@
 // agent's, and the server refuses it the other way round), AGT-12 (ops-call receipts as
 // a rate: 0101's audit and its three actions), AGT-20 (what the latest run still has
 // unchecked: 0098's receipt states on admin_run).
-// Not built (no backend): "hold payouts" on a mismatch, "push all agents to sync",
-// suspending an agent (needs a second approver — 0101 refuses it and says so).
+// "Hold payouts" (?hold=<salon>) is 0141's: nothing we owe a held shop leaves us — no settled
+// line, no agent hand-over — until it is lifted here; its weeks are still cut and stated.
+// Not built (no backend): "push all agents to sync", suspending an agent (needs a second
+// approver — 0101 refuses it and says so).
 import { esc, DH, first, initials, dayShort, hhmm, ago } from '/app.js';
 import { pageHead, chips, label9, btnS, btnP, csv } from '/s/ui.js';
 
@@ -31,12 +33,17 @@ export default async function (ctx) {
 
 // ---- SAL-03 ------------------------------------------------------------------------
 const LEDGER = { cash_topup: 'Top-up', topup: 'Top-up', deposit: 'Deposit', deposit_refund: 'Refund', refund: 'Refund', referral: 'Referral reward', settlement: 'Settlement', payout: 'Paid out to the shop' };
-async function float({ rpc, rest }) {
-  const [d, salons, duty] = await Promise.all([rpc('admin_wallets'), rest('salons?select=id,slug'), rpc('admin_duty_queue').catch(() => [])]);
+async function float({ rpc, rest, act, q, go, toast, dialog, closeDialog }) {
+  const [d, salons, duty, holds] = await Promise.all([rpc('admin_wallets'), rest('salons?select=id,slug,name'), rpc('admin_duty_queue').catch(() => []),
+    rest('payout_holds?select=salon_id,reason,held_at,held_by&order=held_at')]);
   const slug = Object.fromEntries(salons.map((s) => [s.id, s.slug]));
+  const held = Object.fromEntries(holds.map((h) => [h.salon_id, h]));
+  const ids = [...new Set(holds.map((h) => h.held_by).filter(Boolean))];
+  const people = ids.length ? Object.fromEntries((await rest(`profiles?select=id,full_name&id=in.(${ids.join(',')})`).catch(() => [])).map((p) => [p.id, p.full_name])) : {};
+  const shopName = (id) => salons.find((s) => s.id === id)?.name || 'the shop';
   const gaps = d.shops.filter((s) => s.gap_cents !== 0);
   const row = (s) => `<a href="/salons/${esc(slug[s.id] || '')}" class="hov" style="display:grid;grid-template-columns:1.6fr 80px 110px 100px 130px;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid #1E1E22;text-decoration:none;color:#fff;font-size:12px">
-    <span style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.name)}${s.cap_cents && s.float_cents > s.cap_cents ? ' <span style="font-size:10px;color:#F87171;font-weight:600">· over cap</span>' : ''}</span>
+    <span style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.name)}${s.cap_cents && s.float_cents > s.cap_cents ? ' <span style="font-size:10px;color:#F87171;font-weight:600">· over cap</span>' : ''}${held[s.id] ? ' <span style="font-size:10px;color:#E8A100;font-weight:600">· payouts held</span>' : ''}</span>
     <span class="num">${s.topups}</span><span class="num" style="font-weight:700">${DH(s.float_cents)}</span>
     <span class="num" style="color:${s.gap_cents ? '#F87171' : '#6B6B72'}">${s.gap_cents ? signed(s.gap_cents) : '0'}</span><span>${pill(STATE[s.state] || [s.state, '#9A9CA3'])}</span></a>`;
   const g = gaps[0];
@@ -57,8 +64,14 @@ async function float({ rpc, rest }) {
           <span style="font-size:12px;color:#9A9CA3;line-height:1.55">${esc(g.name)} logged ${g.topups} top-up${g.topups === 1 ? '' : 's'}, and the drawer doesn’t agree with them by ${DH(Math.abs(g.gap_cents))}.</span>
           <div style="display:flex;gap:10px"><div style="flex:1;background:#111113;border-radius:10px;padding:9px 11px"><span style="display:block;font-size:9px;letter-spacing:.12em;font-weight:700;color:#6B6B72">CASH HELD</span><span class="num" style="font-size:14px;font-weight:700">${DH(g.float_cents)}</span></div>
             <div style="flex:1;background:#111113;border-radius:10px;padding:9px 11px"><span style="display:block;font-size:9px;letter-spacing:.12em;font-weight:700;color:#6B6B72">GAP</span><span class="num" style="font-size:14px;font-weight:700;color:#F87171">${signed(g.gap_cents)}</span></div></div>
-          <a href="/salons/${esc(slug[g.id] || '')}" style="align-self:flex-start;font-size:10px;font-weight:800;letter-spacing:.06em;background:#E8442E;border-radius:7px;padding:8px 11px;color:#fff">OPEN THE SHOP</a>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><a href="/salons/${esc(slug[g.id] || '')}" style="font-size:10px;font-weight:800;letter-spacing:.06em;background:#E8442E;border-radius:7px;padding:8px 11px;color:#fff">OPEN THE SHOP</a>
+            ${held[g.id] ? `<span data-lift="${g.id}" style="cursor:pointer;font-size:10px;font-weight:800;letter-spacing:.06em;background:#212125;border:1px solid #3A3A40;border-radius:7px;padding:7px 11px;color:#E8A100">PAYOUTS HELD · LIFT</span>`
+              : `<a href="/wallets?hold=${g.id}" style="font-size:10px;font-weight:800;letter-spacing:.06em;background:#212125;border:1px solid #3A3A40;border-radius:7px;padding:7px 11px;color:#fff">HOLD PAYOUTS</a>`}</div>
           ${gaps.length > 1 ? `<span style="font-size:10.5px;color:#6B6B72">and ${gaps.length - 1} more in the table</span>` : ''}</div>` : ''}
+        ${holds.length ? `<div style="background:#17171A;border:1px solid rgba(232,161,0,.35);border-radius:14px;padding:15px 16px;display:flex;flex-direction:column;gap:10px">
+          ${label9('PAYOUTS ON HOLD', '#E8A100')}
+          ${holds.map((h) => `<div style="display:flex;gap:10px;align-items:flex-start;border-top:1px solid #1E1E22;padding-top:10px"><span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:700">${esc(shopName(h.salon_id))}</span><span style="display:block;font-size:10.5px;color:#9A9CA3;line-height:1.45;margin-top:2px">“${esc(h.reason)}”</span><span style="display:block;font-size:10px;color:#6B6B72;margin-top:2px">since ${esc(dayShort(h.held_at))}${people[h.held_by] ? ` · ${esc(first(people[h.held_by]))}` : ''}</span></span><span data-lift="${h.salon_id}" style="cursor:pointer;flex:none;font-size:9.5px;font-weight:800;letter-spacing:.06em;background:#212125;border-radius:7px;padding:7px 10px">LIFT</span></div>`).join('')}
+          <span style="font-size:10.5px;color:#6B6B72;line-height:1.5">Nothing we owe a held shop leaves us. Its weeks are still cut and stated; an unpaid pay-out carries forward on day 14.</span></div>` : ''}
         <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:15px 16px;display:flex;flex-direction:column;gap:10px">
           ${label9('RECENT LEDGER')}
           ${d.ledger.slice(0, 12).map((l) => `<div style="display:flex;gap:10px;align-items:center"><span style="flex:1;min-width:0"><span style="display:block;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(LEDGER[l.kind] || l.kind.replace(/_/g, ' '))} · ${esc(l.ref || l.who)}</span><span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:1px">${esc(l.where)} · ${esc(dayShort(l.at))} ${hhmm(l.at)}</span></span><span class="num" style="font-size:12px;font-weight:700;color:${l.amount_cents > 0 ? '#4ADE80' : '#fff'}">${signed(l.amount_cents)}</span></div>`).join('') || '<span style="font-size:12px;color:#6B6B72">Nothing yet.</span>'}</div>
@@ -66,6 +79,31 @@ async function float({ rpc, rest }) {
   return {
     top: false, html,
     ready(root) {
+      root.addEventListener('click', async (e) => {
+        const b = e.target.closest('[data-lift]');
+        if (!b) return;
+        e.preventDefault(); e.stopPropagation();
+        const name = shopName(b.dataset.lift);
+        if (!confirm(`Lift the hold on ${name}? What we owe them can go out on the next round, and the owner is told.`)) return;
+        try { await act('admin_release_payouts', { p_salon: b.dataset.lift }, { title: `Lift the payout hold on ${name}` }); toast(`Payouts to ${name} are back on`); go('/wallets', { replace: true }); }
+        catch (err) { if (!err.handled) toast(err.message, false); }
+      }, true);
+      const hid = q.get('hold');
+      if (hid && salons.some((x) => x.id === hid) && !held[hid]) {
+        const name = shopName(hid), gp = d.shops.find((x) => x.id === hid);
+        const dl = dialog(`<div style="padding:22px;display:flex;flex-direction:column;gap:14px">
+          <span style="font-size:17px;font-weight:800">Hold payouts to ${esc(name)}</span>
+          <span style="font-size:12px;color:#9A9CA3;line-height:1.55">${gp && gp.gap_cents ? `The drawer is ${DH(Math.abs(gp.gap_cents))} off what was logged. ` : ''}Nothing we owe ${esc(name)} leaves us until the hold is lifted — not a settled line, not an agent’s hand-over. Their weeks are still cut and stated, and the owner is told payouts are paused, not why.</span>
+          <textarea id="hd-why" rows="3" placeholder="Why — kept with the hold" style="background:#111113;border:1px solid #26262B;border-radius:11px;padding:11px 12px;color:#fff;font-size:12.5px;outline:none;resize:vertical"></textarea>
+          ${errBox}
+          <div style="display:flex;gap:10px;justify-content:flex-end">${btnS('Cancel', 'data-dlg-close="1"')}${btnP('HOLD PAYOUTS', 'id="hd-go"')}</div></div>`, { onClose: () => go('/wallets'), width: 460 });
+        dl.querySelector('#hd-go').onclick = async () => {
+          const why = dl.querySelector('#hd-why').value.trim();
+          if (!why) return showErr(dl, new Error('Say why — it is kept with the hold.'));
+          try { await act('admin_hold_payouts', { p_salon: hid, p_reason: why }, { title: `Hold payouts to ${name}`, reason: why }); closeDialog(); toast(`Payouts to ${name} are on hold`); }
+          catch (err) { showErr(dl, err); }
+        };
+      }
       root.querySelector('#wl-csv').onclick = () => csv('ledger', [['When', (l) => l.at], ['Kind', (l) => LEDGER[l.kind] || l.kind], ['Who', (l) => l.who], ['Where', (l) => l.where], ['Ref', (l) => l.ref || ''], ['DH', (l) => l.amount_cents / 100]], d.ledger);
     },
   };

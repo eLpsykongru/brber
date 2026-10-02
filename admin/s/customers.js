@@ -1,15 +1,16 @@
-// /customers and /customers/<id> — CUS-02 (who needs something: 0056's flagged
-// customers) and CUS-03 (the file: 0136's admin_customer). Actions, all through
+// /customers and /customers/<id> — CUS-02 (every customer, who we owe on top: 0140's
+// admin_customers) and CUS-03 (the file: 0136's admin_customer). Actions, all through
 // the gate:
 //   · credit a wallet (CUS-04) — a support case resolved with a refund, the only
 //     path that credits a wallet and leaves a trail (so it asks above 200 DH);
 //   · clear a barber's flag (CUS-05) — admin_clear_flag;
 //   · ban or lift (CUS-07) — admin_set_suspension, Support asks the Head.
-// Anyone else is found with ⌘K, where a phone lookup is written to the audit trail.
+// A phone searched on the list, or in ⌘K, is written to the audit trail.
 // Not built: the smaller sanctions CUS-07 offers before a ban, and the erasure
 // requests page (CUS-08) — account deletion (0130) has no staff read yet.
-import { esc, DH, num, initials, dayShort, hhmm, first } from '/app.js';
-import { pageHead, label9, profile, btnS } from '/s/ui.js';
+import { esc, DH, num, initials, dayShort, dayWk, hhmm, first } from '/app.js';
+import { pageHead, label9, profile, btnS, chips, csv } from '/s/ui.js';
+import { REASON } from '/s/support.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const errBox = '<span class="dlg-err" style="font-size:12px;color:#F87171;display:none"></span>';
@@ -23,20 +24,58 @@ export default async function (ctx) {
   return file(ctx, id);
 }
 
-async function list({ rpc }) {
-  const d = await rpc('admin_flagged_customers', {});
-  const rows = d.flagged.map((c) => `<a href="/customers/${c.id}" class="hov" style="display:flex;align-items:center;gap:12px;padding:13px 16px;border-top:1px solid #1E1E22;text-decoration:none;color:#fff">
-    <span style="width:30px;height:30px;border-radius:999px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#9A9CA3;flex:none">${esc(initials(c.name))}</span>
-    <span style="width:220px;flex:none;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">${esc(c.name)}</span><span style="display:block;font-size:10.5px;color:#9A9CA3">${esc(c.phone || 'no phone')}</span></span>
-    <span style="flex:1;min-width:0;font-size:11.5px;color:#D8D8DC">Flagged by ${c.barbers} barber${c.barbers === 1 ? '' : 's'}${c.blocked ? ' · blocked by one' : c.full_payment ? ' · pays in full up front' : ''}</span>
-    <span class="num" style="width:90px;flex:none;font-size:11.5px;color:${c.no_shows ? '#F87171' : '#9A9CA3'}">${c.no_shows} no-show${c.no_shows === 1 ? '' : 's'}</span>
-    <span class="num" style="width:80px;flex:none;font-size:11.5px;color:#9A9CA3">${c.live_marks} mark${c.live_marks === 1 ? '' : 's'}</span>
-    <span style="width:90px;flex:none;text-align:right">${c.suspended ? '<span style="font-size:9px;letter-spacing:.1em;font-weight:800;color:#F87171;background:rgba(248,113,113,.12);border-radius:5px;padding:4px 7px">BANNED</span>' : ''}</span></a>`).join('');
-  const html = `<div style="height:100%;display:flex;flex-direction:column">${pageHead('Customers', 'Who needs something', btnS('Find someone · ⌘K', 'data-pal="1"'))}
-    <div style="flex:1;overflow:auto;padding:18px 24px;display:flex;flex-direction:column;gap:12px">
-      <span style="font-size:12px;color:#9A9CA3;line-height:1.55;max-width:640px">Customers a barber has flagged, newest first. Anyone else is one search away — a phone number looked up in ⌘K is written to the audit trail, with your name.</span>
-      <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;overflow:hidden">${rows || '<div style="padding:22px 16px;font-size:12px;color:#6B6B72">No barber has flagged anyone.</div>'}</div></div></div>`;
-  return { top: false, html };
+// ---- CUS-02 · every customer, the ones we owe on top (0140's admin_customers) ---------------
+// With no view asked for it opens on who we owe, unless nobody is owed — then everyone.
+const VIEWS = [['owed', 'Owed something'], ['all', 'All'], ['flagged', 'Pay-up-front flag'], ['lapsed', 'Lapsed 60 days'], ['wallet', 'Wallet over 200 DH']];
+const owedText = (o) => (o.kind === 'case' ? `${REASON[o.reason] || o.reason} · ${o.ref}${o.cents ? ` · ${DH(o.cents)}` : ''}`
+  : o.kind === 'suspended_shop' ? `Booking at a shop that’s suspended · ${dayWk(o.at)} ${hhmm(o.at)}`
+    : `Cancelled on ${o.n} times this month by ${first(o.barber)}`);
+const what = (r) => (r.owed ? r.owed.map(owedText).join(' · ')
+  : r.flag_barbers ? `Flagged by ${r.flag_barbers} barber${r.flag_barbers === 1 ? '' : 's'}${r.blocked ? ' · blocked by one' : r.full_payment ? ' · pays in full up front' : ''}`
+    : '');
+const seen = (t) => (!t ? '—' : dayShort(t) === dayShort(Date.now()) ? 'Today' : dayShort(t));
+
+async function list({ rpc, q, go }) {
+  const n = Math.min(500, Number(q.get('n')) || 100);
+  const s = (q.get('q') || '').trim();
+  const d = await rpc('admin_customers', { p_view: q.get('view') || null, p_q: s || null, p_limit: n });
+  const c = d.counts, k = d.kpi;
+  const link = (patch) => { const u = new URLSearchParams(q); for (const [key, v] of Object.entries(patch)) { if (v) u.set(key, v); else u.delete(key); } const x = u.toString(); return '/customers' + (x ? '?' + x : ''); };
+  const kpi = (l, v, sub, col) => `<div style="flex:1 1 170px;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">${l}</span><span class="num" style="font-size:22px;font-weight:800${col ? `;color:${col}` : ''}">${v}</span><span style="font-size:10.5px;color:#9A9CA3">${sub}</span></div>`;
+  const COLS = 'display:grid;grid-template-columns:minmax(200px,1.3fr) minmax(220px,2fr) 90px 60px 80px;gap:12px;align-items:center';
+  const row = (r) => `<a href="/customers/${r.id}" class="hov" style="${COLS};padding:12px 16px;border-top:1px solid #1E1E22;text-decoration:none;color:#fff;font-size:12px">
+    <span style="display:flex;align-items:center;gap:10px;min-width:0"><span style="width:30px;height:30px;border-radius:999px;background:${r.owed ? 'rgba(232,161,0,.16)' : '#212125'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${r.owed ? '#E8A100' : '#9A9CA3'};flex:none">${esc(initials(r.name))}</span>
+      <span style="min-width:0"><span style="display:block;font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.name)}${r.suspended ? ' <span style="font-size:9px;letter-spacing:.1em;font-weight:800;color:#F87171">BANNED</span>' : ''}</span><span class="num" style="display:block;font-size:10.5px;color:#6B6B72">${esc(r.phone || 'no phone')}${r.marks ? ` · ${r.marks} mark${r.marks === 1 ? '' : 's'}` : ''}</span></span></span>
+    <span style="min-width:0;font-size:11.5px;line-height:1.45;color:${r.owed ? '#E8A100' : '#9A9CA3'}">${esc(what(r)) || '<span style="color:#3A3A40">—</span>'}</span>
+    <span class="num" style="text-align:right">${r.wallet_cents ? DH(r.wallet_cents) : '<span style="color:#3A3A40">—</span>'}</span>
+    <span class="num" style="text-align:right">${r.visits}</span>
+    <span class="num" style="text-align:right;color:#9A9CA3">${seen(r.last_seen)}</span></a>`;
+  const empty = s ? `Nobody here matches “${esc(s)}”.` : d.view === 'owed' ? 'Nobody is owed anything.' : 'Nobody here.';
+  const more = d.total > d.rows.length ? `Showing ${d.rows.length} of ${num(d.total)} — search, or <a href="${link({ n: String(n + 100) })}" style="font-weight:700">show 100 more</a>.` : '';
+  const html = `<div style="height:100%;display:flex;flex-direction:column">
+    ${pageHead('Customers', `${num(c.all)} in Tangier · ${c.owed ? `${num(c.owed)} need${c.owed === 1 ? 's' : ''} something from us` : 'nobody is owed anything'}`, `<span style="display:flex;gap:10px;align-items:center">${btnS('Export CSV', 'id="cu-csv"')}</span>`)}
+    ${chips(VIEWS.map(([key, label]) => [label, link({ view: key, n: null }), d.view === key, c[key] || null]),
+      `<input id="cu-q" value="${esc(s)}" placeholder="Phone, name or booking ID" style="height:30px;width:220px;border-radius:8px;background:#17171A;border:1px solid #26262B;padding:0 11px;color:#fff;font-size:11.5px;outline:none">`)}
+    <div style="flex:1;overflow:auto;padding:18px 24px 32px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        ${kpi('OWED BACK', DH(k.owed_cents), `across ${num(k.owed_people)} ${k.owed_people === 1 ? 'person' : 'people'}`, k.owed_cents ? '#E8A100' : '')}
+        ${kpi('IN WALLETS', DH(k.wallet_cents), 'we hold this, not the shops')}
+        ${kpi('BOOKED AGAIN', k.again_pct == null ? '—' : `${k.again_pct}%`, k.again_pct == null ? 'not enough visits six weeks old yet' : `within 6 weeks · of ${num(k.again_n)} visits`)}
+        ${kpi('LEFT AFTER A BAD ONE', k.left_pct == null ? '—' : `${k.left_pct}%`, k.left_pct == null ? 'nobody cancelled on by a barber yet' : `cancelled on, never back · of ${num(k.left_n)}`, k.left_pct ? '#F87171' : '')}</div>
+      <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;overflow:auto">
+        <div style="${COLS};padding:11px 16px;font-size:9px;letter-spacing:.13em;font-weight:700;color:#6B6B72;min-width:720px"><span>CUSTOMER</span><span>WHAT WE OWE THEM</span><span style="text-align:right">WALLET</span><span style="text-align:right">VISITS</span><span style="text-align:right">LAST SEEN</span></div>
+        <div style="min-width:720px">${d.rows.map(row).join('') || `<div style="padding:22px 16px;border-top:1px solid #1E1E22;font-size:12px;color:#6B6B72">${empty}</div>`}</div></div>
+      ${d.view === 'owed' && !s && c.all > c.owed ? `<span style="font-size:11.5px;color:#6B6B72">${num(c.all - c.owed)} others, nothing owed. There’s no reason to open a customer who hasn’t asked us for anything — <a href="${link({ view: 'all', n: null })}" style="font-weight:700">all of them</a>.</span>` : ''}
+      ${more ? `<span style="font-size:11.5px;color:#6B6B72">${more}</span>` : ''}
+      <span style="font-size:10.5px;color:#6B6B72">A phone number searched here is written to the audit log, the same as in ⌘K.</span>
+    </div></div>`;
+  return {
+    top: false, html,
+    ready(root) {
+      root.querySelector('#cu-q').addEventListener('keydown', (e) => { if (e.key === 'Enter') go(link({ q: e.target.value.trim() || null, n: null })); });
+      root.querySelector('#cu-csv').onclick = () => csv(`customers-${d.view}`, [['Name', (r) => r.name], ['Phone', (r) => r.phone || ''], ['What we owe them', (r) => what(r)], ['Wallet DH', (r) => r.wallet_cents / 100], ['Visits', (r) => r.visits], ['Last seen', (r) => r.last_seen || ''], ['Banned', (r) => (r.suspended ? 'yes' : '')]], d.rows);
+    },
+  };
 }
 
 async function file({ rpc, act, q, go, toast, dialog, closeDialog, me }, id) {

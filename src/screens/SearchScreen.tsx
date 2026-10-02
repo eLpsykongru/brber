@@ -77,8 +77,15 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
   const [miss, setMiss] = useState<{ id: string; asks: number; forQuery: string } | null>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [notified, setNotified] = useState(false);
+  // ops' own list of districts (0141): one with no shop yet still names a miss
+  const [listed, setListed] = useState<string[]>([]);
 
   useAndroidBack(onClose);
+
+  useEffect(() => {
+    supabase.from('districts').select('name')
+      .then(({ data }) => setListed((data ?? []).map((d: { name: string }) => d.name)));
+  }, []);
 
   useEffect(() => {
     AsyncStorage.getItem(RECENT_KEY)
@@ -128,10 +135,10 @@ export default function SearchScreen({ salons, kmFor, onPick, onClose }: {
 
   // The district the query names, if it names one we know. Guessing a district
   // out of free text would put a real place name next to a number we invented,
-  // so this only ever matches districts that already exist on a salon row.
+  // so this only ever matches districts that exist on a salon row or on ops' list.
   const districts = useMemo(
-    () => [...new Set(salons.map((s) => s.district).filter((d): d is string => !!d))],
-    [salons],
+    () => [...new Set([...salons.map((s) => s.district).filter((d): d is string => !!d), ...listed])],
+    [salons, listed],
   );
   const namedDistrict = useMemo(
     () => districts.find((d) => q.includes(d.toLowerCase())) ?? null,

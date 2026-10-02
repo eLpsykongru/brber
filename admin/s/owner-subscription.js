@@ -6,7 +6,7 @@
 // Deliberately absent, as in the app (README §8 of the billing rail): an invoice
 // number and a PDF — a Moroccan invoice needs a sequence and an ICE nobody has set
 // up — and any SMS price.
-import { esc, DH, dayShort } from '/app.js';
+import { esc, DH, dayShort, ZONE } from '/app.js';
 import { column, card, eyebrow, kv, rule } from '/s/ui.js';
 
 // ---- src/lib/billing.ts, the pieces these pages print ------------------------
@@ -19,7 +19,7 @@ const friday = (dep, open) => { const nets = Math.min(open, Math.max(dep, 0)); r
 const perBooking = (total, n) => (n > 0 ? Math.round(total / n) : null);
 
 const noon = (iso) => new Date(iso.length > 10 ? iso : `${iso}T12:00:00Z`);
-const dayMonth = (iso) => noon(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'Africa/Casablanca' });
+const dayMonth = (iso) => noon(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: ZONE });
 const monthName = (iso) => noon(iso.slice(0, 10)).toLocaleDateString('en-GB', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 const monthOnly = (iso) => noon(iso.slice(0, 10)).toLocaleDateString('en-GB', { month: 'long', timeZone: 'UTC' });
 const whyNot = (c, cap) => (c.reason === 'over_cap' ? `Past the first ${cap} chairs — free` : c.reason === 'paused' ? 'Paused — not accepting bookings'

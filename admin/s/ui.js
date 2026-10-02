@@ -1,5 +1,5 @@
 // Pieces every section page draws the same way (README §8 tokens).
-import { esc } from '/app.js';
+import { esc, ZONE } from '/app.js';
 
 // the 62 px page header a section draws when the shell's top bar is off
 export const pageHead = (title, sub, right = '') => `
@@ -86,8 +86,8 @@ export function profile(p) {
 // the shop's day, in the shop's timezone, as the instants the database compares
 export function shopDay(offsetDays = 0) {
   const now = new Date();
-  const ymd = now.toLocaleDateString('en-CA', { timeZone: 'Africa/Casablanca' });   // YYYY-MM-DD
-  const off = Date.parse(now.toLocaleString('en-US', { timeZone: 'Africa/Casablanca' })) - Date.parse(now.toLocaleString('en-US', { timeZone: 'UTC' }));
+  const ymd = now.toLocaleDateString('en-CA', { timeZone: ZONE });   // YYYY-MM-DD
+  const off = Date.parse(now.toLocaleString('en-US', { timeZone: ZONE })) - Date.parse(now.toLocaleString('en-US', { timeZone: 'UTC' }));
   const start = Date.parse(ymd + 'T00:00:00Z') - off + offsetDays * 86400000;
   return { ymd: new Date(start + off).toISOString().slice(0, 10), from: new Date(start).toISOString(), to: new Date(start + 86400000).toISOString(), off };
 }

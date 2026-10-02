@@ -14,20 +14,20 @@
 // an open invoice nets off the shop's next Friday statement by itself.
 // Not as drawn: FIN-11's per-barber + per-cut model and free months aren't what 0123
 // bills (one subscription per shop, netted weekly); FIN-01/02/03/13 have no backend.
-import { esc, DH, num, first, initials, dayShort, dayWk, hhmm, ago } from '/app.js';
+import { esc, DH, num, first, initials, dayShort, dayWk, hhmm, ago, ZONE } from '/app.js';
 import { pageHead, chips, label9, btnS, btnP, csv } from '/s/ui.js';
 
 const RUNG = { open: ['OPEN', '#9A9CA3'], search_hidden: ['HIDDEN FROM SEARCH', '#E8A100'], bookings_closed: ['BOOKINGS CLOSED', '#F87171'] };
 const pill = ([t, c]) => `<span style="font-size:9px;letter-spacing:.1em;font-weight:800;color:${c};background:${c}1F;border-radius:5px;padding:3px 7px;white-space:nowrap">${esc(t)}</span>`;
 const kpi = (l, v, s, col) => `<div style="flex:1 1 180px;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:5px"><span style="font-size:9px;letter-spacing:.14em;font-weight:700;color:#9A9CA3">${l}</span><span class="num" style="font-size:22px;font-weight:800${col ? ';color:' + col : ''}">${v}</span><span style="font-size:10.5px;color:#9A9CA3">${s}</span></div>`;
-const month = (d) => new Date(d).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'Africa/Casablanca' });
+const month = (d) => new Date(d).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: ZONE });
 const input = 'background:#111113;border:1px solid #26262B;border-radius:11px;padding:11px 12px;color:#fff;font-size:12.5px;outline:none';
 const errBox = '<span class="dlg-err" style="font-size:12px;color:#F87171;display:none"></span>';
 const showErr = (d, e) => { if (e.handled) return; const x = d.querySelector('.dlg-err'); x.textContent = e.message; x.style.display = 'block'; };
 const cents = (v) => Math.round(Number(String(v).replace(/\s/g, '').replace(',', '.')) * 100);
 const when = (t) => (t ? `${dayWk(t)} ${hhmm(t)}` : '—');   // §7: 'Fri 4 Sep 21:04'
 const wk = (w) => String(w || '').slice(-2);                 // '2026-W39' → '39'
-const CASA = new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Casablanca', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+const CASA = new Intl.DateTimeFormat('en-CA', { timeZone: ZONE, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
 const casa = (t) => Object.fromEntries(CASA.formatToParts(new Date(t)).map((x) => [x.type, x.value]));
 // a run's label from its cut: settlement_week_label's arithmetic, the ISO week read in Casablanca
 function weekOf(t) {

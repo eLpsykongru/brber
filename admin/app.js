@@ -7,7 +7,6 @@
 // answers ask:/deny: (0133). This file only draws what those answers mean.
 //
 // A section is s/<name>.js: `export default async (ctx) => ({ html, ready?, top?, heading?, place? })`.
-// Sections not rebuilt yet run the old console (legacy.html) in a frame.
 
 const CFG = { url: (window.SUPABASE_URL || '').replace(/\/$/, ''), key: window.SUPABASE_ANON_KEY || '' };
 export const FLAGS = window.STERNCUT_FLAGS || {};
@@ -21,7 +20,11 @@ export const num = (n) => (n == null ? '—' : sp(n));
 export const DH = (c) => (c == null ? '—' : sp(Math.round(c / 100)) + ' DH');   // "3 240 DH"
 export const initials = (s) => String(s || '?').split(/[\s@._-]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
 export const first = (s) => String(s || '').split(/\s+/)[0];
-const TZ = { timeZone: 'Africa/Casablanca' };
+// Tangier's clock. Morocco has kept GMT since 20 Sep 2026; a browser whose zone data predates
+// that still says +01, so it reads UTC instead — the same call the database makes (0139's
+// morocco_tz), so the page and the numbers it shows agree.
+export const ZONE = new Date('2026-10-01T12:00:00Z').toLocaleString('en-GB', { timeZone: 'Africa/Casablanca', hour: '2-digit', hourCycle: 'h23' }) === '12' ? 'Africa/Casablanca' : 'UTC';
+const TZ = { timeZone: ZONE };
 export const hhmm = (t) => new Date(t).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', ...TZ });
 export const dayLong = (t) => new Date(t).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', ...TZ });
 // §7: 'Fri 4 Sep' — en-US parts, because en-GB now prints 'Sept'
@@ -87,7 +90,7 @@ const OWNER_NATIVE = { today: 'today', payouts: 'payouts', reviews: 'reviews', s
 export const ROLE_LABEL = { head: 'Head of Ops', support: 'Support', mod: 'Moderator', field: 'Field ops' };
 
 // ---------------------------------------------------------------- session --
-// The same key legacy.html reads, so its screens run on this aal2 session.
+// The aal2 session, kept across reloads (the old console's key, so nobody was signed out by the move).
 const KEY = 'sc_admin';
 let sess = (() => { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { return null; } })();
 const keep = (s) => { sess = s; localStorage.setItem(KEY, JSON.stringify(s)); };
@@ -140,7 +143,7 @@ async function verifyCode(factorId, code) {
 }
 async function signOut(mode) {
   await api('/auth/v1/logout', { method: 'POST' }).catch(() => {});
-  forget(); me = null; frame = null;
+  forget(); me = null;
   si = { ...si, mode: mode || si.mode, error: '', pw: '' };
   go('/sign-in', { replace: true });
 }
@@ -222,7 +225,7 @@ async function route() {
     ctx = { ...ctx, seg: seg.slice(1) };
     if (key === 'coupons' && !FLAGS.coupons) return shell(key, notBuilt('coupons'));
     mod = NATIVE[key];
-    if (!mod) return shell(key, framed(path));
+    if (!mod) return shell(null, missing(path));
     shell(key, loading());
   }
   try {
@@ -239,10 +242,9 @@ const home = () => (me.kind === 'owner' ? `/${me.shops[0].slug}/today` : '/overv
 
 // ------------------------------------------------------------------ paint --
 const root = document.getElementById('root');
-function paint(html) { root.innerHTML = html; frame = null; document.title = 'Sign in · Sterncut'; bindSignIn(); }
+function paint(html) { root.innerHTML = html; document.title = 'Sign in · Sterncut'; bindSignIn(); }
 
-// the shell: rail + top bar + page. `page` = { html, ready?, top?, heading?, place?, frame? }
-let frame = null;                       // the legacy iframe, kept across legacy pages
+// the shell: rail + top bar + page. `page` = { html, ready?, top?, heading?, place? }
 let cur = {};                           // the section on screen, for redrawing the rail
 function shell(key, page, shop) {
   const owner = me.kind === 'owner';
@@ -258,13 +260,12 @@ function shell(key, page, shop) {
         <div style="flex:1;min-width:0;display:flex;flex-direction:column;position:relative">
           <div id="top"></div><div id="askbar"></div>
           <div id="page" style="flex:1;min-height:0;position:relative"></div>
-          <div id="legacy" style="position:absolute;inset:0;display:none"></div>
         </div>
       </div>
       <div id="overlay"></div><div id="toast"></div>`;
   }
   drawRail(key, shop);
-  const top = page.top !== false && !page.frame;
+  const top = page.top !== false;
   $('#top').innerHTML = top ? `
     <div style="height:62px;flex:none;border-bottom:1px solid #1E1E22;display:flex;align-items:center;gap:12px;padding:0 24px;box-sizing:border-box">
       <span style="font-size:15px;font-weight:700;white-space:nowrap">${esc(page.heading || (isHome ? dayLong(Date.now()) : label || 'Not found'))}</span>
@@ -275,21 +276,9 @@ function shell(key, page, shop) {
         <span style="font-family:ui-monospace,Menlo,monospace;font-size:10px;background:#26262B;border-radius:4px;padding:2px 5px;color:#9A9CA3">⌘K</span>
       </span>
     </div>` : '';
-  const pg = $('#page'), lg = $('#legacy');
-  if (page.frame) {
-    pg.style.display = 'none'; lg.style.display = 'block';
-    lg.style.top = $('#askbar').offsetHeight + 'px';
-    if (!frame || !lg.contains(frame)) {
-      lg.innerHTML = `<iframe title="Sterncut Admin" src="/legacy.html?embed=1#/${page.frame}" style="border:0;width:100%;height:100%;display:block"></iframe>`;
-      frame = lg.firstElementChild;
-    } else if (frame.contentWindow.location.hash !== '#/' + page.frame) {
-      frame.contentWindow.location.hash = '#/' + page.frame;
-    }
-  } else {
-    lg.style.display = 'none'; pg.style.display = 'block';
-    pg.innerHTML = page.html || '';
-    page.ready?.(pg);
-  }
+  const pg = $('#page');
+  pg.innerHTML = page.html || '';
+  page.ready?.(pg);
   askBar();
 }
 
@@ -393,37 +382,6 @@ function notBuilt(key, owner) {
     </div></div>` };
 }
 
-// ------------------------------------------------- the old console, framed --
-// Path → the legacy hash route that draws it. Replaced section by section.
-const LEGACY = [
-  [/^\/settings\/deposit-bounds/, 'reliability/deposit'], [/^\/settings/, 'reliability'],
-];
-// the reverse of LEGACY, for the routes a native section still frames
-const FRAME_PATH = { reliability: '/settings', 'reliability/deposit': '/settings/deposit-bounds' };
-const LEGACY_SECTION = { appeals: 'reviews', reliability: 'settings', desk: 'support', invites: 'salons', salon: 'salons', booking: 'bookings' };
-export function framed(path) { return { frame: (LEGACY.find(([re]) => re.test(path)) || [, 'overview'])[1] }; }
-
-// the frame reports where it went, asks it hit, and a session it lost
-addEventListener('message', (e) => {
-  if (e.origin !== location.origin || !e.data?.sterncut) return;
-  const d = e.data;
-  if (d.sterncut === 'signed-out') return signOut();
-  if (d.sterncut === 'route') {
-    const r = String(d.route || '');
-    // a framed page walking between its own sub-pages: the site URL follows it, nothing reloads
-    if (me?.kind === 'staff' && FRAME_PATH[r]) { if (location.pathname !== FRAME_PATH[r]) history.replaceState(null, '', FRAME_PATH[r]); return; }
-    const key = LEGACY_SECTION[r.split('/')[0]] || r.split('/')[0];
-    // a frame that walks into a section rebuilt here hands over to the native page
-    if (me?.kind === 'staff' && NATIVE[key]) return go('/' + key);
-    if (me?.kind === 'staff' && STAFF_NAV.some((x) => x.key === key) && location.pathname.split('/')[1] !== key) {
-      history.replaceState(null, '', '/' + key);
-      cur.key = key;
-      drawRail(key);
-    }
-  }
-  if (d.sterncut === 'gate') gateAnswer(d.message, d.rpc, d.args).catch(() => {});
-});
-
 // ------------------------------------------------------------------- toast --
 // §6: white, bottom-centre, 2.2 s — "Downloaded" / "Copied" / "Sent to the printer"
 export function toast(msg, ok = true) {
@@ -524,7 +482,6 @@ async function askBar() {
       <span data-decide="yes" class="btn-p" style="height:32px;padding:0 14px;border-radius:9px;background:#E8442E;display:flex;align-items:center;font-size:11px;font-weight:700;letter-spacing:.08em;cursor:pointer">DO IT</span>`
       : `<span style="font-size:11px;font-weight:700;color:#9A9CA3">${waiting ? `With ${esc(head())}` : a.state === 'done' ? 'Done' : a.state === 'refused' ? 'Refused' : 'Withdrawn'}</span>`}
   </div>`;
-  if ($('#legacy').style.display === 'block') $('#legacy').style.top = bar.offsetHeight + 'px';
   bar.onclick = async (e) => {
     const b = e.target.closest('[data-decide]');
     if (!b) return;
@@ -536,7 +493,6 @@ async function askBar() {
       toast(yes ? 'Done' : 'Refused — nothing changed');
       await refreshMe();
       const u = new URL(location.href); u.searchParams.delete('ask');
-      if (frame) frame.contentWindow.location.reload();
       go(u.pathname + u.search, { replace: true });
     } catch (err) { toast(err.message, false); }
   };

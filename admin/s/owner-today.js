@@ -7,7 +7,7 @@
 // Not as drawn: "Pause walk-ins, whole shop" is not a separate switch. The app
 // keeps one shop-wide lever on purpose (OSH-09, close_shop — LinesScreen says so),
 // and it pauses new bookings as well as the line, so the card opens that page.
-import { esc, DH, first, initials, hhmm, dayShort } from '/app.js';
+import { esc, DH, first, initials, hhmm, dayShort, ZONE } from '/app.js';
 import { shopDay, shopMin, clock, CHAIR_TINTS, stars } from '/s/ui.js';
 
 const tile = (label, value, note, noteColor = '#9A9CA3', href) => `
@@ -163,7 +163,7 @@ export default async function ({ rpc, rest, shop: s0 }) {
         ${roster.map(chairRow).join('') || '<div style="padding:16px;border-top:1px solid #1E1E22;font-size:12px;color:#6B6B72">No barber has joined the shop yet.</div>'}
       </div>
       <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px 17px;display:flex;flex-direction:column;gap:12px">
-        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><span style="font-size:12.5px;font-weight:700">Day view</span><span style="font-size:10.5px;color:#6B6B72">${esc(new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long', timeZone: 'Africa/Casablanca' }))} · ${occ}% full</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><span style="font-size:12.5px;font-weight:700">Day view</span><span style="font-size:10.5px;color:#6B6B72">${esc(new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long', timeZone: ZONE }))} · ${occ}% full</span></div>
         <div style="display:flex;gap:12px"><span style="width:80px;flex:none"></span><div class="num" style="flex:1;min-width:0;display:flex;font-size:10px;color:#6B6B72">${ticks.map((t) => `<span style="flex:1">${clock(t)}</span>`).join('')}</div></div>
         ${roster.map(lane).join('')}
         <div style="display:flex;flex-wrap:wrap;gap:16px;padding-left:92px;font-size:10px;color:#9A9CA3">

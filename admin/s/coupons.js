@@ -5,7 +5,7 @@
 // Not built (no backend): "came back after" and cost per keeper (nothing links a redeemed
 // coupon to the bookings after it), topping up a cap, sending to yourself first, and
 // CPN-03…15 / SAL-39/40 (armed triggers, barber returns, board reports, overrides, passes).
-import { esc, DH, num } from '/app.js';
+import { esc, DH, num, ZONE } from '/app.js';
 import { pageHead, chips, label9, btnS, btnP } from '/s/ui.js';
 
 const STATE = { draft: ['DRAFT', '#9A9CA3'], running: ['RUNNING', '#4ADE80'], stopped: ['STOPPED', '#E8A100'], done: ['CAPPED OUT', '#9A9CA3'] };
@@ -19,7 +19,7 @@ const errBox = '<span class="dlg-err" style="font-size:12px;color:#F87171;displa
 const showErr = (d, e) => { if (e.handled) return; const x = d.querySelector('.dlg-err'); x.textContent = e.message; x.style.display = 'block'; };
 // 'the shop already full' / 'one of the 4 shops already full'
 const fullShops = (n) => (n === 1 ? 'the one shop already full most days' : `one of the ${n} shops already full most days`);
-const today = () => new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Casablanca' });
+const today = () => new Date().toLocaleDateString('en-CA', { timeZone: ZONE });
 
 export default async function (ctx) {
   if (!ctx.seg[0]) return list(ctx);

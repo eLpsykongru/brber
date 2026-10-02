@@ -286,7 +286,7 @@ clean('QL-18 with a dropped man', kasbah);
 
 // ---- BTD-16 · the tap on another day ---------------------------------------------------------
 const tomorrow = new Date(Date.now() + 86_400_000);
-tomorrow.setUTCHours(9, 0, 0, 0);   // 10:00 in Tangier
+tomorrow.setUTCHours(10, 0, 0, 0);   // 10:00 in Tangier — GMT since 20 Sep 2026 (0139)
 const offerToken = await live('fixture_offer', { shop: 'LF7K2M', starts_at: tomorrow.toISOString() });
 const booked = await get(`/c/${offerToken}`, as);
 ok('an offer tapped is booked', booked.status === 200 && has(booked, 'BOOKED') && has(booked, 'ANAS · WITH YOUSSEF')

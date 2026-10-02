@@ -1,9 +1,9 @@
-// /settings — Team & roles (SET-02), Permissions (SET-03) and the Audit log
-// (SET-04) are drawn here from 0133's tables. Rules, Deposits and Reliability
-// are still the old console's screens; Districts (SET-06) and Pricing (SET-17, read-only)
-// are drawn here too; Message templates are not on the website yet (nothing stores them). "Take" (SET-14…16) is not built: the billing rail
-// (0123) already decided what Sterncut takes.
-import { esc, first, initials, dayShort, ROLE_LABEL, framed } from '/app.js';
+// /settings — Rules (SET-01), Deposits (SET-11…13, 0077), Reliability (HOP-01, 0066),
+// Pricing (SET-17, read-only), Team & roles (SET-02), Permissions (SET-03), the Audit log
+// (SET-04) and Districts (SET-06). Message templates are not on the website yet (nothing
+// stores them). "Take" (SET-14…16) is not built: the billing rail (0123) already decided
+// what Sterncut takes.
+import { esc, num, DH, first, initials, dayShort, hhmm, ROLE_LABEL } from '/app.js';
 import { pageHead, subTabs, chips, btnP, btnS, plus, avatar, label9, csv } from '/s/ui.js';
 
 const ROLES = ['head', 'support', 'mod', 'field'];
@@ -28,6 +28,9 @@ function when(t) {
 
 export default async function (ctx) {
   const page = ctx.seg[0] || '';
+  if (!page) return rules(ctx);
+  if (page === 'reliability') return reliability(ctx);
+  if (page === 'deposit-bounds') return bounds(ctx);
   if (page === 'team') return team(ctx);
   if (page === 'permissions') return permissions(ctx);
   if (page === 'audit') return audit(ctx);
@@ -39,7 +42,7 @@ export default async function (ctx) {
       <span style="font-size:9.5px;letter-spacing:.14em;font-weight:700;border-radius:999px;padding:4px 9px;color:#E8A100;background:rgba(232,161,0,.12);align-self:flex-start">NOT BUILT YET</span>
       <span style="font-size:13px;line-height:1.6;color:#9A9CA3">${esc(t)} isn’t on the website yet: nothing stores the product’s messages as templates — each one is written where it is sent.</span></div>`, t, '') };
   }
-  return framed(ctx.path);
+  throw new Error('not_found');
 }
 
 // ---------------------------------------------------------------- SET-02 --
@@ -338,4 +341,253 @@ async function pricing({ rest, rpc }) {
       ${note('Not editable here yet.', 'There is no audited setter for the list price, and a direct write would skip the permission check and the audit log. Billing itself runs from <a href="/finance/charges" style="font-weight:700">Finance · Charges</a>.')}</div>
   </div>`, 'Pricing', 'What Sterncut charges a shop');
   return { top: false, html };
+}
+
+// ---------------------------------------------------------------- SET-01 --
+// Rules: every dial the platform keeps, what it is now, where it is changed, and the last
+// changes (settings_changes — each setter writes its before and after there). Only the
+// deposit bounds, the reliability numbers and the write-off alert have a page that changes
+// them; the others are shown with the line that says so — a dial with no audited setter is
+// not offered as editable.
+const DIAL = {
+  late_after_min: ['Late after', (v) => `${v} min`], mark_days: ['A mark lasts', (v) => `${v} days`],
+  clear_after_clean: ['Clean visits that clear a mark', (v) => (v == null ? 'off' : String(v))],
+  floor: ['Deposit floor', (v) => `${v}%`], ceiling: ['Deposit ceiling', (v) => `${v}%`],
+  writeoff_alert_cents: ['Write-off alert', (v) => (v == null ? 'off' : `${Math.round(v / 100)} DH`)],
+  billing: ['Billing', (v) => String(v)],
+};
+const changeText = (c) => Object.keys(c.after || {}).filter((k) => DIAL[k] && JSON.stringify((c.before || {})[k]) !== JSON.stringify(c.after[k]))
+  .map((k) => `${DIAL[k][0]} ${DIAL[k][1]((c.before || {})[k])} → ${DIAL[k][1](c.after[k])}`).join(' · ');
+const box = (inner) => `<div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:11px">${inner}</div>`;
+const fact = (label, value, sub) => `<div style="display:flex;align-items:baseline;gap:12px"><span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:600">${label}</span>${sub ? `<span style="display:block;font-size:10.5px;color:#6B6B72;margin-top:2px">${sub}</span>` : ''}</span><span class="num" style="font-size:15px;font-weight:800">${value}</span></div>`;
+const goLink = (href, label) => `<a href="${href}" style="align-self:flex-start;font-size:11px;font-weight:700">${label} →</a>`;
+
+async function rules({ rest }) {
+  const [ps, changes] = await Promise.all([rest('platform_settings?select=*&limit=1'), rest('settings_changes?select=changed_by,changed_at,before,after,note&order=changed_at.desc&limit=8')]);
+  const p = ps[0] || {};
+  const ids = [...new Set(changes.map((c) => c.changed_by).filter(Boolean))];
+  const people = ids.length ? Object.fromEntries((await rest(`profiles?select=id,full_name&id=in.(${ids.join(',')})`).catch(() => [])).map((x) => [x.id, x.full_name])) : {};
+  const cancel = p.free_cancel_min == null ? '—' : p.free_cancel_min % 60 ? `${p.free_cancel_min} min` : `${p.free_cancel_min / 60} h`;
+  const html = frame(`<div style="flex:1;overflow:auto;padding:20px 24px 32px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+    <div style="flex:3 1 520px;min-width:0;display:flex;flex-direction:column;gap:14px">
+      ${box(`<div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:13px;font-weight:700">Deposits</span><span style="font-size:11px;color:#6B6B72">applies at checkout on every phone</span></div>
+        ${fact('Floor', `${p.deposit_floor_pct}%`, 'The least a shop may ask up front')}${fact('Ceiling', `${p.deposit_ceiling_pct}%`, 'The most a shop may ask')}
+        ${fact('Free cancel window', cancel, 'The deposit comes back in full before this. No screen changes it yet.')}
+        ${goLink('/settings/deposit-bounds', 'Change the bounds — every shop’s position shown first')}`)}
+      ${box(`<div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:13px;font-weight:700">Reliability</span><span style="font-size:11px;color:#6B6B72">Head of Ops only</span></div>
+        ${fact('Late after', `${p.late_after_min} min`, 'Past the booked slot, a customer gets a mark')}${fact('A mark lasts', `${p.mark_days} days`, 'While it does, their deposit is locked at 100%')}
+        ${fact('Clean visits that clear it', p.clear_after_clean == null ? 'off' : p.clear_after_clean, 'On time this many times, and the mark goes early')}
+        ${goLink('/settings/reliability', 'Tune them — dry-run against the last 90 days first')}`)}
+      ${box(`<span style="font-size:13px;font-weight:700">Cash</span>
+        ${fact('An agent’s bag', DH(p.agent_bag_cap_cents), 'The most an agent carries before dropping at the office')}
+        ${fact('Unchecked cash an agent may hold', `${DH(p.agent_unchecked_cents)} · ${p.agent_unchecked_max} receipts`, 'At either, the app won’t open another collection until the queue syncs')}
+        ${fact('Days a shop may hold our float', p.float_hold_days, 'After this, a remainder carries onto the week being cut')}
+        ${fact('Monthly write-off alert', p.writeoff_alert_cents == null ? 'off' : DH(p.writeoff_alert_cents), 'It never refuses a write-off; it turns the month red')}
+        <span style="font-size:10.5px;color:#6B6B72">No screen changes the first three yet. ${goLink('/finance/float?alert=1', 'Change the alert')}</span>`)}
+      ${box(`<span style="font-size:13px;font-weight:700">Pricing</span>
+        ${fact('A chair, a month', DH(p.sub_monthly_cents), `${DH(p.sub_yearly_cents)} a month on a year · up to ${p.sub_chair_cap} chairs`)}
+        ${goLink('/settings/pricing', 'What a new subscription is charged')}`)}
+    </div>
+    <div style="flex:2 1 300px;min-width:0;display:flex;flex-direction:column;gap:12px">
+      ${box(`${label9('LAST CHANGED', '#6B6B72')}${changes.map((c, i) => `<div style="display:flex;gap:10px;align-items:flex-start;${i ? 'border-top:1px solid #1E1E22;padding-top:10px' : ''}">
+          ${avatar(initials(people[c.changed_by] || 'Ops'), i ? '#212125' : '#E8442E', 26)}
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font-size:12px;font-weight:600">${esc(changeText(c) || c.note || 'A platform setting')}</span>
+            <span style="font-size:10.5px;color:#6B6B72">${esc(first(people[c.changed_by] || 'Ops'))} · ${esc(dayShort(c.changed_at))}, ${hhmm(c.changed_at)}</span>
+            ${c.note && changeText(c) ? `<span style="font-size:10.5px;line-height:1.45;color:#9A9CA3">“${esc(c.note)}”</span>` : ''}</span></div>`).join('') || '<span style="font-size:11.5px;color:#6B6B72">Nothing has been changed since launch.</span>'}
+        ${goLink('/settings/audit', 'Full audit log')}`)}
+      <div style="background:#111113;border:1px solid #26262B;border-radius:12px;padding:13px 15px;display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700">Nothing here is a draft</span><span style="font-size:11.5px;color:#9A9CA3;line-height:1.55">Every dial writes to live shops the moment it is saved — there is no staging Sterncut. Everything not on this page belongs to the shop.</span></div>
+    </div></div>`, 'Settings', 'Changes here affect every shop and every phone');
+  return { top: false, html };
+}
+
+// ---------------------------------------------------------------- HOP-01 --
+// 0046's 15 minutes and 90 days were guesses nobody tuned, so every figure here is counted
+// against the last 90 days of real arrivals (admin_reliability_dryrun) and the page claims
+// no saving it hasn't measured. Saving is the Head of Ops' alone (platform_rule).
+async function reliability({ rest, rpc, act, toast, go }) {
+  const saved = (await rest('platform_settings?select=late_after_min,mark_days,clear_after_clean&limit=1'))[0] || { late_after_min: 15, mark_days: 90, clear_after_clean: null };
+  const draft = { ...saved };
+  const html = frame('<div id="rb" style="flex:1;overflow:auto;padding:20px 24px 32px"><span style="font-size:12px;color:#6B6B72">Counting the last 90 days…</span></div>', 'Reliability',
+    'Dry-run against the last 90 days before anything goes live', `<span style="display:flex;gap:10px;align-items:center">${btnS('Discard', 'id="rb-discard"')}${btnP('Save &amp; apply', 'id="rb-apply"')}</span>`);
+  return {
+    top: false, html,
+    ready(root) {
+      const body = root.querySelector('#rb');
+      const dirty = () => ['late_after_min', 'mark_days', 'clear_after_clean'].some((k) => draft[k] !== saved[k]);
+      const pick = (on) => `cursor:pointer;border-radius:12px;padding:13px;display:flex;flex-direction:column;gap:4px;border:1px solid ${on ? '#E8442E' : '#1E1E22'};background:${on ? 'rgba(232,68,46,.12)' : '#17171A'}`;
+      const stat = (l, v, s, tone) => `<div style="flex:1 1 140px;background:#17171A;border:1px solid #1E1E22;border-radius:12px;padding:12px 13px;display:flex;flex-direction:column;gap:4px"><span style="font-size:9px;letter-spacing:.12em;font-weight:700;color:#6B6B72">${l}</span><span class="num" style="font-size:20px;font-weight:700;color:${tone || '#fff'}">${v}</span><span style="font-size:10.5px;color:#9A9CA3">${s}</span></div>`;
+      const row = (k, v, tone) => `<div style="display:flex;align-items:center;padding:9px 0;border-bottom:1px solid #1E1E22"><span style="flex:1;font-size:11.5px;color:#9A9CA3">${k}</span><span class="num" style="font-size:12.5px;font-weight:700;color:${tone || '#fff'}">${v}</span></div>`;
+      let seq = 0;
+      const draw = async () => {
+        const n = ++seq;
+        const d = await rpc('admin_reliability_dryrun', { p_late_min: draft.late_after_min, p_mark_days: draft.mark_days, p_clean: draft.clear_after_clean });
+        if (n !== seq) return;   // a newer click is already counting
+        const pct = (a, b) => (b ? `${(a * 100 / b).toFixed(1)}%` : '0%');
+        const delta = d.marks_at - d.marks_now, freed = Math.max(0, d.carrying - d.carrying_after);
+        const dispPct = d.marks_total ? Math.round(d.disputed * 100 / d.marks_total) : 0;
+        body.innerHTML = `<div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+          <div style="flex:3 1 520px;min-width:0;display:flex;flex-direction:column;gap:14px">
+            <span style="font-size:12.5px;color:#9A9CA3;line-height:1.55">These numbers were guesses at launch and nobody has tuned them. Every change is dry-run against the last 90 days before it goes live.</span>
+            <div style="background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px">
+              ${label9('WHEN IS SOMEONE LATE', '#6B6B72')}
+              <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap"><span><span class="num" style="display:block;font-family:'Playfair Display',serif;font-weight:700;font-size:34px;line-height:1">${draft.late_after_min} min</span><span style="display:block;font-size:11px;color:#9A9CA3;margin-top:5px">past the booked slot</span></span>
+                <span style="flex:1;display:flex;gap:8px;justify-content:flex-end">${[5, 15, 20, 35].map((m) => `<span data-late="${m}" style="cursor:pointer;min-width:44px;text-align:center;padding:7px 10px;border-radius:8px;font-size:12px;font-weight:700;${draft.late_after_min === m ? 'background:#E8442E;color:#fff' : 'background:#212125;color:#9A9CA3'}">${m}</span>`).join('')}</span></div>
+              <div style="display:flex;gap:11px;flex-wrap:wrap;border-top:1px solid #1E1E22;padding-top:15px">${stat(`MARKS AT ${saved.late_after_min} MIN`, num(d.marks_now), `${pct(d.marks_now, d.visits)} of visits`)}
+                ${stat(`AT ${draft.late_after_min} MIN`, num(d.marks_at), delta === 0 ? 'no change' : `${delta > 0 ? '+' : '−'}${num(Math.abs(delta))} people`, delta === 0 ? null : delta > 0 ? '#E8A100' : '#4ADE80')}
+                ${stat('DISPUTED', num(d.disputed), `${pct(d.disputed, d.marks_total)} of marks`)}</div>
+              <span style="font-size:11.5px;line-height:1.5;color:#9A9CA3">${dispPct >= 10 && d.poster_tasks > 0 ? `A ${dispPct}% dispute rate is high. ${d.poster_tasks} shops have a review-poster task open, which may be the real cause rather than the threshold.` : `Dispute rate is ${dispPct}% of the marks raised in the last 90 days.`}</span></div>
+            <div style="background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px">
+              ${label9('HOW LONG A MARK LASTS', '#6B6B72')}
+              <div style="display:flex;gap:10px;flex-wrap:wrap">${[[90, saved.mark_days === 90 ? `Current · ${num(d.carrying)} carrying one` : 'The launch guess'], [60, `Would clear ${num(freed)} tonight`], [30, 'Aggressive']]
+                .map(([v, s]) => `<div data-days="${v}" style="flex:1 1 140px;${pick(draft.mark_days === v)}"><span style="font-size:13px;font-weight:700">${v} days</span><span style="font-size:10.5px;color:#9A9CA3">${draft.mark_days === v && v !== 90 ? `Would clear ${num(freed)} tonight` : s}</span></div>`).join('')}</div>
+              <div style="display:flex;align-items:center;gap:12px;background:#17171A;border-radius:12px;padding:12px 13px"><span style="flex:1;min-width:0"><span style="display:block;font-size:12.5px;font-weight:700">Clear it after ${draft.clear_after_clean || 3} visits on time as well</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">What the customer app (39b) promises · currently ${draft.clear_after_clean ? 'on' : 'off'}</span></span>
+                <span data-clean="${draft.clear_after_clean ? 'off' : '3'}" style="cursor:pointer;width:42px;height:24px;border-radius:999px;background:${draft.clear_after_clean ? '#4ADE80' : '#3A3A40'};display:flex;align-items:center;justify-content:${draft.clear_after_clean ? 'flex-end' : 'flex-start'};padding:0 3px;flex:none;box-sizing:border-box"><span style="width:18px;height:18px;border-radius:999px;background:#0D0D0F"></span></span></div></div>
+            <div style="background:#111113;border:1px solid #1E1E22;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:9px">
+              ${label9('WHAT A MARK ACTUALLY DOES', '#6B6B72')}
+              ${[['Deposit locked at 100%', 'live since launch', '#4ADE80'], ['Barbers can refuse the booking outright', 'NOT BUILT', '#6B6B72'], ['Reliable clients get first refusal on freed slots', 'NOT BUILT', '#6B6B72']]
+                .map(([t, s, c]) => `<div style="display:flex;align-items:center;gap:10px;font-size:12px"><span style="flex:1">${t}</span><span style="font-size:9.5px;letter-spacing:.1em;font-weight:800;color:${c}">${s.toUpperCase()}</span></div>`).join('')}</div>
+          </div>
+          <div style="flex:2 1 300px;min-width:0;background:#17171A;border:1px solid #1E1E22;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px">
+            ${label9('DRY RUN · LAST 90 DAYS', '#6B6B72')}
+            <span style="font-size:13px;font-weight:700">${dirty() ? 'If you save this' : 'As it stands'}</span>
+            <span style="font-size:12px;color:#9A9CA3">Late at ${draft.late_after_min} min, a mark clears after ${draft.clear_after_clean ? `${draft.clear_after_clean} clean visits or ` : ''}${draft.mark_days} days.</span>
+            <div>${row('Marked today', `${num(d.carrying)} → ${num(d.carrying_after)}`)}${row('Cleared tonight', `${num(freed)} people`, '#4ADE80')}${row('Marks at the new threshold', `${delta >= 0 ? '+' : '−'}${num(Math.abs(delta))}`, delta > 0 ? '#E8A100' : '#4ADE80')}</div>
+            ${label9('WHO GETS TOLD', '#6B6B72')}
+            <div>${row(`${num(freed)} customers`, '“your mark has gone”')}${row('Logged against', 'you')}</div>
+            <span id="rb-save" style="height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;letter-spacing:.04em;${dirty() ? 'cursor:pointer;background:#E8442E;color:#fff' : 'background:#212125;color:#6B6B72'}">${dirty() ? 'SAVE &amp; APPLY TONIGHT' : 'NOTHING TO SAVE'}</span>
+            <span style="font-size:10.5px;color:#6B6B72">Every change is logged with who made it. Only the Head of Ops can save.</span>
+          </div></div>`;
+        root.querySelector('#rb-apply').style.opacity = dirty() ? '1' : '.45';
+        root.querySelector('#rb-discard').style.opacity = dirty() ? '1' : '.45';
+      };
+      const save = async () => {
+        if (!dirty()) return;
+        try {
+          await act('admin_save_reliability', { p_late_min: draft.late_after_min, p_mark_days: draft.mark_days, p_clean: draft.clear_after_clean, p_note: null }, { title: `Reliability: late at ${draft.late_after_min} min, marks last ${draft.mark_days} days` });
+          toast('Applied. Everyone affected has been told.'); go('/settings/reliability', { replace: true });
+        } catch (e) { if (!e.handled) toast(e.message, false); }
+      };
+      root.addEventListener('click', (e) => {
+        const t = e.target.closest('[data-late],[data-days],[data-clean],#rb-save,#rb-apply,#rb-discard');
+        if (!t) return;
+        if (t.dataset.late) draft.late_after_min = Number(t.dataset.late);
+        else if (t.dataset.days) draft.mark_days = Number(t.dataset.days);
+        else if (t.dataset.clean) draft.clear_after_clean = t.dataset.clean === 'off' ? null : Number(t.dataset.clean);
+        else if (t.id === 'rb-discard') Object.assign(draft, saved);
+        else return save();
+        draw().catch((err) => toast(err.message, false));
+      });
+      draw().catch((err) => { body.innerHTML = `<span style="font-size:12px;color:#F87171">${esc(err.message)}</span>`; });
+    },
+  };
+}
+
+// ---------------------------------------------------------- SET-11/12/13 --
+// The deposit floor and ceiling (0077). Checked when an owner saves, never applied back:
+// a shop's percentage is versioned, so moving these can't reach a booking already taken.
+// `?edit=1` is SET-12/13's dialog — the impact is counted before the save, and a reason is
+// required exactly when the server requires one (either bound narrowing).
+const SAMPLE = 6000;   // the drawn reference cut: every bound prices itself against one service
+const pctDh = (cents, pct) => Math.ceil((cents * pct) / 100) / 100;
+function bandTrack(floor, ceiling, shops) {
+  const hatch = 'repeating-linear-gradient(135deg,#26262B 0 4px,#1A1A1D 4px 8px)';
+  // a tick per percentage a live shop actually sits on, so the band reads against the network
+  const marks = [...new Set((shops || []).filter((s) => s.pct > 0).map((s) => s.pct))].sort((a, b) => a - b).slice(0, 6);
+  return `<span style="position:absolute;left:0;top:0;bottom:0;width:${floor}%;border-radius:4px 0 0 4px;background:${hatch}"></span>
+    <span style="position:absolute;left:${ceiling}%;right:0;top:0;bottom:0;border-radius:0 4px 4px 0;background:${hatch}"></span>
+    <span style="position:absolute;left:${floor}%;width:${ceiling - floor}%;top:0;bottom:0;background:#E8442E"></span>
+    ${[floor, ceiling].map((x) => `<span style="position:absolute;left:${x}%;top:-7px;bottom:-7px;width:3px;background:#fff;border-radius:2px;margin-left:-1px"></span><span class="num" style="position:absolute;left:${x}%;top:-26px;transform:translateX(-50%);font-size:10.5px;font-weight:700">${x}%</span>`).join('')}
+    ${marks.map((x) => `<span style="position:absolute;left:${x}%;top:12px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:3px"><span style="width:1px;height:6px;background:#3A3A40"></span><span class="num" style="font-size:9.5px;color:#6B6B72">${x}%</span></span>`).join('')}`;
+}
+
+async function bounds({ rpc, act, q, go, toast, dialog, closeDialog }) {
+  const d = await rpc('admin_deposit_bounds');
+  const card = (label, value, sub) => `<div style="flex:1 1 200px;background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px">${label9(label, '#9A9CA3')}<span><span class="num" style="font-family:'Playfair Display',serif;font-weight:700;font-size:34px">${value}</span><span style="font-size:14px;color:#9A9CA3"> %</span></span><span style="font-size:11px;color:#9A9CA3;line-height:1.5">${sub}</span></div>`;
+  const byPct = {};
+  (d.shops || []).forEach((s) => { byPct[s.pct] = (byPct[s.pct] || 0) + 1; });
+  const cols = Object.keys(byPct).map(Number).sort((a, b) => a - b), top = Math.max(1, ...cols.map((x) => byPct[x]));
+  const stat = (v, label, colour) => `<span style="flex:1 1 120px;display:flex;flex-direction:column;gap:3px"><span class="num" style="font-size:17px;font-weight:800${colour ? `;color:${colour}` : ''}">${v}</span><span style="font-size:10.5px;color:#9A9CA3;line-height:1.4">${label}</span></span>`;
+  const html = frame(`<div style="flex:1;overflow:auto;padding:20px 24px 32px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+    <div style="flex:3 1 560px;min-width:0;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap"><span style="font-size:15px;font-weight:700">Deposit floor &amp; ceiling</span><span style="font-size:9.5px;letter-spacing:.12em;font-weight:700;color:#9A9CA3">PLATFORM-WIDE</span><span style="font-size:11px;color:#6B6B72">Checked when an owner saves — never applied retroactively</span></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        ${card('FLOOR', d.floor_pct, `The least a shop may require · <span class="num">${pctDh(SAMPLE, d.floor_pct)} DH</span> on a 60 DH skin fade`)}
+        ${card('CEILING', d.ceiling_pct, `The most · <span class="num">${pctDh(SAMPLE, d.ceiling_pct)} DH</span> on the same cut, <span class="num">${pctDh(9000, d.ceiling_pct)} DH</span> on cut and beard`)}
+        ${card('OR EXACTLY', 0, 'A shop may take no deposit at all. The bounds do not touch that choice.')}</div>
+      <div style="background:#17171A;border:1px solid #1E1E22;border-radius:14px;padding:34px 18px 18px;display:flex;flex-direction:column;gap:30px">
+        <div style="position:relative;height:10px;border-radius:4px">${bandTrack(d.floor_pct, d.ceiling_pct, d.shops)}</div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="flex:1;min-width:220px;font-size:11px;color:#9A9CA3;line-height:1.5">Owners choose anywhere in the coral band. A shop’s percentage is versioned with an effective date, so moving these numbers can never reach a booking already taken.</span>${btnP('CHANGE BOUNDS', 'data-go="/settings/deposit-bounds?edit=1"')}</div></div>
+      ${box(`<div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:13px;font-weight:700">Where ${d.total} shop${d.total === 1 ? '' : 's'} actually sit${d.total === 1 ? 's' : ''}</span><span style="font-size:11px;color:#6B6B72">their own deposit percentage, today</span></div>
+        <div style="display:flex;align-items:flex-end;gap:8px;min-height:110px">${cols.length ? cols.map((x) => { const zero = x === 0, c = zero ? '#9A9CA3' : '#D8D8DC'; return `<span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:7px"><span class="num" style="font-size:12px;font-weight:700;color:${c}">${byPct[x]}</span><span style="width:100%;max-width:38px;height:${Math.max(6, Math.round((byPct[x] / top) * 75))}px;border-radius:5px 5px 0 0;background:${zero ? 'repeating-linear-gradient(135deg,#3A3A40 0 4px,#2A2A2F 4px 8px)' : '#E8442E'}"></span><span class="num" style="font-size:10.5px;font-weight:700;color:${c}">${x}%</span></span>`; }).join('') : '<span style="font-size:11.5px;color:#6B6B72">No live shops yet.</span>'}</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">${stat(d.at_zero, 'at 0% — took the opt-out, no deposit at all', '#9A9CA3')}${stat(d.inside, `inside the band${d.median != null ? `, median <span class="num">${d.median}%</span>` : ''}`)}${stat(d.on_floor, 'sitting exactly on the floor')}${stat(d.on_ceiling, 'sitting exactly on the ceiling')}</div>`)}
+    </div>
+    <div style="flex:2 1 300px;min-width:0;display:flex;flex-direction:column;gap:12px">
+      ${box(`<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:13px;font-weight:700">Bound changes</span><span style="font-size:11px;color:#6B6B72">${d.changes_total === 1 ? '1 ever' : `${d.changes_total} ever`}</span></div>
+        ${(d.changes || []).map((c, i) => { const both = c.floor_before !== c.floor_after && c.ceiling_before !== c.ceiling_after; return `<div style="display:flex;gap:10px;align-items:flex-start">${avatar(initials(c.who), i ? '#212125' : '#E8442E', 26)}<span style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font-size:11.5px;line-height:1.4">${both ? `Band <b class="num">${c.floor_after}% – ${c.ceiling_after}%</b>` : c.floor_before !== c.floor_after ? `Floor <b class="num">${c.floor_before}% → ${c.floor_after}%</b>` : `Ceiling <b class="num">${c.ceiling_before}% → ${c.ceiling_after}%</b>`}</span>
+          <span style="font-size:10px;color:#6B6B72">${esc(c.who)} · ${esc(dayShort(c.at))}, ${hhmm(c.at)} · ${c.outside} shop${c.outside === 1 ? '' : 's'} outside</span>${c.reason ? `<span style="font-size:10.5px;line-height:1.45;color:#9A9CA3">“${esc(c.reason)}”</span>` : ''}</span></div>`; }).join('') || '<span style="font-size:11px;color:#6B6B72">Never changed. The bounds are what 0076 shipped.</span>'}`)}
+      ${box(`<span style="font-size:12px;font-weight:700">What the audit records</span>${['Who, to the second', 'Both numbers before and after, even if only one moved', 'How many shops were outside the new band at that moment', 'A reason — mandatory when either bound narrows, optional when it widens'].map((t) => `<span style="font-size:11.5px;color:#9A9CA3;line-height:1.45">✓ ${t}</span>`).join('')}
+        <span style="font-size:11px;color:#6B6B72;line-height:1.5">Widening can only give owners more room, so it needs no defence. Narrowing takes a choice away from a shop that already made it, and that is the entry someone will read back in six months.</span>`)}
+    </div></div>`, 'Settings', 'Changes here affect every shop and every phone');
+  return {
+    top: false, html,
+    ready() {
+      if (!q.get('edit')) return;
+      const s = { floor: d.floor_pct, ceiling: d.ceiling_pct, notify: true, reason: '' };
+      const dl = dialog('<div id="bd" style="padding:22px;display:flex;flex-direction:column;gap:14px"></div>', { onClose: () => go('/settings/deposit-bounds'), width: 600 });
+      const el = dl.querySelector('#bd');
+      let seq = 0, blocked = false;
+      const dial = (which, value, was, red) => `<div style="flex:1 1 200px;background:#111113;border:1px solid ${red ? 'rgba(248,113,113,.45)' : '#26262B'};border-radius:11px;padding:13px 14px;display:flex;flex-direction:column;gap:9px">
+        ${label9(which.toUpperCase(), red ? '#F87171' : '#9A9CA3')}
+        <div style="display:flex;align-items:center;gap:10px"><span data-step="${which}:-5" style="cursor:pointer;width:30px;height:30px;flex:none;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#9A9CA3">−</span>
+          <span style="flex:1;text-align:center"><span class="num" style="font-size:26px;font-weight:800;color:${red ? '#F87171' : '#fff'}">${value}</span><span style="font-size:13px;color:#9A9CA3"> %</span></span>
+          <span data-step="${which}:5" style="cursor:pointer;width:30px;height:30px;flex:none;border-radius:8px;background:#212125;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700">+</span></div>
+        <span class="num" style="font-size:10.5px;color:#6B6B72">was ${was}%</span></div>`;
+      const draw = async () => {
+        const n = ++seq;
+        const imp = await rpc('admin_bounds_impact', { p_floor: s.floor, p_ceiling: s.ceiling });
+        if (n !== seq) return;
+        const narrowing = s.floor > d.floor_pct || s.ceiling < d.ceiling_pct;
+        // SET-13's threshold: once most of the network is stranded the panel turns red
+        const heavy = imp.outside > 0 && imp.outside >= Math.ceil((d.total - imp.at_zero) / 2);
+        const tint = heavy ? '#F87171' : '#E8A100', bg = heavy ? 'rgba(248,113,113,.09)' : 'rgba(232,161,0,.08)', ln = heavy ? 'rgba(248,113,113,.4)' : 'rgba(232,161,0,.28)';
+        const chip = (v, label, muted) => `<span style="flex:1 1 90px;background:${muted ? 'rgba(255,255,255,.04)' : heavy ? 'rgba(248,113,113,.1)' : 'rgba(232,161,0,.1)'};border-radius:8px;padding:9px 11px;display:flex;flex-direction:column;gap:2px"><span class="num" style="font-size:13px;font-weight:800;color:${muted ? '#9A9CA3' : tint}">${v}</span><span style="font-size:10px;color:${muted ? '#6B6B72' : heavy ? '#F0A9A9' : '#C79A3E'}">${label}</span></span>`;
+        blocked = narrowing && !s.reason.trim();
+        el.innerHTML = `<div><span style="display:block;font-size:17px;font-weight:800">Change deposit bounds</span><span style="display:block;font-size:12px;margin-top:4px;color:${heavy ? '#F87171' : '#9A9CA3'}">${heavy ? 'This band strands most of the network.' : !narrowing ? 'Widening. Every shop keeps what it has.'
+            : s.floor > d.floor_pct && s.ceiling < d.ceiling_pct ? 'Both bounds narrowing.' : s.floor > d.floor_pct ? 'Raising the floor. Ceiling untouched.' : 'Lowering the ceiling. Floor untouched.'}</span></div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">${dial('floor', s.floor, d.floor_pct, heavy)}${dial('ceiling', s.ceiling, d.ceiling_pct, heavy)}</div>
+          ${imp.outside === 0 ? `<div style="background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.28);border-radius:11px;padding:14px 15px;font-size:12px;font-weight:700;color:#4ADE80">No shop falls outside ${s.floor}% – ${s.ceiling}%</div>`
+            : `<div style="background:${bg};border:1px solid ${ln};border-radius:11px;padding:14px 15px;display:flex;flex-direction:column;gap:11px">
+              <span style="font-size:12.5px;font-weight:700;color:${tint}"><span class="num">${imp.outside}${heavy ? ` of ${d.total}` : ''}</span> shop${imp.outside === 1 ? '' : 's'} would sit outside <span class="num">${s.floor}% – ${s.ceiling}%</span></span>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">${(imp.buckets || []).map((b) => chip(b.n, `at ${b.pct}%`)).join('')}${chip(imp.at_zero, 'at 0% · unaffected', true)}${chip(imp.inside, 'already inside', true)}</div>
+              ${(imp.named || []).length ? `<div style="display:flex;flex-direction:column;gap:7px;border-top:1px solid ${ln};padding-top:11px">${imp.named.map((x) => `<span style="display:flex;gap:8px;font-size:11.5px"><span style="flex:1;color:#D8D8DC">${esc(x.name)}</span><span class="num" style="font-weight:700;color:${tint}">${x.pct}% · outside</span></span>`).join('')}</div>` : ''}
+              <span style="font-size:11.5px;line-height:1.55;color:${heavy ? '#F0A9A9' : '#C79A3E'}">Each of them keeps its own percentage until its owner next opens the deposit screen — nothing is clamped, and no booking already taken changes. At that edit, <span class="num">${s.floor}%</span> becomes their lowest option.</span></div>`}
+          <div style="display:flex;flex-direction:column;gap:7px">${label9(narrowing ? `REASON · REQUIRED, ${s.floor > d.floor_pct && s.ceiling < d.ceiling_pct ? 'BOTH BOUNDS ARE' : 'THE BAND IS'} NARROWING` : 'REASON · OPTIONAL, THIS IS A WIDENING', narrowing ? (heavy ? '#F87171' : '#9A9CA3') : '#6B6B72')}
+            <textarea id="bd-why" rows="2" style="background:#111113;border:1px solid #26262B;border-radius:11px;padding:11px 12px;color:#fff;font-size:12.5px;outline:none;resize:vertical">${esc(s.reason)}</textarea></div>
+          ${imp.outside > 0 ? `<div style="display:flex;align-items:center;gap:12px"><span style="flex:1"><span style="display:block;font-size:12.5px;font-weight:700">Tell the ${imp.outside} owner${imp.outside === 1 ? '' : 's'} the range moved</span><span style="display:block;font-size:10.5px;color:#9A9CA3;margin-top:2px">They find out now, not the next time they try to save.</span></span>
+            <span id="bd-notify" style="cursor:pointer;width:42px;height:24px;border-radius:999px;background:${s.notify ? '#E8442E' : '#3A3A40'};display:flex;align-items:center;justify-content:${s.notify ? 'flex-end' : 'flex-start'};padding:0 3px;flex:none;box-sizing:border-box"><span style="width:18px;height:18px;border-radius:999px;background:#0D0D0F"></span></span></div>` : ''}
+          <span id="bd-log" style="font-size:11px;color:#6B6B72"></span>
+          <div style="display:flex;gap:10px;justify-content:flex-end">${btnS('Cancel', 'data-dlg-close="1"')}${btnP('SAVE BOUNDS', 'id="bd-save"')}</div>`;
+        const log = () => { blocked = narrowing && !s.reason.trim(); el.querySelector('#bd-log').innerHTML = blocked ? '<span style="color:#F87171;font-weight:700">A reason is required before this can be saved</span>' : `Will be logged as — floor ${d.floor_pct} → ${s.floor} · ceiling ${d.ceiling_pct} → ${s.ceiling} · ${imp.outside} outside`; el.querySelector('#bd-save').style.opacity = blocked ? '.45' : '1'; };
+        el.querySelector('#bd-why').oninput = (e) => { s.reason = e.target.value; log(); };
+        log();
+      };
+      el.addEventListener('click', async (e) => {
+        const st = e.target.closest('[data-step]');
+        if (st) {
+          const [which, by] = st.dataset.step.split(':');
+          const next = Math.min(100, Math.max(0, s[which] + Number(by)));
+          if (which === 'floor') s.floor = Math.min(next, s.ceiling); else s.ceiling = Math.max(next, s.floor);
+          return draw();
+        }
+        if (e.target.closest('#bd-notify')) { s.notify = !s.notify; return draw(); }
+        if (!e.target.closest('#bd-save')) return;
+        if (blocked) return toast('Narrowing needs a reason.', false);
+        try {
+          await act('admin_set_deposit_bounds', { p_floor: s.floor, p_ceiling: s.ceiling, p_reason: s.reason.trim() || null, p_notify: s.notify }, { title: `Deposit bounds ${s.floor}% – ${s.ceiling}%`, reason: s.reason.trim() });
+          closeDialog(); toast(`Bounds are now ${s.floor}% – ${s.ceiling}%`);
+        } catch (err) { if (!err.handled) toast(err.message, false); }
+      });
+      draw().catch((err) => { el.innerHTML = `<span style="font-size:12px;color:#F87171">${esc(err.message)}</span>`; });
+    },
+  };
 }

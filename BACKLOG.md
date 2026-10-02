@@ -3765,6 +3765,28 @@ evening before. The app's own code names no time zone (phones follow their OS). 
 SQL editor — `00:00:00` is right, `01:00:00` means its time-zone data is out of date.
 Trigger: that query returns 01:00 — then decide between waiting for Supabase's update and
 pinning the arithmetic to UTC from 20 Sep (history before it stays +01).
+- **Trigger hit 2026-10-02: the live project returned 01:00.** Waiting wasn't an option —
+  62 functions (notifications and reminders that print a booking's time, "today", whether a
+  shop is open, queue estimates, slot offers, the Friday cut) had run an hour fast since
+  20 Sep, while phones already had the new rules.
+- **0139_morocco_on_gmt — NOT APPLIED.** `morocco_tz()` is the one place the zone is decided:
+  'UTC' while the server's data is stale, 'Africa/Casablanca' once Supabase updates it (then
+  it is right for every date, so it heals itself — no follow-up migration). The 62 functions
+  are re-created from their own live definitions in a loop with only the literal swapped.
+  While it reads UTC, moments before 20 Sep read an hour earlier than they did — history
+  only. Two changes ride along because weeks already cut ended at the old 20:00 UTC:
+  `settlement_week_of` (the stored run containing a moment) replaces recomputed-cut equality
+  in corrections and carried lines, and cutting refuses a run ending within a day of one
+  already cut, so no one-hour "week" can follow a Friday cut by the old clock. The next run
+  after 0139 covers 7 days and 1 hour, once. PGlite: 12 checks, plus the run without 0139
+  reproducing the hour; 0136–0138's tests pass on top of it.
+- The admin site picks its zone the same way (`ZONE` in app.js): UTC in a browser whose
+  zone data still says +01. So does the website (`TZ` in web/src/render.js, run on
+  Cloudflare's servers); render.check's offer fixture had "10:00 in Tangier" as 09:00 UTC
+  and now uses GMT.
+- **Applied 2026-10-02; live `morocco_tz()` returns 'UTC'** (checked with the anon key).
+- Not affected: pg_cron jobs (fixed UTC schedules, none tied to local 21:00) and the app's
+  code (it names no zone).
 
 **Settings: Districts and Pricing (2026-09-30)** — no migration.
 - `/settings/districts` (SET-06): every district with its live shops, asks and unmet asks
@@ -3810,12 +3832,31 @@ Nothing new in the database; every page first calls `owner_shop(slug)` (the 404)
 - ponytail: owner reads assume one shop per owner, like the app's (`limit 1`). An owner
   of two shops would see the first one's data under both slugs.
 
+**Settings: Rules, Reliability, Deposits — and the old console retired (2026-10-02).**
+- `/settings` (SET-01) is every platform dial with its value, where it is changed, and the
+  last changes from `settings_changes` (who, before → after, the reason). Only the deposit
+  bounds, the reliability numbers and the write-off alert have a page that changes them;
+  the free-cancel window, an agent's bag, the unchecked-cash ceiling and the float hold are
+  shown read-only with "no screen changes it yet" — none has an audited setter.
+- `/settings/reliability` (HOP-01, 0066) — every click re-runs the dry run against the last
+  90 days; Save & apply is the Head's alone (platform_rule). "Try it on one district" isn't
+  built (nothing scopes a rule to a district).
+- `/settings/deposit-bounds` (SET-11, 0077) with `?edit=1` (SET-12/13): the impact is counted
+  before the save, the panel turns red once most of the network would sit outside, and a
+  reason is required exactly when a bound narrows.
+- **0138_reliability_saves — NOT APPLIED.** 0066's save could never save: it told customers
+  with `select distinct …, 'moderation'`, and DISTINCT types the literal as text before the
+  insert can make it the notif_kind enum (an enum since 0032 — so the reliability numbers
+  have only ever been the launch defaults). 0138 re-emits 0066's body into
+  `admin_save_reliability__direct` with the one cast. PGlite: 7 checks, plus the same test
+  without 0138 reproducing the error.
+- **`admin/legacy.html` is deleted** (8 280 lines): nothing frames it any more, and the
+  shell's frame plumbing (the iframe, LEGACY / FRAME_PATH, the frame's postMessage
+  listener) went with it. It is in git history (`git show 5713087:admin/legacy.html`).
+
 **Still open:**
-- Still the old console in a frame: only Settings' reliability and deposit-bounds pages
-  (8a, G4). The shell keeps the site URL in step with the frame.
-- Two bugs in the old console fixed on the way (both there before this site): the
-  barbers search box was swallowed by a `</svg<input` typo (boot logged "markup is
-  missing bb-q" on every framed page), and the reliability rules page (8a, framed under
-  Settings) wiped its own stats row and note when it redrew, then threw writing to them.
+- Two bugs in the old console were fixed while it was still framed (both there before this
+  site): the barbers search box swallowed by a `</svg<input` typo, and the reliability page
+  wiping its own stats row on redraw. Moot now the console is gone.
 - §10 of the handoff (period pickers, other cities, Karim's and Nabil's pages) is
   flagged, not invented.

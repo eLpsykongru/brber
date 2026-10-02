@@ -12,7 +12,9 @@
 import { en, fill } from './copy.js';
 import { CSS } from './styles.js';
 
-const TZ = 'Africa/Casablanca';   // single-city, like every shop_tz in the migrations
+// single-city. Morocco has kept GMT since 20 Sep 2026; a runtime whose zone data predates
+// that still says +01, so it reads UTC instead — the same call the database makes (0139).
+const TZ = new Date('2026-10-01T12:00:00Z').toLocaleString('en-GB', { timeZone: 'Africa/Casablanca', hour: '2-digit', hourCycle: 'h23' }) === '12' ? 'Africa/Casablanca' : 'UTC';
 const clockFormat = new Intl.DateTimeFormat('en-GB', {
   hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZone: TZ,
 });

@@ -6,6 +6,7 @@ import {
 import { supabase } from '../lib/supabase';
 import { dark as D } from '../theme';
 import { loc, tr, trn } from '../lib/i18n';
+import { perRent } from '../lib/rent';
 
 // Turn 2 of "Barber App.dc.html" — the shop above the chair. 2a dashboard,
 // 2b all chairs, 2c barber detail. Commission, chairs and per-barber earnings
@@ -16,7 +17,7 @@ const CHAIR_TINTS = ['#E8442E', '#5B8DEF', '#4ADE80', '#E8A100', '#A78BFA'];
 export type Member = {
   id: string; name: string; avatar: string | null; role: string; chair: string | null;
   status: 'pending' | 'approved' | 'rejected'; pay: 'commission' | 'rent';
-  split: number; rent: number; rating: number; reviews: number;
+  split: number; rent: number; period: 'week' | 'month'; rating: number; reviews: number;
   todayBookings: number; todayRevenue: number | null; inService: boolean; isCashAgent: boolean;
 };
 
@@ -227,6 +228,13 @@ export function AllChairsScreen({ salon, team, onBack, onAdd }: {
 
   const roster = team.filter((m) => m.status === 'approved');
   const ids = roster.map((m) => m.id);
+  // BRB-30 in the app (0145): the week of the day on screen, fetched once per week
+  const monday = (() => { const d = new Date(day); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return isoDay(d); })();
+  const [week, setWeek] = useState<ChairWeek[] | null>(null);
+  useEffect(() => {
+    supabase.rpc('salon_chair_week', { p_day: monday })
+      .then(({ data }) => setWeek(((data as ChairWeek[] | null) ?? []).filter((w) => w.barber_id)));
+  }, [monday]);
 
   const load = useCallback(async () => {
     if (!ids.length) return;
@@ -357,9 +365,39 @@ export function AllChairsScreen({ salon, team, onBack, onAdd }: {
         <View style={s.grow} />
         <T w="b" size={11} c={D.sub}>{tr('{occupancy}% full', { occupancy })}</T>
       </View>
+
+      {!!week?.length && (() => {
+        const sum = (k: 'sold_min' | 'empty_min' | 'empty_am_min' | 'share_cents') => week.reduce((a, w) => a + w[k], 0);
+        const hrs = (min: number) => tr('{n}h', { n: Math.round(min / 60) });
+        return (
+          <>
+            <Eyebrow ls={1.65}>{tr('THE CHAIRS · WEEK OF {date}', { date: new Date(`${monday}T00:00:00`).toLocaleDateString(loc('en-US'), { day: 'numeric', month: 'short' }) })}</Eyebrow>
+            <View style={s.weekCard}>
+              <View style={s.weekStats}>
+                <MiniStat value={hrs(sum('sold_min'))} label={tr('SOLD')} />
+                <MiniStat value={hrs(sum('empty_min'))} label={tr('EMPTY')} />
+                <MiniStat value={hrs(sum('empty_am_min'))} label={tr('EMPTY BEFORE NOON')} />
+                <MiniStat value={dh(sum('share_cents'))} label={tr('YOUR SHARE')} />
+              </View>
+              {week.map((w) => (
+                <View key={w.chair_id} style={s.chairWeekRow}>
+                  <T w="b" size={12} style={s.grow} numberOfLines={1}>{`${w.label} · ${first(w.barber_name ?? '')}`}</T>
+                  <T size={11} c={D.sub}>{tr('{sold} sold · {empty} empty', { sold: hrs(w.sold_min), empty: hrs(w.empty_min) })}</T>
+                  <T w="b" size={12} style={[s.tnum, s.chairWeekShare]}>{dh(w.share_cents)}</T>
+                </View>
+              ))}
+            </View>
+          </>
+        );
+      })()}
     </Screen>
   );
 }
+
+type ChairWeek = {
+  chair_id: string; label: string; barber_id: string | null; barber_name: string | null;
+  sold_min: number; empty_min: number; empty_am_min: number; share_cents: number;
+};
 
 function LegendDot({ color, label }: { color: string; label: string }) {
   return (
@@ -373,9 +411,9 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 // ---- 2c · barber detail, owner view ---------------------------------------
 type Period = { label: string; bookings: number; booked: number; commission: number; noShows: number };
 
-export function OwnerBarberScreen({ member, salon, onBack, onChat, onSchedule, onChanged }: {
+export function OwnerBarberScreen({ member, salon, onBack, onChat, onSchedule, onTerms, onChanged }: {
   member: Member; salon: ShopMeta; onBack: () => void;
-  onChat?: () => void; onSchedule?: () => void; onChanged: () => void;
+  onChat?: () => void; onSchedule?: () => void; onTerms?: () => void; onChanged: () => void;
 }) {
   const [week, setWeek] = useState<Period | null>(null);
   const [days, setDays] = useState<number[]>([]);
@@ -478,7 +516,7 @@ export function OwnerBarberScreen({ member, salon, onBack, onChat, onSchedule, o
               {member.pay === 'rent' ? tr('RENT') : tr('SHOP CUT · {x}%', { x: 100 - member.split })}
             </Eyebrow>
             <T w="b" size={18} c={D.accent} style={[s.tnum, { marginTop: 6 }]}>
-              {dh(member.pay === 'rent' ? member.rent : week?.commission ?? 0)}
+              {member.pay === 'rent' ? perRent(member.rent, member.period) : dh(week?.commission ?? 0)}
             </T>
           </View>
         </View>
@@ -508,16 +546,18 @@ export function OwnerBarberScreen({ member, salon, onBack, onChat, onSchedule, o
           <Toggle small on={cashAgent} color={D.accent}
             onPress={busy ? undefined : () => setAgent(!cashAgent)} />
         </View>
-        <View style={s.accessRow}>
+        <Pressable disabled={!onTerms} onPress={onTerms} accessibilityRole={onTerms ? 'button' : undefined}
+          style={({ pressed }) => [s.accessRow, pressed && s.pressed]}>
           <T w="sb" size={13} style={s.grow}>
             {member.pay === 'rent' ? tr('Chair rent') : tr('Commission rate')}
           </T>
           <View style={s.ratePill}>
             <T w="b" size={12}>
-              {member.pay === 'rent' ? dh(member.rent) : `${100 - member.split}%`}
+              {member.pay === 'rent' ? perRent(member.rent, member.period) : `${100 - member.split}%`}
             </T>
           </View>
-        </View>
+          {onTerms && <Ico name="chevron-right" size={15} color={D.sub} />}
+        </Pressable>
       </View>
 
       <GhostBtn title={tr('REMOVE FROM SHOP')} height={48} color={D.red} border={D.redLine} onPress={remove} />
@@ -615,6 +655,8 @@ const s = StyleSheet.create({
     paddingHorizontal: 15, borderRadius: 999, backgroundColor: D.card2,
   },
   weekCard: { backgroundColor: D.card, borderRadius: 20, padding: 16, gap: 12 },
+  chairWeekRow: { flexDirection: 'row', alignItems: 'center', gap: 10, borderTopWidth: 1, borderTopColor: D.border, paddingTop: 10 },
+  chairWeekShare: { minWidth: 72, textAlign: 'right' },
   weekTop: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
   weekValue: { marginTop: 4, fontVariant: ['tabular-nums'] },
   bars: { flexDirection: 'row', alignItems: 'flex-end', gap: 4, height: 52 },

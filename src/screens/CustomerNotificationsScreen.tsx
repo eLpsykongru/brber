@@ -23,7 +23,7 @@ import { useHideTabBar } from '../components/TabBar';
 type Kind =
   | 'queue_next' | 'booking_answer' | 'cancellation' | 'wallet'
   | 'message' | 'review_ask' | 'reminder' | 'offer'
-  | 'booking_request' | 'reschedule' | 'checked_in' | 'review' | 'digest';
+  | 'booking_request' | 'reschedule' | 'checked_in' | 'review' | 'digest' | 'shop_status';
 
 type Notif = {
   id: string; kind: Kind; title: string; body: string | null;
@@ -35,12 +35,13 @@ type Prefs = {
   push_queue_next: boolean; push_queue_moves: boolean; push_booking_answer: boolean;
   push_wallet: boolean; push_message: boolean; push_review_ask: boolean;
   push_offers: boolean; reminder_min: number;
+  tell_barber_moves: boolean;   // 0146 — the one line when a barber you've sat with changes shop
 };
 
 const DEFAULTS: Prefs = {
   push_queue_next: true, push_queue_moves: false, push_booking_answer: true,
   push_wallet: true, push_message: true, push_review_ask: true,
-  push_offers: false, reminder_min: 60,
+  push_offers: false, reminder_min: 60, tell_barber_moves: true,
 };
 
 // icon + the two tints per event, straight off 14a
@@ -58,6 +59,7 @@ const LOOK: Record<Kind, { icon: keyof typeof Ionicons.glyphMap; tint: string; b
   checked_in: { icon: 'checkmark', tint: colors.text, bg: colors.surface },
   review: { icon: 'star', tint: colors.accent, bg: 'rgba(232,68,46,0.10)' },
   digest: { icon: 'trending-up-outline', tint: colors.text, bg: colors.surface },
+  shop_status: { icon: 'storefront-outline', tint: colors.text, bg: colors.surface },   // e.g. 0146's "now cuts at"
 };
 
 // 15a's options. -1 is the evening before; 0 turns reminders off entirely.
@@ -260,6 +262,7 @@ const QUEUE_ROWS: { key: keyof Prefs; label: string; hint: string }[] = [
 const MONEY_ROWS: { key: keyof Prefs; label: string; hint: string }[] = [
   { key: 'push_wallet', label: tr('Deposits & refunds'), hint: tr('Money in or out of your wallet') },
   { key: 'push_message', label: tr('New messages'), hint: tr('From your barber') },
+  { key: 'tell_barber_moves', label: tr('When your barber changes shop'), hint: tr('One line saying where he went') },
   { key: 'push_review_ask', label: tr('Review reminders'), hint: tr('After a completed visit') },
 ];
 

@@ -39,6 +39,8 @@ import BarberProfileEditScreen from './BarberProfileEditScreen';
 import BarberReviewsScreen from './BarberReviewsScreen';
 import BundleEditorScreen from './BundleEditorScreen';
 import CancellationsScreen from './CancellationsScreen';
+import OpenChairsScreen from './OpenChairsScreen';
+import MyChairScreen from './MyChairScreen';
 import WaitingListScreen from './WaitingListScreen';
 import ShopTasksScreen from './ShopTasksScreen';
 import ApplicationScreen from './ApplicationScreen';
@@ -70,7 +72,9 @@ type ProfileView =
   // the billing rail — the owner's bill, and every barber's two-sided account
   | 'subscription' | 'account' | 'cashagent'
   // the launch handoff — BST-01…06 (barber settings) and DEL (both sides)
-  | 'notifs' | 'security' | 'delete';
+  | 'notifs' | 'security' | 'delete'
+  // 0142 — empty chairs other shops have listed; 0144 — his own chair and rent
+  | 'chairs' | 'mychair';
 
 export default function ProfileScreen({ profile, barber, phone, onProfileChanged, onChromeHidden, onBack, onExplore, onCalendar, initialView }: {
   profile: Profile; barber: Barber | null; phone: string | null;
@@ -322,6 +326,8 @@ export default function ProfileScreen({ profile, barber, phone, onProfileChanged
     if (view === 'cancellations' && barber) return <CancellationsScreen onBack={back} />;
     // G2 — BRV-08, the list of their own reviews a barber never had
     if (view === 'reviews' && barber) return <BarberReviewsScreen barberId={barber.id} onBack={back} />;
+    if (view === 'chairs' && barber) return <OpenChairsScreen onBack={back} />;
+    if (view === 'mychair' && barber) return <MyChairScreen barberId={barber.id} onBack={back} />;
     // 8h/8i — where turn 36's asks land
     if (view === 'waitlist' && barber) {
       return <WaitingListScreen barberId={barber.id} onBack={back} />;
@@ -508,6 +514,8 @@ function BarberProfile({
     // BAC-01: every barber has an account with Sterncut, owner or not — and BAC-11:
     // one who has left a shop that still owes him has it with no shop at all
     { icon: 'repeat' as IconName, label: tr('You & Sterncut'), onPress: () => go('account') },
+    ...(barber.salon_id && !ownsSalon ? [{ icon: 'home' as IconName, label: tr('Your chair'), onPress: () => go('mychair') }] : []),
+    { icon: 'search' as IconName, label: tr('Chairs for rent'), onPress: () => go('chairs') },
     // the owner's money rows. "Weekly statement" and "Settle up" lived only in the
     // customer-side list, which a barber never sees — so the agent's four-digit
     // code on the statement had no way in.

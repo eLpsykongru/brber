@@ -106,7 +106,10 @@ export default function App() {
     const profile: Profile = { ...row, email: s.user.email ?? null };
     let barber: Barber | null = null;
     if (profile.role === 'barber') {
-      const { data } = await supabase.from('barbers').select('*').eq('id', s.user.id).single();
+      // named, not '*': the pay terms are not readable off the table (0143)
+      const { data } = await supabase.from('barbers')
+        .select('id, bio, status, id_document_path, salon_id, specialty, years_experience, languages, licence_expires_at')
+        .eq('id', s.user.id).single();
       barber = data;
     }
     setUser({ profile, barber }); // set once, so we never flash Home before the barber row arrives

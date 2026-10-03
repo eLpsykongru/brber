@@ -11,7 +11,8 @@ import { supabase } from '../lib/supabase';
 import { useAndroidBack } from '../lib/back';
 import { colors, dark as D, font, inter, radius, serif, sp, TOP_INSET } from '../theme';
 import LinesScreen from './LinesScreen';
-import { AllChairsScreen, OwnerBarberScreen, OwnerDashboard } from './OwnerScreens';
+import { AllChairsScreen, type Member, OwnerBarberScreen, OwnerDashboard } from './OwnerScreens';
+import { paidPeriodName, periodStart, rentPeriodName } from '../lib/rent';
 import { ReviewsInboxScreen, ShopListingScreen, ShopReportScreen, WalkInPosterScreen, WallDisplayScreen } from './ShopScreens';
 import DepositScreen from './DepositScreen';
 import { loc, tr, trn } from '../lib/i18n';
@@ -41,18 +42,20 @@ type OwnerView =
   | 'lines';     // OSH-19
 
 const hhmm = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
-type Member = {
-  id: string; name: string; avatar: string | null; role: string; chair: string | null;
-  status: 'pending' | 'approved' | 'rejected'; pay: PayModel; split: number; rent: number;
-  rating: number; reviews: number; todayBookings: number; todayRevenue: number | null;
-  inService: boolean; isCashAgent: boolean;
-};
 type Stats = { onFloor: number; chairs: number; bookings: number; revenue: number; shopCut: number };
 type Svc = { id: string; name: string; price_cents: number; duration_min: number; is_active: boolean };
 type Availability = 'empty' | 'open' | 'busy' | 'off';
 type Chair = {
   id: string; label: string; barberId: string | null; barberName: string | null;
   avatar: string | null; availability: Availability;
+  // 0142 — what an empty chair asks, and whether barbers can see it
+  rentCents: number | null; rentPeriod: 'week' | 'month'; note: string | null;
+  listedAt: string | null; vacantSince: string | null;
+  asks: number;   // 0144 — barbers waiting on an answer
+};
+type Ask = {
+  ask_id: string; full_name: string; phone: string | null; rating: number | null; reviews_count: number;
+  cuts: number; shop_name: string | null;
 };
 
 const AVAIL: Record<Availability, { c: string; t: string }> = {
@@ -83,6 +86,7 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
   const [services, setServices] = useState<Svc[] | null>(null);
   const [chairs, setChairs] = useState<Chair[] | null>(null);
   const [selected, setSelected] = useState<Member | null>(null);
+  const [editTerms, setEditTerms] = useState(false);
   const [chairEdit, setChairEdit] = useState<Chair | 'new' | null>(null);
   const [payoutsFor, setPayoutsFor] = useState<Member | null>(null);
   const [invite, setInvite] = useState(false);
@@ -105,11 +109,13 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
     setChairs(((ch as any[]) ?? []).map((r) => ({
       id: r.chair_id, label: r.label, barberId: r.barber_id, barberName: r.barber_name,
       avatar: r.avatar_url, availability: r.availability,
+      rentCents: r.rent_cents, rentPeriod: r.rent_period ?? 'month', note: r.note,
+      listedAt: r.listed_at, vacantSince: r.vacant_since, asks: r.asks ?? 0,
     })));
     setTeam(((t as any[]) ?? []).map((r) => ({
       id: r.barber_id, name: r.full_name, avatar: r.avatar_url, role: r.salon_role,
       chair: r.chair_label, status: r.salon_status, pay: r.pay_model, split: r.commission_pct,
-      rent: r.rent_cents, rating: Number(r.rating), reviews: r.reviews_count,
+      rent: r.rent_cents, period: r.rent_period ?? 'month', rating: Number(r.rating), reviews: r.reviews_count,
       todayBookings: r.today_bookings, todayRevenue: r.today_revenue_cents,
       inService: r.in_service, isCashAgent: r.is_cash_agent,
     })));
@@ -163,9 +169,17 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
 
   // 2c — an approved barber opens the owner's full view of them
   if (selected && selected.status === 'approved') {
-    return <OwnerBarberScreen member={selected} salon={salon} onBack={() => setSelected(null)}
-      onSchedule={() => { setPayoutsFor(selected); setSelected(null); }}
-      onChanged={load} />;
+    const fresh = team.find((x) => x.id === selected.id) ?? selected;   // load() refreshes team, not selected
+    return (
+      <>
+        <OwnerBarberScreen member={fresh} salon={salon} onBack={() => setSelected(null)}
+          onSchedule={() => { setPayoutsFor(fresh); setSelected(null); }}
+          onTerms={fresh.role === 'owner' ? undefined : () => setEditTerms(true)}
+          onChanged={load} />
+        {editTerms && <MemberSheet m={fresh} onClose={() => setEditTerms(false)}
+          onChanged={() => { setEditTerms(false); load(); }} />}
+      </>
+    );
   }
 
   // ---- turn 2 · the shop screens behind this hub
@@ -362,8 +376,7 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
 
       {selected && selected.status === 'pending' && (
         <MemberSheet m={selected} onClose={() => setSelected(null)}
-          onChanged={() => { setSelected(null); load(); }}
-          onEarnings={() => { setPayoutsFor(selected); setSelected(null); }} />
+          onChanged={() => { setSelected(null); load(); }} />
       )}
       {chairEdit && (
         <ChairSheet chair={chairEdit === 'new' ? null : chairEdit} team={team}
@@ -512,7 +525,11 @@ function ChairsTab({ chairs, onOpen, onAdd }: {
                 <Text style={s.chairOccupant} numberOfLines={1}>{c.barberName}</Text>
               </View>
             ) : (
-              <Text style={s.chairEmpty}>{tr('Empty — tap to assign')}</Text>
+              c.asks > 0
+                ? <Text style={[s.chairEmpty, { color: colors.accent }]}>{trn(c.asks, '{n} barber asked — tap to answer', '{n} barbers asked — tap to answer')}</Text>
+                : c.listedAt
+                  ? <Text style={[s.chairEmpty, { color: colors.accent }]}>{tr('Looking for a barber')}</Text>
+                  : <Text style={s.chairEmpty}>{tr('Empty — tap to assign')}</Text>
             )}
             <Text style={[s.chairAvail, { color: AVAIL[c.availability].c }]}>{AVAIL[c.availability].t}</Text>
           </Pressable>
@@ -527,7 +544,29 @@ function ChairSheet({ chair, team, onClose, onChanged }: {
 }) {
   const [label, setLabel] = useState(chair?.label ?? '');
   const [busy, setBusy] = useState(false);
+  // 0142 — what the empty chair asks, and whether other barbers see it
+  const [rent, setRent] = useState(chair?.rentCents != null ? String(Math.round(chair.rentCents / 100)) : '');
+  const [period, setPeriod] = useState<'week' | 'month'>(chair?.rentPeriod ?? 'month');
+  const [note, setNote] = useState(chair?.note ?? '');
+  const [listed, setListed] = useState(!!chair?.listedAt);
+  const [asks, setAsks] = useState<Ask[]>([]);
+  useEffect(() => {
+    if (!chair || chair.barberId || !chair.asks) return;
+    supabase.rpc('salon_chair_asks', { p_chair: chair.id }).then(({ data }) => setAsks((data as Ask[] | null) ?? []));
+  }, [chair?.id]);
+  // RVW-12 — the barber in it came through Chairs for rent: when, and who heard (0146)
+  const [taken, setTaken] = useState<{ answered_at: string; told: number | null } | null>(null);
+  useEffect(() => {
+    if (!chair?.barberId) return;
+    supabase.from('chair_asks').select('answered_at, told')
+      .eq('chair_id', chair.id).eq('barber_id', chair.barberId).eq('answer', 'taken')
+      .order('answered_at', { ascending: false }).limit(1).maybeSingle()
+      .then(({ data }) => setTaken(data as { answered_at: string; told: number | null } | null));
+  }, [chair?.id, chair?.barberId]);
   const members = team.filter((m) => m.status === 'approved');
+  const ask = rent ? Number(rent) * 100 : null;
+  const askDirty = !!chair && (ask !== chair.rentCents || period !== chair.rentPeriod
+    || note.trim() !== (chair.note ?? '') || listed !== !!chair.listedAt);
 
   async function call(fn: string, args: object) {
     setBusy(true);
@@ -571,6 +610,83 @@ function ChairSheet({ chair, team, onClose, onChanged }: {
           <Ionicons name="trash-outline" size={16} color={colors.danger} />
         </Pressable>
       </View>
+
+      {taken && (
+        <Text style={s.pendingBody}>
+          {taken.told
+            ? trn(taken.told, 'Taken on {date} from Chairs for rent · {n} of his customers was told where he went, once',
+                'Taken on {date} from Chairs for rent · {n} of his customers were told where he went, once', { date: dayMonth(taken.answered_at) })
+            : tr('Taken on {date} from Chairs for rent', { date: dayMonth(taken.answered_at) })}
+        </Text>
+      )}
+      {/* BRB-30 — an empty chair can be offered to barbers looking for one */}
+      {!chair.barberId && (
+        <>
+          {chair.vacantSince && (
+            <Text style={s.pendingBody}>{tr('Empty since {date}', { date: dayMonth(chair.vacantSince) })}</Text>
+          )}
+          {/* 0144 — barbers who asked for it in the app */}
+          {asks.length > 0 && <Text style={s.fieldLabel}>{tr('ASKED FOR IT · {n}', { n: asks.length })}</Text>}
+          {asks.map((a) => (
+            <View key={a.ask_id} style={s.listRow}>
+              <View style={s.grow}>
+                <Text style={s.assignName}>{a.full_name}</Text>
+                <Text style={s.setSub}>{[
+                  a.reviews_count ? `★ ${Number(a.rating).toFixed(1)} (${a.reviews_count})` : null,
+                  trn(a.cuts, '{n} cut on Sterncut', '{n} cuts on Sterncut'),
+                  a.shop_name ? tr('at {shop}', { shop: a.shop_name }) : tr('no shop now'),
+                ].filter(Boolean).join(' · ')}</Text>
+              </View>
+              {!!a.phone && (
+                <Pressable onPress={() => Linking.openURL(`tel:${a.phone}`)} accessibilityLabel={tr('Call {name}', { name: a.full_name })}
+                  style={({ pressed }) => [s.iconBtn, pressed && s.pressed]}>
+                  <Ionicons name="call-outline" size={17} color={D.text} />
+                </Pressable>
+              )}
+              <Pressable disabled={busy} accessibilityLabel={tr('Take {name} on', { name: a.full_name })}
+                onPress={() => Alert.alert(tr('Take {name} on for {chair}?', { name: a.full_name, chair: chair.label }),
+                  a.shop_name
+                    ? tr('He leaves {shop} and sits in {chair} from today, on the rent this chair asks. His terms can be changed after.', { shop: a.shop_name, chair: chair.label })
+                    : tr('He sits in {chair} from today, on the rent this chair asks. His terms can be changed after.', { chair: chair.label }),
+                  [{ text: tr('Cancel'), style: 'cancel' }, { text: tr('Take on'), onPress: () => call('take_chair_ask', { p_ask: a.ask_id }) }])}
+                style={({ pressed }) => [s.iconBtn, pressed && s.pressed]}>
+                <Ionicons name="checkmark" size={18} color={colors.accent} />
+              </Pressable>
+              <Pressable disabled={busy} accessibilityLabel={tr('Say no to {name}', { name: a.full_name })}
+                onPress={() => Alert.alert(tr('Say no to {name}?', { name: a.full_name }), tr('He is told, and can still ask for your other chairs.'),
+                  [{ text: tr('Cancel'), style: 'cancel' },
+                   { text: tr('Say no'), style: 'destructive', onPress: () => call('decline_chair_ask', { p_ask: a.ask_id }) }])}
+                style={({ pressed }) => [s.iconBtn, pressed && s.pressed]}>
+                <Ionicons name="close" size={18} color={colors.danger} />
+              </Pressable>
+            </View>
+          ))}
+          <Text style={s.fieldLabel}>{tr('CHAIR RENT (DH)')}</Text>
+          <TextInput value={rent} onChangeText={(v) => setRent(v.replace(/\D/g, ''))}
+            keyboardType="number-pad" maxLength={6} placeholder={tr('Not said')} placeholderTextColor={D.sub}
+            accessibilityLabel={tr('Chair rent in dirhams')} style={s.input} />
+          <PeriodPick value={period} onChange={setPeriod} />
+          <Text style={s.fieldLabel}>{tr('WHAT COMES WITH IT')}</Text>
+          <TextInput value={note} onChangeText={setNote} multiline maxLength={280}
+            placeholder={tr('Products, days off, the hours you open…')} placeholderTextColor={D.sub}
+            accessibilityLabel={tr('What comes with the chair')} style={[s.input, s.noteInput]} />
+          <View style={s.listRow}>
+            <View style={s.grow}>
+              <Text style={s.setTitle}>{tr('Look for a barber')}</Text>
+              <Text style={s.setSub}>{tr('Barbers on Sterncut see this chair, your shop and your phone number, to call you about it.')}</Text>
+            </View>
+            <Switch value={listed} onValueChange={setListed} accessibilityLabel={tr('Look for a barber')}
+              trackColor={{ true: colors.accent, false: D.card2 }} thumbColor="#fff" />
+          </View>
+          {askDirty && (
+            <Pressable disabled={busy} onPress={() => call('salon_set_chair', {
+              p_chair: chair.id, p_rent_cents: ask, p_rent_period: period, p_note: note, p_listed: listed,
+            })} style={({ pressed }) => [s.cta, pressed && s.pressed]}>
+              {busy ? <ActivityIndicator color={colors.onAccent} /> : <Text style={s.ctaText}>{tr('Save chair')}</Text>}
+            </Pressable>
+          )}
+        </>
+      )}
 
       <Text style={s.fieldLabel}>{tr('ASSIGN A BARBER')}</Text>
       <Pressable disabled={busy} onPress={() => call('salon_assign_chair', { p_chair: chair.id, p_barber: null })}
@@ -672,14 +788,18 @@ function SectionHead({ label, action, onAction }: { label: string; action: strin
 const cap = (r: string) => r.charAt(0).toUpperCase() + r.slice(1);
 
 // ── Member detail sheet ───────────────────────────────────────────────────────
-function MemberSheet({ m, onClose, onChanged, onEarnings }: {
-  m: Member; onClose: () => void; onChanged: () => void; onEarnings: () => void;
+// pending → approve / decline; approved → pay terms, opened from 2c's rate row
+function MemberSheet({ m, onClose, onChanged }: {
+  m: Member; onClose: () => void; onChanged: () => void;
 }) {
   const [pay, setPay] = useState<PayModel>(m.pay);
   const [split, setSplit] = useState(m.split);
+  const [rent, setRent] = useState(m.rent ? String(Math.round(m.rent / 100)) : '');   // whole DH
+  const [period, setPeriod] = useState(m.period);
   const [busy, setBusy] = useState(false);
-  const dirty = pay !== m.pay || (pay === 'commission' && split !== m.split);
-  const showMoney = m.pay === 'commission'; // rent barber's book stays private
+  const rentCents = Number(rent || 0) * 100;
+  const dirty = pay !== m.pay
+    || (pay === 'commission' ? split !== m.split : rentCents !== m.rent || period !== m.period);
 
   async function call(fn: string, args: object, ok?: string) {
     setBusy(true);
@@ -692,7 +812,8 @@ function MemberSheet({ m, onClose, onChanged, onEarnings }: {
 
   const saveTerms = () => call('salon_set_terms', {
     p_barber: m.id, p_salon_role: m.role, p_pay_model: pay,
-    p_commission_pct: split, p_rent_cents: m.rent, p_chair: m.chair ?? '',
+    p_commission_pct: split, p_rent_cents: pay === 'rent' ? rentCents : m.rent, p_chair: m.chair ?? '',
+    p_rent_period: pay === 'rent' ? period : null,   // null keeps it (0142)
   });
 
   return (
@@ -730,15 +851,6 @@ function MemberSheet({ m, onClose, onChanged, onEarnings }: {
         </>
       ) : (
         <>
-          <View style={s.sheetStats}>
-            <Stat label={tr('BOOKINGS')} value={String(m.todayBookings)} />
-            {showMoney && <Stat label={tr('REVENUE')} value={dh(m.todayRevenue ?? 0)} />}
-            <View style={[s.statTile, s.statTileAccent]}>
-              <Text style={s.statLabel}>{tr('RATING')}</Text>
-              <Text style={s.statValue}>{m.rating > 0 ? `★ ${m.rating.toFixed(1)}` : tr('New')}</Text>
-            </View>
-          </View>
-
           <Text style={s.fieldLabel}>{tr('PAY MODEL')}</Text>
           <Segmented options={[tr('Commission'), tr('Rent')]}
             value={pay === 'commission' ? tr('Commission') : tr('Rent')}
@@ -754,10 +866,17 @@ function MemberSheet({ m, onClose, onChanged, onEarnings }: {
               <Split value={split} onChange={setSplit} editable />
             </>
           ) : (
-            <View style={s.rentRow}>
-              <Ionicons name="home-outline" size={16} color={D.sub} />
-              <Text style={s.rentText}>{tr('Rents the chair — keeps 100%, revenue stays private.')}</Text>
-            </View>
+            <>
+              <Text style={s.fieldLabel}>{tr('CHAIR RENT (DH)')}</Text>
+              <TextInput value={rent} onChangeText={(v) => setRent(v.replace(/\D/g, ''))}
+                keyboardType="number-pad" maxLength={6} placeholder="0" placeholderTextColor={D.sub}
+                accessibilityLabel={tr('Chair rent in dirhams')} style={s.input} />
+              <PeriodPick value={period} onChange={setPeriod} />
+              <View style={s.rentRow}>
+                <Ionicons name="home-outline" size={16} color={D.sub} />
+                <Text style={s.rentText}>{tr('Rents the chair — keeps 100%, revenue stays private.')}</Text>
+              </View>
+            </>
           )}
 
           {dirty && (
@@ -765,36 +884,6 @@ function MemberSheet({ m, onClose, onChanged, onEarnings }: {
               style={({ pressed }) => [s.cta, pressed && s.pressed]}>
               {busy ? <ActivityIndicator color={colors.onAccent} />
                 : <Text style={s.ctaText}>{tr('Save pay terms')}</Text>}
-            </Pressable>
-          )}
-
-          {!m.isCashAgent && (
-            <Pressable disabled={busy} onPress={() => call('salon_set_cash_agent', { p_barber: m.id }, `${m.name} is now the cash agent.`)}
-              style={({ pressed }) => [s.agentBtn, pressed && s.pressed]}>
-              <Text style={s.crown}>👑</Text>
-              <Text style={s.agentText}>{tr('Make cash agent')}</Text>
-            </Pressable>
-          )}
-
-          <Pressable onPress={onEarnings} accessibilityLabel={tr('Earnings and payouts')}
-            style={({ pressed }) => [s.earningsRow, pressed && s.pressed]}>
-            <View style={s.setIcon}><Ionicons name="cash-outline" size={18} color={colors.accent} /></View>
-            <View style={s.grow}>
-              <Text style={s.setTitle}>{tr('Earnings & payouts')}</Text>
-              <Text style={s.setSub}>{m.pay === 'commission' ? tr('Weekly commission statement') : tr('Chair rent')}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={D.sub} />
-          </Pressable>
-
-
-          {m.role !== 'owner' && (
-            <Pressable disabled={busy} onPress={() => Alert.alert(tr('Remove from salon?'),
-              tr('{name} loses this chair and is unlinked from the salon.', { name: m.name }),
-              [{ text: tr('Cancel'), style: 'cancel' },
-               { text: tr('Remove'), style: 'destructive', onPress: () => call('salon_remove_member', { p_barber: m.id }) }])}
-              style={({ pressed }) => [s.removeBtn, pressed && s.pressed]}>
-              <Ionicons name="trash-outline" size={16} color={colors.danger} />
-              <Text style={s.removeText}>{tr('Remove from salon')}</Text>
             </Pressable>
           )}
         </>
@@ -1060,16 +1149,7 @@ function BarberEarnings({ member, onBack }: { member: Member; onBack: () => void
 
         {rows === null && <ActivityIndicator color={colors.accent} style={{ marginTop: sp(8) }} />}
 
-        {member.pay === 'rent' && rows !== null && (
-          <>
-            <View style={s.payoutHero}>
-              <Text style={s.heroLabel}>{tr('CHAIR RENT DUE')}</Text>
-              <Text style={s.heroValue}>{dh(member.rent)}<Text style={s.heroPer}>{' '}{tr('/ mo')}</Text></Text>
-              <Text style={s.heroNote}>{tr('Rent barber — keeps 100% of takings, so revenue stays private.')}</Text>
-            </View>
-            <Text style={s.emptyHint}>{tr('Rent collection and receipts arrive with in-app payouts.')}</Text>
-          </>
-        )}
+        {member.pay === 'rent' && rows !== null && <RentLedger member={member} />}
 
         {member.pay === 'commission' && rows !== null && (
           <>
@@ -1103,6 +1183,110 @@ function BarberEarnings({ member, onBack }: { member: Member; onBack: () => void
   );
 }
 
+type RentRow = { id: string; covers_from: string; covers_to: string; amount_cents: number };
+
+// 0142 — the rent taken at the shop, one period at a time. Written down, not moved:
+// the cash is already in the owner's hand when he taps, as with 0031's settlements.
+function RentLedger({ member }: { member: Member }) {
+  const [rows, setRows] = useState<RentRow[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const load = useCallback(() => {
+    supabase.from('rent_payments').select('id, covers_from, covers_to, amount_cents')
+      .eq('barber_id', member.id).order('covers_to', { ascending: false }).limit(12)
+      .then(({ data, error }) => {
+        if (error) Alert.alert(tr('Could not load the rent'), error.message);
+        setRows((data as RentRow[] | null) ?? []);
+      });
+  }, [member.id]);
+  useEffect(() => { load(); }, [load]);
+
+  async function run(fn: 'salon_rent_received' | 'salon_rent_undo', restart = false) {
+    setBusy(true);
+    const { error } = await supabase.rpc(fn, restart ? { p_barber: member.id, p_restart: true } : { p_barber: member.id });
+    setBusy(false);
+    if (error) Alert.alert(tr('Could not update'), error.message);
+    load();
+  }
+
+  if (!rows) return <ActivityIndicator color={colors.accent} style={{ marginTop: sp(8) }} />;
+  const week = member.period === 'week';
+  const upTo = rows[0]?.covers_to;
+  // the server writes the period after the last one, else the one we are in — this only names it
+  const next = rentPeriodName(upTo ?? periodStart(week), week);
+  // more than a period behind: maybe owed, maybe he wasn't on rent then (0144)
+  const now = rentPeriodName(periodStart(week), week);
+  const behind = !!upTo && Date.parse(upTo) < Date.parse(periodStart(week));
+
+  return (
+    <>
+      <View style={s.payoutHero}>
+        <Text style={s.heroLabel}>{tr('CHAIR RENT')}</Text>
+        <Text style={s.heroValue}>{dh(member.rent)}<Text style={s.heroPer}>{' '}{tr(week ? '/ wk' : '/ mo')}</Text></Text>
+        <Text style={s.heroNote}>{tr('Rent barber — keeps 100% of takings, so revenue stays private.')}</Text>
+      </View>
+      <Text style={[s.emptyHint, upTo && Date.parse(upTo) <= Date.now() && { color: colors.danger }]}>
+        {!upTo ? tr('Nothing written down yet.')
+          : Date.parse(upTo) > Date.now() ? tr('Paid up to {date}', { date: dayMonth(upTo) })
+            : tr('Due since {date}', { date: dayMonth(upTo) })}
+      </Text>
+      {member.rent > 0 ? (
+        <>
+          <Pressable disabled={busy} accessibilityRole="button"
+            onPress={() => Alert.alert(tr('{amount} for {period}?', { amount: dh(member.rent), period: next }),
+              tr('Only once the cash is in your hand. The latest one can be taken back.'),
+              [{ text: tr('Cancel'), style: 'cancel' }, { text: tr('Mark paid'), onPress: () => run('salon_rent_received') }])}
+            style={({ pressed }) => [s.cta, pressed && s.pressed]}>
+            {busy ? <ActivityIndicator color={colors.onAccent} />
+              : <Text style={s.ctaText}>{tr('Mark {period} paid in cash', { period: next })}</Text>}
+          </Pressable>
+          {behind && (
+            <Pressable disabled={busy} hitSlop={8} accessibilityRole="button"
+              onPress={() => Alert.alert(tr('Start again from {period}?', { period: now }),
+                tr('The periods in between stay off the record. Use it when he wasn’t on rent then — not to clear what he owes.'),
+                [{ text: tr('Cancel'), style: 'cancel' }, { text: tr('Start again'), onPress: () => run('salon_rent_received', true) }])}>
+              <Text style={s.undoText}>{tr('Start again from {period}', { period: now })}</Text>
+            </Pressable>
+          )}
+        </>
+      ) : (
+        <Text style={s.emptyHint}>{tr('Set the rent on the barber’s page first.')}</Text>
+      )}
+
+      {rows.length > 0 && <Text style={s.sectionLabel}>{tr('WRITTEN DOWN')}</Text>}
+      {rows.map((r, i) => {
+        const name = paidPeriodName(r.covers_from, r.covers_to);
+        return (
+          <View key={r.id} style={s.weekRow}>
+            <View style={s.grow}>
+              <Text style={s.weekLabel}>{name}</Text>
+              {i === 0 && (
+                <Pressable disabled={busy} hitSlop={8} accessibilityRole="button"
+                  onPress={() => Alert.alert(tr('Take back {period}?', { period: name }), tr('It goes back to unpaid.'),
+                    [{ text: tr('Cancel'), style: 'cancel' },
+                     { text: tr('Take back'), style: 'destructive', onPress: () => run('salon_rent_undo') }])}>
+                  <Text style={s.undoText}>{tr('Take back')}</Text>
+                </Pressable>
+              )}
+            </View>
+            <Text style={s.weekAmt}>{dh(r.amount_cents)}</Text>
+          </View>
+        );
+      })}
+    </>
+  );
+}
+
+const dayMonth = (iso: string) => new Date(iso).toLocaleDateString(loc(), { day: 'numeric', month: 'short' });
+
+// by the month or by the week — the agreed rent (MemberSheet) and the asked one (ChairSheet)
+function PeriodPick({ value, onChange }: { value: 'week' | 'month'; onChange: (p: 'week' | 'month') => void }) {
+  return (
+    <Segmented options={[tr('By the month'), tr('By the week')]}
+      value={value === 'week' ? tr('By the week') : tr('By the month')}
+      onChange={(v) => onChange(v === tr('By the week') ? 'week' : 'month')} />
+  );
+}
+
 function Segmented({ options, value, onChange }: { options: string[]; value: string; onChange: (v: string) => void }) {
   return (
     <View style={s.pillGroup}>
@@ -1128,6 +1312,7 @@ function Split({ value, onChange, editable }: { value: number; onChange?: (v: nu
     onMoveShouldSetPanResponder: () => !!editable,
     onPanResponderGrant: (e) => set(e.nativeEvent.locationX),
     onPanResponderMove: (e) => set(e.nativeEvent.locationX),
+    onPanResponderTerminationRequest: () => false,   // the sheet scrolls now; a drag stays the slider's
   })).current;
   return (
     <View style={s.sliderHit} onLayout={(e) => { w.current = e.nativeEvent.layout.width; }} {...pan.panHandlers}>
@@ -1144,7 +1329,11 @@ function Sheet({ children, onClose }: { children: React.ReactNode; onClose: () =
         <Pressable style={s.backdrop} onPress={onClose} accessibilityLabel={tr('Close')} />
         <View style={s.sheet}>
           <View style={s.handle} />
-          {children}
+          {/* the dark kit's sheet: bounded, and scrolls when a chair's ask makes it long */}
+          <ScrollView bounces={false} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled"
+            contentContainerStyle={s.sheetBody}>
+            {children}
+          </ScrollView>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -1346,8 +1535,9 @@ const s = StyleSheet.create({
   backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.55)' },
   sheet: {
     backgroundColor: '#151517', borderTopLeftRadius: 24, borderTopRightRadius: 24,
-    padding: sp(5), paddingBottom: sp(9), gap: sp(3),
+    padding: sp(5), paddingBottom: sp(9), gap: sp(3), maxHeight: '92%',
   },
+  sheetBody: { gap: sp(3) },
   handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: radius.pill, backgroundColor: '#333' },
   sheetTitle: { fontSize: font.h2, fontWeight: '700', color: D.text },
 
@@ -1358,7 +1548,6 @@ const s = StyleSheet.create({
   },
   sheetAvatarText: { fontSize: font.body, fontWeight: '700', color: D.text },
   sheetName: { fontSize: font.h2, fontWeight: '700', color: D.text },
-  sheetStats: { flexDirection: 'row', gap: sp(2) },
   pendingBody: { fontSize: font.small, color: D.sub, lineHeight: 19 },
 
   fieldLabel: { fontSize: font.tiny, fontWeight: '700', color: D.sub, letterSpacing: 1 },
@@ -1370,12 +1559,13 @@ const s = StyleSheet.create({
     borderRadius: radius.md, padding: sp(3.5),
   },
   rentText: { flex: 1, fontSize: font.small, color: D.sub },
-
-  agentBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, height: 48,
-    borderRadius: radius.md, borderWidth: 1, borderColor: 'rgba(232,71,79,0.4)', backgroundColor: 'rgba(232,71,79,0.1)',
+  noteInput: { height: 88, paddingTop: sp(3), textAlignVertical: 'top' },
+  listRow: {
+    flexDirection: 'row', alignItems: 'center', gap: sp(3), backgroundColor: D.card2,
+    borderRadius: radius.md, padding: sp(3.5),
   },
-  agentText: { fontSize: font.small, fontWeight: '700', color: colors.accent },
+  undoText: { fontSize: font.small, fontWeight: '700', color: colors.accent, marginTop: 2 },
+
   hoursRow: {
     flexDirection: 'row', alignItems: 'center', gap: sp(2), backgroundColor: D.card2,
     borderRadius: radius.md, paddingHorizontal: sp(3.5), height: 56,
@@ -1388,10 +1578,6 @@ const s = StyleSheet.create({
   stepBtn: {
     width: 34, height: 34, borderRadius: radius.pill, backgroundColor: D.border,
     alignItems: 'center', justifyContent: 'center',
-  },
-  earningsRow: {
-    flexDirection: 'row', alignItems: 'center', gap: sp(3), backgroundColor: D.card2,
-    borderRadius: radius.md, padding: sp(3),
   },
 
   payoutHero: {
@@ -1426,11 +1612,6 @@ const s = StyleSheet.create({
     height: 50, borderRadius: radius.md, borderWidth: 1, borderColor: 'rgba(210,59,59,0.4)', backgroundColor: 'rgba(210,59,59,0.1)',
   },
   declineText: { fontSize: font.body, fontWeight: '700', color: colors.danger },
-  removeBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, height: 48,
-    borderRadius: radius.md, borderWidth: 1, borderColor: 'rgba(210,59,59,0.4)', backgroundColor: 'rgba(210,59,59,0.1)',
-  },
-  removeText: { fontSize: font.small, fontWeight: '700', color: colors.danger },
 
   inviteIcon: {
     width: 40, height: 40, borderRadius: radius.pill, backgroundColor: 'rgba(232,71,79,0.14)',

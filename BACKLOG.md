@@ -182,6 +182,41 @@ owner-only RPCs (`salon_team`, `salon_stats`, `salon_set_terms`,
 - Removing a member sets `salon_id = null` (unlinked), not a fresh solo salon —
   give them one back if that edge bites.
 
+## Rentable chairs  → `ChairSheet` / `RentLedger` in `SalonScreen.tsx`, `OpenChairsScreen.tsx`, `MyChairScreen.tsx`, admin `owner-chairs.js` — 2026-10-03 (0142–0146)
+BRB-30's "LOOK FOR A BARBER FOR CHAIR 4". A chair carries an asking rent (week or
+month) and a note; the owner lists an empty chair, and `open_chairs()` shows it to
+other barbers (Profile → Chairs for rent) with the shop's rating and the owner's
+phone — listing is the consent. `vacant_since` is stamped by a trigger, and a barber
+leaving a shop now frees his chair (none of the four ways out touched `chairs`).
+Agreed terms are editable again — 2c's rate row opens them (the old sheet had been
+pending-only since the redesign) — and gained `rent_period`. Rent taken in cash is
+written down in `rent_payments`, one contiguous period at a time, latest undoable;
+bookkeeping like 0031, so it is not the blocked Phase 2 "paid status".
+**Since (2026-10-03, 0143–0145):** pay terms came off the barbers table (0143 — it
+is column-granted now: a new column needs `grant select (col)`, and `select('*')` on
+barbers fails). A barber can **ask for a chair** in the app (0144): the owner gets a
+push and answers in the chair sheet / site dialog; **taking him on moves him** —
+0128's guards (no shop owner, not the till, no handover under way) are checked at
+the ask and again at the answer. Chairs list nearest the caller's shop first; the
+barber sees his own terms and rent (Profile → Your chair, `my_terms`); the owner can
+**start rent afresh** from the current period. The site's Chairs page carries
+BRB-30's **week** (`salon_chair_week`): open / sold / empty hours per chair, empty
+before noon, the shop's take — open time computed exactly as `lib/slots.ts` does.
+**And (0146):** taking a barber on tells his past customers where he went — one
+inbox line each (completed visit in the last 12 months; never walk-ins, deleted
+accounts, or anyone who switched it off: customer Notifications → "When your barber
+changes shop", `notification_prefs.tell_barber_moves`). The filled chair says when he
+was taken on and how many were told (RVW-12, short of its Saturday-slots prose).
+The week is in the app too (All chairs). Found on the way: `notif_should_push` had
+`else false` for kinds with no switch (shop_status, moderation, digest), so anyone
+who had ever saved a notification setting stopped being buzzed for them — now they
+push as they do for an account with no settings row.
+Still open:
+- **Nobody is told a chair was listed** — barbers find it by opening Chairs for
+  rent. **Trigger:** a listed chair sits a fortnight with no ask.
+- **BRB-30's prose** ("a pricing and hours question, not a barber question") is not
+  written; the page states the before-noon number and leaves the reading to him.
+
 ## Agent wallet (salon till)  → `src/screens/AgentWalletScreen.tsx` — REAL 2026-07-19 (0022)
 Owner-only — the barber **Wallet tab**, which only appears for the salon owner
 (gated on `salons.owner_id`; owner = the v1 cash agent). Co-barbers see just

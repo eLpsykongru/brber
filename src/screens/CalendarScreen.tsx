@@ -42,7 +42,7 @@ type ClientHit = { name: string; avatar: string | null; app: boolean };
 const DAY_MS = 86_400_000;
 const HOUR_H = 112; // timeline px per hour
 const STEP = 15;    // drag reschedule snaps to 15-min increments
-const AMBER = '#E8B84B';
+const AMBER = D.gold;
 // kept in English: the reasons are written into the client's chat, and shown translated
 const CANCEL_REASONS = [en('Client requested'), en('Client no-show'), en("I'm unavailable"), en('Double booked'), en('Emergency')];
 const MOVE_REASONS = [en('Client requested'), en('Running late'), en('Schedule conflict'), en('Better slot'), en('Emergency')];
@@ -756,7 +756,7 @@ export default function CalendarScreen({ barberId, onChromeHidden }: {
             <Text style={s.sheetTitleLight}>
               {tr('Move {resched} · {resched2} min', { resched: nameOf(resched, barberId), resched2: durMin(resched) })}
             </Text>
-            {/* ponytail: SlotPicker is light-themed; lives on a light sheet until a dark variant matters */}
+            {/* SlotPicker and this sheet draw from the customer palette, which follows the same Light/Dark as the kit */}
             <ScrollView style={{ flexGrow: 0 }}>
               <SlotPicker barberId={barberId} durationMin={durMin(resched)}
                 selected={reschedAt} onSelect={setReschedAt} />

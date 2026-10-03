@@ -322,7 +322,7 @@ function OptionsSheet({ visible, dark, title, sub, rows, onClose }: {
   visible: boolean; dark?: boolean; title: string; sub?: string; rows: OptionRow[]; onClose: () => void;
 }) {
   const c = dark
-    ? { sheet: D.sheet, card: D.card, line: D.border, text: '#fff', sub: D.sub, bubble: D.card2, grab: D.hairline }
+    ? { sheet: D.sheet, card: D.card, line: D.border, text: D.text, sub: D.sub, bubble: D.card2, grab: D.hairline }
     : { sheet: colors.surface, card: colors.bg, line: colors.border, text: colors.text, sub: colors.textSecondary, bubble: colors.surface, grab: colors.line };
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -339,10 +339,10 @@ function OptionsSheet({ visible, dark, title, sub, rows, onClose }: {
               <Pressable key={r.label} onPress={() => { onClose(); r.onPress(); }} accessibilityRole="button"
                 style={({ pressed }) => [st.optRow, i < rows.length - 1 && { borderBottomWidth: 1, borderBottomColor: c.line }, pressed && st.pressed]}>
                 <View style={[st.optIcon, { backgroundColor: r.danger ? 'rgba(248,113,113,.14)' : c.bubble }]}>
-                  <Ionicons name={r.icon} size={16} color={r.danger ? '#F87171' : c.text} />
+                  <Ionicons name={r.icon} size={16} color={r.danger ? D.red : c.text} />
                 </View>
                 <View style={st.optBody}>
-                  <Text style={[st.optLabel, { color: r.danger ? '#F87171' : c.text }]}>{r.label}</Text>
+                  <Text style={[st.optLabel, { color: r.danger ? D.red : c.text }]}>{r.label}</Text>
                   {!!r.sub && <Text style={[st.optSub, { color: c.sub }]}>{r.sub}</Text>}
                 </View>
               </Pressable>

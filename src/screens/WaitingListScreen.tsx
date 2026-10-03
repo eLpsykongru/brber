@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabase';
 import {
   daySlots, makeRoomOptions, Block, Range, RoomOption, Window,
 } from '../lib/slots';
-import { dark as D, serif } from '../theme';
+import { dark as D, isDark, serif } from '../theme';
 import ChatScreen from './ChatScreen';
 import { loc, tr, trn } from '../lib/i18n';
 
@@ -571,7 +571,7 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   radioOn: { backgroundColor: D.accent, borderColor: D.accent },
-  wouldCard: { backgroundColor: '#101010', borderRadius: 20, padding: 17, gap: 12 },
+  wouldCard: { backgroundColor: D.recessed, borderRadius: 20, padding: 17, gap: 12 },
   wouldRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' },
   wouldBig: {
     fontFamily: serif, fontWeight: '700', fontSize: 30, lineHeight: 32, color: D.text,
@@ -579,7 +579,7 @@ const s = StyleSheet.create({
   },
   wouldFoot: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)', paddingTop: 12,
+    borderTopWidth: 1, borderTopColor: isDark ? 'rgba(255,255,255,0.1)' : D.seam, paddingTop: 12,
   },
   sendBtn: {
     height: 54, borderRadius: 999, backgroundColor: D.accent,

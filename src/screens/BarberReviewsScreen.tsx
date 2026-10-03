@@ -223,7 +223,7 @@ export default function BarberReviewsScreen({ barberId, onBack, openBookingId }:
           {!open.reply && (
             <Pressable onPress={() => setReplying(open)} accessibilityRole="button"
               style={({ pressed }) => [s.whiteBtn, pressed && s.pressed]}>
-              <T w="eb" size={12.5} c="#111" ls={0.5}>{tr('REPLY IN PUBLIC')}</T>
+              <T w="eb" size={12.5} c={D.bg} ls={0.5}>{tr('REPLY IN PUBLIC')}</T>
             </Pressable>
           )}
           {dispute === null && (
@@ -316,7 +316,7 @@ export default function BarberReviewsScreen({ barberId, onBack, openBookingId }:
               return (
                 <Pressable key={k} onPress={() => setFilter(k)} accessibilityRole="button"
                   accessibilityState={{ selected: on }} style={[s.chip, on ? s.chipOn : s.chipOff]}>
-                  <T w={on ? 'b' : 'sb'} size={11.5} c={on ? '#111' : D.sub}>{label}</T>
+                  <T w={on ? 'b' : 'sb'} size={11.5} c={on ? D.bg : D.sub}>{label}</T>
                 </Pressable>
               );
             })}
@@ -417,7 +417,7 @@ const s = StyleSheet.create({
 
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
   chip: { borderRadius: 999, paddingVertical: 6, paddingHorizontal: 12 },
-  chipOn: { backgroundColor: '#fff' },
+  chipOn: { backgroundColor: D.text },
   chipOff: { borderWidth: 1, borderColor: D.muted },
   empty: { paddingVertical: 20, lineHeight: 19 },
 
@@ -441,7 +441,7 @@ const s = StyleSheet.create({
   replyCard: { backgroundColor: D.card, borderRadius: 16, paddingVertical: 13, paddingHorizontal: 15, gap: 7 },
 
   actions: { gap: 8, marginTop: 2 },
-  whiteBtn: { height: 48, borderRadius: 16, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
+  whiteBtn: { height: 48, borderRadius: 16, backgroundColor: D.text, alignItems: 'center', justifyContent: 'center' },
   outlineBtn: {
     height: 44, borderRadius: 16, backgroundColor: D.card, borderWidth: 1, borderColor: D.border,
     alignItems: 'center', justifyContent: 'center',

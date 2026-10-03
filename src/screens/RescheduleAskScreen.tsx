@@ -6,7 +6,7 @@ import {
   Ask, Blk, Busy, Fit, Win, agoLabel, asksFor, fitAt, localDay, ordinal, spanLabel,
 } from '../lib/inboxRules';
 import { supabase } from '../lib/supabase';
-import { dark as D } from '../theme';
+import { dark as D, isDark } from '../theme';
 import { loc, tr, trn, trRich } from '../lib/i18n';
 
 // G1 of "Notification Routing.dc.html" — BDY-14 and BDY-15 of "Barber - My Day".
@@ -345,8 +345,8 @@ export default function RescheduleAskScreen({ barberId, bookingId, onBack }: {
               <Pressable onPress={() => answer(true)} disabled={busy || blocked} accessibilityRole="button"
                 accessibilityLabel={tr('Give {name} {requested_start}', { name, requested_start: hh(req.requested_start) })}
                 style={({ pressed }) => [s.primary, (busy || blocked) && s.dim, pressed && s.pressed]}>
-                <T w="eb" size={12.5} c="#111" ls={0.5}>{tr('GIVE {first} {requested_start}', { first: first.toUpperCase(), requested_start: hh(req.requested_start) })}</T>
-                <T w="sb" size={10.5} c="#5C5C58">
+                <T w="eb" size={12.5} c={D.bg} ls={0.5}>{tr('GIVE {first} {requested_start}', { first: first.toUpperCase(), requested_start: hh(req.requested_start) })}</T>
+                <T w="sb" size={10.5} c={isDark ? '#5C5C58' : D.faint}>
                   {paid > 0
                     ? tr('The {paid} moves with the booking — nothing to refund', { paid: dh(paid) })
                     : tr('Same booking, new time — nothing to refund')}
@@ -449,7 +449,7 @@ const s = StyleSheet.create({
 
   actions: { gap: 8, marginTop: 3 },
   primary: {
-    height: 50, borderRadius: 16, backgroundColor: '#fff',
+    height: 50, borderRadius: 16, backgroundColor: D.text,
     alignItems: 'center', justifyContent: 'center', gap: 1,
   },
   secondary: {

@@ -4,7 +4,7 @@ import { Alert, Pressable, StyleSheet, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { Ico, Screen, Serif, T, TAB_INSET, TopBar } from '../components/dark';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D } from '../theme';
+import { colors, dark as D, isDark } from '../theme';
 import { loc, tr, trn } from '../lib/i18n';
 
 // 9c / 9d of "Barber App.dc.html" — the applying shop's own status screen, the
@@ -109,7 +109,7 @@ export default function ApplicationScreen({ onBack, onGo }: {
         </View>
         {left > 0 && !rejected && (
           <View style={s.todoChip}>
-            <T w="b" size={10} c="#0D0D0F" ls={0.8}>{tr('{left} TO DO', { left })}</T>
+            <T w="b" size={10} c={D.bg} ls={0.8}>{tr('{left} TO DO', { left })}</T>
           </View>
         )}
       </View>
@@ -232,11 +232,11 @@ function LiveScreen({ app, onBack, onGo }: {
           <View style={s.previewImg} />
           <View style={s.grow}>
             <View style={s.row6}>
-              <T w="b" size={13.5} c="#111" style={s.grow}>{app.name}</T>
-              <T w="b" size={11} c="#8A8A85">{app.preview.reviews >= 3 ? tr('Rated') : tr('New')}</T>
+              <T w="b" size={13.5} c={colors.text} style={s.grow}>{app.name}</T>
+              <T w="b" size={11} c={colors.textSecondary}>{app.preview.reviews >= 3 ? tr('Rated') : tr('New')}</T>
             </View>
-            {!!app.address && <T size={11} c="#8A8A85" style={s.mt5}>{app.address}</T>}
-            <T size={11} c="#8A8A85" style={s.mt3}>
+            {!!app.address && <T size={11} c={colors.textSecondary} style={s.mt5}>{app.address}</T>}
+            <T size={11} c={colors.textSecondary} style={s.mt3}>
               {trn(app.preview.services, '{x}{n} service', '{x}{n} services', { x: app.preview.from_cents != null
                 ? tr('From {round} DH · ', { round: Math.round(app.preview.from_cents / 100) })
                 : '' })}
@@ -299,7 +299,7 @@ const s = StyleSheet.create({
   progress: { backgroundColor: D.card, borderRadius: 22, padding: 18, gap: 14 },
   progressTitle: { marginTop: -8 },
   bars: { flexDirection: 'row', gap: 6 },
-  bar: { flex: 1, height: 5, borderRadius: 3, backgroundColor: '#2F2F35' },
+  bar: { flex: 1, height: 5, borderRadius: 3, backgroundColor: isDark ? '#2F2F35' : D.card2 },
   barOn: { backgroundColor: D.green },
   rejectCard: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: D.card,

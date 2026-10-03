@@ -300,8 +300,8 @@ export function LicenceBanner({ standing, onSend }: {
         {tr('After that we have to hide you from search until it\'s renewed. Bookings you already have would still stand.')}
       </T>
       <Pressable onPress={onSend} style={s.amberBtn}>
-        <Ico name="camera" size={15} color="#0D0D0F" />
-        <T w="eb" size={12} c="#0D0D0F" ls={0.6}>{tr('PHOTOGRAPH THE NEW ONE')}</T>
+        <Ico name="camera" size={15} color={D.bg} />
+        <T w="eb" size={12} c={D.bg} ls={0.6}>{tr('PHOTOGRAPH THE NEW ONE')}</T>
       </Pressable>
     </View>
   );

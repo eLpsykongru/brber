@@ -9,7 +9,7 @@ import { OPS_PHONE } from './BarberSupportScreens';
 import ExportSheet from '../components/ExportSheet';
 import { fileRange, walletActivityHtml } from '../lib/exportPdf';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, inter, radius, sp, TOP_INSET } from '../theme';
+import { colors, dark as D, inter, isDark, radius, sp, TOP_INSET } from '../theme';
 import { loc, tr, lang, trn, ltr } from '../lib/i18n';
 
 // REAL since 0022: float + activity read wallet_transactions; Top-up calls the
@@ -373,7 +373,7 @@ const s = StyleSheet.create({
   headTitle: { fontFamily: inter.b, fontSize: 17, color: D.text },
 
   floatCard: {
-    backgroundColor: '#1D1416', borderWidth: 1, borderColor: '#332124',
+    backgroundColor: D.redCard, borderWidth: 1, borderColor: D.redSeam,
     borderRadius: 20, padding: 18, gap: 14,
   },
   redChip: {
@@ -388,7 +388,7 @@ const s = StyleSheet.create({
   afterLabel: { fontFamily: inter.r, fontSize: 12, color: D.sub },
   afterValue: { fontFamily: inter.eb, fontSize: 14, color: D.text, fontVariant: ['tabular-nums'] },
   eyeBtn: {
-    width: 32, height: 32, borderRadius: radius.pill, backgroundColor: 'rgba(255,255,255,0.06)',
+    width: 32, height: 32, borderRadius: radius.pill, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
     alignItems: 'center', justifyContent: 'center',
   },
   floatValue: { fontVariant: ['tabular-nums'] },

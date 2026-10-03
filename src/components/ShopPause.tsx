@@ -143,7 +143,7 @@ export function ShopPauseSheet({ visible, onClose, onClosed }: {
           <Btn title={busy ? tr('CLOSING…') : scope === 'today'
             ? tr('CLOSE FOR THE REST OF TODAY') : tr('CLOSE UNTIL I REOPEN')}
             bg={d.red} fg={d.bg} height={54} onPress={close} />
-          <T size={11} c="#6B6B72" style={s.foot}>{tr('Only you can reopen it — your barbers can\'t.')}</T>
+          <T size={11} c={d.faint} style={s.foot}>{tr('Only you can reopen it — your barbers can\'t.')}</T>
         </>
       )}
     </Sheet>

@@ -3,17 +3,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as LocalAuthentication from 'expo-local-authentication';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
-import { Ico, IconName, Screen, Serif, Sheet, T, Toggle, TopBar } from '../components/dark';
+import { Ico, IconName, Screen, Segmented, Serif, Sheet, T, Toggle, TopBar } from '../components/dark';
 import { dh } from '../lib/billing';
 import { Blocker, DeletionCheck, deleteAccount, loadDeletionCheck, typedDelete } from '../lib/deletion';
 import { lang, ltr, tr, trn } from '../lib/i18n';
 import type { Lang } from '../lib/i18n';
-import { chooseLanguage, LANGUAGE_ROWS } from '../lib/language';
+import { chooseLanguage, LANGUAGE_ROWS, reopenSettings } from '../lib/language';
 import { openLegal } from '../lib/legal';
 import { listPortfolio } from '../lib/portfolio';
 import { logOut } from '../lib/push';
 import { supabase } from '../lib/supabase';
-import { dark as D, inter, serif } from '../theme';
+import { appearance, chooseAppearance, dark as D, inter, serif } from '../theme';
+import type { AppearancePick } from '../theme';
 import { biometricLockOn, LOCK_KEY } from './LinkedAccountsScreen';
 import { DEFAULTS, Prefs, PUSH_ROWS } from './NotificationsScreen';
 
@@ -22,8 +23,12 @@ import { DEFAULTS, Prefs, PUSH_ROWS } from './NotificationsScreen';
 // no Link button (manual identity linking is off on the project), no lock row on a
 // phone with no biometrics, no delete control while anything is open.
 
-const RED = '#F87171';
+const RED = D.red;
 const NAME: Record<Lang, string> = { en: tr('English'), fr: tr('French'), ar: tr('Arabic') };
+// PRO-07's three, on this side too: the barber kit has a light twin (theme.ts)
+const LOOKS = [
+  { key: 'light', label: tr('Light') }, { key: 'dark', label: tr('Dark') }, { key: 'system', label: tr('System') },
+];
 const hh = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 
 // ---- BST-01 ------------------------------------------------------------------
@@ -65,6 +70,13 @@ export default function BarberSettingsScreen({ userId, email, onBack, onNotifica
         <Row icon="globe" label={tr('Language')} sub={current?.native} onPress={() => setLangOpen(true)} line />
         <Row icon="bell" label={tr('Notifications')} sub={summary ?? undefined} onPress={onNotifications} />
       </Group>
+      <Label>{tr('APPEARANCE')}</Label>
+      <Segmented items={LOOKS} active={appearance} onChange={(k) => {
+        if (k === appearance) return;
+        reopenSettings();
+        chooseAppearance(k as AppearancePick);
+      }} />
+      <T size={12} c={D.sub} style={{ marginHorizontal: 4, marginTop: -4 }}>{tr('The app restarts to switch.')}</T>
       <Label>{tr('ACCOUNT')}</Label>
       <Group>
         <Row icon="lock" label={tr('Sign-in & security')} sub={email ?? undefined} onPress={onSecurity} />
@@ -304,7 +316,7 @@ function Secret({ value, onChange, shown, onShow, error, focused }: {
   error?: boolean; focused?: boolean;
 }) {
   return (
-    <View style={[s.secret, focused && { borderColor: '#fff' }, error && { borderColor: RED }]}>
+    <View style={[s.secret, focused && { borderColor: D.text }, error && { borderColor: RED }]}>
       <TextInput value={value} onChangeText={onChange} secureTextEntry={!shown} autoCapitalize="none"
         autoCorrect={false} style={s.secretInput} placeholderTextColor={D.sub} textAlign="left" />
       <Pressable onPress={onShow} style={s.eye} accessibilityLabel={shown ? tr('Hide') : tr('Show')}>
@@ -332,7 +344,7 @@ export function BarberDeleteScreen({ userId, onBack, onCalendar, onAccount, onSe
   useEffect(() => { load(); }, [load]);
 
   if (!check?.barber) {
-    return <Screen><TopBar title={tr('Delete account')} onBack={onBack} plain /><ActivityIndicator color="#fff" /></Screen>;
+    return <Screen><TopBar title={tr('Delete account')} onBack={onBack} plain /><ActivityIndicator color={D.text} /></Screen>;
   }
   const rows = check.barber.blockers;
   // the bookings row already counts his own deposit bookings elsewhere (0131)
@@ -498,7 +510,7 @@ export function BarberDeletedScreen({ onDone }: { onDone: () => void }) {
   return (
     <View style={[s.fill, s.doneWrap]}>
       <View style={s.doneMid}>
-        <View style={s.doneMark}><Ico name="check" size={28} color="#fff" /></View>
+        <View style={s.doneMark}><Ico name="check" size={28} color={D.text} /></View>
         <T w="b" size={11} c={D.sub} ls={1.76} style={{ marginTop: 10 }}>{tr('SIGNED OUT')}</T>
         <Serif size={30} ls={0.04}>{tr('Account deleted')}</Serif>
         <T size={14} c={D.sub} style={s.doneText}>
@@ -517,7 +529,7 @@ function Label({ children }: { children: ReactNode }) {
 function Group({ children }: { children: ReactNode }) {
   return <View style={s.group}>{children}</View>;
 }
-function Bubble({ icon, color = '#fff', bg = D.card2 }: { icon: IconName; color?: string; bg?: string }) {
+function Bubble({ icon, color = D.text, bg = D.card2 }: { icon: IconName; color?: string; bg?: string }) {
   return <View style={[s.bubble36, { backgroundColor: bg }]}><Ico name={icon} size={16} color={color} /></View>;
 }
 function Row({ icon, label, sub, onPress, line, external, danger, bare }: {
@@ -527,7 +539,7 @@ function Row({ icon, label, sub, onPress, line, external, danger, bare }: {
   return (
     <Pressable onPress={onPress} accessibilityRole={external ? 'link' : 'button'}
       style={({ pressed }) => [s.row, line && s.line, pressed && s.pressed]}>
-      <Bubble icon={icon} color={danger ? RED : '#fff'} bg={danger ? 'rgba(248,113,113,.14)' : D.card2} />
+      <Bubble icon={icon} color={danger ? RED : D.text} bg={danger ? 'rgba(248,113,113,.14)' : D.card2} />
       <View style={s.grow}>
         <T w="sb" size={15} c={danger ? RED : D.text}>{label}</T>
         {!!sub && <T size={12} c={D.sub} style={{ marginTop: 3 }} numberOfLines={1}>{sub}</T>}
@@ -540,7 +552,7 @@ function Row({ icon, label, sub, onPress, line, external, danger, bare }: {
 function Linked({ icon, name, on, line }: { icon: 'logo-google' | 'logo-apple'; name: string; on: boolean; line?: boolean }) {
   return (
     <View style={[s.row, line && s.line]}>
-      <View style={[s.bubble36, { backgroundColor: D.card2 }]}><Ionicons name={icon} size={16} color="#fff" /></View>
+      <View style={[s.bubble36, { backgroundColor: D.card2 }]}><Ionicons name={icon} size={16} color={D.text} /></View>
       <View style={s.grow}>
         <T w="sb" size={15}>{name}</T>
         {!on && <T size={12} c={D.sub} style={{ marginTop: 3 }}>{tr('Not linked')}</T>}
@@ -621,7 +633,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 64, backgroundColor: D.card,
     borderRadius: 18, paddingHorizontal: 16, borderWidth: 1.5, borderColor: 'transparent',
   },
-  langRowOn: { backgroundColor: D.card2, borderColor: '#fff' },
+  langRowOn: { backgroundColor: D.card2, borderColor: D.text },
   radioOn: { width: 24, height: 24, borderRadius: 999, backgroundColor: D.accent, alignItems: 'center', justifyContent: 'center' },
   radioOff: { width: 24, height: 24, borderRadius: 999, borderWidth: 2, borderColor: D.muted },
   note: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: D.card, borderRadius: 16, paddingVertical: 13, paddingHorizontal: 15 },
@@ -632,12 +644,12 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 10, height: 54, borderRadius: 16, backgroundColor: D.card2,
     paddingLeft: 16, paddingRight: 6, borderWidth: 1.5, borderColor: 'transparent',
   },
-  secretInput: { flex: 1, fontFamily: inter.sb, fontSize: 16, color: '#fff', writingDirection: 'ltr' },
+  secretInput: { flex: 1, fontFamily: inter.sb, fontSize: 16, color: D.text, writingDirection: 'ltr' },
   eye: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   forgot: { flexDirection: 'row', alignItems: 'center', minHeight: 44, flexWrap: 'wrap' },
   rule: { flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 2 },
-  display28: { fontFamily: serif, fontSize: 28, lineHeight: 32, color: '#fff' },
-  display26: { fontFamily: serif, fontSize: 26, lineHeight: 30, color: '#fff' },
+  display28: { fontFamily: serif, fontSize: 28, lineHeight: 32, color: D.text },
+  display26: { fontFamily: serif, fontSize: 26, lineHeight: 30, color: D.text },
   progress: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 2, paddingVertical: 2 },
   bars: { flex: 1, flexDirection: 'row', gap: 4 },
   bar: { flex: 1, height: 4, borderRadius: 2, backgroundColor: D.border },
@@ -658,7 +670,7 @@ const s = StyleSheet.create({
   staysDot: { width: 6, height: 6, borderRadius: 999, backgroundColor: D.sub, marginTop: 7, marginHorizontal: 3 },
   confirm: {
     height: 54, borderRadius: 16, backgroundColor: D.card2, borderWidth: 1.5, borderColor: D.border,
-    paddingHorizontal: 16, fontFamily: inter.b, fontSize: 16, letterSpacing: 2.2, color: '#fff', writingDirection: 'ltr',
+    paddingHorizontal: 16, fontFamily: inter.b, fontSize: 16, letterSpacing: 2.2, color: D.text, writingDirection: 'ltr',
   },
   footer: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingTop: 10, paddingHorizontal: 20, paddingBottom: 30, gap: 10, backgroundColor: D.bg },
   doneWrap: { justifyContent: 'space-between' },

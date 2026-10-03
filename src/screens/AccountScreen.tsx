@@ -4,7 +4,11 @@ import { Btn, Card, Eyebrow, Ico, type IconName, RadioRow, Screen, Serif, Sheet,
 import { awkwardNet, dh, netWay } from '../lib/billing';
 import { loc, tr, trn } from '../lib/i18n';
 import { supabase } from '../lib/supabase';
-import { dark as D } from '../theme';
+import { dark as D, isDark } from '../theme';
+
+// still owed to you: the dark kit's soft green, the light kit's AA green
+const OWED = isDark ? '#7FC79B' : D.green;
+const OWED_SEAM = isDark ? '#1F3A2C' : '#CFE8D7';
 
 // "Barber - Account.dc.html" BAC-01 … BAC-10, over 0125 and 0127.
 //
@@ -165,7 +169,7 @@ function HomeView({ a, go, onBack, onOldShop }: {
       <Eyebrow ls={1.8}>{`${a.me} · ${a.salon}`.toUpperCase()}</Eyebrow>
 
       <View style={[st.hero, owed ? st.heroOwed : way === 'square' ? st.heroSquare : null]}>
-        <Eyebrow c={owed ? '#7FC79B' : D.sub} ls={1.5}>
+        <Eyebrow c={owed ? OWED : D.sub} ls={1.5}>
           {way === 'square' ? tr('ALL SQUARE') : owed ? tr('AFTER WE NET IT OFF · OURS TO PAY') : tr('AFTER WE NET IT OFF')}
         </Eyebrow>
         <Serif size={42} ls={0} c={owed ? D.green : D.text} style={st.num}>{dh(a.net_cents)}</Serif>
@@ -714,7 +718,7 @@ function OwedByShop({ shop, onReported }: { shop: OldShop; onReported: () => voi
   return (
     <>
       <View style={[st.hero, st.heroOwed]}>
-        <Eyebrow c="#7FC79B" ls={1.5}>{tr('STILL OWED TO YOU')}</Eyebrow>
+        <Eyebrow c={OWED} ls={1.5}>{tr('STILL OWED TO YOU')}</Eyebrow>
         <T w="b" size={15} style={st.lh}>{tr('{salon} still owes you', { salon: shop.salon })}</T>
         <Serif size={42} ls={0} c={D.green} style={st.num}>{dh(shop.cents)}</Serif>
         <T size={11.5} c={D.sub} style={[st.lh, st.heroWhy, st.heroWhyOwed]}>{why}</T>
@@ -955,7 +959,7 @@ function SettleView({ a, onBack, onStatement }: { a: Account; onBack: () => void
           <Row2 label={trn(a.colleagues.barbers, 'Your colleague — you pay him from the drawer', 'Your {n} colleagues — you pay them from the drawer')}
             value={`− ${dh(a.colleagues.cents)}`} color={D.green} />
         )}
-        {a.bill_cents > 0 && <Row2 label={tr("The shop's subscription")} value={`+ ${dh(a.bill_cents)}`} color="#FF7A66" />}
+        {a.bill_cents > 0 && <Row2 label={tr("The shop's subscription")} value={`+ ${dh(a.bill_cents)}`} color={D.coral} />}
         <View style={st.ruleDim} />
         <View style={st.row}>
           <T w="b" size={13} style={st.grow}>{way === 'you_are_owed' ? tr('We owe you') : tr('You hand over')}</T>
@@ -1314,11 +1318,11 @@ const st = StyleSheet.create({
   center: { textAlign: 'center' },
   pressed: { opacity: 0.7 },
   foot: { textAlign: 'center', lineHeight: 16 },
-  hero: { backgroundColor: '#1D1416', borderWidth: 1, borderColor: '#332124', borderRadius: 22, padding: 18, gap: 11 },
-  heroOwed: { backgroundColor: '#13201A', borderColor: '#1F3A2C' },
+  hero: { backgroundColor: D.redCard, borderWidth: 1, borderColor: D.redSeam, borderRadius: 22, padding: 18, gap: 11 },
+  heroOwed: { backgroundColor: isDark ? '#13201A' : '#EEF7F1', borderColor: OWED_SEAM },
   heroSquare: { backgroundColor: D.card, borderColor: D.border },
-  heroWhy: { borderTopWidth: 1, borderTopColor: '#332124', paddingTop: 12 },
-  heroWhyOwed: { borderTopColor: '#1F3A2C' },
+  heroWhy: { borderTopWidth: 1, borderTopColor: D.redSeam, paddingTop: 12 },
+  heroWhyOwed: { borderTopColor: OWED_SEAM },
   tiles: { flexDirection: 'row', gap: 10 },
   tile: { flex: 1, minWidth: 0, backgroundColor: D.card, borderRadius: 18, padding: 14, gap: 6 },
   nav: { flexDirection: 'row', alignItems: 'center', gap: 11, padding: 14, borderRadius: 18 },
@@ -1334,23 +1338,23 @@ const st = StyleSheet.create({
   dayBlock: { gap: 8 },
   cat: { flexDirection: 'row', alignItems: 'center', gap: 11, padding: 12, borderRadius: 16 },
   ruleDim: { height: 1, backgroundColor: D.border },
-  pendingRow: { flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: '#101010', borderWidth: 1,
+  pendingRow: { flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: D.recessed, borderWidth: 1,
     borderColor: D.border, borderRadius: 16, padding: 12 },
   capWrap: { gap: 7 },
-  capTrack: { height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.12)', overflow: 'hidden' },
+  capTrack: { height: 6, borderRadius: 3, backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)', overflow: 'hidden' },
   capFill: { height: '100%' },
   line: { flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: D.card, borderRadius: 16, padding: 12 },
-  lineDim: { backgroundColor: '#101010', borderWidth: 1, borderColor: D.border },
+  lineDim: { backgroundColor: D.recessed, borderWidth: 1, borderColor: D.border },
   right: { alignItems: 'flex-end' },
-  info: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: '#101010', borderWidth: 1,
+  info: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: D.recessed, borderWidth: 1,
     borderColor: D.border, borderRadius: 16, padding: 12 },
-  codeCard: { backgroundColor: '#101010', borderWidth: 1, borderColor: D.border, borderRadius: 20, padding: 17,
+  codeCard: { backgroundColor: D.recessed, borderWidth: 1, borderColor: D.border, borderRadius: 20, padding: 17,
     gap: 11, alignItems: 'center' },
   awk: { padding: 14, gap: 10, borderRadius: 18 },
   disputeLink: { flexDirection: 'row', alignItems: 'center', gap: 8, borderTopWidth: 1, borderTopColor: D.border, paddingTop: 10 },
-  netBox: { backgroundColor: '#101010', borderWidth: 1, borderColor: D.border, borderRadius: 16, padding: 13, gap: 4 },
+  netBox: { backgroundColor: D.recessed, borderWidth: 1, borderColor: D.border, borderRadius: 16, padding: 13, gap: 4 },
   safe: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: D.card2, borderRadius: 14, padding: 12 },
-  codeInner: { alignItems: 'center', gap: 8, backgroundColor: '#101010', borderWidth: 1, borderColor: D.border,
+  codeInner: { alignItems: 'center', gap: 8, backgroundColor: D.recessed, borderWidth: 1, borderColor: D.border,
     borderRadius: 16, padding: 14 },
   input: { height: 52, borderRadius: 14, backgroundColor: D.card, borderWidth: 1, borderColor: D.border,
     paddingHorizontal: 15, color: D.text, fontSize: 17, fontVariant: ['tabular-nums'] },

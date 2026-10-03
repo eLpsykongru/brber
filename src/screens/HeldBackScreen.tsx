@@ -237,7 +237,7 @@ export default function HeldBackScreen({ barberId, held, onBack, onOpenAsk, onOp
                     <View style={s.row8}>
                       <Pressable onPress={() => answer(i, true)} disabled={busy === i.notif.id}
                         accessibilityRole="button" style={({ pressed }) => [s.whiteCta, s.grow, pressed && s.pressed]}>
-                        <T w="eb" size={11.5} c="#111" ls={0.5}>{tr('ACCEPT')}</T>
+                        <T w="eb" size={11.5} c={D.bg} ls={0.5}>{tr('ACCEPT')}</T>
                       </Pressable>
                       <Pressable onPress={() => answer(i, false)} disabled={busy === i.notif.id}
                         accessibilityRole="button" style={({ pressed }) => [s.greyCta, pressed && s.pressed]}>
@@ -260,7 +260,7 @@ export default function HeldBackScreen({ barberId, held, onBack, onOpenAsk, onOp
               </T>
               <Pressable onPress={() => onOpenAsk(b.id)} accessibilityRole="button"
                 style={({ pressed }) => [s.whiteCta, pressed && s.pressed]}>
-                <T w="eb" size={11.5} c="#111" ls={0.5}>{tr('ANSWER IT')}</T>
+                <T w="eb" size={11.5} c={D.bg} ls={0.5}>{tr('ANSWER IT')}</T>
               </Pressable>
             </View>
           );
@@ -333,7 +333,7 @@ const s = StyleSheet.create({
   card: { backgroundColor: D.card, borderRadius: 18, paddingVertical: 14, paddingHorizontal: 15, gap: 9 },
   cardHot: { borderLeftWidth: 3, borderLeftColor: D.accent },
   redCta: { height: 38, borderRadius: 12, backgroundColor: D.accent, alignItems: 'center', justifyContent: 'center' },
-  whiteCta: { height: 38, borderRadius: 12, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center' },
+  whiteCta: { height: 38, borderRadius: 12, backgroundColor: D.text, alignItems: 'center', justifyContent: 'center' },
   greyCta: {
     width: 104, height: 38, borderRadius: 12, backgroundColor: D.card2,
     alignItems: 'center', justifyContent: 'center',

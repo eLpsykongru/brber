@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Alert, Linking, StyleSheet, View } from 'react-native';
 import { Btn, Card, Eyebrow, Ico, Sheet, T } from './dark';
 import { supabase } from '../lib/supabase';
-import { dark as d, inter, radius } from '../theme';
+import { dark as d, inter, isDark, radius } from '../theme';
 import { tr, trn, trRich } from '../lib/i18n';
 
 // Barber turn 11c/11d of "Barber App.dc.html" — the float cap, finally on screen.
@@ -193,11 +193,11 @@ const s = StyleSheet.create({
   gap2: { marginTop: 2 },
 
   capRow: { flexDirection: 'row', justifyContent: 'flex-end' },
-  track: { height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.12)', overflow: 'hidden' },
+  track: { height: 6, borderRadius: 3, backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)', overflow: 'hidden' },
   fill: { height: '100%' },
   capMeta: { flexDirection: 'row', justifyContent: 'space-between' },
   capNote: {
-    lineHeight: 18, borderTopWidth: 1, borderTopColor: '#332124', paddingTop: 14,
+    lineHeight: 18, borderTopWidth: 1, borderTopColor: d.redSeam, paddingTop: 14,
   },
 
   hero: { alignItems: 'center', paddingTop: 2 },

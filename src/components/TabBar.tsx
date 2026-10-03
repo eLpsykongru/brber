@@ -44,7 +44,7 @@ export default function TabBar({ items, active, onChange, center, dark, centerOf
         ]}>
         <View>
           <Ionicons name={on ? t.icon : t.iconOutline} size={dark ? 17 : 18}
-            color={on ? colors.onAccent : (dark ? d.sub : colors.tabInactiveText)} />
+            color={dark ? (on ? d.text : d.sub) : (on ? colors.onAccent : colors.tabInactiveText)} />
           {!!t.badge && (
             <View style={[s.badge, { borderColor: dark ? (on ? d.accent : d.card) : (on ? colors.tabActive : colors.tabBg) }]}>
               <Text style={s.badgeText}>{t.badge > 99 ? '99+' : t.badge}</Text>
@@ -129,7 +129,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 7,
     height: 44, paddingHorizontal: 12, borderRadius: 999, backgroundColor: d.card2,
   },
-  dLabel: { color: '#fff', fontSize: 12, fontFamily: inter.b },
+  dLabel: { color: d.text, fontSize: 12, fontFamily: inter.b },
   dFab: {
     width: 48, height: 48, borderRadius: 999, backgroundColor: d.accent,
     alignItems: 'center', justifyContent: 'center',

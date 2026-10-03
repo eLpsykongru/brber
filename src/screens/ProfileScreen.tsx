@@ -615,7 +615,7 @@ const d = StyleSheet.create({
     width: 76, height: 76, borderRadius: 999, backgroundColor: D.card,
     alignItems: 'center', justifyContent: 'center',
   },
-  avatarText: { fontFamily: serif, fontSize: 26, color: '#fff' },
+  avatarText: { fontFamily: serif, fontSize: 26, color: D.text },
   editBadge: {
     position: 'absolute', bottom: -2, right: -2, width: 26, height: 26, borderRadius: 999,
     backgroundColor: D.accent, borderWidth: 3, borderColor: D.bg,

@@ -117,7 +117,7 @@ const s = StyleSheet.create({
     flexGrow: 1, flexBasis: '45%', height: 48, borderRadius: 999, backgroundColor: D.card,
     borderWidth: 1, borderColor: D.border, alignItems: 'center', justifyContent: 'center',
   },
-  chipOn: { backgroundColor: '#fff', borderColor: '#fff' },
+  chipOn: { backgroundColor: D.text, borderColor: D.text },
   preview: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: D.card, borderRadius: 18, padding: 12 },
   thumb: { width: 84, height: 118, borderRadius: 6, backgroundColor: '#F4F2EE', padding: 8, gap: 4 },
   thumbBrand: { fontFamily: serif, fontSize: 6, letterSpacing: 0.6, color: '#111' },

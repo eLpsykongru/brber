@@ -294,7 +294,7 @@ const s = StyleSheet.create({
   worksDotOn: { backgroundColor: D.greenSoft },
   costCard: {
     flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: D.bg,
-    borderWidth: 1, borderColor: '#1E1E22', borderRadius: 20,
+    borderWidth: 1, borderColor: D.seam, borderRadius: 20,
     paddingHorizontal: 16, paddingVertical: 15,
   },
   costIcon: {

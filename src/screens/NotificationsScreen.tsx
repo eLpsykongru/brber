@@ -4,9 +4,12 @@ import { Eyebrow, Ico, IconName, Screen, T, Toggle, TopBar } from '../components
 import { pushPermission } from '../lib/push';
 import { Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
-import { dark as D } from '../theme';
+import { dark as D, isDark } from '../theme';
 import { tr } from '../lib/i18n';
 import ChatScreen from './ChatScreen';
+
+// the hours outside work on the quiet-hours bar
+const OFF_HOURS = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
 
 // Turn 4 — 4b the inbox, 4c the settings behind its gear. What buzzes is decided
 // server-side by notif_should_push() (0032); this screen owns the toggles it reads.
@@ -402,12 +405,12 @@ export function NotificationSettings({ barberId, onBack }: { barberId: string; o
             onPress={() => set('quiet_outside_hours', !prefs.quiet_outside_hours)} color={D.accent} />
         </View>
         <View style={s.dayBar}>
-          <View style={[s.barSeg, { left: '0%', width: `${openPct}%`, backgroundColor: 'rgba(255,255,255,0.06)' }]} />
+          <View style={[s.barSeg, { left: '0%', width: `${openPct}%`, backgroundColor: OFF_HOURS }]} />
           <View style={[s.barSeg, {
             left: `${openPct}%`, width: `${Math.max(0, closePct - openPct)}%`,
             backgroundColor: prefs.quiet_outside_hours ? 'rgba(232,68,46,0.35)' : 'rgba(232,68,46,0.2)',
           }]} />
-          <View style={[s.barSeg, { left: `${closePct}%`, right: 0, backgroundColor: 'rgba(255,255,255,0.06)' }]} />
+          <View style={[s.barSeg, { left: `${closePct}%`, right: 0, backgroundColor: OFF_HOURS }]} />
         </View>
         <View style={s.axis}>
           <T size={10} c={D.sub}>00:00</T>
@@ -418,7 +421,7 @@ export function NotificationSettings({ barberId, onBack }: { barberId: string; o
         <View style={s.legend}>
           <View style={[s.swatch, { backgroundColor: 'rgba(232,68,46,0.35)' }]} />
           <T size={12} c={D.sub} style={s.grow}>{tr('Buzzing')}</T>
-          <View style={[s.swatch, { backgroundColor: 'rgba(255,255,255,0.06)' }]} />
+          <View style={[s.swatch, { backgroundColor: OFF_HOURS }]} />
           <T size={12} c={D.sub}>{tr('Silent · lands in inbox')}</T>
         </View>
       </View>
@@ -447,7 +450,7 @@ const s = StyleSheet.create({
   sectionRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
 
   row: { backgroundColor: D.card, borderRadius: 20, padding: 14, paddingHorizontal: 15, gap: 12 },
-  rowDim: { backgroundColor: '#141416', borderRadius: 20, padding: 14, paddingHorizontal: 15, gap: 12 },
+  rowDim: { backgroundColor: isDark ? '#141416' : D.recessed, borderRadius: 20, padding: 14, paddingHorizontal: 15, gap: 12 },
   rowHot: { borderWidth: 2, borderColor: D.accent },
   rowTop: { flexDirection: 'row', gap: 12 },
   icon: { width: 38, height: 38, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },

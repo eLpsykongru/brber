@@ -935,7 +935,7 @@ export default function BookingsScreen({ barber, profile, phone, onProfileChange
             <Text style={s.sheetTitleLight}>
               {tr('Move {resched} · {x} min', { resched: nameOf(resched, barberId), x: (new Date(resched.ends_at).getTime() - new Date(resched.starts_at).getTime()) / 60_000 })}
             </Text>
-            {/* ponytail: SlotPicker is light-themed; lives on a light sheet until a dark variant matters */}
+            {/* SlotPicker and this sheet draw from the customer palette, which follows the same Light/Dark as the kit */}
             <ScrollView style={{ flexGrow: 0 }}>
               <SlotPicker barberId={barberId}
                 durationMin={(new Date(resched.ends_at).getTime() - new Date(resched.starts_at).getTime()) / 60_000}

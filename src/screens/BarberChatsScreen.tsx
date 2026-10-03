@@ -5,7 +5,7 @@ import { Avatar, Eyebrow, Serif, T, TAB_INSET } from '../components/dark';
 import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
 import { groupThreads, Thread as ThreadOf } from '../lib/threads';
-import { dark as d, radius, sp, TOP_INSET } from '../theme';
+import { dark as d, isDark, radius, sp, TOP_INSET } from '../theme';
 import { BarberCaseScreen, BarberReportSheet, CaseRow } from './BarberSupportScreens';
 import { loadUnread } from '../lib/unread';
 import { Pushed } from '../components/motion';
@@ -381,7 +381,7 @@ const s = StyleSheet.create({
 
   note: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: sp(2),
-    backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 14, padding: 12,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)', borderRadius: 14, padding: 12,
   },
   noteText: { flex: 1, lineHeight: 17 },
 

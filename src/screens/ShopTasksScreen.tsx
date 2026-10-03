@@ -140,7 +140,7 @@ export default function ShopTasksScreen({ onBack, onChat }: {
           <View key={t.id} style={[s.card, urgent && !sent && s.cardUrgent]}>
             <View style={s.row10}>
               <View style={[s.dueChip, urgent && !sent && s.dueChipHot]}>
-                <T w="b" size={10} ls={0.8} c={urgent && !sent ? '#0D0D0F' : D.sub}>
+                <T w="b" size={10} ls={0.8} c={urgent && !sent ? D.bg : D.sub}>
                   {sent ? tr('WITH OPS') : dueLabel(t)}
                 </T>
               </View>
@@ -395,7 +395,7 @@ const s = StyleSheet.create({
   nodeDotDone: { backgroundColor: D.card2 },
   nodeDotNow: { backgroundColor: D.amber },
   nodeDotNext: { backgroundColor: 'transparent', borderWidth: 1.5, borderColor: D.muted, borderStyle: 'dashed' },
-  nodePip: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#0D0D0F' },
+  nodePip: { width: 7, height: 7, borderRadius: 4, backgroundColor: D.bg },
   nodeLine: { flex: 1, width: 2, backgroundColor: D.border },
   nodePad: { paddingBottom: 15 },
   nowChip: {

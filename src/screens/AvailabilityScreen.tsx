@@ -8,7 +8,7 @@ import { Ico, Serif, T, Toggle } from '../components/dark';
 import { Field } from '../components/ui';
 import { setLastFix } from '../lib/lastFix';
 import { supabase } from '../lib/supabase';
-import { colors, dark as D, font, inter, radius, sp, TOP_INSET } from '../theme';
+import { colors, dark as D, font, inter, isDark, radius, sp, TOP_INSET } from '../theme';
 import { tr, trn, weekdayName, weekdayDate, lang } from '../lib/i18n';
 
 const AMBER = D.amber;
@@ -40,9 +40,9 @@ type FixPlan = {
 
 // preview range bars: context + change colors (legend always names them in text)
 const BAR = {
-  ctx: 'rgba(255,255,255,0.08)',
+  ctx: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
   block: 'rgba(232,184,75,0.45)',
-  added: '#E8B84B',
+  added: D.gold,
   overflow: 'rgba(210,59,59,0.55)',
 };
 type UndoPayload = {
@@ -775,7 +775,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
               <View key={`b-${item.b.id}`} style={s.blockRow}>
                 <View style={[s.blockIcon, item.b.day === null && s.blockIconBreak]}>
                   <Ionicons name={item.b.day === null ? 'cafe' : 'time-outline'} size={17}
-                    color={item.b.day === null ? '#E8B84B' : D.text} />
+                    color={item.b.day === null ? D.gold : D.text} />
                 </View>
                 <View style={s.grow}>
                   <Text style={s.cardTitle}>{item.b.label ?? tr('Blocked')}</Text>
@@ -905,7 +905,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                   <View key={b.id} style={s.previewRow}>
                     <View style={[s.blockIcon, b.day === null && s.blockIconBreak]}>
                       <Ionicons name={b.day === null ? 'cafe' : 'time-outline'} size={17}
-                        color={b.day === null ? '#E8B84B' : D.text} />
+                        color={b.day === null ? D.gold : D.text} />
                     </View>
                     <View style={s.grow}>
                       <Text style={s.cardTitle}>{b.label ?? tr('Blocked')}</Text>
@@ -937,7 +937,7 @@ export default function AvailabilityScreen({ barberId, onBack }: { barberId: str
                 return (
                   <View key={`ins-${b.id}`} style={s.previewRow}>
                     <View style={[s.blockIcon, s.blockIconBreak]}>
-                      <Ionicons name="calendar-outline" size={17} color="#E8B84B" />
+                      <Ionicons name="calendar-outline" size={17} color={D.gold} />
                     </View>
                     <View style={s.grow}>
                       <Text style={s.cardTitle}>{tr('{label} — {day} only', { label: b.label ?? tr('Blocked'), day: prettyDay(day) })}</Text>
@@ -1219,7 +1219,7 @@ const s = StyleSheet.create({
   miniThumbOn: { backgroundColor: colors.onAccent },
   bufCols: { flexDirection: 'row', gap: 14 },
   bufCol: { flex: 1, gap: 8 },
-  bufDivider: { width: 1, backgroundColor: '#2C2C31' },
+  bufDivider: { width: 1, backgroundColor: isDark ? '#2C2C31' : D.border },
   bufColHead: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   bufColLabel: { fontFamily: inter.b, fontSize: 9, color: D.sub, letterSpacing: 1.08 },
   bufValue: { fontFamily: inter.b, fontSize: 20, color: D.text, fontVariant: ['tabular-nums'] },
@@ -1244,7 +1244,7 @@ const s = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   previewNew: { fontFamily: inter.b, fontSize: font.small, color: D.text, fontVariant: ['tabular-nums'] },
-  previewDelta: { fontFamily: inter.b, fontSize: font.tiny, color: '#E8B84B' },
+  previewDelta: { fontFamily: inter.b, fontSize: font.tiny, color: D.gold },
   previewActions: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: sp(1) },
 
   scopeRow: { flexDirection: 'row', gap: 5 },
@@ -1326,7 +1326,7 @@ const s = StyleSheet.create({
     position: 'absolute', left: 0, right: 0, bottom: 0,
     flexDirection: 'row', alignItems: 'center', gap: 10,
     paddingTop: 14, paddingHorizontal: 16, paddingBottom: 30,
-    backgroundColor: D.bg, borderTopWidth: 1, borderTopColor: '#1E1E22',
+    backgroundColor: D.bg, borderTopWidth: 1, borderTopColor: D.seam,
   },
   cancelBtn: {
     height: 48, borderRadius: 999, borderWidth: 1, borderColor: D.border,

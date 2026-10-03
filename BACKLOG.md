@@ -91,9 +91,8 @@ Still open:
   individually, not grouped as one "Vacation Jul 21–28" row. Group when it annoys.
 - **Breaks recur every day** (not per-weekday like the mockup's "Every weekday");
   add a weekday mask to `time_blocks` if a barber asks.
-- **SlotPicker stays light-themed** inside the dark reschedule sheet.
-- **WalletScreen still light** — shared with the customer side; darken with the
-  wallet increment.
+- **SlotPicker / WalletScreen light inside the dark side** — DONE 2026-10-03: both draw
+  from `colors`, which now follows the same Light/Dark as the barber kit (see "Dark mode").
 
 ## Owner: salon management  → `src/screens/SalonScreen.tsx` — REAL 2026-07-20 (0025)
 Owner-only. Lives in **Profile → Salon management** (a menu row gated on
@@ -3948,23 +3947,31 @@ shop becomes the subject of every task action, the reason typed with a call its 
 - §10 of the handoff (period pickers, other cities, Karim's and Nabil's pages) is
   flagged, not invented.
 
-## Dark mode — the customer side (PRO-07, 2026-10-03)
-Settings → Appearance is live: Light / Dark / System, saved on the phone (`app_appearance`),
-System by default. `theme.ts` picks the palette as it loads and a change reloads the app,
-like the language — so a screen follows dark mode only if it draws from `colors.*`: a
-hardcoded light grey stays light. The dark palette is the barber kit's surfaces. `ink` stays
-a dark surface (everything printed on it is already white), a selection ring uses
-`colors.text`, and the label on a white pill is `'#111'` in both themes. The barber side
-stays dark: it has no light design.
+## Dark mode — both sides (PRO-07, 2026-10-03)
+Light / Dark / System, saved on the phone (`app_appearance`), System by default — one pick
+per phone, for whichever side signs in. Customer: Settings → Appearance. Barber: Settings →
+Appearance, which lands back on Settings after the restart, like the language (BST-02).
+`theme.ts` picks both palettes as it loads and a change reloads the app, like the language —
+so a screen follows the theme only if it draws from `colors.*` (customer) or the kit
+(`dark as D`): a hardcoded colour stays as it is. The customer's dark palette is the barber
+kit's surfaces; the kit's light twin (`kitLight`) is the customer's light ones, with status
+colours stepped down to AA-on-white. The kit export is still called `dark`.
+
+Rules the two passes settled on: `ink` stays a dark surface on both sides; a selection ring
+uses `text`; a white pill on the barber side is `D.text` with a `D.bg` label (white in dark,
+ink in light), while on the customer side a pill that stays white takes `'#111'`; dark text on
+a kit green/amber/red fill is `D.bg`, but on a fixed bright fill (a chair tint, the in-chair
+block) it is a literal `'#0D0D0F'`; paper previews (poster, ticket, PDF thumb) stay light.
 
 **Still open:**
+- **Barbers on a light phone now get the light kit by default** (System), and the light kit
+  is derived, not designed. **Trigger:** a barber dislikes it → default barbers to Dark by
+  caching the role at sign-in (`theme.ts` loads before the profile does).
 - **System needs the next native build on iOS.** `userInterfaceStyle` went from light to
-  automatic; until a rebuild iOS reports light, so System means Light there. Picking Dark
-  works now, and Android already follows the phone.
+  automatic; until a rebuild iOS reports light, so System means Light there. Picking Dark or
+  Light works now, and Android already follows the phone.
 - **A phone that changes mode while the app is open** re-themes on the next launch.
   **Trigger:** someone notices → reload on resume when the phone's scheme differs.
 - **The Android map stays light** (Google), while Apple's map follows. **Trigger:** it
   looks wrong in use → `customMapStyle`.
-- **The barber's status bar** follows the customer palette, so on a light phone the dark
-  kit gets dark icons, as it did before. **Trigger:** a barber on a light iPhone.
-- Built by reading, not on glass: walk the customer screens once in Dark.
+- Built by reading, not on glass: walk both sides once in each theme.

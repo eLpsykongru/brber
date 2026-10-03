@@ -271,7 +271,7 @@ export function CollectionRoundScreen({ onBack }: { onBack?: () => void }) {
             </View>
             {stop.held_days != null && stop.held_days > 14 && (
               <View style={s.overdueChip}>
-                <T w="b" size={10} c="#0D0D0F" ls={0.6}>{tr('OVERDUE')}</T>
+                <T w="b" size={10} c={D.bg} ls={0.6}>{tr('OVERDUE')}</T>
               </View>
             )}
           </View>
@@ -362,7 +362,7 @@ const s = StyleSheet.create({
     backgroundColor: D.card, borderWidth: 1, borderColor: D.border,
     borderRadius: 22, padding: 18, gap: 12,
   },
-  handOverLate: { backgroundColor: '#1D1416', borderColor: '#332124' },
+  handOverLate: { backgroundColor: D.redCard, borderColor: D.redSeam },
   huge: {
     fontFamily: serif, fontWeight: '700', fontSize: 40, lineHeight: 42, color: D.text,
     fontVariant: ['tabular-nums'],
@@ -371,7 +371,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 8,
     borderTopWidth: 1, borderTopColor: D.border, paddingTop: 12,
   },
-  heldRowLate: { borderTopColor: '#332124' },
+  heldRowLate: { borderTopColor: D.redSeam },
   card: { backgroundColor: D.card, borderRadius: 20, padding: 16, gap: 11 },
   line: { flexDirection: 'row', alignItems: 'baseline', gap: 9 },
   rule: { height: 1, backgroundColor: D.border },
@@ -388,7 +388,7 @@ const s = StyleSheet.create({
   },
   radioOn: { backgroundColor: D.accent, borderColor: D.accent },
   codeCard: {
-    backgroundColor: '#101010', borderWidth: 1, borderColor: D.border, borderRadius: 20,
+    backgroundColor: D.recessed, borderWidth: 1, borderColor: D.border, borderRadius: 20,
     padding: 17, gap: 12, alignItems: 'center',
   },
   code: {

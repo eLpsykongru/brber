@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Ico, Screen, T, TAB_INSET, TopBar } from '../components/dark';
 import { supabase } from '../lib/supabase';
-import { dark as D } from '../theme';
+import { dark as D, isDark } from '../theme';
 import { loc, tr, trn, trRich, weekdayName } from '../lib/i18n';
 
 // OSH-16 / OSH-17 of "Owner - Shop.dc.html" — the week, and which way it points.
@@ -382,9 +382,9 @@ function Bill({ s, sign }: { s: Stmt; sign: '+' | '−' }) {
     .toLocaleDateString(loc('en-GB'), { month: 'long', year: 'numeric' });
   return (
     <>
-      <Group label={tr('Your subscription')} total={sign === '−' ? -(s.subscription_cents ?? 0) : (s.subscription_cents ?? 0)} colour="#FF7A66" />
+      <Group label={tr('Your subscription')} total={sign === '−' ? -(s.subscription_cents ?? 0) : (s.subscription_cents ?? 0)} colour={D.coral} />
       {lines.map((x) => (
-        <Row key={x.ref + x.at} sign={sign} colour="#FF7A66" it={{ ...x,
+        <Row key={x.ref + x.at} sign={sign} colour={D.coral} it={{ ...x,
           label: x.invoice_kind === 'year' ? tr('The year from {date}', { date: day(x.period_start) })
             : x.invoice_kind === 'year_extra' ? tr('{month} · chairs added', { month: month(x.period_start) })
               : trn(x.seats, '{month} · {n} chair', '{month} · {n} chairs', { month: month(x.period_start) }) }} />
@@ -460,8 +460,8 @@ function DisputeCard({ d, onAnswered }: {
 
       <View style={s2.dChoices}>
         <Pressable disabled={busy} onPress={() => answer(true)} style={s2.dYes}>
-          <T w="b" size={12.5} c="#0D0D0F">{tr('YES, I DID')}</T>
-          <T size={10.5} c="rgba(13,13,15,0.7)" style={s2.gap2}>
+          <T w="b" size={12.5} c={D.bg}>{tr('YES, I DID')}</T>
+          <T size={10.5} c={isDark ? 'rgba(13,13,15,0.7)' : 'rgba(242,240,235,0.75)'} style={s2.gap2}>
             {tr('We close it and the line stands as it is.')}
           </T>
         </Pressable>

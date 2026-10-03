@@ -68,7 +68,7 @@ const light = {
   greenInk: '#15803D',      // VERIFIED / refunded text on a green tint
 };
 
-// The customer side in dark: the barber kit's surfaces (`dark` below), so both
+// The customer side in dark: the barber kit's surfaces (`kitDark` below), so both
 // sides read as one app. `ink` stays a dark surface, a step above the cards,
 // because everything printed on it is already white; a selection border, which
 // wants the most contrast there is, uses `text` instead.
@@ -111,9 +111,9 @@ const night: typeof light = {
 
 export const colors = isDark ? night : light;
 
-// dark surfaces for the whole barber side — values lifted verbatim from
-// "Barber App.dc.html" turn 1, so a screen can be checked against the mock by eye.
-export const dark = {
+// The barber kit — dark surfaces for the whole barber side, values lifted verbatim
+// from "Barber App.dc.html" turn 1, so a screen can be checked against the mock by eye.
+const kitDark = {
   bg: '#0D0D0F',
   card: '#17171A',
   card2: '#212125',
@@ -148,7 +148,62 @@ export const dark = {
 
   red: '#F87171',
   redLine: 'rgba(248,113,113,0.40)',
+
+  coral: '#FF7A66',         // money owed out: the subscription, an unpaid bill
+  gold: '#E8B84B',          // breaks and pending holds on the schedule
+  redCard: '#1D1416',       // the late / short card, and its seam
+  redSeam: '#332124',
 };
+
+// The kit when the barber picks Light (or the phone is light): the customer
+// side's light surfaces under the kit's names, so both sides are one app again.
+// Status colours step down to their AA-on-white shades, so a fill that carried
+// dark text in the dark kit carries `bg` (light) text here — hence `bg` on a
+// green or amber button, never a hardcoded #0D0D0F.
+const kitLight: typeof kitDark = {
+  bg: '#F2F0EB',
+  card: '#FFFFFF',
+  card2: '#E9E6DE',
+  sheet: '#F2F0EB',
+  border: '#E5E2DB',
+  hairline: '#D8D4CA',
+  muted: '#C9C5BB',
+  text: '#111111',
+  textDim: '#5C5C58',
+  sub: '#8A8A85',
+  faint: '#B0AFAA',
+  recessed: '#F7F5F1',
+  seam: '#EFECE4',
+  scrim: 'rgba(0,0,0,0.5)',
+  scrimDeep: 'rgba(0,0,0,0.52)',
+
+  accent: '#E8442E',
+  accentSoft: 'rgba(232,68,46,0.12)',
+  accentSoft16: 'rgba(232,68,46,0.14)',
+  barMuted: 'rgba(232,68,46,0.22)',
+
+  green: '#15803D',
+  greenSoft: 'rgba(74,222,128,0.18)',
+  greenSoft10: 'rgba(74,222,128,0.12)',
+  greenLine: 'rgba(21,128,61,0.35)',
+
+  amber: '#9A6B00',
+  amberSoft: 'rgba(232,161,0,0.14)',
+  amberSoft16: 'rgba(232,161,0,0.16)',
+  amberSoft12: 'rgba(232,161,0,0.12)',
+  amberLine: 'rgba(154,107,0,0.35)',
+
+  red: '#D23B3B',
+  redLine: 'rgba(210,59,59,0.40)',
+
+  coral: '#C33421',
+  gold: '#9A6B00',
+  redCard: '#FCEEEB',
+  redSeam: '#F2D5CF',
+};
+
+// still `dark` at every import (`dark as D`): the kit's name, not the scheme's
+export const dark = isDark ? kitDark : kitLight;
 
 // Inter, loaded in App.tsx — the mock's body face. Weights are separate families
 // on RN, so fontWeight is a no-op once fontFamily is set; use these instead.

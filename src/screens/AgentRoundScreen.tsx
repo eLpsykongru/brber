@@ -145,9 +145,9 @@ export default function AgentRoundScreen({ onBack }: { onBack?: () => void }) {
         {q && (q.n > 0 || q.failed > 0) && (
           <View style={s.queueStrip}>
             <Ico name={q.failed ? 'alert-triangle' : 'clock'} size={14}
-              color={q.failed ? '#F87171' : D.amber} />
+              color={q.failed ? D.red : D.amber} />
             <View style={s.grow}>
-              <T w="sb" size={12} c={q.failed ? '#F87171' : D.amber}>
+              <T w="sb" size={12} c={q.failed ? D.red : D.amber}>
                 {q.failed
                   ? tr('{failed} code didn’t match', { failed: q.failed })
                   : tr('{n} of {max_n} · {cents} DH waiting to be checked', { n: q.n, max_n: q.max_n, cents: dh(q.cents) })}
@@ -258,7 +258,7 @@ function DropSheet({ visible, bag, onClose, onDrop }: {
         {tr('You are carrying {in_bag_cents} DH. Leave all of it, or keep back what the hand-overs still on your round need.', { in_bag_cents: dh(bag.in_bag_cents) })}
       </T>
 
-      <View style={[s.amount, over && { borderColor: '#F87171' }]}>
+      <View style={[s.amount, over && { borderColor: D.red }]}>
         <T style={s.amountText}>
           {typed ? Number(typed).toLocaleString('en-US').replace(/,/g, '\u00a0') : '0'}
         </T>
@@ -289,7 +289,7 @@ function DropSheet({ visible, bag, onClose, onDrop }: {
 
       <Btn title={cents > 0 ? tr('RECORD {cents} DH DROPPED', { cents: dh(cents) }) : tr('HOW MUCH DID YOU LEAVE?')}
         bg={cents > 0 && !over ? D.green : D.card2}
-        fg={cents > 0 && !over ? '#0D0D0F' : D.faint}
+        fg={cents > 0 && !over ? D.bg : D.faint}
         height={54} ls={0.7}
         onPress={() => { if (cents > 0 && !over) onDrop(cents); }} />
     </Sheet>
@@ -305,7 +305,7 @@ function VisitCard({ v, later, blocked, onPress }: {
   const collect = v.direction === 'collect';
   // §2.3 — the age is only real in one direction, and the other says so
   const late = collect && v.age_days != null && v.age_days >= v.limit_days - 5;
-  const border = later ? D.border : late ? '#F87171' : collect ? D.border : 'rgba(74,222,128,0.4)';
+  const border = later ? D.border : late ? D.red : collect ? D.border : 'rgba(74,222,128,0.4)';
   const pct = collect && v.age_days != null
     ? Math.min(100, Math.round(v.age_days * 100 / v.limit_days)) : 0;
 
@@ -333,18 +333,18 @@ function VisitCard({ v, later, blocked, onPress }: {
 
       {!later && collect && v.age_days != null && (
         <View style={s.track2}>
-          <View style={[s.fill, { width: `${pct}%`, backgroundColor: late ? '#F87171' : D.amber }]} />
+          <View style={[s.fill, { width: `${pct}%`, backgroundColor: late ? D.red : D.amber }]} />
         </View>
       )}
 
       <View style={s.cardFoot}>
         {collect ? (
           <>
-            <T size={11} c={late ? '#F87171' : D.sub}>
+            <T size={11} c={late ? D.red : D.sub}>
               {v.age_days == null ? tr('No money of ours yet') : tr('Day {age_days} of {limit_days}', { age_days: v.age_days, limit_days: v.limit_days })}
             </T>
             <View style={s.grow} />
-            <T size={11} c={late ? '#F87171' : D.faint}>
+            <T size={11} c={late ? D.red : D.faint}>
               {late ? tr('Do this one first') : v.owner}
             </T>
           </>
@@ -423,7 +423,7 @@ function CollectScreen({ v, bag, q, online, onBack, onDone }: {
         <T w="b" size={10} c={D.sub} ls={1.4} style={s.label}>
           {tr('COUNT IT WITH HIM, THEN TYPE WHAT YOU HAVE')}
         </T>
-        <View style={[s.amount, over && { borderColor: '#F87171' }]}>
+        <View style={[s.amount, over && { borderColor: D.red }]}>
           <T style={s.amountText}>{typed ? Number(typed).toLocaleString('en-US').replace(/,/g, '\u00a0') : '0'}</T>
           <T style={s.caret}>|</T>
           <View style={s.grow} />
@@ -462,7 +462,7 @@ function CollectScreen({ v, bag, q, online, onBack, onDone }: {
         )}
         {over && (
           <View style={s.overPanel}>
-            <T size={11.5} c="#F87171">
+            <T size={11.5} c={D.red}>
               {tr('He only owes {amount_cents} DH this week. Take that, not more.', { amount_cents: dh(v.amount_cents) })}
             </T>
           </View>
@@ -979,7 +979,7 @@ function HandOverScreen({ v, bag, onBack, onDone }: {
 
         <Pressable onPress={() => setCounted(true)} style={[s.step, counted && s.stepOn]}>
           <View style={[s.stepDot, counted && s.stepDotOn]}>
-            {counted && <Ico name="check" size={11} color="#0D0D0F" />}
+            {counted && <Ico name="check" size={11} color={D.bg} />}
           </View>
           <T size={12.5} c={counted ? D.green : D.textDim} style={s.grow}>
             {counted ? tr('He counted it himself · {hhmm}', { hhmm: hhmm() }) : tr('He counted it himself')}
@@ -988,7 +988,7 @@ function HandOverScreen({ v, bag, onBack, onDone }: {
 
         <View style={[s.step, !counted && s.stepOff]}>
           <View style={[s.stepDot, signed && s.stepDotOn]}>
-            {signed && <Ico name="check" size={11} color="#0D0D0F" />}
+            {signed && <Ico name="check" size={11} color={D.bg} />}
           </View>
           <T size={12.5} c={counted ? D.textDim : D.faint} style={s.grow}>
             {tr('Hand him the phone to sign')}
@@ -1027,7 +1027,7 @@ function HandOverScreen({ v, bag, onBack, onDone }: {
       <View style={s.foot}>
         <Btn title={busy ? tr('RECORDING…') : tr('RECORD {amount_cents} DH HANDED OVER', { amount_cents: dh(v.amount_cents) })}
           bg={signed && !busy ? D.green : D.card2}
-          fg={signed && !busy ? '#0D0D0F' : D.faint}
+          fg={signed && !busy ? D.bg : D.faint}
           height={54} ls={0.7}
           onPress={() => { if (signed && !busy) record(); }} />
       </View>

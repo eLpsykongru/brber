@@ -4,7 +4,7 @@ import {
   Avatar, Btn, Eyebrow, GhostBtn, Ico, IconName, Screen, Serif, Stars, Stat, T, Toggle, TopBar,
 } from '../components/dark';
 import { supabase } from '../lib/supabase';
-import { dark as D } from '../theme';
+import { dark as D, isDark } from '../theme';
 import { loc, tr, trn } from '../lib/i18n';
 import { perRent } from '../lib/rent';
 
@@ -326,7 +326,7 @@ export function AllChairsScreen({ salon, team, onBack, onAdd }: {
                   height: Math.max(18, (b.end_min - b.start_min) * PX_PER_MIN),
                   backgroundColor: 'rgba(232,161,0,0.5)',
                 }]}>
-                  <T w="b" size={9} c={D.bg}>{b.label ?? tr('Break')}</T>
+                  <T w="b" size={9} c="#0D0D0F">{b.label ?? tr('Break')}</T>
                 </View>
               ))}
               {mine.map((b) => {
@@ -341,7 +341,7 @@ export function AllChairsScreen({ salon, team, onBack, onAdd }: {
                       : inChair ? 'rgba(74,222,128,0.9)' : tint,
                     ...(noShow ? { borderWidth: 1, borderStyle: 'dashed' as const, borderColor: 'rgba(248,113,113,0.7)' } : null),
                   }]}>
-                    <T w="b" size={10} c={noShow ? D.red : inChair ? D.bg : '#fff'}>
+                    <T w="b" size={10} c={noShow ? D.red : inChair ? '#0D0D0F' : '#fff'}>
                       {noShow ? tr('No-show') : clientOf(b)}
                     </T>
                     {h >= 38 && (
@@ -637,7 +637,7 @@ const s = StyleSheet.create({
   laneRow: { flexDirection: 'row', gap: 7 },
   gutter: { width: 38 },
   gutterLabel: { height: 56, fontVariant: ['tabular-nums'] },
-  lane: { flex: 1, height: LANE_H, backgroundColor: '#141416', borderRadius: 12, overflow: 'hidden' },
+  lane: { flex: 1, height: LANE_H, backgroundColor: isDark ? '#141416' : D.recessed, borderRadius: 12, overflow: 'hidden' },
   laneOffBody: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   slot: {
     position: 'absolute', left: 4, right: 4, borderRadius: 9,

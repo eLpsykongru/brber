@@ -5,7 +5,7 @@ import { useAndroidBack } from '../lib/back';
 import { dayGaps, dayWords, firstFits, Gap, hhmmOf, offerText } from '../lib/line';
 import type { Block, Range, Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
-import { dark as D } from '../theme';
+import { dark as D, isDark } from '../theme';
 import { loc, tr, weekdayName, weekdayDate, lang } from '../lib/i18n';
 
 // BTD-16 "Come back tomorrow" and BTD-19, its day picker (ADDENDUM-app-first, B10).
@@ -180,8 +180,8 @@ export default function OfferDayScreen({ barberId, row, onBack, onSent }: {
         {dayPick && (
           <Pressable onPress={() => { setPicked(dayPick); setChoosing(false); }} accessibilityRole="button"
             style={({ pressed }) => [s.white, pressed && s.pressed]}>
-            <T w="eb" size={12.5} c="#111" ls={0.5}>{tr('USE {dayPick}', { dayPick: said(dayPick).toUpperCase() })}</T>
-            <T size={10} c="rgba(0,0,0,0.55)">{tr('Back to the text he\'ll get')}</T>
+            <T w="eb" size={12.5} c={D.bg} ls={0.5}>{tr('USE {dayPick}', { dayPick: said(dayPick).toUpperCase() })}</T>
+            <T size={10} c={isDark ? 'rgba(0,0,0,0.55)' : D.faint}>{tr('Back to the text he\'ll get')}</T>
           </Pressable>
         )}
       </Screen>
@@ -252,10 +252,10 @@ export default function OfferDayScreen({ barberId, row, onBack, onSent }: {
       <View style={{ gap: 8, marginTop: 2 }}>
         <Pressable disabled={!picked || busy} onPress={send} accessibilityRole="button"
           style={({ pressed }) => [s.white, (!picked || busy) && s.off, pressed && s.pressed]}>
-          <T w="eb" size={12.5} c="#111" ls={0.5}>
+          <T w="eb" size={12.5} c={D.bg} ls={0.5}>
             {picked ? tr('OFFER HIM {picked}', { picked: said(picked).toUpperCase() }) : tr('PICK A TIME FIRST')}
           </T>
-          <T size={10} c="rgba(0,0,0,0.55)">{tr('Takes him out of today\'s line')}</T>
+          <T size={10} c={isDark ? 'rgba(0,0,0,0.55)' : D.faint}>{tr('Takes him out of today\'s line')}</T>
         </Pressable>
         <Pressable onPress={onBack} accessibilityRole="button"
           style={({ pressed }) => [s.keep, pressed && s.pressed]}>
@@ -293,7 +293,7 @@ const s = StyleSheet.create({
   },
   bubble: { backgroundColor: D.card, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14 },
   white: {
-    height: 52, borderRadius: 16, backgroundColor: '#fff',
+    height: 52, borderRadius: 16, backgroundColor: D.text,
     alignItems: 'center', justifyContent: 'center', gap: 1,
   },
   keep: {

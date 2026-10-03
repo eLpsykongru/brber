@@ -4,7 +4,7 @@ import { Avatar, Eyebrow, GhostBtn, Ico, Screen, Serif, T, TopBar } from '../com
 import { ShopPauseSheet } from '../components/ShopPause';
 import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
-import { dark as D } from '../theme';
+import { dark as D, isDark } from '../theme';
 import BarberQueueScreen from './BarberQueueScreen';
 import { tr, trRich } from '../lib/i18n';
 
@@ -152,7 +152,7 @@ export default function LinesScreen({ onBack }: { onBack: () => void }) {
 function Can({ yes, text }: { yes?: boolean; text: string }) {
   return (
     <View style={s.canRow}>
-      <View style={[s.canTick, { backgroundColor: yes ? 'rgba(74,222,128,0.18)' : 'rgba(255,255,255,0.07)' }]}>
+      <View style={[s.canTick, { backgroundColor: yes ? 'rgba(74,222,128,0.18)' : isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)' }]}>
         <Ico name={yes ? 'check' : 'x'} size={10} color={yes ? D.green : D.faint} />
       </View>
       <T size={12} c={yes ? D.textDim : D.faint} style={s.grow}>{text}</T>
@@ -219,7 +219,7 @@ const s = StyleSheet.create({
     borderRadius: 18, paddingVertical: 13, paddingHorizontal: 14,
   },
   chairWorst: { borderWidth: 2, borderColor: 'rgba(248,113,113,0.4)' },
-  chairQuiet: { backgroundColor: D.recessed, borderWidth: 1, borderStyle: 'dashed', borderColor: '#2E2E34' },
+  chairQuiet: { backgroundColor: D.recessed, borderWidth: 1, borderStyle: 'dashed', borderColor: isDark ? '#2E2E34' : D.muted },
   pausedChip: { backgroundColor: D.card2, borderRadius: 8, paddingVertical: 5, paddingHorizontal: 8 },
   can: { backgroundColor: D.card, borderRadius: 18, paddingVertical: 15, paddingHorizontal: 16, gap: 11 },
   canRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },

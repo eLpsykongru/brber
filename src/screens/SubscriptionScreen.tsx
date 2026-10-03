@@ -115,7 +115,7 @@ function HomeView({ p, unpaid, go, onBack }: {
 
       {unpaid && (
         <Card onPress={() => go('unpaid')} style={st.unpaidStrip}>
-          <Ico name="alert-circle" size={15} color="#FF7A66" />
+          <Ico name="alert-circle" size={15} color={D.coral} />
           <T w="b" size={12.5} style={st.grow}>
             {tr('Unpaid · {days} days · {amount}', { days: unpaid.days, amount: dh(unpaid.balance_cents) })}
           </T>
@@ -285,7 +285,7 @@ function PlanView({ p, onBack, onChanged }: { p: Payload; onBack: () => void; on
         <View style={st.tierTop}>
           <View style={[st.radio, yearly && st.radioOn]}>{yearly && <View style={st.radioDot} />}</View>
           <T w="b" size={14} style={st.grow}>{tr('Yearly')}</T>
-          <Serif size={30} ls={0} c="#FF7A66">{Math.round(p.list.yearly_cents / 100)}</Serif>
+          <Serif size={30} ls={0} c={D.coral}>{Math.round(p.list.yearly_cents / 100)}</Serif>
           <T w="b" size={11} c={D.sub}>{tr('DH / chair')}</T>
         </View>
         <View style={st.ruleDim} />
@@ -300,7 +300,7 @@ function PlanView({ p, onBack, onChanged }: { p: Payload; onBack: () => void; on
           {billed ? tr('YOUR FIRST {n} CHAIRS, TWELVE MONTHS', { n: billed }) : tr('ONE CHAIR, TWELVE MONTHS')}
         </Eyebrow>
         <Line label={tr('Monthly')} value={dh(m.yearAtMonthly)} />
-        <Line label={tr('Yearly')} value={dh(m.yearAtYearly)} color="#FF7A66" />
+        <Line label={tr('Yearly')} value={dh(m.yearAtYearly)} color={D.coral} />
         <View style={st.ruleDim} />
         <Line label={tr('Every chair past the first {cap}', { cap })} value="0 DH" color={D.green} />
         <View style={st.lineRow}>
@@ -355,7 +355,7 @@ function PaidView({ p, onBack, onInvoice }: { p: Payload; onBack: () => void; on
         <Line label={tr('Deposits we hold for you')} value={dh(Math.max(p.friday.deposits_cents, 0))} />
         <View style={st.lineRow}>
           <T size={12.5} c={D.sub} style={st.grow}>{tr('Your subscription')}</T>
-          <T w="b" size={13.5} c="#FF7A66" style={st.num}>{`− ${dh(fr.nets)}`}</T>
+          <T w="b" size={13.5} c={D.coral} style={st.num}>{`− ${dh(fr.nets)}`}</T>
         </View>
         <View style={st.ruleDim} />
         <View style={st.lineRow}>
@@ -567,7 +567,7 @@ function UnpaidView({ u, onBack, onAsked }: { u: Unpaid; onBack: () => void; onA
     <Screen bottom={TAB_INSET} gap={13}>
       <TopBar title={tr('Subscription')} onBack={onBack} plain />
       <View style={st.unpaidCard}>
-        <Eyebrow c="#FF7A66" ls={1.6}>{tr('UNPAID · {days} DAYS', { days: u.days })}</Eyebrow>
+        <Eyebrow c={D.coral} ls={1.6}>{tr('UNPAID · {days} DAYS', { days: u.days })}</Eyebrow>
         <View style={st.unpaidAmt}>
           <Serif size={38} ls={0}>{dh(u.balance_cents)}</Serif>
           <T size={12} c={D.sub}>{tr('for {period}', { period })}</T>
@@ -658,7 +658,7 @@ const st = StyleSheet.create({
   unpaidStrip: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 13, borderRadius: 16,
     backgroundColor: 'rgba(232,68,46,0.1)', borderWidth: 1, borderColor: 'rgba(232,68,46,0.3)' },
   tier: { borderWidth: 1.5, borderColor: D.border, borderRadius: 20, padding: 16, gap: 11 },
-  tierYear: { backgroundColor: '#101010' },
+  tierYear: { backgroundColor: D.recessed },
   tierOn: { borderColor: D.accent },
   tierTop: { flexDirection: 'row', alignItems: 'center', gap: 11 },
   badge: { position: 'absolute', top: -10, right: 16, height: 21, borderRadius: 999, backgroundColor: D.accent,
@@ -673,14 +673,14 @@ const st = StyleSheet.create({
   stepN: { width: 20, height: 20, borderRadius: 999, backgroundColor: D.card2, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
   invRow: { flexDirection: 'row', alignItems: 'center', gap: 11, padding: 13, borderRadius: 14 },
   statusChip: { height: 24, borderRadius: 999, paddingHorizontal: 11, justifyContent: 'center' },
-  paidRow: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#101010', borderRadius: 14, padding: 12 },
+  paidRow: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: D.recessed, borderRadius: 14, padding: 12 },
   perRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 14 },
   unpaidCard: { backgroundColor: 'rgba(232,68,46,0.1)', borderWidth: 1, borderColor: 'rgba(232,68,46,0.3)',
     borderRadius: 20, padding: 16, gap: 9 },
   unpaidAmt: { flexDirection: 'row', alignItems: 'baseline', gap: 9 },
   rung: { flexDirection: 'row', gap: 11 },
   rungDot: { width: 9, height: 9, borderRadius: 999, marginTop: 4 },
-  never: { backgroundColor: '#101010', borderWidth: 1, borderColor: D.border, borderRadius: 20, padding: 15, gap: 10 },
+  never: { backgroundColor: D.recessed, borderWidth: 1, borderColor: D.border, borderRadius: 20, padding: 15, gap: 10 },
   neverRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   talk: { flexDirection: 'row', alignItems: 'center', gap: 11, padding: 14, borderRadius: 18 },
   talkIcon: { width: 32, height: 32, borderRadius: 999, backgroundColor: D.card2, alignItems: 'center', justifyContent: 'center' },

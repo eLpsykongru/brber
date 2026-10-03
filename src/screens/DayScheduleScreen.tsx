@@ -744,7 +744,7 @@ export default function DayScheduleScreen({ barberId, onBack, autoAddNow, prefil
             <Text style={s.sheetTitleLight}>
               {tr('Move {reschedule} · {x} min', { reschedule: nameOf(reschedule, barberId), x: (new Date(reschedule.ends_at).getTime() - new Date(reschedule.starts_at).getTime()) / 60_000 })}
             </Text>
-            {/* ponytail: SlotPicker is light-themed; lives on a light sheet until a dark variant matters */}
+            {/* SlotPicker and this sheet draw from the customer palette, which follows the same Light/Dark as the kit */}
             <ScrollView style={{ flexGrow: 0 }}>
               <SlotPicker barberId={barberId}
                 durationMin={(new Date(reschedule.ends_at).getTime() - new Date(reschedule.starts_at).getTime()) / 60_000}
@@ -948,7 +948,7 @@ const s = StyleSheet.create({
   },
   slotBlockText: { fontSize: font.small, color: D.sub, fontWeight: '600' },
   glowOverlay: { backgroundColor: 'rgba(232,184,75,0.35)', borderRadius: radius.md },
-  glowTag: { fontSize: font.tiny, fontWeight: '700', color: '#E8B84B', marginLeft: 'auto' },
+  glowTag: { fontSize: font.tiny, fontWeight: '700', color: D.gold, marginLeft: 'auto' },
 
   sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)' },
   sheet: {
@@ -981,7 +981,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(154,107,0,0.25)', borderRadius: radius.pill,
     paddingVertical: 4, paddingHorizontal: sp(2.5),
   },
-  pendingPillText: { fontSize: font.tiny, fontWeight: '800', color: '#E8B84B', letterSpacing: 0.5 },
+  pendingPillText: { fontSize: font.tiny, fontWeight: '800', color: D.gold, letterSpacing: 0.5 },
   panelActions: { flexDirection: 'row', gap: sp(4), marginTop: sp(2), flexWrap: 'wrap' },
   panelBtn: { alignItems: 'center', gap: sp(1) },
   panelBtnIcon: {

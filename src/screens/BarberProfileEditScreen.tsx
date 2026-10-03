@@ -10,7 +10,7 @@ import {
   ABOUT_MAX, LANGUAGES, formerlyName, nameLockedUntil, sinceYear, yearsFrom,
 } from '../lib/profileRules';
 import { supabase } from '../lib/supabase';
-import { dark as D, inter, serif } from '../theme';
+import { dark as D, inter, isDark, serif } from '../theme';
 import type { Barber, Profile } from '../types';
 import { loc, tr, trn, trRich } from '../lib/i18n';
 
@@ -266,8 +266,8 @@ export default function BarberProfileEditScreen({
                 <Pressable key={l.key} accessibilityRole="checkbox" accessibilityState={{ checked: on }}
                   onPress={() => set({ languages: on ? draft.languages.filter((k) => k !== l.key) : [...draft.languages, l.key] })}
                   style={[s.chip, on ? s.chipOn : s.chipOff]}>
-                  {on && <Ico name="check" size={11} color="#111" />}
-                  <T w={on ? 'b' : 'sb'} size={11.5} c={on ? '#111' : D.sub}>{l.label}</T>
+                  {on && <Ico name="check" size={11} color={D.bg} />}
+                  <T w={on ? 'b' : 'sb'} size={11.5} c={on ? D.bg : D.sub}>{l.label}</T>
                 </Pressable>
               );
             })}
@@ -367,8 +367,8 @@ export default function BarberProfileEditScreen({
         </View>
         <Pressable onPress={() => save(true)} disabled={busy} accessibilityRole="button"
           style={({ pressed }) => [s.whiteBtn, pressed && s.pressed]}>
-          <T w="eb" size={12.5} c="#111" ls={0.5}>{busy ? tr('CHANGING…') : tr('CHANGE IT')}</T>
-          <T w="sb" size={10.5} c="#5C5C58">{tr('Live on your page straight away')}</T>
+          <T w="eb" size={12.5} c={D.bg} ls={0.5}>{busy ? tr('CHANGING…') : tr('CHANGE IT')}</T>
+          <T w="sb" size={10.5} c={isDark ? '#5C5C58' : D.faint}>{tr('Live on your page straight away')}</T>
         </Pressable>
         <Pressable accessibilityRole="button"
           onPress={() => { set({ name: loaded.full_name ?? '' }); setSheetOpen(false); }}
@@ -458,7 +458,7 @@ const s = StyleSheet.create({
   since: { width: 112 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginTop: 6 },
   chip: { flexDirection: 'row', alignItems: 'center', gap: 6, borderRadius: 999, paddingVertical: 6, paddingHorizontal: 11 },
-  chipOn: { backgroundColor: '#fff' },
+  chipOn: { backgroundColor: D.text },
   chipOff: { borderWidth: 1, borderColor: D.muted },
   about: { fontFamily: inter.r, fontSize: 12.5, lineHeight: 19, color: D.textDim, minHeight: 60, textAlignVertical: 'top' },
   aboutRule: { lineHeight: 15, borderTopWidth: 1, borderTopColor: D.border, paddingTop: 8, marginTop: 4 },
@@ -489,7 +489,7 @@ const s = StyleSheet.create({
   cons: { flexDirection: 'row', alignItems: 'flex-start', gap: 9 },
   consIcon: { marginTop: 2 },
   whiteBtn: {
-    height: 50, borderRadius: 16, backgroundColor: '#fff',
+    height: 50, borderRadius: 16, backgroundColor: D.text,
     alignItems: 'center', justifyContent: 'center', gap: 1,
   },
   keepBtn: {

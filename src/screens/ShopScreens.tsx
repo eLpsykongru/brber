@@ -12,7 +12,7 @@ import { qrSvg, queueUrl } from '../lib/qr';
 import { supabase } from '../lib/supabase';
 import ExportSheet from '../components/ExportSheet';
 import { fileRange, shopReportHtml } from '../lib/exportPdf';
-import { dark as D, inter, serif } from '../theme';
+import { dark as D, inter, isDark, serif } from '../theme';
 import type { Member, ShopMeta } from './OwnerScreens';
 import { loc, tr, trn } from '../lib/i18n';
 import { nameOrFormer } from '../lib/deletion';
@@ -1060,7 +1060,7 @@ const s = StyleSheet.create({
   wallClose: { position: 'absolute', top: 18, right: 18, zIndex: 10, padding: 8 },
   wallMain: {
     flex: 1.35, padding: 38, paddingHorizontal: 44, gap: 26,
-    borderRightWidth: 1, borderRightColor: '#1E1E22',
+    borderRightWidth: 1, borderRightColor: D.seam,
   },
   wallHead: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
   nowCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: D.card, borderRadius: 28 },
@@ -1074,7 +1074,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', backgroundColor: D.card, borderRadius: 24,
     borderWidth: 3, borderColor: D.accent,
   },
-  nextCardDim: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#141416', borderRadius: 24 },
+  nextCardDim: { flexDirection: 'row', alignItems: 'center', backgroundColor: isDark ? '#141416' : D.recessed, borderRadius: 24 },
   nextTicketHot: {
     borderRadius: 999, backgroundColor: D.accentSoft16, alignItems: 'center', justifyContent: 'center',
   },
@@ -1082,7 +1082,7 @@ const s = StyleSheet.create({
   wallSide: { flex: 0.65 },
   wallChair: { flexDirection: 'row', alignItems: 'center', backgroundColor: D.card, borderRadius: 20 },
   wallChairOff: {
-    flexDirection: 'row', alignItems: 'center', backgroundColor: '#141416', borderRadius: 20, opacity: 0.55,
+    flexDirection: 'row', alignItems: 'center', backgroundColor: isDark ? '#141416' : D.recessed, borderRadius: 20, opacity: 0.55,
   },
   ticketCard: { backgroundColor: '#F2F0EB', borderRadius: 26, alignItems: 'center' },
   ticketTitle: { fontFamily: serif, color: '#111', letterSpacing: 0.5, textAlign: 'center' },

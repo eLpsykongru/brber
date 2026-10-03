@@ -3,7 +3,7 @@ import { ComponentProps, ReactNode } from 'react';
 import {
   Modal, Pressable, ScrollView, StyleSheet, Text, TextProps, TextStyle, View, ViewStyle,
 } from 'react-native';
-import { dark as d, inter, serif, TOP_INSET } from '../theme';
+import { colors, dark as d, inter, serif, TOP_INSET } from '../theme';
 import { Press, useBack } from './motion';
 import { tr } from '../lib/i18n';
 
@@ -58,7 +58,7 @@ export function Eyebrow({ children, c = d.sub, ls = 1.6, style }: {
 /** ★★★★★ with the unearned tail dimmed, as the mock draws it. */
 export function Stars({ n, size = 10 }: { n: number; size?: number }) {
   return (
-    <Text style={{ fontSize: size, color: d.amber }}>
+    <Text style={{ fontSize: size, color: colors.star }}>
       {'★'.repeat(n)}<Text style={{ color: d.muted }}>{'★'.repeat(5 - n)}</Text>
     </Text>
   );

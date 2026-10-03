@@ -4,7 +4,7 @@ import { Btn, Card, Eyebrow, GhostBtn, Ico, Screen, Serif, T, TAB_INSET, TopBar 
 import { dh } from '../lib/billing';
 import { loc, tr, trn } from '../lib/i18n';
 import { supabase } from '../lib/supabase';
-import { dark as D } from '../theme';
+import { dark as D, isDark } from '../theme';
 
 // "Owner - Barbers.dc.html" turn T4 — OBR-07 who holds the cash, OBR-08 the change
 // refused while the drawer isn't empty, over 0127.
@@ -271,7 +271,7 @@ const st = StyleSheet.create({
   sum: { padding: 16, gap: 10, borderRadius: 20 },
   way: { padding: 14, gap: 6, borderRadius: 18 },
   whyLine: { borderTopWidth: 1, borderTopColor: D.border, paddingTop: 11 },
-  hero: { backgroundColor: '#1D1A14', borderWidth: 1, borderColor: '#3A3120', borderRadius: 22, padding: 18, gap: 10 },
+  hero: { backgroundColor: isDark ? '#1D1A14' : '#FBF4E4', borderWidth: 1, borderColor: isDark ? '#3A3120' : '#EBDDB8', borderRadius: 22, padding: 18, gap: 10 },
   amber: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: 'rgba(232,161,0,0.08)',
     borderWidth: 1, borderColor: 'rgba(232,161,0,0.22)', borderRadius: 16, padding: 12 },
   red: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, backgroundColor: 'rgba(248,113,113,0.08)',

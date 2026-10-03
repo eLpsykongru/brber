@@ -9,7 +9,7 @@ import { ShopPauseSheet } from '../components/ShopPause';
 import { TAB_BAR_INSET } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import { useAndroidBack } from '../lib/back';
-import { colors, dark as D, font, inter, radius, serif, sp, TOP_INSET } from '../theme';
+import { colors, dark as D, font, inter, isDark, radius, serif, sp, TOP_INSET } from '../theme';
 import LinesScreen from './LinesScreen';
 import { AllChairsScreen, type Member, OwnerBarberScreen, OwnerDashboard } from './OwnerScreens';
 import { paidPeriodName, periodStart, rentPeriodName } from '../lib/rent';
@@ -58,8 +58,11 @@ type Ask = {
   cuts: number; shop_name: string | null;
 };
 
+// the floor's "open" is a brighter green than the kit's
+const OPEN = isDark ? '#3BD07A' : D.green;
+
 const AVAIL: Record<Availability, { c: string; t: string }> = {
-  open: { c: '#3BD07A', t: tr('Open') },
+  open: { c: OPEN, t: tr('Open') },
   busy: { c: colors.accent, t: tr('In service') },
   off: { c: colors.star, t: tr('Off') },
   empty: { c: D.sub, t: tr('Empty') },
@@ -67,7 +70,7 @@ const AVAIL: Record<Availability, { c: string; t: string }> = {
 
 const initials = (n: string) => n.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 const statusColor = (m: Member) =>
-  m.status === 'pending' ? colors.star : m.inService ? colors.accent : '#3BD07A';
+  m.status === 'pending' ? colors.star : m.inService ? colors.accent : OPEN;
 const statusLabel = (m: Member) =>
   m.status === 'pending' ? tr('PENDING') : m.inService ? tr('IN SERVICE') : tr('FREE');
 
@@ -269,7 +272,7 @@ export default function SalonScreen({ barberId, onBack, onManageServices, onEdit
               style={({ pressed }) => [s.teamRow, pressed && s.pressed]}>
               <View style={s.teamAvatar}>
                 <Text style={s.avatarText}>{initials(m.name)}</Text>
-                <View style={[s.presence, { backgroundColor: m.inService ? '#4ADE80' : m.todayBookings ? '#4ADE80' : D.muted }]} />
+                <View style={[s.presence, { backgroundColor: m.inService ? D.green : m.todayBookings ? D.green : D.muted }]} />
               </View>
               <View style={s.grow}>
                 <View style={s.rowCenter}>
@@ -418,7 +421,7 @@ function ShopHeader({ salon, stats, onPower }: {
   return (
     <View style={s.shopCard}>
       <View style={s.rowCenter}>
-        <View style={[s.dot, { backgroundColor: open ? '#3BD07A' : D.sub }]} />
+        <View style={[s.dot, { backgroundColor: open ? OPEN : D.sub }]} />
         <Text style={s.shopStatus}>{open ? tr('SHOP OPEN') : tr('SHOP CLOSED')}</Text>
         <View style={s.grow} />
         {/* 11a — closing opens the sheet that spells out what it covers; there
@@ -1534,11 +1537,11 @@ const s = StyleSheet.create({
   backdropWrap: { flex: 1, justifyContent: 'flex-end' },
   backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.55)' },
   sheet: {
-    backgroundColor: '#151517', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    backgroundColor: D.sheet, borderTopLeftRadius: 24, borderTopRightRadius: 24,
     padding: sp(5), paddingBottom: sp(9), gap: sp(3), maxHeight: '92%',
   },
   sheetBody: { gap: sp(3) },
-  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: radius.pill, backgroundColor: '#333' },
+  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: radius.pill, backgroundColor: D.hairline },
   sheetTitle: { fontSize: font.h2, fontWeight: '700', color: D.text },
 
   sheetHead: { flexDirection: 'row', alignItems: 'center', gap: sp(3) },
@@ -1581,7 +1584,7 @@ const s = StyleSheet.create({
   },
 
   payoutHero: {
-    backgroundColor: '#1D1416', borderWidth: 1, borderColor: '#332124',
+    backgroundColor: D.redCard, borderWidth: 1, borderColor: D.redSeam,
     borderRadius: radius.lg, padding: sp(4), gap: sp(1),
   },
   heroLabel: { fontSize: font.tiny, fontWeight: '700', color: D.sub, letterSpacing: 1.5 },
@@ -1648,7 +1651,7 @@ const s = StyleSheet.create({
   ctaText: { fontSize: font.body, fontWeight: '700', color: colors.onAccent },
 
   sliderHit: { height: 28, justifyContent: 'center' },
-  sliderTrack: { height: 6, borderRadius: 3, backgroundColor: '#3A3A40', overflow: 'hidden' },
+  sliderTrack: { height: 6, borderRadius: 3, backgroundColor: D.muted, overflow: 'hidden' },
   sliderFill: { height: 6, backgroundColor: colors.accent },
   sliderKnob: {
     position: 'absolute', width: 20, height: 20, borderRadius: 10, backgroundColor: '#fff',

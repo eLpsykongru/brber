@@ -76,6 +76,9 @@ export function takeReopen(): 'settings' | null {
   return v === 'settings' ? v : null;
 }
 
+/** The same landing for a restart that isn't a language — the barber's appearance switch. */
+export function reopenSettings() { write(REOPEN, 'settings'); }
+
 export async function chooseLanguage(next: Lang, reopen?: 'settings') {
   if (reopen) write(REOPEN, reopen);
   write(KEY, next);

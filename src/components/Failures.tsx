@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Display } from './ui';
-import { colors, font, radius, shadow } from '../theme';
+import { colors, font, isDark, radius, shadow } from '../theme';
 import { tr, trn } from '../lib/i18n';
 
 // Turn 38 of "Customer App 3.dc.html" — the rest of the failures.
@@ -303,7 +303,7 @@ const s = StyleSheet.create({
     height: 36, borderRadius: radius.pill, backgroundColor: colors.surface,
     justifyContent: 'center', paddingHorizontal: 16,
   },
-  barGhostText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6, color: '#5c5c58' },
+  barGhostText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6, color: colors.textDim },
   barLinkRow: { marginTop: 9 },
   barLink: { fontSize: 12, fontWeight: '600', color: colors.accent },
 
@@ -318,7 +318,7 @@ const s = StyleSheet.create({
   lowSub: { fontSize: 11.5, color: colors.textSecondary, marginTop: 3 },
   lowBarRow: {
     flexDirection: 'row', alignItems: 'center',
-    borderTopWidth: 1, borderTopColor: '#EFECE4', paddingTop: 12,
+    borderTopWidth: 1, borderTopColor: colors.divider, paddingTop: 12,
   },
   lowMeta: { fontSize: 10.5, fontWeight: '700', letterSpacing: 0.8, color: colors.textSecondary },
   lowShort: { fontSize: 12, fontWeight: '700', color: colors.accent },
@@ -343,26 +343,26 @@ const s = StyleSheet.create({
   // 38f
   reviewCard: {
     backgroundColor: colors.bg, borderRadius: 20, padding: 16, gap: 11,
-    borderWidth: 1, borderColor: '#E5E2DB', ...shadow,
+    borderWidth: 1, borderColor: colors.border, ...shadow,
   },
   reviewChip: {
-    alignSelf: 'flex-start', backgroundColor: '#F0E7D8', borderRadius: 6,
+    alignSelf: 'flex-start', backgroundColor: isDark ? 'rgba(232,161,0,0.16)' : '#F0E7D8', borderRadius: 6,
     paddingHorizontal: 8, paddingVertical: 4,
   },
-  reviewChipText: { fontSize: 9.5, fontWeight: '700', letterSpacing: 1, color: '#8A6D2F' },
+  reviewChipText: { fontSize: 9.5, fontWeight: '700', letterSpacing: 1, color: isDark ? colors.warning : '#8A6D2F' },
   reviewTitle: { fontSize: 13.5, fontWeight: '700', color: colors.text },
   reviewBody: { fontSize: 12, lineHeight: 18, color: colors.textSecondary },
   reviewRefund: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    borderTopWidth: 1, borderTopColor: '#EFECE4', paddingTop: 11,
+    borderTopWidth: 1, borderTopColor: colors.divider, paddingTop: 11,
   },
-  reviewRefundText: { flex: 1, fontSize: 11.5, color: '#5c5c58' },
+  reviewRefundText: { flex: 1, fontSize: 11.5, color: colors.textDim },
   reviewBtns: { flexDirection: 'row', gap: 8 },
   reviewGhost: {
-    flex: 1, height: 42, borderRadius: radius.pill, borderWidth: 1, borderColor: '#DDD9CF',
+    flex: 1, height: 42, borderRadius: radius.pill, borderWidth: 1, borderColor: colors.track,
     alignItems: 'center', justifyContent: 'center',
   },
-  reviewGhostText: { fontSize: 11.5, fontWeight: '700', letterSpacing: 0.5, color: '#5c5c58' },
+  reviewGhostText: { fontSize: 11.5, fontWeight: '700', letterSpacing: 0.5, color: colors.textDim },
   reviewSolid: {
     flex: 1, height: 42, borderRadius: radius.pill, backgroundColor: colors.ink,
     alignItems: 'center', justifyContent: 'center',

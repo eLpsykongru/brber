@@ -181,7 +181,7 @@ const s = StyleSheet.create({
   subLight: { fontSize: 14, lineHeight: 21, color: colors.textSecondary, maxWidth: 300 },
 
   dots: { flexDirection: 'row', gap: 6 },
-  dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: '#C9C5BB' },
+  dot: { width: 5, height: 5, borderRadius: 3, backgroundColor: colors.dash },
   dotOnDark: { backgroundColor: 'rgba(255,255,255,0.3)' },
   dotActive: { width: 22, backgroundColor: colors.accent },
 
@@ -189,7 +189,7 @@ const s = StyleSheet.create({
   ctaLight: { backgroundColor: colors.onAccent },
   ctaInk: { backgroundColor: colors.ink },
   ctaTextDarkOnLight: {
-    color: colors.text, fontSize: font.small, fontWeight: '700', letterSpacing: 1.3, textTransform: 'uppercase',
+    color: '#111', fontSize: font.small, fontWeight: '700', letterSpacing: 1.3, textTransform: 'uppercase',
   },
   ctaTextLightOnInk: {
     color: colors.onAccent, fontSize: font.small, fontWeight: '700', letterSpacing: 1.3, textTransform: 'uppercase',

@@ -396,7 +396,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.bg,
     borderRadius: 16, paddingVertical: 11, paddingHorizontal: 18, ...shadow,
   },
-  fieldFocus: { borderWidth: 2, borderColor: colors.ink },
+  fieldFocus: { borderWidth: 2, borderColor: colors.text },
   fieldLabel: { fontSize: 10, letterSpacing: 1.2, fontWeight: '700', color: colors.textTertiary },
   fieldInput: { fontSize: 14, fontWeight: '500', color: colors.text, marginTop: 3, padding: 0 },
   tick: {
@@ -405,7 +405,7 @@ const s = StyleSheet.create({
   },
 
   meterRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  meterBar: { flex: 1, height: 5, borderRadius: 3, backgroundColor: '#DDD9CF' },
+  meterBar: { flex: 1, height: 5, borderRadius: 3, backgroundColor: colors.track },
   meterLabel: { fontSize: 11, fontWeight: '700' },
   rulesCard: {
     backgroundColor: colors.bg, borderRadius: 20, paddingVertical: 15, paddingHorizontal: 18,
@@ -413,11 +413,11 @@ const s = StyleSheet.create({
   },
   ruleRow: { flexDirection: 'row', alignItems: 'center', gap: 9 },
   ruleDot: {
-    width: 18, height: 18, borderRadius: 999, borderWidth: 1.5, borderColor: '#D8D4CA',
+    width: 18, height: 18, borderRadius: 999, borderWidth: 1.5, borderColor: colors.line,
     alignItems: 'center', justifyContent: 'center',
   },
   ruleDotOn: { backgroundColor: 'rgba(74,222,128,0.20)', borderWidth: 0 },
-  ruleText: { fontSize: 12, color: '#5C5C58' },
+  ruleText: { fontSize: 12, color: colors.textDim },
   ruleTextOff: { color: colors.textTertiary },
 
   orRow: { flexDirection: 'row', alignItems: 'center', gap: 14, marginVertical: 2 },
@@ -428,7 +428,7 @@ const s = StyleSheet.create({
     borderRadius: 16, paddingVertical: 13, paddingHorizontal: 15, ...shadow,
   },
   noteIcon: { marginTop: 1 },
-  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: '#5C5C58' },
+  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: colors.textDim },
 
   // 23b
   inbox: {
@@ -452,7 +452,7 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   stepNoText: { fontSize: 11, fontWeight: '700', color: '#fff' },
-  stepText: { flex: 1, fontSize: 12, color: '#5C5C58' },
+  stepText: { flex: 1, fontSize: 12, color: colors.textDim },
   resend: { fontSize: font.small, color: colors.textSecondary },
   resendWait: { color: colors.textTertiary, fontWeight: '600' },
 
@@ -463,7 +463,7 @@ const s = StyleSheet.create({
     borderTopLeftRadius: 28, borderTopRightRadius: 28,
     paddingTop: 12, paddingHorizontal: 24, paddingBottom: 34, gap: 14,
   },
-  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: '#D8D4CA' },
+  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line },
   centerBlock: { alignItems: 'center', paddingTop: 6 },
   warnCircle: {
     width: 60, height: 60, borderRadius: radius.pill, backgroundColor: colors.accentSoft,
@@ -478,7 +478,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.bg, borderRadius: 20, padding: 16, gap: 11, ...shadow,
   },
   safeRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  safeText: { flex: 1, fontSize: 12, color: '#5C5C58' },
+  safeText: { flex: 1, fontSize: 12, color: colors.textDim },
   whoRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.bg,
     borderRadius: 18, paddingVertical: 13, paddingHorizontal: 15, ...shadow,

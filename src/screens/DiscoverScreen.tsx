@@ -520,7 +520,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', ...shadow,
   },
   catCircleActive: { backgroundColor: colors.accent },
-  catLabel: { fontSize: font.tiny, color: '#5C5C58', fontWeight: '600' },
+  catLabel: { fontSize: font.tiny, color: colors.textDim, fontWeight: '600' },
   catLabelActive: { color: colors.accent },
   topStrip: { marginHorizontal: -sp(5) },
   topRow: { flexDirection: 'row', gap: sp(3), paddingHorizontal: sp(5) },

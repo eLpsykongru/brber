@@ -112,7 +112,7 @@ const s = StyleSheet.create({
     width: 64, height: 72, borderRadius: 18, backgroundColor: colors.bg,
     alignItems: 'center', justifyContent: 'center', ...shadow,
   },
-  boxActive: { borderWidth: 2, borderColor: colors.ink },
+  boxActive: { borderWidth: 2, borderColor: colors.text },
   boxDigit: { fontSize: 26, fontWeight: '800', color: colors.text, fontVariant: ['tabular-nums'] },
   hiddenInput: { position: 'absolute', opacity: 0, height: 1, width: 1 },
 

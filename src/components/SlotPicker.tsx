@@ -185,7 +185,7 @@ const s = StyleSheet.create({
   muted: { color: colors.textTertiary },
   dayNum: { width: 36, height: 36, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center' },
   dayNumActive: { backgroundColor: colors.ink },
-  dayNumNow: { borderWidth: 1.5, borderColor: '#C9C5BB' },
+  dayNumNow: { borderWidth: 1.5, borderColor: colors.dash },
   dayNowTag: {
     position: 'absolute', bottom: -10, fontSize: 8, letterSpacing: 0.48,
     fontWeight: '700', color: colors.textTertiary,
@@ -199,7 +199,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.bg,
   },
   slotSel: { backgroundColor: colors.ink },
-  slotFull: { backgroundColor: '#E9E6DE' },
+  slotFull: { backgroundColor: colors.fill },
   slotPast: { opacity: 0.5 },
   slotText: { color: colors.text, fontWeight: '600', fontSize: font.small },
   slotTextSel: { color: colors.onAccent },

@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, shadow, shadowLg, TOP_INSET } from '../theme';
+import { colors, font, isDark, radius, shadow, shadowLg, TOP_INSET } from '../theme';
 import { loc, tr } from '../lib/i18n';
 
 // Customer turn 31 of "Customer App 3.dc.html" — what Anas gets after ops clicks
@@ -86,7 +86,7 @@ function Stars({ n, size = 15 }: { n: number; size?: number }) {
     <View style={s.stars}>
       {[1, 2, 3, 4, 5].map((i) => (
         <Ionicons key={i} name={i <= n ? 'star' : 'star-outline'} size={size}
-          color={i <= n ? colors.star : '#D8D4CA'} />
+          color={i <= n ? colors.star : colors.line} />
       ))}
     </View>
   );
@@ -448,7 +448,7 @@ const s = StyleSheet.create({
   struck: {
     fontSize: 14, lineHeight: 22, color: colors.textSecondary, textDecorationLine: 'line-through',
   },
-  quote: { fontSize: 13, lineHeight: 20, color: '#5c5c58' },
+  quote: { fontSize: 13, lineHeight: 20, color: colors.textDim },
   stars: { flexDirection: 'row', gap: 2 },
   tag: { backgroundColor: colors.surface, borderRadius: 6, paddingVertical: 4, paddingHorizontal: 8 },
   tagText: {
@@ -511,7 +511,7 @@ const s = StyleSheet.create({
     flex: 1, height: 52, borderRadius: radius.pill, backgroundColor: colors.bg,
     borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center',
   },
-  ghostText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6, color: '#5c5c58' },
+  ghostText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6, color: colors.textDim },
   dark: {
     flex: 1.2, height: 52, borderRadius: radius.pill, backgroundColor: colors.ink,
     alignItems: 'center', justifyContent: 'center',
@@ -525,11 +525,11 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.bg,
     borderRadius: 16, paddingVertical: 13, paddingHorizontal: 15, ...shadow,
   },
-  optionOn: { borderWidth: 2, borderColor: colors.ink },
+  optionOn: { borderWidth: 2, borderColor: colors.text },
   optionLabel: { flex: 1, fontSize: 13, fontWeight: '600', color: colors.text },
   optionLabelOn: { fontWeight: '700' },
   radio: {
-    width: 20, height: 20, borderRadius: 999, borderWidth: 1.5, borderColor: '#D8D4CA',
+    width: 20, height: 20, borderRadius: 999, borderWidth: 1.5, borderColor: colors.line,
     alignItems: 'center', justifyContent: 'center',
   },
   radioOn: { backgroundColor: colors.ink, borderColor: colors.ink },
@@ -552,7 +552,7 @@ const s = StyleSheet.create({
   },
   stepDotDone: { backgroundColor: colors.ink },
   stepDotNow: { backgroundColor: colors.accent },
-  stepDotTodo: { borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#D8D4CA' },
+  stepDotTodo: { borderWidth: 1.5, borderStyle: 'dashed', borderColor: colors.line },
   stepDotInner: { width: 7, height: 7, borderRadius: 999, backgroundColor: '#fff' },
   stepLine: { flex: 1, width: 2, backgroundColor: colors.border },
   stepTitle: { fontSize: 13, fontWeight: '700', color: colors.text },
@@ -565,7 +565,7 @@ const s = StyleSheet.create({
   nowTagText: { fontSize: 10, letterSpacing: 0.8, fontWeight: '700', color: colors.accent },
   attachRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    borderTopWidth: 1, borderTopColor: '#EFECE4', paddingTop: 11,
+    borderTopWidth: 1, borderTopColor: colors.divider, paddingTop: 11,
   },
   attachText: { flex: 1, fontSize: font.tiny, color: colors.textSecondary },
 
@@ -575,5 +575,5 @@ const s = StyleSheet.create({
     width: 18, height: 18, borderRadius: 999, backgroundColor: 'rgba(74,222,128,0.18)',
     alignItems: 'center', justifyContent: 'center',
   },
-  changedText: { flex: 1, fontSize: 12.5, lineHeight: 19, color: '#3d3d3a' },
+  changedText: { flex: 1, fontSize: 12.5, lineHeight: 19, color: isDark ? colors.textDim : '#3d3d3a' },
 });

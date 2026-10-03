@@ -100,7 +100,7 @@ const s = StyleSheet.create({
   wrap: { alignItems: 'center', gap: 16, paddingTop: 118, paddingHorizontal: 20 },
   circle: {
     width: 96, height: 96, borderRadius: radius.pill, borderWidth: 1.5, borderStyle: 'dashed',
-    borderColor: '#C9C5BB', alignItems: 'center', justifyContent: 'center',
+    borderColor: colors.dash, alignItems: 'center', justifyContent: 'center',
   },
   title: { textAlign: 'center' },
   body: {
@@ -118,5 +118,5 @@ const s = StyleSheet.create({
     borderRadius: 16, paddingVertical: 13, paddingHorizontal: 15, marginTop: 30, ...shadow,
   },
   noteIcon: { marginTop: 1 },
-  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: '#5C5C58' },
+  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: colors.textDim },
 });

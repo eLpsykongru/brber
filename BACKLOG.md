@@ -3947,3 +3947,24 @@ shop becomes the subject of every task action, the reason typed with a call its 
   wiping its own stats row on redraw. Moot now the console is gone.
 - §10 of the handoff (period pickers, other cities, Karim's and Nabil's pages) is
   flagged, not invented.
+
+## Dark mode — the customer side (PRO-07, 2026-10-03)
+Settings → Appearance is live: Light / Dark / System, saved on the phone (`app_appearance`),
+System by default. `theme.ts` picks the palette as it loads and a change reloads the app,
+like the language — so a screen follows dark mode only if it draws from `colors.*`: a
+hardcoded light grey stays light. The dark palette is the barber kit's surfaces. `ink` stays
+a dark surface (everything printed on it is already white), a selection ring uses
+`colors.text`, and the label on a white pill is `'#111'` in both themes. The barber side
+stays dark: it has no light design.
+
+**Still open:**
+- **System needs the next native build on iOS.** `userInterfaceStyle` went from light to
+  automatic; until a rebuild iOS reports light, so System means Light there. Picking Dark
+  works now, and Android already follows the phone.
+- **A phone that changes mode while the app is open** re-themes on the next launch.
+  **Trigger:** someone notices → reload on resume when the phone's scheme differs.
+- **The Android map stays light** (Google), while Apple's map follows. **Trigger:** it
+  looks wrong in use → `customMapStyle`.
+- **The barber's status bar** follows the customer palette, so on a light phone the dark
+  kit gets dark icons, as it did before. **Trigger:** a barber on a light iPhone.
+- Built by reading, not on glass: walk the customer screens once in Dark.

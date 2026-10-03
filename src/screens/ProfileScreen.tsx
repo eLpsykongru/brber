@@ -668,7 +668,7 @@ const s = StyleSheet.create({
   },
   row: {
     flexDirection: 'row', alignItems: 'center', gap: sp(3.5), paddingVertical: sp(3.25),
-    borderBottomWidth: 1, borderBottomColor: '#EFECE4',
+    borderBottomWidth: 1, borderBottomColor: colors.divider,
   },
   rowPressed: { opacity: 0.7 },
   rowIcon: {

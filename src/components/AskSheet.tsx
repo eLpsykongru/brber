@@ -71,7 +71,7 @@ export function AskBlock({ salonId, barberId, barberName, salonName, serviceId, 
     <>
       <View style={s.fullBlock}>
         <View style={s.fullCircle}>
-          <Ionicons name="calendar-clear-outline" size={22} color="#C9C5BB" />
+          <Ionicons name="calendar-clear-outline" size={22} color={colors.dash} />
         </View>
         <Text style={s.fullTitle}>{tr('{day} is full', { day: dayName(day) })}</Text>
         <Text style={s.fullSub}>
@@ -212,7 +212,7 @@ const s = StyleSheet.create({
   fullBlock: { alignItems: 'center', gap: 9, paddingTop: 14, paddingBottom: 4 },
   fullCircle: {
     width: 56, height: 56, borderRadius: radius.pill, borderWidth: 1.5,
-    borderColor: '#C9C5BB', borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center',
+    borderColor: colors.dash, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center',
   },
   fullTitle: { fontSize: 15, fontWeight: '700', color: colors.text },
   fullSub: {
@@ -256,7 +256,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28,
     paddingTop: 12, paddingHorizontal: 22, paddingBottom: 30, gap: 14, ...shadowLg,
   },
-  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: '#D8D4CA' },
+  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line },
   center: { alignItems: 'center', paddingTop: 4 },
   okCircle: {
     width: 60, height: 60, borderRadius: radius.pill, backgroundColor: 'rgba(74,222,128,0.18)',
@@ -290,7 +290,7 @@ const s = StyleSheet.create({
     flex: 1, height: 52, borderRadius: radius.pill, backgroundColor: colors.bg,
     borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center',
   },
-  ghostText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6, color: '#5C5C58' },
+  ghostText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6, color: colors.textDim },
   doneBtn: {
     flex: 1, height: 52, borderRadius: radius.pill, backgroundColor: colors.ink,
     alignItems: 'center', justifyContent: 'center',

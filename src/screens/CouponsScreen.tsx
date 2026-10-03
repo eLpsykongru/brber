@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Display } from '../components/ui';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif, shadow, TOP_INSET } from '../theme';
+import { colors, font, isDark, radius, serif, shadow, TOP_INSET } from '../theme';
 import { loc, tr } from '../lib/i18n';
 
 // 16a (active) and 17c (used & expired). A coupon is a code you show at the
@@ -281,7 +281,7 @@ function HeroTicket({ c }: { c: Coupon }) {
 const s = StyleSheet.create({
   // 37a hero
   hero: {
-    position: 'relative', backgroundColor: '#101010', borderRadius: 22, padding: 18,
+    position: 'relative', backgroundColor: colors.ink, borderRadius: 22, padding: 18,
     gap: 14, overflow: 'hidden',
   },
   notchL: {
@@ -332,7 +332,7 @@ const s = StyleSheet.create({
   referSub: { fontSize: 11.5, color: colors.textSecondary, marginTop: 3 },
   referCodeRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    borderTopWidth: 1, borderTopColor: '#EFECE4', paddingTop: 12,
+    borderTopWidth: 1, borderTopColor: colors.divider, paddingTop: 12,
   },
   referCode: { flex: 1, fontSize: 14, fontWeight: '700', letterSpacing: 0.9, color: colors.text },
   referShare: { fontSize: 12, fontWeight: '700', color: colors.accent },
@@ -379,7 +379,7 @@ const s = StyleSheet.create({
   stubOffHero: { color: 'rgba(255,255,255,0.5)' },
   // ponytail: a solid hairline where the mock has a dashed perforation — RN has
   // no repeating-gradient, and a 10-View dash ladder is not worth the nodes
-  perf: { width: 1, alignSelf: 'stretch', backgroundColor: '#DDD9CF' },
+  perf: { width: 1, alignSelf: 'stretch', backgroundColor: colors.track },
   perfHero: { backgroundColor: 'rgba(255,255,255,0.3)' },
   ticketBody: { flex: 1, paddingVertical: 15, paddingHorizontal: 16 },
   ticketTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
@@ -402,12 +402,12 @@ const s = StyleSheet.create({
     marginRight: 16,
   },
   stateChipDead: { backgroundColor: 'rgba(232,68,46,0.10)' },
-  stateText: { fontSize: 10, letterSpacing: 1, fontWeight: '700', color: '#5C5C58' },
-  stateTextDead: { color: '#B4351F' },
+  stateText: { fontSize: 10, letterSpacing: 1, fontWeight: '700', color: colors.textDim },
+  stateTextDead: { color: isDark ? colors.danger : '#B4351F' },
 
   addRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.bg,
-    borderWidth: 1.5, borderStyle: 'dashed', borderColor: '#C9C5BB', borderRadius: 20,
+    borderWidth: 1.5, borderStyle: 'dashed', borderColor: colors.dash, borderRadius: 20,
     paddingVertical: 15, paddingHorizontal: 16, marginTop: 2,
   },
   addIcon: {
@@ -433,7 +433,7 @@ const s = StyleSheet.create({
     borderTopLeftRadius: 28, borderTopRightRadius: 28,
     paddingTop: 12, paddingHorizontal: 24, paddingBottom: 34, gap: 14,
   },
-  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: '#D8D4CA' },
+  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line },
   sheetTitle: { textAlign: 'center' },
   input: {
     backgroundColor: colors.bg, borderRadius: 18, height: 52, paddingHorizontal: 16,

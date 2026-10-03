@@ -9,7 +9,7 @@ import { useAndroidBack } from '../lib/back';
 import { Pushed } from '../components/motion';
 import ReportProblemScreen, { CaseRow, SupportCaseScreen } from './SupportScreens';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif, shadow, sp, TOP_INSET } from '../theme';
+import { colors, font, isDark, radius, serif, shadow, sp, TOP_INSET } from '../theme';
 import { BookingDetailSheet } from './MyBookingScreen';
 import QueueScreen, { DayQueueRow, minutesUntil } from './QueueScreen';
 import { loc, tr, trn } from '../lib/i18n';
@@ -49,8 +49,8 @@ type Row = {
 };
 
 type Filter = 'upcoming' | 'completed' | 'cancelled';
-const SUNK = '#F7F5F1';
-const DEEP_RED = '#B4351F';
+const SUNK = isDark ? '#111113' : '#F7F5F1';
+const DEEP_RED = isDark ? colors.danger : '#B4351F';
 
 function shortId(id: string) {
   return `#${id.replace(/-/g, '').slice(0, 8).toUpperCase()}`;
@@ -808,7 +808,7 @@ function ReviewSheet({ booking, onClose, onDone }: {
             <Pressable key={n} onPress={() => setRating(n)} hitSlop={6}
               accessibilityLabel={trn(n, '{n} star', '{n} stars')}>
               <Ionicons name={n <= rating ? 'star' : 'star-outline'} size={38}
-                color={n <= rating ? colors.text : '#C9C5BB'} />
+                color={n <= rating ? colors.text : colors.dash} />
             </Pressable>
           ))}
         </View>
@@ -882,7 +882,7 @@ const s = StyleSheet.create({
     height: 42, borderRadius: 999, backgroundColor: '#fff',
     alignItems: 'center', justifyContent: 'center',
   },
-  heroBtnText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.72, color: colors.text },
+  heroBtnText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.72, color: '#111' },  // the pill is white in both themes
 
   // 6b banner
   reviewBanner: {
@@ -897,7 +897,7 @@ const s = StyleSheet.create({
   chip: { backgroundColor: colors.surface, borderRadius: 8, paddingVertical: 5, paddingHorizontal: 10 },
   chipAccentBg: { backgroundColor: 'rgba(232,68,46,0.10)' },
   chipRedBg: { backgroundColor: 'rgba(232,68,46,0.10)' },
-  chipReviewBg: { backgroundColor: '#F0E7D8' },
+  chipReviewBg: { backgroundColor: isDark ? 'rgba(232,161,0,0.16)' : '#F0E7D8' },
   receiptNote: {
     fontSize: 11, lineHeight: 17, color: colors.textSecondary, textAlign: 'center',
     paddingHorizontal: 12,
@@ -906,14 +906,14 @@ const s = StyleSheet.create({
   chipMuted: { color: colors.textSecondary },
   chipAccent: { color: colors.accent },
   chipRed: { color: DEEP_RED },
-  chipReview: { color: '#8A6D2F' },
+  chipReview: { color: isDark ? colors.warning : '#8A6D2F' },
 
   bodyRow: { flexDirection: 'row', gap: 14, alignItems: 'center' },
   photo: { backgroundColor: colors.surface },
   photoFallback: { backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
   salon: { fontSize: 16, fontWeight: '700', color: colors.text },
   salonSm: { fontSize: 15, fontWeight: '700', color: colors.text },
-  salonOff: { fontSize: 16, fontWeight: '700', color: '#5C5C58' },
+  salonOff: { fontSize: 16, fontWeight: '700', color: colors.textDim },
   metaLine: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 4 },
   meta: { fontSize: 12, color: colors.textSecondary, flexShrink: 1, marginTop: 4 },
   struck: { textDecorationLine: 'line-through' },
@@ -981,7 +981,7 @@ const s = StyleSheet.create({
   },
   btnDark: { backgroundColor: colors.ink, borderColor: colors.ink },
   btnAccent: { backgroundColor: colors.accent, borderColor: colors.accent },
-  btnText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.72, color: '#5C5C58' },
+  btnText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.72, color: colors.textDim },
   btnTextOn: { color: '#fff' },
 
   // 6c boxes
@@ -990,25 +990,25 @@ const s = StyleSheet.create({
     backgroundColor: SUNK, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14,
   },
   reasonIcon: { marginTop: 1 },
-  reasonText: { flex: 1, fontSize: 12, lineHeight: 18, color: '#5C5C58' },
+  reasonText: { flex: 1, fontSize: 12, lineHeight: 18, color: colors.textDim },
   refundBox: {
     flexDirection: 'row', alignItems: 'center', gap: 9,
     backgroundColor: 'rgba(74,222,128,0.14)', borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14,
   },
-  refundText: { flex: 1, fontSize: 12, fontWeight: '600', color: '#15803D' },
+  refundText: { flex: 1, fontSize: 12, fontWeight: '600', color: colors.greenInk },
   refundAmount: { fontSize: font.small, fontWeight: '800', color: '#16A34A', fontVariant: ['tabular-nums'] },
   keptBox: {
     flexDirection: 'row', alignItems: 'center', gap: 9,
     backgroundColor: SUNK, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14,
   },
-  keptText: { flex: 1, fontSize: 12, lineHeight: 18, color: '#5C5C58' },
+  keptText: { flex: 1, fontSize: 12, lineHeight: 18, color: colors.textDim },
   keptAmount: { fontSize: font.small, fontWeight: '700', color: colors.textSecondary, fontVariant: ['tabular-nums'] },
 
   // empty
   emptyWrap: { alignItems: 'center', gap: sp(4), paddingVertical: sp(14) },
   emptyCircle: {
     width: 96, height: 96, borderRadius: 999, borderWidth: 1.5, borderStyle: 'dashed',
-    borderColor: '#C9C5BB', alignItems: 'center', justifyContent: 'center',
+    borderColor: colors.dash, alignItems: 'center', justifyContent: 'center',
   },
   emptyTitle: { textAlign: 'center' },
   emptyText: {
@@ -1038,7 +1038,7 @@ const s = StyleSheet.create({
     borderTopLeftRadius: 28, borderTopRightRadius: 28,
     paddingTop: 12, paddingHorizontal: 24, paddingBottom: 34, gap: 14,
   },
-  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: '#D8D4CA' },
+  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line },
   reviewHead: { flexDirection: 'row', alignItems: 'center' },
   skip: { width: 40, fontSize: 12, fontWeight: '600', color: colors.textSecondary },
   reviewTitle: { flex: 1, textAlign: 'center', letterSpacing: 0.54 },
@@ -1063,7 +1063,7 @@ const s = StyleSheet.create({
   tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'center' },
   tag: { borderRadius: 999, backgroundColor: colors.bg, paddingVertical: 9, paddingHorizontal: 16, ...shadow },
   tagOn: { backgroundColor: colors.ink },
-  tagText: { fontSize: 12, fontWeight: '600', color: '#5C5C58' },
+  tagText: { fontSize: 12, fontWeight: '600', color: colors.textDim },
   tagTextOn: { color: '#fff' },
   commentField: { minHeight: 70, textAlignVertical: 'top', paddingTop: 14, borderRadius: 18 },
   submitBtn: {

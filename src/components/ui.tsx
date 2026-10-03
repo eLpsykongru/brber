@@ -193,13 +193,13 @@ const s = StyleSheet.create({
     color: colors.onAccent, fontSize: font.small, fontWeight: '700',
     textTransform: 'uppercase', letterSpacing: 1.2,
   },
-  pillTextSecondary: { color: '#5C5C58' },
+  pillTextSecondary: { color: colors.textDim },
   chip: {
     paddingVertical: sp(2.5), paddingHorizontal: sp(4.5), borderRadius: radius.pill,
     backgroundColor: colors.bg, ...shadow,
   },
   chipActive: { backgroundColor: colors.ink },
-  chipText: { color: '#5C5C58', fontSize: font.small, fontWeight: '600' },
+  chipText: { color: colors.textDim, fontSize: font.small, fontWeight: '600' },
   chipTextActive: { color: colors.onAccent },
   field: {
     backgroundColor: colors.bg, borderRadius: radius.md,
@@ -213,7 +213,7 @@ const s = StyleSheet.create({
   emptyWrap: { alignItems: 'center', gap: sp(4), paddingVertical: sp(14) },
   emptyCircle: {
     width: 96, height: 96, borderRadius: radius.pill, borderWidth: 1.5, borderStyle: 'dashed',
-    borderColor: '#C9C5BB', alignItems: 'center', justifyContent: 'center',
+    borderColor: colors.dash, alignItems: 'center', justifyContent: 'center',
   },
   emptyTitle: { textAlign: 'center' },
   emptyText: {

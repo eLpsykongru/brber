@@ -497,7 +497,7 @@ const s = StyleSheet.create({
     borderTopLeftRadius: 28, borderTopRightRadius: 28,
     paddingTop: 12, paddingHorizontal: 24, paddingBottom: 34, gap: 14,
   },
-  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: '#D8D4CA' },
+  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line },
   sheetHead: { flexDirection: 'row', alignItems: 'center' },
   sheetSlot: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
   sheetSlotEnd: { alignItems: 'flex-end' },
@@ -541,7 +541,7 @@ const s = StyleSheet.create({
     paddingVertical: 10, paddingHorizontal: 16, ...shadow,
   },
   chipOn: { backgroundColor: colors.ink },
-  chipText: { fontSize: 12, fontWeight: '600', color: '#5C5C58' },
+  chipText: { fontSize: 12, fontWeight: '600', color: colors.textDim },
   chipTextOn: { color: '#fff' },
 
   barberRow: { flexDirection: 'row', gap: 9, marginTop: -5 },
@@ -549,7 +549,7 @@ const s = StyleSheet.create({
     flex: 1, backgroundColor: colors.bg, borderRadius: 16, padding: 12,
     alignItems: 'center', gap: 6, ...shadow,
   },
-  barberCardOn: { borderWidth: 2, borderColor: colors.ink },
+  barberCardOn: { borderWidth: 2, borderColor: colors.text },
   barberAvatar: {
     width: 34, height: 34, borderRadius: 999, backgroundColor: colors.surface,
     alignItems: 'center', justifyContent: 'center',
@@ -566,7 +566,7 @@ const s = StyleSheet.create({
     borderRadius: 16, paddingVertical: 13, paddingHorizontal: 15, ...shadow,
   },
   noteIcon: { marginTop: 1 },
-  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: '#5C5C58' },
+  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: colors.textDim },
 
   wideDark: {
     width: '100%', height: 54, borderRadius: radius.pill, backgroundColor: colors.ink,

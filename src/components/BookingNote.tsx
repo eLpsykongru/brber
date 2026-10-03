@@ -127,7 +127,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28,
     paddingTop: 12, paddingHorizontal: 22, paddingBottom: 30, gap: 12, maxHeight: '88%',
   },
-  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: '#D8D4CA' },
+  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line },
   head: { flexDirection: 'row', alignItems: 'center' },
   headSide: { width: 32, height: 32, justifyContent: 'center' },
   headRight: { alignItems: 'flex-end' },
@@ -158,7 +158,7 @@ const s = StyleSheet.create({
     borderWidth: 1.5, borderColor: colors.border, paddingVertical: 9, paddingHorizontal: 14,
   },
   chipOn: { backgroundColor: colors.ink, borderColor: colors.ink },
-  chipText: { fontFamily: inter.sb, fontSize: 11.5, color: '#5c5c58' },
+  chipText: { fontFamily: inter.sb, fontSize: 11.5, color: colors.textDim },
   chipTextOn: { fontFamily: inter.b, color: '#FFFFFF' },
 
   input: {
@@ -176,7 +176,7 @@ const s = StyleSheet.create({
     width: 26, height: 26, borderRadius: radius.pill, backgroundColor: colors.surface,
     alignItems: 'center', justifyContent: 'center', marginTop: 1,
   },
-  hintText: { flex: 1, fontFamily: inter.r, fontSize: 11.5, lineHeight: 17, color: '#5c5c58' },
+  hintText: { flex: 1, fontFamily: inter.r, fontSize: 11.5, lineHeight: 17, color: colors.textDim },
 
   actions: { flexDirection: 'row', gap: 10, paddingTop: sp(1) },
   sendCol: { flex: 1.4 },

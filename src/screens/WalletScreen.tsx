@@ -199,7 +199,7 @@ const s = StyleSheet.create({
     height: 50, borderRadius: radius.pill, backgroundColor: '#fff',
     alignItems: 'center', justifyContent: 'center',
   },
-  addText: { fontSize: font.small, fontWeight: '700', letterSpacing: 1.04, color: colors.text },
+  addText: { fontSize: font.small, fontWeight: '700', letterSpacing: 1.04, color: '#111' },  // the pill is white in both themes
 
   heldRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.bg,
@@ -217,7 +217,7 @@ const s = StyleSheet.create({
     borderRadius: 16, paddingVertical: 13, paddingHorizontal: 15, ...shadow,
   },
   noteIcon: { marginTop: 1 },
-  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: '#5C5C58' },
+  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: colors.textDim },
 
   section: { fontSize: 17, fontWeight: '700', color: colors.text, marginTop: 2 },
   spinner: { marginTop: sp(4) },

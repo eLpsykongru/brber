@@ -404,7 +404,7 @@ const s = StyleSheet.create({
   pill: {
     flex: 1, flexDirection: 'row', alignItems: 'center', gap: sp(2.5), height: 48,
     paddingHorizontal: sp(4.5), borderRadius: radius.pill, backgroundColor: colors.bg,
-    borderWidth: 1.5, borderColor: colors.ink, ...shadow,
+    borderWidth: 1.5, borderColor: colors.text, ...shadow,
   },
   input: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.text, padding: 0 },
   cancel: { fontSize: 14, fontWeight: '600', color: colors.textSecondary },

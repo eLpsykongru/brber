@@ -246,7 +246,7 @@ const s = StyleSheet.create({
 
   card: { backgroundColor: colors.bg, borderRadius: 24, paddingHorizontal: 18, ...shadow },
   row: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14 },
-  rowBorder: { borderBottomWidth: 1, borderBottomColor: '#EFECE4' },
+  rowBorder: { borderBottomWidth: 1, borderBottomColor: colors.divider },
   rowLabel: { flex: 1, fontSize: 14, fontWeight: '600', color: colors.text },
   rowCount: { fontSize: 12, color: colors.textTertiary },
 
@@ -264,12 +264,12 @@ const s = StyleSheet.create({
     height: 38, borderRadius: radius.pill, backgroundColor: '#fff',
     justifyContent: 'center', paddingHorizontal: 16,
   },
-  contactBtnText: { fontSize: font.tiny, fontWeight: '700', letterSpacing: 0.66, color: colors.text },
+  contactBtnText: { fontSize: font.tiny, fontWeight: '700', letterSpacing: 0.66, color: '#111' },  // the pill is white in both themes
 
   articleTopic: {
     fontSize: 10, letterSpacing: 1.8, fontWeight: '700', color: colors.textTertiary, marginTop: 2,
   },
   articleTitle: { marginTop: -6 },
   articleCard: { backgroundColor: colors.bg, borderRadius: 24, padding: 20, ...shadow },
-  articleBody: { fontSize: 14, lineHeight: 23, color: '#5C5C58' },
+  articleBody: { fontSize: 14, lineHeight: 23, color: colors.textDim },
 });

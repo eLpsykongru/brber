@@ -323,7 +323,7 @@ function OptionsSheet({ visible, dark, title, sub, rows, onClose }: {
 }) {
   const c = dark
     ? { sheet: D.sheet, card: D.card, line: D.border, text: '#fff', sub: D.sub, bubble: D.card2, grab: D.hairline }
-    : { sheet: colors.surface, card: '#fff', line: colors.border, text: colors.text, sub: colors.textSecondary, bubble: colors.surface, grab: '#D8D4CA' };
+    : { sheet: colors.surface, card: colors.bg, line: colors.border, text: colors.text, sub: colors.textSecondary, bubble: colors.surface, grab: colors.line };
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={st.sheetWrap}>
@@ -349,7 +349,7 @@ function OptionsSheet({ visible, dark, title, sub, rows, onClose }: {
             ))}
           </View>
           <Pressable onPress={onClose} accessibilityRole="button"
-            style={({ pressed }) => [st.cancel, dark ? { borderColor: D.border } : { backgroundColor: '#fff', borderColor: colors.border, borderWidth: 1.5 }, pressed && st.pressed]}>
+            style={({ pressed }) => [st.cancel, dark ? { borderColor: D.border } : { backgroundColor: colors.bg, borderColor: colors.border, borderWidth: 1.5 }, pressed && st.pressed]}>
             <Text style={[st.cancelText, { color: c.text }]}>{dark ? tr('Cancel') : tr('CANCEL')}</Text>
           </Pressable>
         </View>

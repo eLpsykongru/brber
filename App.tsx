@@ -29,7 +29,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import IntroScreen from './src/screens/IntroScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import QueueLinkScreen from './src/screens/QueueLinkScreen';
-import { colors } from './src/theme';
+import { colors, isDark } from './src/theme';
 import type { Barber, Profile } from './src/types';
 import { tr } from './src/lib/i18n';
 
@@ -234,7 +234,8 @@ export default function App() {
       <SessionExpiredSheet visible={!!expired && !session} name={expired?.name ?? null}
         email={expired?.email ?? null}
         onSignIn={() => setExpired(null)} onNotYou={() => setExpired(null)} />
-      <StatusBar style="auto" />
+      {/* the palette's own scheme, not the phone's: Settings can pick against it */}
+      <StatusBar style={isDark ? 'light' : 'dark'} />
     </View>
   );
 }

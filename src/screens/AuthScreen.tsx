@@ -70,7 +70,7 @@ function Welcome({ onEmail, onRegister }: { onEmail: () => void; onRegister: () 
         </View>
         <Pressable onPress={() => go('google')} disabled={!!busy}
           style={({ pressed }) => [s.socialBtn, s.socialLight, (pressed || busy) && s.pressed]}>
-          <Ionicons name="logo-google" size={18} color={colors.text} />
+          <Ionicons name="logo-google" size={18} color="#111" />
           <Text style={s.socialLightText}>{busy === 'google' ? tr('Opening…') : tr('Continue with Google')}</Text>
         </Pressable>
         <Pressable onPress={() => go('apple')} disabled={!!busy}
@@ -261,7 +261,7 @@ function Register({ onBack, onSignIn }: { onBack: () => void; onSignIn: () => vo
 const s = StyleSheet.create({
   grow: { flex: 1 },
   // an inline link's target is its line box: 24 tall, as close to 44 as a sentence allows
-  consent: { fontSize: 12.5, lineHeight: 24, color: '#5C5C58', textAlign: 'center', paddingVertical: 4 },
+  consent: { fontSize: 12.5, lineHeight: 24, color: colors.textDim, textAlign: 'center', paddingVertical: 4 },
   consentLink: { color: colors.text, fontWeight: '700' },
   consentInk: { fontSize: 12.5, lineHeight: 24, color: 'rgba(255,255,255,0.65)', textAlign: 'center', paddingVertical: 4 },
   consentLinkInk: { color: '#fff', fontWeight: '700' },
@@ -282,7 +282,7 @@ const s = StyleSheet.create({
     justifyContent: 'center', gap: 10,
   },
   socialLight: { backgroundColor: colors.onAccent },
-  socialLightText: { fontSize: 14, fontWeight: '600', color: colors.text },
+  socialLightText: { fontSize: 14, fontWeight: '600', color: '#111' },  // the pill is white in both themes
   socialDark: { backgroundColor: '#1E1E1C', borderWidth: 1, borderColor: 'rgba(255,255,255,0.16)' },
   socialDarkText: { fontSize: 14, fontWeight: '600', color: colors.onAccent },
   socialOutline: { borderWidth: 1, borderColor: 'rgba(255,255,255,0.25)' },

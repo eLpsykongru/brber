@@ -547,7 +547,7 @@ export function SupportHomeScreen({ onBack, onOpenCase, onNewCase }: {
         <View style={s.homeActions}>
           <Pressable onPress={() => Linking.openURL(`tel:${SUPPORT_PHONE}`)}
             style={({ pressed }) => [s.ghostWide, pressed && s.pressed]}>
-            <Ionicons name="call-outline" size={15} color="#5c5c58" />
+            <Ionicons name="call-outline" size={15} color={colors.textDim} />
             <Text style={s.ghostWideText}>{tr('CALL US')}</Text>
           </Pressable>
           <Pressable onPress={onNewCase}
@@ -601,7 +601,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.bg, borderRadius: 14, paddingVertical: 11, paddingHorizontal: 14,
     borderWidth: 1, borderColor: colors.border,
   },
-  visitPickOn: { borderColor: colors.ink },
+  visitPickOn: { borderColor: colors.text },
   visitPickText: { fontSize: 12, color: colors.text },
 
   eyebrow: {
@@ -612,12 +612,12 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.bg,
     borderRadius: 18, paddingVertical: 15, paddingHorizontal: 16, ...shadow,
   },
-  optionOn: { borderWidth: 2, borderColor: colors.ink },
+  optionOn: { borderWidth: 2, borderColor: colors.text },
   optionLabel: { fontSize: 14, fontWeight: '600', color: colors.text },
   optionLabelOn: { fontWeight: '700' },
   optionHint: { fontSize: font.tiny, color: colors.textSecondary, marginTop: 2 },
   radio: {
-    width: 22, height: 22, borderRadius: 999, borderWidth: 1.5, borderColor: '#D8D4CA',
+    width: 22, height: 22, borderRadius: 999, borderWidth: 1.5, borderColor: colors.line,
     alignItems: 'center', justifyContent: 'center',
   },
   radioOn: { backgroundColor: colors.ink, borderColor: colors.ink },
@@ -630,7 +630,7 @@ const s = StyleSheet.create({
   photoRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
   photoAdd: {
     width: 58, height: 58, borderRadius: 14, borderWidth: 1.5, borderStyle: 'dashed',
-    borderColor: '#C9C5BB', alignItems: 'center', justifyContent: 'center',
+    borderColor: colors.dash, alignItems: 'center', justifyContent: 'center',
   },
   photoThumb: { width: 58, height: 58, borderRadius: 14, backgroundColor: colors.surface },
   photoHint: { flex: 1, fontSize: font.tiny, lineHeight: 16, color: colors.textTertiary },
@@ -696,7 +696,7 @@ const s = StyleSheet.create({
   },
   caseChipOk: { backgroundColor: 'rgba(74,222,128,0.20)' },
   caseChipText: { fontSize: 10, letterSpacing: 1, fontWeight: '700', color: 'rgba(255,255,255,0.7)' },
-  caseChipTextOk: { color: '#15803D' },
+  caseChipTextOk: { color: colors.greenInk },
 
   thread: { padding: 16, paddingBottom: 8 },
   dayLabel: {
@@ -723,7 +723,7 @@ const s = StyleSheet.create({
     paddingVertical: 14, paddingHorizontal: 16, gap: 9, marginTop: 8, ...shadow,
   },
   refundHead: { flexDirection: 'row', alignItems: 'center', gap: 9 },
-  refundTitle: { fontSize: 12, fontWeight: '700', color: '#15803D' },
+  refundTitle: { fontSize: 12, fontWeight: '700', color: colors.greenInk },
   refundAmount: { fontSize: 12, fontWeight: '800', color: '#16A34A', fontVariant: ['tabular-nums'] },
   closed: {
     alignSelf: 'center', textAlign: 'center', fontSize: font.tiny, lineHeight: 16,
@@ -768,7 +768,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.bg,
     borderRadius: 20, paddingVertical: 13, paddingHorizontal: 14, ...shadow,
   },
-  caseRowHot: { borderWidth: 2, borderColor: colors.ink },
+  caseRowHot: { borderWidth: 2, borderColor: colors.text },
   caseIcon: {
     width: 38, height: 38, borderRadius: 12, backgroundColor: colors.surface,
     alignItems: 'center', justifyContent: 'center',
@@ -790,7 +790,7 @@ const s = StyleSheet.create({
   },
   faq: { backgroundColor: colors.bg, borderRadius: 22, paddingHorizontal: 18, ...shadow },
   faqRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14 },
-  faqLine: { borderBottomWidth: 1, borderBottomColor: '#EFECE4' },
+  faqLine: { borderBottomWidth: 1, borderBottomColor: colors.divider },
   faqText: { flex: 1, fontSize: 13, fontWeight: '600', color: colors.text },
   homeActions: { flexDirection: 'row', gap: 10, marginTop: 2 },
   ghostWide: {
@@ -798,7 +798,7 @@ const s = StyleSheet.create({
     borderWidth: 1.5, borderColor: colors.border,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7,
   },
-  ghostWideText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6, color: '#5c5c58' },
+  ghostWideText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6, color: colors.textDim },
   darkWide: {
     flex: 1.3, height: 52, borderRadius: radius.pill, backgroundColor: colors.ink,
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7,

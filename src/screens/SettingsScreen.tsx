@@ -9,7 +9,8 @@ import { chooseLanguage, LANGUAGE_ROWS } from '../lib/language';
 import { openLegal } from '../lib/legal';
 import { logOut } from '../lib/push';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif, shadow, TOP_INSET } from '../theme';
+import { appearance, chooseAppearance, colors, font, radius, serif, shadow, TOP_INSET } from '../theme';
+import type { AppearancePick } from '../theme';
 import type { Profile } from '../types';
 import { tr, trn, lang } from '../lib/i18n';
 import type { Lang } from '../lib/i18n';
@@ -64,19 +65,18 @@ export default function SettingsScreen({ profile, onBack, onProfileChanged, go }
         <View style={s.cardPad}>
           <View style={s.segRow}>
             {(['Light', 'Dark', 'System'] as const).map((mode) => {
-              const on = mode === 'Light';
+              const pick = mode.toLowerCase() as AppearancePick;
+              const on = pick === appearance;
               return (
-                <Pressable key={mode} disabled={!on}
-                  onPress={() => {}}
-                  style={[s.seg, on && s.segOn, !on && s.segOff]}>
+                <Pressable key={mode} onPress={() => { if (!on) chooseAppearance(pick); }}
+                  accessibilityRole="radio" accessibilityState={{ selected: on }}
+                  style={({ pressed }) => [s.seg, on && s.segOn, pressed && s.pressed]}>
                   <Text style={[s.segText, on && s.segTextOn]}>{tr(mode)}</Text>
                 </Pressable>
               );
             })}
           </View>
-          {/* the customer app has no dark theme yet — the dark kit is the barber
-              side's. A switch that did nothing would be worse than saying so. */}
-          <Text style={s.segNote}>{tr('Dark mode is coming — the customer app is light for now.')}</Text>
+          <Text style={s.segNote}>{tr('The app restarts to switch.')}</Text>
         </View>
 
         <Text style={s.section}>{tr('ACCOUNT')}</Text>
@@ -395,7 +395,7 @@ const s = StyleSheet.create({
   },
   dangerCard: { marginTop: 2 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14 },
-  rowBorder: { borderBottomWidth: 1, borderBottomColor: '#EFECE4' },
+  rowBorder: { borderBottomWidth: 1, borderBottomColor: colors.divider },
   rowLabel: { fontSize: 14, fontWeight: '600', color: colors.text },
   rowHint: { fontSize: font.tiny, color: colors.textSecondary, marginTop: 2 },
   rowValue: { fontSize: 12, color: colors.textSecondary },
@@ -408,8 +408,7 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   segOn: { backgroundColor: colors.ink },
-  segOff: { opacity: 0.5 },
-  segText: { fontSize: 12, fontWeight: '600', color: '#5C5C58' },
+  segText: { fontSize: 12, fontWeight: '600', color: colors.textDim },
   segTextOn: { fontWeight: '700', color: '#fff' },
   segNote: { fontSize: font.tiny, color: colors.textTertiary },
 
@@ -421,7 +420,7 @@ const s = StyleSheet.create({
     borderTopLeftRadius: 28, borderTopRightRadius: 28,
     paddingTop: 12, paddingHorizontal: 24, paddingBottom: 34, gap: 14,
   },
-  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: '#D8D4CA' },
+  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line },
   sheetHead: { flexDirection: 'row', alignItems: 'center' },
   sheetSlot: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
   sheetSlotEnd: { alignItems: 'flex-end' },
@@ -440,12 +439,12 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.bg,
     borderRadius: 18, paddingVertical: 15, paddingHorizontal: 16, ...shadow,
   },
-  optionOn: { borderWidth: 2, borderColor: colors.ink },
+  optionOn: { borderWidth: 2, borderColor: colors.text },
   optionLabel: { fontSize: 14, fontWeight: '600', color: colors.text },
   optionLabelOn: { fontWeight: '700' },
   optionHint: { fontSize: font.tiny, color: colors.textSecondary, marginTop: 2 },
   radio: {
-    width: 22, height: 22, borderRadius: 999, borderWidth: 1.5, borderColor: '#D8D4CA',
+    width: 22, height: 22, borderRadius: 999, borderWidth: 1.5, borderColor: colors.line,
     alignItems: 'center', justifyContent: 'center',
   },
   radioOn: { backgroundColor: colors.ink, borderColor: colors.ink },
@@ -453,14 +452,14 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'flex-start', gap: 9, backgroundColor: colors.bg,
     borderRadius: 16, paddingVertical: 13, paddingHorizontal: 15, ...shadow,
   },
-  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: '#5C5C58' },
+  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: colors.textDim },
 
   summaryCard: {
     backgroundColor: colors.bg, borderRadius: 20, padding: 16, gap: 11, ...shadow,
   },
   warnRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 9 },
   warnIcon: { marginTop: 1 },
-  warnBody: { flex: 1, fontSize: 12, lineHeight: 18, color: '#5C5C58' },
+  warnBody: { flex: 1, fontSize: 12, lineHeight: 18, color: colors.textDim },
   warnStrong: { color: colors.text, fontWeight: '700' },
   hr: { height: 1, backgroundColor: colors.border },
   sumRow: { flexDirection: 'row', justifyContent: 'space-between' },
@@ -501,16 +500,16 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.bg,
     borderRadius: 16, paddingVertical: 11, paddingHorizontal: 18, ...shadow,
   },
-  fieldFocus: { borderWidth: 2, borderColor: colors.ink, flexDirection: 'column', alignItems: 'stretch' },
+  fieldFocus: { borderWidth: 2, borderColor: colors.text, flexDirection: 'column', alignItems: 'stretch' },
   fieldLabel: { fontSize: 10, letterSpacing: 1.2, fontWeight: '700', color: colors.textTertiary },
   fieldInput: { fontSize: 14, fontWeight: '500', color: colors.text, marginTop: 3, padding: 0 },
   fieldValue: { fontSize: 14, fontWeight: '500', color: colors.text, marginTop: 3 },
-  fieldLocked: { fontSize: 14, fontWeight: '500', color: '#5C5C58', marginTop: 3 },
+  fieldLocked: { fontSize: 14, fontWeight: '500', color: colors.textDim, marginTop: 3 },
   verified: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     backgroundColor: 'rgba(74,222,128,0.16)', borderRadius: 8, paddingVertical: 5, paddingHorizontal: 9,
   },
-  verifiedText: { fontSize: 10, letterSpacing: 0.8, fontWeight: '700', color: '#15803D' },
+  verifiedText: { fontSize: 10, letterSpacing: 0.8, fontWeight: '700', color: colors.greenInk },
 
   prefRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.bg,
@@ -529,7 +528,7 @@ const s = StyleSheet.create({
     paddingVertical: 9, paddingHorizontal: 16, ...shadow,
   },
   chipOn: { backgroundColor: colors.ink },
-  chipText: { fontSize: 12, fontWeight: '600', color: '#5C5C58' },
+  chipText: { fontSize: 12, fontWeight: '600', color: colors.textDim },
   chipTextOn: { color: '#fff' },
 
   footer: { position: 'absolute', left: 20, right: 20, bottom: 26 },

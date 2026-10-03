@@ -382,7 +382,7 @@ const st = StyleSheet.create({
   tabText: { fontSize: font.body, fontWeight: '600', color: colors.textTertiary },
   tabTextActive: { color: colors.text, fontWeight: '700' },
   tabCount: {
-    minWidth: 20, height: 20, borderRadius: 10, backgroundColor: '#E9E6DE',
+    minWidth: 20, height: 20, borderRadius: 10, backgroundColor: colors.fill,
     alignItems: 'center', justifyContent: 'center', paddingHorizontal: 5,
   },
   tabCountActive: { backgroundColor: colors.accent },
@@ -394,7 +394,7 @@ const st = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: sp(3), paddingVertical: sp(2.5),
     borderBottomWidth: 1, borderBottomColor: colors.border,
   },
-  rowPressed: { backgroundColor: '#ECE9E2' },
+  rowPressed: { backgroundColor: colors.fill },
   rowBody: { flex: 1, gap: 2 },
   rowName: { fontSize: font.body, fontWeight: '700', color: colors.text },
   rowMore: { fontSize: 11, color: colors.textTertiary, marginTop: 2 },
@@ -409,7 +409,7 @@ const st = StyleSheet.create({
   },
   helpCardLive: { borderWidth: 1.5, borderColor: '#E8A33D' },
   helpIcon: {
-    width: 46, height: 46, borderRadius: 14, backgroundColor: colors.text,
+    width: 46, height: 46, borderRadius: 14, backgroundColor: colors.ink,
     alignItems: 'center', justifyContent: 'center',
   },
   helpIconLive: { backgroundColor: 'rgba(232,163,61,0.16)' },
@@ -427,7 +427,7 @@ const st = StyleSheet.create({
   rowSide: { alignItems: 'flex-end', gap: 5 },
   caught: { alignItems: 'center', gap: 10, paddingTop: sp(12), paddingHorizontal: sp(6) },
   caughtTitle: { fontFamily: serif, fontSize: 22, letterSpacing: 0.4, color: colors.text, textAlign: 'center' },
-  caughtBody: { fontSize: 13.5, lineHeight: 20, color: '#5C5C58', textAlign: 'center' },
+  caughtBody: { fontSize: 13.5, lineHeight: 20, color: colors.textDim, textAlign: 'center' },
   caughtBtn: { marginTop: 8, height: 52, paddingHorizontal: 26, borderRadius: 999, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
   caughtBtnText: { color: '#fff', fontSize: 13, fontWeight: '700', letterSpacing: 1.3 },
 });

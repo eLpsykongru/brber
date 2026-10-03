@@ -4,7 +4,7 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View
 import { Display, PillButton } from '../components/ui';
 import type { QueueLink } from '../lib/queueLink';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif, shadow, TOP_INSET } from '../theme';
+import { colors, font, isDark, radius, serif, shadow, TOP_INSET } from '../theme';
 import { tr } from '../lib/i18n';
 import { useHideTabBar } from '../components/TabBar';
 
@@ -333,7 +333,7 @@ export default function QueueLinkScreen({ link, onSignIn, onBrowser, onDismiss }
 }
 
 const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#EBE8E1', paddingTop: TOP_INSET - 12 },
+  screen: { flex: 1, backgroundColor: isDark ? colors.surface : '#EBE8E1', paddingTop: TOP_INSET - 12 },
   top: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 20, paddingBottom: 14 },
   logo: {
     width: 26, height: 26, borderRadius: 8, backgroundColor: colors.accent,
@@ -349,7 +349,7 @@ const s = StyleSheet.create({
   liveText: { fontSize: 9.5, fontWeight: '800', letterSpacing: 1.1, color: colors.accent },
   body: { paddingHorizontal: 20, gap: 12, paddingBottom: 12 },
   meta: { fontSize: 12, color: colors.textSecondary, marginTop: 5 },
-  lede: { fontSize: font.small, lineHeight: 20, color: '#5C5C58', marginTop: 8 },
+  lede: { fontSize: font.small, lineHeight: 20, color: colors.textDim, marginTop: 8 },
   grow: { flex: 1, minWidth: 0 },
   pressed: { opacity: 0.75 },
   dim: { opacity: 0.55 },
@@ -386,7 +386,7 @@ const s = StyleSheet.create({
     flex: 1, backgroundColor: colors.bg, borderRadius: radius.md, padding: 11,
     alignItems: 'center', gap: 4, ...shadow,
   },
-  chairOn: { borderWidth: 2, borderColor: colors.ink, padding: 9 },
+  chairOn: { borderWidth: 2, borderColor: colors.text, padding: 9 },
   av: {
     width: 32, height: 32, borderRadius: 16, backgroundColor: colors.surface,
     alignItems: 'center', justifyContent: 'center',
@@ -406,13 +406,13 @@ const s = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { borderRadius: radius.pill, backgroundColor: colors.bg, paddingVertical: 9, paddingHorizontal: 15 },
   chipOn: { backgroundColor: colors.ink },
-  chipText: { fontSize: 12, fontWeight: '600', color: '#5C5C58' },
+  chipText: { fontSize: 12, fontWeight: '600', color: colors.textDim },
 
   note: {
     flexDirection: 'row', gap: 9, backgroundColor: colors.bg, borderRadius: radius.md,
     paddingVertical: 13, paddingHorizontal: 15, ...shadow,
   },
-  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: '#5C5C58' },
+  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: colors.textDim },
 
   foot: { marginTop: 'auto', paddingHorizontal: 20, paddingTop: 12, paddingBottom: 30, gap: 9 },
   hot: {

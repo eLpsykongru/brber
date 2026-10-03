@@ -325,7 +325,7 @@ function NotificationSettings({ userId, onBack, onOpenBooking, onOpenWallet }: {
             <Text style={s.prefHint}>{r.hint}</Text>
           </View>
           <Switch value={prefs[r.key] as boolean} onValueChange={(v) => save({ [r.key]: v } as Partial<Prefs>)}
-            trackColor={{ false: '#DDD9CF', true: denied ? '#DDD9CF' : colors.accent }} disabled={denied} thumbColor="#fff" />
+            trackColor={{ false: colors.track, true: denied ? colors.track : colors.accent }} disabled={denied} thumbColor="#fff" />
         </View>
       ))}
     </View>
@@ -403,7 +403,7 @@ function NotificationSettings({ userId, onBack, onOpenBooking, onOpenWallet }: {
               </View>
               <Switch value={prefs[r.key] as boolean}
                 onValueChange={(v) => save({ [r.key]: v } as Partial<Prefs>)}
-                trackColor={{ false: '#DDD9CF', true: denied ? '#DDD9CF' : colors.accent }} disabled={denied} thumbColor="#fff" />
+                trackColor={{ false: colors.track, true: denied ? colors.track : colors.accent }} disabled={denied} thumbColor="#fff" />
             </View>
           ))}
           <Pressable onPress={() => setPickerOpen(true)} style={s.prefRow}
@@ -432,7 +432,7 @@ function NotificationSettings({ userId, onBack, onOpenBooking, onOpenWallet }: {
               <Text style={s.prefHint}>{tr('Discounts from Tangier salons')}</Text>
             </View>
             <Switch value={prefs.push_offers} onValueChange={(v) => save({ push_offers: v })}
-              trackColor={{ false: '#DDD9CF', true: denied ? '#DDD9CF' : colors.accent }} disabled={denied} thumbColor="#fff" />
+              trackColor={{ false: colors.track, true: denied ? colors.track : colors.accent }} disabled={denied} thumbColor="#fff" />
           </View>
         </View>
         </View>
@@ -553,7 +553,7 @@ const s = StyleSheet.create({
   empty: { alignItems: 'center', gap: 16, paddingTop: 150 },
   emptyCircle: {
     width: 96, height: 96, borderRadius: radius.pill, borderWidth: 1.5, borderStyle: 'dashed',
-    borderColor: '#C9C5BB', alignItems: 'center', justifyContent: 'center',
+    borderColor: colors.dash, alignItems: 'center', justifyContent: 'center',
   },
   emptyTitle: { textAlign: 'center' },
   emptyText: {
@@ -597,7 +597,7 @@ const s = StyleSheet.create({
   },
   card: { backgroundColor: colors.bg, borderRadius: 24, paddingHorizontal: 18, ...shadow },
   prefRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14 },
-  prefRowBorder: { borderBottomWidth: 1, borderBottomColor: '#EFECE4' },
+  prefRowBorder: { borderBottomWidth: 1, borderBottomColor: colors.divider },
   prefLabel: { fontSize: 14, fontWeight: '600', color: colors.text },
   prefHint: { fontSize: font.tiny, color: colors.textSecondary, marginTop: 2 },
   prefValue: { fontSize: 12, fontWeight: '600', color: colors.textSecondary },
@@ -612,7 +612,7 @@ const s = StyleSheet.create({
     borderTopLeftRadius: 28, borderTopRightRadius: 28,
     paddingTop: 12, paddingHorizontal: 24, paddingBottom: 34, gap: 14,
   },
-  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: '#D8D4CA' },
+  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line },
   sheetHead: { flexDirection: 'row', alignItems: 'center' },
   sheetSlot: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
   sheetSlotEnd: { alignItems: 'flex-end' },
@@ -626,12 +626,12 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.bg,
     borderRadius: 18, paddingVertical: 15, paddingHorizontal: 16, ...shadow,
   },
-  optionOn: { borderWidth: 2, borderColor: colors.ink },
+  optionOn: { borderWidth: 2, borderColor: colors.text },
   optionLabel: { fontSize: 14, fontWeight: '600', color: colors.text },
   optionLabelOn: { fontWeight: '700' },
   optionHint: { fontSize: font.tiny, color: colors.textSecondary, marginTop: 2 },
   radio: {
-    width: 22, height: 22, borderRadius: 999, borderWidth: 1.5, borderColor: '#D8D4CA',
+    width: 22, height: 22, borderRadius: 999, borderWidth: 1.5, borderColor: colors.line,
     alignItems: 'center', justifyContent: 'center',
   },
   radioOn: { backgroundColor: colors.ink, borderColor: colors.ink },
@@ -639,7 +639,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'flex-start', gap: 9, backgroundColor: colors.bg,
     borderRadius: 16, paddingVertical: 13, paddingHorizontal: 15, ...shadow,
   },
-  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: '#5C5C58' },
+  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: colors.textDim },
   saveBtn: {
     height: 54, borderRadius: radius.pill, backgroundColor: colors.ink,
     alignItems: 'center', justifyContent: 'center',

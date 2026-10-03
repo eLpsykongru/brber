@@ -11,7 +11,7 @@ import { UnderReviewStrip } from '../components/Failures';
 import { daySlots } from '../lib/slots';
 import { useAndroidBack } from '../lib/back';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif, shadow, shadowLg, sp, TOP_INSET } from '../theme';
+import { colors, font, isDark, radius, serif, shadow, shadowLg, sp, TOP_INSET } from '../theme';
 import ChatScreen from './ChatScreen';
 import { DayQueueRow, minutesUntil } from './QueueScreen';
 import { en, loc, tr, trn, trRich } from '../lib/i18n';
@@ -29,10 +29,10 @@ import { nameOrFormer } from '../lib/deletion';
 // cash, at the shop. The moment a rail lands and deposit_cents > 0, these rows
 // render the mock's copy verbatim with no layout change.
 
-const SURFACE_SUNK = '#F7F5F1';   // the quote / inset rows inside white cards
-const DASH = '#C9C5BB';
+const SURFACE_SUNK = isDark ? '#111113' : '#F7F5F1';   // the quote / inset rows inside white cards
+const DASH = colors.dash;
 const GREEN = '#4ADE80';
-const GREEN_INK = '#15803D';
+const GREEN_INK = colors.greenInk;
 const SEEN_KEY = (id: string) => `moved_seen_${id}`;
 
 export type Detail = {
@@ -1422,7 +1422,7 @@ const s = StyleSheet.create({
   pillDark: { backgroundColor: colors.ink },
   pillLight: { backgroundColor: colors.bg, borderWidth: 1.5, borderColor: colors.border },
   pillText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.72, color: '#fff' },
-  pillTextLight: { color: '#5C5C58' },
+  pillTextLight: { color: colors.textDim },
 
   // 12b declined
   declined: { borderWidth: 2, borderColor: colors.accent, gap: 13, padding: 18 },
@@ -1441,7 +1441,7 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   quoteAvatarText: { fontSize: 9, fontWeight: '700', color: colors.accent },
-  quoteText: { flex: 1, fontSize: 12, lineHeight: 18, color: '#5C5C58' },
+  quoteText: { flex: 1, fontSize: 12, lineHeight: 18, color: colors.textDim },
   suggestLabel: { marginTop: 2, fontSize: font.tiny },
   offerList: { gap: 9 },
   offer: {
@@ -1459,7 +1459,7 @@ const s = StyleSheet.create({
   // sheets
   scrim: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.5)' },
   scrimDeep: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.52)' },
-  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: '#D8D4CA' },
+  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line },
   sheetBottom: {
     position: 'absolute', left: 0, right: 0, bottom: 0, backgroundColor: colors.surface,
     borderTopLeftRadius: 28, borderTopRightRadius: 28,
@@ -1490,7 +1490,7 @@ const s = StyleSheet.create({
   },
   lockRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 9 },
   lockIcon: { marginTop: 1 },
-  lockBody: { flex: 1, fontSize: 12, lineHeight: 18, color: '#5C5C58' },
+  lockBody: { flex: 1, fontSize: 12, lineHeight: 18, color: colors.textDim },
   lockStrong: { color: colors.text, fontWeight: '700' },
   reasonBlock: { gap: 9 },
   reasonRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
@@ -1498,7 +1498,7 @@ const s = StyleSheet.create({
     borderRadius: radius.pill, backgroundColor: colors.bg, paddingVertical: 9, paddingHorizontal: 16,
   },
   reasonOn: { backgroundColor: colors.ink },
-  reasonText: { fontSize: 12, fontWeight: '600', color: '#5C5C58' },
+  reasonText: { fontSize: 12, fontWeight: '600', color: colors.textDim },
   reasonTextOn: { color: '#fff' },
   sheetCtas: { gap: 10, marginTop: 2 },
   dangerBtn: {
@@ -1514,7 +1514,7 @@ const s = StyleSheet.create({
 
   // 35a/35b — "Other" gets somewhere to go, and a withdrawal is calm, not alarming
   calmCircle: {
-    width: 60, height: 60, borderRadius: radius.pill, backgroundColor: '#E9E6DE',
+    width: 60, height: 60, borderRadius: radius.pill, backgroundColor: colors.fill,
     alignItems: 'center', justifyContent: 'center',
   },
   okDot: {
@@ -1548,7 +1548,7 @@ const s = StyleSheet.create({
   },
   receiptCenter: { alignItems: 'center', gap: 13, paddingTop: 2 },
   receiptIcon: {
-    width: 64, height: 64, borderRadius: radius.pill, backgroundColor: '#E9E6DE',
+    width: 64, height: 64, borderRadius: radius.pill, backgroundColor: colors.fill,
     alignItems: 'center', justifyContent: 'center',
   },
   receiptSub: {
@@ -1588,7 +1588,7 @@ const s = StyleSheet.create({
     flex: 1, height: 52, borderRadius: radius.pill, backgroundColor: colors.bg,
     borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center',
   },
-  msgText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6, color: '#5C5C58' },
+  msgText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.6, color: colors.textDim },
   againBtn: {
     flex: 1.2, height: 52, borderRadius: radius.pill, backgroundColor: colors.ink,
     alignItems: 'center', justifyContent: 'center',
@@ -1604,13 +1604,13 @@ const s = StyleSheet.create({
   minChip: {
     backgroundColor: colors.surface, borderRadius: 8, paddingVertical: 5, paddingHorizontal: 9,
   },
-  minChipText: { fontSize: 10, letterSpacing: 1, fontWeight: '700', color: '#5C5C58' },
+  minChipText: { fontSize: 10, letterSpacing: 1, fontWeight: '700', color: colors.textDim },
   pickerScroll: { paddingBottom: 110 },
   noteCard: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 9, backgroundColor: colors.bg,
     borderRadius: 16, paddingVertical: 13, paddingHorizontal: 15, marginTop: 14, ...shadow,
   },
-  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: '#5C5C58' },
+  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: colors.textDim },
   sheetFooter: { position: 'absolute', left: 22, right: 22, bottom: 28 },
   moveBtn: {
     height: 54, borderRadius: radius.pill, backgroundColor: colors.ink,
@@ -1675,7 +1675,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 9, backgroundColor: SURFACE_SUNK,
     borderRadius: 14, paddingVertical: 12, paddingHorizontal: 14,
   },
-  sunkLabel: { flex: 1, fontSize: 12, color: '#5C5C58' },
+  sunkLabel: { flex: 1, fontSize: 12, color: colors.textDim },
   sunkValue: { fontSize: font.small, fontWeight: '700', color: colors.text, fontVariant: ['tabular-nums'] },
   wideDark: {
     width: '100%', height: 54, borderRadius: radius.pill, backgroundColor: colors.ink,

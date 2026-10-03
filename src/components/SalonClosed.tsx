@@ -117,7 +117,7 @@ export function ClosedCard({ c, salonId, onBookLater }: {
           accessibilityLabel={tr('Tell me if they reopen')}
           style={({ pressed }) => [s.secondary, pressed && s.pressed, told && s.done]}>
           <Ionicons name={told ? 'checkmark' : 'time-outline'} size={15}
-            color={told ? colors.success : '#5c5c58'} />
+            color={told ? colors.success : colors.textDim} />
           <Text style={[s.secondaryText, told && s.doneText]}>
             {told ? tr('WE\'LL TELL YOU') : tr('TELL ME IF THEY REOPEN')}
           </Text>
@@ -150,8 +150,8 @@ const s = StyleSheet.create({
   cardTitle: { fontFamily: inter.b, fontSize: 13.5, color: colors.text },
   cardSub: { fontFamily: inter.r, fontSize: 11.5, color: colors.textSecondary, marginTop: 3 },
   cardBody: {
-    fontFamily: inter.r, fontSize: 12, lineHeight: 18, color: '#5c5c58',
-    borderTopWidth: 1, borderTopColor: '#EFECE4', paddingTop: 12,
+    fontFamily: inter.r, fontSize: 12, lineHeight: 18, color: colors.textDim,
+    borderTopWidth: 1, borderTopColor: colors.divider, paddingTop: 12,
   },
 
   actions: { gap: 10 },
@@ -165,7 +165,7 @@ const s = StyleSheet.create({
     borderWidth: 1.5, borderColor: colors.border, flexDirection: 'row',
     alignItems: 'center', justifyContent: 'center', gap: 8,
   },
-  secondaryText: { fontFamily: inter.b, fontSize: 12.5, color: '#5c5c58', letterSpacing: 0.5 },
+  secondaryText: { fontFamily: inter.b, fontSize: 12.5, color: colors.textDim, letterSpacing: 0.5 },
   done: { borderColor: 'rgba(30,142,79,0.4)' },
   doneText: { color: colors.success },
 });

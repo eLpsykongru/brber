@@ -1,10 +1,34 @@
+import { reloadAppAsync } from 'expo';
+import Storage from 'expo-sqlite/kv-store';
+import { Appearance } from 'react-native';
 import { initialWindowMetrics } from 'react-native-safe-area-context';
+
+// PRO-07 Appearance: Light, Dark or System, saved on this phone ('system' until
+// someone picks). Read once, as this file loads — every screen builds its
+// StyleSheet from `colors` as it loads, after this — so a change saves and
+// reloads the app, the way the language does (lib/language.ts).
+export type AppearancePick = 'light' | 'dark' | 'system';
+const APPEARANCE = 'app_appearance';
+const saved = (() => { try { return Storage.getItemSync(APPEARANCE); } catch { return null; } })();
+export const appearance: AppearancePick = saved === 'light' || saved === 'dark' ? saved : 'system';
+// alerts, keyboards and Apple's map follow an explicit pick too
+if (appearance !== 'system') Appearance.setColorScheme(appearance);
+// ponytail: 'system' is read at launch, so a phone that flips mid-session
+// re-themes on the next one. Reload on the way back to the foreground if that bites.
+export const isDark = (appearance === 'system' ? Appearance.getColorScheme() : appearance) === 'dark';
+
+export async function chooseAppearance(next: AppearancePick) {
+  try { Storage.setItemSync(APPEARANCE, next); } catch { /* stays on the old pick */ }
+  // the override outlives a reload: drop it, or 'system' would read the old pick back
+  Appearance.setColorScheme(next === 'system' ? null : next);
+  await reloadAppAsync('appearance');
+}
 
 // Design tokens — single source of truth for the visual system.
 // "Rentra" editorial skin (design.md): warm off-white canvas, white cards,
 // near-black hero surfaces, Playfair Display for display type, coral accents only.
 
-export const colors = {
+const light = {
   bg: '#FFFFFF',            // cards, sheets, white surfaces
   surface: '#F2F0EB',       // warm canvas + subtle fills on white cards
   cardAlt: '#FAF9F6',       // nested / inset panels
@@ -33,7 +57,59 @@ export const colors = {
   warning: '#9A6B00',
   danger: '#D23B3B',
   star: '#E8A100',
+
+  // greys the screens used to hardcode, named so the dark palette can answer them
+  textDim: '#5C5C58',       // body copy a step below text
+  divider: '#EFECE4',       // row dividers inside white cards
+  line: '#D8D4CA',          // sheet grabbers, radio and checkbox outlines
+  track: '#DDD9CF',         // off switches, empty meters, progress dashes
+  dash: '#C9C5BB',          // dashed empty-state rings and their icons
+  fill: '#E9E6DE',          // full slots, photo placeholders
+  greenInk: '#15803D',      // VERIFIED / refunded text on a green tint
 };
+
+// The customer side in dark: the barber kit's surfaces (`dark` below), so both
+// sides read as one app. `ink` stays a dark surface, a step above the cards,
+// because everything printed on it is already white; a selection border, which
+// wants the most contrast there is, uses `text` instead.
+const night: typeof light = {
+  bg: '#17171A',
+  surface: '#0D0D0F',
+  cardAlt: '#212125',
+  border: '#26262B',
+  hairline: 'rgba(255,255,255,0.06)',
+  borderSoft: 'rgba(255,255,255,0.12)',
+  slotEmpty: '#212125',
+  skeleton: '#26262B',
+  skeletonSoft: '#1E1E22',
+  text: '#FFFFFF',
+  textSecondary: '#9A9CA3',
+  textTertiary: '#6B6B72',
+
+  accent: '#E8442E',
+  accentSoft: 'rgba(232,68,46,0.14)',
+  onAccent: '#FFFFFF',
+
+  ink: '#2A2A2F',
+  tabBg: '#212125',
+  tabActive: '#3A3A40',
+  tabInactiveText: '#9A9CA3',
+
+  success: '#4ADE80',
+  warning: '#E8A100',
+  danger: '#E5484D',        // under white text (pill_danger) and as text on a card
+  star: '#E8A100',
+
+  textDim: '#D8D8DC',
+  divider: '#26262B',
+  line: '#3A3A40',
+  track: '#3A3A40',
+  dash: '#4A4A52',
+  fill: '#26262B',
+  greenInk: '#4ADE80',
+};
+
+export const colors = isDark ? night : light;
 
 // dark surfaces for the whole barber side — values lifted verbatim from
 // "Barber App.dc.html" turn 1, so a screen can be checked against the mock by eye.

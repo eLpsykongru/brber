@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Card, ScreenHeader, TAB_BAR_INSET } from '../components/ui';
 import { supabase } from '../lib/supabase';
-import { colors, font, inter, radius, sp, TOP_INSET } from '../theme';
+import { colors, font, inter, isDark, radius, sp, TOP_INSET } from '../theme';
 import { loc, tr } from '../lib/i18n';
 
 // 39b of "Customer App 3.dc.html" — your standing.
@@ -64,7 +64,7 @@ export default function StandingScreen({ onBack, onDispute }: {
           <View style={s.warnCard}>
             <View style={s.warnTop}>
               <View style={s.warnChip}>
-                <Ionicons name="time-outline" size={17} color="#8a6508" />
+                <Ionicons name="time-outline" size={17} color={isDark ? colors.warning : '#8a6508'} />
               </View>
               <View style={s.grow}>
                 <Text style={s.warnTitle}>{tr('Barbers ask you to pay up front')}</Text>
@@ -187,10 +187,10 @@ const s = StyleSheet.create({
     width: 36, height: 36, borderRadius: radius.pill, backgroundColor: 'rgba(232,161,0,0.24)',
     alignItems: 'center', justifyContent: 'center',
   },
-  warnTitle: { fontFamily: inter.b, fontSize: 13.5, color: '#8a6508' },
-  warnSub: { fontFamily: inter.r, fontSize: 11.5, color: '#5c5c58', marginTop: 3 },
+  warnTitle: { fontFamily: inter.b, fontSize: 13.5, color: isDark ? colors.warning : '#8a6508' },
+  warnSub: { fontFamily: inter.r, fontSize: 11.5, color: colors.textDim, marginTop: 3 },
   warnBody: {
-    fontFamily: inter.r, fontSize: 12.5, lineHeight: 19, color: '#3d3d3a',
+    fontFamily: inter.r, fontSize: 12.5, lineHeight: 19, color: isDark ? colors.textDim : '#3d3d3a',
     borderTopWidth: 1, borderTopColor: 'rgba(232,161,0,0.24)', paddingTop: 13,
   },
 
@@ -207,7 +207,7 @@ const s = StyleSheet.create({
   bar: { flex: 1, height: 6, borderRadius: 3, backgroundColor: colors.border },
   barOn: { backgroundColor: '#16A34A' },
   ladder: {
-    gap: 11, marginTop: 14, borderTopWidth: 1, borderTopColor: '#EFECE4', paddingTop: 13,
+    gap: 11, marginTop: 14, borderTopWidth: 1, borderTopColor: colors.divider, paddingTop: 13,
   },
   step: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   stepDone: {
@@ -216,9 +216,9 @@ const s = StyleSheet.create({
   },
   stepTodo: {
     width: 20, height: 20, borderRadius: radius.pill,
-    borderWidth: 1.5, borderColor: '#D8D4CA', borderStyle: 'dashed',
+    borderWidth: 1.5, borderColor: colors.line, borderStyle: 'dashed',
   },
-  stepText: { flex: 1, fontFamily: inter.r, fontSize: 12.5, color: '#3d3d3a' },
+  stepText: { flex: 1, fontFamily: inter.r, fontSize: 12.5, color: isDark ? colors.textDim : '#3d3d3a' },
   stepTodoText: { flex: 1, fontFamily: inter.r, fontSize: 12.5, color: colors.textTertiary },
 
   section: {
@@ -227,7 +227,7 @@ const s = StyleSheet.create({
   },
   list: { backgroundColor: colors.bg, borderRadius: 20, paddingHorizontal: 18 },
   markRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 13 },
-  markDivider: { borderBottomWidth: 1, borderBottomColor: '#EFECE4' },
+  markDivider: { borderBottomWidth: 1, borderBottomColor: colors.divider },
   markTitle: { fontFamily: inter.sb, fontSize: 12.5, color: colors.text },
   markMeta: { fontFamily: inter.r, fontSize: 11, color: colors.textTertiary, marginTop: 2 },
   dispute: { fontFamily: inter.sb, fontSize: 11.5, color: colors.accent },
@@ -243,6 +243,6 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', marginTop: 1,
   },
   privacyText: {
-    flex: 1, fontFamily: inter.r, fontSize: 11.5, lineHeight: 17, color: '#5c5c58',
+    flex: 1, fontFamily: inter.r, fontSize: 11.5, lineHeight: 17, color: colors.textDim,
   },
 });

@@ -6,7 +6,7 @@ import {
 import { dh } from '../lib/billing';
 import { DeletionCheck, deleteAccount, DepositBooking, loadDeletionCheck, typedDelete } from '../lib/deletion';
 import { loc, ltr, tr, trn } from '../lib/i18n';
-import { colors, inter, serif, shadow, TOP_INSET } from '../theme';
+import { colors, inter, isDark, serif, shadow, TOP_INSET } from '../theme';
 
 // DEL-04…06 of design_handoff_sterncut_launch/2_customer_store_readiness — the
 // customer's way out, as pushed screens (PRO-09's sheet is gone). The rule is the
@@ -235,38 +235,38 @@ const s = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   body: { paddingTop: TOP_INSET - 12, paddingHorizontal: 20, paddingBottom: 24, gap: 12 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  back: { width: 44, height: 44, borderRadius: 999, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', ...shadow },
+  back: { width: 44, height: 44, borderRadius: 999, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', ...shadow },
   headerText: { flex: 1, textAlign: 'center', fontFamily: inter.b, fontSize: 11, letterSpacing: 1.76, color: colors.textSecondary },
   lead: { paddingTop: 2, paddingHorizontal: 4 },
   title24: { fontFamily: serif, fontSize: 24, lineHeight: 28, letterSpacing: 0.48, color: colors.text },
   title32: { fontFamily: serif, fontSize: 32, lineHeight: 35, letterSpacing: 0.64, color: colors.text },
   sub13: { fontFamily: inter.r, fontSize: 13, color: colors.textSecondary, marginTop: 6 },
-  card: { backgroundColor: '#fff', borderRadius: 20, paddingVertical: 14, paddingHorizontal: 16, gap: 8, ...shadow, shadowOpacity: 0.05 },
+  card: { backgroundColor: colors.bg, borderRadius: 20, paddingVertical: 14, paddingHorizontal: 16, gap: 8, ...shadow, shadowOpacity: 0.05 },
   label: { fontFamily: inter.b, fontSize: 10, letterSpacing: 1.4, color: colors.textSecondary },
   line: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   lineText: { flex: 1, fontFamily: inter.r, fontSize: 13, color: colors.text },
   dot: { width: 5, height: 5, borderRadius: 999, backgroundColor: colors.textSecondary, marginHorizontal: 3 },
   hr: { height: 1, backgroundColor: colors.border, marginVertical: 4 },
-  walletCard: { backgroundColor: '#fff', borderRadius: 20, borderWidth: 1.5, borderColor: AMBER, paddingTop: 14, paddingHorizontal: 16, paddingBottom: 6, gap: 6 },
+  walletCard: { backgroundColor: colors.bg, borderRadius: 20, borderWidth: 1.5, borderColor: AMBER, paddingTop: 14, paddingHorizontal: 16, paddingBottom: 6, gap: 6 },
   walletTitle: { fontFamily: inter.b, fontSize: 15, color: colors.text, fontVariant: ['tabular-nums'] },
-  walletBody: { fontFamily: inter.r, fontSize: 12.5, lineHeight: 19, color: '#5C5C58' },
+  walletBody: { fontFamily: inter.r, fontSize: 12.5, lineHeight: 19, color: colors.textDim },
   walletLink: { fontFamily: inter.b, color: colors.text, textDecorationLine: 'underline' },
-  tickRow: { flexDirection: 'row', alignItems: 'center', gap: 11, minHeight: 44, borderTopWidth: 1, borderTopColor: '#F0EDE6', marginTop: 4 },
+  tickRow: { flexDirection: 'row', alignItems: 'center', gap: 11, minHeight: 44, borderTopWidth: 1, borderTopColor: colors.divider, marginTop: 4 },
   tick: { width: 24, height: 24, borderRadius: 7, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
   tickOn: { backgroundColor: colors.ink, borderColor: colors.ink },
   tickText: { flex: 1, fontFamily: inter.sb, fontSize: 13.5, color: colors.text },
   field: {
-    height: 50, borderRadius: 16, backgroundColor: '#fff', borderWidth: 1.5, borderColor: colors.border,
+    height: 50, borderRadius: 16, backgroundColor: colors.bg, borderWidth: 1.5, borderColor: colors.border,
     paddingHorizontal: 18, fontFamily: inter.b, fontSize: 14, letterSpacing: 1.4, color: colors.text, writingDirection: 'ltr',
   },
   fieldOn: { borderColor: colors.text },
   footer: { paddingTop: 12, paddingHorizontal: 20, paddingBottom: 30, gap: 10 },
   danger: { height: 54, borderRadius: 999, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
-  keep: { height: 52, borderRadius: 999, backgroundColor: '#fff', borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
+  keep: { height: 52, borderRadius: 999, backgroundColor: colors.bg, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
   ink: { height: 54, borderRadius: 999, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
   btnText: { fontFamily: inter.b, fontSize: 13, letterSpacing: 1.3, color: '#fff' },
   chip: { alignSelf: 'flex-start', height: 26, borderRadius: 999, backgroundColor: 'rgba(232,163,61,.16)', paddingHorizontal: 11, justifyContent: 'center' },
-  chipText: { fontFamily: inter.b, fontSize: 10.5, letterSpacing: 1.05, color: '#8F5E14' },
+  chipText: { fontFamily: inter.b, fontSize: 10.5, letterSpacing: 1.05, color: isDark ? colors.warning : '#8F5E14' },
   who: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   initials: { width: 48, height: 48, borderRadius: 999, backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center' },
   initialsText: { fontFamily: inter.b, fontSize: 13, color: colors.accent },
@@ -275,9 +275,9 @@ const s = StyleSheet.create({
   when: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 12 },
   whenText: { fontFamily: inter.b, fontSize: 13, color: colors.text, fontVariant: ['tabular-nums'] },
   warn: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingHorizontal: 4 },
-  warnText: { flex: 1, fontFamily: inter.r, fontSize: 13.5, lineHeight: 21, color: '#5C5C58' },
+  warnText: { flex: 1, fontFamily: inter.r, fontSize: 13.5, lineHeight: 21, color: colors.textDim },
   doneBody: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12, paddingTop: 40, paddingHorizontal: 34 },
   doneMark: { width: 72, height: 72, borderRadius: 999, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
-  doneText: { fontFamily: inter.r, fontSize: 14, lineHeight: 22, color: '#5C5C58', maxWidth: 318, textAlign: 'center', marginTop: 2 },
+  doneText: { fontFamily: inter.r, fontSize: 14, lineHeight: 22, color: colors.textDim, maxWidth: 318, textAlign: 'center', marginTop: 2 },
   pressed: { opacity: 0.75 },
 });

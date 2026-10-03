@@ -190,7 +190,7 @@ const s = StyleSheet.create({
     fontSize: 14, lineHeight: 21, color: 'rgba(255,255,255,0.6)', marginTop: 10, maxWidth: 300,
   },
 
-  codeCard: { backgroundColor: '#fff', borderRadius: 22, padding: 18, gap: 14 },
+  codeCard: { backgroundColor: colors.bg, borderRadius: 22, padding: 18, gap: 14 },
   codeLabel: { fontSize: 10, letterSpacing: 1.5, fontWeight: '700', color: colors.textSecondary },
   codeRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   code: { flex: 1, fontFamily: serif, fontSize: 30, lineHeight: 32, color: colors.text, letterSpacing: 1.8 },
@@ -200,7 +200,7 @@ const s = StyleSheet.create({
   },
   copyText: { fontSize: 12, fontWeight: '700', letterSpacing: 0.72, color: colors.text },
   shareRow: {
-    flexDirection: 'row', gap: 8, borderTopWidth: 1, borderTopColor: '#EFECE4', paddingTop: 14,
+    flexDirection: 'row', gap: 8, borderTopWidth: 1, borderTopColor: colors.divider, paddingTop: 14,
   },
   shareBtn: {
     flex: 1, height: 46, borderRadius: radius.pill, backgroundColor: colors.ink,

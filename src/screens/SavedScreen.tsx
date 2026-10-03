@@ -8,7 +8,7 @@ import { Press, Pushed } from '../components/motion';
 import { Filter, SavedBarber, SavedRow, SavedSalon, splitSaved } from '../lib/saved';
 import { shouldRemove } from '../lib/swipe';
 import { supabase } from '../lib/supabase';
-import { colors, inter, radius, sp, TOP_INSET } from '../theme';
+import { colors, inter, isDark, radius, sp, TOP_INSET } from '../theme';
 import { tr } from '../lib/i18n';
 
 // EXPL-24 … EXPL-27 — Saved, promoted from a page nobody could find twice to a
@@ -422,7 +422,7 @@ const s = StyleSheet.create({
   avatarText: { fontFamily: inter.b, fontSize: 13, color: colors.accent },
   avatarTextMuted: { fontFamily: inter.b, fontSize: 13, color: colors.textSecondary },
   shopTile: {
-    width: 48, height: 48, borderRadius: 14, backgroundColor: '#E9E6DE',
+    width: 48, height: 48, borderRadius: 14, backgroundColor: colors.fill,
     alignItems: 'center', justifyContent: 'center',
   },
   name: { fontFamily: inter.b, fontSize: 14, color: colors.text },
@@ -441,21 +441,21 @@ const s = StyleSheet.create({
 
   blockedStrip: {
     flexDirection: 'row', alignItems: 'center', gap: 11,
-    backgroundColor: 'rgba(0,0,0,0.045)', borderRadius: 20, padding: 13, paddingHorizontal: 14,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.045)', borderRadius: 20, padding: 13, paddingHorizontal: 14,
   },
   blockedIcon: {
-    width: 34, height: 34, borderRadius: radius.pill, backgroundColor: 'rgba(0,0,0,0.06)',
+    width: 34, height: 34, borderRadius: radius.pill, backgroundColor: colors.hairline,
     alignItems: 'center', justifyContent: 'center',
   },
-  blockedText: { flex: 1, fontFamily: inter.r, fontSize: 12, lineHeight: 17, color: '#5c5c58' },
+  blockedText: { flex: 1, fontFamily: inter.r, fontSize: 12, lineHeight: 17, color: colors.textDim },
 
   blockedCard: {
     backgroundColor: colors.bg, borderRadius: 20, padding: 14, paddingHorizontal: 15, gap: 12,
   },
   blockedHead: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   blockedBody: {
-    fontFamily: inter.r, fontSize: 12, lineHeight: 18, color: '#5c5c58',
-    borderTopWidth: 1, borderTopColor: '#EFECE4', paddingTop: 12,
+    fontFamily: inter.r, fontSize: 12, lineHeight: 18, color: colors.textDim,
+    borderTopWidth: 1, borderTopColor: colors.divider, paddingTop: 12,
   },
   offPill: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
@@ -469,13 +469,13 @@ const s = StyleSheet.create({
     borderWidth: 1.5, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center',
   },
-  removeText: { fontFamily: inter.b, fontSize: 11.5, letterSpacing: 0.46, color: '#5c5c58' },
+  removeText: { fontFamily: inter.b, fontSize: 11.5, letterSpacing: 0.46, color: colors.textDim },
 
   note: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 11,
-    backgroundColor: 'rgba(0,0,0,0.045)', borderRadius: 18, padding: 13, paddingHorizontal: 14,
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.045)', borderRadius: 18, padding: 13, paddingHorizontal: 14,
   },
-  noteText: { flex: 1, fontFamily: inter.r, fontSize: 11.5, lineHeight: 17, color: '#5c5c58' },
+  noteText: { flex: 1, fontFamily: inter.r, fontSize: 11.5, lineHeight: 17, color: colors.textDim },
 
   toast: {
     position: 'absolute', left: 16, right: 16, bottom: TAB_BAR_INSET - 20,

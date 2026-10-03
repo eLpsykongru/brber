@@ -160,7 +160,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28,
     paddingTop: 12, paddingHorizontal: 22, paddingBottom: 30, gap: 13, ...shadowLg,
   },
-  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: '#D8D4CA' },
+  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line },
   center: { alignItems: 'center', paddingTop: 2 },
   icon: {
     width: 58, height: 58, borderRadius: radius.pill, backgroundColor: colors.accentSoft,
@@ -201,7 +201,7 @@ const s = StyleSheet.create({
     width: 28, height: 28, borderRadius: radius.pill, backgroundColor: colors.accentSoft,
     alignItems: 'center', justifyContent: 'center',
   },
-  raceText: { flex: 1, fontSize: 12.5, lineHeight: 18, color: '#5C5C58' },
+  raceText: { flex: 1, fontSize: 12.5, lineHeight: 18, color: colors.textDim },
   raceClock: {
     fontSize: 12, fontWeight: '800', color: colors.accent, fontVariant: ['tabular-nums'],
   },

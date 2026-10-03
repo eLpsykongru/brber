@@ -357,7 +357,7 @@ const s = StyleSheet.create({
   preview: {
     flexDirection: 'row', gap: 12, backgroundColor: colors.bg, borderRadius: 16, padding: 11,
   },
-  previewImg: { width: 66, height: 66, borderRadius: 12, backgroundColor: '#E9E6DE' },
+  previewImg: { width: 66, height: 66, borderRadius: 12, backgroundColor: colors.fill },
   previewNote: { lineHeight: 17 },
   firstRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: D.card,

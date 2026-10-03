@@ -6,7 +6,7 @@ import {
 import { LowWalletBlock } from './Failures';
 import { Block, daySlots, nextFree, Range, Window } from '../lib/slots';
 import { supabase } from '../lib/supabase';
-import { colors, font, radius, serif, shadow, sp } from '../theme';
+import { colors, font, isDark, radius, serif, shadow, sp } from '../theme';
 import type { Specialist } from '../types';
 import { AskBlock, AskedSheet, type AskRecord } from './AskSheet';
 import BookingNoteSheet from './BookingNote';
@@ -1108,7 +1108,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28,
   },
   handleZone: { paddingTop: sp(2.5), paddingHorizontal: sp(5) },
-  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: '#D8D4CA', marginBottom: sp(2) },
+  handle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line, marginBottom: sp(2) },
   headRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   headBtn: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
   headTitle: {
@@ -1116,7 +1116,7 @@ const s = StyleSheet.create({
     letterSpacing: 0.5, textTransform: 'uppercase', color: colors.text,
   },
   progress: { flexDirection: 'row', gap: sp(1.5), justifyContent: 'center', paddingVertical: sp(3) },
-  dot: { width: 28, height: 4, borderRadius: 2, backgroundColor: '#DDD9CF' },
+  dot: { width: 28, height: 4, borderRadius: 2, backgroundColor: colors.track },
   dotActive: { backgroundColor: colors.accent },
 
   body: { padding: sp(5), gap: sp(2.5), paddingBottom: sp(10) },
@@ -1139,7 +1139,7 @@ const s = StyleSheet.create({
     width: 22, height: 22, borderRadius: radius.pill, backgroundColor: colors.accent,
     alignItems: 'center', justifyContent: 'center',
   },
-  radio: { width: 22, height: 22, borderRadius: radius.pill, borderWidth: 2, borderColor: '#D8D4CA' },
+  radio: { width: 22, height: 22, borderRadius: radius.pill, borderWidth: 2, borderColor: colors.line },
   radioOn: {
     width: 22, height: 22, borderRadius: radius.pill, backgroundColor: colors.accent,
     alignItems: 'center', justifyContent: 'center',
@@ -1245,7 +1245,7 @@ const s = StyleSheet.create({
   couponOn: {
     flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: colors.bg,
     borderRadius: 20, paddingHorizontal: 16, paddingVertical: 14,
-    borderWidth: 2, borderColor: colors.ink, ...shadow,
+    borderWidth: 2, borderColor: colors.text, ...shadow,
   },
   couponOff: {
     flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: colors.bg,
@@ -1282,7 +1282,7 @@ const s = StyleSheet.create({
     width: 26, height: 26, borderRadius: 13, backgroundColor: 'rgba(74,222,128,0.18)',
     alignItems: 'center', justifyContent: 'center', marginTop: 1,
   },
-  fullPriceText: { flex: 1, fontSize: 11.5, lineHeight: 18, color: '#5c5c58' },
+  fullPriceText: { flex: 1, fontSize: 11.5, lineHeight: 18, color: colors.textDim },
 
   depSplit: {
     borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)', paddingTop: 14, gap: 10,
@@ -1301,7 +1301,7 @@ const s = StyleSheet.create({
   },
   quickOn: { backgroundColor: '#fff', borderColor: '#fff' },
   quickText: { fontSize: 11, fontWeight: '600', color: '#fff' },
-  quickTextOn: { fontWeight: '700', color: colors.text },
+  quickTextOn: { fontWeight: '700', color: '#111' },  // the pill is white in both themes
 
   breakCard: {
     backgroundColor: colors.bg, borderRadius: 20, paddingVertical: 15, paddingHorizontal: 16,
@@ -1325,16 +1325,16 @@ const s = StyleSheet.create({
   adjustUnit: { fontSize: 22, letterSpacing: 0.88 },
   adjustSub: { fontSize: font.small, color: colors.textSecondary, marginTop: 6 },
   adjustTrackZone: { paddingVertical: 10, marginTop: -4 },
-  adjustTrack: { height: 8, borderRadius: 4, backgroundColor: '#E3E0D8' },
+  adjustTrack: { height: 8, borderRadius: 4, backgroundColor: isDark ? colors.track : '#E3E0D8' },
   adjustLocked: {
     position: 'absolute', left: 0, top: 0, bottom: 0,
-    borderTopLeftRadius: 4, borderBottomLeftRadius: 4, backgroundColor: '#D8D4CA',
+    borderTopLeftRadius: 4, borderBottomLeftRadius: 4, backgroundColor: colors.line,
   },
   adjustFill: { position: 'absolute', top: 0, bottom: 0, backgroundColor: colors.accent },
-  adjustTick: { position: 'absolute', top: -4, bottom: -4, width: 2, backgroundColor: '#B9B6AD' },
+  adjustTick: { position: 'absolute', top: -4, bottom: -4, width: 2, backgroundColor: isDark ? colors.textTertiary : '#B9B6AD' },
   adjustKnob: {
     position: 'absolute', top: -8, width: 24, height: 24, borderRadius: 999,
-    backgroundColor: colors.ink, marginLeft: -12, borderWidth: 3, borderColor: '#fff',
+    backgroundColor: colors.ink, marginLeft: -12, borderWidth: 3, borderColor: colors.bg,
   },
   adjustFoot: { flexDirection: 'row', justifyContent: 'space-between', marginTop: -6 },
   adjustFootText: { fontSize: 11, fontWeight: '700', color: colors.textTertiary },
@@ -1350,7 +1350,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'flex-start', gap: 9, backgroundColor: colors.bg,
     borderRadius: 16, paddingVertical: 13, paddingHorizontal: 15, ...shadow,
   },
-  adjustNoteText: { flex: 1, fontSize: 12, lineHeight: 18, color: '#5C5C58' },
+  adjustNoteText: { flex: 1, fontSize: 12, lineHeight: 18, color: colors.textDim },
 
   // 8c — booked
   doneWrap: {
@@ -1413,7 +1413,7 @@ const s = StyleSheet.create({
     width: 20, height: 20, borderRadius: 999, backgroundColor: 'rgba(74,222,128,0.20)',
     alignItems: 'center', justifyContent: 'center',
   },
-  failOkText: { flex: 1, fontSize: 12, color: '#5C5C58' },
+  failOkText: { flex: 1, fontSize: 12, color: colors.textDim },
   failOkAmount: {
     fontSize: font.small, fontWeight: '800', color: '#16A34A', fontVariant: ['tabular-nums'],
   },

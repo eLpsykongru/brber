@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabase';
 import {
   Block, daySlots, fitCount, Range, sameDay, slotNote, SLOT_STEP_MIN, Window,
 } from '../lib/slots';
-import { colors, font, radius, serif, shadow, shadowLg, sp } from '../theme';
+import { colors, font, isDark, radius, serif, shadow, shadowLg, sp } from '../theme';
 import { loc, tr, trn, trRich } from '../lib/i18n';
 
 // Turn 34 of "Customer App 3.dc.html" — the one-visit bundle. Turn 33 drew the
@@ -317,7 +317,7 @@ export function BundleSheet({ visible, bundle, bundles, barbers, onClose, onBook
 
                 {cellsFor(totalMin) >= 2 && (
                   <View style={s.warn}>
-                    <Ionicons name="alert-circle-outline" size={17} color="#9A6B00" />
+                    <Ionicons name="alert-circle-outline" size={17} color={colors.warning} />
                     <Text style={s.warnText}>
                       {trRich('{totalMin} min needs <b>{cells} slots in a row</b> — that\'s rare later in the day.', {
                         b: (text, key) => <Text key={key} style={s.warnBold}>{text}</Text>,
@@ -583,14 +583,14 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28,
     paddingTop: 12, paddingHorizontal: 22, paddingBottom: 30, maxHeight: '92%', ...shadowLg,
   },
-  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: '#D8D4CA' },
+  grabber: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line },
   sheetHead: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
   sheetTitle: {
     flex: 1, textAlign: 'center', fontFamily: serif, fontSize: font.h2,
     letterSpacing: 0.6, textTransform: 'uppercase', color: colors.text,
   },
   dashes: { flexDirection: 'row', gap: 6, justifyContent: 'center', marginTop: 12 },
-  dash: { width: 28, height: 4, borderRadius: 2, backgroundColor: '#DDD9CF' },
+  dash: { width: 28, height: 4, borderRadius: 2, backgroundColor: colors.track },
   dashOn: { backgroundColor: colors.accent },
   body: { marginTop: 12 },
   bodyPad: { gap: 12, paddingBottom: sp(3) },
@@ -612,14 +612,14 @@ const s = StyleSheet.create({
     borderRadius: radius.md, paddingHorizontal: 15, paddingVertical: 13,
     borderWidth: 2, borderColor: 'transparent', ...shadow,
   },
-  pickOn: { borderColor: colors.ink },
+  pickOn: { borderColor: colors.text },
   pickName: { fontSize: 13.5, fontWeight: '600', color: colors.text },
   pickNameOn: { fontWeight: '700' },
   pickMin: { fontSize: font.tiny, color: colors.textSecondary, marginTop: 2 },
   pickPrice: { fontSize: 14, fontWeight: '800', color: colors.text },
   pickPriceOff: { fontWeight: '700', color: colors.textSecondary },
   box: {
-    width: 20, height: 20, borderRadius: 6, borderWidth: 1.5, borderColor: '#D8D4CA',
+    width: 20, height: 20, borderRadius: 6, borderWidth: 1.5, borderColor: colors.line,
     alignItems: 'center', justifyContent: 'center',
   },
   boxOn: { backgroundColor: colors.ink, borderColor: colors.ink },
@@ -629,7 +629,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(232,161,0,0.12)', borderWidth: 1, borderColor: 'rgba(232,161,0,0.35)',
     borderRadius: 14, paddingHorizontal: 13, paddingVertical: 11,
   },
-  warnText: { flex: 1, fontSize: 11.5, lineHeight: 17, color: '#7A5400' },
+  warnText: { flex: 1, fontSize: 11.5, lineHeight: 17, color: isDark ? colors.warning : '#7A5400' },
   warnBold: { fontWeight: '700' },
 
   // 34c
@@ -648,12 +648,12 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'flex-start', gap: 9, backgroundColor: colors.bg,
     borderRadius: 14, paddingHorizontal: 13, paddingVertical: 11, ...shadow,
   },
-  infoText: { flex: 1, fontSize: 11.5, lineHeight: 17, color: '#5C5C58' },
+  infoText: { flex: 1, fontSize: 11.5, lineHeight: 17, color: colors.textDim },
   infoBold: { fontWeight: '700' },
 
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   slotDead: {
-    width: '31.5%', height: 44, borderRadius: 14, backgroundColor: '#E9E6DE',
+    width: '31.5%', height: 44, borderRadius: 14, backgroundColor: colors.fill,
     alignItems: 'center', justifyContent: 'center',
   },
   slotDeadText: { fontSize: font.small, fontWeight: '600', color: colors.textTertiary },
@@ -666,7 +666,7 @@ const s = StyleSheet.create({
   slotFitTimeOn: { color: colors.onAccent, fontSize: 14 },
   slotFitNote: { fontSize: font.tiny, color: colors.textSecondary, marginTop: 2 },
   slotFitNoteOn: { color: 'rgba(255,255,255,0.55)' },
-  tick: { width: 20, height: 20, borderRadius: radius.pill, borderWidth: 1.5, borderColor: '#D8D4CA' },
+  tick: { width: 20, height: 20, borderRadius: radius.pill, borderWidth: 1.5, borderColor: colors.line },
   tickOn: {
     backgroundColor: colors.accent, borderColor: colors.accent,
     alignItems: 'center', justifyContent: 'center',
@@ -679,9 +679,9 @@ const s = StyleSheet.create({
   sumEyebrow: { fontSize: 10, letterSpacing: 1.5, fontWeight: '700', color: colors.textSecondary },
   sumWhen: { fontSize: font.tiny, color: colors.textSecondary },
   sumRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
-  sumSvc: { fontSize: font.small, color: '#5C5C58' },
+  sumSvc: { fontSize: font.small, color: colors.textDim },
   sumPrice: { fontSize: font.small, fontWeight: '600', color: colors.text },
-  hr: { height: 1, backgroundColor: '#EFECE4' },
+  hr: { height: 1, backgroundColor: colors.divider },
   sumMuted: { fontSize: font.small, color: colors.textSecondary },
   sumSaving: { fontSize: font.small, fontWeight: '700', color: colors.accent },
   sumTotalK: { fontSize: 14, fontWeight: '700', color: colors.text },

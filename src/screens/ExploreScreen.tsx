@@ -438,7 +438,7 @@ const styles = StyleSheet.create({
   },
   sheetHandle: {
     alignSelf: 'center', width: 40, height: 4, borderRadius: 2,
-    backgroundColor: '#D8D4CA', marginBottom: sp(2),
+    backgroundColor: colors.line, marginBottom: sp(2),
   },
   sheetHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   sheetReset: { fontSize: font.small, fontWeight: '600', color: colors.accent },

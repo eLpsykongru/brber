@@ -140,7 +140,7 @@ export default function LinkedAccountsScreen({ onBack, onSetPassword }: {
               </Text>
             </View>
             <Switch value={lock} onValueChange={toggleLock} disabled={!hasBiometrics}
-              trackColor={{ false: '#DDD9CF', true: colors.accent }} thumbColor="#fff" />
+              trackColor={{ false: colors.track, true: colors.accent }} thumbColor="#fff" />
           </View>
         </View>
 
@@ -225,7 +225,7 @@ const s = StyleSheet.create({
   },
   card: { backgroundColor: colors.bg, borderRadius: 24, paddingHorizontal: 18, ...shadow },
   row: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 14 },
-  rowBorder: { borderBottomWidth: 1, borderBottomColor: '#EFECE4' },
+  rowBorder: { borderBottomWidth: 1, borderBottomColor: colors.divider },
   rowIcon: {
     width: 38, height: 38, borderRadius: radius.pill, backgroundColor: colors.surface,
     alignItems: 'center', justifyContent: 'center',
@@ -244,7 +244,7 @@ const s = StyleSheet.create({
     borderRadius: 16, paddingVertical: 13, paddingHorizontal: 15, ...shadow,
   },
   noteIcon: { marginTop: 1 },
-  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: '#5C5C58' },
+  noteText: { flex: 1, fontSize: 12, lineHeight: 18, color: colors.textDim },
 
   sessionCard: {
     backgroundColor: colors.bg, borderRadius: 20, paddingVertical: 16, paddingHorizontal: 18,
@@ -283,6 +283,6 @@ const s = StyleSheet.create({
     height: 54, borderRadius: radius.pill, backgroundColor: '#fff',
     alignItems: 'center', justifyContent: 'center',
   },
-  unlockText: { fontSize: font.small, fontWeight: '700', letterSpacing: 1.3, color: colors.text },
+  unlockText: { fontSize: font.small, fontWeight: '700', letterSpacing: 1.3, color: '#111' },  // the pill is white in both themes
   lockLink: { textAlign: 'center', fontSize: font.small, color: 'rgba(255,255,255,0.6)' },
 });

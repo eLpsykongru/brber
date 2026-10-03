@@ -122,7 +122,7 @@ const s = StyleSheet.create({
   section: { fontSize: 11, letterSpacing: 1.65, fontWeight: '700', color: colors.textSecondary, marginTop: 2 },
   list: { backgroundColor: colors.bg, borderRadius: 22, paddingHorizontal: 18, ...shadow },
   row: { flexDirection: 'row', gap: 12, paddingVertical: 14 },
-  rowLine: { borderBottomWidth: 1, borderBottomColor: '#EFECE4' },
+  rowLine: { borderBottomWidth: 1, borderBottomColor: colors.divider },
   dot: { width: 8, height: 8, borderRadius: 999, marginTop: 5 },
   rowTitle: { fontSize: 13, fontWeight: '700', color: colors.text },
   rowBody: { fontSize: 11.5, lineHeight: 16.5, color: colors.textSecondary, marginTop: 3 },

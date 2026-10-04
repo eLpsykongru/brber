@@ -1,4 +1,4 @@
-import * as WebBrowser from 'expo-web-browser';
+import { Linking } from 'react-native';
 import { lang } from './i18n';
 
 // sterncut.ma's legal pages (WEB-14/15), in the in-app browser. The site 301s
@@ -8,5 +8,14 @@ import { lang } from './i18n';
 const SITE = (process.env.EXPO_PUBLIC_QUEUE_BASE || 'https://sterncut.ma/q').replace(/\/q\/?$/, '');
 
 export function openLegal(page: 'terms' | 'privacy') {
-  WebBrowser.openBrowserAsync(`${SITE}/${lang()}/${page}`).catch(() => {});
+  const url = `${SITE}/${lang()}/${page}`;
+  try {
+    // required here, not imported at the top (see oauth.ts): a build from before
+    // expo-web-browser would otherwise lose the whole app at launch, not this link
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const WebBrowser = require('expo-web-browser') as typeof import('expo-web-browser');
+    WebBrowser.openBrowserAsync(url).catch(() => {});
+  } catch {
+    Linking.openURL(url).catch(() => {});   // no native module in this build: the phone's browser
+  }
 }

@@ -44,3 +44,6 @@ admin/config.js
 /android
 # store console uploads (10 MB, re-exported for each listing) — kept out of history
 design_handoff_sterncut_launch/4_store_assets/store-assets/
+
+# database backups (npm run backup): real customer data, never commit
+backups/
